@@ -1,0 +1,11 @@
+build/
+dist/
+**/__pycache__/
+**/*.pyc
+examples/*/build*/
+examples/*/sdkconfig
+examples/*/sdkconfig.old
+examples/*/sdkconfig.defaults.board
+examples/*/managed_components/
+examples/*/dependencies.lock*
+/PLAN*.md

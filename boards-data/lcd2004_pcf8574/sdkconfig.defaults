@@ -1,0 +1,5 @@
+# The 2004 character LCD on a PCF8574 backpack: a module, not a board. It rides the I2C bus
+# of whichever board is chosen; this file, read after the board's own (tools/board_select.py
+# --module), turns the module on in the menu of the configuration and brings jef-sure/hd44780
+# in by the rules of the manifest. Nothing of the chip here: the board says that.
+CONFIG_BOARD_MODULE_LCD2004_PCF8574=y

@@ -1,0 +1,42 @@
+# jef-sure/boards: the boards a program runs on, described as data and set up by the component.
+# A directory a board in boards-data/ (pins, buses, peripherals), glue to the drivers in boards/
+# (DGX for a frame buffer display, jef-sure/hd44780 for a character one, DGX-DI for a touch).
+# The board is chosen by CONFIG_BOARD_SELECT_<BOARD> (its sdkconfig.defaults carries the line,
+# the menu follows); what it needs comes as manifest rules (dependencies) and the Kconfig of
+# the boards (selects of the drivers of DGX). Kconfig and boards/boards.cmake are made by
+# tools/boards_gen.py --all from the data, as the glue is.
+idf_component_register(SRCS "src/boards.c" "src/board_i2c.c" "src/board_pointer.c" "src/board_touch_fw.c"
+                       INCLUDE_DIRS "include"
+                       PRIV_INCLUDE_DIRS "src"
+                       PRIV_REQUIRES esp_driver_i2c esp_driver_gpio)
+
+# The glue of the boards and the modules, beside the core: only the chosen board's is compiled,
+# by the symbol its data owns (CONFIG_BOARD_<BOARD>, 1 when chosen), and a module's by its
+# option (CONFIG_BOARD_MODULE_<MODULE>). The lists come from the data: boards/boards.cmake.
+include("${CMAKE_CURRENT_LIST_DIR}/boards/boards.cmake")
+set(_boards_glue "")
+foreach(_board ${BOARDS_LIST})
+    string(TOUPPER "${_board}" _upper)
+    if(CONFIG_BOARD_${_upper})
+        list(APPEND _boards_glue boards/${_board}/${_board}.c)
+        # what the board's glue needs at link (its panel driver, its touch, its codec), named
+        # by the board itself in its directory, beside the data it is for
+        include("${CMAKE_CURRENT_LIST_DIR}/boards/${_board}/board.cmake")
+    endif()
+endforeach()
+foreach(_module ${BOARDS_MODULES})
+    string(TOUPPER "${_module}" _upper)
+    if(CONFIG_BOARD_MODULE_${_upper})
+        list(APPEND _boards_glue boards/${_module}/${_module}.c)
+        include("${CMAKE_CURRENT_LIST_DIR}/boards/${_module}/board.cmake")
+    endif()
+endforeach()
+list(LENGTH _boards_glue _boards_len)
+if(_boards_len)
+    target_sources(${COMPONENT_LIB} PRIVATE ${_boards_glue})
+endif()
+unset(_boards_glue)
+unset(_boards_len)
+unset(_board)
+unset(_module)
+unset(_upper)

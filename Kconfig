@@ -1,0 +1,134 @@
+# The Kconfig of the boards, made by tools/boards_gen.py --all from boards-data/: do not edit
+# by hand. One choice of the board, one option a module, and beside them the hidden symbols
+# the rules of idf_component.yml look at, so that the parts a board needs others than this
+# component come only with the board that needs them (the model of esp-bsp's bsp_selector).
+menu "Boards"
+
+choice BOARD_SELECT
+    prompt "Board the program runs on"
+    default BOARD_SELECT_NONE
+    help
+        One board of boards-data/, or none (the program sets its hardware up
+        itself). The board's own sdkconfig.defaults carries the line that
+        chooses it here (CONFIG_BOARD_SELECT_<BOARD>=y, tools/board_select.py
+        puts the file into the project); what the choice takes with it, the
+        drivers of DGX its panel needs, comes as selects, and the parts others
+        than DGX (a touch driver, a codec) by the rules of idf_component.yml on
+        the symbols below.
+
+config BOARD_SELECT_NONE
+    bool "None: the program sets its hardware up itself"
+
+config BOARD_SELECT_CYD
+    bool "CYD (ESP32-2432S028R): 320x240 ILI9341, XPT2046 touch, DAC sound"
+    depends on IDF_TARGET_ESP32
+    select DGX_ENABLE_SPI
+    select DGX_ENABLE_SPI_ILI_9341
+    help
+        2.8-inch 320x240 ILI9341 on SPI2, lying landscape; a resistive XPT2046
+        touch on SPI3 (one finger); sound the chip's own 8-bit DAC on GPIO26
+        through the board's amplifier; the BOOT button; the microSD slot wired
+        to pins no host is left for (spi3 is the touch's): kept as data for the
+        program.
+
+config BOARD_SELECT_JC1060P470
+    bool "Guition JC1060P470: 1024x600 JD9165, GT911 touch, ES8311 sound"
+    depends on IDF_TARGET_ESP32P4
+    select DGX_ENABLE_DSI
+    select DGX_ENABLE_JD9165
+    help
+        7-inch 1024x600 JD9165 on MIPI-DSI, GT911 touch, ES8311 sound: an
+        ESP32-P4 with Wi-Fi and BLE in an ESP32-C6 beside it.
+
+config BOARD_SELECT_JC4827W543
+    bool "Guition JC4827W543: 480x272 NV3041A, GT911 touch"
+    depends on IDF_TARGET_ESP32S3
+    select DGX_ENABLE_SPI
+    select DGX_ENABLE_NV3041A
+    help
+        4.3-inch 480x272 NV3041A on QSPI, GT911 touch on its own I2C; an
+        ESP32-S3 with 8 MB octal PSRAM.
+
+config BOARD_SELECT_JC8012P4A1C
+    bool "Guition JC8012P4A1C: 1280x800 JD9365, GSL3680 touch, ES8311 sound"
+    depends on IDF_TARGET_ESP32P4
+    select DGX_ENABLE_DSI
+    select DGX_ENABLE_JD9365
+    help
+        10.1-inch 800x1280 JD9365 on MIPI-DSI (lying 1280x800), GSL3680 touch
+        (firmware written into it at start), ES8311 sound.
+
+endchoice
+
+# A module is not a board of its own: it rides whichever board the choice above picked, and
+# its glue comes in beside the board's (its sdkconfig.defaults turns it on, read after the board's).
+config BOARD_MODULE_LCD2004_PCF8574
+    bool "2004 character LCD on a PCF8574 backpack: 20x4 HD44780"
+    depends on !BOARD_SELECT_NONE
+    help
+        A 20x4 HD44780 on the common I2C backpack (P0 RS, P1 RW, P2 E, P3
+        backlight, P4-P7 D4-D7): not a board of its own, a display any board's
+        I2C bus can carry.
+
+# Hidden symbols the rules of idf_component.yml and CMakeLists.txt look at: the board chosen,
+# as a number (a number is easier for a rule to compare).
+config BOARD_CYD
+    int
+    default 1 if BOARD_SELECT_CYD
+    default 0
+
+config BOARD_JC1060P470
+    int
+    default 1 if BOARD_SELECT_JC1060P470
+    default 0
+
+config BOARD_JC4827W543
+    int
+    default 1 if BOARD_SELECT_JC4827W543
+    default 0
+
+config BOARD_JC8012P4A1C
+    int
+    default 1 if BOARD_SELECT_JC8012P4A1C
+    default 0
+
+# What the chosen board and the modules have, as the rules need it: a frame buffer display
+# brings DGX, a touch brings DGX-DI and its driver, sound with an ES8311 brings esp_codec_dev,
+# a character display brings hd44780. Derived from the data, so the data of a board and the
+# rules cannot drift apart.
+config BOARD_DISPLAY_FRAMEBUFFER
+    int
+    default 1 if BOARD_SELECT_CYD || BOARD_SELECT_JC1060P470 || BOARD_SELECT_JC4827W543 || BOARD_SELECT_JC8012P4A1C
+    default 0
+
+config BOARD_DISPLAY_HD44780
+    int
+    default 1 if BOARD_MODULE_LCD2004_PCF8574
+    default 0
+
+config BOARD_MODULE_CHARACTER_DISPLAY
+    int
+    default 1 if BOARD_MODULE_LCD2004_PCF8574
+    default 0
+
+config BOARD_SOUND_ES8311
+    int
+    default 1 if BOARD_SELECT_JC1060P470 || BOARD_SELECT_JC8012P4A1C
+    default 0
+
+config BOARD_TOUCH
+    int
+    default 1 if BOARD_SELECT_CYD || BOARD_SELECT_JC1060P470 || BOARD_SELECT_JC4827W543 || BOARD_SELECT_JC8012P4A1C
+    default 0
+
+config BOARD_TOUCH_GT911
+    int
+    default 1 if BOARD_SELECT_JC1060P470 || BOARD_SELECT_JC4827W543
+    default 0
+
+config BOARD_TOUCH_XPT2046
+    int
+    default 1 if BOARD_SELECT_CYD
+    default 0
+
+endmenu

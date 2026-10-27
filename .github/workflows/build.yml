@@ -1,0 +1,50 @@
+# The boards built, every one: the data checked, every glue compiled against test/fake on the
+# host, then examples/hello_board built for every board under two versions of ESP-IDF, the
+# oldest the manifest promises and the newest. A board that does not build does not merge.
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    name: the data, the glue, the Kconfig and the manifest agree
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python3 tools/check_boards.py --host-syntax
+      - run: python3 tools/board_pins.py --all
+
+  build:
+    name: ${{ matrix.board }}${{ matrix.module && format(' + {0}', matrix.module) || '' }} on ESP-IDF ${{ matrix.idf }}
+    needs: check
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        board: [cyd, jc1060p470, jc4827w543, jc8012p4a1c]
+        idf: [release-v5.5, v6.1]
+        module: [""]
+        include:
+          - board: jc1060p470
+            idf: v6.1
+            module: lcd2004_pcf8574
+    steps:
+      - uses: actions/checkout@v4
+      - name: choose the board
+        run: |
+          python3 tools/board_select.py ${{ matrix.board }} ${{ matrix.module && format('--module {0}', matrix.module) || '' }} examples/hello_board
+          echo "target=$(python3 -c "import json; print(json.load(open('boards-data/${{ matrix.board }}/board.json'))['mcu']['target'])")" >> "$GITHUB_OUTPUT"
+        id: board
+      - name: build hello_board
+        uses: espressif/esp-idf-ci-action@v1
+        with:
+          esp_idf_version: ${{ matrix.idf }}
+          target: ${{ steps.board.outputs.target }}
+          path: examples/hello_board
+          command: idf.py build

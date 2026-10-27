@@ -1,0 +1,84 @@
+## IDF Component Manager Manifest File
+version: "0.0.1"
+description: "Boards of ESP-IDF programs described once as data: pins, buses, display, touch, sound, button. The board is chosen once; the component sets its hardware up and the program asks by kind, never by the board's name. A frame buffer display through DGX, a character LCD through hd44780, a touch panel as a device of DGX-DI with the calibration measured on the board."
+url: https://github.com/jef-sure/esp32-component-boards
+repository: https://github.com/jef-sure/esp32-component-boards.git
+documentation: https://github.com/jef-sure/esp32-component-boards/blob/main/README.md
+issues: https://github.com/jef-sure/esp32-component-boards/issues
+
+dependencies:
+  idf:
+    version: ">=5.5.0"  # the versions the boards are built with in CI (esp_driver_i2c, esp_driver_dac as components of their own)
+  # boards: dependencies generated
+  # What a board needs beside this component comes only with the board that needs it: the
+  # rules look at the symbols the Kconfig of the boards defines beside the choice (the model of
+  # esp-bsp's bsp_selector). Made by tools/boards_gen.py --all from the data: do not edit here.
+  jef-sure/dgx:
+    version: "^0.8.2"
+    matches:
+      - if: "$CONFIG{BOARD_DISPLAY_FRAMEBUFFER} == 1"
+  jef-sure/dgx-di:
+    version: "^0.1.2"
+    matches:
+      - if: "$CONFIG{BOARD_TOUCH} == 1"
+  espressif/esp_lcd_touch_gt911:
+    version: "^1"
+    matches:
+      - if: "$CONFIG{BOARD_TOUCH_GT911} == 1"
+  espressif/esp_codec_dev:
+    version: "~1.5"
+    matches:
+      - if: "$CONFIG{BOARD_SOUND_ES8311} == 1"
+  jef-sure/hd44780:
+    version: "^0.1.2"
+    matches:
+      - if: "$CONFIG{BOARD_DISPLAY_HD44780} == 1"
+  atanisoft/esp_lcd_touch_xpt2046:
+    version: "^1.0.6"
+    matches:
+      - if: "$CONFIG{BOARD_TOUCH_XPT2046} == 1"
+  # boards: end of generated
+
+tags:
+  - board
+  - bsp
+  - display
+  - touch
+  - dgx
+
+maintainers:
+  - "Anton Petrusevich <anton.petrusevich.mobile@gmail.com>"
+
+license: MIT
+
+files:
+  include:
+    - "idf_component.yml"
+    - "CMakeLists.txt"
+    - "Kconfig"
+    - "include/**/*.h"
+    - "src/**/*.c"
+    - "src/**/*.h"
+    - "boards/**/*.c"
+    - "boards/**/*.cmake"
+    - "boards-data/**/*.json"
+    - "boards-data/**/sdkconfig.defaults"
+    - "tools/*.py"
+    - "editor/**/*"
+    - "examples/**/*"
+    - "docs/**/*.md"
+    - "README.md"
+    - "README.ru.md"
+    - "CHANGES.md"
+    - "LICENSE"
+  exclude:
+    - "build/**"
+    - ".git/**"
+    - ".github/**"
+    - "test/**"
+    - "**/__pycache__/**"
+    - "examples/*/build*/**"
+    - "examples/*/managed_components/**"
+    - "examples/*/sdkconfig"
+    - "examples/*/sdkconfig.defaults.board"
+    - "examples/*/dependencies.lock*"

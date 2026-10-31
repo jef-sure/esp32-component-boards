@@ -1,0 +1,45 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "connector_on_expander",
+    "title": "A connector pin behind an expander",
+    "mcu": {
+        "target": "esp32s3"
+    },
+    "checked": {
+        "pins": {
+            "level": "unchecked",
+            "source": "shape only"
+        }
+    },
+    "buses": {
+        "i2c": {
+            "i2c0": {
+                "sda": 8,
+                "scl": 9
+            }
+        }
+    },
+    "devices": {
+        "io": {
+            "chip": "ch422g",
+            "on": {
+                "i2c.i2c0": {}
+            }
+        }
+    },
+    "connectors": {
+        "P1": {
+            "type": "qwiic",
+            "pins": [
+                "GND",
+                {
+                    "via": "io",
+                    "bit": 3
+                },
+                "nc"
+            ]
+        }
+    }
+}

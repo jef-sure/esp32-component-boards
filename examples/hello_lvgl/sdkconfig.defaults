@@ -1,0 +1,9 @@
+# The program's own defaults, read after the board's (sdkconfig.defaults.board).
+CONFIG_COMPILER_OPTIMIZATION_PERF=y
+CONFIG_FREERTOS_HZ=1000
+
+# LVGL renders on the stack of the task that calls lv_timer_handler()
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=8192
+
+# room for the fonts of LVGL
+CONFIG_PARTITION_TABLE_SINGLE_APP_LARGE=y

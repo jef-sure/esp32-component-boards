@@ -1,0 +1,258 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "jc1060p470c",
+    "title": "Guition JC1060P470C",
+    "description": "7-inch 1024x600 JD9165 on MIPI-DSI, GT911 touch, ES8311 sound: an ESP32-P4 with Wi-Fi and BLE in an ESP32-C6 on the same module",
+    "mcu": {
+        "target": "esp32p4",
+        "flash_mb": 16,
+        "psram_mb": 32,
+        "revision": "1.3",
+        "notes": "The core is the module JC-ESP32P4-M3: ESP32P4NRW32, 16 MB flash, 32 MB PSRAM, an ESP32-C6. The chip of the board measured is of revision 1.3: a chip of revision 3 needs board_select.py --revision."
+    },
+    "checked": {
+        "pins": {"level": "schematic", "source": "JC1060P470C_I_W_Y-V1.0.pdf, vendor archive", "date": "2026-10-28"},
+        "touch": {
+            "level": "hardware",
+            "covers": ["devices.touch"],
+            "by": "Anton",
+            "date": "2026-10-30",
+            "notes": "a dot under the finger, coordinates right"
+        },
+        "start": {
+            "level": "hardware",
+            "covers": ["devices.lcd", "devices.sound"],
+            "by": "log of hello_board",
+            "date": "2026-10-30",
+            "result": "pending",
+            "notes": "starts without errors; picture and sound not judged"
+        },
+        "schematic_parts": {
+            "level": "schematic",
+            "covers": [
+                "devices.ethernet",
+                "devices.rs485",
+                "devices.rtc",
+                "devices.sd",
+                "buses.rmii",
+                "buses.uart",
+                "buses.sdmmc",
+                "connectors",
+                "shared_pins",
+                "devices.battery",
+                "buses.i2s.i2s0.din"
+            ],
+            "source": "JC1060P470C_I_W_Y-V1.0.pdf",
+            "date": "2026-10-31",
+            "result": "pending",
+            "notes": "From the schematic: none of these was started on the board. din is ASDOUT of the ES8311, on the net ES7210_SDOUT."
+        },
+        "photo": {
+            "level": "hardware",
+            "covers": [
+                "devices.ethernet",
+                "devices.rs485",
+                "devices.rtc",
+                "devices.sd",
+                "devices.radio",
+                "connectors",
+                "devices.sound.notes"
+            ],
+            "by": "Anton, photos of the open board",
+            "date": "2026-10-31",
+            "result": "confirmed",
+            "notes": "That they are fitted: none was started."
+        },
+        "picture": {
+            "level": "hardware",
+            "covers": ["devices.lcd"],
+            "by": "Anton",
+            "date": "2026-10-31",
+            "result": "confirmed",
+            "notes": "hello_board on the adapters: a white frame with a blue bar at the top."
+        },
+        "sound": {
+            "level": "hardware",
+            "covers": ["devices.sound"],
+            "by": "log of hello_board",
+            "date": "2026-10-31",
+            "result": "pending",
+            "notes": "esp_codec_dev opens the ES8311 with no error. No speaker on the board seen, so nothing was heard."
+        }
+    },
+    "buses": {
+        "dsi": {"dsi0": {"lanes": 2, "lane_mbps": 750, "phy_ldo_chan": 3, "phy_ldo_mv": 2500}},
+        "i2c": {"i2c0": {"sda": 7, "scl": 8}},
+        "i2s": {"i2s0": {"mclk": 13, "bclk": 12, "ws": 10, "dout": 9, "din": 48}},
+        "sdio": {"sdio0": {"clk": 18, "cmd": 19, "d0": 14, "d1": 15, "d2": 16, "d3": 17, "reset": 54}},
+        "rmii": {
+            "rmii0": {
+                "txd0": 34,
+                "txd1": 35,
+                "txen": 49,
+                "rxd0": 29,
+                "rxd1": 30,
+                "crs_dv": 28,
+                "ref_clk": 50,
+                "mdc": 31,
+                "mdio": 52
+            }
+        },
+        "uart": {"uart0": {"tx": 37, "rx": 38}, "uart1": {"tx": 26, "rx": 27}},
+        "sdmmc": {"sdmmc0": {"clk": 43, "cmd": 44, "d0": 39, "d1": 40, "d2": 41, "d3": 42}}
+    },
+    "shared_pins": {
+        "boot_txd1": {
+            "line": 35,
+            "devices": ["ethernet", "boot"],
+            "only_while": {"device": "ethernet", "control": "enabled", "value": "off"}
+        }
+    },
+    "connectors": {
+        "CN1": {"type": "speaker, 2 pins", "pins": ["SPK+", "SPK-"]},
+        "CN2": {"type": "MX 1.25 mm, 4 pins", "pins": ["5V", 37, 38, "GND"]},
+        "CN3": {"type": "4 pins", "pins": ["GND", "3V3", 8, 7]},
+        "CN4": {"type": "battery, 2 pins", "pins": ["BAT+", "BAT-"]},
+        "J4": {"type": "RS-485, 4 pins", "pins": ["5V", "A", "B", "GND"]},
+        "J5": {"type": "UART1, 4 pins", "pins": ["5V", 26, 27, "GND"]},
+        "RJ1": {"type": "RJ45", "pins": ["TX+", "TX-", "RX+", "RX-"]},
+        "JP1": {
+            "type": "expansion header, 2 x 13",
+            "pins": [
+                "3V3",
+                "VOUT-BAT",
+                "3V3",
+                "VOUT-BAT",
+                "GND",
+                "GND",
+                1,
+                "NC",
+                2,
+                47,
+                3,
+                46,
+                4,
+                45,
+                5,
+                "GND",
+                20,
+                "3V3",
+                32,
+                "C6_U0RXD",
+                33,
+                "C6_U0TXD",
+                7,
+                "C6_IO9",
+                8,
+                "C6_CHIP_PU"
+            ]
+        }
+    },
+    "devices": {
+        "lcd": {
+            "chip": "jd9165",
+            "on": {"dsi.dsi0": {}},
+            "pins": {"rst": 0, "backlight": {"gpio": 23, "active": "high"}},
+            "config": {
+                "primary": true,
+                "panel": {"width": 1024, "height": 600, "mm_w": 154, "mm_h": 86},
+                "depth_bits": 16
+            },
+            "controls": {"orientation": {"start": {"x": "left-right", "y": "top-bottom", "swap": false}}}
+        },
+        "touch": {
+            "chip": "gt911",
+            "on": {"i2c.i2c0": {}},
+            "pins": {"rst": 22, "int": 21},
+            "config": {
+                "over": "lcd",
+                "x_max": 1023,
+                "y_max": 599,
+                "calibrations": {
+                    "esp-idf/jef-sure/dgx-di": [
+                        {
+                            "rule": "the newest",
+                            "notes": "Measured before the versions were kept: measured_with is not known.",
+                            "x_min": 0,
+                            "x_max": 1023,
+                            "y_min": 0,
+                            "y_max": 599,
+                            "width": 1024,
+                            "height": 600,
+                            "flags": 0,
+                            "knots_x": 3,
+                            "knots_y": 3,
+                            "rounds": 3,
+                            "affine": [66150, 221, -683737, 460, 66859, -1265431],
+                            "x": [[48, 48], [512, 512], [975, 975]],
+                            "y": [[49, 48], [298, 300], [552, 551]],
+                            "down_ms": 0,
+                            "up_ms": 60,
+                            "blink_ms": 0,
+                            "gap_ms": 0,
+                            "off_tenths": 101,
+                            "worst_tenths": 210,
+                            "left_tenths": 33,
+                            "left_worst_tenths": 70
+                        }
+                    ]
+                }
+            }
+        },
+        "sound": {
+            "chip": "es8311",
+            "on": {"i2c.i2c0": {}, "i2s.i2s0": {}},
+            "pins": {"pa": 11},
+            "config": {"sample_rate": 22050, "pa_voltage": 5.0, "codec_dac_voltage": 3.3},
+            "controls": {"volume": {"start": 25}},
+            "notes": [
+                "MIC1 is fitted: ASDOUT of the codec comes in on GPIO48. Only the output is set up.",
+                "CN1 takes a speaker: none is fitted on the board seen."
+            ]
+        },
+        "boot": {"class": "button", "pins": {"in": {"gpio": 35, "active": "low"}}},
+        "ethernet": {
+            "class": "network",
+            "on": {"rmii.rmii0": {}},
+            "pins": {"rst": 51},
+            "config": {"ref_clk": "from the PHY"},
+            "controls": {"enabled": {"how": "driver", "values": ["off", "on"], "start": "off", "read": "none"}},
+            "notes": [
+                "U4 has the logo of IC Plus; the part number is not read and the schematic has none. 25 MHz crystal; its 50 MHz output feeds RMII_CLK. The LAN transformer is a JXD B1603S.",
+                "TXD1 is GPIO35, the line of the BOOT button: a program that starts Ethernet loses the button."
+            ]
+        },
+        "rs485": {
+            "class": "network",
+            "on": {"uart.uart1": {}},
+            "config": {"transceiver": "MAX485", "direction": "auto"},
+            "notes": "Q3 and a 74LVC1G132 make the direction from TX: no GPIO sets it. U8, the TVS diodes and the fuses are fitted on the board seen; the marking of U8 is not read. J5 brings IO26 and IO27 out beside it."
+        },
+        "rtc": {
+            "chip": "rx8025t",
+            "on": {"i2c.i2c0": {}},
+            "notes": "BT1 has room for a CR1220 backup cell; none is fitted."
+        },
+        "sd": {
+            "class": "storage",
+            "on": {"sdmmc.sdmmc0": {}},
+            "config": {"media": "microsd"},
+            "notes": "Fed by LDO channel 4 of the chip, through Q1."
+        },
+        "radio": {
+            "class": "radio",
+            "on": {"sdio.sdio0": {}},
+            "antenna": {"kind": "connector"},
+            "config": {"chip": "esp32-c6"},
+            "notes": "The ESP32-C6 inside the module: Wi-Fi and BLE of the P4, its antenna on a wire from a connector of the module."
+        },
+        "battery": {
+            "class": "battery_adc",
+            "pins": {"in": 53},
+            "config": {"divider": "68k/100k"},
+            "notes": "R55 is 0R on the schematic. The charger is an IP5306, with no line to the chip."
+        }
+    }
+}

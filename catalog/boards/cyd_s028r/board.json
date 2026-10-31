@@ -1,0 +1,123 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "cyd_s028r",
+    "title": "CYD (ESP32-2432S028R)",
+    "description": "2.8-inch 320x240 ILI9341 on SPI2, lying landscape; a resistive XPT2046 touch on SPI3 (one finger); sound the chip's own 8-bit DAC on GPIO26 through the board's amplifier; the BOOT button; the microSD slot wired to pins no host is left for (spi3 is the touch's): kept as data for the program",
+    "notes": [
+        "One product page sells three kinds of this board with the same pins: ILI9341, ILI9341 with another init sequence, ST7789. This data was tried with the ILI9341 driver of DGX.",
+        "The reset of the panel is wired to EN: no GPIO resets it alone.",
+        "CN1 carries GPIO27 and GPIO22, the pair for an I2C module. The schematic V0.1 shows no net on its contact 3, the board has GPIO22 there.",
+        "P3 carries GPIO22 too, beside GPIO21, which is the backlight, and GPIO35, which is input only."
+    ],
+    "mcu": {
+        "target": "esp32",
+        "flash_mb": 4,
+        "notes": "the ESP32 has two SPI hosts for the program: SPI2 the display, SPI3 the touch; the SD slot's pins (23, 19, 18, cs 5) have no host left and are data only (buses.sdspi.sd)"
+    },
+    "checked": {
+        "pins": {
+            "level": "schematic",
+            "source": "ESP32-2432S028 V0.1, OriginalDocumentation/5-Schematic of witnessmenow/ESP32-Cheap-Yellow-Display",
+            "date": "2026-10-30"
+        },
+        "cn1": {
+            "level": "hardware",
+            "covers": ["connectors.CN1"],
+            "by": "Anton",
+            "date": "2026-10-30",
+            "notes": "contact 3 is IO22; the schematic shows no net there"
+        },
+        "touch": {
+            "level": "hardware",
+            "covers": ["devices.touch"],
+            "by": "Anton",
+            "date": "2026-10-30",
+            "notes": "a dot under the finger, coordinates right"
+        },
+        "start": {
+            "level": "hardware",
+            "covers": ["devices.lcd", "devices.sound"],
+            "by": "log of hello_board",
+            "date": "2026-10-30",
+            "result": "pending",
+            "notes": "starts without errors; picture and sound not judged"
+        }
+    },
+    "buses": {
+        "spi": {
+            "spi2": {"hz": 40000000, "mosi": 13, "miso": 12, "sclk": 14},
+            "spi3": {"hz": 1000000, "mosi": 32, "miso": 39, "sclk": 25}
+        },
+        "sdspi": {"sd": {"mosi": 23, "miso": 19, "sclk": 18}}
+    },
+    "connectors": {
+        "P1": {"type": "HC 1.25 mm, 4 pins", "pins": ["VIN", "U0TXD", "U0RXD", "GND"]},
+        "P3": {"type": "HC 1.25 mm, 4 pins", "pins": [21, 22, 35, "GND"]},
+        "CN1": {"type": "HC 1.25 mm, 4 pins", "pins": ["3V3", 27, 22, "GND"]},
+        "P4": {"type": "PH 2.0 mm, 2 pins", "pins": ["SPK+", "SPK-"]}
+    },
+    "devices": {
+        "light": {"class": "sensor", "pins": {"in": 34}, "config": {"sensor": "GT36516"}, "provides": {"light": {}}},
+        "rgb": {
+            "class": "led",
+            "pins": {
+                "r": {"gpio": 4, "active": "low"},
+                "g": {"gpio": 16, "active": "low"},
+                "b": {"gpio": 17, "active": "low"}
+            }
+        },
+        "sd": {"class": "storage", "on": {"sdspi.sd": {"cs": 5}}, "config": {"media": "microsd"}},
+        "lcd": {
+            "chip": "ili9341",
+            "on": {"spi.spi2": {"cs": 15}},
+            "pins": {"dc": 2, "rst": "nc", "backlight": {"gpio": 21, "active": "high"}},
+            "config": {
+                "primary": true,
+                "panel": {"width": 240, "height": 320, "mm_w": 43, "mm_h": 58},
+                "depth_bits": 16
+            },
+            "controls": {"orientation": {"start": {"x": "right-left", "y": "top-bottom", "swap": true}}}
+        },
+        "touch": {
+            "chip": "xpt2046",
+            "on": {"spi.spi3": {"cs": 33, "hz": 1000000}},
+            "pins": {"int": 36},
+            "config": {
+                "over": "lcd",
+                "calibrations": {
+                    "esp-idf/jef-sure/dgx-di": [
+                        {
+                            "rule": "the newest",
+                            "notes": "Measured before the versions were kept: measured_with is not known.",
+                            "x_min": 0,
+                            "x_max": 4095,
+                            "y_min": 0,
+                            "y_max": 4095,
+                            "width": 240,
+                            "height": 320,
+                            "flags": 1,
+                            "knots_x": 3,
+                            "knots_y": 3,
+                            "rounds": 3,
+                            "affine": [74051, -652, -886661, 173, 75199, -702795],
+                            "x": [[30, 30], [119, 119], [209, 209]],
+                            "y": [[30, 30], [159, 160], [289, 289]],
+                            "down_ms": 130,
+                            "up_ms": 30,
+                            "blink_ms": 101,
+                            "gap_ms": 0,
+                            "off_tenths": 164,
+                            "worst_tenths": 290,
+                            "left_tenths": 18,
+                            "left_worst_tenths": 30
+                        }
+                    ]
+                }
+            }
+        },
+        "sound": {"chip": "esp32_dac", "pins": {"out": 26, "pa": "nc"}, "config": {"sample_rate": 22050}},
+        "boot": {"class": "button", "pins": {"in": {"gpio": 0, "active": "low"}}}
+    }
+}

@@ -1,0 +1,10 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "tca9548a",
+    "title": "TCA9548A multiplexer",
+    "class": "i2c_mux",
+    "on": {"i2c": {"required": true, "address": "0x70"}},
+    "checked": {"facts": {"level": "unchecked", "source": "from memory, for the shape of the format only"}}
+}

@@ -1,0 +1,18 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "library_version_kept",
+    "title": "A version of the library that does what is needed",
+    "mcu": {"target": "esp32"},
+    "buses": {"spi": {"spi2": {"mosi": 13, "miso": 12, "sclk": 14}}},
+    "devices": {
+        "nfc": {
+            "chip": "two_libraries",
+            "on": {"spi.spi2": {"cs": 15}},
+            "library": "esp-idf/owner_a/idf_library",
+            "needs": {"ntag": ["pages_read"]},
+            "library_version": "1.1.0"
+        }
+    }
+}

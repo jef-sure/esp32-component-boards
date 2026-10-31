@@ -15,3 +15,6 @@ typedef struct { int clk_cfg; int slot_cfg; i2s_std_gpio_config_t gpio_cfg; } i2
 int i2s_new_channel(const i2s_chan_config_t *cfg, i2s_chan_handle_t *tx, i2s_chan_handle_t *rx);
 int i2s_channel_init_std_mode(i2s_chan_handle_t chan, const i2s_std_config_t *cfg);
 int i2s_channel_enable(i2s_chan_handle_t chan);
+int i2s_channel_disable(i2s_chan_handle_t chan);
+int i2s_del_channel(i2s_chan_handle_t chan);
+int i2s_channel_write(i2s_chan_handle_t chan, const void *data, size_t size, size_t *written, int timeout);

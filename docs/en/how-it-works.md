@@ -7,7 +7,8 @@ way they are.
 
 ## The data
 
-`boards-data/<board>/board.json` is the only place a board is described. It
+`catalog/boards/<board>/board.json` is the only place a board is described; what
+its chips are lies in `catalog/devices/` and `catalog/mcu/`, under it. It
 names the chip, the buses the board wires (each by the host or port of the
 chip it claims), and the devices on those buses: the display, the touch panel,
 the sound, the button, the SD slot. A device references a bus by name and
@@ -20,7 +21,7 @@ comments. Its first two lines choose the chip and the board:
 
 ```
 CONFIG_IDF_TARGET="esp32p4"
-CONFIG_BOARD_SELECT_JC1060P470=y
+CONFIG_BOARD_SELECT_JC1060P470C=y
 ```
 
 That is how a project chooses a board: by reading this file before its own
@@ -34,7 +35,7 @@ and millimetres lying different ways) and writes:
 
 - `boards/<board>/<board>.c`: the glue. It defines **every** function of
   `boards.h`. For the parts the board has, the function sets the hardware up
-  from the data; for the parts it has not, the function answers `false`. So
+  from the data; for the parts it has not, the function returns `false`. So
   the contract of `boards.h` holds at link time on every board, and a program
   never needs `#if` on the board's name.
 - `boards/<board>/board.cmake`: the components the glue needs, derived from
@@ -64,7 +65,7 @@ panel needs (`DGX_ENABLE_DSI`, `DGX_ENABLE_JD9165`).
 
 Beside the choice are hidden `int` symbols: `BOARD_<BOARD>` is 1 when the
 board is chosen, and feature symbols say what the chosen board has:
-`BOARD_DISPLAY_FRAMEBUFFER`, `BOARD_TOUCH`, `BOARD_TOUCH_GT911`,
+`BOARD_DISPLAY_GRAPHICS`, `BOARD_TOUCH`, `BOARD_TOUCH_GT911`,
 `BOARD_TOUCH_XPT2046`, `BOARD_SOUND_ES8311`, `BOARD_DISPLAY_HD44780`. They are
 numbers because the rules of the component manager compare numbers easily.
 
@@ -77,7 +78,7 @@ espressif/esp_lcd_touch_gt911:
     - if: "$CONFIG{BOARD_TOUCH_GT911} == 1"
 ```
 
-So a build for the CYD downloads no GT911 driver and no codec library, and a
+So a build for the CYD S028R downloads no GT911 driver and no codec library, and a
 build with no board chosen downloads nothing of DGX. This is the mechanism of
 `components/bsp_selector` in espressif/esp-bsp, with the symbols derived from
 the data instead of written by hand.
@@ -87,26 +88,36 @@ The component's `CMakeLists.txt` compiles only the chosen board's glue, by
 
 ## The core
 
-`src/` is small and board-independent:
+`src/` is small, depends on no board and names no library:
 
 - `boards.c`: `board_info()`, from the `board_data` the glue defines.
 - `board_i2c.c`: the board's I2C master, made once from the pins the glue
   gives and shared by the touch panel, the codec and a character display module.
-- `board_pointer.c`: the one DGX-DI pointer the touch is read through.
-  Compiled only when the board has a touch (`CONFIG_BOARD_TOUCH`), so a board
-  without one does not need DGX-DI's headers.
-- `board_touch_fw.c`: the weak `board_touch_firmware()` that answers `false`.
+- `board_spi.c`: the SPI hosts the component sets up.
+- `board_sound.c`: the task that paces samples to the output of the board.
+- `board_touch_fw.c`: the weak `board_touch_firmware()` that returns `false`.
   A program that embeds the firmware of a GSL3680 defines the strong one. Weak
   here and strong in the program's own component is safe: they are in
   different archives. Inside this component nothing is weak, because a weak
   symbol in one object of a static library does not reliably yield to a strong
   one in another object of the same library.
 
+## The adapters
+
+The code for each library lies in `adapters/<owner>__<name>/`, and every library
+is on the same terms: a record in `catalog/libraries/` and, when this component
+can start it, a directory here. The field `adapter` of the record names what the
+glue includes (`headers`), what a program includes (`public`, in `include/` of the
+directory) and what is compiled by which Kconfig symbol (`sources`). A touch panel
+goes through two: the driver gives an `esp_lcd_touch_handle_t`, and DGX-DI makes a
+device and a pointer of it.
+
 ## What the component does and does not do
 
-It sets hardware up and hands the program the handles of the libraries that
-drive it: a `dgx_screen_t`, a `dgx_di_device_t` and its pointer, an
-`hd44780_t`. From there the program uses those libraries directly. The
+It sets hardware up and gives the program sizes, millimetres and orientation;
+the headers of the adapters give the handles of the libraries that drive it: a
+`dgx_screen_t`, a `dgx_di_device_t` and its pointer, an `hd44780_t`. From there
+the program uses those libraries directly. The
 component wraps no API of theirs; it is initialisation and the knowledge of
 the board, nothing more. The one convenience beyond that is
 `board_sound_start`, which runs the task that paces samples to the speaker.
@@ -115,7 +126,7 @@ the board, nothing more. The one convenience beyond that is
 
 A module is a device any board's bus can carry: today the 2004 character LCD
 on a PCF8574 backpack. It is described as a board without a chip
-(`"module": true`), has an option of its own in the menu
+(`"kind": "module"`), has an option of its own in the menu
 (`CONFIG_BOARD_MODULE_LCD2004_PCF8574`), and its `sdkconfig.defaults` turns
 that option on. Its glue defines the function of its kind,
 `board_character_display_init`, and every board's glue leaves that function
@@ -135,5 +146,6 @@ Three layers, from fast to real:
    mirror the shape of the real ones. Catches a wrong argument type in seconds,
    without ESP-IDF.
 3. CI (`.github/workflows/build.yml`): `examples/hello_board` is built for
-   every board, with and without the module, under two versions of ESP-IDF.
+   every board, with and without the module, under two versions of ESP-IDF,
+   and `examples/hello_lvgl` for every board.
    Only this one proves the glue links.

@@ -1,0 +1,38 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "co2_station",
+    "title": "SCD41 on I2C",
+    "mcu": {
+        "target": "esp32s3"
+    },
+    "checked": {
+        "pins": {
+            "level": "unchecked",
+            "source": "shape only"
+        }
+    },
+    "buses": {
+        "i2c": {
+            "i2c0": {
+                "sda": 8,
+                "scl": 9
+            }
+        }
+    },
+    "devices": {
+        "co2": {
+            "chip": "scd4x",
+            "variant": "scd41",
+            "on": {
+                "i2c.i2c0": {}
+            },
+            "controls": {
+                "mode": {
+                    "start": "single_shot"
+                }
+            }
+        }
+    }
+}

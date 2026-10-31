@@ -1,0 +1,125 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "library",
+    "ecosystem": "esp-idf",
+    "owner": "jef-sure",
+    "name": "pn532",
+    "title": "PN532",
+    "url": "https://github.com/jef-sure/esp32-component-pn532",
+    "install": [
+        {"via": "registry"},
+        {"via": "git", "url": "https://github.com/jef-sure/esp32-component-pn532.git", "ref": "v{version}"}
+    ],
+    "described": "0.7.5",
+    "transports": {
+        "spi": {
+            "init": {
+                "call": "pn532_spi_init",
+                "args": ["{host}", "{sclk}", "{miso}", "{mosi}", "{cs}", "{hz}"],
+                "returns": "bus",
+                "ok": {"not": "NULL"}
+            },
+            "shared": {
+                "call": "pn532_spi_attach",
+                "args": ["{host}", "{cs}", "{hz}"],
+                "returns": "bus",
+                "ok": {"not": "NULL"}
+            }
+        },
+        "i2c": {
+            "init": {
+                "call": "pn532_i2c_init",
+                "args": ["{port}", "{scl}", "{sda}", "{address}", "{hz}"],
+                "returns": "bus",
+                "ok": {"not": "NULL"}
+            },
+            "shared": {
+                "call": "pn532_i2c_attach",
+                "args": ["{port}", "{address}", "{hz}"],
+                "returns": "bus",
+                "ok": {"not": "NULL"}
+            },
+            "notes": "pn532_i2c_attach needs ESP-IDF 5.4."
+        },
+        "uart": {
+            "init": {
+                "call": "pn532_uart_init",
+                "args": ["{port}", "{tx}", "{rx}", "{baud}"],
+                "returns": "bus",
+                "ok": {"not": "NULL"}
+            }
+        }
+    },
+    "chips": {
+        "pn532": {
+            "header": "pn532.h",
+            "on": ["spi", "i2c", "uart"],
+            "init": [
+                {"call": "pn532_init", "args": ["{bus}", "{irq}", "{rst}"], "returns": "nfc", "ok": {"not": "NULL"}}
+            ],
+            "standards": ["iso14443a"],
+            "modes": ["reader"],
+            "supports": {
+                "ntag": ["uid", "pages_read", "pages_write", "ndef_read", "ndef_write"],
+                "mifare_ultralight": ["uid", "pages_read", "pages_write", "ndef_read", "ndef_write"],
+                "mifare_classic": ["uid", "authenticate", "blocks_read", "blocks_write", "value_blocks", "ndef_read"],
+                "iso14443_4": ["uid", "apdu", "ndef_read"]
+            }
+        }
+    },
+    "checked": {
+        "api": {
+            "level": "vendor-code",
+            "source": "README of esp32-component-pn532 0.7.5, Features and scope; include/pn532.h",
+            "date": "2026-10-31"
+        },
+        "history": {
+            "level": "vendor-code",
+            "covers": ["history"],
+            "source": "headers of include/ at every tag of esp32-component-pn532; before tag v0.2.0 nothing is known",
+            "date": "2026-10-31"
+        }
+    },
+    "history": [
+        {
+            "before": "0.7.0",
+            "chips": {
+                "pn532": {
+                    "supports": {
+                        "ntag": ["uid", "pages_read", "pages_write", "ndef_read"],
+                        "mifare_ultralight": ["uid", "pages_read", "pages_write", "ndef_read"]
+                    }
+                }
+            },
+            "notes": "pn532_ndef_write_to_selected_card came in 0.7.0."
+        },
+        {"before": "0.5.0", "transports": {"spi": {"shared": null}, "i2c": {"shared": null}}}
+    ],
+    "versions": {
+        "0.7.5": {"frameworks": {"esp-idf": ">=5.2.0"}},
+        "0.7.4": {"frameworks": {"esp-idf": ">=5.2.0"}},
+        "0.7.3": {"frameworks": {"esp-idf": ">=5.2.0"}},
+        "0.7.2": {"via": ["git"]},
+        "0.7.1": {"via": ["git"]},
+        "0.7.0": {"via": ["git"]},
+        "0.6.2": {"frameworks": {"esp-idf": ">=5.2.0"}},
+        "0.6.1": {"via": ["git"]},
+        "0.6.0": {"via": ["git"]},
+        "0.5.4": {"frameworks": {"esp-idf": ">=5.2.0"}},
+        "0.5.3": {"via": ["git"]},
+        "0.5.2": {"via": ["git"]},
+        "0.5.1": {"via": ["git"]},
+        "0.5.0": {"via": ["git"]},
+        "0.4.5": {"frameworks": {"esp-idf": ">=5.2.0"}},
+        "0.4.4": {"via": ["git"]},
+        "0.4.2": {"via": ["git"]},
+        "0.3.2": {"via": ["git"]},
+        "0.3.1": {"via": ["git"]},
+        "0.3.0": {"via": ["git"]},
+        "0.2.2": {"via": ["git"]},
+        "0.2.1": {"via": ["git"]},
+        "0.2.0": {"via": ["git"]},
+        "0.0.3": {"frameworks": {"esp-idf": ">=5.2.0"}}
+    }
+}

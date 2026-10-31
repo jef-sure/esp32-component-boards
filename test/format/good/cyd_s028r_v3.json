@@ -1,0 +1,27 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "cyd_s028r_v3",
+    "title": "CYD S028R, third kind: ST7789",
+    "extends": "cyd_s028r",
+    "checked": {
+        "pins": {
+            "level": "community",
+            "source": "rzeldent/platformio-espressif32-sunton, esp32-2432S028Rv3.json"
+        }
+    },
+    "devices": {
+        "lcd": {
+            "chip": "st7789",
+            "on": {
+                "spi.spi2": {
+                    "mode": 3
+                }
+            },
+            "config": {
+                "color_order": "rgb"
+            }
+        }
+    }
+}

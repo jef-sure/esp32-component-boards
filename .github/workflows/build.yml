@@ -18,6 +18,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: python3 tools/check_boards.py --host-syntax
+      - run: pip install jsonschema && python3 tools/check_format.py
       - run: python3 tools/board_pins.py --all
 
   build:
@@ -27,11 +28,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        board: [cyd, jc1060p470, jc4827w543, jc8012p4a1c]
+        board: [cyd_s028r, jc1060p470c, jc4827w543c, jc8012p4a1c, local_terminal]
         idf: [release-v5.5, v6.1]
         module: [""]
         include:
-          - board: jc1060p470
+          - board: jc1060p470c
             idf: v6.1
             module: lcd2004_pcf8574
     steps:
@@ -39,7 +40,8 @@ jobs:
       - name: choose the board
         run: |
           python3 tools/board_select.py ${{ matrix.board }} ${{ matrix.module && format('--module {0}', matrix.module) || '' }} examples/hello_board
-          echo "target=$(python3 -c "import json; print(json.load(open('boards-data/${{ matrix.board }}/board.json'))['mcu']['target'])")" >> "$GITHUB_OUTPUT"
+          python3 tools/board_select.py ${{ matrix.board }} examples/hello_lvgl
+          echo "target=$(python3 -c "import json; print(json.load(open('catalog/boards/${{ matrix.board }}/board.json'))['mcu']['target'])")" >> "$GITHUB_OUTPUT"
         id: board
       - name: build hello_board
         uses: espressif/esp-idf-ci-action@v1
@@ -47,4 +49,12 @@ jobs:
           esp_idf_version: ${{ matrix.idf }}
           target: ${{ steps.board.outputs.target }}
           path: examples/hello_board
+          command: idf.py build
+      - name: build hello_lvgl
+        if: ${{ !matrix.module }}
+        uses: espressif/esp-idf-ci-action@v1
+        with:
+          esp_idf_version: ${{ matrix.idf }}
+          target: ${{ steps.board.outputs.target }}
+          path: examples/hello_lvgl
           command: idf.py build

@@ -4,35 +4,40 @@
 
 Компонент ESP-IDF, который описывает платы, на которых работает программа,
 **один раз, как данные**, и настраивает их аппаратуру для программы. Каталог
-на каждую плату в `boards-data/` хранит её пины, шины и периферию в одном
+на каждую плату в `catalog/boards/` хранит её пины, шины и периферию в одном
 `board.json`; компонент превращает его в клей на C, а программа спрашивает
 то, что ей нужно, **по роду**, а не по имени платы:
 
 ```c
 #include "boards.h"
+#include "boards_dgx.h"
+#include "boards_dgx_di.h"
 
-struct board_display display;
+struct board_display display = {0};
 if (board_display_init(&display)) {
-    /* display.screen is a dgx_screen_t *, 1024x600 or 320x240, whatever the chosen
-       board has; display.mm_w / mm_h is its size in millimetres */
+    /* display.width, display.height: 1024x600 or 320x240, whatever the chosen board has;
+       display.mm_w, display.mm_h: its size in millimetres */
+    dgx_screen_t *screen = board_dgx_screen(&display);
 }
 
-struct dgx_di_device *device;
-void                 *pointer; /* a dgx_di_pointer_t * */
-if (board_touch_start(&display, &device, &pointer)) {
+struct board_touch touch;
+if (board_touch_start(&display, &touch)) {
     /* the touch panel under that display, calibrated by the board's data */
+    dgx_di_pointer_t *pointer = board_dgx_di_pointer(&touch);
 }
 ```
 
 Каждая функция `boards.h` существует на каждой плате. Функция для того, чего
-у платы нет, отвечает `false`, и программа идёт дальше без него. Один и тот
-же `main.c` собирается и работает на 2,8-дюймовой CYD и на 10,1-дюймовой
+у платы нет, возвращает `false`, и программа идёт дальше без него. `boards.h` не
+называет ни одной библиотеки: дескрипторы DGX, DGX-DI или hd44780 дают заголовки их
+адаптеров. Один и тот
+же `main.c` собирается и работает на 2,8-дюймовой CYD S028R и на 10,1-дюймовой
 Guition.
 
 Сам по себе компонент не знает никакого дисплея: у платы его может не быть, а
 дисплей — одна периферия среди прочих. Что сегодня может быть у платы:
 
-- **дисплей с кадровым буфером** под управлением [DGX](https://github.com/jef-sure/esp32-component-dgx):
+- **графический дисплей** под управлением [DGX](https://github.com/jef-sure/esp32-component-dgx):
   панели MIPI-DSI, QSPI или SPI, с их размером в пикселях и в миллиметрах и
   тем, как они лежат на плате;
 - **символьный дисплей** (HD44780, 2004 на переходнике PCF8574) через
@@ -40,7 +45,10 @@ Guition.
   или как модуль на её шине I2C;
 - **тач-панель** как устройство [DGX-DI](https://github.com/jef-sure/esp32-component-dgx-di),
   с калибровкой, измеренной на плате и хранящейся в данных;
-- **звук**: кодек ES8311 на I2S или собственный ЦАП ESP32;
+- **LVGL** через [DGX-LVGL](https://github.com/jef-sure/esp32-component-dgx-lvgl):
+  дисплей и тач-панель, которые настраивает компонент, становятся дисплеем и
+  устройством ввода LVGL, см. [examples/hello_lvgl](examples/hello_lvgl);
+- **звук**: кодек ES8311 на I2S, усилитель на I2S или собственный ЦАП ESP32;
 - **кнопка**; и любая **шина**, которую плата разводит, даже та, которую
   компонент сам не настраивает (SDIO радиомодуля, пины слота SD), хранящаяся
   как данные, которые программа может прочитать.
@@ -53,7 +61,7 @@ Guition.
 
 ```sh
 idf.py add-dependency "jef-sure/boards^0.0.1"
-python3 managed_components/jef-sure__boards/tools/board_select.py cyd .
+python3 managed_components/jef-sure__boards/tools/board_select.py cyd_s028r .
 idf.py build flash monitor
 ```
 
@@ -71,7 +79,7 @@ include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 on*) следует за файлом; оно есть, чтобы посмотреть и чтобы переопределить. Что
 нужно плате, приходит вместе с выбором: драйверы DGX её панели — как
 `select`-ы, остальные части (драйвер тача, кодек, hd44780) — по правилам в
-`idf_component.yml` компонента, так что сборка для CYD не скачивает ни драйвер
+`idf_component.yml` компонента, так что сборка для CYD S028R не скачивает ни драйвер
 GT911, ни библиотеку кодека. См. [docs/ru/choosing-a-board.md](docs/ru/choosing-a-board.md).
 
 ## Платы
@@ -79,17 +87,17 @@ GT911, ни библиотеку кодека. См. [docs/ru/choosing-a-board.m
 <!-- boards:table -->
 | плата | чип | дисплей | тач | звук | кнопка |
 |---|---|---|---|---|---|
-| CYD (ESP32-2432S028R) | ESP32 | 320x240 ILI9341, SPI, 58x43 mm | XPT2046 (резистивный); калибровка-заглушка | DAC, GPIO26 | да |
-| Guition JC1060P470 | ESP32-P4 | 1024x600 JD9165, MIPI-DSI, 154x86 mm | GT911 | ES8311 | да |
-| Guition JC4827W543 | ESP32-S3 | 480x272 NV3041A, QSPI, 95x54 mm | GT911 | нет | нет |
-| Guition JC8012P4A1C | ESP32-P4 | 1280x800 JD9365, MIPI-DSI, 217x136 mm | GSL3680 (прошивку встраивает программа) | ES8311 | нет |
+| CYD (ESP32-2432S028R) | ESP32 | 320x240 ILI9341, SPI, 58x43 mm | XPT2046 (резистивный) | DAC, GPIO26 | да |
+| Guition JC1060P470C | ESP32-P4 | 1024x600 JD9165, MIPI-DSI, 154x86 mm | GT911 | ES8311 | да |
+| Guition JC4827W543C | ESP32-S3 | 480x272 NV3041A, QSPI, 95x54 mm | GT911 | усилитель I2S | да |
+| Guition JC8012P4A1C | ESP32-P4 | 1280x800 JD9365, MIPI-DSI, 217x136 mm | GSL3680 (прошивку встраивает программа) | ES8311 | да |
+| Local terminal: ESP32, 2004 LCD, two PN532 | ESP32 | 20x4 HD44780 | нет | нет | нет |
 <!-- boards:end -->
 
-Модуль едет на любой выбранной плате: `board_select.py cyd --module
+Модуль едет на любой выбранной плате: `board_select.py cyd_s028r --module
 lcd2004_pcf8574 .` добавляет символьный LCD 20x4 на шину I2C платы.
 
-Калибровка тача CYD — заглушка, пока её не измерят на плате; тач работает,
-только неточно, и лог об этом говорит. GSL3680 10,1-дюймовой платы не хранит
+GSL3680 10,1-дюймовой платы не хранит
 собственной прошивки, а массив производителя не несёт лицензии на
 распространение: программа встраивает его сама, см.
 [docs/ru/touch-firmware.md](docs/ru/touch-firmware.md); без него плата
@@ -98,18 +106,23 @@ lcd2004_pcf8574 .` добавляет символьный LCD 20x4 на шин�
 ## Что в репозитории
 
 ```
-boards-data/<board>/board.json         плата: единственный источник правды
-boards-data/<board>/sdkconfig.defaults что нужно её чипу, памяти и флешу; строки, которые её выбирают
+catalog/boards/<board>/board.json         плата: единственный источник правды
+catalog/devices/, catalog/mcu/            что за чипы на ней, лежат под ней
+catalog/libraries/                        что каждая библиотека делает с каждым чипом и что требуют её версии
+catalog/boards/<board>/sdkconfig.defaults что нужно её чипу, памяти и флешу; строки, которые её выбирают
 boards/<board>/<board>.c, board.cmake  клей, сгенерированный из данных и закоммиченный
 boards/boards.cmake, Kconfig           тоже сгенерированы, как и зависимости в idf_component.yml
 include/boards.h                       что программа спрашивает, по роду
-src/                                   ядро: board_info, общий мастер I2C, указатель, хук прошивки тача
+src/                                   ядро: board_info, общие I2C и SPI, задача звука, хук прошивки тача
+adapters/<владелец>__<имя>/            код под каждую библиотеку, её публичный заголовок в include/
 tools/boards_gen.py                    данные -> клей, Kconfig, списки, правила манифеста, таблицы README
+tools/check_format.py                  схема, правила и их случаи в test/format/
 tools/check_boards.py                  сгенерированное совпадает с данными; пины не пересекаются; API полон
 tools/board_pins.py                    карта пинов платы и её дерево
 tools/board_select.py                  выбор платы для проекта
-editor/                                редактор данных: Vue + Pinia с CDN, без сборки
+editor/                                редактор формата 1, будет заменён; rules.js, правила для нового
 examples/hello_board/                  самая маленькая программа, собирается в CI для каждой платы
+examples/hello_lvgl/                   LVGL через DGX-LVGL, собирается в CI для каждой платы
 docs/en/, docs/ru/                     документация
 ```
 
@@ -127,13 +140,12 @@ docs/en/, docs/ru/                     документация
 
 ## Добавление платы
 
-Скопируйте ближайшую `boards-data/<board>/`, отредактируйте `board.json`
-(редактор в `editor/index.html` проверяет схему по мере ввода), напишите её
+Скопируйте ближайшую `catalog/boards/<board>/`, отредактируйте `board.json`, напишите её
 `sdkconfig.defaults` с причинами в комментариях, запустите
 `python3 tools/boards_gen.py --all`, затем `python3 tools/check_boards.py
 --host-syntax`. Плата оказывается в меню, в манифесте и в таблице README, и
 ни одного из них не нужно трогать. Измерьте тач на плате
-(`dgx_di_calibrate_measure` из DGX-DI) и вставьте результат в редактор.
+(`dgx_di_calibrate_measure` из DGX-DI) и отдайте лог `tools/board_calibration.py`.
 См. [docs/ru/adding-a-board.md](docs/ru/adding-a-board.md).
 
 ## Чем это отличается от esp-bsp и esp_board_manager
@@ -154,8 +166,11 @@ docs/en/, docs/ru/                     документация
 ## Состояние
 
 0.0.1. Собирается для каждой платы, и с модулем, под ESP-IDF 5.5 и 6.1: это
-матрица `.github/workflows/build.yml`. Клей повторяет код настройки
-рукописных часов и DGX-GE, которые работают на этих платах; сам этот релиз
-ещё не прошивался, и тач CYD ждёт своего измерения.
+матрица `.github/workflows/build.yml`. `examples/hello_board` и
+`examples/hello_lvgl` прошиты на CYD S028R, JC4827W543C и JC1060P470C под ESP-IDF 6.1:
+дисплей, тач и звук запускаются без ошибок в логе. Координаты касаний проверены
+пальцем на всех трёх и верны. На JC1060P470C проверено и изображение: цвета и ориентация. На терминале модуль 2004
+показывает текст. На JC8012P4A1C, тоже прошитой, дисплей запускается, а звук `hello_board` услышан. Её
+тач требует прошивку, которую встраивает программа, и это не запускалось.
 
 Лицензия: MIT.

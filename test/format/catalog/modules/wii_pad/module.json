@@ -1,0 +1,8 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "wii_pad",
+    "title": "A wired Wii Classic pad",
+    "devices": {"pad": {"chip": "wii_classic", "on": {"i2c": {}}, "config": {"player": 1}}}
+}

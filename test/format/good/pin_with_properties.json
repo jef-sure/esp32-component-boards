@@ -1,0 +1,36 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "pin_with_properties",
+    "title": "A pin with level and pull",
+    "mcu": {
+        "target": "esp32s3"
+    },
+    "checked": {
+        "pins": {
+            "level": "unchecked",
+            "source": "shape only"
+        }
+    },
+    "devices": {
+        "btn": {
+            "class": "button",
+            "pins": {
+                "in": {
+                    "gpio": 0,
+                    "active": "low",
+                    "pull": "up"
+                }
+            }
+        }
+    },
+    "buses": {
+        "i2c": {
+            "i2c0": {
+                "sda": 8,
+                "scl": 9
+            }
+        }
+    }
+}

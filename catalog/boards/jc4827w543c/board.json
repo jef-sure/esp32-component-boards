@@ -1,0 +1,140 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "jc4827w543c",
+    "title": "Guition JC4827W543C",
+    "description": "4.3-inch 480x272 NV3041A on QSPI, GT911 touch on its own I2C; an ESP32-S3 with 8 MB octal PSRAM",
+    "notes": [
+        "GPIO0 is the BOOT button and, through R9, the TE line of the panel. TE stays off until the panel is set up for it; with TE on, BOOT cannot be read.",
+        "GPIO5 is the battery divider (33k over 100k, through R25) and contact 4 of P2 at once.",
+        "The schematic also has a resistive touch, an XPT2046 on the lines of the TF slot: CS 38, CLK 12, DIN 11, DOUT 13, IRQ 3. This data is the capacitive board.",
+        "The reset of the panel goes to an RC circuit, not to a GPIO.",
+        "The speaker goes on connector P7. The amplifier has no volume of its own: a program scales its samples."
+    ],
+    "mcu": {
+        "target": "esp32s3",
+        "flash_mb": 4,
+        "psram_mb": 8,
+        "psram_mhz": 80,
+        "notes": "the QSPI bus divides 80 MHz by a whole number; 80 MHz garbles the picture on this board, so it runs at 40"
+    },
+    "checked": {
+        "pins": {
+            "level": "schematic",
+            "source": "JC4827W543 V1.1 and ESP32-4827A043 V0.2, 5-IO pin distribution of the vendor archive",
+            "date": "2026-10-30"
+        },
+        "pin_table": {
+            "level": "vendor-docs",
+            "covers": ["buses.spi.spi3"],
+            "source": "4.3 inches IO pin distribution.xlsx, vendor archive",
+            "date": "2026-10-30",
+            "result": "refuted",
+            "notes": "it swaps TF_MOSI and TF_MISO against the schematic"
+        },
+        "touch": {
+            "level": "hardware",
+            "covers": ["devices.touch"],
+            "by": "Anton",
+            "date": "2026-10-30",
+            "notes": "a dot under the finger, coordinates right"
+        },
+        "sound": {
+            "level": "schematic",
+            "covers": ["devices.sound"],
+            "date": "2026-10-30",
+            "result": "pending",
+            "notes": "U4 on the schematic, connector P7 on the board; no speaker at hand, the tone was not heard"
+        },
+        "sound_start": {
+            "level": "hardware",
+            "covers": ["devices.sound"],
+            "by": "log of hello_board",
+            "date": "2026-10-30",
+            "result": "pending",
+            "notes": "the I2S starts and takes samples without errors; this says nothing of the amplifier"
+        }
+    },
+    "buses": {
+        "spi": {"spi3": {"mosi": 11, "miso": 13, "sclk": 12}},
+        "i2s": {"i2s0": {"mclk": "nc", "bclk": 42, "ws": 2, "dout": 41, "din": "nc"}},
+        "qspi": {"spi2": {"hz": 40000000, "d0": 21, "d1": 48, "d2": 40, "d3": 39, "sclk": 47}},
+        "i2c": {"i2c0": {"sda": 8, "scl": 4}}
+    },
+    "shared_pins": {
+        "boot_te": {
+            "line": 0,
+            "devices": ["lcd", "boot"],
+            "only_while": {"device": "lcd", "control": "te", "value": "off"}
+        }
+    },
+    "connectors": {
+        "P1": {"type": "HC 1.25 mm, 4 pins", "pins": ["VIN", "U0TXD", "U0RXD", "GND"]},
+        "P2": {"type": "HC 1.25 mm, 4 pins", "pins": [46, 9, 14, 5]},
+        "P3": {"type": "HC 1.25 mm, 4 pins", "pins": [6, 7, 15, 16]},
+        "P4": {"type": "HC 1.25 mm, 4 pins", "pins": ["GND", "3V3", 17, 18]},
+        "P5": {"type": "SH 1.0 mm, 4 pins", "pins": ["GND", "3V3", 17, 18]},
+        "P6": {"type": "JST 1.25 mm, 2 pins", "pins": ["BAT+", "BAT-"]},
+        "P7": {"type": "JST 1.25 mm, 2 pins", "pins": ["SPK+", "SPK-"]}
+    },
+    "devices": {
+        "battery": {"class": "battery_adc", "pins": {"in": 5}, "config": {"divider": "33k/100k"}},
+        "lcd": {
+            "chip": "nv3041a",
+            "on": {"qspi.spi2": {"cs": 45}},
+            "pins": {"rst": "nc", "backlight": {"gpio": 1, "active": "high"}, "te": 0},
+            "config": {
+                "primary": true,
+                "panel": {"width": 480, "height": 272, "mm_w": 95, "mm_h": 54},
+                "depth_bits": 16
+            },
+            "controls": {
+                "orientation": {"start": {"x": "left-right", "y": "top-bottom", "swap": false}},
+                "te": {"how": "panel_command", "values": ["off", "on"], "start": "off", "read": "none"}
+            }
+        },
+        "touch": {
+            "chip": "gt911",
+            "on": {"i2c.i2c0": {"address_try": ["0x5d"]}},
+            "pins": {"rst": 38, "int": 3},
+            "config": {
+                "over": "lcd",
+                "x_max": 479,
+                "y_max": 271,
+                "calibrations": {
+                    "esp-idf/jef-sure/dgx-di": [
+                        {
+                            "rule": "the newest",
+                            "notes": "Measured before the versions were kept: measured_with is not known.",
+                            "x_min": 0,
+                            "x_max": 479,
+                            "y_min": 0,
+                            "y_max": 271,
+                            "width": 480,
+                            "height": 272,
+                            "flags": 0,
+                            "knots_x": 3,
+                            "knots_y": 3,
+                            "rounds": 3,
+                            "affine": [66171, 447, -375665, -881, 67265, -193200],
+                            "x": [[34, 34], [240, 241], [445, 445]],
+                            "y": [[34, 33], [136, 137], [237, 236]],
+                            "down_ms": 0,
+                            "up_ms": 30,
+                            "blink_ms": 0,
+                            "gap_ms": 0,
+                            "off_tenths": 44,
+                            "worst_tenths": 90,
+                            "left_tenths": 24,
+                            "left_worst_tenths": 50
+                        }
+                    ]
+                }
+            }
+        },
+        "sound": {"chip": "i2s_amp", "on": {"i2s.i2s0": {}}, "config": {"sample_rate": 22050}},
+        "boot": {"class": "button", "pins": {"in": {"gpio": 0, "active": "low"}}},
+        "sd": {"class": "storage", "on": {"spi.spi3": {"cs": 10}}, "config": {"media": "microsd"}}
+    }
+}

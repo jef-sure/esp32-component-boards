@@ -9,3 +9,5 @@ typedef struct { int chan_mask; uint32_t desc_num; size_t buf_size; uint32_t fre
 int dac_continuous_new_channels(const dac_continuous_config_t *c, dac_continuous_handle_t *h);
 int dac_continuous_enable(dac_continuous_handle_t h);
 int dac_continuous_write(dac_continuous_handle_t h, uint8_t *buf, size_t size, size_t *loaded, int timeout_ms);
+int dac_continuous_disable(dac_continuous_handle_t h);
+int dac_continuous_del_channels(dac_continuous_handle_t h);

@@ -1,0 +1,82 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "library",
+    "ecosystem": "esp-idf",
+    "owner": "jef-sure",
+    "name": "hd44780",
+    "title": "hd44780",
+    "url": "https://github.com/jef-sure/esp32-component-hd44780",
+    "install": [{"via": "registry"}, {"via": "git", "url": "https://github.com/jef-sure/esp32-component-hd44780.git"}],
+    "described": "0.1.2",
+    "transports": {
+        "i2c": {
+            "requires": ["esp_driver_i2c"],
+            "init": {
+                "call": "lcd_bus_pcf8574_i2c_create",
+                "args": ["{port}", "{address}", "{sda}", "{scl}", "{hz}"],
+                "returns": "bus",
+                "ok": {"not": "NULL"}
+            },
+            "shared": {
+                "call": "lcd_bus_pcf8574_i2c_create_on_bus",
+                "args": ["{i2c_bus}", "{address}", "{hz}"],
+                "returns": "bus",
+                "ok": {"not": "NULL"}
+            },
+            "defaults": {"hz": 0}
+        },
+        "gpio.4bit": {
+            "init": {
+                "call": "lcd_bus_gpio4_create",
+                "args": ["{rs}", "{en}", "{d4}", "{d5}", "{d6}", "{d7}"],
+                "returns": "bus",
+                "ok": {"not": "NULL"}
+            }
+        },
+        "gpio.8bit": {
+            "init": {
+                "call": "lcd_bus_gpio8_create",
+                "args": ["{rs}", "{en}", "{d0}", "{d1}", "{d2}", "{d3}", "{d4}", "{d5}", "{d6}", "{d7}"],
+                "returns": "bus",
+                "ok": {"not": "NULL"}
+            }
+        }
+    },
+    "chips": {
+        "hd44780": {
+            "header": "hd44780.h",
+            "on": ["i2c", "gpio"],
+            "init": [
+                {
+                    "call": "lcd_init",
+                    "args": ["{bus}", "HD44780_GEOMETRY_{cols}X{rows}", "true"],
+                    "returns": "lcd",
+                    "ok": {"not": "NULL"}
+                }
+            ],
+            "setup": [
+                {"call": "lcd_clear_screen", "args": ["{lcd}"], "ok": "none"},
+                {"call": "lcd_backlight_on", "args": ["{lcd}"], "ok": "none"}
+            ],
+            "supports": {"geometry": ["8x2", "16x2", "16x4", "20x2", "20x4", "40x2"]},
+            "adapter": {"kind": "character"}
+        }
+    },
+    "adapter": {
+        "version": "^0.1.2",
+        "symbol": "BOARD_DISPLAY_HD44780",
+        "requires": ["esp_driver_gpio"],
+        "headers": ["board_character.h"],
+        "public": "boards_hd44780.h",
+        "sources": {"BOARD_DISPLAY_HD44780": ["board_character.c"]}
+    },
+    "checked": {
+        "api": {
+            "level": "vendor-code",
+            "source": "include/hd44780.h of esp32-component-hd44780 0.1.2",
+            "date": "2026-10-31"
+        }
+    },
+    "versions": {"0.1.2": {"frameworks": {"esp-idf": ">=5.3"}}, "0.1.0": {"frameworks": {"esp-idf": ">=5.0"}}}
+}

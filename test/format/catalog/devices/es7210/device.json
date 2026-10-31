@@ -1,0 +1,11 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "es7210",
+    "title": "Everest ES7210 microphone ADC",
+    "class": "audio",
+    "on": {"i2c": {"required": true, "role": "control"}, "i2s": {"required": true, "role": "data"}},
+    "config": {"direction": "in"},
+    "checked": {"facts": {"level": "unchecked", "source": "from memory, for the shape of the format only"}}
+}

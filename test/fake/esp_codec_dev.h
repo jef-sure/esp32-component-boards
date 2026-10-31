@@ -14,3 +14,4 @@ esp_codec_dev_handle_t esp_codec_dev_new(const esp_codec_dev_cfg_t *cfg);
 int esp_codec_dev_open(esp_codec_dev_handle_t dev, const esp_codec_dev_sample_info_t *fmt);
 int esp_codec_dev_set_out_vol(esp_codec_dev_handle_t dev, int vol);
 int esp_codec_dev_write(esp_codec_dev_handle_t dev, const void *data, size_t len);
+void esp_codec_dev_delete(esp_codec_dev_handle_t dev);

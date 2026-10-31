@@ -1,0 +1,10 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "magnetometer_b",
+    "title": "Another magnetometer at another address, shape only",
+    "class": "sensor",
+    "on": {"i2c": {"required": true, "address": "0x0d"}},
+    "checked": {"facts": {"level": "unchecked", "source": "shape only"}}
+}

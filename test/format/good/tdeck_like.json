@@ -1,0 +1,125 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "tdeck_like",
+    "title": "A T-Deck like board",
+    "mcu": {
+        "target": "esp32s3"
+    },
+    "checked": {
+        "pins": {
+            "level": "unchecked",
+            "source": "LilyGO pin names from memory"
+        }
+    },
+    "buses": {
+        "spi": {
+            "spi2": {
+                "hz": 40000000,
+                "mosi": 41,
+                "miso": 38,
+                "sclk": 40
+            }
+        },
+        "i2c": {
+            "i2c0": {
+                "sda": 18,
+                "scl": 8
+            }
+        }
+    },
+    "power": [
+        {
+            "line": 10,
+            "level": 1,
+            "delay_ms": 100,
+            "feeds": [
+                "lcd",
+                "touch"
+            ],
+            "why": "the rail of the display, the touch and the keyboard"
+        },
+        {
+            "line": 39,
+            "level": 1,
+            "why": "CS of the SD card, before the bus starts"
+        },
+        {
+            "line": 9,
+            "level": 1,
+            "why": "CS of the radio, before the bus starts"
+        }
+    ],
+    "devices": {
+        "lcd": {
+            "chip": "st7789",
+            "on": {
+                "spi.spi2": {
+                    "cs": 12
+                }
+            },
+            "config": {
+                "panel": {
+                    "width": 240,
+                    "height": 320,
+                    "mm_w": 42,
+                    "mm_h": 56
+                },
+                "primary": true,
+                "invert": true
+            },
+            "controls": {
+                "orientation": {
+                    "start": {
+                        "x": "left-right",
+                        "y": "top-bottom",
+                        "swap": false
+                    }
+                }
+            },
+            "pins": {
+                "dc": 11,
+                "rst": "nc",
+                "backlight": 42
+            }
+        },
+        "touch": {
+            "chip": "cst816",
+            "variant": "cst816t",
+            "on": {
+                "i2c.i2c0": {}
+            },
+            "pins": {
+                "int": 16
+            },
+            "start": {
+                "defer": true
+            },
+            "config": {
+                "over": "lcd",
+                "x_max": 239,
+                "y_max": 319
+            }
+        },
+        "keys": {
+            "chip": "tdeck_keyboard",
+            "on": {
+                "i2c.i2c0": {}
+            },
+            "start": {
+                "after": [
+                    "lcd"
+                ]
+            }
+        },
+        "sd": {
+            "class": "storage",
+            "on": {
+                "spi.spi2": {
+                    "cs": 39
+                }
+            }
+        }
+    }
+}

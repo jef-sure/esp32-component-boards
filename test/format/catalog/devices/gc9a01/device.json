@@ -1,0 +1,12 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "gc9a01",
+    "title": "GC9A01",
+    "class": "display",
+    "on": {"spi": {"required": true}},
+    "config": {"kind": "graphics"},
+    "controls": {"orientation": {"how": "driver", "read": "none"}},
+    "checked": {"facts": {"level": "unchecked", "source": "from memory, for the shape of the format only"}}
+}

@@ -1,0 +1,11 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "spm1423",
+    "title": "SPM1423 PDM microphone",
+    "class": "audio",
+    "on": {"i2s": {"required": true}},
+    "config": {"direction": "in"},
+    "checked": {"facts": {"level": "unchecked", "source": "from memory, for the shape of the format only"}}
+}

@@ -1,0 +1,8 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "imu_two",
+    "title": "A motion sensor with a magnetometer",
+    "devices": {"motion": {"chip": "motion_sensor"}, "mag": {"chip": "magnetometer_a", "start": {"after": ["motion"]}}}
+}

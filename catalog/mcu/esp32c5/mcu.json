@@ -1,0 +1,199 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "mcu",
+    "name": "esp32c5",
+    "title": "ESP32-C5",
+    "gpio": {
+        "count": 29,
+        "valid": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28
+        ],
+        "input_only": [],
+        "strapping": [
+            2,
+            7,
+            25,
+            27,
+            28
+        ],
+        "pins": {
+            "0": {
+                "low_power": "LP_GPIO0"
+            },
+            "1": {
+                "analog": [
+                    "ADC1_CH0"
+                ],
+                "low_power": "LP_GPIO1"
+            },
+            "2": {
+                "analog": [
+                    "ADC1_CH1"
+                ],
+                "low_power": "LP_GPIO2",
+                "notes": [
+                    "Strapping pin"
+                ]
+            },
+            "3": {
+                "analog": [
+                    "ADC1_CH2"
+                ],
+                "low_power": "LP_GPIO3"
+            },
+            "4": {
+                "analog": [
+                    "ADC1_CH3"
+                ],
+                "low_power": "LP_GPIO4"
+            },
+            "5": {
+                "analog": [
+                    "ADC1_CH4"
+                ],
+                "low_power": "LP_GPIO5"
+            },
+            "6": {
+                "analog": [
+                    "ADC1_CH5"
+                ],
+                "low_power": "LP_GPIO6"
+            },
+            "7": {
+                "notes": [
+                    "Strapping pin"
+                ]
+            },
+            "13": {
+                "notes": [
+                    "USB-JTAG"
+                ]
+            },
+            "14": {
+                "notes": [
+                    "USB-JTAG"
+                ]
+            },
+            "16": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            },
+            "17": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            },
+            "18": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            },
+            "19": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            },
+            "20": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            },
+            "21": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            },
+            "22": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            },
+            "25": {
+                "notes": [
+                    "Strapping pin"
+                ]
+            },
+            "27": {
+                "notes": [
+                    "Strapping pin"
+                ]
+            },
+            "28": {
+                "notes": [
+                    "Strapping pin"
+                ]
+            }
+        },
+        "notes": [
+            "Strapping pin: GPIO2, GPIO7, GPIO25, GPIO27, and GPIO28 are strapping pins. For more information, please refer to datasheet.",
+            "SPI0/1: GPIO16 ~ GPIO22 are usually used for SPI flash and PSRAM, they're not recommended for other uses.",
+            "USB-JTAG: GPIO13 and GPIO14 are used by USB-JTAG by default. If they are reconfigured to operate as normal GPIOs, USB-JTAG functionality will be disabled."
+        ]
+    },
+    "hosts": {
+        "spi": 2,
+        "i2c": 2
+    },
+    "provides": {
+        "wifi": {},
+        "bluetooth": {},
+        "twai": {}
+    },
+    "checked": {
+        "facts": {
+            "level": "vendor-docs",
+            "source": "ESP-IDF esp-idf, components/soc/esp32c5, soc_caps.h"
+        },
+        "pins": {
+            "level": "vendor-docs",
+            "covers": [
+                "gpio.pins",
+                "gpio.strapping"
+            ],
+            "source": "ESP-IDF esp-idf, docs/en/api-reference/peripherals/gpio/esp32c5.inc"
+        }
+    },
+    "controls": {
+        "wifi_tx_power": {
+            "how": "wifi_tx_power",
+            "min": 8,
+            "max": 84,
+            "unit": "0.25 dBm",
+            "read": "command"
+        }
+    },
+    "limits": {
+        "psram_mhz": 120,
+        "cpu_mhz": 240
+    }
+}

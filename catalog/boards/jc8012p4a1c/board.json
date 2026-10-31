@@ -1,0 +1,179 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "jc8012p4a1c",
+    "title": "Guition JC8012P4A1C",
+    "description": "10.1-inch 800x1280 JD9365 on MIPI-DSI (lying 1280x800), GSL3680 touch (firmware written into it at start), ES8311 sound",
+    "notes": [
+        "BOOT (GPIO35) is under the cover.",
+        "The nets named ES7210_* on the schematic are lines of the ES8311: its sheets have no ES7210 chip.",
+        "A start can fail before app_main, about one in ten after a reset over USB: a store access fault while ESP-IDF sets up, or in the ROM. The chip restarts or the next start goes through. The cause is not known."
+    ],
+    "mcu": {
+        "target": "esp32p4",
+        "flash_mb": 16,
+        "psram_mb": 32,
+        "revision": "3.2",
+        "notes": "The display reads 160 MB/s from the PSRAM within a row: at 200 MHz a moving picture leaves it short now and then and the screen flashes light blue for a frame. 250 MHz leaves it enough, so revision 3 is needed here."
+    },
+    "checked": {
+        "pins": {"level": "schematic", "source": "JC8012P4A1.pdf, vendor archive", "date": "2026-10-28"},
+        "sound": {
+            "level": "hardware",
+            "covers": ["devices.sound"],
+            "by": "Anton",
+            "date": "2026-10-31",
+            "result": "confirmed",
+            "notes": "hello_board through the adapter: its tone heard on the speaker of the case, quiet, at volume 25 and a quarter of full scale. Heard before in Prince of Persia of DGX-GE."
+        },
+        "schematic_parts": {
+            "level": "schematic",
+            "covers": [
+                "devices.sd",
+                "devices.rtc",
+                "devices.led",
+                "devices.battery",
+                "devices.radio",
+                "devices.clock_32k",
+                "buses.uart",
+                "buses.sdmmc",
+                "connectors"
+            ],
+            "source": "JC8012P4A1.pdf and the PNG sheets of the archive",
+            "date": "2026-10-31",
+            "result": "pending",
+            "notes": "From the schematic: none of these was started on the board."
+        },
+        "photo": {
+            "level": "hardware",
+            "covers": ["devices.sd", "devices.rtc", "devices.led", "devices.battery", "devices.radio", "connectors"],
+            "by": "Anton, photos of the open board",
+            "date": "2026-10-31",
+            "result": "confirmed",
+            "notes": "That they are fitted, the battery and the speaker in the case too: none was started."
+        }
+    },
+    "buses": {
+        "dsi": {"dsi0": {"lanes": 2, "lane_mbps": 1000, "phy_ldo_chan": 3, "phy_ldo_mv": 2500}},
+        "i2c": {"i2c0": {"sda": 7, "scl": 8}},
+        "i2s": {"i2s0": {"mclk": 13, "bclk": 12, "ws": 10, "dout": 9, "din": 11}},
+        "sdio": {"sdio0": {"clk": 18, "cmd": 19, "d0": 14, "d1": 15, "d2": 16, "d3": 17, "reset": 54}},
+        "uart": {"uart0": {"tx": 37, "rx": 38}},
+        "sdmmc": {"sdmmc0": {"clk": 43, "cmd": 44, "d0": 39, "d1": 40, "d2": 41, "d3": 42}}
+    },
+    "connectors": {
+        "CN1": {"type": "battery, 2 pins", "pins": ["BAT+", "BAT-"]},
+        "CN2": {"type": "MX 1.25 mm, 4 pins", "pins": ["5V", 37, 38, "GND"]},
+        "CN3": {"type": "speaker, 2 pins", "pins": ["SPK+", "SPK-"]},
+        "CN4": {"type": "4 pins", "pins": ["GND", "3V3", 8, 7]},
+        "EXTEND1": {
+            "type": "FPC3, 15 pins",
+            "pins": ["GND", "GND", 45, 46, 47, 48, 5, 4, 3, 2, 8, 7, "VDDA", "VDDA", "GND"]
+        },
+        "EXTEND2": {
+            "type": "FPC4, 15 pins",
+            "pins": ["GND", "GND", "NC", "NC", "NC", 28, 29, 30, 31, 32, 33, 34, "VDDA", "VDDA", "GND"]
+        }
+    },
+    "devices": {
+        "lcd": {
+            "chip": "jd9365",
+            "on": {"dsi.dsi0": {}},
+            "pins": {"rst": 27, "backlight": {"gpio": 23, "active": "high"}},
+            "config": {
+                "primary": true,
+                "panel": {"width": 800, "height": 1280, "mm_w": 136, "mm_h": 217},
+                "depth_bits": 16
+            },
+            "controls": {"orientation": {"start": {"x": "right-left", "y": "top-bottom", "swap": true}}}
+        },
+        "touch": {
+            "chip": "gsl3680",
+            "on": {"i2c.i2c0": {}},
+            "pins": {"rst": 22, "int": 21},
+            "config": {
+                "over": "lcd",
+                "x_max": 1663,
+                "y_max": 895,
+                "calibrations": {
+                    "esp-idf/jef-sure/dgx-di": [
+                        {
+                            "rule": "the newest",
+                            "notes": "Measured before the versions were kept: measured_with is not known.",
+                            "x_min": 0,
+                            "x_max": 1663,
+                            "y_min": 0,
+                            "y_max": 895,
+                            "width": 800,
+                            "height": 1280,
+                            "flags": 6,
+                            "knots_x": 3,
+                            "knots_y": 3,
+                            "rounds": 3,
+                            "affine": [65301, 579, 774524, -221, 66564, -691501],
+                            "x": [[44, 48], [407, 399], [747, 751]],
+                            "y": [[47, 48], [642, 640], [1230, 1231]],
+                            "down_ms": 50,
+                            "up_ms": 60,
+                            "blink_ms": 22,
+                            "gap_ms": 0,
+                            "off_tenths": 181,
+                            "worst_tenths": 220,
+                            "left_tenths": 50,
+                            "left_worst_tenths": 110
+                        }
+                    ]
+                }
+            }
+        },
+        "sound": {
+            "chip": "es8311",
+            "on": {"i2c.i2c0": {}, "i2s.i2s0": {}},
+            "pins": {"pa": 20},
+            "config": {"sample_rate": 22050, "pa_voltage": 5.0, "codec_dac_voltage": 3.3},
+            "controls": {"volume": {"start": 25}},
+            "notes": [
+                "MIC1 feeds the codec and ASDOUT comes in on GPIO11. Only the output is set up.",
+                "A speaker in a box of the case, on CN3."
+            ]
+        },
+        "boot": {"class": "button", "pins": {"in": {"gpio": 35, "active": "low"}}},
+        "sd": {
+            "class": "storage",
+            "on": {"sdmmc.sdmmc0": {}},
+            "config": {"media": "microsd"},
+            "notes": "Fed by LDO channel 4 of the chip."
+        },
+        "rtc": {
+            "chip": "rx8025t",
+            "on": {"i2c.i2c0": {}},
+            "notes": "BT1 has room for a CR1220 backup cell; none is fitted."
+        },
+        "led": {
+            "class": "led",
+            "pins": {"data": 26},
+            "config": {"kind": "ws2812", "count": 1},
+            "notes": "LED1, beside the P4, on the side of the board that faces the back cover of the case."
+        },
+        "battery": {
+            "class": "battery_adc",
+            "pins": {"in": 52},
+            "config": {"divider": "68k/100k"},
+            "notes": "A LiPo cell in the case, on CN1. The charger is an IP5306, with no line to the chip."
+        },
+        "radio": {
+            "class": "radio",
+            "on": {"sdio.sdio0": {}},
+            "pins": {"io2": 6},
+            "antenna": {"kind": "connector"},
+            "config": {"chip": "esp32-c6"},
+            "notes": "An ESP32-C6 module beside the P4: Wi-Fi and BLE, its antenna on a wire from a connector of the module."
+        },
+        "clock_32k": {
+            "class": "other",
+            "pins": {"xtal_p": 0, "xtal_n": 1},
+            "notes": "The 32.768 kHz crystal X2 of the chip."
+        }
+    }
+}

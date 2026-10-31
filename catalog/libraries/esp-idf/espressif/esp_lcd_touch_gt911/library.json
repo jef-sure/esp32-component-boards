@@ -1,0 +1,70 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "library",
+    "ecosystem": "esp-idf",
+    "owner": "espressif",
+    "name": "esp_lcd_touch_gt911",
+    "title": "esp_lcd_touch GT911",
+    "url": "https://components.espressif.com/components/espressif/esp_lcd_touch_gt911",
+    "install": [
+        {"via": "registry"},
+        {
+            "via": "git",
+            "url": "https://github.com/espressif/esp-bsp.git",
+            "path": "components/lcd_touch/esp_lcd_touch_gt911"
+        }
+    ],
+    "described": "1.2.1",
+    "chips": {
+        "gt911": {
+            "header": "esp_lcd_touch_gt911.h",
+            "on": ["i2c"],
+            "interface": "esp_lcd_touch",
+            "init": [
+                {
+                    "call": "esp_lcd_touch_new_i2c_gt911",
+                    "args": ["{io}", "{config}", "{handle}"],
+                    "ok": {"equals": "ESP_OK"}
+                }
+            ],
+            "adapter": {"kind": "gt911", "headers": ["board_touch_lcd.h"]}
+        }
+    },
+    "adapter": {
+        "version": "^1.1.1",
+        "symbol": "BOARD_TOUCH_GT911",
+        "with": ["esp-idf/jef-sure/dgx-di", "esp-idf/espressif/esp_lcd_touch"],
+        "notes": "1.1.1: the address set by INT during reset.",
+        "headers": ["board_touch_gt911.h"],
+        "sources": {"BOARD_TOUCH_GT911": ["board_touch_gt911.c"]}
+    },
+    "checked": {
+        "api": {
+            "level": "vendor-code",
+            "source": "include/esp_lcd_touch_gt911.h of the version the builds took",
+            "date": "2026-10-31"
+        }
+    },
+    "versions": {
+        "1.2.1": {"requires": {"esp-idf/espressif/esp_lcd_touch": "^1.2.0"}, "frameworks": {"esp-idf": ">=5.2"}},
+        "1.2.0~3": {"requires": {"esp-idf/espressif/esp_lcd_touch": "^1.2.0"}, "frameworks": {"esp-idf": ">=5.2"}},
+        "1.2.0~2": {"requires": {"esp-idf/espressif/esp_lcd_touch": "^1.2.0"}, "frameworks": {"esp-idf": ">=5.2"}},
+        "1.2.0~1": {"requires": {"esp-idf/espressif/esp_lcd_touch": "^1.2.0"}, "frameworks": {"esp-idf": ">=4.4.2"}},
+        "1.2.0": {"requires": {"esp-idf/espressif/esp_lcd_touch": "^1.2.0"}, "frameworks": {"esp-idf": ">=4.4.2"}},
+        "1.1.3": {"requires": {"esp-idf/espressif/esp_lcd_touch": "^1.1.0"}, "frameworks": {"esp-idf": ">=4.4.2"}},
+        "1.1.2": {"requires": {"esp-idf/espressif/esp_lcd_touch": "^1.1.0"}, "frameworks": {"esp-idf": ">=4.4.2"}},
+        "1.1.1~2": {"requires": {"esp-idf/espressif/esp_lcd_touch": "^1.1.0"}, "frameworks": {"esp-idf": ">=4.4.2"}},
+        "1.1.1~1": {"requires": {"esp-idf/espressif/esp_lcd_touch": "^1.1.0"}, "frameworks": {"esp-idf": ">=4.4.2"}},
+        "1.1.1": {"requires": {"esp-idf/espressif/esp_lcd_touch": "^1.1.0"}, "frameworks": {"esp-idf": ">=4.4.2"}},
+        "1.1.0": {"requires": {"esp-idf/espressif/esp_lcd_touch": "^1.1.0"}, "frameworks": {"esp-idf": ">=4.4.2"}},
+        "1.0.7~1": {"requires": {"esp-idf/espressif/esp_lcd_touch": "^1.0.4"}, "frameworks": {"esp-idf": ">=4.4.2"}},
+        "1.0.6": {"requires": {"esp-idf/espressif/esp_lcd_touch": "^1.0"}, "frameworks": {"esp-idf": ">=4.4.2"}},
+        "1.0.4": {"requires": {"esp-idf/espressif/esp_lcd_touch": "^1.0"}, "frameworks": {"esp-idf": ">=4.4.2"}},
+        "1.0.3": {"requires": {"esp-idf/espressif/esp_lcd_touch": "^1.0"}, "frameworks": {"esp-idf": ">=4.4.2"}},
+        "1.0.2": {"requires": {"esp-idf/espressif/esp_lcd_touch": "^1.0"}, "frameworks": {"esp-idf": ">=4.4.2"}},
+        "1.0.1": {"requires": {"esp-idf/espressif/esp_lcd_touch": "^1.0"}, "frameworks": {"esp-idf": ">=4.4.2"}},
+        "1.0.0": {"requires": {"esp-idf/espressif/esp_lcd_touch": "^1.0"}, "frameworks": {"esp-idf": ">=5.0"}},
+        "0.9.0": {"requires": {"esp-idf/espressif/esp_lcd_touch": "^0.9"}, "frameworks": {"esp-idf": ">=4.4"}}
+    }
+}

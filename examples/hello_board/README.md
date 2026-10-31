@@ -12,8 +12,8 @@ flash, and the line that chooses it in the menu of the configuration. No
 `set-target`, no `menuconfig`:
 
 ```sh
-python3 ../../tools/board_select.py cyd .                      # or jc1060p470, jc8012p4a1c, jc4827w543
-python3 ../../tools/board_select.py jc1060p470 --module lcd2004_pcf8574 .   # a 2004 on the board's I2C
+python3 ../../tools/board_select.py cyd_s028r .                # or jc1060p470c, jc8012p4a1c, jc4827w543c
+python3 ../../tools/board_select.py jc1060p470c --module lcd2004_pcf8574 .  # a 2004 on the board's I2C
 idf.py build flash monitor
 ```
 

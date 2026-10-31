@@ -1,0 +1,48 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "library",
+    "ecosystem": "esp-idf",
+    "owner": "jef-sure",
+    "name": "scd4x",
+    "title": "SCD4x",
+    "url": "https://github.com/jef-sure/esp32-component-scd4x",
+    "install": [
+        {"via": "registry"},
+        {"via": "git", "url": "https://github.com/jef-sure/esp32-component-scd4x.git", "ref": "v{version}"}
+    ],
+    "described": "0.2.0",
+    "chips": {
+        "scd4x": {
+            "header": "scd4x.h",
+            "on": ["i2c"],
+            "init": [
+                {
+                    "call": "scd4x_init",
+                    "args": ["{i2c_device}"],
+                    "returns": "sensor",
+                    "notes": "The program adds the device at 0x62 to its I2C bus.",
+                    "ok": {"not": "NULL"}
+                }
+            ],
+            "supports": {
+                "variants": ["scd40", "scd41", "scd43"],
+                "modes": ["periodic", "low_power_periodic", "single_shot"]
+            },
+            "notes": "Single shot on the SCD41 and the SCD43 only: scd4x_get_sensor_variant() tells them apart."
+        }
+    },
+    "checked": {
+        "api": {
+            "level": "vendor-code",
+            "source": "README and include/scd4x.h of esp32-component-scd4x 0.2.0",
+            "date": "2026-10-31"
+        }
+    },
+    "versions": {
+        "0.2.0": {"frameworks": {"esp-idf": ">=5.2.0"}},
+        "0.1.0": {"frameworks": {"esp-idf": ">=5.2.0"}},
+        "0.0.3": {"frameworks": {"esp-idf": ">=5.2.0"}},
+        "0.0.1": {"frameworks": {"esp-idf": ">=5.2.0"}}
+    }
+}

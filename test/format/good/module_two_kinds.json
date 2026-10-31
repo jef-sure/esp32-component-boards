@@ -1,0 +1,17 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "mcu": {"target": "esp32"},
+    "name": "module_two_kinds",
+    "title": "One module of one chip, one of two, on one I2C",
+    "buses": {"i2c": {"i2c0": {"sda": 21, "scl": 22}}},
+    "modules": {
+        "a": {"module": "imu_one", "on": {"i2c.i2c0": {"address": "0x69"}}},
+        "b": {
+            "module": "imu_two_b",
+            "on": {"i2c.i2c0": {}},
+            "devices": {"motion": {"on": {"i2c.i2c0": {"address": "0x68"}}}}
+        }
+    }
+}

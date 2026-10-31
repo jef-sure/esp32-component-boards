@@ -1,0 +1,20 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "gsl3680",
+    "title": "Silead GSL3680",
+    "class": "touch",
+    "on": {"i2c": {"required": true}},
+    "config": {"fingers": 5},
+    "firmware": {"kept": "none", "set": "program"},
+    "checked": {
+        "facts": {"level": "hardware", "source": "boards-data, flashed or checked against the schematic"},
+        "firmware": {
+            "level": "vendor-code",
+            "covers": ["firmware"],
+            "source": "dgx_di_gsl3680.h and tools/gsl_firmware.py of DGX-DI"
+        }
+    },
+    "notes": ["The firmware sets the range of its coordinates, so x_max and y_max go with the firmware of the panel."]
+}

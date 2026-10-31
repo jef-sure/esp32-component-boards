@@ -1,0 +1,11 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "library",
+    "ecosystem": "zephyr",
+    "owner": "owner_c",
+    "name": "zephyr_library",
+    "title": "A library of an ecosystem nothing else here knows",
+    "versions": {"0.1.0": {"frameworks": {"zephyr": ">=3.7"}}},
+    "install": [{"via": "git", "url": "https://github.com/owner_c/zephyr_library.git", "ref": "main"}]
+}

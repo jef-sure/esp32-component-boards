@@ -8,4 +8,13 @@ examples/*/sdkconfig.old
 examples/*/sdkconfig.defaults.board
 examples/*/managed_components/
 examples/*/dependencies.lock*
-/PLAN*.md
+/PLAN*
+# assistants: instructions, plans and settings stay out of the repository
+/CLAUDE.md
+/CLAUDE.local.md
+/AGENTS.md
+/GEMINI.md
+.claude/
+.vscode/
+.cursor/
+.github/copilot-instructions.md

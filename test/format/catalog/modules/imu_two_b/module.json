@@ -1,0 +1,9 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "imu_two_b",
+    "title": "The same board with another magnetometer on it",
+    "extends": "imu_two",
+    "devices": {"mag": {"chip": "magnetometer_b"}}
+}

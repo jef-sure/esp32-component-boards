@@ -1,0 +1,65 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "two_audio_on_one_i2s",
+    "title": "A codec and a microphone ADC",
+    "mcu": {
+        "target": "esp32s3"
+    },
+    "checked": {
+        "pins": {
+            "level": "unchecked",
+            "source": "shape only"
+        }
+    },
+    "buses": {
+        "i2c": {
+            "i2c0": {
+                "sda": 8,
+                "scl": 9
+            }
+        },
+        "i2s": {
+            "i2s0": {
+                "mclk": 2,
+                "bclk": 17,
+                "ws": 45,
+                "dout": 15,
+                "din": 16
+            }
+        }
+    },
+    "devices": {
+        "out": {
+            "chip": "es8311",
+            "on": {
+                "i2c.i2c0": {},
+                "i2s.i2s0": {}
+            },
+            "pins": {
+                "pa": 46
+            },
+            "config": {
+                "sample_rate": 22050
+            },
+            "controls": {
+                "volume": {
+                    "start": 50
+                }
+            }
+        },
+        "mic": {
+            "chip": "es7210",
+            "on": {
+                "i2c.i2c0": {
+                    "address": "0x40"
+                },
+                "i2s.i2s0": {}
+            },
+            "config": {
+                "sample_rate": 16000
+            }
+        }
+    }
+}

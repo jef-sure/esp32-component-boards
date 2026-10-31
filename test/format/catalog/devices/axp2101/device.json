@@ -1,0 +1,11 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "axp2101",
+    "title": "X-Powers AXP2101",
+    "class": ["pmic", "battery_adc"],
+    "on": {"i2c": {"required": true, "address": "0x34"}},
+    "provides": {"battery_level": {}},
+    "checked": {"facts": {"level": "community", "source": "nanoFramework Axp2101, Zephyr binding"}}
+}

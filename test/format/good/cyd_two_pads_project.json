@@ -1,0 +1,43 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "project",
+    "name": "cyd_two_pads_project",
+    "title": "A project on the CYD with two pads",
+    "extends": "cyd_s028r",
+    "buses": {
+        "i2c": {
+            "i2c0": {
+                "sda": 22,
+                "scl": 27
+            },
+            "i2c1": {
+                "sda": 4,
+                "scl": 16
+            }
+        }
+    },
+    "devices": {
+        "rgb": null
+    },
+    "modules": {
+        "pad1": {
+            "module": "wii_pad",
+            "on": {
+                "i2c.i2c0": {}
+            },
+            "config": {
+                "player": 1
+            }
+        },
+        "pad2": {
+            "module": "wii_pad",
+            "on": {
+                "i2c.i2c1": {}
+            },
+            "config": {
+                "player": 2
+            }
+        }
+    }
+}

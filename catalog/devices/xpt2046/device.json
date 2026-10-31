@@ -1,0 +1,11 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "xpt2046",
+    "title": "XPT2046 resistive touch",
+    "class": "touch",
+    "on": {"spi": {"required": true}},
+    "config": {"x_max": 4095, "y_max": 4095, "fingers": 1, "resistive": true},
+    "checked": {"facts": {"level": "hardware", "source": "boards-data, flashed or checked against the schematic"}}
+}

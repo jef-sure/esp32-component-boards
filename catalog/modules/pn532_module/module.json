@@ -1,0 +1,17 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "pn532_module",
+    "title": "PN532 module with its antenna on the board",
+    "devices": {"nfc": {"chip": "pn532", "antenna": {"kind": "on_board"}, "provides": {"nfc": {"range_mm": 40}}}},
+    "checked": {
+        "range": {
+            "level": "hardware",
+            "covers": ["devices.nfc.provides.nfc.range_mm"],
+            "by": "Anton",
+            "date": "2026-10-31",
+            "notes": "from experience"
+        }
+    }
+}

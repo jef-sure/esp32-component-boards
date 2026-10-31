@@ -1,0 +1,12 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "jd9165",
+    "title": "JD9165",
+    "class": "display",
+    "on": {"dsi": {"required": true}},
+    "config": {"kind": "graphics"},
+    "controls": {"orientation": {"how": "driver", "read": "none"}},
+    "checked": {"facts": {"level": "hardware", "source": "boards-data, flashed or checked against the schematic"}}
+}

@@ -1,0 +1,120 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "library",
+    "ecosystem": "esp-idf",
+    "owner": "jef-sure",
+    "name": "pn5180",
+    "title": "PN5180",
+    "url": "https://github.com/jef-sure/esp32-component-pn5180",
+    "install": [
+        {"via": "registry"},
+        {"via": "git", "url": "https://github.com/jef-sure/esp32-component-pn5180.git", "ref": "v{version}"}
+    ],
+    "described": "0.6.0",
+    "transports": {
+        "spi": {
+            "init": {
+                "call": "pn5180_spi_init",
+                "args": ["{host}", "{sclk}", "{miso}", "{mosi}", "{hz}"],
+                "returns": "bus",
+                "ok": {"not": "NULL"}
+            },
+            "shared": {"call": "pn5180_spi_attach", "args": ["{host}", "{hz}"], "returns": "bus", "ok": {"not": "NULL"}}
+        }
+    },
+    "chips": {
+        "pn5180": {
+            "header": "pn5180.h",
+            "on": ["spi"],
+            "init": [
+                {
+                    "call": "pn5180_init",
+                    "args": ["{bus}", "{cs}", "{busy}", "{rst}"],
+                    "returns": "nfc",
+                    "ok": {"not": "NULL"}
+                }
+            ],
+            "setup": [
+                {
+                    "call": "pn5180_14443_init",
+                    "args": ["{nfc}"],
+                    "returns": "protocol",
+                    "for": "iso14443a",
+                    "ok": {"not": "NULL"}
+                },
+                {
+                    "call": "pn5180_15693_init",
+                    "args": ["{nfc}", "{rf_config}"],
+                    "returns": "protocol",
+                    "for": "iso15693",
+                    "ok": {"not": "NULL"}
+                }
+            ],
+            "standards": ["iso14443a", "iso15693"],
+            "modes": ["reader"],
+            "supports": {
+                "ntag": ["uid", "pages_read", "pages_write", "ndef_read", "ndef_write"],
+                "mifare_ultralight": ["uid", "pages_read", "pages_write", "ndef_read", "ndef_write"],
+                "mifare_classic": ["uid", "authenticate", "blocks_read", "blocks_write", "value_blocks", "ndef_read"],
+                "mifare_plus": ["uid", "identify"],
+                "iso14443_4": ["uid", "apdu", "ndef_read"],
+                "iso15693": ["uid", "blocks_read", "blocks_write", "ndef_read", "ndef_write"]
+            },
+            "limits": {"iso14443a_cards_per_scan": 14},
+            "firmware": ">=3.4"
+        }
+    },
+    "checked": {
+        "api": {
+            "level": "vendor-code",
+            "source": "README of esp32-component-pn5180 0.6.0, Features and scope; src/pn5180-14443.c for the 14 cards",
+            "date": "2026-10-31"
+        },
+        "history": {
+            "level": "vendor-code",
+            "covers": ["history"],
+            "source": "headers of include/ at every tag of esp32-component-pn5180 and its CHANGES.md; before tag v0.2.0 nothing is known",
+            "date": "2026-10-31"
+        }
+    },
+    "history": [
+        {
+            "before": "0.5.0",
+            "notes": "NDEF was written by pn5180_ndef_write_to_selected_card, which wrote where it was told; pn5180_ndef_write_card_auto replaced it."
+        },
+        {
+            "before": "0.4.0",
+            "chips": {
+                "pn5180": {
+                    "supports": {
+                        "mifare_classic": ["uid", "authenticate", "blocks_read", "blocks_write"],
+                        "iso14443_4": null
+                    }
+                }
+            }
+        },
+        {
+            "before": "0.3.0",
+            "chips": {
+                "pn5180": {"supports": {"mifare_classic": ["uid", "blocks_read", "blocks_write"], "iso14443_4": null}}
+            },
+            "transports": {"spi": {"shared": null}}
+        }
+    ],
+    "versions": {
+        "0.6.0": {"frameworks": {"esp-idf": ">=5.0.0"}},
+        "0.5.2": {"frameworks": {"esp-idf": ">=5.0.0"}},
+        "0.5.1": {"frameworks": {"esp-idf": ">=5.0.0"}},
+        "0.5.0": {"via": ["git"]},
+        "0.4.3": {"frameworks": {"esp-idf": ">=5.0.0"}},
+        "0.4.2": {"frameworks": {"esp-idf": ">=5.0.0"}},
+        "0.4.1": {"via": ["git"]},
+        "0.4.0": {"via": ["git"]},
+        "0.3.0": {"via": ["git"]},
+        "0.2.0": {"via": ["git"]},
+        "0.1.1": {"frameworks": {"esp-idf": ">=5.0.0"}},
+        "0.1.0": {"frameworks": {"esp-idf": ">=5.0.0"}},
+        "0.0.9": {"frameworks": {"esp-idf": ">=5.0.0"}}
+    }
+}

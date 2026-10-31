@@ -1,0 +1,10 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "psram_by_revision",
+    "title": "A P4 of revision 3 with its PSRAM at 250 MHz",
+    "mcu": {"target": "esp32p4", "psram_mb": 32, "psram_mhz": 250, "revision": "3.2"},
+    "buses": {"i2c": {"i2c0": {"sda": 7, "scl": 8}}},
+    "devices": {"button": {"class": "button", "pins": {"in": {"gpio": 35, "active": "low"}}}}
+}

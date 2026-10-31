@@ -1,0 +1,13 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "two_calibrations",
+    "title": "A panel measured for two libraries",
+    "extends": "jc1060p470c",
+    "devices": {
+        "touch": {
+            "config": {"calibrations": {"esp-idf/lvgl/lvgl": [{"points": [[48, 48, 49, 48], [975, 975, 552, 551]]}]}}
+        }
+    }
+}

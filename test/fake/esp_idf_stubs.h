@@ -20,6 +20,9 @@ int gpio_set_level(gpio_num_t n, int l);
 int gpio_get_level(gpio_num_t n);
 
 #define ESP_OK 0
+#define ESP_FAIL (-1)
+typedef int esp_err_t;
+const char *esp_err_to_name(esp_err_t err);
 
 /* spi */
 typedef enum { SPI1_HOST = 0, SPI2_HOST = 1, SPI3_HOST = 2 } spi_host_device_t;

@@ -1,0 +1,42 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "cyd_s028r_v2",
+    "title": "CYD S028R, second kind: ILI9341 with its own init",
+    "extends": "cyd_s028r",
+    "checked": {
+        "pins": {
+            "level": "community",
+            "source": "rzeldent/platformio-espressif32-sunton, esp32-2432S028Rv2.json"
+        }
+    },
+    "devices": {
+        "lcd": {
+            "config": {
+                "init": {
+                    "source": "esp32-2432S028Rv2.json",
+                    "sequence": [
+                        {
+                            "cmd": 54,
+                            "data": [
+                                8
+                            ]
+                        },
+                        {
+                            "cmd": 33
+                        },
+                        {
+                            "cmd": 17,
+                            "delay_ms": 120
+                        },
+                        {
+                            "cmd": 41,
+                            "delay_ms": 1
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}

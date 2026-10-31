@@ -1,0 +1,101 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "cores3_like",
+    "title": "Backlight on a PMIC rail, reset through an expander",
+    "mcu": {
+        "target": "esp32s3"
+    },
+    "checked": {
+        "pins": {
+            "level": "community",
+            "source": "ESPHome M5Stack CoreS3, not the schematic"
+        }
+    },
+    "buses": {
+        "i2c": {
+            "i2c0": {
+                "sda": 8,
+                "scl": 9
+            }
+        },
+        "spi": {
+            "spi2": {
+                "mosi": 37,
+                "miso": 35,
+                "sclk": 36
+            }
+        }
+    },
+    "power": [
+        {
+            "line": {
+                "via": "pmu",
+                "rail": "aldo1"
+            },
+            "mv": 3300,
+            "feeds": [
+                "lcd"
+            ]
+        }
+    ],
+    "devices": {
+        "pmu": {
+            "chip": "axp2101",
+            "on": {
+                "i2c.i2c0": {}
+            }
+        },
+        "io": {
+            "chip": "aw9523",
+            "on": {
+                "i2c.i2c0": {}
+            }
+        },
+        "lcd": {
+            "chip": "ili9342",
+            "on": {
+                "spi.spi2": {
+                    "cs": 3
+                }
+            },
+            "config": {
+                "panel": {
+                    "width": 320,
+                    "height": 240,
+                    "mm_w": 54,
+                    "mm_h": 41
+                },
+                "primary": true
+            },
+            "controls": {
+                "orientation": {
+                    "start": {
+                        "x": "left-right",
+                        "y": "top-bottom",
+                        "swap": false
+                    }
+                },
+                "brightness": {
+                    "how": "pmic_rail",
+                    "min": 2600,
+                    "max": 3300,
+                    "unit": "mV",
+                    "start": 3300
+                }
+            },
+            "pins": {
+                "dc": 2,
+                "rst": {
+                    "via": "io",
+                    "bit": 9
+                },
+                "backlight": {
+                    "via": "pmu",
+                    "rail": "dldo1"
+                }
+            }
+        }
+    }
+}

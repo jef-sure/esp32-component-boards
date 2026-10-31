@@ -1,0 +1,32 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "one_chip_two_roles",
+    "title": "PMIC and fuel gauge in one chip",
+    "mcu": {
+        "target": "esp32s3"
+    },
+    "checked": {
+        "pins": {
+            "level": "unchecked",
+            "source": "shape only"
+        }
+    },
+    "buses": {
+        "i2c": {
+            "i2c0": {
+                "sda": 8,
+                "scl": 9
+            }
+        }
+    },
+    "devices": {
+        "pmu": {
+            "chip": "axp2101",
+            "on": {
+                "i2c.i2c0": {}
+            }
+        }
+    }
+}

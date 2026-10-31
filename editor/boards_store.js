@@ -27,7 +27,7 @@ const BusKinds = {
     spi:  { title: 'SPI',        own: 'a host of the chip: spi2, spi3', fields: { hz: 'opt', mosi: 'req', miso: 'req', sclk: 'req' } },
     qspi: { title: 'QSPI',       own: 'a host of the chip: spi2, spi3', fields: { hz: 'opt', d0: 'req', d1: 'req', d2: 'req', d3: 'req', sclk: 'req' } },
     i2c:  { title: 'I2C',        own: 'a port of the chip: i2c0',       fields: { sda: 'req', scl: 'req' } },
-    i2s:  { title: 'I2S',        own: 'a port of the chip: i2s0',       fields: { mclk: 'req', bclk: 'req', ws: 'req', dout: 'req', din: 'nullable' } },
+    i2s:  { title: 'I2S',        own: 'a port of the chip: i2s0',       fields: { mclk: 'opt', bclk: 'req', ws: 'req', dout: 'req', din: 'nullable' } },
     dsi:  { title: 'MIPI-DSI',   own: 'the DSI of the chip: dsi0',      fields: { lanes: 'req', lane_mbps: 'req', phy_ldo_chan: 'req', phy_ldo_mv: 'req' } },
     p8:   { title: 'Intel 8080', own: 'any name',                       fields: { d0: 'req', d1: 'req', d2: 'req', d3: 'req', d4: 'req', d5: 'req', d6: 'req', d7: 'req', wr: 'req', rd: 'nullable', dc: 'req', hz: 'req' } }
 };
@@ -50,6 +50,12 @@ function busOf(board, name) {
 
 function isInt(x) {
     return Number.isInteger(x);
+}
+
+/* a 7-bit I2C address from the data (0x27, "0x27" or 39), null if it is not one */
+function i2cAddress(v) {
+    const a = typeof v === 'string' && /^\s*(0x[0-9a-f]+|\d+)\s*$/i.test(v) ? Number(v.trim()) : v;
+    return Number.isInteger(a) && a >= 0x08 && a <= 0x77 ? a : null;
 }
 
 /* the board checked, the generator's own questions asked where a browser can; what it answers
@@ -78,10 +84,11 @@ function boardProblems(b) {
                 const need = kind === 'spi' ? ['mosi', 'miso', 'sclk'] : ['d0', 'd1', 'd2', 'd3', 'sclk'];
                 for (const s of need) if (!isInt(bus[s])) P.push(`the bus ${name} lacks its "${s}" pin`);
             } else if (kind === 'i2c') {
+                if (!/^i2c\d+$/.test(own)) P.push(`the name of an i2c bus is its port: "i2c.i2c0", not "${own}"`);
                 for (const s of ['sda', 'scl']) if (!isInt(bus[s])) P.push(`the bus ${name} lacks its "${s}" pin`);
             } else if (kind === 'i2s') {
                 if (!/^i2s\d+$/.test(own)) P.push(`the name of an i2s bus is its port: "i2s.i2s0", not "${own}"`);
-                for (const s of ['mclk', 'bclk', 'ws', 'dout']) if (!isInt(bus[s])) P.push(`the bus ${name} lacks its "${s}" pin`);
+                for (const s of ['bclk', 'ws', 'dout']) if (!isInt(bus[s])) P.push(`the bus ${name} lacks its "${s}" pin`);
                 if (bus.din != null && !isInt(bus.din)) P.push(`the bus ${name} has a din that is not a pin`);
             } else if (kind === 'dsi') {
                 for (const k of ['lanes', 'lane_mbps', 'phy_ldo_chan', 'phy_ldo_mv']) if (!isInt(bus[k])) P.push(`the bus ${name} lacks its "${k}"`);
@@ -94,6 +101,8 @@ function boardProblems(b) {
             }
         }
     }
+    if (Object.keys((b.buses || {}).i2c || {}).length > 1)
+        P.push('only one I2C bus per board is supported: the glue creates a single I2C master');
     const d = b.display;
     if (d) {
         const driver = d.driver;
@@ -103,7 +112,7 @@ function boardProblems(b) {
             const t = d.bus || {};
             const [kind, width] = busParts(t.bus);
             if (kind === 'i2c') {
-                if (!t.address) P.push('a character LCD on I2C names the backpack\'s address beside the bus');
+                if (i2cAddress(t.address) === null) P.push('a character LCD on I2C needs the 7-bit address of its backpack, e.g. "0x27"');
                 if (!module && !busOf(b, t.bus)) P.push(`the character LCD rides the board's bus "${t.bus}", which the board does not wire`);
             } else if (kind === 'gpio') {
                 const pins = t.pins || {};
@@ -140,7 +149,7 @@ function boardProblems(b) {
     const t = b.touch;
     if (t) {
         if (!TouchKinds.includes(t.kind)) P.push(`touch of a kind not known: "${t.kind}"`);
-        if (!(d && PanelDrivers[d.driver])) P.push('a touch panel lies on a frame buffer display: the board has none');
+        if (!(d && PanelDrivers[d.driver])) P.push('a touch panel needs a graphics display: the board has none');
         if (!t.calibration) P.push('the touch has no calibration: measure the board (dgx_di_calibrate_measure) and put it in the data; "measured": false marks a placeholder');
         if (!isInt(t.x_max) || !isInt(t.y_max)) P.push('the touch lacks its x_max and y_max, the range of its coordinates');
         if (!t.bus || !busOf(b, t.bus)) P.push(`the touch's bus "${t.bus}" is not among the board's buses`);
@@ -151,9 +160,14 @@ function boardProblems(b) {
             for (const line of ['cs', 'irq']) if (!isInt(t[line])) P.push(`the touch lacks its "${line}" pin`);
         } else if (t.kind === 'gt911' || t.kind === 'gsl3680') {
             if (t.bus && busParts(t.bus)[0] !== 'i2c') P.push(`the ${t.kind} rides a board's I2C bus: bus is its name, "i2c.i2c0"`);
+            if (t.kind === 'gt911')
+                for (const a of t.address_try || ['0x5d'])
+                    if (![0x5d, 0x14].includes(i2cAddress(a))) P.push(`a GT911 answers at 0x5d or 0x14, not ${a}`);
         }
         if (t.calibration && isInt(t.x_max) && (t.calibration.x_max !== t.x_max || t.calibration.y_max !== t.y_max))
             P.push('the calibration is for another panel: its x_max/y_max differ from the touch\'s own');
+        if (t.calibration && d && d.panel && (t.calibration.width !== d.panel.width || t.calibration.height !== d.panel.height))
+            P.push('the calibration is for another display: its width/height differ from the panel\'s');
     }
     const s = b.sound;
     if (s) {
@@ -161,10 +175,12 @@ function boardProblems(b) {
             if (target !== 'esp32') P.push('the DAC kind of sound is the ESP32\'s own: no other chip here has one');
             if (![25, 26].includes(s.out)) P.push(`the DAC of an ESP32 is on GPIO 25 or 26, not ${s.out}`);
             if (s.pa != null && !isInt(s.pa)) P.push('the pa of the sound is a pin or null');
+        } else if (s.kind === 'i2s') {
+            if (!busOf(b, s.i2s_bus)) P.push('the amplifier streams over a board\'s I2S bus: i2s_bus is its name, "i2s.i2s0"');
         } else if (s.kind === 'es8311') {
             if (busParts(s.bus)[0] !== 'i2c' || !busOf(b, s.bus)) P.push('the codec comes on a board\'s I2C bus: bus is its name, "i2c.<own>"');
             if (!busOf(b, s.i2s_bus)) P.push('the codec streams over a board\'s I2S bus: i2s_bus is its name, "i2s.i2s0"');
-            if (!s.address) P.push('the codec needs its address on the I2C bus');
+            if (i2cAddress(s.address) === null) P.push('the codec needs its 7-bit I2C address, e.g. "0x18"');
             if (!isInt(s.volume)) P.push('the codec needs its volume, 0..100');
         } else {
             P.push(`sound of a kind not known: "${s.kind}"`);
@@ -282,6 +298,7 @@ function unmarkFloats(text) {
 function boardForSave(board) {
     const out = JSON.parse(JSON.stringify(board));
     for (const k of ['display', 'touch', 'sound', 'button', 'sd']) if (out[k] == null) delete out[k];
+    if (Array.isArray(out.notes)) out.notes = out.notes.filter(line => line.trim());
     if (out.buses && !Object.keys(out.buses).length) delete out.buses;
     return out;
 }

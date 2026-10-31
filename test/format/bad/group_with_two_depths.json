@@ -1,0 +1,124 @@
+{
+    "expect": "takes its depth from the left",
+    "board": {
+        "format": "jef-sure/boards",
+        "format_version": 2,
+        "kind": "board",
+        "name": "dotview_clock",
+        "title": "Clock with dot indication: two SSD1351 as one screen",
+        "mcu": {
+            "target": "esp32"
+        },
+        "buses": {
+            "spi": {
+                "spi2": {
+                    "hz": 20000000,
+                    "mosi": 13,
+                    "miso": "nc",
+                    "sclk": 14
+                },
+                "spi3": {
+                    "hz": 20000000,
+                    "mosi": 23,
+                    "miso": "nc",
+                    "sclk": 18
+                }
+            }
+        },
+        "devices": {
+            "left": {
+                "chip": "ssd1351",
+                "on": {
+                    "spi.spi2": {
+                        "cs": 15
+                    }
+                },
+                "pins": {
+                    "dc": 27,
+                    "rst": 33
+                },
+                "config": {
+                    "panel": {
+                        "width": 128,
+                        "height": 128,
+                        "mm_w": 27,
+                        "mm_h": 27
+                    },
+                    "depth_bits": 16
+                },
+                "controls": {
+                    "orientation": {
+                        "start": {
+                            "x": "left-right",
+                            "y": "top-bottom",
+                            "swap": true
+                        }
+                    }
+                }
+            },
+            "right": {
+                "chip": "ssd1351",
+                "on": {
+                    "spi.spi3": {
+                        "cs": 5
+                    }
+                },
+                "pins": {
+                    "dc": 25,
+                    "rst": 26
+                },
+                "config": {
+                    "panel": {
+                        "width": 128,
+                        "height": 128,
+                        "mm_w": 27,
+                        "mm_h": 27
+                    },
+                    "depth_bits": 18
+                },
+                "controls": {
+                    "orientation": {
+                        "start": {
+                            "x": "right-left",
+                            "y": "bottom-top",
+                            "swap": true
+                        }
+                    }
+                }
+            },
+            "light": {
+                "class": "sensor",
+                "pins": {
+                    "in": 32
+                },
+                "provides": {
+                    "light": {}
+                }
+            },
+            "config": {
+                "class": "button",
+                "pins": {
+                    "in": {
+                        "gpio": 19,
+                        "active": "low",
+                        "pull": "up"
+                    }
+                }
+            }
+        },
+        "display_groups": {
+            "wide": {
+                "how": "side_by_side",
+                "left": "left",
+                "right": "right",
+                "primary": true
+            }
+        },
+        "checked": {
+            "pins": {
+                "level": "community",
+                "source": "jef-sure/dotview-clock, main/main.c"
+            }
+        }
+    }
+}

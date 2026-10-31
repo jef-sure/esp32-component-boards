@@ -34,13 +34,13 @@ project(hello)
 
 ```sh
 idf.py reconfigure            # once: downloads the component into managed_components/
-python3 managed_components/jef-sure__boards/tools/board_select.py cyd .
+python3 managed_components/jef-sure__boards/tools/board_select.py cyd_s028r .
 idf.py build flash monitor
 ```
 
 `board_select.py` записывает `sdkconfig.defaults.board`: `sdkconfig.defaults`
 платы из данных компонента. Его первые строки — `CONFIG_IDF_TARGET="esp32"` и
-`CONFIG_BOARD_SELECT_CYD=y`; остальное — что нужно чипу, памяти и флешу.
+`CONFIG_BOARD_SELECT_CYD_S028R=y`; остальное — что нужно чипу, памяти и флешу.
 ESP-IDF берёт target из первого файла в `SDKCONFIG_DEFAULTS`, который его
 называет, поэтому `idf.py set-target` не нужен, а меню *Boards → Board the
 program runs on* показывает выбранную плату.
@@ -51,7 +51,7 @@ program runs on* показывает выбранную плату.
 ## Модуль
 
 ```sh
-python3 managed_components/jef-sure__boards/tools/board_select.py jc1060p470 --module lcd2004_pcf8574 .
+python3 managed_components/jef-sure__boards/tools/board_select.py jc1060p470c --module lcd2004_pcf8574 .
 ```
 
 Умолчания модуля дописываются после умолчаний платы: они включают его опцию в
@@ -64,7 +64,7 @@ ESP-IDF читает `sdkconfig.defaults*` только когда создаё�
 Чтобы перевести проект на другую плату:
 
 ```sh
-python3 managed_components/jef-sure__boards/tools/board_select.py jc4827w543 --reset .
+python3 managed_components/jef-sure__boards/tools/board_select.py jc4827w543c --reset .
 idf.py build
 ```
 
@@ -74,8 +74,8 @@ idf.py build
 плату:
 
 ```sh
-idf.py -B build-cyd -D SDKCONFIG=build-cyd/sdkconfig \
-       -D SDKCONFIG_DEFAULTS="managed_components/jef-sure__boards/boards-data/cyd/sdkconfig.defaults;sdkconfig.defaults" build
+idf.py -B build-cyd_s028r -D SDKCONFIG=build-cyd_s028r/sdkconfig \
+       -D SDKCONFIG_DEFAULTS="managed_components/jef-sure__boards/catalog/boards/cyd_s028r/sdkconfig.defaults;sdkconfig.defaults" build
 ```
 
 `-D SDKCONFIG_DEFAULTS=...` в командной строке побеждает
@@ -87,7 +87,7 @@ idf.py -B build-cyd -D SDKCONFIG=build-cyd/sdkconfig \
 - Драйверы DGX панели платы: `select`-ы в choice в Kconfig компонента
   (`CONFIG_DGX_ENABLE_DSI`, `CONFIG_DGX_ENABLE_JD9165`, ...).
 - Остальные части: правила в `idf_component.yml` компонента на скрытых
-  символах рядом с choice. Сборка для CYD получает `atanisoft/esp_lcd_touch_xpt2046`
+  символах рядом с choice. Сборка для CYD S028R получает `atanisoft/esp_lcd_touch_xpt2046`
   и ничего от GT911 или ES8311; сборка с выбранным *None* не получает ничего
   из DGX.
 - Клей выбранной платы, компилируемый в компонент по
@@ -103,7 +103,7 @@ dependencies* в логе), и сам разрешает их заново в т
 
 ## Без board_select.py
 
-Файл, который он записывает, — копия `boards-data/<board>/sdkconfig.defaults`.
+Файл, который он записывает, — копия `catalog/boards/<board>/sdkconfig.defaults`.
 Любой другой способ попасть этому файлу в `SDKCONFIG_DEFAULTS` работает: путь
 внутрь `managed_components/` или в чекаут компонента рядом с проектом, или
 копирование строк в собственный `sdkconfig.defaults` проекта. И меню работает
@@ -114,7 +114,12 @@ dependencies* в логе), и сам разрешает их заново в т
 ## Ревизии чипа
 
 Платы на ESP32-P4 приходят с чипами ревизии 1.x или 3.x, и сборка для одной не
-запускается на другой. `sdkconfig.defaults` каждой платы написан для ревизии
-той платы, на которой его измеряли, и говорит об этом в комментариях, со
-строками, которые нужно изменить для другой ревизии. Проверьте свой чип
-(`esptool.py chip_id` или лог загрузки) перед первой прошивкой.
+запускается на другой. Ревизии различаются возможностями: 360 или 400 МГц у CPU,
+200 или 250 МГц у PSRAM, а от этой PSRAM зависит панель MIPI-DSI. `mcu.revision`
+платы называет ревизию, на которой её измеряли, а `tools/board_select.py` пишет
+строки этой ревизии из `catalog/mcu/`. Для платы с другим чипом есть `--revision`.
+Проверьте свой чип (`esptool.py chip_id` или лог загрузки) перед первой прошивкой:
+
+```sh
+python3 tools/board_select.py jc1060p470c --revision 3.1 .
+```

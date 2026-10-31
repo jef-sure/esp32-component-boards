@@ -1,0 +1,10 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "motion_sensor",
+    "title": "A gyroscope and accelerometer, shape only",
+    "class": "imu",
+    "on": {"i2c": {"required": true, "address_try": ["0x68", "0x69"]}},
+    "checked": {"facts": {"level": "unchecked", "source": "shape only"}}
+}

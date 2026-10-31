@@ -1,0 +1,11 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "hd44780",
+    "title": "HD44780 character LCD",
+    "class": "display",
+    "on": {"i2c": {}},
+    "config": {"kind": "character"},
+    "checked": {"facts": {"level": "hardware", "source": "boards-data, flashed or checked against the schematic"}}
+}

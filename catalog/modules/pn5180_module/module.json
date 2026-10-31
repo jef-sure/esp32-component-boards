@@ -1,0 +1,18 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "pn5180_module",
+    "title": "PN5180 module with its antenna on the board",
+    "devices": {"nfc": {"chip": "pn5180", "on": {"spi": {}}, "antenna": {"kind": "on_board"}}},
+    "notes": ["Stronger in the field than the PN532 module, from experience; no figure in mm yet."],
+    "checked": {
+        "field": {
+            "level": "hardware",
+            "covers": ["notes"],
+            "by": "Anton",
+            "date": "2026-10-31",
+            "notes": "from experience"
+        }
+    }
+}

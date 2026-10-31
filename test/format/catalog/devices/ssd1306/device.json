@@ -1,0 +1,12 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "ssd1306",
+    "title": "SSD1306 OLED",
+    "class": "display",
+    "on": {"i2c": {"address_try": ["0x3c", "0x3d"]}},
+    "config": {"kind": "graphics", "depth_bits": 1},
+    "controls": {"brightness": {"how": "panel_command", "min": 0, "max": 255, "read": "none"}},
+    "checked": {"facts": {"level": "unchecked", "source": "from memory, for the shape of the format only"}}
+}

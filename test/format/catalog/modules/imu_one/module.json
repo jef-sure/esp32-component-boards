@@ -1,0 +1,8 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "imu_one",
+    "title": "A motion sensor alone",
+    "devices": {"motion": {"chip": "motion_sensor"}}
+}

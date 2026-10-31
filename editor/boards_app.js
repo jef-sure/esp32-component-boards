@@ -12,7 +12,7 @@ var app = VueDemi.createApp({
                 <h3>boards editor</h3>
                 <p class="text-muted mb-0">One board, as data: this edits the JSON that is the only source of truth —
                 <code>tools/boards_gen.py</code> makes the glue, <code>tools/check_boards.py</code> checks the two agree.
-                Save as <code>board.json</code> into <code>boards-data/&lt;board&gt;/</code>.</p>
+                Save as <code>board.json</code> into <code>catalog/boards/&lt;board&gt;/</code>.</p>
             </div>
         </div>
         <div class="row mb-3 align-items-end">
@@ -39,6 +39,8 @@ var app = VueDemi.createApp({
                 </div>
                 <div class="mb-2"><label class="form-label mb-0">description</label>
                     <input class="form-control" v-model="store.board.description"></div>
+                <div class="mb-2"><label class="form-label mb-0">notes: what is special about this board, a line for each thing</label>
+                    <textarea class="form-control" rows="4" :value="notesText()" @input="notesChanged($event.target.value)"></textarea></div>
                 <div class="row g-2 mb-2">
                     <div class="col-md-4"><label class="form-label mb-0">target</label>
                         <select class="form-select" :disabled="!!store.board.module" v-model="store.board.mcu.target">
@@ -288,6 +290,7 @@ var app = VueDemi.createApp({
                         <div class="col-md-4"><label class="form-label mb-0">kind</label>
                             <select class="form-select" v-model="store.board.sound.kind" @change="soundKindChanged">
                                 <option value="es8311">es8311 — a codec on I2C and I2S</option>
+                                <option value="i2s">i2s — an amplifier on I2S, no codec</option>
                                 <option value="dac">dac — the chip's own, on a pin</option>
                             </select></div>
                         <div class="col-md-4"><label class="form-label mb-0">sample rate</label>
@@ -379,6 +382,16 @@ var app = VueDemi.createApp({
                 t.x_max = 4095; t.y_max = 4095;
             } else { delete t.component; delete t.header; delete t.cs; delete t.irq; delete t.hz; delete t.resistive; t.fingers = 5; }
         }
+        function notesText() {
+            return [].concat(store.board.notes || []).join('\n');
+        }
+
+        function notesChanged(text) {
+            const lines = text.split('\n');
+            if (lines.some(line => line.trim())) store.board.notes = lines;
+            else delete store.board.notes;
+        }
+
         function soundKindChanged() {
             const s = store.board.sound;
             if (s.kind === 'dac') store.board.sound = { kind: 'dac', out: 26, pa: null, sample_rate: s.sample_rate };
@@ -403,7 +416,7 @@ var app = VueDemi.createApp({
             const depths = store.board.display && PanelDrivers[store.board.display.driver];
             if (depths && !depths.includes(store.board.display.depth_bits)) store.board.display.depth_bits = depths[0];
         });
-        return { store, panelDrivers: PanelDrivers, characterDrivers: CharacterDrivers, busKinds: BusKinds, panelStrobes: PanelStrobes,
+        return { store, notesText, notesChanged, panelDrivers: PanelDrivers, characterDrivers: CharacterDrivers, busKinds: BusKinds, panelStrobes: PanelStrobes,
                  newBusKind, newBusOwn, displayFamily, newDisplay, newTouch, newSound, familyOf, busKindOf, touchKindsOf,
                  addBus, familyChanged, displayBusChanged, touchKindChanged, soundKindChanged, busExtra, setBusExtra };
     }

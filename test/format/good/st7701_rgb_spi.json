@@ -1,0 +1,83 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "st7701_rgb_spi",
+    "title": "RGB pixels, commands over software SPI",
+    "mcu": {
+        "target": "esp32s3"
+    },
+    "checked": {
+        "pins": {
+            "level": "unchecked",
+            "source": "shape only"
+        }
+    },
+    "buses": {
+        "rgb": {
+            "lcd": {
+                "de": 18,
+                "vsync": 17,
+                "hsync": 16,
+                "pclk": 21,
+                "data": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15
+                ]
+            }
+        },
+        "spi": {
+            "soft0": {
+                "mosi": 47,
+                "miso": "nc",
+                "sclk": 48
+            }
+        }
+    },
+    "devices": {
+        "lcd": {
+            "chip": "st7701",
+            "on": {
+                "rgb.lcd": {},
+                "spi.soft0": {
+                    "cs": 39
+                }
+            },
+            "config": {
+                "panel": {
+                    "width": 480,
+                    "height": 480,
+                    "mm_w": 70,
+                    "mm_h": 70
+                },
+                "primary": true
+            },
+            "controls": {
+                "orientation": {
+                    "start": {
+                        "x": "left-right",
+                        "y": "top-bottom",
+                        "swap": false
+                    }
+                }
+            },
+            "pins": {
+                "backlight": 38
+            }
+        }
+    }
+}

@@ -1,0 +1,128 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "handheld",
+    "title": "A handheld",
+    "mcu": {
+        "target": "esp32s3"
+    },
+    "checked": {
+        "pins": {
+            "level": "unchecked",
+            "source": "shape only"
+        }
+    },
+    "buses": {
+        "spi": {
+            "spi2": {
+                "hz": 40000000,
+                "mosi": 11,
+                "miso": "nc",
+                "sclk": 12
+            }
+        },
+        "i2c": {
+            "i2c0": {
+                "sda": 8,
+                "scl": 9
+            }
+        }
+    },
+    "devices": {
+        "io": {
+            "chip": "tca9554",
+            "on": {
+                "i2c.i2c0": {}
+            }
+        },
+        "shift": {
+            "chip": "hc165",
+            "pins": {
+                "latch": 14,
+                "clock": 15,
+                "data": 16
+            }
+        },
+        "lcd": {
+            "chip": "st7789",
+            "on": {
+                "spi.spi2": {
+                    "cs": 10
+                }
+            },
+            "config": {
+                "panel": {
+                    "width": 320,
+                    "height": 240,
+                    "mm_w": 49,
+                    "mm_h": 37
+                },
+                "primary": true,
+                "band_bytes": 0
+            },
+            "controls": {
+                "orientation": {
+                    "start": {
+                        "x": "left-right",
+                        "y": "top-bottom",
+                        "swap": false
+                    }
+                }
+            },
+            "pins": {
+                "dc": 13,
+                "rst": {
+                    "via": "io",
+                    "bit": 0
+                },
+                "backlight": {
+                    "via": "io",
+                    "bit": 1
+                }
+            }
+        },
+        "pad": {
+            "class": "gamepad",
+            "config": {
+                "player": 1,
+                "buttons": {
+                    "a": {
+                        "via": "shift",
+                        "bit": 0
+                    },
+                    "b": {
+                        "via": "shift",
+                        "bit": 1
+                    },
+                    "up": {
+                        "gpio": 4,
+                        "analog": [
+                            3000,
+                            4095
+                        ]
+                    },
+                    "start": {
+                        "via": "io",
+                        "bit": 3
+                    },
+                    "back": 17
+                }
+            }
+        },
+        "pad_touch": {
+            "chip": "cst816",
+            "variant": "cst816s",
+            "on": {
+                "i2c.i2c0": {
+                    "address": "0x16"
+                }
+            },
+            "config": {
+                "over": "none",
+                "x_max": 127,
+                "y_max": 127
+            }
+        }
+    }
+}

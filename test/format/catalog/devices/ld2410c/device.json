@@ -1,0 +1,11 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "ld2410c",
+    "title": "HLK-LD2410C radar",
+    "class": "sensor",
+    "on": {"uart": {"required": true}},
+    "provides": {"presence": {}},
+    "checked": {"facts": {"level": "unchecked", "source": "from memory, for the shape of the format only"}}
+}

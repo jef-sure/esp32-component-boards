@@ -1,0 +1,49 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "library",
+    "ecosystem": "esp-idf",
+    "owner": "atanisoft",
+    "name": "esp_lcd_touch_xpt2046",
+    "title": "esp_lcd_touch XPT2046",
+    "url": "https://github.com/atanisoft/esp_lcd_touch_xpt2046",
+    "install": [
+        {"via": "registry"},
+        {"via": "git", "url": "https://github.com/atanisoft/esp_lcd_touch_xpt2046.git", "ref": "v{version}"}
+    ],
+    "described": "1.0.6",
+    "chips": {
+        "xpt2046": {
+            "header": "esp_lcd_touch_xpt2046.h",
+            "on": ["spi"],
+            "interface": "esp_lcd_touch",
+            "defaults": {"hz": 1000000},
+            "init": [
+                {
+                    "call": "esp_lcd_touch_new_spi_xpt2046",
+                    "args": ["{io}", "{config}", "{handle}"],
+                    "ok": {"equals": "ESP_OK"}
+                }
+            ],
+            "adapter": {"kind": "esp_lcd_touch", "symbols": ["BOARD_TOUCH_SPI"], "headers": ["board_touch_lcd.h"]},
+            "notes": "1 MHz is what the driver recommends for its reads."
+        }
+    },
+    "adapter": {
+        "version": "^1.0.6",
+        "symbol": "BOARD_TOUCH_XPT2046",
+        "requires": ["esp_lcd", "esp_driver_spi"],
+        "with": ["esp-idf/jef-sure/dgx-di", "esp-idf/espressif/esp_lcd_touch"]
+    },
+    "checked": {
+        "api": {"level": "vendor-code", "source": "include/esp_lcd_touch_xpt2046.h of 1.0.6", "date": "2026-10-31"}
+    },
+    "versions": {
+        "1.0.6": {"requires": {"esp-idf/espressif/esp_lcd_touch": ">=1.0.4"}, "frameworks": {"esp-idf": ">=4.4"}},
+        "1.0.5": {"requires": {"esp-idf/espressif/esp_lcd_touch": ">=1.0.4"}, "frameworks": {"esp-idf": ">=4.4"}},
+        "1.0.4": {"requires": {"esp-idf/espressif/esp_lcd_touch": ">=1.0.4"}, "frameworks": {"esp-idf": ">=4.4"}},
+        "1.0.3": {"requires": {"esp-idf/espressif/esp_lcd_touch": ">=1.0.4"}, "frameworks": {"esp-idf": ">=4.4"}},
+        "1.0.2": {"requires": {"esp-idf/espressif/esp_lcd_touch": ">=1.0.4"}, "frameworks": {"esp-idf": ">=4.4"}},
+        "1.0.1": {"requires": {"esp-idf/espressif/esp_lcd_touch": ">=1.0.2"}, "frameworks": {"esp-idf": ">=4.4"}}
+    }
+}

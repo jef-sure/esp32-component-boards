@@ -1,0 +1,35 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "pn5180",
+    "title": "NXP PN5180",
+    "class": "nfc",
+    "on": {"spi": {"required": true}},
+    "provides": {
+        "nfc": {
+            "standards": ["iso14443a", "iso14443b", "felica", "iso15693", "iso18000_3m3", "iso18092"],
+            "tx_ma_max": 250,
+            "modes": ["reader", "peer_to_peer", "card_emulation"]
+        }
+    },
+    "firmware": {
+        "read": "command",
+        "scheme": "hex",
+        "described": "3.A",
+        "history": [{"before": "3.A", "controls": {"lpcd_reference": null}}]
+    },
+    "notes": [
+        "Drives an antenna of its own choice: the range is that of the antenna, see the modules.",
+        "The chip sets no limit of cards at once: 14 is the scan of the library, for ISO14443A."
+    ],
+    "checked": {
+        "facts": {"level": "datasheet", "source": "PN5180A0XX_C3_C4.pdf Rev. 4.0, features"},
+        "firmware": {
+            "level": "vendor-code",
+            "covers": ["firmware", "controls.lpcd_reference"],
+            "source": "esp32-component-pn5180, include/pn5180.h: PN5180_FIRMWARE_VERSION_3_A, the first with the LPCD reference modes of datasheet rev. 4.0"
+        }
+    },
+    "controls": {"lpcd_reference": {"how": "driver"}}
+}

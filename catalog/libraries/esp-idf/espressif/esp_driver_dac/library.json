@@ -1,0 +1,19 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "library",
+    "ecosystem": "esp-idf",
+    "owner": "espressif",
+    "name": "esp_driver_dac",
+    "title": "DAC driver of ESP-IDF",
+    "url": "https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/peripherals/dac.html",
+    "install": [{"via": "platform"}],
+    "described": "6.1",
+    "chips": {"esp32_dac": {"header": "driver/dac_continuous.h", "adapter": {"kind": "dac"}}},
+    "adapter": {
+        "symbol": "BOARD_SOUND_DAC",
+        "requires": ["esp_driver_gpio"],
+        "headers": ["board_sound_dac.h"],
+        "sources": {"BOARD_SOUND_DAC": ["board_sound_dac.c"]}
+    }
+}

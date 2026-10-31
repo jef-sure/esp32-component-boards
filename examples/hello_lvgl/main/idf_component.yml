@@ -1,0 +1,6 @@
+## The example takes the boards component by directory (EXTRA_COMPONENT_DIRS in the project's
+## CMakeLists.txt). A project of its own also names jef-sure/boards: "^0.0.1" here.
+dependencies:
+  idf:
+    version: ">=5.5"
+  jef-sure/dgx-lvgl: "^0.0.2"

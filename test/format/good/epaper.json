@@ -1,0 +1,47 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "epaper",
+    "title": "E-paper",
+    "mcu": {
+        "target": "esp32s3"
+    },
+    "checked": {
+        "pins": {
+            "level": "unchecked",
+            "source": "shape only"
+        }
+    },
+    "buses": {
+        "spi": {
+            "spi2": {
+                "mosi": 13,
+                "miso": "nc",
+                "sclk": 14
+            }
+        }
+    },
+    "devices": {
+        "epd": {
+            "chip": "ssd1680",
+            "on": {
+                "spi.spi2": {
+                    "cs": 15
+                }
+            },
+            "pins": {
+                "busy": 4
+            },
+            "config": {
+                "panel": {
+                    "width": 250,
+                    "height": 122,
+                    "mm_w": 48,
+                    "mm_h": 23
+                },
+                "primary": true
+            }
+        }
+    }
+}

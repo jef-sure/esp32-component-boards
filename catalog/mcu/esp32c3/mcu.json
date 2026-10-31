@@ -1,0 +1,62 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "mcu",
+    "name": "esp32c3",
+    "title": "ESP32-C3",
+    "gpio": {
+        "count": 22,
+        "valid": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21
+        ],
+        "input_only": []
+    },
+    "hosts": {
+        "spi": 2,
+        "i2c": 1
+    },
+    "provides": {
+        "wifi": {},
+        "bluetooth": {},
+        "twai": {}
+    },
+    "checked": {
+        "facts": {
+            "level": "vendor-docs",
+            "source": "ESP-IDF esp-idf, components/soc/esp32c3, soc_caps.h"
+        }
+    },
+    "controls": {
+        "wifi_tx_power": {
+            "how": "wifi_tx_power",
+            "min": 8,
+            "max": 84,
+            "unit": "0.25 dBm",
+            "read": "command"
+        }
+    },
+    "limits": {
+        "cpu_mhz": 160
+    }
+}

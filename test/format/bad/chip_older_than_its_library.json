@@ -1,0 +1,34 @@
+{
+    "expect": "not in that version",
+    "board": {
+        "format": "jef-sure/boards",
+        "format_version": 2,
+        "kind": "board",
+        "name": "old_library_new_need",
+        "title": "A version of the library that does not do what is needed yet",
+        "mcu": {
+            "target": "esp32"
+        },
+        "buses": {
+            "spi": {
+                "spi2": {
+                    "mosi": 13,
+                    "miso": 12,
+                    "sclk": 14
+                }
+            }
+        },
+        "devices": {
+            "nfc": {
+                "chip": "two_libraries",
+                "on": {
+                    "spi.spi2": {
+                        "cs": 15
+                    }
+                },
+                "library": "esp-idf/owner_a/idf_library",
+                "library_version": "0.8.0"
+            }
+        }
+    }
+}

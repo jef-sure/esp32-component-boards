@@ -49,13 +49,13 @@ bool board_touch_firmware(const uint8_t **start, size_t *size)
 }
 ```
 
-The component's own `board_touch_firmware` is weak and answers `false`; the
+The component's own `board_touch_firmware` is weak and returns `false`; the
 program's strong definition takes its place at link. The glue of the board
 calls it at `board_touch_start`, hands the bytes to DGX-DI's GSL3680 driver,
 which writes them into the chip.
 
 A program built for several boards keeps the file and the function under a
-condition, so the CYD build does not look for a file it has not:
+condition, so the CYD S028R build does not look for a file it has not:
 
 ```cmake
 if(CONFIG_BOARD_JC8012P4A1C AND EXISTS ${CMAKE_CURRENT_LIST_DIR}/jc8012p4a1c_touch.fw)

@@ -1,0 +1,35 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "pdm_mic",
+    "title": "A PDM microphone",
+    "mcu": {
+        "target": "esp32s3"
+    },
+    "checked": {
+        "pins": {
+            "level": "unchecked",
+            "source": "shape only"
+        }
+    },
+    "buses": {
+        "i2s": {
+            "i2s0": {
+                "clk": 0,
+                "din": 34
+            }
+        }
+    },
+    "devices": {
+        "mic": {
+            "chip": "spm1423",
+            "on": {
+                "i2s.i2s0": {}
+            },
+            "config": {
+                "sample_rate": 16000
+            }
+        }
+    }
+}

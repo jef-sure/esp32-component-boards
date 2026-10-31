@@ -1,0 +1,44 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "library",
+    "ecosystem": "esp-idf",
+    "owner": "espressif",
+    "name": "esp_lcd_touch",
+    "title": "esp_lcd_touch",
+    "url": "https://components.espressif.com/components/espressif/esp_lcd_touch",
+    "install": [
+        {"via": "registry"},
+        {"via": "git", "url": "https://github.com/espressif/esp-bsp.git", "path": "components/lcd_touch/esp_lcd_touch"}
+    ],
+    "described": "1.2.1",
+    "description": "The common interface of touch drivers: its drivers are libraries of their own.",
+    "adapter": {
+        "symbol": "BOARD_TOUCH_ESP_LCD",
+        "requires": ["esp_lcd"],
+        "headers": ["board_touch_spi.h"],
+        "sources": {"BOARD_TOUCH_SPI": ["board_touch_spi.c"]},
+        "notes": "It comes as a dependency of its drivers: no rule of the manifest of its own."
+    },
+    "checked": {
+        "api": {
+            "level": "vendor-code",
+            "source": "include/esp_lcd_touch.h of the version the builds took",
+            "date": "2026-10-31"
+        }
+    },
+    "versions": {
+        "1.2.1": {"frameworks": {"esp-idf": ">=4.4.2"}},
+        "1.2.0": {"frameworks": {"esp-idf": ">=4.4.2"}},
+        "1.1.2": {"frameworks": {"esp-idf": ">=4.4.2"}},
+        "1.1.1": {"frameworks": {"esp-idf": ">=4.4.2"}},
+        "1.1.0": {"frameworks": {"esp-idf": ">=4.4.2"}},
+        "1.0.4": {"frameworks": {"esp-idf": ">=4.4.2"}},
+        "1.0.3": {"frameworks": {"esp-idf": ">=4.4.2"}},
+        "1.0.2": {"frameworks": {"esp-idf": ">=4.4.2"}},
+        "1.0.1": {"frameworks": {"esp-idf": ">=4.4.2"}},
+        "1.0.0": {"frameworks": {"esp-idf": ">=5.0"}},
+        "0.9.1": {"frameworks": {"esp-idf": ">=4.4"}},
+        "0.9.0": {"frameworks": {"esp-idf": ">=4.4"}}
+    }
+}

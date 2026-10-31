@@ -1,0 +1,10 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "co_radio",
+    "title": "A radio on SDIO, shape only",
+    "class": "radio",
+    "on": {"sdio": {"required": true}},
+    "checked": {"facts": {"level": "unchecked", "source": "shape only"}}
+}

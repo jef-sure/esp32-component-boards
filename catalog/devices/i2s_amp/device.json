@@ -1,0 +1,11 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "i2s_amp",
+    "title": "An amplifier on I2S, no control",
+    "class": "audio",
+    "on": {"i2s": {"required": true}},
+    "config": {"direction": "out"},
+    "checked": {"facts": {"level": "schematic", "source": "JC4827W543 schematic, U4 with CTRL, LRCLK, BCLK, DATA"}}
+}

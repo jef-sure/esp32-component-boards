@@ -1,0 +1,118 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "eyes",
+    "title": "Two GC9A01 eyes",
+    "mcu": {
+        "target": "esp32s3"
+    },
+    "checked": {
+        "pins": {
+            "level": "unchecked",
+            "source": "shape only"
+        }
+    },
+    "buses": {
+        "spi": {
+            "spi2": {
+                "hz": 40000000,
+                "mosi": 11,
+                "miso": "nc",
+                "sclk": 12
+            }
+        }
+    },
+    "devices": {
+        "eye_left": {
+            "chip": "gc9a01",
+            "on": {
+                "spi.spi2": {
+                    "cs": 9
+                }
+            },
+            "config": {
+                "panel": {
+                    "width": 240,
+                    "height": 240,
+                    "mm_w": 32,
+                    "mm_h": 32,
+                    "round": true
+                },
+                "color_order": "bgr",
+                "invert": true,
+                "primary": true
+            },
+            "controls": {
+                "orientation": {
+                    "start": {
+                        "x": "left-right",
+                        "y": "top-bottom",
+                        "swap": false
+                    }
+                }
+            },
+            "pins": {
+                "dc": 13,
+                "rst": 14,
+                "backlight": 15
+            }
+        },
+        "eye_right": {
+            "chip": "gc9a01",
+            "on": {
+                "spi.spi2": {
+                    "cs": 10
+                }
+            },
+            "config": {
+                "panel": {
+                    "width": 240,
+                    "height": 240,
+                    "mm_w": 32,
+                    "mm_h": 32,
+                    "round": true
+                },
+                "color_order": "bgr",
+                "invert": true
+            },
+            "controls": {
+                "orientation": {
+                    "start": {
+                        "x": "left-right",
+                        "y": "top-bottom",
+                        "swap": false
+                    }
+                }
+            },
+            "pins": {
+                "dc": 13,
+                "rst": 14,
+                "backlight": 15
+            }
+        }
+    },
+    "shared_pins": {
+        "eyes_dc": {
+            "line": 13,
+            "devices": [
+                "eye_left",
+                "eye_right"
+            ]
+        },
+        "eyes_rst": {
+            "line": 14,
+            "devices": [
+                "eye_left",
+                "eye_right"
+            ]
+        },
+        "eyes_bl": {
+            "line": 15,
+            "devices": [
+                "eye_left",
+                "eye_right"
+            ]
+        }
+    }
+}

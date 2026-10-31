@@ -1,0 +1,141 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "library",
+    "ecosystem": "esp-idf",
+    "owner": "espressif",
+    "name": "esp_codec_dev",
+    "title": "esp_codec_dev",
+    "url": "https://components.espressif.com/components/espressif/esp_codec_dev",
+    "install": [
+        {"via": "registry"},
+        {"via": "git", "url": "https://github.com/espressif/esp-audio-dev.git", "path": "esp_codec_dev"}
+    ],
+    "described": "1.6.2",
+    "chips": {
+        "es8311": {
+            "header": "esp_codec_dev_defaults.h",
+            "on": ["i2c", "i2s"],
+            "init": [
+                {"call": "audio_codec_new_i2s_data", "ok": {"not": "NULL"}},
+                {"call": "audio_codec_new_i2c_ctrl", "ok": {"not": "NULL"}},
+                {"call": "audio_codec_new_gpio", "ok": {"not": "NULL"}},
+                {"call": "es8311_codec_new", "ok": {"not": "NULL"}},
+                {"call": "esp_codec_dev_new", "ok": {"not": "NULL"}},
+                {"call": "esp_codec_dev_open", "ok": {"equals": "ESP_CODEC_DEV_OK"}}
+            ],
+            "setup": [{"control": "volume"}],
+            "controls": {
+                "volume": {
+                    "call": "esp_codec_dev_set_out_vol",
+                    "args": ["{speaker}", "{volume}"],
+                    "ok": {"equals": "ESP_CODEC_DEV_OK"}
+                }
+            },
+            "adapter": {"kind": "es8311"}
+        },
+        "aw88298": {"header": "esp_codec_dev_defaults.h"},
+        "cjc8910": {"header": "esp_codec_dev_defaults.h"},
+        "es7210": {"header": "esp_codec_dev_defaults.h"},
+        "es7243": {"header": "esp_codec_dev_defaults.h"},
+        "es7243e": {"header": "esp_codec_dev_defaults.h"},
+        "es8156": {"header": "esp_codec_dev_defaults.h"},
+        "es8374": {"header": "esp_codec_dev_defaults.h"},
+        "es8388": {"header": "esp_codec_dev_defaults.h"},
+        "es8389": {"header": "esp_codec_dev_defaults.h"},
+        "tas5805m": {"header": "esp_codec_dev_defaults.h"},
+        "zl38063": {"header": "esp_codec_dev_defaults.h"}
+    },
+    "adapter": {
+        "version": "~1.6.2",
+        "symbol": "BOARD_SOUND_ES8311",
+        "requires": ["esp_driver_i2s"],
+        "headers": ["board_sound_es8311.h"],
+        "sources": {"BOARD_SOUND_ES8311": ["board_sound_es8311.c"]},
+        "notes": "1.6.2 is what the example of DGX-GE asks: the sound of the JC8012P4A1C was heard there."
+    },
+    "checked": {
+        "api": {
+            "level": "vendor-code",
+            "source": "device/include/ of esp_codec_dev 1.6.2, src/board_sound_es8311.c for the calls",
+            "date": "2026-10-31"
+        }
+    },
+    "versions": {
+        "2.0.0-beta5": {
+            "requires": {
+                "esp-idf/espressif/usb_host_uac": {
+                    "version": "^1.5.0",
+                    "if": ["target in [esp32s2, esp32s3, esp32s31, esp32p4, esp32h4]"]
+                }
+            },
+            "frameworks": {"esp-idf": ">=5.4.4,!=5.5.0,!=5.5.1,!=5.5.2"}
+        },
+        "2.0.0-beta4": {
+            "requires": {
+                "esp-idf/espressif/usb_host_uac": {
+                    "version": "^1.5.0",
+                    "if": ["target in [esp32s2, esp32s3, esp32s31, esp32p4, esp32h4]"]
+                }
+            },
+            "frameworks": {"esp-idf": ">=5.4.4,!=5.5.0,!=5.5.1,!=5.5.2"}
+        },
+        "2.0.0-beta3": {
+            "requires": {
+                "esp-idf/espressif/usb_host_uac": {
+                    "version": "^1.5.0",
+                    "if": ["target in [esp32s2, esp32s3, esp32s31, esp32p4, esp32h4]"]
+                }
+            },
+            "frameworks": {"esp-idf": ">=5.4.4,!=5.5.0,!=5.5.1,!=5.5.2"}
+        },
+        "2.0.0-beta2": {
+            "requires": {
+                "esp-idf/espressif/usb_host_uac": {
+                    "version": "^1.5.0",
+                    "if": ["target in [esp32s2, esp32s3, esp32s31, esp32p4, esp32h4]"]
+                }
+            },
+            "frameworks": {"esp-idf": ">=5.4.4,!=5.5.0,!=5.5.1,!=5.5.2"}
+        },
+        "2.0.0-beta1": {
+            "requires": {
+                "esp-idf/espressif/usb_host_uac": {
+                    "version": "^1.5.0",
+                    "if": [
+                        "target in [esp32s2, esp32s3, esp32s31, esp32p4, esp32h4] && $CONFIG{CODEC_UAC_SUPPORT} == True"
+                    ]
+                }
+            },
+            "frameworks": {"esp-idf": ">=5.4.4,!=5.5.0,!=5.5.1,!=5.5.2"}
+        },
+        "1.6.2": {"frameworks": {"esp-idf": ">=4.0"}},
+        "1.6.1": {"frameworks": {"esp-idf": ">=4.0"}},
+        "1.5.11": {"frameworks": {"esp-idf": ">=4.0"}},
+        "1.5.10": {"frameworks": {"esp-idf": ">=4.0"}},
+        "1.5.9": {"frameworks": {"esp-idf": ">=4.0"}},
+        "1.5.8": {"frameworks": {"esp-idf": ">=4.0"}},
+        "1.5.7": {"frameworks": {"esp-idf": ">=4.0"}},
+        "1.5.6": {"frameworks": {"esp-idf": ">=4.0"}},
+        "1.5.5": {"frameworks": {"esp-idf": ">=4.0"}},
+        "1.5.4": {"frameworks": {"esp-idf": ">=4.0"}},
+        "1.5.3": {"frameworks": {"esp-idf": ">=4.0"}},
+        "1.5.2": {"frameworks": {"esp-idf": ">=4.0"}},
+        "1.5.1": {"frameworks": {"esp-idf": ">=4.0"}},
+        "1.5.0": {"frameworks": {"esp-idf": ">=4.0"}},
+        "1.4.0": {"frameworks": {"esp-idf": ">=4.0"}},
+        "1.3.6": {"frameworks": {"esp-idf": ">=4.0"}},
+        "1.3.5": {"frameworks": {"esp-idf": ">=4.0"}},
+        "1.3.4": {"frameworks": {"esp-idf": ">=4.0"}},
+        "1.3.3": {"frameworks": {"esp-idf": ">=4.0"}},
+        "1.3.2": {"frameworks": {"esp-idf": ">=4.0"}},
+        "1.3.1": {"frameworks": {"esp-idf": ">=4.0"}},
+        "1.3.0": {"frameworks": {"esp-idf": ">=4.0"}},
+        "1.2.0": {"frameworks": {"esp-idf": ">=4.0"}},
+        "1.1.0": {"frameworks": {"esp-idf": ">=4.0"}},
+        "1.0.3": {"frameworks": {"esp-idf": ">=4.0"}},
+        "1.0.2": {"frameworks": {"esp-idf": ">=4.0"}},
+        "1.0.1": {"frameworks": {"esp-idf": ">=4.0"}},
+        "1.0.0": {"frameworks": {"esp-idf": ">=4.0"}}
+    }
+}

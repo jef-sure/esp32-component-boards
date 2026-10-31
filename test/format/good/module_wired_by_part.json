@@ -1,0 +1,19 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "mcu": {"target": "esp32"},
+    "name": "module_wired_by_part",
+    "title": "A display and its touch, each with its own wiring",
+    "buses": {"spi": {"spi2": {"mosi": 23, "miso": 19, "sclk": 18}}},
+    "modules": {
+        "tft": {
+            "module": "tft_with_touch",
+            "on": {"spi.spi2": {}},
+            "devices": {
+                "lcd": {"on": {"spi.spi2": {"cs": 5}}, "pins": {"dc": 2, "rst": 4, "backlight": 15}},
+                "touch": {"on": {"spi.spi2": {"cs": 16}}, "pins": {"int": 17}}
+            }
+        }
+    }
+}

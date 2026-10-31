@@ -11,6 +11,7 @@ repository root.
 """
 
 import argparse
+import json
 import pathlib
 import sys
 
@@ -24,6 +25,7 @@ def pin_map(board):
     owners = {}
     for pin, owner, direction in boards_gen.pins_of(board):
         owners.setdefault(pin, []).append((owner, direction))
+    shared = {group["line"].get("gpio") for group in (board.get("shared_pins") or {}).values() if isinstance(group["line"], dict)}
     lines = [f"{board['title']} ({board['mcu']['target']}): GPIO -> owner"]
     for pin in sorted(owners):
         marks = []
@@ -32,7 +34,7 @@ def pin_map(board):
         if pin in input_only and any(d != "in" for _, d in owners[pin]):
             marks.append("INPUT ONLY, DRIVEN")
         if len(owners[pin]) > 1:
-            marks.append("TWO OWNERS")
+            marks.append("shared on purpose" if pin in shared else "TWO OWNERS")
         names = ", ".join(f"{o} ({d})" for o, d in owners[pin])
         lines.append(f"  GPIO {pin:>2}  {names}" + (f"   <- {'; '.join(marks)}" if marks else ""))
     problems = boards_gen.pin_problems(board)
@@ -53,18 +55,18 @@ def tree(board):
             if display and display.get("bus", {}).get("bus") == f"{kind}.{own}":
                 strobes = ", ".join(f"{k} {v}" for k, v in display["bus"].items() if k != "bus" and v is not None)
                 lines.append(f"    display {display['driver']}: {strobes}")
-            touch = board.get("touch")
-            if touch and touch.get("bus") == f"{kind}.{own}":
-                lines.append(f"    touch {touch['kind']}" + (f" ({touch['component']})" if touch.get("component") else "") + ": "
-                             + ", ".join(f"{k} {touch[k]}" for k in ("cs", "irq", "rst", "int") if touch.get(k) is not None))
-            sound = board.get("sound")
-            if sound and sound.get("bus") == f"{kind}.{own}":
-                lines.append(f"    sound {sound['kind']}: address {sound.get('address')}, pa {sound.get('pa')}")
-            if sound and sound.get("i2s_bus") == f"{kind}.{own}":
-                lines.append(f"    sound {sound['kind']}: streams here")
-            sd = board.get("sd")
-            if sd and sd.get("bus") == f"{kind}.{own}":
-                lines.append(f"    sd: cs {sd['cs']}")
+            for touch in board["touches"]:
+                if touch.get("bus") == f"{kind}.{own}":
+                    lines.append(f"    touch {touch['kind']}" + (f" ({touch['component']})" if touch.get("component") else "") + ": "
+                                 + ", ".join(f"{k} {touch[k]}" for k in ("cs", "irq", "rst", "int") if touch.get(k) is not None))
+            for sound in board["sounds"]:
+                if sound.get("bus") == f"{kind}.{own}":
+                    lines.append(f"    sound {sound['kind']}: address {sound.get('address')}, pa {sound.get('pa')}")
+                if sound.get("i2s_bus") == f"{kind}.{own}":
+                    lines.append(f"    sound {sound['kind']}: streams here")
+            for name, device in board["devices"].items():
+                if f"{kind}.{own}" in (device.get("on") or {}) and name in board["kept"]:
+                    lines.append(f"    {name}: kept as data" + (f", {device['chip']}" if device.get("chip") else ""))
     display = board.get("display")
     if display:
         if boards_gen.is_pixel(display):
@@ -74,12 +76,26 @@ def tree(board):
                          + (f", backlight {display['backlight']}" if display.get("backlight") is not None else ""))
         else:
             lines.append(f"  display: {display['driver']} {display['geometry']} on {display['bus']['bus']}")
-    sound = board.get("sound")
-    if sound and sound["kind"] == "dac":
-        lines.append(f"  sound: the chip's DAC on GPIO {sound['out']}" + (f", pa {sound['pa']}" if sound.get("pa") is not None else ""))
-    if board.get("button"):
-        lines.append(f"  button: GPIO {board['button']['pin']}, {'low' if board['button'].get('active_low', True) else 'high'} when pressed")
+    for sound in board["sounds"]:
+        if sound["kind"] == "dac":
+            lines.append(f"  sound: the chip's DAC on GPIO {sound['out']}" + (f", pa {sound['pa']}" if sound.get("pa") is not None else ""))
+    for button in board["buttons"]:
+        lines.append(f"  button {button['name']}: GPIO {button['pin']}, {'low' if button['active_low'] else 'high'} when pressed")
     return "\n".join(lines)
+
+
+def free_pins(board, word):
+    """The pins left for what will be connected, the ones that come out to a connector first; word narrows them: ADC, TOUCH, DAC."""
+    rows = []
+    for pin, entry in boards_gen.pin_map(board).items():
+        analog = entry.get("analog", [])
+        if entry["state"] == "taken" or (word and not any(word.upper() in item.upper() for item in analog)):
+            continue
+        marks = [*analog, *entry.get("notes", [])]
+        where = ", ".join(entry["connectors"]) or "no connector in the data"
+        when = f", only while {entry['free_while']}" if "free_while" in entry else ""
+        rows.append((not entry["connectors"], pin, f"  GPIO {pin:2d}  {where}{when}" + (f"  [{', '.join(marks)}]" if marks else "")))
+    return [row[2] for row in sorted(rows)]
 
 
 def main():
@@ -87,8 +103,10 @@ def main():
     parser.add_argument("board", nargs="?")
     parser.add_argument("--tree", action="store_true")
     parser.add_argument("--all", action="store_true")
+    parser.add_argument("--free", nargs="?", const="", metavar="WORD", help="the pins left for what will be connected; ADC, DAC or TOUCH narrows them")
+    parser.add_argument("--json", action="store_true", help="the whole map of the pins as JSON")
     args = parser.parse_args()
-    boards, modules = boards_gen.read_all(ROOT / "boards-data")
+    boards, modules = boards_gen.read_all(ROOT / "catalog")
     if args.all:
         for board in boards:
             problems = boards_gen.pin_problems(board)
@@ -98,9 +116,14 @@ def main():
         parser.error("a board, or --all")
     for board in boards + modules:
         if board["name"] == args.board:
-            print(tree(board) if args.tree else pin_map(board))
+            if args.json:
+                print(json.dumps(boards_gen.pin_map(board), indent=2))
+            elif args.free is not None:
+                print("\n".join(free_pins(board, args.free)))
+            else:
+                print(tree(board) if args.tree else pin_map(board))
             return 0
-    print(f"{args.board}: no such board in boards-data/", file=sys.stderr)
+    print(f"{args.board}: no such board in catalog/boards/", file=sys.stderr)
     return 1
 
 

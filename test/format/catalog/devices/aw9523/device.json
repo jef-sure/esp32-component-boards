@@ -1,0 +1,10 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "aw9523",
+    "title": "AW9523 expander",
+    "class": "io_expander",
+    "on": {"i2c": {"required": true, "address": "0x58"}},
+    "checked": {"facts": {"level": "community", "source": "ESPHome M5Stack CoreS3"}}
+}

@@ -1,0 +1,32 @@
+{
+    "expect": "takes its wiring by part",
+    "board": {
+        "format": "jef-sure/boards",
+        "format_version": 2,
+        "kind": "board",
+        "mcu": {
+            "target": "esp32"
+        },
+        "name": "module_wiring_of_several_parts",
+        "title": "module_wiring_of_several_parts",
+        "buses": {
+            "spi": {
+                "spi2": {
+                    "mosi": 23,
+                    "miso": 19,
+                    "sclk": 18
+                }
+            }
+        },
+        "modules": {
+            "tft": {
+                "module": "tft_with_touch",
+                "on": {
+                    "spi.spi2": {
+                        "cs": 5
+                    }
+                }
+            }
+        }
+    }
+}

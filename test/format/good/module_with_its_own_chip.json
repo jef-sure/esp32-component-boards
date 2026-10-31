@@ -1,0 +1,10 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "mcu": {"target": "esp32p4"},
+    "name": "module_with_its_own_chip",
+    "title": "A P4 with a C6 on its SDIO",
+    "buses": {"sdio": {"sdio0": {"clk": 18, "cmd": 19, "d0": 14, "d1": 15, "d2": 16, "d3": 17}}},
+    "modules": {"radio": {"module": "c6_radio", "on": {"sdio.sdio0": {}}}}
+}

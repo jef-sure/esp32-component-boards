@@ -1,0 +1,12 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "st7701",
+    "title": "ST7701",
+    "class": "display",
+    "on": {"rgb": {"required": true, "role": "data"}, "spi": {"required": true, "role": "control"}},
+    "config": {"kind": "graphics"},
+    "controls": {"orientation": {"how": "driver", "read": "none"}},
+    "checked": {"facts": {"level": "vendor-code", "source": "espressif/esp_lcd_st7701: 3-wire SPI and parallel RGB"}}
+}

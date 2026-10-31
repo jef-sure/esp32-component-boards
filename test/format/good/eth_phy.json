@@ -1,0 +1,32 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "eth_phy",
+    "title": "Ethernet",
+    "mcu": {
+        "target": "esp32p4"
+    },
+    "checked": {
+        "pins": {
+            "level": "unchecked",
+            "source": "shape only"
+        }
+    },
+    "buses": {
+        "rmii": {
+            "eth": {
+                "mdc": 31,
+                "mdio": 52
+            }
+        }
+    },
+    "devices": {
+        "eth": {
+            "chip": "ip101",
+            "on": {
+                "rmii.eth": {}
+            }
+        }
+    }
+}

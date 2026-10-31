@@ -1,0 +1,20 @@
+{
+    "expect": "is at the value that frees it",
+    "board": {
+        "format": "jef-sure/boards",
+        "format_version": 2,
+        "kind": "board",
+        "name": "te_on",
+        "title": "TE on over the BOOT button",
+        "extends": "jc4827w543c",
+        "devices": {
+            "lcd": {
+                "controls": {
+                    "te": {
+                        "start": "on"
+                    }
+                }
+            }
+        }
+    }
+}

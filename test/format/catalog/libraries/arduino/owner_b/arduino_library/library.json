@@ -1,0 +1,24 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "library",
+    "ecosystem": "arduino",
+    "owner": "owner_b",
+    "name": "arduino_library",
+    "title": "arduino_library",
+    "chips": {
+        "two_libraries": {
+            "header": "arduino_library.h",
+            "on": ["spi"],
+            "init": [
+                {"call": "arduino_library_init", "args": ["{bus}", "{cs}"], "returns": "nfc", "ok": {"not": "NULL"}}
+            ],
+            "supports": {"ntag": ["uid", "ndef_read"]}
+        }
+    },
+    "versions": {
+        "1.0.0": {"frameworks": {"arduino-esp32": ">=2.0.0", "esp-idf": ">=5.1"}, "targets": ["esp32", "esp32s3"]}
+    },
+    "described": "1.0.0",
+    "install": [{"via": "registry"}, {"via": "archive", "url": "https://example.com/arduino_library.zip"}]
+}

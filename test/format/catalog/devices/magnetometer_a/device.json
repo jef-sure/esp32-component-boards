@@ -1,0 +1,10 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "magnetometer_a",
+    "title": "A magnetometer, shape only",
+    "class": "sensor",
+    "on": {"i2c": {"required": true, "address": "0x1e"}},
+    "checked": {"facts": {"level": "unchecked", "source": "shape only"}}
+}

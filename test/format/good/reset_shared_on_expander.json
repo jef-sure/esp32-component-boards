@@ -1,0 +1,62 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "reset_shared_on_expander",
+    "title": "One reset through one expander bit",
+    "mcu": {
+        "target": "esp32s3"
+    },
+    "checked": {
+        "pins": {
+            "level": "unchecked",
+            "source": "shape only"
+        }
+    },
+    "buses": {
+        "i2c": {
+            "i2c0": {
+                "sda": 8,
+                "scl": 9
+            }
+        }
+    },
+    "devices": {
+        "io": {
+            "chip": "ch422g",
+            "on": {
+                "i2c.i2c0": {}
+            }
+        },
+        "a": {
+            "class": "imu",
+            "pins": {
+                "rst": {
+                    "via": "io",
+                    "bit": 1
+                }
+            }
+        },
+        "b": {
+            "class": "rtc",
+            "pins": {
+                "rst": {
+                    "via": "io",
+                    "bit": 1
+                }
+            }
+        }
+    },
+    "shared_pins": {
+        "rst": {
+            "line": {
+                "via": "io",
+                "bit": 1
+            },
+            "devices": [
+                "a",
+                "b"
+            ]
+        }
+    }
+}

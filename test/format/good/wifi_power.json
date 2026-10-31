@@ -1,0 +1,37 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "wifi_power",
+    "title": "The power of Wi-Fi as a parameter of the chip",
+    "mcu": {
+        "target": "esp32s3",
+        "controls": {
+            "wifi_tx_power": {
+                "start": 40
+            }
+        }
+    },
+    "checked": {
+        "pins": {
+            "level": "unchecked",
+            "source": "shape only"
+        }
+    },
+    "buses": {
+        "i2c": {
+            "i2c0": {
+                "sda": 8,
+                "scl": 9
+            }
+        }
+    },
+    "devices": {
+        "b": {
+            "class": "button",
+            "pins": {
+                "in": 0
+            }
+        }
+    }
+}

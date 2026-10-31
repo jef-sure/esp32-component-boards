@@ -1,0 +1,10 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "tca9554",
+    "title": "TCA9554 expander",
+    "class": "io_expander",
+    "on": {"i2c": {"required": true, "address": "0x20"}},
+    "checked": {"facts": {"level": "unchecked", "source": "from memory, for the shape of the format only"}}
+}

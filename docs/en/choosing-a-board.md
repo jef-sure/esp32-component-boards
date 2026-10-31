@@ -33,13 +33,13 @@ build:
 
 ```sh
 idf.py reconfigure            # once: downloads the component into managed_components/
-python3 managed_components/jef-sure__boards/tools/board_select.py cyd .
+python3 managed_components/jef-sure__boards/tools/board_select.py cyd_s028r .
 idf.py build flash monitor
 ```
 
 `board_select.py` writes `sdkconfig.defaults.board`: the board's
 `sdkconfig.defaults` from the component's data. Its first lines are
-`CONFIG_IDF_TARGET="esp32"` and `CONFIG_BOARD_SELECT_CYD=y`; the rest is what
+`CONFIG_IDF_TARGET="esp32"` and `CONFIG_BOARD_SELECT_CYD_S028R=y`; the rest is what
 the chip, the memory and the flash need. ESP-IDF takes the target from the
 first file of `SDKCONFIG_DEFAULTS` that names one, so no `idf.py set-target`
 is needed, and the menu *Boards → Board the program runs on* shows the board
@@ -51,7 +51,7 @@ built for several boards; commit it if the project is for one.
 ## A module
 
 ```sh
-python3 managed_components/jef-sure__boards/tools/board_select.py jc1060p470 --module lcd2004_pcf8574 .
+python3 managed_components/jef-sure__boards/tools/board_select.py jc1060p470c --module lcd2004_pcf8574 .
 ```
 
 The module's defaults are appended after the board's: they turn its option on
@@ -64,7 +64,7 @@ ESP-IDF reads `sdkconfig.defaults*` only when it creates a new `sdkconfig`. To
 move a project to another board:
 
 ```sh
-python3 managed_components/jef-sure__boards/tools/board_select.py jc4827w543 --reset .
+python3 managed_components/jef-sure__boards/tools/board_select.py jc4827w543c --reset .
 idf.py build
 ```
 
@@ -73,8 +73,8 @@ idf.py build
 A project built for several boards at once keeps a build directory per board:
 
 ```sh
-idf.py -B build-cyd -D SDKCONFIG=build-cyd/sdkconfig \
-       -D SDKCONFIG_DEFAULTS="managed_components/jef-sure__boards/boards-data/cyd/sdkconfig.defaults;sdkconfig.defaults" build
+idf.py -B build-cyd_s028r -D SDKCONFIG=build-cyd_s028r/sdkconfig \
+       -D SDKCONFIG_DEFAULTS="managed_components/jef-sure__boards/catalog/boards/cyd_s028r/sdkconfig.defaults;sdkconfig.defaults" build
 ```
 
 A `-D SDKCONFIG_DEFAULTS=...` on the command line wins over
@@ -86,7 +86,7 @@ when none is given.
 - The DGX drivers of the board's panel: `select`s of the choice in the
   component's Kconfig (`CONFIG_DGX_ENABLE_DSI`, `CONFIG_DGX_ENABLE_JD9165`, ...).
 - The other parts: rules in the component's `idf_component.yml` on hidden
-  symbols beside the choice. A build for the CYD gets `atanisoft/esp_lcd_touch_xpt2046`
+  symbols beside the choice. A build for the CYD S028R gets `atanisoft/esp_lcd_touch_xpt2046`
   and nothing of the GT911 or the ES8311; a build with *None* chosen gets none
   of DGX.
 - The glue of the chosen board, compiled into the component by
@@ -101,7 +101,7 @@ dependencies were skipped.
 
 ## Without board_select.py
 
-The file it writes is a copy of `boards-data/<board>/sdkconfig.defaults`. Any
+The file it writes is a copy of `catalog/boards/<board>/sdkconfig.defaults`. Any
 other way of getting that file into `SDKCONFIG_DEFAULTS` works: a path into
 `managed_components/` or into a checkout of the component beside the project,
 or copying the lines into the project's own `sdkconfig.defaults`. And the
@@ -112,7 +112,13 @@ which is what the defaults file saves you from.
 ## Chip revisions
 
 The ESP32-P4 boards come with chips of revision 1.x or 3.x, and a build for
-one does not start on the other. Each board's `sdkconfig.defaults` is written
-for the revision of the board it was measured on and says so in its comments,
-with the lines to change for the other revision. Check your chip
-(`esptool.py chip_id` or the boot log) before the first flash.
+one does not start on the other. The revisions differ in what they can do: 360
+or 400 MHz of the CPU, 200 or 250 MHz of the PSRAM, and a MIPI-DSI panel depends
+on that PSRAM. `mcu.revision` of the board names the revision it was measured on,
+and `tools/board_select.py` writes the lines of that revision from `catalog/mcu/`.
+A board with another chip takes `--revision`. Check your chip (`esptool.py chip_id`
+or the boot log) before the first flash:
+
+```sh
+python3 tools/board_select.py jc1060p470c --revision 3.1 .
+```

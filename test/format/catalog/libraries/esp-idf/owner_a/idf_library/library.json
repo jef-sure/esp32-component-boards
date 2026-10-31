@@ -1,0 +1,35 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "library",
+    "ecosystem": "esp-idf",
+    "owner": "owner_a",
+    "name": "idf_library",
+    "title": "idf_library",
+    "chips": {
+        "two_libraries": {
+            "header": "idf_library.h",
+            "on": ["spi"],
+            "init": [{"call": "idf_library_init", "args": ["{bus}", "{cs}"], "returns": "nfc", "ok": {"not": "NULL"}}],
+            "supports": {"ntag": ["uid", "pages_read"]}
+        }
+    },
+    "versions": {
+        "1.1.0": {"frameworks": {"esp-idf": ">=5.2"}, "requires": {"esp-idf/owner_b/base": "^2.1"}},
+        "1.0.0": {"requires": {"esp-idf/owner_b/base": "^2.0"}}
+    },
+    "history": [
+        {"before": "1.1.0", "chips": {"two_libraries": {"supports": {"ntag": ["uid"]}}}},
+        {"before": "0.9.0", "chips": {"two_libraries": null}}
+    ],
+    "described": "1.1.0",
+    "install": [
+        {"via": "registry"},
+        {
+            "via": "git",
+            "url": "https://github.com/owner_a/idf_library.git",
+            "path": "components/idf_library",
+            "ref": "v{version}"
+        }
+    ]
+}

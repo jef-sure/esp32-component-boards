@@ -1,0 +1,10 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "two_libraries",
+    "title": "A chip with libraries of two ecosystems",
+    "class": "nfc",
+    "on": {"spi": {"required": true}},
+    "checked": {"facts": {"level": "unchecked", "source": "shape only"}}
+}

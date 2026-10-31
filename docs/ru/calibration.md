@@ -10,7 +10,12 @@
 настоящей плате: аффинное преобразование плюс три корректирующих узла на
 каждую ось, и тайминги того, как палец появляется и уходит (`down_ms`,
 `up_ms`, `blink_ms`). Данные каждой платы несут одну такую, под
-`touch.calibration`, и клей передаёт её указателю в `board_touch_start`.
+`config.calibrations` тача, с ключом по библиотеке, которая её читает: у каждой библиотеки свой
+формат, и панель может хранить запись для каждой. У библиотеки это список, новейшая запись
+последняя. `measured_with` говорит, с какими версиями измерено: изменение в библиотеке может
+сделать калибровку неверной. `rule` словами говорит, когда запись годится, `notes` — что ещё
+известно. Инструменты `rule` пока не читают: клей берёт последнюю запись. Клей передаёт её указателю в
+`board_touch_start`.
 
 Калибровка измеряется на **одной** плате данного рода. Другая плата того же
 рода близка, но не идентична; если это важно, измерьте заново. Калибровка
@@ -27,12 +32,12 @@ DGX-DI предоставляет `dgx_di_calibrate_measure(device, screen, roun
 запускает её на собственном дисплее платы. В программе этого компонента:
 
 ```c
-struct board_display display;
-struct dgx_di_device *device;
+struct board_display display = {0};
+struct board_touch touch;
 board_display_init(&display);
-board_touch_start(&display, &device, NULL);
+board_touch_start(&display, &touch);
 dgx_di_calibration_t measured;
-if (dgx_di_calibrate_measure(device, (dgx_screen_t *)display.screen, 3, &measured)) {
+if (dgx_di_calibrate_measure(board_dgx_di_device(&touch), board_dgx_screen(&display), 3, &measured)) {
     char text[1024];
     dgx_di_calibration_code(&measured, text, sizeof text);  /* the C initializer, printed to the log */
     puts(text);
@@ -44,16 +49,15 @@ if (dgx_di_calibrate_measure(device, (dgx_screen_t *)display.screen, 3, &measure
 
 ### Сохранение
 
-Скопируйте инициализатор из лога в поле калибровки редактора и *apply the
-paste*: поля `touch.calibration` заполняются, `measured` выставляется в true.
-Сохраните `board.json`, запустите `tools/boards_gen.py --all`, соберите. Лог
+Сохраните лог и отдайте его инструменту: он запишет числа в данные платы и уберёт
+`measured`: `python3 tools/board_calibration.py <board> < log.txt`. Затем запустите
+`tools/boards_gen.py --all` и соберите. Лог
 при следующем старте говорит, насколько касания отклонялись до и после
 (`off_tenths`, `left_tenths`: десятые доли пикселя) — хорошая проверка того,
 что легли правильные числа.
 
 Плата, калибровку которой никогда не измеряли, имеет `"measured": false`:
-клей предупреждает при старте, и таблица README об этом говорит. Сегодня
-такая плата — CYD.
+клей предупреждает при старте, и таблица README об этом говорит.
 
 ## Настройка DSI
 
@@ -67,7 +71,7 @@ paste*: поля `touch.calibration` заполняются, `measured` выст
 
 ```c
 #include "bus/dgx_dsi_esp32.h"
-if (display.bus && ((dgx_bus_protocols_t *)display.bus)->bus_type == DGX_BUS_DSI) {
+if (display.bus && display.bus->bus_type == DGX_BUS_DSI) {
     dgx_dsi_tuning_t tuning;
     /* read it from NVS; if there is none or dgx_dsi_tune() refuses it: */
     if (dgx_dsi_bench(display.bus, &tuning) && dgx_dsi_tune(display.bus, &tuning)) { /* write it to NVS */ }
@@ -76,5 +80,5 @@ if (display.bus && ((dgx_bus_protocols_t *)display.bus)->bus_type == DGX_BUS_DSI
 
 В отличие от калибровки тача, это пока не хранится в данных платы: оно
 принадлежит конкретному чипу не меньше, чем плате. Будущая версия будет
-хранить измеренные калибровки обоих родов в `boards-data/<board>/calibrations/`
+хранить измеренные калибровки обоих родов в `catalog/boards/<board>/calibrations/`
 и позволит программе выбирать по ревизии чипа.

@@ -1,0 +1,32 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "c6_main_chip",
+    "title": "An ESP32-C6 board",
+    "mcu": {
+        "target": "esp32c6"
+    },
+    "checked": {
+        "pins": {
+            "level": "unchecked",
+            "source": "shape only"
+        }
+    },
+    "buses": {
+        "i2c": {
+            "i2c0": {
+                "sda": 4,
+                "scl": 5
+            }
+        }
+    },
+    "devices": {
+        "b": {
+            "class": "button",
+            "pins": {
+                "in": 9
+            }
+        }
+    }
+}

@@ -1,0 +1,48 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "scd4x",
+    "title": "Sensirion SCD4x",
+    "class": "sensor",
+    "on": {"i2c": {"required": true, "address": "0x62"}},
+    "provides": {
+        "co2": {"unit": "ppm", "output": [0, 40000]},
+        "humidity": {"unit": "%RH", "specified": [0, 100]},
+        "temperature": {"unit": "C", "specified": [-10, 60]}
+    },
+    "controls": {"mode": {"how": "driver", "values": ["periodic", "low_power", "single_shot"], "read": "command"}},
+    "variants": {
+        "scd40": {
+            "provides": {
+                "co2": {
+                    "specified": [400, 2000],
+                    "accuracy": [{"from": 400, "to": 2000, "plus_minus": 50, "percent": 5}]
+                }
+            },
+            "controls": {"mode": {"values": ["periodic", "low_power"]}}
+        },
+        "scd41": {
+            "provides": {
+                "co2": {
+                    "specified": [400, 5000],
+                    "accuracy": [
+                        {"from": 400, "to": 1000, "plus_minus": 50, "percent": 2.5},
+                        {"from": 1001, "to": 2000, "plus_minus": 50, "percent": 3},
+                        {"from": 2001, "to": 5000, "plus_minus": 40, "percent": 5}
+                    ]
+                }
+            }
+        },
+        "scd43": {
+            "provides": {
+                "co2": {
+                    "specified": [400, 5000],
+                    "accuracy": [{"from": 400, "to": 5000, "plus_minus": 30, "percent": 3}]
+                }
+            }
+        }
+    },
+    "variant_by": {"set": "factory", "read": "command"},
+    "checked": {"facts": {"level": "datasheet", "source": "CD_DS_SCD4x_Datasheet_D1.pdf in esp32-component-scd4x"}}
+}

@@ -1,0 +1,302 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "mcu",
+    "name": "esp32s2",
+    "title": "ESP32-S2",
+    "gpio": {
+        "count": 47,
+        "valid": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46
+        ],
+        "input_only": [
+            46
+        ],
+        "strapping": [
+            0,
+            45
+        ],
+        "pins": {
+            "0": {
+                "low_power": "RTC_GPIO0",
+                "notes": [
+                    "Strapping pin"
+                ]
+            },
+            "1": {
+                "analog": [
+                    "ADC1_CH0"
+                ],
+                "low_power": "RTC_GPIO1"
+            },
+            "2": {
+                "analog": [
+                    "ADC1_CH1"
+                ],
+                "low_power": "RTC_GPIO2"
+            },
+            "3": {
+                "analog": [
+                    "ADC1_CH2"
+                ],
+                "low_power": "RTC_GPIO3"
+            },
+            "4": {
+                "analog": [
+                    "ADC1_CH3"
+                ],
+                "low_power": "RTC_GPIO4"
+            },
+            "5": {
+                "analog": [
+                    "ADC1_CH4"
+                ],
+                "low_power": "RTC_GPIO5"
+            },
+            "6": {
+                "analog": [
+                    "ADC1_CH5"
+                ],
+                "low_power": "RTC_GPIO6"
+            },
+            "7": {
+                "analog": [
+                    "ADC1_CH6"
+                ],
+                "low_power": "RTC_GPIO7"
+            },
+            "8": {
+                "analog": [
+                    "ADC1_CH7"
+                ],
+                "low_power": "RTC_GPIO8"
+            },
+            "9": {
+                "analog": [
+                    "ADC1_CH8"
+                ],
+                "low_power": "RTC_GPIO9"
+            },
+            "10": {
+                "analog": [
+                    "ADC1_CH9"
+                ],
+                "low_power": "RTC_GPIO10"
+            },
+            "11": {
+                "analog": [
+                    "ADC2_CH0"
+                ],
+                "low_power": "RTC_GPIO11"
+            },
+            "12": {
+                "analog": [
+                    "ADC2_CH1"
+                ],
+                "low_power": "RTC_GPIO12"
+            },
+            "13": {
+                "analog": [
+                    "ADC2_CH2"
+                ],
+                "low_power": "RTC_GPIO13"
+            },
+            "14": {
+                "analog": [
+                    "ADC2_CH3"
+                ],
+                "low_power": "RTC_GPIO14"
+            },
+            "15": {
+                "analog": [
+                    "ADC2_CH4"
+                ],
+                "low_power": "RTC_GPIO15"
+            },
+            "16": {
+                "analog": [
+                    "ADC2_CH5"
+                ],
+                "low_power": "RTC_GPIO16"
+            },
+            "17": {
+                "analog": [
+                    "ADC2_CH6"
+                ],
+                "low_power": "RTC_GPIO17"
+            },
+            "18": {
+                "analog": [
+                    "ADC2_CH7"
+                ],
+                "low_power": "RTC_GPIO18"
+            },
+            "19": {
+                "analog": [
+                    "ADC2_CH8"
+                ],
+                "low_power": "RTC_GPIO19"
+            },
+            "20": {
+                "analog": [
+                    "ADC2_CH9"
+                ],
+                "low_power": "RTC_GPIO20"
+            },
+            "21": {
+                "low_power": "RTC_GPIO21"
+            },
+            "26": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            },
+            "27": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            },
+            "28": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            },
+            "29": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            },
+            "30": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            },
+            "31": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            },
+            "32": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            },
+            "39": {
+                "notes": [
+                    "JTAG"
+                ]
+            },
+            "40": {
+                "notes": [
+                    "JTAG"
+                ]
+            },
+            "41": {
+                "notes": [
+                    "JTAG"
+                ]
+            },
+            "42": {
+                "notes": [
+                    "JTAG"
+                ]
+            },
+            "45": {
+                "notes": [
+                    "Strapping pin"
+                ]
+            },
+            "46": {
+                "notes": [
+                    "GPI\uff1bStrapping pin"
+                ]
+            }
+        },
+        "notes": [
+            "Strapping pin: GPIO0, GPIO45 and GPIO46 are strapping pins. For more information, please refer to ESP32-S2 datasheet",
+            "SPI0/1: GPIO26-32 are usually used for SPI flash and PSRAM and not recommended for other uses.",
+            "JTAG: GPIO39-42 are usually used for inline debug.",
+            "GPI: GPIO46 is fixed to pull-down and is input only."
+        ]
+    },
+    "hosts": {
+        "spi": 3,
+        "i2c": 2
+    },
+    "provides": {
+        "wifi": {},
+        "dac": {},
+        "usb_otg": {},
+        "touch_pads": {},
+        "twai": {}
+    },
+    "checked": {
+        "facts": {
+            "level": "vendor-docs",
+            "source": "ESP-IDF esp-idf, components/soc/esp32s2, soc_caps.h"
+        },
+        "pins": {
+            "level": "vendor-docs",
+            "covers": [
+                "gpio.pins",
+                "gpio.strapping"
+            ],
+            "source": "ESP-IDF esp-idf, docs/en/api-reference/peripherals/gpio/esp32s2.inc"
+        }
+    },
+    "controls": {
+        "wifi_tx_power": {
+            "how": "wifi_tx_power",
+            "min": 8,
+            "max": 84,
+            "unit": "0.25 dBm",
+            "read": "command"
+        }
+    },
+    "limits": {
+        "psram_mhz": 80,
+        "cpu_mhz": 240
+    }
+}

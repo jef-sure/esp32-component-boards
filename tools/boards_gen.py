@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Generate everything the data of the boards decides.
 
-Usage: boards_gen.py [--data DIR] [--out DIR] (BOARD | --all)
+Usage: boards_gen.py [--data DIR] [--out DIR] BOARD
+       boards_gen.py --all
 
-For one board, reads boards-data/BOARD/board.json and writes into boards/BOARD/:
+For one board, reads catalog/boards/BOARD/board.json and writes into boards/BOARD/:
   - BOARD.c               the glue the component compiles when the board is chosen: every
                           function of boards.h, those for the parts the board has set up by
                           the data, those for the parts it has not answering false
@@ -19,7 +20,7 @@ With --all, every board and module, and beside them what names them all:
                           the table of the boards between "<!-- boards:table -->" and
                           "<!-- boards:end -->"
 
-The board's sdkconfig.defaults is not generated: it is boards-data/BOARD/sdkconfig.defaults
+The board's sdkconfig.defaults is not generated: it is catalog/boards/BOARD/sdkconfig.defaults
 already, written by hand with its reasons (tools/check_boards.py checks that it chooses the
 board and the chip: CONFIG_BOARD_SELECT_<BOARD>=y, CONFIG_IDF_TARGET).
 
@@ -35,8 +36,9 @@ The shape of the data:
   display    the pixel panel (a driver of DGX) or the character LCD (hd44780), its bus a
              name from buses, its cs/dc/rst/backlight its own lines (a device's, not the bus's)
   touch      on a bus of the board, with the calibration measured on it (measured: false
-             marks a placeholder)
-  sound      a codec on a bus (es8311) or the chip's own DAC on a pin (dac)
+             marks a placeholder); x_max and y_max are the largest coordinates, and
+             esp_lcd_touch_config_t takes one more, the number of coordinates
+  sound      a codec on a bus (es8311), an amplifier on I2S (i2s) or the chip's own DAC on a pin (dac)
   button     its pin, active_low
   sd         the slot, a device on a bus of the board, its cs its own
   module     true: not a board but a device any board's bus can carry (the 2004 backpack);
@@ -45,24 +47,22 @@ The shape of the data:
 Run from the repository root:
 
     python3 tools/boards_gen.py --all
-    python3 tools/boards_gen.py jc1060p470
+    python3 tools/boards_gen.py jc1060p470c
 """
 
 import argparse
+import collections
 import json
 import pathlib
 import re
 import sys
 
-ROOT = pathlib.Path(__file__).resolve().parent.parent
+import resolve
+import rules
 
-# what a display bus of a kind is in C: the header of dgx that makes it
-BUS_HEADERS = {
-    "dsi": "bus/dgx_dsi_esp32.h",
-    "qspi": "bus/dgx_qspi_esp32.h",
-    "spi": "bus/dgx_spi_esp32.h",
-    "p8": "bus/dgx_p8_esp32.h",
-}
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+FORMAT_VERSION = 2
+RULES = json.loads((ROOT / "catalog" / "rules.json").read_text())
 
 # the SPI buses a chip has: the name of the data ("spi2", "spi3") is the claim of
 # the host, and a chip that has fewer refuses more names (a C-series joins here
@@ -81,63 +81,8 @@ GPIOS = {
     "esp32p4": (range(0, 55), ()),
 }
 
-# a panel driver: the header of dgx that inits it, the pixel depths it takes (as its
-# header says: 16 RGB565 everywhere, 24 on the DSI panels), and the symbols of dgx's
-# Kconfig the choice of a board with it selects
-PANEL_HEADERS = {
-    "jd9165": "drivers/jd9165.h",
-    "jd9365": "drivers/jd9365.h",
-    "nv3041a": "drivers/nv3041a.h",
-    "ili9341": "drivers/ili9341.h",
-}
-PANEL_DEPTHS = {
-    "jd9165": (16, 24),
-    "jd9365": (16, 24),
-    "nv3041a": (16,),
-    "ili9341": (16,),
-}
-PANEL_SELECTS = {
-    "jd9165": ("DGX_ENABLE_DSI", "DGX_ENABLE_JD9165"),
-    "jd9365": ("DGX_ENABLE_DSI", "DGX_ENABLE_JD9365"),
-    "nv3041a": ("DGX_ENABLE_SPI", "DGX_ENABLE_NV3041A"),
-    "ili9341": ("DGX_ENABLE_SPI", "DGX_ENABLE_SPI_ILI_9341"),
-}
-
-# the character family: a driver of jef-sure/hd44780, on a board's I2C bus or GPIOs; the
-# geometries it takes, as its header names them (an HD44780_GEOMETRY_*)
-CHARACTER_DRIVERS = {
-    "hd44780": ("8x2", "16x2", "16x4", "20x2", "20x4", "40x2"),
-}
-
-ORIENT_X = {"left-right": "DgxScreenLeftRight", "right-left": "DgxScreenRightLeft"}
-ORIENT_Y = {"top-bottom": "DgxScreenTopBottom", "bottom-top": "DgxScreenBottomTop"}
-
-# the touch of a kind: the header of its device in DGX-DI, the vendor's beside it
-TOUCH_KINDS = {
-    "gt911": ("dgx_di_esp_lcd_touch.h", "esp_lcd_touch_gt911.h"),
-    "gsl3680": ("dgx_di_gsl3680.h", None),
-    # any other driver of ESP-IDF's esp_lcd_touch interface on SPI (an XPT2046 resistive
-    # panel): the data names the component and its header, the glue calls the interface
-    "esp_lcd_touch": ("dgx_di_esp_lcd_touch.h", None),
-}
-
-# what the rules of idf_component.yml bring, by the hidden symbol a board or a module
-# raises: the component and the version the glue is written against. A touch of the
-# esp_lcd_touch kind raises BOARD_TOUCH_<DRIVER> for the component its data names; its
-# version is in COMPONENT_VERSIONS.
-FEATURE_DEPS = [
-    ("BOARD_DISPLAY_FRAMEBUFFER", "jef-sure/dgx", "^0.8.2"),
-    ("BOARD_TOUCH", "jef-sure/dgx-di", "^0.1.2"),
-    ("BOARD_TOUCH_GT911", "espressif/esp_lcd_touch_gt911", "^1"),
-    ("BOARD_SOUND_ES8311", "espressif/esp_codec_dev", "~1.5"),
-    ("BOARD_DISPLAY_HD44780", "jef-sure/hd44780", "^0.1.2"),
-]
-COMPONENT_VERSIONS = {
-    "atanisoft/esp_lcd_touch_xpt2046": "^1.0.6",
-}
-
 I2C_HZ_DEFAULT = 400000
-TOUCH_SPI_HZ_DEFAULT = 1000000  # what the XPT2046 driver recommends for its reads
+INPUT_LINES = ("in", "int", "irq", "te", "busy")  # lines of a device that only come in
 
 MANIFEST_BEGIN = "  # boards: dependencies generated"
 MANIFEST_END = "  # boards: end of generated"
@@ -157,23 +102,175 @@ def bus_of(board, bus_name):
     return (board.get("buses", {}).get(kind, {}) or {}).get(own) if own else None
 
 
+def fill_call(step, values):
+    """A step of a library as a C call: its {names} replaced by the values of this board."""
+    args = [re.sub(r"\{(\w+)\}", lambda m: str(values[m[1]]), arg) for arg in step["args"]]
+    return f"{step['call']}({', '.join(args)})"
+
+
+def transport_of(display):
+    """What the library of a display says about the kind of its bus."""
+    return resolve.library(display["library"])["transports"][bus_parts(display["bus"]["bus"])[0]]
+
+
+def idf_name(record):
+    """A library as a component of the build: one that is downloaded has its owner in the name."""
+    return record["name"] if record["install"][0]["via"] == "platform" else f"{record['owner']}__{record['name']}"
+
+
+def adapter_dir(record):
+    """Where the code of a library lies in this component."""
+    return f"adapters/{record['owner']}__{record['name']}"
+
+
+def started(board):
+    """What the glue starts: for each device the library, its entry for the chip and the libraries that come with it."""
+    for device in (*(board.get("displays") or ()), *board["touches"], *board["sounds"]):
+        record = resolve.library(device["library"])
+        yield record, device["entry"], [resolve.library(name) for name in (record.get("adapter") or {}).get("with", ())]
+
+
 def port_of(own, prefix):
     """i2c0 -> 0, i2s1 -> 1: the number of the chip's port a bus name claims."""
     digits = own[len(prefix):] if own and own.startswith(prefix) else ""
     return int(digits) if digits.isdigit() else 0
 
 
-def touch_driver(touch):
-    """esp_lcd_touch_xpt2046.h -> xpt2046: the driver of a touch of the esp_lcd_touch kind."""
-    return touch["header"].replace("esp_lcd_touch_", "").replace(".h", "").replace(".", "_")
+def i2c_address(value):
+    """A 7-bit I2C address from the data (0x27, "0x27" or 39), None if it is not one."""
+    try:
+        address = int(value, 0) if isinstance(value, str) else value
+    except ValueError:
+        return None
+    if not isinstance(address, int) or isinstance(address, bool) or not 0x08 <= address <= 0x77:
+        return None
+    return address
 
 
 def is_character(display):
-    return bool(display) and display.get("driver") in CHARACTER_DRIVERS
+    return bool(display) and display.get("kind") == "character"
 
 
 def is_pixel(display):
-    return bool(display) and display.get("driver") in PANEL_HEADERS
+    return bool(display) and display.get("kind") == "graphics"
+
+
+# ---------------------------------------------------------------------------------------------
+# the parts of a board: what the glue starts, read from its devices; the rest stays data
+# ---------------------------------------------------------------------------------------------
+
+MODULE_BUS = "i2c.i2c0"  # a module leaves its bus to the board it is on; the glue names this one
+
+
+def number(value):
+    """A line as the number of its GPIO, None when it is not wired."""
+    if value == "nc":
+        return None
+    return value["gpio"] if isinstance(value, dict) and "gpio" in value else value
+
+
+def started_by(device):
+    """The library that starts a device and its entry for the chip: the one named, or the only one with an adapter."""
+    libraries = device.get("libraries") or {}
+    able = [name for name, entry in libraries.items() if entry.get("adapter")]
+    name = device.get("library") or (able[0] if len(able) == 1 else None)
+    if not libraries.get(name, {}).get("adapter"):
+        raise ValueError(f"{device.get('chip')}: no library this component can start it with: {name or ', '.join(libraries) or 'none in the catalog'}")
+    return {"library": name, "entry": libraries[name]}
+
+
+def display_part(name, device, module):
+    key, connection = next(iter(device["on"].items()))
+    pins, config = device.get("pins", {}), device["config"]
+    part = {"name": name, "driver": device["chip"], "kind": config["kind"], "bus": {"bus": MODULE_BUS if module else key}, "primary": bool(config.get("primary")), **started_by(device)}
+    for field in ("cs", "address"):
+        if field in connection:
+            part["bus"][field] = number(connection[field])
+    if "dc" in pins:
+        part["bus"]["dc"] = number(pins["dc"])
+    if "rst" in pins:
+        part["rst"] = number(pins["rst"])
+    if "backlight" in pins:
+        part["backlight"] = number(pins["backlight"])
+        if isinstance(pins["backlight"], dict):
+            part["backlight_on_high"] = pins["backlight"].get("active", "high") == "high"
+    if config["kind"] == "character":
+        part["geometry"] = config["geometry"]
+        part["bus"]["pins"] = {line: number(value) for line, value in pins.items()}
+    else:
+        part["panel"] = config["panel"]
+        part.update({field: config[field] for field in ("depth_bits", "color_order") if field in config})
+        part["original_orientation"] = device["controls"]["orientation"]["start"]
+    return part
+
+
+def touch_part(name, device):
+    key, connection = next(iter(device["on"].items()))
+    pins, config = device.get("pins", {}), device["config"]
+    started = started_by(device)
+    entry = started["entry"]
+    part = {"name": name, "kind": entry["adapter"]["kind"], "chip": device["chip"], "bus": key, "firmware": device.get("firmware") or {}, **started}
+    if part["kind"] == "esp_lcd_touch":
+        part.update({"component": started["library"].split("/", 1)[1], "header": entry["header"], "cs": number(connection["cs"]), "irq": number(pins["int"])})
+    else:
+        part.update({line: number(pins[line]) for line in ("rst", "int") if line in pins})
+    part.update({field: connection[field] for field in ("hz", "address_try") if field in connection})
+    part.update({field: config[field] for field in ("over", "x_max", "y_max", "fingers", "resistive", "calibrations") if field in config})
+    return part
+
+
+def sound_part(name, device):
+    pins, config = device.get("pins", {}), device["config"]
+    started = started_by(device)
+    part = {"name": name, "kind": started["entry"]["adapter"]["kind"], **started, **{key: config[key] for key in ("sample_rate", "pa_voltage", "codec_dac_voltage") if key in config}}
+    if part["kind"] == "dac":
+        part.update({"out": number(pins["out"]), "pa": number(pins["pa"])})
+    elif part["kind"] == "i2s":
+        part["i2s_bus"] = next(iter(device["on"]))
+    else:
+        bus = next(key for key in device["on"] if key.startswith("i2c."))
+        part.update({"bus": bus, "i2s_bus": next(key for key in device["on"] if key.startswith("i2s.")), "address": device["on"][bus]["address"], "pa": number(pins["pa"]),
+                     "volume": device["controls"]["volume"]["start"]})
+    return part
+
+
+def kept_numbers(device):
+    """The numbers of a device the component does not set up: its cs and its pins, for board_bus_get."""
+    numbers = {}
+    for connection in (device.get("on") or {}).values():
+        if isinstance(connection.get("cs"), dict) and "gpio" in connection["cs"]:
+            numbers["cs"] = connection["cs"]["gpio"]
+    numbers.update({line: value["gpio"] for line, value in (device.get("pins") or {}).items() if isinstance(value, dict) and "gpio" in value})
+    return numbers
+
+
+def parts_of(resolved):
+    """A resolved board with the devices the glue starts as lists: displays, touches, sounds, buttons; kept for the rest."""
+    module = resolved["kind"] == "module"
+    board = {**resolved, "touches": [], "sounds": [], "buttons": [], "kept": {}}
+    if module:
+        board["module"] = True
+    board["buses"] = {kind: {own: {key: number(value) for key, value in bus.items()} for own, bus in named.items()} for kind, named in (resolved.get("buses") or {}).items()}
+    displays = []
+    for name, device in resolved["devices"].items():
+        classes = device["classes"]
+        if "display" in classes:
+            displays.append(display_part(name, device, module))
+        elif "touch" in classes:
+            board["touches"].append(touch_part(name, device))
+        elif "audio" in classes:
+            board["sounds"].append(sound_part(name, device))
+        elif "button" in classes:
+            line = device["pins"]["in"]
+            board["buttons"].append({"name": name, "pin": line["gpio"], "active_low": line.get("active") == "low"})
+        else:
+            board["kept"][name] = kept_numbers(device)
+    if displays:
+        board["displays"] = [d for d in displays if d["primary"]] + [d for d in displays if not d["primary"]]
+        board["display"] = board["displays"][0]
+    if "connectors" in resolved:
+        board["connectors"] = {name: {**connector, "pins": [number(line) for line in connector["pins"]]} for name, connector in resolved["connectors"].items()}
+    return board
 
 
 def lying(display):
@@ -189,22 +286,33 @@ def read_board(path):
     data = json.loads(path.read_text())
     if data.get("format") != "jef-sure/boards":
         raise ValueError(f'not of the format jef-sure/boards: "{data.get("format")}"')
-    if data.get("format_version") != 1:
-        raise ValueError(f'format_version {data.get("format_version")} is not 1')
+    if data.get("format_version") != FORMAT_VERSION:
+        raise ValueError(f'format_version {data.get("format_version")} is not {FORMAT_VERSION}')
+    try:
+        resolved = resolve.resolve(data)
+    except resolve.Refused as err:
+        raise ValueError(f"{path}: {err}") from err
+    found = rules.check(resolved, RULES)
+    if found:
+        raise ValueError(f"{path}: " + "; ".join(item["message"] for item in found))
+    for name, device in resolved["devices"].items():
+        if "touch" in device["classes"] and (device.get("config") or {}).get("over") == "none":
+            raise ValueError(f"{path}: {name}: a touch with no display: DGX-DI has no pointer for it yet")
+    characters = [name for name, device in resolved["devices"].items() if (device.get("config") or {}).get("kind") == "character"]
+    if characters and len([d for d in resolved["devices"].values() if "display" in d["classes"]]) > 1:
+        raise ValueError(f"{path}: a character display beside another display is not set up yet: {', '.join(characters)}")
+    data = parts_of(resolved)
+    kinds = [sound["kind"] for sound in data["sounds"]]
+    if len(set(kinds)) != len(kinds):
+        raise ValueError(f"{path}: the adapter of a kind of sound drives one output yet: {', '.join(kinds)}")
     name = data.get("name")
     if not name or not isinstance(name, str) or not re.fullmatch(r"[a-z0-9_]+", name):
         raise ValueError("the name is lowercase letters, digits and _ only")
     if not data.get("title"):
         raise ValueError("no title")
     is_module = bool(data.get("module"))
-    if is_module and data.get("mcu"):
-        raise ValueError("a module rides a board's buses: no mcu of its own")
-    if is_module and data.get("buses"):
-        raise ValueError("a module rides the carrier board's buses: no buses of its own to wire")
-    if is_module and data.get("button"):
-        raise ValueError("a module has no button of its own")
-    if is_module and (data.get("touch") or data.get("sound") or data.get("sd")):
-        raise ValueError("a module is a display for now: no touch, sound or sd of its own")
+    if is_module and (data["buttons"] or data["touches"] or data["sounds"]):
+        raise ValueError("a module set up on its own is a display for now: name the others in modules of the board")
     target = data.get("mcu", {}).get("target")
     if not is_module and target not in SPI_BUSES:
         raise ValueError(f'the target is one of {", ".join(SPI_BUSES)}, not "{target}"')
@@ -218,7 +326,7 @@ def read_board(path):
             if kind in ("spi", "qspi"):
                 if own not in SPI_BUSES[target]:
                     raise ValueError(f'the chip {target} has no "{own}" to wire: {", ".join(SPI_BUSES[target])}')
-                signals = ("mosi", "miso", "sclk") if kind == "spi" else ("d0", "d1", "d2", "d3", "sclk")
+                signals = ("mosi", "sclk") if kind == "spi" else ("d0", "d1", "d2", "d3", "sclk")  # a display may have no miso
                 for signal in signals:
                     if not isinstance(bus.get(signal), int):
                         raise ValueError(f'the bus {kind}.{own} lacks its "{signal}" pin')
@@ -231,11 +339,12 @@ def read_board(path):
             elif kind == "i2s":
                 if not (own.startswith("i2s") and own[3:].isdigit()):
                     raise ValueError(f'the name of an i2s bus is its port: "i2s.i2s0", not "{own}"')
-                for signal in ("mclk", "bclk", "ws", "dout"):
+                for signal in ("bclk", "ws", "dout"):
                     if not isinstance(bus.get(signal), int):
                         raise ValueError(f'the bus i2s.{own} lacks its "{signal}" pin')
-                if bus.get("din") is not None and not isinstance(bus.get("din"), int):
-                    raise ValueError(f'the bus i2s.{own} has a din that is not a pin')
+                for signal in ("mclk", "din"):
+                    if bus.get(signal) is not None and not isinstance(bus.get(signal), int):
+                        raise ValueError(f'the bus i2s.{own} has a {signal} that is not a pin')
             elif kind == "dsi":
                 for key in ("lanes", "lane_mbps", "phy_ldo_chan", "phy_ldo_mv"):
                     if not isinstance(bus.get(key), int):
@@ -254,23 +363,26 @@ def read_board(path):
                 for key, value in bus.items():
                     if value is not None and not isinstance(value, (int, str)):
                         raise ValueError(f'the bus {kind}.{own} has a "{key}" that is neither a pin nor a parameter')
+    if len(buses.get("i2c") or {}) > 1:
+        raise ValueError("only one I2C bus per board is supported: the glue creates a single I2C master")
 
     # the display: a pixel panel of dgx or a character LCD of hd44780
     display = data.get("display")
     if is_module and not is_character(display):
         raise ValueError("a module is a character display (hd44780) for now")
-    if display is not None:
+    for display in data.get("displays") or ([display] if display is not None else []):
         driver = display.get("driver")
-        if driver in CHARACTER_DRIVERS:
+        if is_character(display):
             geometry = display.get("geometry")
-            if geometry not in CHARACTER_DRIVERS[driver]:
-                raise ValueError(f'the geometry {geometry} is not one the driver {driver} takes ({", ".join(CHARACTER_DRIVERS[driver])})')
+            geometries = display["entry"]["supports"]["geometry"]
+            if geometry not in geometries:
+                raise ValueError(f'the geometry {geometry} is not one the driver {driver} takes ({", ".join(geometries)})')
             transport = display.get("bus", {})
             bus_name = transport.get("bus", "") if isinstance(transport, dict) else transport
             kind = bus_parts(bus_name)[0] if isinstance(bus_name, str) else None
             if kind == "i2c":
-                if "address" not in transport:
-                    raise ValueError("a character LCD on I2C names the backpack's address beside the bus")
+                if i2c_address(transport.get("address")) is None:
+                    raise ValueError('a character LCD on I2C needs the 7-bit address of its backpack, e.g. "0x27"')
                 if not is_module and bus_of(data, bus_name) is None:
                     raise ValueError(f'the character LCD rides the board\'s bus "{bus_name}", which the board does not wire')
             elif kind == "gpio":
@@ -284,9 +396,9 @@ def read_board(path):
                         raise ValueError(f'the character LCD on gpio.{width} lacks its "{signal}" pin')
             else:
                 raise ValueError('a character LCD rides one of three transports: "i2c.<own>" (a PCF8574 backpack), "gpio.4bit", "gpio.8bit"')
-        elif driver in PANEL_HEADERS:
+        elif is_pixel(display):
             bus_name = display.get("bus", {}).get("bus")
-            if not bus_name or bus_parts(bus_name)[0] not in ("spi", "qspi", "dsi", "p8"):
+            if not bus_name or bus_parts(bus_name)[0] not in display["entry"]["on"]:
                 raise ValueError('the display\'s bus is a name from buses: "spi.spi2", "qspi.spi2", "dsi.dsi0", "p8.i80"')
             if bus_of(data, bus_name) is None:
                 raise ValueError(f'the display\'s bus "{bus_name}" is not among the board\'s buses')
@@ -294,8 +406,9 @@ def read_board(path):
             if not panel or not all(isinstance(panel.get(k), int) for k in ("width", "height", "mm_w", "mm_h")):
                 raise ValueError("the panel of the display lacks its size, in pixels or millimetres")
             depth = display.get("depth_bits", 16)
-            if depth not in PANEL_DEPTHS[driver]:
-                raise ValueError(f'depth_bits {depth} is not one the driver {driver} takes ({", ".join(str(d) for d in PANEL_DEPTHS[driver])})')
+            depths = display["entry"]["supports"]["depth_bits"]
+            if depth not in depths:
+                raise ValueError(f'depth_bits {depth} is not one the driver {driver} takes ({", ".join(map(str, depths))})')
             if panel["width"] > panel["height"] and panel["mm_w"] < panel["mm_h"] or \
                panel["width"] < panel["height"] and panel["mm_w"] > panel["mm_h"]:
                 raise ValueError("the panel's pixels and its millimetres lie different ways: both are the glass as the controller scans it")
@@ -304,25 +417,26 @@ def read_board(path):
             if abs(ratio_px - ratio_mm) / max(ratio_px, ratio_mm) > 0.2:
                 raise ValueError(f"the panel's pixels ({panel['width']}x{panel['height']}) and its millimetres ({panel['mm_w']}x{panel['mm_h']}) are not near one proportion")
             orientation = display.get("original_orientation")
-            if not orientation or orientation.get("x") not in ORIENT_X or orientation.get("y") not in ORIENT_Y:
+            names = resolve.library(display["library"])["values"]
+            if not orientation or orientation.get("x") not in names["dir_x"] or orientation.get("y") not in names["dir_y"]:
                 raise ValueError("the original_orientation of the display is not left-right/right-left x top-bottom/bottom-top")
             kind = bus_parts(bus_name)[0]
             for line in {"spi": ("cs", "dc"), "qspi": ("cs",), "p8": ("cs",), "dsi": ()}[kind]:
-                if not isinstance(display["bus"].get(line), int):
+                if line not in display["bus"]:
                     raise ValueError(f'the display lacks its "{line}" line')
         else:
             raise ValueError(f'panel driver not known: "{driver}"')
 
     # the touch, the sound, the button, the sd slot
-    touch = data.get("touch")
-    if touch is not None:
-        if touch.get("kind") not in TOUCH_KINDS:
-            raise ValueError(f'touch of a kind not known: "{touch.get("kind")}"')
+    for touch in data["touches"]:
+        display = next((shown for shown in data.get("displays") or [] if shown["name"] == touch.get("over")), None)
         if not is_pixel(display):
-            raise ValueError("a touch panel lies on a frame buffer display: the board has none")
-        calibration = touch.get("calibration")
-        if not calibration:
-            raise ValueError("the touch has no calibration: measure the board (dgx_di_calibrate_measure) and put it in the data; measured: false marks a placeholder")
+            raise ValueError("a touch panel needs a graphics display: the board has none")
+        takers = (touch["library"], *resolve.library(touch["library"]).get("adapter", {}).get("with", ()))
+        reader = next((name for name in takers if name in (touch.get("calibrations") or {})), None)
+        if not reader:
+            raise ValueError(f"the touch has no calibration for {', '.join(takers)}: measure the board (dgx_di_calibrate_measure) and put it in the data; measured: false marks a placeholder")
+        calibration = touch["calibration"] = touch["calibrations"][reader][-1]  # the newest: one for the versions in use is for later
         for key in ("x_min", "x_max", "y_min", "y_max", "width", "height", "flags", "knots_x", "knots_y", "rounds", "affine", "x", "y",
                     "down_ms", "up_ms", "blink_ms", "gap_ms", "off_tenths", "worst_tenths", "left_tenths", "left_worst_tenths"):
             if key not in calibration:
@@ -331,26 +445,28 @@ def read_board(path):
             raise ValueError("calibration.measured is true or false")
         if not isinstance(touch.get("x_max"), int) or not isinstance(touch.get("y_max"), int):
             raise ValueError("the touch lacks its x_max and y_max, the range of its coordinates")
+        # DGX-DI compares these with the device and the display, and refuses a calibration that differs
+        if (calibration["x_max"], calibration["y_max"]) != (touch["x_max"], touch["y_max"]):
+            raise ValueError("the calibration is for another panel: its x_max/y_max differ from the touch's")
+        panel = display["panel"]
+        if (calibration["width"], calibration["height"]) != (panel["width"], panel["height"]):
+            raise ValueError("the calibration is for another display: its width/height differ from the panel's")
         if not touch.get("bus") or bus_of(data, touch["bus"]) is None:
             raise ValueError(f'the touch\'s bus "{touch.get("bus")}" is not among the board\'s buses')
         if touch["kind"] in ("gt911", "gsl3680") and bus_parts(touch["bus"])[0] != "i2c":
             raise ValueError(f'a {touch["kind"]} rides a board\'s I2C bus: bus is its name, "i2c.i2c0"')
+        if touch["kind"] == "gt911":
+            for address in touch.get("address_try") or ["0x5d"]:
+                if i2c_address(address) not in (0x5D, 0x14):
+                    raise ValueError(f'a GT911 answers at 0x5d or 0x14, not {address}')
         if touch["kind"] == "esp_lcd_touch":
-            component = touch.get("component")
-            if not component or not touch.get("header"):
-                raise ValueError('a touch of the esp_lcd_touch kind names its component and its header (atanisoft/esp_lcd_touch_xpt2046, esp_lcd_touch_xpt2046.h)')
-            if component.count("/") != 1:
-                raise ValueError(f'the component is named with its namespace, "atanisoft/esp_lcd_touch_xpt2046", not "{component}"')
-            if component not in COMPONENT_VERSIONS:
-                raise ValueError(f"the component {component} has no version in COMPONENT_VERSIONS of the generator: add the one the glue is written against")
             if bus_parts(touch["bus"])[0] != "spi":
                 raise ValueError('a touch of the esp_lcd_touch kind rides a board\'s SPI bus: bus is its name, "spi.spi3"')
             for line in ("cs", "irq"):
                 if not isinstance(touch.get(line), int):
                     raise ValueError(f'the touch lacks its "{line}" pin')
-    sound = data.get("sound")
-    if sound is not None:
-        if sound.get("kind") not in ("es8311", "dac"):
+    for sound in data["sounds"]:
+        if sound.get("kind") not in ("es8311", "dac", "i2s"):
             raise ValueError(f'sound of a kind not known: "{sound.get("kind")}"')
         if not isinstance(sound.get("sample_rate"), int):
             raise ValueError("the sound lacks its sample_rate")
@@ -361,24 +477,20 @@ def read_board(path):
                 raise ValueError(f'the DAC of an ESP32 is on GPIO 25 or 26, not {sound.get("out")}')
             if sound.get("pa") is not None and not isinstance(sound.get("pa"), int):
                 raise ValueError("the pa of the sound is a pin or null")
+        elif sound["kind"] == "i2s":
+            if bus_of(data, sound.get("i2s_bus", "")) is None or bus_parts(sound.get("i2s_bus", ""))[0] != "i2s":
+                raise ValueError('the amplifier streams over a board\'s I2S bus: i2s_bus is its name, "i2s.i2s0"')
         else:
             if bus_of(data, sound.get("bus", "")) is None or bus_parts(sound.get("bus", ""))[0] != "i2c":
                 raise ValueError('the codec comes on a board\'s I2C bus: bus is its name, "i2c.<own>"')
             if bus_of(data, sound.get("i2s_bus", "")) is None or bus_parts(sound.get("i2s_bus", ""))[0] != "i2s":
                 raise ValueError('the codec streams over a board\'s I2S bus: i2s_bus is its name, "i2s.i2s0"')
-            if not sound.get("address"):
-                raise ValueError("the codec needs its address on the I2C bus")
+            if not isinstance(bus_of(data, sound["i2s_bus"]).get("mclk"), int):
+                raise ValueError(f'the codec needs the mclk of {sound["i2s_bus"]}')
+            if i2c_address(sound.get("address")) is None:
+                raise ValueError('the codec needs its 7-bit I2C address, e.g. "0x18"')
             if not isinstance(sound.get("volume"), int):
                 raise ValueError("the codec needs its volume, 0..100")
-    button = data.get("button")
-    if button is not None and not isinstance(button.get("pin"), int):
-        raise ValueError("the button lacks its pin")
-    sd = data.get("sd")
-    if sd is not None:
-        if bus_parts(sd.get("bus", ""))[0] != "spi" or bus_of(data, sd.get("bus", "")) is None:
-            raise ValueError('the sd slot is a device on a board\'s SPI bus: bus is its name, "spi.spi2"')
-        if not isinstance(sd.get("cs"), int):
-            raise ValueError("the sd slot lacks its cs pin")
     return data
 
 
@@ -389,42 +501,45 @@ def read_board(path):
 def pins_of(board):
     """Every pin the data names, as (pin, owner, direction): direction "out", "in" or "bus"."""
     pins = []
-    buses = board.get("buses") or {}
-    for kind, named in buses.items():
+    for kind, named in (board.get("buses") or {}).items():
         for own, bus in (named or {}).items():
             for key, value in sorted((bus or {}).items()):
-                if key in ("hz", "lanes", "lane_mbps", "phy_ldo_chan", "phy_ldo_mv") or not isinstance(value, int):
+                if key in resolve.NOT_LINES or not isinstance(value, int):
                     continue
-                direction = "in" if key in ("miso", "din", "rd", "d1") and kind in ("spi", "i2s", "p8") else "bus"
-                pins.append((value, f"{kind}.{own}.{key}", direction))
-    display = board.get("display")
-    if is_pixel(display):
-        for line in ("cs", "dc"):
-            if isinstance(display["bus"].get(line), int):
-                pins.append((display["bus"][line], f"display.{line}", "out"))
-        for line in ("rst", "backlight"):
-            if isinstance(display.get(line), int):
-                pins.append((display[line], f"display.{line}", "out"))
-    elif is_character(display):
-        transport = display.get("bus", {})
-        for key, value in sorted((transport.get("pins") or {}).items()):
-            if isinstance(value, int):
-                pins.append((value, f"display.{key}", "out"))
-    touch = board.get("touch")
-    if touch:
-        for line, direction in (("cs", "out"), ("irq", "in"), ("rst", "out"), ("int", "in")):
-            if isinstance(touch.get(line), int):
-                pins.append((touch[line], f"touch.{line}", direction))
-    sound = board.get("sound")
-    if sound:
-        for line in ("out", "pa"):
-            if isinstance(sound.get(line), int):
-                pins.append((sound[line], f"sound.{line}", "out"))
-    if board.get("button"):
-        pins.append((board["button"]["pin"], "button", "in"))
-    if board.get("sd") and isinstance(board["sd"].get("cs"), int):
-        pins.append((board["sd"]["cs"], "sd.cs", "out"))
+                # only MISO and I2S DIN are inputs; data lines are bidirectional and RD is driven by the chip
+                pins.append((value, f"{kind}.{own}.{key}", "in" if key in ("miso", "din") else "bus"))
+    for name, device in board["devices"].items():
+        for line, value in sorted((device.get("pins") or {}).items()):
+            if isinstance(value, dict) and "gpio" in value:
+                pins.append((value["gpio"], f"{name}.{line}", "in" if line in INPUT_LINES else "out"))
+        for connection in (device.get("on") or {}).values():
+            if isinstance(connection.get("cs"), dict) and "gpio" in connection["cs"]:
+                pins.append((connection["cs"]["gpio"], f"{name}.cs", "out"))
     return pins
+
+
+def pin_map(board):
+    """Every GPIO of the chip of a board: what it can do, who has it, where it comes out and when it is free."""
+    gpio = board["mcu"]["facts"]["gpio"]
+    owners = {}
+    for pin, owner, _ in pins_of(board):
+        owners.setdefault(pin, []).append(owner)
+    outside = {}
+    for name, connector in (board.get("connectors") or {}).items():
+        for pin in connector["pins"]:
+            if isinstance(pin, int):
+                outside.setdefault(pin, []).append(name)
+    shared = {group["line"]["gpio"]: group for group in (board.get("shared_pins") or {}).values() if isinstance(group["line"], dict)}
+    out = {}
+    for pin in gpio["valid"]:
+        entry = {"owners": owners.get(pin, []), "connectors": outside.get(pin, []), "strapping": pin in gpio.get("strapping", ()), "input_only": pin in gpio["input_only"]}
+        entry.update(gpio.get("pins", {}).get(str(pin), {}))
+        if pin in shared and "only_while" in shared[pin]:
+            when = shared[pin]["only_while"]
+            entry["free_while"] = f"{when['device']}.{when['control']} is {when['value']}"
+        entry["state"] = "free" if not entry["owners"] else "shared" if pin in shared else "taken"
+        out[pin] = entry
+    return out
 
 
 def pin_problems(board):
@@ -441,7 +556,10 @@ def pin_problems(board):
         if direction != "in" and pin in input_only:
             problems.append(f"GPIO {pin} ({owner}) is input only on an {target}, and {owner} drives it")
         owners.setdefault(pin, []).append(owner)
+    shared = {group["line"].get("gpio") for group in (board.get("shared_pins") or {}).values() if isinstance(group["line"], dict)}
     for pin, names in sorted(owners.items()):
+        if pin in shared:
+            continue
         if len(names) > 1:
             problems.append(f"GPIO {pin} has two owners: {', '.join(names)}")
     return problems
@@ -454,35 +572,35 @@ def pin_problems(board):
 def features_of(board):
     """The hidden symbols a board or a module raises when chosen."""
     features = set()
-    display = board.get("display")
-    if is_pixel(display):
-        features.add("BOARD_DISPLAY_FRAMEBUFFER")
-    if is_character(display):
-        features.add("BOARD_DISPLAY_HD44780")
-        if board.get("module"):
-            features.add("BOARD_MODULE_CHARACTER_DISPLAY")
-    touch = board.get("touch")
-    if touch:
-        features.add("BOARD_TOUCH")
-        if touch["kind"] == "gt911":
-            features.add("BOARD_TOUCH_GT911")
-        elif touch["kind"] == "esp_lcd_touch":
-            features.add(f"BOARD_TOUCH_{touch_driver(touch).upper()}")
-    sound = board.get("sound")
-    if sound and sound["kind"] == "es8311":
-        features.add("BOARD_SOUND_ES8311")
+    if board.get("display_groups"):
+        features.add("BOARD_DISPLAY_GROUP")
+    if is_character(board.get("display")) and board.get("module"):
+        features.add("BOARD_MODULE_CHARACTER_DISPLAY")
+    for record, entry, also in started(board):
+        features.update(used["adapter"]["symbol"] for used in (record, *also))
+        features.update(entry["adapter"].get("symbols", ()))
     return features
 
 
-def feature_deps(boards):
-    """The dependencies the rules bring, (symbol, component, version), those of the known features and of the touch components the data names."""
-    deps = list(FEATURE_DEPS)
-    for board in boards:
-        touch = board.get("touch")
-        if touch and touch["kind"] == "esp_lcd_touch":
-            entry = (f"BOARD_TOUCH_{touch_driver(touch).upper()}", touch["component"], COMPONENT_VERSIONS[touch["component"]])
-            if entry not in deps:
-                deps.append(entry)
+def install_lines(way, version):
+    """How the manifest gets a library: the way it is taken, for the version the adapter asks."""
+    if way["via"] == "registry":
+        return [f'version: "{version}"']
+    if way["via"] != "git":
+        raise ValueError(f'a manifest cannot take a library through "{way["via"]}"')
+    if version[0] in "^~<>=" and "{version}" in way.get("ref", ""):
+        raise ValueError(f"a tag of git is one version, not the range {version}")
+    lines = [f"git: {way['url']}"] + ([f"path: {way['path']}"] if "path" in way else [])
+    return lines + ([f'version: "{way["ref"].replace("{version}", version)}"'] if "ref" in way else [])
+
+
+def feature_deps():
+    """The dependencies the rules bring, (symbol, component, its lines in the manifest): the libraries the adapters are written against."""
+    deps = []
+    for record in resolve.all_libraries(tuple(resolve.ROOTS)).values():
+        adapter = record.get("adapter") or {}
+        if "version" in adapter:
+            deps.append((adapter["symbol"], f"{record['owner']}/{record['name']}", install_lines(record["install"][0], adapter["version"])))
     return deps
 
 
@@ -497,29 +615,14 @@ def module_symbol(board):
 def derive_requires(board):
     """What the glue needs at link, derived from what the board has."""
     requires = set()
-    display = board.get("display")
-    touch = board.get("touch")
-    sound = board.get("sound")
     for kind in (board.get("buses") or {}):
         requires.add({"i2c": "esp_driver_i2c", "i2s": "esp_driver_i2s", "spi": "esp_driver_spi", "qspi": "esp_driver_spi"}.get(kind, "esp_driver_gpio"))
-    if is_character(display):
-        requires.update(("esp_driver_gpio", "jef-sure__hd44780"))
-        if bus_parts(display.get("bus", {}).get("bus", ""))[0] == "i2c":
-            requires.add("esp_driver_i2c")
-    elif is_pixel(display):
-        requires.update(("esp_driver_gpio", "jef-sure__dgx"))
-    if touch:
-        requires.add("jef-sure__dgx-di")
-        if touch["kind"] == "gt911":
-            requires.update(("esp_lcd", "espressif__esp_lcd_touch_gt911"))
-        elif touch["kind"] == "esp_lcd_touch":
-            requires.update(("esp_lcd", "esp_driver_spi", touch["component"].replace("/", "__")))
-    if sound:
-        if sound["kind"] == "dac":
-            requires.update(("esp_driver_dac", "esp_driver_gpio"))
-        else:
-            requires.update(("esp_driver_i2s", "espressif__esp_codec_dev"))
-    if board.get("button"):
+    for record, _, also in started(board):
+        requires.update(idf_name(used) for used in (record, *also))
+        requires.update(record["adapter"].get("requires", ()))
+    for shown in board.get("displays") or ():
+        requires.update(resolve.library(shown["library"])["transports"].get(bus_parts(shown["bus"]["bus"])[0], {}).get("requires", ()))
+    if board["buttons"]:
         requires.add("esp_driver_gpio")
     requires.update(board.get("extra_requires", []))
     return sorted(requires)
@@ -551,30 +654,35 @@ def c_gpio(num):
 
 
 def gen_c(board):
-    """The C glue of the board: every function of boards.h, by the data or answering false."""
+    """The C glue of the board: every function of boards.h, by the data or returning false."""
     name = board["name"]
     buses = board.get("buses") or {}
     display = board.get("display")
-    touch = board.get("touch")
-    sound = board.get("sound")
-    button = board.get("button")
-    sd = board.get("sd")
+    touches, sounds, buttons = board["touches"], board["sounds"], board["buttons"]
     is_module = bool(board.get("module"))
     pixel = is_pixel(display)
     character = is_character(display)
     i2c_buses = sorted((buses.get("i2c") or {}).items())
     i2c_port = port_of(i2c_buses[0][0], "i2c") if i2c_buses else 0
-    touch_own_spi = bool(touch) and touch["kind"] == "esp_lcd_touch" and (not pixel or touch["bus"] != display["bus"]["bus"])
+    # dgx_spi_init() keeps its host for the display: a device beside the display needs a host
+    # set up here and dgx_spi_init_on_bus(), and a display alone leaves no bus for the program
+    displays = [shown for shown in board.get("displays") or [] if is_pixel(shown)]
+    groups = board.get("display_groups") or {}
+    display_buses = {shown["bus"]["bus"] for shown in displays}
+    beside = [key for part, device in board["devices"].items() if part not in {shown["name"] for shown in displays} for key in device.get("on") or ()]
+    beside += [name for name in display_buses if sum(shown["bus"]["bus"] == name for shown in displays) > 1]
+    shared = {name for name in display_buses if bus_parts(name)[0] == "spi" and name in beside}
+    plain_spi = {own: bus for own, bus in (buses.get("spi") or {}).items() if f"spi.{own}" in shared or f"spi.{own}" not in display_buses}
     L = []
     out = L.append
     out("/*")
-    out(f" * The glue of {name}, made by tools/boards_gen.py from boards-data/{name}/board.json: do not")
+    out(f" * The glue of {name}, made by tools/boards_gen.py from {data_path(board)}: do not")
     out(" * edit by hand: edit the data and generate again (tools/check_boards.py checks the two agree).")
     if is_module:
         out(" * A module: not a board but a device the chosen board's bus carries; it gives the function of")
         out(" * its kind, and the board's glue leaves that one out (CONFIG_BOARD_MODULE_CHARACTER_DISPLAY).")
     else:
-        out(" * Every function of boards.h is here: by the data for the parts the board has, answering")
+        out(" * Every function of boards.h is here: by the data for the parts the board has, returning")
         out(" * false for the parts it has not, so the contract of boards.h holds at link.")
     out(" */")
     out("#include \"boards.h\"")
@@ -583,42 +691,21 @@ def gen_c(board):
     out("#include \"sdkconfig.h\"")
     out("")
     headers = ["stdlib.h", "string.h", "esp_log.h"]
-    if character:
-        headers.append("hd44780.h")
-        if bus_parts(display["bus"]["bus"])[0] == "gpio":
-            headers.append("driver/gpio.h")
-    elif pixel:
-        kind = bus_parts(display["bus"]["bus"])[0]
-        headers.append(BUS_HEADERS[kind])
-        headers.append(PANEL_HEADERS[display["driver"]])
-        if kind == "dsi" and display.get("backlight") is not None:
-            headers.append("driver/gpio.h")
-    if touch:
-        t = TOUCH_KINDS[touch["kind"]]
-        headers.append(t[0])
-        if t[1]:
-            headers.append(t[1])
+    for record, entry, also in started(board):
+        headers += [header for used in (record, *also) for header in used["adapter"].get("headers", ())] + entry["adapter"].get("headers", [])
+    if character and bus_parts(display["bus"]["bus"])[0] == "gpio":
+        headers.append("driver/gpio.h")
+    for shown in displays:
+        headers.append(transport_of(shown)["header"])
+        headers.append(shown["entry"]["header"])
+    for touch in touches:
         if touch["kind"] == "esp_lcd_touch":
             headers.append(touch["header"])
-            headers.append("esp_lcd_panel_io.h")
-            if touch_own_spi:
-                headers.append("driver/spi_common.h")
-        if touch["kind"] == "gt911":
-            headers.append("esp_lcd_panel_io.h")
-        headers.append("dgx_di.h")
-    if sound:
-        headers.append("freertos/FreeRTOS.h")
-        headers.append("freertos/task.h")
-        if sound["kind"] == "dac":
-            headers.append("driver/dac_continuous.h")
-            if sound.get("pa") is not None:
-                headers.append("driver/gpio.h")
-        else:
-            headers.append("driver/i2s_std.h")
-            headers.append("esp_codec_dev.h")          # the device: open, write, volume
-            headers.append("esp_codec_dev_defaults.h") # the interfaces and the ES8311's own
-    if button:
-        headers.append("driver/gpio.h")
+            headers.append("driver/spi_common.h")
+    if any(sound["kind"] != "dac" for sound in sounds):
+        headers.append("driver/i2s_std.h")  # I2S_NUM_* of the table of buses
+    if plain_spi:
+        headers.append("driver/spi_common.h")  # SPI2_HOST of the table of buses
     for header in sorted(set(headers)):
         out(f"#include <{header}>" if header in ("stdlib.h", "string.h") else f"#include \"{header}\"")
     out("")
@@ -627,39 +714,14 @@ def gen_c(board):
 
     # ---- the pins of the board, each named by the part it serves ----
     if not is_module:
-        out("/* The pins of the board, each named by the part it serves: a bus's own, a device's")
-        out(" * strobes (cs, dc, rst, backlight, an amplifier's pa). */")
-        for own, bus in sorted((buses.get("spi") or {}).items()):
+        out("/* The buses of the board. */")
+        for own, bus in sorted(plain_spi.items()):
             hz = f", .hz = {bus['hz']}" if bus.get("hz") is not None else ""
             out(f"static const struct board_spi_bus board_spi_{own} = {{.host = {own.upper()}_HOST, .mosi = {c_gpio(bus['mosi'])}, .miso = {c_gpio(bus['miso'])}, .sclk = {c_gpio(bus['sclk'])}{hz}}};")
         for own, bus in i2c_buses[:1]:
             out(f"static const struct board_i2c_pins board_i2c_pins_of = {{.port = I2C_NUM_{port_of(own, 'i2c')}, .sda = {c_gpio(bus['sda'])}, .scl = {c_gpio(bus['scl'])}}}; /* i2c.{own} */")
         for own, bus in sorted((buses.get("i2s") or {}).items()):
             out(f"static const struct board_i2s_bus board_i2s_{own} = {{.port = I2S_NUM_{port_of(own, 'i2s')}, .mclk = {c_gpio(bus['mclk'])}, .bclk = {c_gpio(bus['bclk'])}, .ws = {c_gpio(bus['ws'])}, .dout = {c_gpio(bus['dout'])}, .din = {c_gpio(bus.get('din'))}}};")
-        # the strobes as macros of gpio_num_t constants: the exact type the drivers take (an enum
-        # of the glue's own would convert, with a warning ESP-IDF makes an error)
-        if pixel:
-            db = display["bus"]
-            for line, pin in (("CS", db.get("cs")), ("DC", db.get("dc"))):
-                if pin is not None:
-                    out(f"#define PIN_{line} {c_gpio(pin)}")
-            if display.get("rst") is not None:
-                out(f"#define PIN_LCD_RST {c_gpio(display['rst'])}")
-            if display.get("backlight") is not None:
-                out(f"#define PIN_LCD_BACKLIGHT {c_gpio(display['backlight'])}")
-        if touch:
-            out(f"#define PIN_TOUCH_RST {c_gpio(touch.get('rst'))}")
-            out(f"#define PIN_TOUCH_INT {c_gpio(touch.get('int') if touch['kind'] != 'esp_lcd_touch' else touch.get('irq'))}")
-            if touch["kind"] == "esp_lcd_touch":
-                out(f"#define PIN_TOUCH_CS {c_gpio(touch['cs'])}")
-        if sound and sound["kind"] == "dac":
-            out(f"#define PIN_SOUND_OUT {c_gpio(sound.get('out'))}")
-        if sound and sound.get("pa") is not None:
-            out(f"#define PIN_SOUND_PA {c_gpio(sound.get('pa'))}")
-        if button:
-            out(f"#define PIN_BUTTON {c_gpio(button['pin'])}")
-        if sd:
-            out(f"#define PIN_SD_CS {c_gpio(sd.get('cs'))}")
         out("")
 
         # ---- every bus of the board, its numbers by name: the universal table ----
@@ -669,6 +731,8 @@ def gen_c(board):
                 for key, value in sorted((bus or {}).items()):
                     if isinstance(value, int):
                         rows.append((f"{kind}.{own}", key, value))
+        for own, numbers in board["kept"].items():
+            rows.extend((own, key, value) for key, value in sorted(numbers.items()))
         out("/* Every bus of the board, its numbers by name: the kinds the component sets up and the")
         out(" * kinds it only keeps for the program, for a program that sets its own hardware up on the")
         out(" * board's wiring instead of copying pins. */")
@@ -692,9 +756,9 @@ def gen_c(board):
 
         # ---- the shared buses as the program sees them ----
         spi_hosts = sorted(set(list(buses.get("spi") or {}) + list(buses.get("qspi") or {})))
-        if buses.get("spi"):
-            entries = ", ".join(f"&board_spi_{own}" for own in sorted(buses["spi"]))
-            out("/* The board's SPI buses by host: a device the program adds takes one of them or a free host. */")
+        if plain_spi:
+            entries = ", ".join(f"&board_spi_{own}" for own in sorted(plain_spi))
+            out("/* The SPI buses open to the program's devices. A host with only a display on it is not one of them. */")
             out(f"static const struct board_spi_bus *const board_spi_buses[] = {{{entries}}};")
             out("")
             out("const struct board_spi_bus *board_spi_bus(int host)")
@@ -704,7 +768,7 @@ def gen_c(board):
             out("    return NULL;")
             out("}")
         else:
-            out("/* The board wires no SPI bus of the plain kind: none to hand out. */")
+            out("/* The board has no SPI bus open to the program's devices. */")
             out("const struct board_spi_bus *board_spi_bus(int host)")
             out("{")
             out("    (void)host;")
@@ -745,379 +809,184 @@ def gen_c(board):
     # ---- the display ----
     if character:
         transport = display["bus"]
-        bus_name = transport["bus"]
-        kind, width = bus_parts(bus_name)
-        address = transport.get("address")
+        kind, width = bus_parts(transport["bus"])
         gpins = transport.get("pins", {})
         cols, rows = display["geometry"].split("x")
-        where = "the board's I2C bus" if kind == "i2c" else f"GPIOs ({width})"
-        out(f"/* The character display: a {display['geometry']} {display['driver']} on {where} (jef-sure/hd44780). */")
-        out("static hd44780_t *character_lcd;")
+        out(f"/* The character display: a {display['geometry']} {display['driver']} on {transport['bus']}. */")
+        out("static lcd_bus_hd44780_t *character_bus(void)")
+        out("{")
+        library = resolve.library(display["library"])
+        if kind == "i2c":
+            step = library["transports"]["i2c"]["shared"]
+            out("    i2c_master_bus_handle_t bus = board_glue_i2c();")
+            out(f"    return bus ? {fill_call(step, {'i2c_bus': 'bus', 'address': format(i2c_address(transport.get('address')), '#04x'), **library['transports']['i2c']['defaults']})} : NULL;")
+        else:
+            out(f"    return {fill_call(library['transports'][transport['bus']]['init'], collections.defaultdict(lambda: c_gpio(None), {pin: c_gpio(num) for pin, num in gpins.items()}))};")
+        out("}")
+        out("")
+        out(f"static const struct board_character_panel character_panel = {{.geometry = HD44780_GEOMETRY_{cols}X{rows}, .cols = {cols}, .rows = {rows}, .bus = character_bus}};")
         out("")
         out("bool board_character_display_init(struct board_character_display *out)")
         out("{")
-        out("    if (!out) return false;")
-        out("    if (!character_lcd) {")
-        if kind == "i2c":
-            out("        i2c_master_bus_handle_t bus = board_glue_i2c();")
-            out("        if (!bus) return false;")
-            out(f"        lcd_bus_hd44780_t *backpack = lcd_bus_pcf8574_i2c_create_on_bus(bus, {address or '0x27'}, 0);")
-            out("        if (!backpack) {")
-            out('            ESP_LOGE("board", "no PCF8574 backpack at the address of the data");')
-            out("            return false;")
-            out("        }")
-        elif width == "4bit":
-            out(f"        lcd_bus_hd44780_t *backpack = lcd_bus_gpio4_create({c_gpio(gpins.get('rs'))}, {c_gpio(gpins.get('en'))}, {c_gpio(gpins.get('d4'))}, {c_gpio(gpins.get('d5'))}, {c_gpio(gpins.get('d6'))}, {c_gpio(gpins.get('d7'))});")
-            out("        if (!backpack) {")
-            out('            ESP_LOGE("board", "no GPIOs of the character LCD");')
-            out("            return false;")
-            out("        }")
-        else:
-            out(f"        lcd_bus_hd44780_t *backpack = lcd_bus_gpio8_create({c_gpio(gpins.get('rs'))}, {c_gpio(gpins.get('en'))}, {', '.join(c_gpio(gpins.get('d%d' % i)) for i in range(8))});")
-            out("        if (!backpack) {")
-            out('            ESP_LOGE("board", "no GPIOs of the character LCD");')
-            out("            return false;")
-            out("        }")
-        out(f"        character_lcd = lcd_init(backpack, HD44780_GEOMETRY_{cols}X{rows}, true); /* the controller owns the backpack: gone with a failed init */")
-        out("        if (!character_lcd) {")
-        out('            ESP_LOGE("board", "the character LCD did not take its init sequence");')
-        out("            return false;")
-        out("        }")
-        out("        lcd_clear_screen(character_lcd);")
-        out("        lcd_backlight_on(character_lcd);")
-        out("    }")
-        out("    out->lcd = character_lcd;")
-        out(f"    out->cols = {cols}, out->rows = {rows};")
-        out("    return true;")
+        out("    return board_glue_character_init(&character_panel, out);")
         out("}")
         out("")
     elif pixel:
-        db = display["bus"]
-        bus_name = db["bus"]
-        kind, own = bus_parts(bus_name)
-        bus = bus_of(board, bus_name)
-        panel = display["panel"]
-        orientation = display["original_orientation"]
-        swap = "true" if orientation.get("swap", False) else "false"
-        w, h, mm_w, mm_h = lying(display)
-        out(f"/* The display: a {panel['width']}x{panel['height']} {display['driver']} on {bus_name}, the glass {panel['mm_w']}x{panel['mm_h']} mm as the controller")
-        out(f" * scans it; lying as the board shows it, {w}x{h}, {mm_w}x{mm_h} mm. */")
-        if kind == "dsi":
-            out(f"enum {{ DSI_LANES = {bus.get('lanes', 2)}, DSI_LANE_MBPS = {bus.get('lane_mbps', 750)}, DSI_PHY_LDO_CHAN = {bus.get('phy_ldo_chan', 3)}, DSI_PHY_LDO_MV = {bus.get('phy_ldo_mv', 2500)} }};")
-        out(f"enum {{ GLASS_W = {panel['width']}, GLASS_H = {panel['height']}, GLASS_MM_W = {panel['mm_w']}, GLASS_MM_H = {panel['mm_h']} }};")
-        out("")
-        out("/* How the display lies after an orientation call: its size follows the swap of its axes. */")
-        out("static void display_lies(struct board_display *d, int dir_x, int dir_y, bool swap_xy)")
-        out("{")
-        out("    d->dir_x = dir_x, d->dir_y = dir_y, d->swap_xy = swap_xy;")
-        out("    d->width = swap_xy ? GLASS_H : GLASS_W, d->height = swap_xy ? GLASS_W : GLASS_H;")
-        out("    d->mm_w = swap_xy ? GLASS_MM_H : GLASS_MM_W, d->mm_h = swap_xy ? GLASS_MM_W : GLASS_MM_H;")
-        out("}")
-        out("")
-        out("bool board_display_init(struct board_display *out)")
-        out("{")
-        out("    if (!out) return false;")
-        if kind == "dsi":
-            out("    dgx_bus_protocols_t *bus = dgx_dsi_init(0, DSI_LANES, DSI_LANE_MBPS, DSI_PHY_LDO_CHAN, DSI_PHY_LDO_MV);")
-        elif kind == "p8":
-            out(f"    dgx_bus_protocols_t *bus = dgx_p8_init({', '.join(c_gpio(bus['d%d' % i]) for i in range(8))}, {c_gpio(bus['wr'])}, {c_gpio(bus.get('rd'))}, PIN_CS, {c_gpio(bus['dc'])}, {bus['hz']}); /* {bus_name} */")
-        elif kind == "qspi":
-            out(f"    dgx_bus_protocols_t *bus = dgx_qspi_init({own.upper()}_HOST, SPI_DMA_CH_AUTO, {c_gpio(bus['d0'])}, {c_gpio(bus['d1'])}, {c_gpio(bus['d2'])}, {c_gpio(bus['d3'])}, {c_gpio(bus['sclk'])}, PIN_CS, {bus.get('hz', 40000000)}, 0); /* {bus_name} */")
-        else:
-            out(f"    dgx_bus_protocols_t *bus = dgx_spi_init({own.upper()}_HOST, SPI_DMA_CH_AUTO, {c_gpio(bus['mosi'])}, {c_gpio(bus['miso'])}, {c_gpio(bus['sclk'])}, PIN_CS, PIN_DC, {bus.get('hz', 40000000)}, 0); /* {bus_name} */")
-        out("    if (!bus) return false;")
-        init = f"dgx_{display['driver']}_init"
-        depth = display.get("depth_bits", 16)
-        rst = "PIN_LCD_RST" if display.get("rst") is not None else "GPIO_NUM_NC"
-        if kind == "dsi":
-            out(f"    dgx_screen_t *screen = {init}(bus, {rst}, {depth}, DgxScreenRGB, DgxDsiTwoFrames);")
-        else:
-            backlight = "PIN_LCD_BACKLIGHT" if display.get("backlight") is not None else "GPIO_NUM_NC"
-            out(f"    dgx_screen_t *screen = {init}(bus, {rst}, {backlight}, {depth}, DgxScreenRGB);")
-        out("    if (!screen) {")
-        out("        bus->dispose(bus);")
-        out("        return false;")
-        out("    }")
-        out(f"    dgx_{display['driver']}_orientation(screen, {ORIENT_X[orientation['x']]}, {ORIENT_Y[orientation['y']]}, {swap}); /* as the board shows it; a program turns it its own way after */")
-        if kind == "dsi" and display.get("backlight") is not None:
-            on = "1" if display.get("backlight_on_high", True) else "0"
-            out("    /* the light goes on over a black frame buffer, not over what the panel had before */")
-            out("    gpio_set_direction(PIN_LCD_BACKLIGHT, GPIO_MODE_OUTPUT);")
-            out(f"    gpio_set_level(PIN_LCD_BACKLIGHT, {on});")
-        out("    out->screen = screen;")
-        out("    out->bus = bus;")
-        out(f"    display_lies(out, {ORIENT_X[orientation['x']]}, {ORIENT_Y[orientation['y']]}, {swap});")
-        out("    return true;")
-        out("}")
-        out("")
-        out("bool board_display_orientation(struct board_display *display, int dir_x, int dir_y, bool swap_xy)")
-        out("{")
-        out("    if (!display || !display->screen) return false;")
-        out(f"    dgx_{display['driver']}_orientation((dgx_screen_t *)display->screen, (dgx_orientation_t)dir_x, (dgx_orientation_t)dir_y, swap_xy);")
-        out("    display_lies(display, dir_x, dir_y, swap_xy);")
-        out("    return true;")
-        out("}")
+        rows, group_rows = [], []
+        for name, group in sorted(groups.items(), key=lambda item: not item[1].get("primary")):
+            group_rows.append((name, group))
+        first = len(group_rows) if any(group.get("primary") for _, group in group_rows) else 0  # a primary group stands first
+        place = {shown["name"]: first + i for i, shown in enumerate(displays)}
+        for i, shown in enumerate(displays):
+            db = shown["bus"]
+            bus_name = db["bus"]
+            kind, own = bus_parts(bus_name)
+            bus = bus_of(board, bus_name)
+            panel = shown["panel"]
+            orientation = shown["original_orientation"]
+            driver = shown["driver"]
+            entry = shown["entry"]
+            library = resolve.library(shown["library"])
+            transport = transport_of(shown)
+            out(f"/* {shown['name']}: a {panel['width']}x{panel['height']} {driver} on {bus_name}. */")
+            out(f"static dgx_bus_protocols_t *display{i}_bus(void)")
+            out("{")
+            values = {**transport.get("defaults", {}), **{key: value if key in resolve.NOT_LINES else c_gpio(value) for key, value in bus.items()}, "host": f"{(own or '').upper()}_HOST"}
+            values.update({line: c_gpio(db[line]) for line in ("cs", "dc") if line in db})
+            if bus_name in shared:
+                out(f"    if (!board_glue_spi_host(&board_spi_{own})) return NULL;")
+                out(f"    return {fill_call(transport['shared'], values)};")
+            else:
+                out(f"    return {fill_call(transport['init'], values)};")
+            out("}")
+            out("")
+            backlight = c_gpio(shown.get("backlight"))
+            order = "bgr" if shown.get("color_order") == "bgr" else "rgb"
+            values = {"bus": "bus", "rst": c_gpio(shown.get("rst")), "backlight": backlight, "depth": shown.get("depth_bits", 16),
+                      "color": library["values"]["color_order"][order], "width": panel["width"], "height": panel["height"]}
+            out(f"static dgx_screen_t *display{i}_screen(dgx_bus_protocols_t *bus)")
+            out("{")
+            out(f"    return {fill_call(entry['init'][0], values)};")
+            out("}")
+            out("")
+            light = backlight if any(step.get("line") == "backlight" for step in entry.get("setup", ())) else "GPIO_NUM_NC"
+            rows.append(f"    {{.name = \"{shown['name']}\", .glass_w = {panel['width']}, .glass_h = {panel['height']}, .mm_w = {panel['mm_w']}, .mm_h = {panel['mm_h']}, "
+                        f".dir_x = {library['values']['dir_x'][orientation['x']]}, .dir_y = {library['values']['dir_y'][orientation['y']]}, .swap_xy = {'true' if orientation.get('swap', False) else 'false'}, "
+                        f".backlight = {light}, .backlight_on = {1 if shown.get('backlight_on_high', True) else 0}, .bus = display{i}_bus, .screen = display{i}_screen, .orientation = {entry['controls']['orientation']['call']}}},")
+        grouped = [f"    {{.name = \"{name}\", .group = true, .left = {place[group['left']]}, .right = {place[group['right']]}}}," for name, group in group_rows]
+        table = grouped + rows if first else rows + grouped
+        out("static const struct board_display_panel display_panels[] = {")
+        for row in table:
+            out(row)
+        out("};")
+        out(f"static struct board_display_started displays_started[{len(table)}];")
+        out(f"const struct board_display_table board_display_table = {{.panels = display_panels, .started = displays_started, .count = {len(table)}}};")
         out("")
 
-    # ---- the touch ----
-    if touch:
-        kind = touch["kind"]
-        cal = touch["calibration"]
-        measured = cal.get("measured", True)
-        if kind == "esp_lcd_touch":
-            fingers = touch.get("fingers", 1)
-            out(f"/* The touch: a {touch_driver(touch).upper()} of {touch['component']} on {touch['bus']}, its own cs and irq,")
-            out(f" * {'one finger of a resistive panel' if touch.get('resistive') else str(fingers) + ' fingers'}, the calibration of its measured board. */")
-        else:
-            out(f"/* The touch: a {kind.upper()} on the board's I2C bus, {touch['fingers']} fingers, the calibration of its measured board. */")
-        if not measured:
-            out("/* The calibration below is a placeholder, not measured on a board: the touch works, only not")
-            out(" * straight; board_touch_start says so. Measure the board (dgx_di_calibrate_measure) and put the")
-            out(" * numbers in the data. */")
-        out(f"static const dgx_di_calibration_t touch_calibration = {{{c_calibration(cal)}}};")
-        out(f"static {'dgx_di_gsl3680_t' if kind == 'gsl3680' else 'dgx_di_esp_lcd_touch_t'} touch_panel;")
-        out("")
-        out("bool board_touch_start(const struct board_display *display, struct dgx_di_device **device_out, void **pointer_out)")
-        out("{")
-        out("    if (!display || !display->screen) return false;")
-        if kind == "esp_lcd_touch":
-            own = bus_parts(touch["bus"])[1]
-            out(f"    const struct board_spi_bus *bus = board_spi_bus({own.upper()}_HOST);")
-            out("    if (!bus) return false;")
-            if touch_own_spi:
-                out("    /* the host is the touch's own, no display on it: taken here, once */")
-                out("    static bool host_up;")
-                out("    if (!host_up) {")
-                out("        const spi_bus_config_t host = {.mosi_io_num = bus->mosi, .miso_io_num = bus->miso, .sclk_io_num = bus->sclk, .quadwp_io_num = GPIO_NUM_NC, .quadhd_io_num = GPIO_NUM_NC, .max_transfer_sz = 0};")
-                out("        if (spi_bus_initialize((spi_host_device_t)bus->host, &host, SPI_DMA_CH_AUTO) != ESP_OK) {")
-                out('            ESP_LOGE("board", "the SPI host of the touch could not be taken");')
-                out("            return false;")
-                out("        }")
-                out("        host_up = true;")
-                out("    }")
-            out("    const esp_lcd_panel_io_spi_config_t config = {")
-            out(f"        .cs_gpio_num = PIN_TOUCH_CS, .dc_gpio_num = GPIO_NUM_NC, .spi_mode = 0, .pclk_hz = {touch.get('hz', TOUCH_SPI_HZ_DEFAULT)},")
-            out("        .trans_queue_depth = 3, .lcd_cmd_bits = 8, .lcd_param_bits = 8,")
-            out("    };")
-            out("    esp_lcd_panel_io_handle_t io;")
-            out("    if (esp_lcd_new_panel_io_spi((esp_lcd_spi_bus_handle_t)(intptr_t)bus->host, &config, &io) != ESP_OK) return false;")
-            out(f"    const esp_lcd_touch_config_t tconfig = {{.x_max = {touch['x_max']}, .y_max = {touch['y_max']}, .rst_gpio_num = PIN_TOUCH_RST, .int_gpio_num = PIN_TOUCH_INT}};")
-            out("    esp_lcd_touch_handle_t handle = NULL;")
-            out(f"    if (esp_lcd_touch_new_spi_{touch_driver(touch)}(io, &tconfig, &handle) != ESP_OK || !handle) {{")
-            out('        ESP_LOGE("board", "no touch panel answers on the board\'s SPI bus");')
-            out("        esp_lcd_panel_io_del(io);")
-            out("        return false;")
-            out("    }")
-            out(f"    dgx_di_esp_lcd_touch_init(&touch_panel, handle, {fingers}, {'false' if touch.get('resistive') else 'true'});")
-        elif kind == "gt911":
-            out("    i2c_master_bus_handle_t bus = board_glue_i2c();")
-            out("    if (!bus) return false;")
-            addresses = ", ".join(gt911_address_symbol(a) for a in (touch.get("address_try") or ["0x5d"]))
-            out(f"    static const uint8_t address[] = {{{addresses}}};")
-            out(f"    const esp_lcd_touch_config_t config = {{.x_max = {touch['x_max']}, .y_max = {touch['y_max']}, .rst_gpio_num = PIN_TOUCH_RST, .int_gpio_num = PIN_TOUCH_INT}};")
-            out("    esp_lcd_touch_handle_t handle = NULL;")
-            out("    for (int i = 0; i < (int)(sizeof(address) / sizeof(address[0])) && !handle; ++i) {")
-            out("        esp_lcd_panel_io_handle_t io;")
-            out("        esp_lcd_panel_io_i2c_config_t io_config = ESP_LCD_TOUCH_IO_I2C_GT911_CONFIG();")
-            out(f"        io_config.dev_addr = address[i], io_config.scl_speed_hz = {I2C_HZ_DEFAULT};")
-            out("        if (esp_lcd_new_panel_io_i2c(bus, &io_config, &io) != ESP_OK) continue;")
-            out("        if (esp_lcd_touch_new_i2c_gt911(io, &config, &handle) != ESP_OK) esp_lcd_panel_io_del(io); /* off the bus: the next address */")
-            out("    }")
-            out("    if (!handle) {")
-            out('        ESP_LOGE("board", "no touch panel answers on the board\'s I2C bus");')
-            out("        return false;")
-            out("    }")
-            out(f"    dgx_di_esp_lcd_touch_init(&touch_panel, handle, {touch['fingers']}, true);")
-        else:  # gsl3680
-            out("    i2c_master_bus_handle_t bus = board_glue_i2c();")
-            out("    if (!bus) return false;")
-            out("    const uint8_t *fw_start;")
-            out("    size_t         fw_size;")
-            out("    if (!board_touch_firmware(&fw_start, &fw_size)) {")
-            out('        ESP_LOGE("board", "no firmware embedded for the touch panel: the program defines board_touch_firmware, see the docs");')
-            out("        return false;")
-            out("    }")
-            out("    if (!dgx_di_gsl3680_init(&touch_panel, bus, PIN_TOUCH_RST, PIN_TOUCH_INT, 0, fw_start, fw_size)) {")
-            out('        ESP_LOGE("board", "no GSL3680 answers");')
-            out("        return false;")
-            out("    }")
-        out("    dgx_di_pointer_t *pointer = board_glue_pointer(); /* the one pointer of the core */")
-        out("    dgx_di_pointer_init(pointer, &touch_panel.device, 0, (const dgx_screen_t *)display->screen);")
-        out("    if (!dgx_di_pointer_calibrate(pointer, &touch_calibration))")
-        out('        ESP_LOGW("board", "the calibration is not this board\'s: the touch works, only not as straight");')
-        if not measured:
-            out('    ESP_LOGW("board", "the touch calibration of this board is a placeholder, not measured: measure the board and put the numbers in the data");')
-        out("    if (device_out) *device_out = &touch_panel.device;")
-        out("    if (pointer_out) *pointer_out = pointer;")
-        out("    return true;")
-        out("}")
-        out("")
-
-    # ---- the sound ----
-    if sound:
-        rate = sound["sample_rate"]
-        out(f"enum {{ SOUND_FRAMES = 256 }}; /* samples a write: {256 * 1000 // rate} ms at {rate} */")
-        out("")
-        out("static board_sound_source_t sound_source;")
-        out("")
-        out("void board_sound_source(board_sound_source_t source)")
-        out("{")
-        out("    sound_source = source;")
-        out("}")
-        out("")
-    if sound and sound["kind"] == "dac":
-        mask = "DAC_CHANNEL_MASK_CH0" if sound["out"] == 25 else "DAC_CHANNEL_MASK_CH1"
-        out("/* The sound: the chip's own DAC, 8 bits on a pin, fed by DMA (dac_continuous); the writes wait")
-        out(" * for the DMA, which sets the pace. A task of its own takes the program's next samples and")
-        out(f" * writes them{'; the amplifier is on PIN_SOUND_PA' if sound.get('pa') is not None else ''}. */")
-        out("static dac_continuous_handle_t dac;")
-        out("")
-        out("static void sound_task(void *arg)")
-        out("{")
-        out("    (void)arg;")
-        out("    static int16_t samples[SOUND_FRAMES];")
-        out("    static uint8_t bytes[SOUND_FRAMES];")
-        out("    bool           told = false;")
-        out("    for (;;) {")
-        out("        if (sound_source) sound_source(samples, SOUND_FRAMES);")
-        out("        else memset(samples, 0, sizeof(samples));")
-        out("        for (int i = 0; i < SOUND_FRAMES; ++i) bytes[i] = (uint8_t)((samples[i] >> 8) + 128);")
-        out("        size_t loaded = 0;")
-        out("        if (dac_continuous_write(dac, bytes, sizeof(bytes), &loaded, -1) == ESP_OK) continue;")
-        out("        if (!told) {")
-        out('            ESP_LOGE("board", "the DAC takes no samples");')
-        out("            told = true;")
-        out("        }")
-        out(f"        vTaskDelay(pdMS_TO_TICKS(SOUND_FRAMES * 1000 / {rate}) + 1);")
-        out("    }")
-        out("}")
-        out("")
-        out("bool board_sound_start(board_sound_source_t source, uint32_t *rate_out)")
-        out("{")
-        out("    if (!dac) {")
-        out(f"        const dac_continuous_config_t config = {{.chan_mask = {mask}, .desc_num = 4, .buf_size = SOUND_FRAMES, .freq_hz = {rate}, .offset = 0, .clk_src = DAC_DIGI_CLK_SRC_DEFAULT, .chan_mode = DAC_CHANNEL_MODE_SIMUL}};")
-        out("        if (dac_continuous_new_channels(&config, &dac) != ESP_OK || dac_continuous_enable(dac) != ESP_OK) {")
-        out('            ESP_LOGE("board", "no DAC");')
-        out("            dac = NULL;")
-        out("            return false;")
-        out("        }")
-        if sound.get("pa") is not None:
-            out("        gpio_set_direction(PIN_SOUND_PA, GPIO_MODE_OUTPUT);")
-            out("        gpio_set_level(PIN_SOUND_PA, 1);")
-        out("        sound_source = source;")
-        out('        if (xTaskCreate(sound_task, "sound", 3072, NULL, 6, NULL) != pdPASS) {')
-        out('            ESP_LOGE("board", "no task for the sound");')
-        out("            return false;")
-        out("        }")
-        out(f'        ESP_LOGI("board", "the DAC at {rate} Hz");')
-        out("    }")
-        out(f"    if (rate_out) *rate_out = {rate};")
-        out("    return true;")
-        out("}")
-        out("")
-    elif sound:
-        bus_name = sound.get("i2s_bus", "")
-        iown = bus_parts(bus_name)[1] or "i2s0"
-        i2s_port = port_of(iown, "i2s")
-        out(f"/* The sound: an {sound['kind'].upper()} on {bus_name}, set up over the board's I2C bus{', its amplifier on PIN_SOUND_PA' if sound.get('pa') is not None else ''};")
-        out(" * a task of its own takes the program's next samples and writes them; the writes wait for the I2S, which sets the pace. */")
-        out(f"enum {{ SOUND_VOLUME = {sound['volume']} }}; /* of the codec, 0..100 */")
-        out("")
-        out("static esp_codec_dev_handle_t speaker;")
-        out("")
-        out("static void sound_task(void *arg)")
-        out("{")
-        out("    (void)arg;")
-        out("    static int16_t samples[SOUND_FRAMES];")
-        out("    bool           told = false;")
-        out("    for (;;) {")
-        out("        if (sound_source) sound_source(samples, SOUND_FRAMES);")
-        out("        else memset(samples, 0, sizeof(samples));")
-        out("        if (esp_codec_dev_write(speaker, samples, sizeof(samples)) == ESP_CODEC_DEV_OK) continue;")
-        out("        if (!told) {")
-        out('            ESP_LOGE("board", "the codec takes no samples");')
-        out("            told = true;")
-        out("        }")
-        out(f"        vTaskDelay(pdMS_TO_TICKS(SOUND_FRAMES * 1000 / {rate}) + 1);")
-        out("    }")
-        out("}")
-        out("")
-        out("bool board_sound_start(board_sound_source_t source, uint32_t *rate_out)")
-        out("{")
-        out("    if (!speaker) {")
-        out("        i2c_master_bus_handle_t i2c = board_glue_i2c();")
-        out("        if (!i2c) {")
-        out('            ESP_LOGE("board", "no I2C bus for the codec");')
-        out("            return false;")
-        out("        }")
-        out("        i2s_chan_handle_t tx;")
-        out(f"        i2s_chan_config_t chan = I2S_CHANNEL_DEFAULT_CONFIG(I2S_NUM_{i2s_port}, I2S_ROLE_MASTER);")
-        out("        chan.dma_frame_num = SOUND_FRAMES;")
-        out("        const i2s_std_config_t std = {")
-        out(f"            .clk_cfg  = I2S_STD_CLK_DEFAULT_CONFIG({rate}),")
-        out("            .slot_cfg = I2S_STD_PHILIPS_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_16BIT, I2S_SLOT_MODE_MONO),")
-        out(f"            .gpio_cfg = {{.mclk = board_i2s_{iown}.mclk, .bclk = board_i2s_{iown}.bclk, .ws = board_i2s_{iown}.ws, .dout = board_i2s_{iown}.dout, .din = board_i2s_{iown}.din}}, /* {bus_name} */")
-        out("        };")
-        out("        /* on from the start: esp_codec_dev turns it off to set the format, and off before ever on is an error in the log */")
-        out("        if (i2s_new_channel(&chan, &tx, NULL) != ESP_OK || i2s_channel_init_std_mode(tx, &std) != ESP_OK || i2s_channel_enable(tx) != ESP_OK) {")
-        out('            ESP_LOGE("board", "no I2S");')
-        out("            return false;")
-        out("        }")
-        out(f"        const audio_codec_data_if_t *data = audio_codec_new_i2s_data(&(audio_codec_i2s_cfg_t){{.port = I2S_NUM_{i2s_port}, .tx_handle = tx}});")
-        out(f"        const audio_codec_ctrl_if_t *ctrl = audio_codec_new_i2c_ctrl(&(audio_codec_i2c_cfg_t){{.port = I2C_NUM_{i2c_port}, .addr = {sound['address']}, .bus_handle = i2c}});")
-        out("        const audio_codec_gpio_if_t *gpio = audio_codec_new_gpio();")
-        pa_pin = "PIN_SOUND_PA" if sound.get("pa") is not None else "GPIO_NUM_NC"
-        out(f"        es8311_codec_cfg_t           es   = {{.ctrl_if = ctrl, .gpio_if = gpio, .codec_mode = ESP_CODEC_DEV_WORK_MODE_DAC, .pa_pin = {pa_pin}, .use_mclk = true}};")
-        out(f"        es.hw_gain.pa_voltage = {sound.get('pa_voltage', 5.0)}, es.hw_gain.codec_dac_voltage = {sound.get('codec_dac_voltage', 3.3)};")
-        out("        const audio_codec_if_t *codec = data && ctrl && gpio ? es8311_codec_new(&es) : NULL;")
-        out("        speaker = codec ? esp_codec_dev_new(&(esp_codec_dev_cfg_t){.dev_type = ESP_CODEC_DEV_TYPE_OUT, .codec_if = codec, .data_if = data}) : NULL;")
-        out(f"        esp_codec_dev_sample_info_t format = {{.sample_rate = {rate}, .channel = 1, .bits_per_sample = 16}};")
-        out("        if (!speaker || esp_codec_dev_open(speaker, &format) != ESP_CODEC_DEV_OK) {")
-        out('            ESP_LOGE("board", "no ES8311");')
-        out("            speaker = NULL;")
-        out("            return false;")
-        out("        }")
-        out("        esp_codec_dev_set_out_vol(speaker, SOUND_VOLUME);")
-        out("        sound_source = source;")
-        out('        if (xTaskCreate(sound_task, "sound", 3072, NULL, 6, NULL) != pdPASS) {')
-        out('            ESP_LOGE("board", "no task for the sound");')
-        out("            return false;")
-        out("        }")
-        out(f'        ESP_LOGI("board", "ES8311 at {rate} Hz");')
-        out("    }")
-        out(f"    if (rate_out) *rate_out = {rate};")
-        out("    return true;")
-        out("}")
-        out("")
-
-    # ---- the button ----
-    if button:
-        active_low = button.get("active_low", True)
-        out(f"/* The button of the board, {'low' if active_low else 'high'} when pressed. */")
-        out("bool board_button(bool *pressed)")
-        out("{")
-        out("    if (!pressed) return false;")
-        out("    static bool set_up;")
-        out("    if (!set_up) {")
-        pull = "GPIO_PULLUP_ENABLE" if active_low else "GPIO_PULLUP_DISABLE"
-        pulldown = "GPIO_PULLDOWN_DISABLE" if active_low else "GPIO_PULLDOWN_ENABLE"
-        out(f"        const gpio_config_t config = {{.pin_bit_mask = 1ULL << PIN_BUTTON, .mode = GPIO_MODE_INPUT, .pull_up_en = {pull}, .pull_down_en = {pulldown}}};")
-        out("        gpio_config(&config);")
-        out("        set_up = true;")
-        out("    }")
-        out(f"    *pressed = gpio_get_level((gpio_num_t)PIN_BUTTON) {'==' if active_low else '!='} 0;")
-        out("    return true;")
-        out("}")
-        out("")
-
-    # ---- what the board has not: the rest of boards.h, answering false ----
+    # ---- the touch panels, the sound, the buttons: tables src/ starts from ----
     if not is_module:
-        out("/* What the board has not: the rest of boards.h, answering false, so that the same program")
+        entries = []
+        for i, touch in enumerate(touches):
+            kind = touch["kind"]
+            cal = touch["calibration"]
+            measured = cal.get("measured", True)
+            out(f"/* {touch['name']}: {touch.get('component', kind)} on {touch['bus']}, the calibration of its measured board. */")
+            if not measured:
+                out("/* The calibration below is a placeholder, not measured on a board: the touch works, only not")
+                out(" * straight; board_touch_start says so. Measure the board (dgx_di_calibrate_measure) and put the")
+                out(" * numbers in the data. */")
+            out(f"static const dgx_di_calibration_t touch{i}_calibration = {{{c_calibration(cal)}}};")
+            out(f"static const struct board_touch_calibration touch{i}_calibrated = {{.calibration = &touch{i}_calibration, .placeholder = {'false' if measured else 'true'}}};")
+            irq = touch.get("irq") if kind == "esp_lcd_touch" else touch.get("int")
+            out(f"static const struct board_touch_panel touch{i}_panel = {{.x_max = {touch['x_max'] + 1}, .y_max = {touch['y_max'] + 1}, .rst = {c_gpio(touch.get('rst'))}, .irq = {c_gpio(irq)}, .fingers = {touch.get('fingers', 1)}}};")
+            if kind == "gt911":
+                addresses = [f"{i2c_address(a):#04x}" for a in (touch.get("address_try") or ["0x5d"])]
+                out(f"static const uint8_t touch{i}_addresses[] = {{{', '.join(addresses)}}};")
+                out(f"static const struct board_touch_gt911 touch{i}_driver = {{.panel = &touch{i}_panel, .addresses = touch{i}_addresses, .address_count = {len(addresses)}, .i2c_hz = {I2C_HZ_DEFAULT}}};")
+            elif kind == "esp_lcd_touch":
+                own = bus_parts(touch["bus"])[1]
+                out(f"static const struct board_touch_spi touch{i}_driver = {{.panel = &touch{i}_panel, .host = {own.upper()}_HOST, .cs = {c_gpio(touch['cs'])}, .hz = {touch.get('hz', touch['entry']['defaults']['hz'])}, "
+                    f".create = {touch['entry']['init'][0]['call']}}};")
+            device_type = "dgx_di_gsl3680_t" if kind == "gsl3680" else "dgx_di_esp_lcd_touch_t"
+            out(f"static {device_type} touch{i}_device;")
+            out("")
+            out(f"static bool touch{i}_start(int index, const struct board_display *display, struct board_touch *out)")
+            out("{")
+            if kind == "gsl3680":
+                out(f"    return board_glue_touch_gsl3680_start(&touch{i}_device, index, &touch{i}_panel, &touch{i}_calibrated, display, out);")
+            else:
+                make = "gt911" if kind == "gt911" else "spi"
+                numbered = "false" if touch.get("resistive") else "true"
+                out("    if (!board_dgx_screen(display)) return false;")
+                out(f"    esp_lcd_touch_handle_t handle = board_glue_touch_{make}_new(&touch{i}_driver);")
+                out(f"    return handle && board_glue_touch_lcd_attach(&touch{i}_device, index, handle, {numbered}, &touch{i}_panel, &touch{i}_calibrated, display, out);")
+            out("}")
+            out("")
+            entries.append(f'{{.name = "{touch["name"]}", .over = "{touch["over"]}", .start = touch{i}_start}}')
+        if touches:
+            out(f"static const struct board_touch_entry touch_entries[] = {{{', '.join(entries)}}};")
+            out(f"static struct board_touch touches_started[{len(touches)}];")
+            out(f"static struct board_touch_slot touch_slots[{len(touches)}];")
+            out(f"const struct board_touch_slots board_touch_slots = {{.slots = touch_slots, .count = {len(touches)}}};")
+            out(f"const struct board_touch_table board_touch_table = {{.entries = touch_entries, .started = touches_started, .count = {len(touches)}}};")
+        else:
+            out("const struct board_touch_table board_touch_table = {.count = 0};")
+        out("")
+        entries = []
+        for i, sound in enumerate(sounds):
+            rate = sound["sample_rate"]
+            pa = c_gpio(sound.get("pa"))
+            iown = bus_parts(sound.get("i2s_bus", ""))[1]
+            out(f"/* {sound['name']}: {sound['kind']} at {rate} Hz. */")
+            if sound["kind"] == "es8311":
+                out(f"static const struct board_sound_es8311 sound{i}_codec = {{.i2s = &board_i2s_{iown}, .i2c_port = I2C_NUM_{i2c_port}, .address = {i2c_address(sound['address']):#04x}, .pa = {pa},")
+                out(f"                                                     .pa_voltage = {sound.get('pa_voltage', 5.0)}f, .codec_dac_voltage = {sound.get('codec_dac_voltage', 3.3)}f, .volume = {sound['volume']}, .rate = {rate}}};")
+                out("")
+            out(f"static bool sound{i}_start(int index, board_sound_source_t source)")
+            out("{")
+            if sound["kind"] == "es8311":
+                out(f"    return board_glue_sound_es8311_start(index, &sound{i}_codec, source);")
+            elif sound["kind"] == "i2s":
+                out(f"    return board_glue_sound_i2s_start(index, &board_i2s_{iown}, {rate}, source);")
+            else:
+                out(f"    return board_glue_sound_dac_start(index, {c_gpio(sound.get('out'))}, {pa}, {rate}, source);")
+            out("}")
+            out("")
+            entries.append(f'{{.name = "{sound["name"]}", .rate = {rate}, .start = sound{i}_start}}')
+        if sounds:
+            out(f"static const struct board_sound_entry sound_entries[] = {{{', '.join(entries)}}};")
+            out(f"static struct board_sound_stream sound_streams[{len(sounds)}];")
+            out(f"const struct board_sound_table board_sound_table = {{.entries = sound_entries, .streams = sound_streams, .count = {len(sounds)}}};")
+        else:
+            out("const struct board_sound_table board_sound_table = {.count = 0};")
+        out("")
+        if buttons:
+            entries = ", ".join(f'{{.name = "{button["name"]}", .pin = {button["pin"]}, .active_low = {"true" if button["active_low"] else "false"}}}' for button in buttons)
+            out(f"static const struct board_button_entry button_entries[] = {{{entries}}};")
+            out(f"const struct board_button_table board_button_table = {{.entries = button_entries, .count = {len(buttons)}}};")
+        else:
+            out("const struct board_button_table board_button_table = {.count = 0};")
+        out("")
+
+    # ---- what the board has not: the rest of boards.h, returning false ----
+    if not is_module:
+        out("/* What the board has not: the rest of boards.h, returning false, so that the same program")
         out(" * links and runs on every board. */")
         if not pixel:
+            out("int board_display_count(void)")
+            out("{")
+            out("    return 0;")
+            out("}")
+            out("")
             out("bool board_display_init(struct board_display *out)")
             out("{")
             out("    (void)out;")
+            out("    return false;")
+            out("}")
+            out("")
+            out("bool board_display_init_at(int index, struct board_display *out)")
+            out("{")
+            out("    (void)index, (void)out;")
             out("    return false;")
             out("}")
             out("")
@@ -1136,40 +1005,10 @@ def gen_c(board):
             out("}")
             out("#endif")
             out("")
-        if not touch:
-            out("bool board_touch_start(const struct board_display *display, struct dgx_di_device **device_out, void **pointer_out)")
-            out("{")
-            out("    (void)display, (void)device_out, (void)pointer_out;")
-            out("    return false;")
-            out("}")
-            out("")
-        if not sound:
-            out("bool board_sound_start(board_sound_source_t source, uint32_t *rate_out)")
-            out("{")
-            out("    (void)source, (void)rate_out;")
-            out("    return false;")
-            out("}")
-            out("")
-            out("void board_sound_source(board_sound_source_t source)")
-            out("{")
-            out("    (void)source;")
-            out("}")
-            out("")
-        if not button:
-            out("bool board_button(bool *pressed)")
-            out("{")
-            out("    (void)pressed;")
-            out("    return false;")
-            out("}")
-            out("")
         target = board.get("mcu", {}).get("target", "any")
         out("/* What the board is, for board_info(). */")
         out(f"const struct board_data board_data = {{.name = \"{name}\", .title = \"{board['title']}\", .target = \"{target}\"}};")
     return "\n".join(L) + "\n"
-
-
-def gt911_address_symbol(address):
-    return "ESP_LCD_TOUCH_IO_I2C_GT911_ADDRESS_BACKUP" if str(address).lower() == "0x14" else "ESP_LCD_TOUCH_IO_I2C_GT911_ADDRESS"
 
 
 def gen_cmake(board):
@@ -1178,7 +1017,7 @@ def gen_cmake(board):
     requires = derive_requires(board)
     L = [f"# The glue of {name}, made by tools/boards_gen.py from its data: the components it needs,",
          f"# derived from what the board has (the components of ESP-IDF 5.3 and later; extra_requires",
-         f"# in boards-data/{name}/board.json adds what the structure cannot say). Do not edit by hand.",
+         f"# in {data_path(board)} adds what the structure cannot say). Do not edit by hand.",
          "# Added after idf_component_register, when the configuration is known: a requirement that",
          "# depends on the board chosen cannot stand in REQUIRES. Optional: a component the rules of the",
          "# manifest did not bring is simply not there, and the glue that needs it is not compiled either.",
@@ -1196,10 +1035,15 @@ def gen_cmake(board):
 
 def gen_boards_cmake(boards, modules):
     L = ["# The boards and the modules the component has glue for, made by tools/boards_gen.py --all",
-         "# from boards-data/: CMakeLists.txt compiles the chosen board's glue (CONFIG_BOARD_<BOARD>)",
+         "# from catalog/: CMakeLists.txt compiles the chosen board's glue (CONFIG_BOARD_<BOARD>)",
          "# and every module turned on (CONFIG_BOARD_MODULE_<MODULE>). Do not edit by hand.",
          f"set(BOARDS_LIST {' '.join(b['name'] for b in boards)})",
          f"set(BOARDS_MODULES {' '.join(m['name'] for m in modules)})"]
+    adapters = [record for record in resolve.all_libraries(tuple(resolve.ROOTS)).values() if record.get("adapter", {}).keys() & {"headers", "public", "sources"}]
+    L.append(f"set(BOARDS_ADAPTER_DIRS {' '.join(adapter_dir(record) for record in adapters)})")
+    L.append(f"set(BOARDS_ADAPTER_INCLUDES {' '.join(adapter_dir(record) + '/include' for record in adapters if 'public' in record['adapter'])})")
+    sources = [f"{symbol}={adapter_dir(record)}/{source}" for record in adapters for symbol, files in record["adapter"].get("sources", {}).items() for source in files]
+    L.append(f"set(BOARDS_ADAPTER_SOURCES {' '.join(sources)})")
     return "\n".join(L) + "\n"
 
 
@@ -1212,12 +1056,8 @@ def menu_text(board):
         parts.append(f"{w}x{h} {display['driver'].upper()}")
     elif is_character(display):
         parts.append(f"{display['geometry']} {display['driver'].upper()}")
-    touch = board.get("touch")
-    if touch:
-        parts.append((touch_driver(touch) if touch["kind"] == "esp_lcd_touch" else touch["kind"]).upper() + " touch")
-    sound = board.get("sound")
-    if sound:
-        parts.append("ES8311 sound" if sound["kind"] == "es8311" else "DAC sound")
+    parts += [touch["chip"].upper() + " touch" for touch in board["touches"]]
+    parts += [{"es8311": "ES8311 sound", "i2s": "I2S amplifier sound"}.get(sound["kind"], "DAC sound") for sound in board["sounds"]]
     return f"{board['title']}: {', '.join(parts)}" if parts else board["title"]
 
 
@@ -1239,7 +1079,7 @@ def kconfig_help(text, indent="        "):
 def gen_kconfig(boards, modules):
     L = []
     out = L.append
-    out("# The Kconfig of the boards, made by tools/boards_gen.py --all from boards-data/: do not edit")
+    out("# The Kconfig of the boards, made by tools/boards_gen.py --all from catalog/: do not edit")
     out("# by hand. One choice of the board, one option a module, and beside them the hidden symbols")
     out("# the rules of idf_component.yml look at, so that the parts a board needs others than this")
     out("# component come only with the board that needs them (the model of esp-bsp's bsp_selector).")
@@ -1249,7 +1089,7 @@ def gen_kconfig(boards, modules):
     out("    prompt \"Board the program runs on\"")
     out("    default BOARD_SELECT_NONE")
     out("    help")
-    out(kconfig_help("One board of boards-data/, or none (the program sets its hardware up itself). "
+    out(kconfig_help("One board of catalog/boards/, or none (the program sets its hardware up itself). "
                      "The board's own sdkconfig.defaults carries the line that chooses it here "
                      "(CONFIG_BOARD_SELECT_<BOARD>=y, tools/board_select.py puts the file into the "
                      "project); what the choice takes with it, the drivers of DGX its panel needs, comes "
@@ -1263,10 +1103,11 @@ def gen_kconfig(boards, modules):
         out(f"config {choice_symbol(board)}")
         out(f"    bool \"{menu_text(board)}\"")
         out(f"    depends on IDF_TARGET_{board['mcu']['target'].upper()}")
-        display = board.get("display")
-        if is_pixel(display):
-            for symbol in PANEL_SELECTS[display["driver"]]:
-                out(f"    select {symbol}")
+        selects = [symbol for shown in board.get("displays") or [] if is_pixel(shown) for symbol in transport_of(shown)["select"] + shown["entry"]["select"]]
+        for group in (board.get("display_groups") or {}).values():
+            selects += resolve.library(board["display"]["library"])["groups"][group["how"]]["select"]
+        for symbol in dict.fromkeys(selects):
+            out(f"    select {symbol}")
         out("    help")
         out(kconfig_help(board["description"] + "."))
         out("")
@@ -1290,7 +1131,7 @@ def gen_kconfig(boards, modules):
         out(f"    default 1 if {choice_symbol(board)}")
         out("    default 0")
         out("")
-    out("# What the chosen board and the modules have, as the rules need it: a frame buffer display")
+    out("# What the chosen board and the modules have, as the rules need it: a graphics display")
     out("# brings DGX, a touch brings DGX-DI and its driver, sound with an ES8311 brings esp_codec_dev,")
     out("# a character display brings hd44780. Derived from the data, so the data of a board and the")
     out("# rules cannot drift apart.")
@@ -1301,7 +1142,7 @@ def gen_kconfig(boards, modules):
     for module in modules:
         for feature in features_of(module):
             all_features.setdefault(feature, []).append(module_symbol(module))
-    for symbol, _, _ in feature_deps(boards):
+    for symbol, _, _ in feature_deps():
         all_features.setdefault(symbol, [])
     all_features.setdefault("BOARD_MODULE_CHARACTER_DISPLAY", [])
     for feature in sorted(all_features):
@@ -1320,9 +1161,9 @@ def gen_manifest_block(boards):
          "  # What a board needs beside this component comes only with the board that needs it: the",
          "  # rules look at the symbols the Kconfig of the boards defines beside the choice (the model of",
          "  # esp-bsp's bsp_selector). Made by tools/boards_gen.py --all from the data: do not edit here."]
-    for symbol, component, version in feature_deps(boards):
+    for symbol, component, lines in feature_deps():
         L.append(f"  {component}:")
-        L.append(f"    version: \"{version}\"")
+        L.extend(f"    {line}" for line in lines)
         L.append("    matches:")
         L.append(f"      - if: \"$CONFIG{{{symbol}}} == 1\"")
     L.append(MANIFEST_END)
@@ -1356,29 +1197,41 @@ def gen_table(boards, lang="en"):
             disp = f"{display['geometry']} {display['driver'].upper()}"
         else:
             disp = none
-        touch = board.get("touch")
-        if touch:
-            t = (touch_driver(touch) if touch["kind"] == "esp_lcd_touch" else touch["kind"]).upper()
+        cells = []
+        for touch in board["touches"]:
+            t = touch["chip"].upper()
             if touch.get("resistive"):
                 t += {"en": " (resistive)", "ru": " (резистивный)"}[lang]
-            if touch["kind"] == "gsl3680":
+            if touch["firmware"].get("set") == "program":
                 t += {"en": " (firmware embedded by the program)", "ru": " (прошивку встраивает программа)"}[lang]
             if not touch["calibration"].get("measured", True):
                 t += {"en": "; calibration a placeholder", "ru": "; калибровка-заглушка"}[lang]
-        else:
-            t = none
-        sound = board.get("sound")
-        s = ("ES8311" if sound["kind"] == "es8311" else f"DAC, GPIO{sound['out']}") if sound else none
-        b = {"en": "yes", "ru": "да"}[lang] if board.get("button") else none
+            cells.append(t)
+        t = ", ".join(cells) or none
+        s = ", ".join({"es8311": "ES8311", "i2s": {"en": "I2S amplifier", "ru": "усилитель I2S"}[lang]}.get(sound["kind"], f"DAC, GPIO{sound.get('out')}") for sound in board["sounds"]) or none
+        b = {"en": "yes", "ru": "да"}[lang] if board["buttons"] else none
         L.append(f"| {board['title']} | {board['mcu']['target'].upper().replace('ESP32', 'ESP32-').rstrip('-')} | {disp} | {t} | {s} | {b} |")
     L.append(TABLE_END)
     return "\n".join(L)
 
 
+def has_glue(module_file):
+    """A module the component sets up: a chip of it has a library with an adapter."""
+    devices = json.loads(module_file.read_text())["devices"].values()
+    return any(entry.get("adapter") for device in devices for entry in resolve.libraries_of(device.get("chip")).values())
+
+
+def data_path(board):
+    """Where the data of a board or a module lies, for the comments of what is generated."""
+    return f"catalog/modules/{board['name']}/module.json" if board.get("module") else f"catalog/boards/{board['name']}/board.json"
+
+
 def read_all(data_dir):
     """Every board and module of the data, boards first, in the order of their directories."""
     boards, modules = [], []
-    for board_file in sorted(data_dir.glob("*/board.json")):
+    for board_file in sorted(data_dir.glob("boards/*/board.json")) + sorted(data_dir.glob("modules/*/module.json")):
+        if board_file.name == "module.json" and not has_glue(board_file):
+            continue  # a module of the catalog only: nothing in it the component sets up yet
         board = read_board(board_file)
         if board["name"] != board_file.parent.name:
             raise ValueError(f'{board_file}: the board names itself "{board["name"]}", its directory is "{board_file.parent.name}"')
@@ -1405,15 +1258,19 @@ def generated_texts(root, boards, modules):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--data", type=pathlib.Path, default=ROOT / "boards-data")
-    parser.add_argument("--out", type=pathlib.Path, default=ROOT / "boards")
+    parser.add_argument("--data", type=pathlib.Path, help="directory of a single board's data (default: this repository's catalog/boards)")
+    parser.add_argument("--out", type=pathlib.Path, help="output directory of a single board's glue (default: this repository's boards/)")
     parser.add_argument("--all", action="store_true", help="every board and module, and Kconfig, boards.cmake, the manifest's dependencies, the README tables")
-    parser.add_argument("board", nargs="?", help="the board's directory name in boards-data/")
+    parser.add_argument("board", nargs="?", help="the board's directory name in catalog/boards/")
     args = parser.parse_args()
     if not args.all and not args.board:
         parser.error("a board, or --all")
+    if args.all and (args.data or args.out):
+        parser.error("--all regenerates this repository's own files: no --data or --out with it")
+    args.data = args.data or ROOT / "catalog" / "boards"
+    args.out = args.out or ROOT / "boards"
     if args.all:
-        boards, modules = read_all(args.data)
+        boards, modules = read_all(ROOT / "catalog")
         for path, text in generated_texts(ROOT, boards, modules).items():
             path.parent.mkdir(parents=True, exist_ok=True)
             if not path.exists() or path.read_text() != text:

@@ -8,7 +8,7 @@ I2C-переходнике PCF8574, распространённый диспл�
 ## Включение
 
 ```sh
-python3 tools/board_select.py jc1060p470 --module lcd2004_pcf8574 .
+python3 tools/board_select.py jc1060p470c --module lcd2004_pcf8574 .
 ```
 
 `sdkconfig.defaults` модуля дописывается к `sdkconfig.defaults` платы и задаёт
@@ -22,10 +22,13 @@ python3 tools/board_select.py jc1060p470 --module lcd2004_pcf8574 .
 ```c
 struct board_character_display lcd;
 if (board_character_display_init(&lcd)) {
-    lcd_set_cursor((hd44780_t *)lcd.lcd, 0, 0);
-    lcd_write_str((hd44780_t *)lcd.lcd, "hello");
+    lcd_set_cursor(board_hd44780(&lcd), 0, 0);
+    lcd_write_str(board_hd44780(&lcd), "hello");
 }
 ```
+
+`lcd_write_str` пишет дальше по памяти HD44780, а там за строкой 0 экрана 20x4 идёт строка 2, поэтому
+текст длиннее строки выводится по строкам, с `lcd_set_cursor` для каждой.
 
 Дисплей поднимается очищенным, с включённой подсветкой; `lcd.cols` и
 `lcd.rows` — его геометрия. Остальное — API hd44780 (`hd44780.h`). Модуль
@@ -33,23 +36,24 @@ if (board_character_display_init(&lcd)) {
 переходника — в данных модуля (`0x27`; переходнику с иначе выставленными
 перемычками адреса нужно изменить данные).
 
-На плате без модуля `board_character_display_init` отвечает `false`: одна и та
+На плате без модуля `board_character_display_init` возвращает `false`: одна и та
 же программа работает с LCD и без него.
 
 ## Как он описан
 
-`boards-data/lcd2004_pcf8574/board.json` — это плата с `"module": true`, без
-чипа, без шин и без кнопки, и с символьным дисплеем, чья шина — `i2c.i2c0`
-платы-носителя:
+`catalog/modules/lcd2004_pcf8574/module.json` не имеет чипа и шин. Его `on` называет
+только вид шины: проводка — дело проекта, а связующий код пока ставит модуль на шину
+I2C платы.
 
 ```json
 {
-    "format": "jef-sure/boards", "format_version": 1,
+    "format": "jef-sure/boards", "format_version": 2, "kind": "module",
     "name": "lcd2004_pcf8574",
     "title": "2004 character LCD on a PCF8574 backpack",
     "description": "...",
-    "display": { "driver": "hd44780", "geometry": "20x4", "bus": { "bus": "i2c.i2c0", "address": "0x27" } },
-    "module": true
+    "devices": {
+        "lcd": { "chip": "hd44780", "on": { "i2c": { "address": "0x27" } }, "config": { "primary": true, "geometry": "20x4" } }
+    }
 }
 ```
 
@@ -68,3 +72,27 @@ if (board_character_display_init(&lcd)) {
 `boards.h`, ветка в генераторе и символ возможности; это форма,
 запланированная на следующую версию, где устройства — список, а не один слот
 на род.
+
+## На плате
+
+Модуль — это плата, использованная как часть другой, с теми же полями, и у него может быть свой
+чип: C6 на SDIO у P4 — это модуль с `mcu`. Плата, у которой модуль есть всегда, называет его:
+
+```json
+"modules": {
+    "screen": { "module": "lcd2004_pcf8574", "on": { "i2c.i2c0": {} } },
+    "tft": {
+        "module": "tft_with_touch",
+        "on": { "spi.spi2": {} },
+        "devices": {
+            "lcd": { "on": { "spi.spi2": { "cs": 5 } }, "pins": { "dc": 2, "rst": 4 } },
+            "touch": { "on": { "spi.spi2": { "cs": 16 } }, "pins": { "int": 17 } }
+        }
+    }
+}
+```
+
+`on` говорит, к какой шине идёт каждый вид шины модуля. `pins` и `config` рядом с ним — для модуля
+из одной части; модуль из нескольких получает проводку по частям, в `devices`. Часть на плате
+называется `<подключение>_<часть>`, `screen_lcd`, сколько бы частей ни было у модуля, а ссылки
+частей друг на друга (`over`, `after`) следуют за новыми именами.

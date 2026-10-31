@@ -1,0 +1,10 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "mcu": {"target": "esp32"},
+    "name": "module_two_parts",
+    "title": "A module of two chips on one I2C",
+    "buses": {"i2c": {"i2c0": {"sda": 21, "scl": 22}}},
+    "modules": {"imu": {"module": "imu_two", "on": {"i2c.i2c0": {}}}}
+}

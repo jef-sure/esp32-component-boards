@@ -1,0 +1,32 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "uart_radar",
+    "title": "LD2410C on a UART",
+    "mcu": {
+        "target": "esp32s3"
+    },
+    "checked": {
+        "pins": {
+            "level": "unchecked",
+            "source": "shape only"
+        }
+    },
+    "buses": {
+        "uart": {
+            "uart1": {
+                "tx": 17,
+                "rx": 16
+            }
+        }
+    },
+    "devices": {
+        "radar": {
+            "chip": "ld2410c",
+            "on": {
+                "uart.uart1": {}
+            }
+        }
+    }
+}

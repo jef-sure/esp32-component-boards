@@ -1,0 +1,314 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "mcu",
+    "name": "esp32",
+    "title": "ESP32",
+    "gpio": {
+        "count": 40,
+        "valid": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            25,
+            26,
+            27,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39
+        ],
+        "input_only": [
+            34,
+            35,
+            36,
+            37,
+            38,
+            39
+        ],
+        "strapping": [
+            0,
+            2,
+            5,
+            12,
+            15
+        ],
+        "pins": {
+            "0": {
+                "analog": [
+                    "ADC2_CH1"
+                ],
+                "low_power": "RTC_GPIO11",
+                "notes": [
+                    "Strapping pin"
+                ]
+            },
+            "1": {
+                "notes": [
+                    "TXD"
+                ]
+            },
+            "2": {
+                "analog": [
+                    "ADC2_CH2"
+                ],
+                "low_power": "RTC_GPIO12",
+                "notes": [
+                    "Strapping pin"
+                ]
+            },
+            "3": {
+                "notes": [
+                    "RXD"
+                ]
+            },
+            "4": {
+                "analog": [
+                    "ADC2_CH0"
+                ],
+                "low_power": "RTC_GPIO10"
+            },
+            "5": {
+                "notes": [
+                    "Strapping pin"
+                ]
+            },
+            "6": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            },
+            "7": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            },
+            "8": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            },
+            "9": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            },
+            "10": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            },
+            "11": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            },
+            "12": {
+                "analog": [
+                    "ADC2_CH5"
+                ],
+                "low_power": "RTC_GPIO15",
+                "notes": [
+                    "Strapping pin",
+                    "JTAG"
+                ]
+            },
+            "13": {
+                "analog": [
+                    "ADC2_CH4"
+                ],
+                "low_power": "RTC_GPIO14",
+                "notes": [
+                    "JTAG"
+                ]
+            },
+            "14": {
+                "analog": [
+                    "ADC2_CH6"
+                ],
+                "low_power": "RTC_GPIO16",
+                "notes": [
+                    "JTAG"
+                ]
+            },
+            "15": {
+                "analog": [
+                    "ADC2_CH3"
+                ],
+                "low_power": "RTC_GPIO13",
+                "notes": [
+                    "Strapping pin",
+                    "JTAG"
+                ]
+            },
+            "16": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            },
+            "17": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            },
+            "25": {
+                "analog": [
+                    "ADC2_CH8"
+                ],
+                "low_power": "RTC_GPIO6"
+            },
+            "26": {
+                "analog": [
+                    "ADC2_CH9"
+                ],
+                "low_power": "RTC_GPIO7"
+            },
+            "27": {
+                "analog": [
+                    "ADC2_CH7"
+                ],
+                "low_power": "RTC_GPIO17"
+            },
+            "32": {
+                "analog": [
+                    "ADC1_CH4"
+                ],
+                "low_power": "RTC_GPIO9"
+            },
+            "33": {
+                "analog": [
+                    "ADC1_CH5"
+                ],
+                "low_power": "RTC_GPIO8"
+            },
+            "34": {
+                "analog": [
+                    "ADC1_CH6"
+                ],
+                "low_power": "RTC_GPIO4",
+                "notes": [
+                    "GPI"
+                ]
+            },
+            "35": {
+                "analog": [
+                    "ADC1_CH7"
+                ],
+                "low_power": "RTC_GPIO5",
+                "notes": [
+                    "GPI"
+                ]
+            },
+            "36": {
+                "analog": [
+                    "ADC1_CH0"
+                ],
+                "low_power": "RTC_GPIO0",
+                "notes": [
+                    "GPI"
+                ]
+            },
+            "37": {
+                "analog": [
+                    "ADC1_CH1"
+                ],
+                "low_power": "RTC_GPIO1",
+                "notes": [
+                    "GPI"
+                ]
+            },
+            "38": {
+                "analog": [
+                    "ADC1_CH2"
+                ],
+                "low_power": "RTC_GPIO2",
+                "notes": [
+                    "GPI"
+                ]
+            },
+            "39": {
+                "analog": [
+                    "ADC1_CH3"
+                ],
+                "low_power": "RTC_GPIO3",
+                "notes": [
+                    "GPI"
+                ]
+            }
+        },
+        "notes": [
+            "Strapping pin: GPIO0, GPIO2, GPIO5, GPIO12 (MTDI), and GPIO15 (MTDO) are strapping pins. For more information, please refer to ESP32 datasheet.",
+            "SPI0/1: GPIO6-11 and GPIO16-17 are usually connected to the SPI flash and PSRAM integrated on the module and therefore should not be used for other purposes.",
+            "JTAG: GPIO12-15 are usually used for inline debug.",
+            "GPI: GPIO34-39 can only be set as input mode and do not have software-enabled pullup or pulldown functions.",
+            "TXD & RXD are usually used for flashing and debugging.",
+            "ADC2: ADC2 pins cannot be used when Wi-Fi is used. So, if you are having trouble getting the value from an ADC2 GPIO while using Wi-Fi, you may consider using an ADC1 GPIO instead, which should solve your problem. For more details, please refer to :ref:Hardware Limitations of ADC Continuous Mode and :ref:Hardware Limitations of ADC Oneshot Mode.",
+            "Please do not use the interrupt of GPIO36 and GPIO39 when using ADC or Wi-Fi and Bluetooth with sleep mode enabled. Please refer to ESP32 ECO and Workarounds for Bugs > GPIO-3.11 for the detailed description of the issue."
+        ]
+    },
+    "hosts": {
+        "spi": 3,
+        "i2c": 2
+    },
+    "provides": {
+        "wifi": {},
+        "bluetooth": {},
+        "dac": {},
+        "ethernet": {},
+        "sdmmc": {},
+        "touch_pads": {},
+        "twai": {}
+    },
+    "checked": {
+        "facts": {
+            "level": "vendor-docs",
+            "source": "ESP-IDF esp-idf, components/soc/esp32, soc_caps.h"
+        },
+        "pins": {
+            "level": "vendor-docs",
+            "covers": [
+                "gpio.pins",
+                "gpio.strapping"
+            ],
+            "source": "ESP-IDF esp-idf, docs/en/api-reference/peripherals/gpio/esp32.inc"
+        }
+    },
+    "controls": {
+        "wifi_tx_power": {
+            "how": "wifi_tx_power",
+            "min": 8,
+            "max": 84,
+            "unit": "0.25 dBm",
+            "read": "command"
+        }
+    },
+    "limits": {
+        "psram_mhz": 80,
+        "cpu_mhz": 240
+    }
+}

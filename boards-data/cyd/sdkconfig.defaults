@@ -1,9 +1,0 @@
-# The CYD (ESP32-2432S028R): what its chip and its flash need, read before the program's own
-# defaults (SDKCONFIG_DEFAULTS of the project, tools/board_select.py puts this file there).
-# The first two lines are the choice of the board: the chip, and the board in the menu of
-# the configuration. The DGX drivers its panel needs (SPI, ILI9341) come with that choice.
-CONFIG_IDF_TARGET="esp32"
-CONFIG_BOARD_SELECT_CYD=y
-
-CONFIG_ESPTOOLPY_FLASHSIZE_4MB=y
-CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_240=y

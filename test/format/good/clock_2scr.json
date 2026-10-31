@@ -1,0 +1,95 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "clock_2scr",
+    "title": "Two ST7789 on a dev board",
+    "mcu": {
+        "target": "esp32"
+    },
+    "checked": {
+        "pins": {
+            "level": "hardware",
+            "source": "~/git/bezier_clock_2scr/main/main.c"
+        }
+    },
+    "buses": {
+        "spi": {
+            "spi2": {
+                "hz": 26000000,
+                "mosi": 5,
+                "miso": "nc",
+                "sclk": 18
+            },
+            "spi3": {
+                "hz": 26000000,
+                "mosi": 26,
+                "miso": "nc",
+                "sclk": 25
+            }
+        }
+    },
+    "devices": {
+        "left": {
+            "chip": "st7789",
+            "on": {
+                "spi.spi2": {
+                    "cs": "nc"
+                }
+            },
+            "config": {
+                "panel": {
+                    "width": 240,
+                    "height": 240,
+                    "mm_w": 23,
+                    "mm_h": 23
+                },
+                "primary": true
+            },
+            "controls": {
+                "orientation": {
+                    "start": {
+                        "x": "left-right",
+                        "y": "top-bottom",
+                        "swap": false
+                    }
+                }
+            },
+            "pins": {
+                "dc": 17,
+                "rst": 16,
+                "backlight": "nc"
+            }
+        },
+        "right": {
+            "chip": "st7789",
+            "on": {
+                "spi.spi3": {
+                    "cs": "nc"
+                }
+            },
+            "config": {
+                "panel": {
+                    "width": 240,
+                    "height": 240,
+                    "mm_w": 23,
+                    "mm_h": 23
+                }
+            },
+            "controls": {
+                "orientation": {
+                    "start": {
+                        "x": "left-right",
+                        "y": "top-bottom",
+                        "swap": false
+                    }
+                }
+            },
+            "pins": {
+                "dc": 14,
+                "rst": 27,
+                "backlight": "nc"
+            }
+        }
+    }
+}

@@ -1,0 +1,18 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "library",
+    "ecosystem": "esp-idf",
+    "owner": "espressif",
+    "name": "esp_driver_i2s",
+    "title": "I2S driver of ESP-IDF",
+    "url": "https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/peripherals/i2s.html",
+    "install": [{"via": "platform"}],
+    "described": "6.1",
+    "chips": {"i2s_amp": {"header": "driver/i2s_std.h", "on": ["i2s"], "adapter": {"kind": "i2s"}}},
+    "adapter": {
+        "symbol": "BOARD_SOUND_I2S",
+        "headers": ["board_sound_i2s.h"],
+        "sources": {"BOARD_SOUND_I2S": ["board_sound_i2s.c"]}
+    }
+}

@@ -4,34 +4,38 @@
 
 An ESP-IDF component that describes the boards a program runs on **once, as
 data**, and sets their hardware up for the program. A directory per board in
-`boards-data/` holds its pins, buses and peripherals in one `board.json`; the
+`catalog/boards/` holds its pins, buses and peripherals in one `board.json`; the
 component turns that into C glue and the program asks for what it needs **by
 kind**, never by the board's name:
 
 ```c
 #include "boards.h"
+#include "boards_dgx.h"
+#include "boards_dgx_di.h"
 
-struct board_display display;
+struct board_display display = {0};
 if (board_display_init(&display)) {
-    /* display.screen is a dgx_screen_t *, 1024x600 or 320x240, whatever the chosen
-       board has; display.mm_w / mm_h is its size in millimetres */
+    /* display.width, display.height: 1024x600 or 320x240, whatever the chosen board has;
+       display.mm_w, display.mm_h: its size in millimetres */
+    dgx_screen_t *screen = board_dgx_screen(&display);
 }
 
-struct dgx_di_device *device;
-void                 *pointer; /* a dgx_di_pointer_t * */
-if (board_touch_start(&display, &device, &pointer)) {
+struct board_touch touch;
+if (board_touch_start(&display, &touch)) {
     /* the touch panel under that display, calibrated by the board's data */
+    dgx_di_pointer_t *pointer = board_dgx_di_pointer(&touch);
 }
 ```
 
 Every function of `boards.h` exists on every board. One the board does not have
-answers `false`, and the program goes on without it. The same `main.c` builds
-and runs on the 2.8-inch CYD and on the 10.1-inch Guition.
+returns `false`, and the program goes on without it. `boards.h` names no library:
+the handles of DGX, DGX-DI or hd44780 come from the headers of their adapters. The same `main.c` builds
+and runs on the 2.8-inch CYD S028R and on the 10.1-inch Guition.
 
 The component knows no display by itself: a board may have none, and a display
 is one peripheral among others. What a board can have today:
 
-- a **frame buffer display** driven by [DGX](https://github.com/jef-sure/esp32-component-dgx):
+- a **graphics display** driven by [DGX](https://github.com/jef-sure/esp32-component-dgx):
   MIPI-DSI, QSPI or SPI panels, with their size in pixels and in millimetres and
   the way they lie on the board;
 - a **character display** (HD44780, a 2004 on a PCF8574 backpack) through
@@ -39,7 +43,10 @@ is one peripheral among others. What a board can have today:
   or as a module on its I2C bus;
 - a **touch panel** as a device of [DGX-DI](https://github.com/jef-sure/esp32-component-dgx-di),
   with the calibration measured on the board kept in the data;
-- **sound**: an ES8311 codec on I2S, or the ESP32's own DAC;
+- **LVGL** through [DGX-LVGL](https://github.com/jef-sure/esp32-component-dgx-lvgl):
+  the display and the touch panel this component sets up become an LVGL display
+  and input device, see [examples/hello_lvgl](examples/hello_lvgl);
+- **sound**: an ES8311 codec on I2S, an amplifier on I2S, or the ESP32's own DAC;
 - a **button**; and any **bus** the board wires, even one the component does not
   set up itself (the SDIO of a radio, the pins of an SD slot), kept as data the
   program can read.
@@ -53,7 +60,7 @@ menu of the configuration.
 
 ```sh
 idf.py add-dependency "jef-sure/boards^0.0.1"
-python3 managed_components/jef-sure__boards/tools/board_select.py cyd .
+python3 managed_components/jef-sure__boards/tools/board_select.py cyd_s028r .
 idf.py build flash monitor
 ```
 
@@ -70,7 +77,7 @@ No `set-target`, no `menuconfig`. The menu (*Boards → Board the program runs
 on*) follows the file; it is there to look at and to override. What the board
 needs comes with the choice: the DGX drivers of its panel as `select`s, the
 other parts (a touch driver, a codec, hd44780) by rules in the component's
-`idf_component.yml`, so a build for the CYD downloads no GT911 driver and no
+`idf_component.yml`, so a build for the CYD S028R downloads no GT911 driver and no
 codec library. See [docs/en/choosing-a-board.md](docs/en/choosing-a-board.md).
 
 ## The boards
@@ -78,17 +85,17 @@ codec library. See [docs/en/choosing-a-board.md](docs/en/choosing-a-board.md).
 <!-- boards:table -->
 | board | chip | display | touch | sound | button |
 |---|---|---|---|---|---|
-| CYD (ESP32-2432S028R) | ESP32 | 320x240 ILI9341, SPI, 58x43 mm | XPT2046 (resistive); calibration a placeholder | DAC, GPIO26 | yes |
-| Guition JC1060P470 | ESP32-P4 | 1024x600 JD9165, MIPI-DSI, 154x86 mm | GT911 | ES8311 | yes |
-| Guition JC4827W543 | ESP32-S3 | 480x272 NV3041A, QSPI, 95x54 mm | GT911 | none | none |
-| Guition JC8012P4A1C | ESP32-P4 | 1280x800 JD9365, MIPI-DSI, 217x136 mm | GSL3680 (firmware embedded by the program) | ES8311 | none |
+| CYD (ESP32-2432S028R) | ESP32 | 320x240 ILI9341, SPI, 58x43 mm | XPT2046 (resistive) | DAC, GPIO26 | yes |
+| Guition JC1060P470C | ESP32-P4 | 1024x600 JD9165, MIPI-DSI, 154x86 mm | GT911 | ES8311 | yes |
+| Guition JC4827W543C | ESP32-S3 | 480x272 NV3041A, QSPI, 95x54 mm | GT911 | I2S amplifier | yes |
+| Guition JC8012P4A1C | ESP32-P4 | 1280x800 JD9365, MIPI-DSI, 217x136 mm | GSL3680 (firmware embedded by the program) | ES8311 | yes |
+| Local terminal: ESP32, 2004 LCD, two PN532 | ESP32 | 20x4 HD44780 | none | none | none |
 <!-- boards:end -->
 
-A module rides whichever board is chosen: `board_select.py cyd --module
+A module rides whichever board is chosen: `board_select.py cyd_s028r --module
 lcd2004_pcf8574 .` adds a 20x4 character LCD on the board's I2C bus.
 
-The CYD's touch calibration is a placeholder until measured on a board; the
-touch works, only not straight, and the log says so. The GSL3680 of the
+The GSL3680 of the
 10.1-inch board keeps no firmware of its own, and the vendor's array carries no
 licence to redistribute: the program embeds it, see
 [docs/en/touch-firmware.md](docs/en/touch-firmware.md); without it the board
@@ -97,18 +104,23 @@ builds and runs with its touch off.
 ## What is in the repository
 
 ```
-boards-data/<board>/board.json         the board: the only source of truth
-boards-data/<board>/sdkconfig.defaults what its chip, memory and flash need; the lines that choose it
+catalog/boards/<board>/board.json         the board: the only source of truth
+catalog/devices/, catalog/mcu/            what its chips are, under it
+catalog/libraries/                        what each library does with each chip, and what its versions require
+catalog/boards/<board>/sdkconfig.defaults what its chip, memory and flash need; the lines that choose it
 boards/<board>/<board>.c, board.cmake  the glue, generated from the data and committed
 boards/boards.cmake, Kconfig           generated too, as are the dependencies of idf_component.yml
 include/boards.h                       what a program asks for, by kind
-src/                                   the core: board_info, the shared I2C master, the pointer, the firmware hook
+src/                                   the core: board_info, the shared I2C and SPI, the sound task, the firmware hook
+adapters/<owner>__<name>/              the code for each library, its public header in include/
 tools/boards_gen.py                    data -> glue, Kconfig, lists, manifest rules, README tables
+tools/check_format.py                  the schema, the rules and their cases in test/format/
 tools/check_boards.py                  the generated is what the data says; pins do not collide; the API holds
 tools/board_pins.py                    the map of a board's pins and its tree
 tools/board_select.py                  choose the board for a project
-editor/                                the editor of the data: Vue + Pinia from a CDN, no build step
+editor/                                the editor of format 1, to be replaced; rules.js, the rules for the next one
 examples/hello_board/                  the smallest program, built for every board in CI
+examples/hello_lvgl/                   LVGL through DGX-LVGL, built for every board in CI
 docs/en/, docs/ru/                     the documentation
 ```
 
@@ -125,13 +137,12 @@ Documentation, in English: [how it works](docs/en/how-it-works.md),
 
 ## Adding a board
 
-Copy the nearest `boards-data/<board>/`, edit `board.json` (the editor in
-`editor/index.html` checks the schema as you type), write its
+Copy the nearest `catalog/boards/<board>/`, edit `board.json`, write its
 `sdkconfig.defaults` with the reasons in comments, run
 `python3 tools/boards_gen.py --all`, then `python3 tools/check_boards.py
 --host-syntax`. The board is in the menu, the manifest and the README table
 without touching any of them. Measure the touch on the board
-(`dgx_di_calibrate_measure` of DGX-DI) and paste the result into the editor.
+(`dgx_di_calibrate_measure` of DGX-DI) and give the log to `tools/board_calibration.py`.
 See [docs/en/adding-a-board.md](docs/en/adding-a-board.md).
 
 ## How it differs from esp-bsp and esp_board_manager
@@ -151,9 +162,13 @@ choice, hidden symbols beside it, manifest rules on them.
 ## Status
 
 0.0.1. Builds for every board, and with the module, under ESP-IDF 5.5 and 6.1:
-the matrix of `.github/workflows/build.yml`. The glue reproduces the set-up
-code of the handwritten clock and of DGX-GE, which run on these boards; this
-release itself has not been flashed yet, and the CYD's touch awaits its
-measurement.
+the matrix of `.github/workflows/build.yml`. `examples/hello_board` and
+`examples/hello_lvgl` were flashed on a CYD S028R, a JC4827W543C and a JC1060P470C
+under ESP-IDF 6.1: the display, the touch and the sound start without errors in
+the log. Touch coordinates were checked by finger on all three and are correct.
+On the JC1060P470C the picture was checked too, colors and orientation. On the
+local terminal the 2004 module shows its text. On the JC8012P4A1C, flashed too, the display starts and the sound of
+`hello_board` was heard. Its touch needs the firmware the program embeds, and
+that was not run.
 
 License: MIT.

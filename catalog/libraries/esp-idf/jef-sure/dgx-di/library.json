@@ -1,0 +1,66 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "library",
+    "ecosystem": "esp-idf",
+    "owner": "jef-sure",
+    "name": "dgx-di",
+    "title": "DGX-DI",
+    "url": "https://github.com/jef-sure/esp32-component-dgx-di",
+    "install": [
+        {"via": "registry"},
+        {"via": "git", "url": "https://github.com/jef-sure/esp32-component-dgx-di.git", "ref": "{version}"}
+    ],
+    "described": "0.1.4",
+    "description": "Input for DGX: touch panels with calibration and gestures, pads, keyboards.",
+    "interfaces": {
+        "esp_lcd_touch": {
+            "header": "dgx_di_esp_lcd_touch.h",
+            "init": {
+                "call": "dgx_di_esp_lcd_touch_init",
+                "args": ["{touch}", "{handle}", "{fingers}", "{numbered}"],
+                "ok": "none"
+            }
+        }
+    },
+    "chips": {
+        "gsl3680": {
+            "header": "dgx_di_gsl3680.h",
+            "on": ["i2c"],
+            "init": [
+                {
+                    "call": "dgx_di_gsl3680_init",
+                    "args": ["{touch}", "{i2c_bus}", "{rst}", "{irq}", "0", "{firmware}", "{firmware_size}"],
+                    "ok": {"equals": "true"}
+                }
+            ],
+            "limits": {"fingers": 10},
+            "adapter": {"kind": "gsl3680", "symbols": ["BOARD_TOUCH_GSL3680"], "headers": ["board_touch_gsl3680.h"]},
+            "notes": "The chip keeps no firmware: init writes it from the data the program gives."
+        }
+    },
+    "adapter": {
+        "version": "^0.1.4",
+        "symbol": "BOARD_TOUCH",
+        "notes": "0.1.4 has the struct tag of dgx_di_pointer_t.",
+        "headers": ["board_touch.h"],
+        "public": "boards_dgx_di.h",
+        "sources": {
+            "BOARD_TOUCH": ["board_pointer.c"],
+            "BOARD_TOUCH_GSL3680": ["board_touch_gsl3680.c"],
+            "BOARD_TOUCH_ESP_LCD": ["board_touch_lcd.c"]
+        }
+    },
+    "checked": {
+        "api": {"level": "vendor-code", "source": "include/ of esp32-component-dgx-di 0.1.4", "date": "2026-10-31"}
+    },
+    "versions": {
+        "0.1.4": {"requires": {"esp-idf/jef-sure/dgx": "^0.10.1"}, "frameworks": {"esp-idf": ">=5.3.0"}},
+        "0.1.3": {"requires": {"esp-idf/jef-sure/dgx": "^0.10.1"}, "frameworks": {"esp-idf": ">=5.3.0"}},
+        "0.1.2": {"requires": {"esp-idf/jef-sure/dgx": "^0.8.0"}, "frameworks": {"esp-idf": ">=5.3.0"}},
+        "0.1.1": {"requires": {"esp-idf/jef-sure/dgx": "^0.7.0"}, "frameworks": {"esp-idf": ">=5.3.0"}},
+        "0.1.0": {"via": ["git"]},
+        "0.0.2": {"via": ["git"]},
+        "0.0.1": {"via": ["git"]}
+    }
+}

@@ -1,0 +1,12 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "es8311",
+    "title": "Everest ES8311 codec",
+    "class": "audio",
+    "on": {"i2c": {"required": true, "address": "0x18", "role": "control"}, "i2s": {"required": true, "role": "data"}},
+    "config": {"direction": "both"},
+    "controls": {"volume": {"how": "codec_volume", "min": 0, "max": 100, "read": "command"}},
+    "checked": {"facts": {"level": "hardware", "source": "boards-data, flashed or checked against the schematic"}}
+}

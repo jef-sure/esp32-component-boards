@@ -1,0 +1,40 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "cyd_capacitive_like",
+    "title": "A CYD variant with a capacitive touch",
+    "extends": "cyd_s028r",
+    "checked": {
+        "touch": null
+    },
+    "devices": {
+        "touch": null,
+        "ctouch": {
+            "chip": "gt911",
+            "on": {
+                "i2c.i2c0": {}
+            },
+            "pins": {
+                "rst": 25,
+                "int": 32
+            },
+            "config": {
+                "over": "lcd",
+                "x_max": 239,
+                "y_max": 319
+            }
+        }
+    },
+    "buses": {
+        "i2c": {
+            "i2c0": {
+                "sda": 33,
+                "scl": 22
+            }
+        },
+        "spi": {
+            "spi3": null
+        }
+    }
+}

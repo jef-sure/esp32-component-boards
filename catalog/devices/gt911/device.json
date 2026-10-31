@@ -1,0 +1,11 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "gt911",
+    "title": "Goodix GT911",
+    "class": "touch",
+    "on": {"i2c": {"required": true, "address_try": ["0x5d", "0x14"]}},
+    "config": {"fingers": 5},
+    "checked": {"facts": {"level": "hardware", "source": "boards-data, flashed or checked against the schematic"}}
+}

@@ -4,8 +4,8 @@
 # sdkconfig.defaults.board here (the board's chip, its memory, its flash, and the line that
 # chooses it in the menu):
 #
-#     python3 ../../tools/board_select.py cyd .          # or jc1060p470, jc8012p4a1c, jc4827w543
-#     python3 ../../tools/board_select.py jc1060p470 --module lcd2004_pcf8574 .
+#     python3 ../../tools/board_select.py cyd_s028r .    # or jc1060p470c, jc8012p4a1c, jc4827w543c
+#     python3 ../../tools/board_select.py jc1060p470c --module lcd2004_pcf8574 .
 #     idf.py build flash monitor
 #
 # Nothing here names a board. A -D SDKCONFIG_DEFAULTS=... on the command line wins over the file.

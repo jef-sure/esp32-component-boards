@@ -1,0 +1,38 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "tool_field",
+    "title": "A field of a tool",
+    "mcu": {
+        "target": "esp32s3"
+    },
+    "checked": {
+        "pins": {
+            "level": "unchecked",
+            "source": "shape only"
+        }
+    },
+    "devices": {
+        "b": {
+            "class": "button",
+            "pins": {
+                "in": 0
+            },
+            "x_editor": {
+                "colour": "red"
+            }
+        }
+    },
+    "buses": {
+        "i2c": {
+            "i2c0": {
+                "sda": 8,
+                "scl": 9
+            }
+        }
+    },
+    "x_editor": {
+        "zoom": 2
+    }
+}

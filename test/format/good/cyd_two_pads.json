@@ -1,0 +1,77 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "cyd_two_pads",
+    "title": "CYD with two wired pads",
+    "mcu": {
+        "target": "esp32"
+    },
+    "checked": {
+        "pins": {
+            "level": "unchecked",
+            "source": "shape only"
+        }
+    },
+    "buses": {
+        "i2c": {
+            "i2c0": {
+                "sda": 22,
+                "scl": 27
+            }
+        }
+    },
+    "devices": {
+        "mux": {
+            "chip": "tca9548a",
+            "on": {
+                "i2c.i2c0": {}
+            }
+        },
+        "pad1": {
+            "chip": "wii_classic",
+            "on": {
+                "i2c.mux.ch0": {}
+            },
+            "config": {
+                "player": 1
+            }
+        },
+        "pad2": {
+            "chip": "wii_classic",
+            "on": {
+                "i2c.mux.ch1": {}
+            },
+            "config": {
+                "player": 2
+            }
+        }
+    },
+    "images": {
+        "front": {
+            "file": "front.webp",
+            "source": "own",
+            "shows": "front",
+            "up": {
+                "x": 0,
+                "y": -1
+            }
+        }
+    },
+    "connectors": {
+        "CN1": {
+            "type": "JST 1.25 mm, 4 pins",
+            "pins": [
+                "3V3",
+                27,
+                22,
+                "GND"
+            ],
+            "at": {
+                "image": "front",
+                "x": 0.82,
+                "y": 0.1
+            }
+        }
+    }
+}

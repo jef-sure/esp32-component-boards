@@ -1,0 +1,533 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "library",
+    "ecosystem": "esp-idf",
+    "owner": "jef-sure",
+    "name": "dgx",
+    "title": "DGX",
+    "url": "https://github.com/jef-sure/esp32-component-dgx",
+    "install": [
+        {"via": "registry"},
+        {"via": "git", "url": "https://github.com/jef-sure/esp32-component-dgx.git", "ref": "{version}"}
+    ],
+    "described": "0.10.2",
+    "description": "Graphics on displays of SPI, QSPI, 8-bit parallel, MIPI-DSI and I2C, with its own panel drivers.",
+    "values": {
+        "color_order": {"rgb": "DgxScreenRGB", "bgr": "DgxScreenBGR"},
+        "dir_x": {"left-right": "DgxScreenLeftRight", "right-left": "DgxScreenRightLeft"},
+        "dir_y": {"top-bottom": "DgxScreenTopBottom", "bottom-top": "DgxScreenBottomTop"}
+    },
+    "transports": {
+        "spi": {
+            "header": "bus/dgx_spi_esp32.h",
+            "select": ["DGX_ENABLE_SPI"],
+            "init": {
+                "call": "dgx_spi_init",
+                "args": ["{host}", "SPI_DMA_CH_AUTO", "{mosi}", "{miso}", "{sclk}", "{cs}", "{dc}", "{hz}", "0"],
+                "returns": "bus",
+                "ok": {"not": "NULL"}
+            },
+            "shared": {
+                "call": "dgx_spi_init_on_bus",
+                "args": ["{host}", "{cs}", "{dc}", "{hz}", "0"],
+                "returns": "bus",
+                "ok": {"not": "NULL"}
+            },
+            "defaults": {"hz": 40000000, "miso": "GPIO_NUM_NC", "dc": "GPIO_NUM_NC"}
+        },
+        "qspi": {
+            "header": "bus/dgx_qspi_esp32.h",
+            "select": ["DGX_ENABLE_SPI"],
+            "init": {
+                "call": "dgx_qspi_init",
+                "args": ["{host}", "SPI_DMA_CH_AUTO", "{d0}", "{d1}", "{d2}", "{d3}", "{sclk}", "{cs}", "{hz}", "0"],
+                "returns": "bus",
+                "ok": {"not": "NULL"}
+            },
+            "shared": {
+                "call": "dgx_qspi_init_on_bus",
+                "args": ["{host}", "{cs}", "{hz}", "0"],
+                "returns": "bus",
+                "ok": {"not": "NULL"}
+            },
+            "defaults": {"hz": 40000000}
+        },
+        "p8": {
+            "header": "bus/dgx_p8_esp32.h",
+            "select": ["DGX_ENABLE_P8"],
+            "init": {
+                "call": "dgx_p8_init",
+                "args": [
+                    "{d0}",
+                    "{d1}",
+                    "{d2}",
+                    "{d3}",
+                    "{d4}",
+                    "{d5}",
+                    "{d6}",
+                    "{d7}",
+                    "{wr}",
+                    "{rd}",
+                    "{cs}",
+                    "{dc}",
+                    "{hz}"
+                ],
+                "returns": "bus",
+                "ok": {"not": "NULL"}
+            },
+            "defaults": {"rd": "GPIO_NUM_NC"}
+        },
+        "dsi": {
+            "header": "bus/dgx_dsi_esp32.h",
+            "select": ["DGX_ENABLE_DSI"],
+            "init": {
+                "call": "dgx_dsi_init",
+                "args": ["0", "{lanes}", "{lane_mbps}", "{phy_ldo_chan}", "{phy_ldo_mv}"],
+                "returns": "bus",
+                "ok": {"not": "NULL"}
+            },
+            "defaults": {"lanes": 2, "lane_mbps": 750, "phy_ldo_chan": 3, "phy_ldo_mv": 2500}
+        },
+        "i2c": {
+            "header": "bus/dgx_i2c_esp32.h",
+            "select": ["DGX_ENABLE_I2C"],
+            "init": {
+                "call": "dgx_i2c_init",
+                "args": ["{port}", "{address}", "{sda}", "{scl}", "{hz}"],
+                "returns": "bus",
+                "ok": {"not": "NULL"}
+            },
+            "shared": {
+                "call": "dgx_i2c_init_on_bus",
+                "args": ["{i2c_bus}", "{address}", "{hz}"],
+                "returns": "bus",
+                "ok": {"not": "NULL"}
+            }
+        }
+    },
+    "groups": {
+        "side_by_side": {
+            "select": ["DGX_ENABLE_VSCREEN", "DGX_ENABLE_VSCREEN_2H"],
+            "init": {
+                "call": "dgx_vscreen_2h_init",
+                "args": ["{left}", "{right}"],
+                "returns": "screen",
+                "ok": {"not": "NULL"}
+            }
+        }
+    },
+    "chips": {
+        "gc9a01": {
+            "header": "drivers/gc9a01.h",
+            "on": ["spi", "p8"],
+            "select": ["DGX_ENABLE_SPI_GC9A01"],
+            "init": [
+                {
+                    "call": "dgx_gc9a01_init",
+                    "args": ["{bus}", "{rst}", "{depth}", "{color}"],
+                    "returns": "screen",
+                    "ok": {"not": "NULL"}
+                }
+            ],
+            "supports": {"depth_bits": [12, 16, 18]},
+            "controls": {
+                "orientation": {
+                    "call": "dgx_gc9a01_orientation",
+                    "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
+                    "ok": "none"
+                }
+            },
+            "setup": [
+                {"control": "orientation"},
+                {"line": "backlight", "notes": "After the first frame: the driver does not light it."}
+            ],
+            "adapter": {"kind": "panel"}
+        },
+        "ili9341": {
+            "header": "drivers/ili9341.h",
+            "on": ["spi", "p8"],
+            "select": ["DGX_ENABLE_SPI_ILI_9341"],
+            "init": [
+                {
+                    "call": "dgx_ili9341_init",
+                    "args": ["{bus}", "{rst}", "{backlight}", "{depth}", "{color}"],
+                    "returns": "screen",
+                    "ok": {"not": "NULL"}
+                }
+            ],
+            "supports": {"depth_bits": [16, 18]},
+            "controls": {
+                "orientation": {
+                    "call": "dgx_ili9341_orientation",
+                    "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
+                    "ok": "none"
+                }
+            },
+            "setup": [{"control": "orientation"}],
+            "adapter": {"kind": "panel"}
+        },
+        "jd9165": {
+            "header": "drivers/jd9165.h",
+            "on": ["dsi"],
+            "select": ["DGX_ENABLE_JD9165"],
+            "init": [
+                {
+                    "call": "dgx_jd9165_init",
+                    "args": ["{bus}", "{rst}", "{depth}", "{color}", "DgxDsiTwoFrames"],
+                    "returns": "screen",
+                    "ok": {"not": "NULL"}
+                }
+            ],
+            "supports": {"depth_bits": [16, 24]},
+            "controls": {
+                "orientation": {
+                    "call": "dgx_jd9165_orientation",
+                    "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
+                    "ok": "none"
+                }
+            },
+            "setup": [
+                {"control": "orientation"},
+                {"line": "backlight", "notes": "After the first frame: the driver does not light it."}
+            ],
+            "adapter": {"kind": "panel"}
+        },
+        "jd9365": {
+            "header": "drivers/jd9365.h",
+            "on": ["dsi"],
+            "select": ["DGX_ENABLE_JD9365"],
+            "init": [
+                {
+                    "call": "dgx_jd9365_init",
+                    "args": ["{bus}", "{rst}", "{depth}", "{color}", "DgxDsiTwoFrames"],
+                    "returns": "screen",
+                    "ok": {"not": "NULL"}
+                }
+            ],
+            "supports": {"depth_bits": [16, 24]},
+            "controls": {
+                "orientation": {
+                    "call": "dgx_jd9365_orientation",
+                    "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
+                    "ok": "none"
+                }
+            },
+            "setup": [
+                {"control": "orientation"},
+                {"line": "backlight", "notes": "After the first frame: the driver does not light it."}
+            ],
+            "adapter": {"kind": "panel"}
+        },
+        "nv3041a": {
+            "header": "drivers/nv3041a.h",
+            "on": ["qspi"],
+            "select": ["DGX_ENABLE_NV3041A"],
+            "init": [
+                {
+                    "call": "dgx_nv3041a_init",
+                    "args": ["{bus}", "{rst}", "{backlight}", "{depth}", "{color}"],
+                    "returns": "screen",
+                    "ok": {"not": "NULL"}
+                }
+            ],
+            "supports": {"depth_bits": [16]},
+            "controls": {
+                "orientation": {
+                    "call": "dgx_nv3041a_orientation",
+                    "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
+                    "ok": "none"
+                }
+            },
+            "setup": [{"control": "orientation"}],
+            "adapter": {"kind": "panel"}
+        },
+        "sh1106": {
+            "header": "drivers/sh1106.h",
+            "on": ["spi", "i2c"],
+            "select": ["DGX_ENABLE_SH1106"],
+            "init": [
+                {
+                    "call": "dgx_sh1106_init",
+                    "args": ["{bus}", "{resolution}", "{rst}"],
+                    "returns": "screen",
+                    "ok": {"not": "NULL"}
+                }
+            ],
+            "supports": {"depth_bits": [1], "resolution": ["128x64", "64x32"]}
+        },
+        "ssd1306": {
+            "header": "drivers/ssd1306.h",
+            "on": ["spi", "i2c"],
+            "select": ["DGX_ENABLE_SSD1306"],
+            "init": [
+                {
+                    "call": "dgx_ssd1306_init",
+                    "args": ["{bus}", "{resolution}", "{is_ext_vcc}", "{rst}"],
+                    "returns": "screen",
+                    "ok": {"not": "NULL"}
+                }
+            ],
+            "supports": {"depth_bits": [1], "resolution": ["128x32", "128x64", "96x16", "64x48", "72x40"]}
+        },
+        "ssd1309": {
+            "header": "drivers/ssd1309.h",
+            "on": ["spi", "i2c"],
+            "select": ["DGX_ENABLE_SSD1309"],
+            "init": [
+                {
+                    "call": "dgx_ssd1309_init",
+                    "args": ["{bus}", "{resolution}", "{rst}"],
+                    "returns": "screen",
+                    "ok": {"not": "NULL"}
+                }
+            ],
+            "supports": {"depth_bits": [1], "resolution": ["128x64", "128x32"]}
+        },
+        "ssd1351": {
+            "header": "drivers/ssd1351.h",
+            "on": ["spi", "p8"],
+            "select": ["DGX_ENABLE_SSD1351"],
+            "init": [
+                {
+                    "call": "dgx_ssd1351_init",
+                    "args": ["{bus}", "{rst}", "{depth}", "{color}"],
+                    "returns": "screen",
+                    "ok": {"not": "NULL"}
+                }
+            ],
+            "supports": {"depth_bits": [16, 18]},
+            "controls": {
+                "orientation": {
+                    "call": "dgx_ssd1351_orientation",
+                    "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
+                    "ok": "none"
+                }
+            },
+            "setup": [
+                {"control": "orientation"},
+                {"line": "backlight", "notes": "After the first frame: the driver does not light it."}
+            ],
+            "adapter": {"kind": "panel"}
+        },
+        "st7565r": {
+            "header": "drivers/st7565r.h",
+            "on": ["spi"],
+            "select": ["DGX_ENABLE_ST7565R"],
+            "init": [
+                {"call": "dgx_st7565r_init", "args": ["{bus}", "{rst}"], "returns": "screen", "ok": {"not": "NULL"}}
+            ],
+            "supports": {"depth_bits": [1]}
+        },
+        "st7735": {
+            "header": "drivers/st7735.h",
+            "on": ["spi", "p8"],
+            "select": ["DGX_ENABLE_SPI_ST7735"],
+            "init": [
+                {
+                    "call": "dgx_st7735_init",
+                    "args": ["{bus}", "{rst}", "{depth}", "{color}"],
+                    "returns": "screen",
+                    "ok": {"not": "NULL"}
+                }
+            ],
+            "supports": {"depth_bits": [12, 16, 18]},
+            "controls": {
+                "orientation": {
+                    "call": "dgx_st7735_orientation",
+                    "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
+                    "ok": "none"
+                }
+            },
+            "setup": [
+                {"control": "orientation"},
+                {"line": "backlight", "notes": "After the first frame: the driver does not light it."}
+            ]
+        },
+        "st7789": {
+            "header": "drivers/st7789.h",
+            "on": ["spi", "p8"],
+            "select": ["DGX_ENABLE_SPI_ST7789"],
+            "init": [
+                {
+                    "call": "dgx_st7789_init",
+                    "args": ["{bus}", "{rst}", "{depth}", "{color}", "ST7789_RESOLUTION_{width}x{height}"],
+                    "returns": "screen",
+                    "ok": {"not": "NULL"}
+                }
+            ],
+            "supports": {"depth_bits": [12, 16, 18], "resolution": ["240x240", "240x320", "320x240"]},
+            "controls": {
+                "orientation": {
+                    "call": "dgx_st7789_orientation",
+                    "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
+                    "ok": "none"
+                }
+            },
+            "setup": [
+                {"control": "orientation"},
+                {"line": "backlight", "notes": "After the first frame: the driver does not light it."}
+            ],
+            "adapter": {"kind": "panel"}
+        },
+        "st77916": {
+            "header": "drivers/st77916.h",
+            "on": ["qspi", "spi"],
+            "select": ["DGX_ENABLE_ST77916"],
+            "init": [
+                {
+                    "call": "dgx_st77916_init",
+                    "args": ["{bus}", "{rst}", "{backlight}", "{depth}", "{color}"],
+                    "returns": "screen",
+                    "ok": {"not": "NULL"}
+                }
+            ],
+            "supports": {"depth_bits": [16, 18]},
+            "controls": {
+                "orientation": {
+                    "call": "dgx_st77916_orientation",
+                    "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
+                    "ok": "none"
+                }
+            },
+            "setup": [{"control": "orientation"}]
+        },
+        "st7920": {
+            "header": "drivers/st7920.h",
+            "on": ["spi"],
+            "select": ["DGX_ENABLE_ST7920"],
+            "init": [
+                {
+                    "call": "dgx_st7920_init",
+                    "args": ["{bus}", "{rst}", "{cs}"],
+                    "returns": "screen",
+                    "ok": {"not": "NULL"}
+                }
+            ],
+            "supports": {"depth_bits": [1]},
+            "controls": {
+                "orientation": {
+                    "call": "dgx_st7920_orientation",
+                    "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
+                    "ok": "none"
+                }
+            },
+            "setup": [{"control": "orientation"}]
+        }
+    },
+    "adapter": {
+        "version": "^0.10.1",
+        "symbol": "BOARD_DISPLAY_GRAPHICS",
+        "requires": ["esp_driver_gpio"],
+        "notes": "0.10.0 is not in the registry.",
+        "headers": ["board_display.h"],
+        "public": "boards_dgx.h",
+        "sources": {"BOARD_DISPLAY_GRAPHICS": ["board_display.c"]}
+    },
+    "checked": {
+        "api": {
+            "level": "vendor-code",
+            "source": "include/drivers/, include/bus/ and Kconfig of esp32-component-dgx 0.10.2",
+            "date": "2026-10-31"
+        },
+        "history": {
+            "level": "vendor-code",
+            "covers": ["history"],
+            "source": "headers of include/ at every tag of esp32-component-dgx: the chips, the buses and the arguments of their init; before tag 0.1.0 nothing is known",
+            "date": "2026-10-31"
+        }
+    },
+    "history": [
+        {"before": "0.9.3", "chips": {"st77916": null}},
+        {
+            "before": "0.9.0",
+            "chips": {
+                "st7789": {
+                    "init": [
+                        {
+                            "call": "dgx_st7789_init",
+                            "args": ["{bus}", "{rst}", "{depth}", "{color}"],
+                            "returns": "screen",
+                            "ok": {"not": "NULL"}
+                        }
+                    ],
+                    "supports": {"resolution": null}
+                }
+            },
+            "notes": "dgx_st7789_init had no resolution."
+        },
+        {"before": "0.8.2", "chips": {"nv3041a": null}, "transports": {"qspi": null}},
+        {"before": "0.8.0", "transports": {"spi": {"shared": null}, "i2c": {"shared": null}}},
+        {"before": "0.6.3", "chips": {"sh1106": null, "ssd1309": null}},
+        {"before": "0.6.2", "chips": {"jd9365": null}},
+        {
+            "before": "0.5.2",
+            "chips": {
+                "jd9165": {
+                    "init": [
+                        {
+                            "call": "dgx_jd9165_init",
+                            "args": ["{bus}", "{rst}", "{depth}", "{color}"],
+                            "returns": "screen",
+                            "ok": {"not": "NULL"}
+                        }
+                    ]
+                }
+            },
+            "notes": "dgx_jd9165_init had no frames."
+        },
+        {"before": "0.5.0", "chips": {"jd9165": null}, "transports": {"dsi": null}}
+    ],
+    "versions": {
+        "0.10.2": {"frameworks": {"esp-idf": ">=5.2.0"}},
+        "0.10.1": {"frameworks": {"esp-idf": ">=5.2.0"}},
+        "0.10.0": {"via": ["git"]},
+        "0.9.3": {"frameworks": {"esp-idf": ">=5.2.0"}},
+        "0.9.1": {"via": ["git"]},
+        "0.9.0": {"via": ["git"]},
+        "0.8.3": {"frameworks": {"esp-idf": ">=5.2.0"}},
+        "0.8.2": {"frameworks": {"esp-idf": ">=5.2.0"}},
+        "0.8.1": {"frameworks": {"esp-idf": ">=5.2.0"}},
+        "0.8.0": {"frameworks": {"esp-idf": ">=5.2.0"}},
+        "0.7.3": {"frameworks": {"esp-idf": ">=5.2.0"}},
+        "0.7.2": {"via": ["git"]},
+        "0.7.1": {"via": ["git"]},
+        "0.7.0": {"frameworks": {"esp-idf": ">=5.2.0"}},
+        "0.6.6": {"frameworks": {"esp-idf": ">=5.2.0"}},
+        "0.6.5": {"frameworks": {"esp-idf": ">=5.2.0"}},
+        "0.6.4": {"via": ["git"]},
+        "0.6.3": {"via": ["git"]},
+        "0.6.2": {"via": ["git"]},
+        "0.6.1": {"frameworks": {"esp-idf": ">=5.2.0"}},
+        "0.6.0": {"frameworks": {"esp-idf": ">=5.2.0"}},
+        "0.5.7": {"frameworks": {"esp-idf": ">=5.2.0"}},
+        "0.5.6": {"via": ["git"]},
+        "0.5.5": {"via": ["git"]},
+        "0.5.4": {"frameworks": {"esp-idf": ">=5.2.0"}},
+        "0.5.3": {"frameworks": {"esp-idf": ">=5.2.0"}},
+        "0.5.2": {"frameworks": {"esp-idf": ">=5.2.0"}},
+        "0.5.1": {"via": ["git"]},
+        "0.5.0": {"via": ["git"]},
+        "0.4.9": {"via": ["git"]},
+        "0.4.8": {"via": ["git"]},
+        "0.4.7": {"via": ["git"]},
+        "0.4.6": {"via": ["git"]},
+        "0.4.5": {"via": ["git"]},
+        "0.4.4": {"via": ["git"]},
+        "0.4.3": {"via": ["git"]},
+        "0.4.2": {"via": ["git"]},
+        "0.4.1": {"via": ["git"]},
+        "0.4.0": {"via": ["git"]},
+        "0.3.1": {"frameworks": {"esp-idf": ">=5.2.0"}},
+        "0.3.0": {"via": ["git"]},
+        "0.2.0": {"frameworks": {"esp-idf": ">=5.2.0"}},
+        "0.1.1": {"via": ["git"]},
+        "0.1.0": {"via": ["git"]},
+        "0.0.12": {"frameworks": {"esp-idf": ">=5.0.0"}},
+        "0.0.10": {"frameworks": {"esp-idf": ">=5.0.0"}},
+        "0.0.7": {"frameworks": {"esp-idf": ">=5.0.0"}},
+        "0.0.6": {"frameworks": {"esp-idf": ">=5.0.0"}},
+        "0.0.4": {"frameworks": {"esp-idf": ">=5.0.0"}},
+        "0.0.2": {"frameworks": {"esp-idf": ">=5.0.0"}}
+    }
+}

@@ -1,4 +1,4 @@
-# The Kconfig of the boards, made by tools/boards_gen.py --all from boards-data/: do not edit
+# The Kconfig of the boards, made by tools/boards_gen.py --all from catalog/: do not edit
 # by hand. One choice of the board, one option a module, and beside them the hidden symbols
 # the rules of idf_component.yml look at, so that the parts a board needs others than this
 # component come only with the board that needs them (the model of esp-bsp's bsp_selector).
@@ -8,7 +8,7 @@ choice BOARD_SELECT
     prompt "Board the program runs on"
     default BOARD_SELECT_NONE
     help
-        One board of boards-data/, or none (the program sets its hardware up
+        One board of catalog/boards/, or none (the program sets its hardware up
         itself). The board's own sdkconfig.defaults carries the line that
         chooses it here (CONFIG_BOARD_SELECT_<BOARD>=y, tools/board_select.py
         puts the file into the project); what the choice takes with it, the
@@ -19,7 +19,7 @@ choice BOARD_SELECT
 config BOARD_SELECT_NONE
     bool "None: the program sets its hardware up itself"
 
-config BOARD_SELECT_CYD
+config BOARD_SELECT_CYD_S028R
     bool "CYD (ESP32-2432S028R): 320x240 ILI9341, XPT2046 touch, DAC sound"
     depends on IDF_TARGET_ESP32
     select DGX_ENABLE_SPI
@@ -31,17 +31,17 @@ config BOARD_SELECT_CYD
         to pins no host is left for (spi3 is the touch's): kept as data for the
         program.
 
-config BOARD_SELECT_JC1060P470
-    bool "Guition JC1060P470: 1024x600 JD9165, GT911 touch, ES8311 sound"
+config BOARD_SELECT_JC1060P470C
+    bool "Guition JC1060P470C: 1024x600 JD9165, GT911 touch, ES8311 sound"
     depends on IDF_TARGET_ESP32P4
     select DGX_ENABLE_DSI
     select DGX_ENABLE_JD9165
     help
         7-inch 1024x600 JD9165 on MIPI-DSI, GT911 touch, ES8311 sound: an
-        ESP32-P4 with Wi-Fi and BLE in an ESP32-C6 beside it.
+        ESP32-P4 with Wi-Fi and BLE in an ESP32-C6 on the same module.
 
-config BOARD_SELECT_JC4827W543
-    bool "Guition JC4827W543: 480x272 NV3041A, GT911 touch"
+config BOARD_SELECT_JC4827W543C
+    bool "Guition JC4827W543C: 480x272 NV3041A, GT911 touch, I2S amplifier sound"
     depends on IDF_TARGET_ESP32S3
     select DGX_ENABLE_SPI
     select DGX_ENABLE_NV3041A
@@ -58,6 +58,13 @@ config BOARD_SELECT_JC8012P4A1C
         10.1-inch 800x1280 JD9365 on MIPI-DSI (lying 1280x800), GSL3680 touch
         (firmware written into it at start), ES8311 sound.
 
+config BOARD_SELECT_LOCAL_TERMINAL
+    bool "Local terminal: ESP32, 2004 LCD, two PN532: 20x4 HD44780"
+    depends on IDF_TARGET_ESP32
+    help
+        An attendance terminal: an ESP32 dev board, two PN532 on SPI2 and SPI3
+        and a 2004 LCD on I2C.
+
 endchoice
 
 # A module is not a board of its own: it rides whichever board the choice above picked, and
@@ -72,19 +79,19 @@ config BOARD_MODULE_LCD2004_PCF8574
 
 # Hidden symbols the rules of idf_component.yml and CMakeLists.txt look at: the board chosen,
 # as a number (a number is easier for a rule to compare).
-config BOARD_CYD
+config BOARD_CYD_S028R
     int
-    default 1 if BOARD_SELECT_CYD
+    default 1 if BOARD_SELECT_CYD_S028R
     default 0
 
-config BOARD_JC1060P470
+config BOARD_JC1060P470C
     int
-    default 1 if BOARD_SELECT_JC1060P470
+    default 1 if BOARD_SELECT_JC1060P470C
     default 0
 
-config BOARD_JC4827W543
+config BOARD_JC4827W543C
     int
-    default 1 if BOARD_SELECT_JC4827W543
+    default 1 if BOARD_SELECT_JC4827W543C
     default 0
 
 config BOARD_JC8012P4A1C
@@ -92,18 +99,23 @@ config BOARD_JC8012P4A1C
     default 1 if BOARD_SELECT_JC8012P4A1C
     default 0
 
-# What the chosen board and the modules have, as the rules need it: a frame buffer display
+config BOARD_LOCAL_TERMINAL
+    int
+    default 1 if BOARD_SELECT_LOCAL_TERMINAL
+    default 0
+
+# What the chosen board and the modules have, as the rules need it: a graphics display
 # brings DGX, a touch brings DGX-DI and its driver, sound with an ES8311 brings esp_codec_dev,
 # a character display brings hd44780. Derived from the data, so the data of a board and the
 # rules cannot drift apart.
-config BOARD_DISPLAY_FRAMEBUFFER
+config BOARD_DISPLAY_GRAPHICS
     int
-    default 1 if BOARD_SELECT_CYD || BOARD_SELECT_JC1060P470 || BOARD_SELECT_JC4827W543 || BOARD_SELECT_JC8012P4A1C
+    default 1 if BOARD_SELECT_CYD_S028R || BOARD_SELECT_JC1060P470C || BOARD_SELECT_JC4827W543C || BOARD_SELECT_JC8012P4A1C
     default 0
 
 config BOARD_DISPLAY_HD44780
     int
-    default 1 if BOARD_MODULE_LCD2004_PCF8574
+    default 1 if BOARD_SELECT_LOCAL_TERMINAL || BOARD_MODULE_LCD2004_PCF8574
     default 0
 
 config BOARD_MODULE_CHARACTER_DISPLAY
@@ -111,24 +123,49 @@ config BOARD_MODULE_CHARACTER_DISPLAY
     default 1 if BOARD_MODULE_LCD2004_PCF8574
     default 0
 
+config BOARD_SOUND_DAC
+    int
+    default 1 if BOARD_SELECT_CYD_S028R
+    default 0
+
 config BOARD_SOUND_ES8311
     int
-    default 1 if BOARD_SELECT_JC1060P470 || BOARD_SELECT_JC8012P4A1C
+    default 1 if BOARD_SELECT_JC1060P470C || BOARD_SELECT_JC8012P4A1C
+    default 0
+
+config BOARD_SOUND_I2S
+    int
+    default 1 if BOARD_SELECT_JC4827W543C
     default 0
 
 config BOARD_TOUCH
     int
-    default 1 if BOARD_SELECT_CYD || BOARD_SELECT_JC1060P470 || BOARD_SELECT_JC4827W543 || BOARD_SELECT_JC8012P4A1C
+    default 1 if BOARD_SELECT_CYD_S028R || BOARD_SELECT_JC1060P470C || BOARD_SELECT_JC4827W543C || BOARD_SELECT_JC8012P4A1C
+    default 0
+
+config BOARD_TOUCH_ESP_LCD
+    int
+    default 1 if BOARD_SELECT_CYD_S028R || BOARD_SELECT_JC1060P470C || BOARD_SELECT_JC4827W543C
+    default 0
+
+config BOARD_TOUCH_GSL3680
+    int
+    default 1 if BOARD_SELECT_JC8012P4A1C
     default 0
 
 config BOARD_TOUCH_GT911
     int
-    default 1 if BOARD_SELECT_JC1060P470 || BOARD_SELECT_JC4827W543
+    default 1 if BOARD_SELECT_JC1060P470C || BOARD_SELECT_JC4827W543C
+    default 0
+
+config BOARD_TOUCH_SPI
+    int
+    default 1 if BOARD_SELECT_CYD_S028R
     default 0
 
 config BOARD_TOUCH_XPT2046
     int
-    default 1 if BOARD_SELECT_CYD
+    default 1 if BOARD_SELECT_CYD_S028R
     default 0
 
 endmenu

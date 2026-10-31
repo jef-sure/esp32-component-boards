@@ -1,0 +1,41 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "oled_1bit",
+    "title": "SSD1306",
+    "mcu": {
+        "target": "esp32s3"
+    },
+    "checked": {
+        "pins": {
+            "level": "unchecked",
+            "source": "shape only"
+        }
+    },
+    "buses": {
+        "i2c": {
+            "i2c0": {
+                "sda": 8,
+                "scl": 9
+            }
+        }
+    },
+    "devices": {
+        "oled": {
+            "chip": "ssd1306",
+            "on": {
+                "i2c.i2c0": {}
+            },
+            "config": {
+                "panel": {
+                    "width": 128,
+                    "height": 64,
+                    "mm_w": 22,
+                    "mm_h": 11
+                },
+                "primary": true
+            }
+        }
+    }
+}

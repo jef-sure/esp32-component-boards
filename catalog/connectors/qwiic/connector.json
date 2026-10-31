@@ -1,0 +1,17 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "connector",
+    "name": "qwiic",
+    "title": "Qwiic",
+    "pitch_mm": 1.0,
+    "volts": 3.3,
+    "pins": ["GND", "3V3", "SDA", "SCL"],
+    "checked": {
+        "facts": {
+            "level": "community",
+            "source": "the same page of Adafruit: its contacts follow Qwiic; 3.3 V only by learn.adafruit.com/introducing-adafruit-stemma-qt",
+            "date": "2026-10-31"
+        }
+    }
+}

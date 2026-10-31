@@ -4,8 +4,11 @@
     "kind": "device",
     "name": "ili9341",
     "title": "ILI9341",
+    "maker": "ilitek",
+    "part": "ILI9341",
+    "compat": "ilitek,ili9341",
     "class": "display",
-    "on": {"spi": {"required": true}},
+    "on": {"spi": {}, "p8": {}},
     "config": {"kind": "graphics"},
     "controls": {"orientation": {"how": "driver", "read": "none"}},
     "checked": {"facts": {"level": "hardware", "source": "boards-data, flashed or checked against the schematic"}}

@@ -1,0 +1,14 @@
+{
+    "expect": "'on' is a required property",
+    "board": {
+        "format": "jef-sure/boards",
+        "format_version": 2,
+        "kind": "board",
+        "name": "camera_on_nothing",
+        "title": "A camera on no bus",
+        "mcu": {"target": "esp32s3"},
+        "checked": {"pins": {"level": "unchecked", "source": "shape only"}},
+        "buses": {},
+        "devices": {"camera": {"class": "camera"}}
+    }
+}

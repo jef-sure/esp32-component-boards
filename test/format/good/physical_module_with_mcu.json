@@ -1,0 +1,11 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "mcu": {"target": "esp32s3"},
+    "checked": {"pins": {"level": "unchecked", "source": "shape only"}},
+    "name": "physical_module_with_mcu",
+    "title": "A module with a chip of its own on a line of its own",
+    "buses": {"sdio": {"sdio0": {"clk": 18, "cmd": 19, "d0": 14, "d1": 15, "d2": 16, "d3": 17}}},
+    "modules": {"wifi": {"module": "radio_with_mcu", "on": {"sdio.sdio0": {}}}}
+}

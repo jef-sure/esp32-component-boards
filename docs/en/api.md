@@ -23,7 +23,7 @@ and for a settings page, not for deciding what to do: ask by kind instead.
 ```c
 struct board_display {
     int   width, height; /* as it lies, in pixels */
-    int   mm_w, mm_h;    /* as it lies, in millimetres */
+    int   mm_w, mm_h;    /* as it lies, in millimetres; 0 when the data has no size */
     int   dir_x, dir_y;  /* BOARD_DIR_FORWARD: left to right, top to bottom; BOARD_DIR_BACKWARD: the other way */
     bool  swap_xy;
     const char *name; /* its name in the data, for the log */
@@ -177,7 +177,7 @@ same task: the display holds the bus until the batch ends.
 
 `board_spi_taken` says whether a host is claimed by any bus of the board, SPI or
 QSPI, so a free host can be found.
-`board_bus_get("nfc_in", "cs", &pin)` gives the lines of a device the component does
+`board_bus_get("nfc_in_nfc", "cs", &pin)` gives the lines of a device the component does
 not set up, by its name in the data.
 `board_bus_get("sdio.sdio0", "clk", &pin)` reads any number of any bus
 the data names, including the kinds the component does not set up.

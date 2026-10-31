@@ -1,0 +1,39 @@
+{
+  "expect": "is not of type 'array'",
+  "board": {
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "mcu": {
+      "target": "esp32s3"
+    },
+    "checked": {
+      "pins": {
+        "level": "unchecked",
+        "source": "shape only"
+      }
+    },
+    "devices": {
+      "boot": {
+        "class": "button",
+        "pins": {
+          "in": {
+            "gpio": 0,
+            "active": "low"
+          }
+        }
+      }
+    },
+    "name": "price_one_number",
+    "title": "A price without a range",
+    "price": {
+      "one": {
+        "shop": "AliExpress",
+        "currency": "EUR",
+        "range": 3,
+        "date": "2026-10-31",
+        "source": "shape only"
+      }
+    }
+  }
+}

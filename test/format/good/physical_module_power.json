@@ -1,0 +1,12 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "mcu": {"target": "esp32s3"},
+    "checked": {"pins": {"level": "unchecked", "source": "shape only"}},
+    "name": "physical_module_power",
+    "title": "A module with its own regulator on a line of the board",
+    "buses": {"i2c": {"i2c0": {"sda": 8, "scl": 9}}},
+    "power": [{"name": "5V", "source": "usb", "mv": 5000, "feeds": ["reader_VIN"]}],
+    "modules": {"reader": {"module": "powered_reader", "on": {"i2c.i2c0": {}}}}
+}

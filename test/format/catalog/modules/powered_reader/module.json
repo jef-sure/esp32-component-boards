@@ -1,0 +1,15 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "powered_reader",
+    "title": "A reader with a regulator of its own",
+    "maker": "someone",
+    "part": "RD-1",
+    "revision": "V2",
+    "power": [
+        {"name": "VIN", "source": "connector"},
+        {"name": "3V3", "from": "VIN", "through": "reg", "regulator": "ldo", "mv": 3300, "feeds": ["chip"]}
+    ],
+    "devices": {"chip": {"class": "nfc", "on": {"i2c": {"address": "0x24"}}}, "reg": {"class": "other", "ref": "U2"}}
+}

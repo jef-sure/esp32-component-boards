@@ -1,0 +1,11 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "fuel_gauge",
+    "title": "A battery gauge on I2C",
+    "mcu": {"target": "esp32s3"},
+    "checked": {"pins": {"level": "unchecked", "source": "shape only"}},
+    "buses": {"i2c": {"i2c0": {"sda": 8, "scl": 9}}},
+    "devices": {"battery": {"class": "fuel_gauge", "on": {"i2c.i2c0": {"address": "0x55"}}}}
+}

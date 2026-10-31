@@ -1,0 +1,17 @@
+{
+    "expect": "share a window on GPIO 5",
+    "board": {
+        "format": "jef-sure/boards",
+        "format_version": 2,
+        "kind": "board",
+        "name": "ladder_windows_overlap",
+        "title": "Two buttons read the same voltage",
+        "mcu": {"target": "esp32s3"},
+        "checked": {"pins": {"level": "unchecked", "source": "shape only"}},
+        "buses": {},
+        "devices": {
+            "a": {"class": "button", "pins": {"in": {"gpio": 5, "analog": [190, 700]}}},
+            "b": {"class": "button", "pins": {"in": {"gpio": 5, "analog": [600, 960]}}}
+        }
+    }
+}

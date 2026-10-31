@@ -1,0 +1,16 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "ladder_buttons",
+    "title": "Buttons on a resistor ladder: windows may touch",
+    "mcu": {"target": "esp32s3"},
+    "checked": {"pins": {"level": "unchecked", "source": "shape only"}},
+    "buses": {},
+    "devices": {
+        "mode": {"class": "button", "pins": {"in": {"gpio": 5, "analog": [190, 600]}}},
+        "play": {"class": "button", "pins": {"in": {"gpio": 5, "analog": [600, 960]}}},
+        "set": {"class": "button", "pins": {"in": {"gpio": 5, "analog": [960, 1380]}}},
+        "mute": {"class": "button", "pins": {"in": {"gpio": 5, "analog": [1380, 2195]}}}
+    }
+}

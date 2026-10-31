@@ -71,7 +71,7 @@ def tree(board):
     if display:
         if boards_gen.is_pixel(display):
             w, h, mm_w, mm_h = boards_gen.lying(display)
-            lines.append(f"  display: {display['driver']} {w}x{h} px, {mm_w}x{mm_h} mm as it lies"
+            lines.append(f"  display: {display['driver']} {w}x{h} px{f', {mm_w}x{mm_h} mm' if mm_w else ''} as it lies"
                          + (f", rst {display['rst']}" if display.get("rst") is not None else "")
                          + (f", backlight {display['backlight']}" if display.get("backlight") is not None else ""))
         else:

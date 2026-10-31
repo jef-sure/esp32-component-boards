@@ -1,0 +1,10 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "radio_with_mcu",
+    "title": "A radio with a chip of its own",
+    "mcu": {"target": "esp32c6"},
+    "power": [{"name": "VIN", "source": "connector", "mv": 3300, "feeds": ["mcu"]}],
+    "devices": {"radio": {"class": "radio", "on": {"sdio": {}}}}
+}

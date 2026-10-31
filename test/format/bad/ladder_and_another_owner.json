@@ -1,0 +1,20 @@
+{
+    "expect": "GPIO 5 has two owners",
+    "board": {
+        "format": "jef-sure/boards",
+        "format_version": 2,
+        "kind": "board",
+        "name": "ladder_and_another_owner",
+        "title": "A ladder on the line of an LED",
+        "mcu": {"target": "esp32s3"},
+        "checked": {"pins": {"level": "unchecked", "source": "shape only"}},
+        "buses": {},
+        "devices": {
+            "mode": {"class": "button", "pins": {"in": {"gpio": 5, "analog": [190, 600]}}},
+            "play": {"class": "button", "pins": {"in": {"gpio": 5, "analog": [600, 960]}}},
+            "set": {"class": "button", "pins": {"in": {"gpio": 5, "analog": [960, 1380]}}},
+            "mute": {"class": "button", "pins": {"in": {"gpio": 5, "analog": [1380, 2195]}}},
+            "led": {"class": "led", "pins": {"data": 5}}
+        }
+    }
+}

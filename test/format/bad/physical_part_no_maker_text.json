@@ -1,0 +1,23 @@
+{
+    "expect": "does not match",
+    "board": {
+        "format": "jef-sure/boards",
+        "format_version": 2,
+        "kind": "board",
+        "mcu": {"target": "esp32s3"},
+        "checked": {"pins": {"level": "unchecked", "source": "shape only"}},
+        "name": "physical_part_no_maker_text",
+        "title": "A maker with capitals and spaces",
+        "buses": {"spi": {"spi2": {"mosi": 12, "miso": "nc", "sclk": 13}}},
+        "devices": {
+            "lcd": {
+                "chip": "st7789",
+                "on": {"spi.spi2": {"cs": 10}},
+                "pins": {"dc": 11},
+                "config": {"primary": true, "panel": {"width": 240, "height": 320}},
+                "controls": {"orientation": {"start": {"x": "left-right", "y": "top-bottom", "swap": false}}}
+            },
+            "reg": {"class": "other", "maker": "Advanced Monolithic"}
+        }
+    }
+}

@@ -30,8 +30,11 @@ def version_of(entry):
 
 
 def registry_versions(record):
+    """The versions of the registry in the form of the catalog, and the license of the version described."""
     with urllib.request.urlopen(REGISTRY.format(**record), timeout=REGISTRY_TIMEOUT_S) as reply:
-        return {entry["version"]: version_of(entry) for entry in json.load(reply)["versions"]}
+        entries = json.load(reply)["versions"]
+    described = next((entry for entry in entries if entry["version"] == record.get("described")), {})
+    return {entry["version"]: version_of(entry) for entry in entries}, (described.get("license") or {}).get("name")
 
 
 def tagged_versions(way):
@@ -50,7 +53,9 @@ def main():
         ways = {way["via"]: way for way in record["install"]}
         if "registry" not in ways:
             continue
-        versions = registry_versions(record)
+        versions, license_name = registry_versions(record)
+        if license_name:
+            record["license"] = license_name
         for version, entry in (record.get("versions") or {}).items():
             versions.setdefault(version, entry)
         for version in tagged_versions(ways.get("git", {})):

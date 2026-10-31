@@ -7,6 +7,7 @@
     "name": "esp_driver_dac",
     "title": "DAC driver of ESP-IDF",
     "url": "https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/peripherals/dac.html",
+    "license": "Apache-2.0",
     "install": [{"via": "platform"}],
     "described": "6.1",
     "chips": {"esp32_dac": {"header": "driver/dac_continuous.h", "adapter": {"kind": "dac"}}},

@@ -1,0 +1,28 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "mcu": {"target": "esp32s3"},
+    "checked": {"pins": {"level": "unchecked", "source": "shape only"}},
+    "name": "physical_switched_rail",
+    "title": "A GPIO switches the line of the peripherals",
+    "buses": {"spi": {"spi2": {"mosi": 12, "miso": "nc", "sclk": 13}}},
+    "power": [
+        {"name": "VBAT", "source": "battery", "mv": 3700},
+        {"name": "PERIPH", "from": "VBAT", "line": 14, "level": 1, "mv": 3300, "delay_ms": 100, "feeds": ["lcd"]},
+        {
+            "line": 10,
+            "level": 1,
+            "why": "CS of the display, before the bus starts: a strobe on a line the display owns."
+        }
+    ],
+    "devices": {
+        "lcd": {
+            "chip": "st7789",
+            "on": {"spi.spi2": {"cs": 10}},
+            "pins": {"dc": 11},
+            "config": {"primary": true, "panel": {"width": 240, "height": 320}},
+            "controls": {"orientation": {"start": {"x": "left-right", "y": "top-bottom", "swap": false}}}
+        }
+    }
+}

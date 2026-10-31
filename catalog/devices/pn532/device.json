@@ -4,6 +4,8 @@
     "kind": "device",
     "name": "pn532",
     "title": "NXP PN532",
+    "maker": "nxp",
+    "part": "PN532",
     "class": "nfc",
     "on": {"i2c": {"address": "0x24"}, "spi": {}, "uart": {}},
     "provides": {

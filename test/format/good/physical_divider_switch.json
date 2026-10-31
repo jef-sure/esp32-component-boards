@@ -1,0 +1,17 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "mcu": {"target": "esp32s3"},
+    "checked": {"pins": {"level": "unchecked", "source": "shape only"}},
+    "name": "physical_divider_switch",
+    "title": "A divider fed only for a reading",
+    "devices": {
+        "battery": {
+            "class": "battery_adc",
+            "pins": {"in": 5},
+            "config": {"divider": {"top_ohm": 100000, "bottom_ohm": 100000, "switch": 15, "settle_us": 100}}
+        }
+    },
+    "buses": {}
+}

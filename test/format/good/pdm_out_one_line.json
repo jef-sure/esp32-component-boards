@@ -1,0 +1,11 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "pdm_out_one_line",
+    "title": "PDM out with no clock line, into a filter",
+    "mcu": {"target": "esp32s3"},
+    "checked": {"pins": {"level": "unchecked", "source": "shape only"}},
+    "buses": {"i2s": {"i2s0": {"clk": "nc", "dout": 9}}},
+    "devices": {"sound": {"chip": "i2s_amp", "on": {"i2s.i2s0": {"format": "pdm"}}, "config": {"sample_rate": 16000}}}
+}

@@ -7,6 +7,7 @@
     "name": "esp_lcd_touch_xpt2046",
     "title": "esp_lcd_touch XPT2046",
     "url": "https://github.com/atanisoft/esp_lcd_touch_xpt2046",
+    "license": "MIT",
     "install": [
         {"via": "registry"},
         {"via": "git", "url": "https://github.com/atanisoft/esp_lcd_touch_xpt2046.git", "ref": "v{version}"}

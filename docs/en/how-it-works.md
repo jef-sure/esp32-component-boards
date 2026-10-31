@@ -147,5 +147,5 @@ Three layers, from fast to real:
    without ESP-IDF.
 3. CI (`.github/workflows/build.yml`): `examples/hello_board` is built for
    every board, with and without the module, under two versions of ESP-IDF,
-   and `examples/hello_lvgl` for every board.
+   and `examples/hello_lvgl` for every board with a graphics display.
    Only this one proves the glue links.

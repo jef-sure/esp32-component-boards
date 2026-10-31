@@ -1,0 +1,52 @@
+{
+  "format": "jef-sure/boards",
+  "format_version": 2,
+  "kind": "board",
+  "mcu": {
+    "target": "esp32s3"
+  },
+  "checked": {
+    "pins": {
+      "level": "unchecked",
+      "source": "shape only"
+    }
+  },
+  "devices": {
+    "boot": {
+      "class": "button",
+      "pins": {
+        "in": {
+          "gpio": 0,
+          "active": "low"
+        }
+      }
+    }
+  },
+  "name": "price_by_quantity",
+  "title": "Prices of one board by quantity",
+  "tariff": "854370",
+  "price": {
+    "one": {
+      "shop": "AliExpress",
+      "currency": "EUR",
+      "range": [
+        1.5,
+        2
+      ],
+      "date": "2026-10-31",
+      "source": "shape only"
+    },
+    "ten": {
+      "shop": "AliExpress",
+      "currency": "EUR",
+      "range": [
+        1,
+        1.5
+      ],
+      "date": "2026-10-31",
+      "source": "shape only",
+      "qty": 10,
+      "notes": "A batch."
+    }
+  }
+}

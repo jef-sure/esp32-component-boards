@@ -1,0 +1,14 @@
+{
+    "expect": "too short",
+    "board": {
+        "format": "jef-sure/boards",
+        "format_version": 2,
+        "kind": "board",
+        "name": "chip_try_of_one",
+        "title": "Nothing to try",
+        "mcu": {"target": "esp32s3"},
+        "checked": {"pins": {"level": "unchecked", "source": "shape only"}},
+        "buses": {"i2c": {"i2c0": {"sda": 8, "scl": 9}}},
+        "devices": {"touch": {"class": "touch", "chip_try": ["gt911"], "on": {"i2c.i2c0": {}}}}
+    }
+}

@@ -1,0 +1,14 @@
+{
+    "expect": "the catalog has no devices entry nosuch",
+    "board": {
+        "format": "jef-sure/boards",
+        "format_version": 2,
+        "kind": "board",
+        "name": "chip_try_unknown",
+        "title": "A chip nobody describes",
+        "mcu": {"target": "esp32s3"},
+        "checked": {"pins": {"level": "unchecked", "source": "shape only"}},
+        "buses": {"i2c": {"i2c0": {"sda": 8, "scl": 9}}},
+        "devices": {"touch": {"class": "touch", "chip_try": ["gt911", "nosuch"], "on": {"i2c.i2c0": {}}}}
+    }
+}

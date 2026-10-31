@@ -1,0 +1,52 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "library",
+    "ecosystem": "esp-idf",
+    "owner": "guition",
+    "name": "esp_cam_sensor",
+    "title": "esp_cam_sensor with OV02C10, the maker's copy",
+    "url": "https://github.com/sukesh-ak/JC8012P4A1-GUITION-ESP32-P4_ESP32-C6",
+    "install": [
+        {
+            "via": "git",
+            "url": "https://github.com/sukesh-ak/JC8012P4A1-GUITION-ESP32-P4_ESP32-C6.git",
+            "path": "1-Demo/idf-examples/common_components/esp_cam_sensor",
+            "notes": "A public copy of an older archive of the maker, with esp_cam_sensor 0.9.0. The archive of the board has 2.1.0 under 1-Demo/IDF_5.5.4 and gives no address to download it from."
+        }
+    ],
+    "described": "2.1.0",
+    "chips": {
+        "ov02c10": {
+            "header": "ov02c10.h",
+            "on": ["csi", "i2c"],
+            "select": ["CONFIG_CAMERA_OV02C10"],
+            "init": [
+                {
+                    "call": "ov02c10_detect",
+                    "args": ["{config}"],
+                    "returns": "esp_cam_sensor_device_t *",
+                    "ok": {"not": "NULL"},
+                    "notes": "ov02c10.h declares sc2336_detect by mistake; this function is in ov02c10.c."
+                }
+            ],
+            "supports": {"modes": ["raw10_1288x728_30_1lane", "raw10_1920x1080_30_1lane", "raw10_1920x1080_30_2lane"]},
+            "notes": "espressif/esp_cam_sensor has no OV02C10 at 2.1.0 or 2.6.0: the maker added sensors/ov02c10 to its copy of 2.1.0."
+        }
+    },
+    "checked": {
+        "api": {
+            "level": "vendor-code",
+            "source": "sensors/ov02c10 of the archive of the JC8012P4A1C, compared with esp_cam_sensor 2.1.0 of the registry",
+            "date": "2026-10-31"
+        }
+    },
+    "versions": {
+        "2.1.0": {
+            "via": ["archive"],
+            "requires": {"esp-idf/espressif/cmake_utilities": "0.*", "esp-idf/espressif/esp_sccb_intf": ">=0.0.5"},
+            "frameworks": {"esp-idf": ">=5.3"},
+            "targets": ["esp32p4", "esp32s3", "esp32c3", "esp32c5", "esp32c6", "esp32c61", "esp32s31"]
+        }
+    }
+}

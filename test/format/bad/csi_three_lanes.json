@@ -1,0 +1,14 @@
+{
+    "expect": "3 is not one of",
+    "board": {
+        "format": "jef-sure/boards",
+        "format_version": 2,
+        "kind": "board",
+        "name": "csi_three_lanes",
+        "title": "The chip has two",
+        "mcu": {"target": "esp32p4"},
+        "checked": {"pins": {"level": "unchecked", "source": "shape only"}},
+        "buses": {"csi": {"csi0": {"lanes": 3}}},
+        "devices": {"camera": {"class": "camera", "on": {"csi.csi0": {}}}}
+    }
+}

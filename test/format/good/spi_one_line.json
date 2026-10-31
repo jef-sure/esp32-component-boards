@@ -1,0 +1,21 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "spi_one_line",
+    "title": "Data both ways on MOSI, DC on the line of MISO",
+    "mcu": {"target": "esp32s3"},
+    "checked": {"pins": {"level": "unchecked", "source": "shape only"}},
+    "buses": {"spi": {"spi2": {"mosi": 37, "miso": 35, "sclk": 36}}},
+    "devices": {
+        "lcd": {
+            "chip": "st7789",
+            "on": {"spi.spi2": {"cs": 3, "sio": true}},
+            "pins": {"dc": 35},
+            "config": {"primary": true, "panel": {"width": 240, "height": 320}},
+            "controls": {"orientation": {"start": {"x": "left-right", "y": "top-bottom", "swap": false}}}
+        },
+        "sd": {"class": "storage", "on": {"spi.spi2": {"cs": 4}}}
+    },
+    "shared_pins": {"dc_on_miso": {"line": 35, "devices": ["lcd", "sd"]}}
+}

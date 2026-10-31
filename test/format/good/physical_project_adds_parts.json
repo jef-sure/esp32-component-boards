@@ -1,0 +1,16 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "project",
+    "name": "physical_project_adds_parts",
+    "title": "A project adds what the board has not",
+    "extends": "cyd_s028r",
+    "devices": {
+        "supply": {
+            "class": "other",
+            "part": "a USB supply of 5 V",
+            "notes": "Bought apart: a list of parts reads it like any other."
+        },
+        "case": {"class": "other", "part": "a printed case"}
+    }
+}

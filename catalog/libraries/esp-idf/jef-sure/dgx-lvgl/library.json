@@ -7,6 +7,7 @@
     "name": "dgx-lvgl",
     "title": "DGX-LVGL",
     "url": "https://github.com/jef-sure/esp32-component-dgx-lvgl",
+    "license": "MIT",
     "install": [
         {"via": "registry"},
         {"via": "git", "url": "https://github.com/jef-sure/esp32-component-dgx-lvgl.git", "ref": "{version}"}

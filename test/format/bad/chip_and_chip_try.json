@@ -1,0 +1,14 @@
+{
+    "expect": "should not be valid",
+    "board": {
+        "format": "jef-sure/boards",
+        "format_version": 2,
+        "kind": "board",
+        "name": "chip_and_chip_try",
+        "title": "Both",
+        "mcu": {"target": "esp32s3"},
+        "checked": {"pins": {"level": "unchecked", "source": "shape only"}},
+        "buses": {"i2c": {"i2c0": {"sda": 8, "scl": 9}}},
+        "devices": {"touch": {"chip": "gt911", "chip_try": ["gt911", "cst816"], "on": {"i2c.i2c0": {}}}}
+    }
+}

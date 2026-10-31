@@ -57,15 +57,19 @@ The schema checks each file as written, and the merged board once more. Then
 | `name` | the directory name. It becomes `CONFIG_BOARD_SELECT_<NAME>` and the glue's file name |
 | `title` | what the menu and `board_info()->title` show |
 | `description` | one sentence: the menu's help and the glue's header comment |
+| `maker`, `part` | who makes the board and its name for it, as `JC1060P470C`. A module has them too |
+| `revision` | the revision of the printed board this file describes, as its maker writes it |
+| `price`, `tariff` | what it costs and its customs code, see [Price](#price) |
 | `notes` | what is special about it, in words, a text or a list. Tools show it and do not read it |
 | `mcu.target` | a directory of `catalog/mcu/` |
+| `mcu.part` | the chip as its maker names it, as `ESP32-D0WD-V3` |
 | `mcu.flash_mb`, `mcu.psram_mb` | for people; `sdkconfig.defaults` carries the settings |
 | `mcu.revision` | the revision of the chip: its speeds and lines come from `catalog/mcu/`, see [choosing-a-board.md](choosing-a-board.md) |
 | `mcu.psram_mhz`, `mcu.cpu_mhz` | a clock below what the revision takes, when the board holds it down |
 | `mcu.notes` | what the `sdkconfig.defaults` encodes and why |
 | `mcu.controls` | values for the parameters of the chip, such as `wifi_tx_power` |
 | `extends` | the board this one is a variant of |
-| `power` | rails and strobes to set before the devices start, in order |
+| `power` | the lines of supply and the strobes, in the order of the start, see [Power](#power) |
 | `shared_pins` | lines several devices use on purpose |
 | `connectors`, `images`, `checked`, `origin` | see below |
 
@@ -80,10 +84,13 @@ A wire is written the same way everywhere:
 | `21` | a GPIO |
 | `"nc"` | not wired |
 | `{ "gpio": 0, "active": "low", "pull": "up" }` | a GPIO with its properties |
-| `{ "gpio": 4, "analog": [3000, 4095] }` | read as an ADC value inside this range |
+| `{ "gpio": 4, "analog": [600, 960] }` | read through the ADC: a window in millivolts |
 | `{ "via": "io", "bit": 3 }` | a bit of an expander |
 | `{ "via": "pmu", "rail": "dldo1" }` | a rail of a PMIC |
 | `{ "via": "adc", "channel": 2 }` | a channel of an ADC chip |
+
+Buttons on a resistor ladder share a GPIO. Each is a device with its own window,
+and windows may touch but not overlap.
 
 ## Buses
 
@@ -106,10 +113,12 @@ an SPI, I2C or I2S bus is a host or port of the chip: `spi.spi2` is its SPI2,
 | `spi` | `mosi`, `miso`, `sclk`; `hz` optional |
 | `qspi` | `d0`..`d3`, `sclk`; `hz` optional |
 | `i2c` | `sda`, `scl`; `hz` optional |
-| `i2s` | `bclk` and `ws`, or `clk` for PDM; `mclk`, `dout`, `din` optional |
+| `i2s` | `bclk` and `ws`, or `clk` for PDM (`"nc"` for a PDM output with no clock line, into a filter); `mclk`, `dout`, `din` optional; `dout2`, `din2`..`din4` for more PDM lines |
 | `dsi` | `lanes`, `lane_mbps`, `phy_ldo_chan`, `phy_ldo_mv` |
 | `p8` | `d0`..`d7`, `wr`, `dc`, `hz`; `rd` optional |
 | `rgb` | `pclk`, `data` (a list); `de`, `vsync`, `hsync`, `hz` optional |
+| `csi` | `lanes`; `lane_mbps`, `phy_ldo_chan`, `phy_ldo_mv` optional. The lanes have pins of their own |
+| `dvp` | `pclk`, `vsync`, `de`, `data` (8 to 16 lines); `hsync` optional |
 | `uart` | `tx`, `rx`; `rts`, `cts`, `baud` optional |
 
 Any other kind (`sdio`, `sdspi`) is kept as data. The program reads it with
@@ -134,13 +143,16 @@ Any other kind (`sdio`, `sdspi`) is kept as data. The program reads it with
 | field | meaning |
 |---|---|
 | `chip` | a directory of `catalog/devices/`. A part with no entry, such as a button, gives `class` itself |
+| `chip_try` | instead of `chip`: the chips it can be, found at start, in the order to try. The device gives its `class` itself |
 | `variant` | a member of the family |
 | `library` | which library the device uses; the loader fills it in for a chip with one library |
 | `library_version` | the version of the library, when it is not the one the record describes |
 | `needs` | what the program needs of the library, as things of its `supports` |
 | `firmware_version` | the firmware of this device, when it is not the newest described |
-| `class` | a role or a list of roles: `display`, `touch`, `audio`, `storage`, `radio`, `network`, `nfc`, `sensor`, `io_expander`, `pmic`, `battery_adc`, `adc`, `camera`, `imu`, `rtc`, `button`, `encoder`, `keyboard`, `gamepad`, `led`, `usb`, `gps`, `motor`, `i2c_mux`, `other` |
-| `on` | the buses of the device, each with what belongs to that connection: `address`, `address_try`, `cs`, `hz`, `mode`, `role` |
+| `maker`, `part`, `marking`, `ref`, `draw` | what it physically is, see [What is on the board](#what-is-on-the-board) |
+| `price`, `tariff`, `count` | for what is bought apart, see [Price](#price) |
+| `class` | a role or a list of roles: `display`, `touch`, `audio`, `storage`, `radio`, `network`, `nfc`, `sensor`, `io_expander`, `pmic`, `battery_adc`, `adc`, `camera`, `imu`, `rtc`, `button`, `encoder`, `keyboard`, `gamepad`, `led`, `usb`, `gps`, `motor`, `i2c_mux`, `fuel_gauge`, `other` |
+| `on` | the buses of the device, each with what belongs to that connection: `address`, `address_try`, `cs`, `hz`, `mode`, `role`; `format` of an I2S bus (`std`, `tdm`, `pdm`; the two directions of a port can differ); `sio` of an SPI bus with data both ways on MOSI |
 | `pins` | its other lines: `dc`, `rst`, `backlight`, `int`, `te` |
 | `config` | facts that do not change |
 | `controls` | parameters, see below |
@@ -165,9 +177,16 @@ may mark a kind `required`. A channel of a multiplexer is `i2c.mux.ch0`.
 ```
 
 `panel` is the glass as the controller scans it: pixels and millimetres in the
-same direction. `orientation` is how the board shows it. `swap` is true when the
+same direction. The millimetres are optional, but go together: without them
+`board_display.mm_w` and `mm_h` are 0. `orientation` is how the board shows it. `swap` is true when the
 display's x runs along the glass's columns. `primary` marks the main display.
 A character display has `config.geometry`, such as `"20x4"`.
+
+`config.timing` is for a panel fed without pause, RGB or MIPI-DSI video:
+`pclk_hz`, `hsync_pulse`, `hsync_back`, `hsync_front`, `vsync_pulse`, `vsync_back`,
+`vsync_front`, and optionally `pclk_edge`, `hsync_active`, `vsync_active`,
+`de_active`. What it stands on goes in `checked`: a maker's figures are a hint until
+measured on the board.
 
 Displays shown as one screen are a group. `side_by_side` is
 `dgx_vscreen_2h_init(left, right)`: the width adds up, the height is the larger,
@@ -182,7 +201,8 @@ and both displays must have one depth. Each keeps its own bus and orientation:
 `config.over` names the display the touch lies over, or `"none"`. The generator
 needs a display: `"none"` waits for DGX-DI. `x_max` and `y_max` are the largest
 raw coordinates, not their number; the calibration must have the same values and
-the size of the panel. See [calibration.md](calibration.md).
+the size of the panel. See [calibration.md](calibration.md). `fingers` comes from the
+entry of the chip; a board writes it only when it differs.
 
 ### Sound
 
@@ -192,13 +212,105 @@ the size of the panel. See [calibration.md](calibration.md).
 | `esp32_dac` | the ESP32's own DAC, `pins.out` on GPIO 25 or 26 |
 | `i2s_amp` | an amplifier on I2S with no codec and no volume: a program scales its samples |
 
-Samples are 16-bit mono in all cases.
+Samples are 16-bit mono in all cases. `config.clock` says what a codec takes its
+clock from: `mclk`, or `bclk` when it derives it from the bit clock.
+
+### Camera
+
+A device of class `camera`: a sensor on a bus for its picture and usually on I2C for
+its registers. A board may have the connector and no sensor: then the bus and the
+connector are all it says. A sensor on a ribbon is a module:
+
+```json
+"buses": { "csi": { "csi0": { "lanes": 2, "phy_ldo_chan": 3, "phy_ldo_mv": 2500 } } },
+"modules": { "camera": { "module": "ov02c10_csi", "on": { "csi.csi0": {}, "i2c.i2c0": {} } } }
+```
+
+A parallel camera has `xclk`, `rst` and `pwdn` in `pins` and `config.xclk_hz` when the
+board gives its clock. `chip` may be missing, as an imported board often does not
+name the sensor, and `chip_try` says the ones to try. The entry of a sensor says
+`provides.camera`: `width_max`, `height_max`, `formats`. The modes a library has are
+in its `supports.modes`. The glue does not start a camera yet: it is kept as data.
 
 ### SD
 
 A device of class `storage` on an SPI bus, with its `cs` in `on`. When no host is
 left for it, as on the CYD S028R, its bus has a kind the component does not set
 up, `sdspi`.
+
+### Battery
+
+A device of class `battery_adc`, read through a divider:
+
+```json
+"battery": { "class": "battery_adc", "pins": { "in": 5 }, "config": { "divider": { "top_ohm": 33000, "bottom_ohm": 100000 } } }
+```
+
+The battery goes through `top_ohm` to the ADC, and `bottom_ohm` goes from there to
+ground. `switch` is a line that feeds the divider only for a reading, `settle_us` the
+wait after it. The line is owned like any other.
+
+### What is on the board
+
+A device names what it physically is: `maker`, `part`, `ref` as on the schematic, and
+`marking` when only the package can be read. The entry of a chip gives `maker`, `part`
+and `compat`, a board writes `part` when it knows more, as `ES8311-S`. A family gives
+`part` and `compat` in each variant. `maker` is a short name of ours; `compat` is the
+compatible of devicetree, the only field kept for a format outside.
+
+A part a program does not see is a device of class `other` with no `on`:
+
+```json
+"reg_esp": { "class": "other", "ref": "U7", "part": "AMS1117-3.3" }
+```
+
+`draw` gives its current by mode in mA, here or in the entry of the chip, and
+`mcu.draw` the same for the chip of the board:
+
+```json
+"draw": { "active": { "ma": 80, "ma_peak": 500 }, "sleep": { "ma": 1 } }
+```
+
+An empty place on a board is said in `notes`.
+
+## Power
+
+`power` lists the lines of supply and the strobes in the order of the start. A step
+takes only from a step before it, so the list cannot make a loop.
+
+```json
+"power": [
+    { "name": "USB", "source": "usb", "mv": 5000 },
+    { "name": "VIN", "source": "vin" },
+    { "name": "5V", "from": [{ "name": "USB", "through": "d_usb" }, { "name": "VIN", "through": "q_vin" }] },
+    { "name": "3V3", "from": "5V", "through": "reg_tft", "regulator": "ldo", "mv": 3300, "ma_max": 1000, "dropout_mv": 1300, "feeds": ["lcd", "touch"] },
+    { "name": "PERIPH", "from": "3V3", "line": 10, "level": 1, "delay_ms": 100, "feeds": ["keyboard"] },
+    { "line": 39, "level": 1, "why": "CS of the SD card, before the bus starts" }
+]
+```
+
+| field | meaning |
+|---|---|
+| `name` | as the schematic or the board writes it. A contact of a connector with this text is this line |
+| `source` | where a supply comes in: `usb`, `vin`, `battery`, or `connector` for a module fed by its board |
+| `from` | the step it takes from, or a list of several ways in: names, or objects with `name`, `through`, `dropout_mv` |
+| `through` | the device it goes through, or a list in order. With a list in `from` it comes after the way of each |
+| `regulator` | `ldo` passes its current on; `buck`, `boost` and `charger` convert power, so the current differs on each side |
+| `efficiency_percent` | of a converter |
+| `line`, `level`, `delay_ms` | what switches it or the rail of a PMIC, the level that turns it on, the wait after |
+| `mv`, `ma_max` | its voltage and the most it gives |
+| `dropout_mv` | what is lost from input to output: the least an `ldo` needs, the drop of a diode |
+| `feeds` | devices, `mcu`, or a step of a module as `<use>_<name>`. A chip on two lines is in both |
+| `why` | what the step is, in words |
+
+A step with a name is a line of supply and owns its GPIO. A step with no name is a
+strobe on a line a device owns. A line a device already owns stays with the device,
+and `why` says so: on the JC1060P470C the boost converter of the backlight is enabled
+by the backlight line of the display.
+
+The list is one array, so a layer replaces it whole. A layer that removes a device
+with `null` needs no new list: the device goes from `feeds` by itself. The steps of a
+module follow those of the board, named `<use>_<name>`.
 
 ## Parameters
 
@@ -297,6 +409,10 @@ refuses a board whose library does not do it:
 "nfc": { "chip": "pn5180", "library": "esp-idf/jef-sure/pn5180", "needs": { "mifare_classic": ["ndef_write"] } }
 ```
 
+`license` is the license of the version described, as an SPDX expression where it has one, and
+a step of `history` says when it was another. For the `esp-idf` ecosystem
+`tools/sync_versions.py` fills it from the registry, which writes `Custom` for a text of its own.
+
 `ecosystem` says where a library is published: its registry and its name depend on that. What
 its code is built against is in `frameworks` of each version: `{ "esp-idf": ">=5.2.0" }`. These
 are different things: a library of the Arduino registry may build with both `arduino-esp32` and
@@ -366,11 +482,50 @@ the board. What firmware a library takes is in `firmware` of the chip in its rec
 "images": { "front": { "file": "front.webp", "source": "own", "shows": "front", "up": { "x": 0, "y": -1 } } }
 ```
 
-In a connector a number is a GPIO, a string a supply or a signal with no GPIO.
-A connector repeats pins devices own, so it is not an owner of them. `images` may
+In a connector a number is a GPIO, a string a supply or a signal with no GPIO; a
+string that is the `name` of a step of `power` is that line.
+A connector repeats pins devices own, so it is not an owner of them.
+
+A connector whose contacts a standard fixes names its entry in `of`, and then needs no
+`type`:
+
+```json
+"J1": { "of": "stemma_qt", "pins": ["GND", "3V3", 8, 9] }
+```
+
+`catalog/connectors/<type>/connector.json` holds `pitch_mm`, `volts` and `pins`, what
+each contact carries from contact 1, and the board gives as many contacts. `images` may
 stand in any file of the catalog, the file beside the JSON; `source` is required,
 and a vendor's photos are not copied. `at` places a mark in shares of the picture,
 and `up` shows where the top of the screen points.
+
+## Price
+
+`price` lies on a board, a module or a device. It holds named offers, so a layer can add
+one, as a project adds what it really paid.
+
+```json
+"price": {
+    "amazon": {"shop": "Amazon", "currency": "EUR", "range": [6, 6], "date": "2026-10-31", "source": "from memory"},
+    "aliexpress": {"shop": "AliExpress", "currency": "EUR", "range": [0, 3], "date": "2026-10-31", "source": "from memory"}
+}
+```
+
+| field | what |
+|---|---|
+| `shop` | where it is sold |
+| `currency` | the code, as `EUR` |
+| `range` | lowest and highest price of one unit, never one number. "Less than 3" is `[0, 3]` |
+| `qty` | the least quantity this price holds for, 1 when absent. Several offers of one shop give its prices by batch |
+| `date`, `source` | when the price was seen and who says so: a price gets old |
+| `notes` | anything else |
+
+Delivery and duty are not here: they depend on the whole order, not on one board. See
+[board_bom.py](tools.md#board_bompy).
+
+`tariff` is the customs tariff code of the goods, HS or CN, digits only. Duties on small
+parcels are counted by it. `count` on a device says how many of it one product takes, for
+what has no wiring of its own: screws, cables.
 
 ## Where the facts come from
 
@@ -390,7 +545,7 @@ The levels, most trusted first: `hardware`, `schematic`, `datasheet`,
 `vendor-docs`, `vendor-code`, `community`, `extracted`, `unchecked`. `covers`
 names what an entry is about, the whole file without it. `result` is `confirmed`
 when absent, `pending` for what is still to be tried, `refuted` for a source that
-disagrees. A variant inherits the entries of its base marked `on_board`, because
+disagrees. `unit` says which piece of the board was tried. A variant inherits the entries of its base marked `on_board`, because
 they were earned on another board.
 
 ## What is refused
@@ -398,12 +553,16 @@ they were earned on another board.
 Beyond the schema, by `catalog/rules.json`: a bus the board does not have; a bus
 kind a device requires; a line through a device that cannot give it; a touch over
 what is not a display; two touches over one display; two primary displays; two
-owners of a GPIO, an expander bit or an I2C address; one host named both `spi` and
-`qspi`; a calibration for another range or display size; a value outside what a
+owners of a GPIO, an expander bit or an I2C address; windows of a ladder that
+overlap; one host named both `spi` and `qspi`; a calibration for another range or display size; a value outside what a
 parameter takes; a GPIO the chip has not; an output on an input-only GPIO; a name
-in `shared_pins`, `power`, `start` or `checked` that does not exist.
+in `shared_pins`, `power`, `start` or `checked` that does not exist; two steps of
+`power` with one name; a step that takes from no step before it; a connector whose
+contacts do not match its entry.
 
-`tools/boards_gen.py` also refuses what it cannot make glue for: it sets up any
-number of graphics displays, but one touch, one sound device, one button and one
-I2C master. The format can describe more than the generator sets up yet: it refuses
-a board with two of these, and a device it does not know is kept as data.
+`tools/boards_gen.py` also refuses what it cannot make glue for. The format can
+describe more than the generator sets up yet, and the error names the device and what
+it lacks: `chip_try`, `config.timing`, a `clock` of `bclk`, an I2S format other than
+`std`, `sio`, a button on a ladder, a touch whose chip does not say its `fingers`, a
+step of `power` with a `line`. Only displays, touch panels, sound and buttons are
+started; any other device is kept as data.

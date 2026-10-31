@@ -4,6 +4,8 @@
     "kind": "board",
     "name": "jc8012p4a1c",
     "title": "Guition JC8012P4A1C",
+    "maker": "guition",
+    "part": "JC8012P4A1C",
     "description": "10.1-inch 800x1280 JD9365 on MIPI-DSI (lying 1280x800), GSL3680 touch (firmware written into it at start), ES8311 sound",
     "notes": [
         "BOOT (GPIO35) is under the cover.",
@@ -38,7 +40,8 @@
                 "devices.clock_32k",
                 "buses.uart",
                 "buses.sdmmc",
-                "connectors"
+                "connectors",
+                "buses.csi"
             ],
             "source": "JC8012P4A1.pdf and the PNG sheets of the archive",
             "date": "2026-10-31",
@@ -52,16 +55,95 @@
             "date": "2026-10-31",
             "result": "confirmed",
             "notes": "That they are fitted, the battery and the speaker in the case too: none was started."
+        },
+        "camera": {
+            "level": "hardware",
+            "covers": ["modules.camera"],
+            "by": "a test firmware",
+            "date": "2026-10-31",
+            "result": "pending",
+            "notes": "0x5602 read from register 0x300A at I2C address 0x36: an OV02C10 on the connector. No picture taken."
+        },
+        "clock_on_i2c": {
+            "level": "hardware",
+            "covers": ["devices.rtc"],
+            "by": "a test firmware",
+            "date": "2026-10-31",
+            "notes": "It answers at 0x32. The clock was not read."
+        },
+        "power": {
+            "level": "schematic",
+            "covers": ["power"],
+            "source": "JC8012P4A1.pdf, sheets 1_PWR, 2_LCD, 3_ESP32-P4, 4_CONN, 5_ESP32-C6, 6_USB, 7_CODEC",
+            "date": "2026-10-31"
+        },
+        "power_figures": {
+            "level": "datasheet",
+            "covers": ["power"],
+            "source": "TLV62569: 2 A, step-down, ti.com/product/TLV62569",
+            "date": "2026-10-31"
         }
     },
     "buses": {
         "dsi": {"dsi0": {"lanes": 2, "lane_mbps": 1000, "phy_ldo_chan": 3, "phy_ldo_mv": 2500}},
+        "csi": {"csi0": {"lanes": 2, "phy_ldo_chan": 3, "phy_ldo_mv": 2500}},
         "i2c": {"i2c0": {"sda": 7, "scl": 8}},
         "i2s": {"i2s0": {"mclk": 13, "bclk": 12, "ws": 10, "dout": 9, "din": 11}},
         "sdio": {"sdio0": {"clk": 18, "cmd": 19, "d0": 14, "d1": 15, "d2": 16, "d3": 17, "reset": 54}},
         "uart": {"uart0": {"tx": 37, "rx": 38}},
         "sdmmc": {"sdmmc0": {"clk": 43, "cmd": 44, "d0": 39, "d1": 40, "d2": 41, "d3": 42}}
     },
+    "power": [
+        {"name": "USB", "source": "usb", "mv": 5000},
+        {"name": "VIN", "source": "vin", "why": "Contact 1 of CN2."},
+        {"name": "5V", "from": ["USB", {"name": "VIN", "through": "q_vin"}], "why": "The net USB5V_IN."},
+        {"name": "BAT+", "source": "battery", "why": "CN1."},
+        {
+            "name": "VOUT-BAT",
+            "from": ["5V", "BAT+"],
+            "through": "charger",
+            "regulator": "charger",
+            "mv": 5000,
+            "feeds": ["amplifier"]
+        },
+        {
+            "name": "LEDA",
+            "from": "VOUT-BAT",
+            "through": "led_driver",
+            "regulator": "boost",
+            "feeds": ["lcd"],
+            "why": "EN of IC1 is LCD_PWM, the backlight line of the display on GPIO23."
+        },
+        {
+            "name": "3V3",
+            "from": "VOUT-BAT",
+            "through": ["fuse", "reg_3v3"],
+            "regulator": "buck",
+            "mv": 3300,
+            "ma_max": 2000,
+            "feeds": ["mcu", "radio", "lcd", "touch", "sound", "led", "usb_serial", "camera_sensor"],
+            "why": "The nets 3V3, VCC3V3, ESP_3V3 and VDDA are one. The net CODEC_3V3 hangs on it through 0 ohm."
+        },
+        {
+            "name": "ESP_VDD_HP",
+            "from": "3V3",
+            "through": "reg_1v2",
+            "regulator": "buck",
+            "mv": 1200,
+            "ma_max": 2000,
+            "feeds": ["mcu"],
+            "why": "The block POWER_1V2 of the schematic."
+        },
+        {
+            "name": "ESP_LDO_VO1",
+            "from": "3V3",
+            "feeds": ["flash"],
+            "why": "LDO channel 1 of the chip, the net VDD_FLASH."
+        },
+        {"name": "ESP_LDO_VO4", "from": "3V3", "feeds": ["sd"], "why": "LDO channel 4 of the chip."},
+        {"name": "VBAT", "source": "battery", "why": "BT1, room for a CR1220 cell."},
+        {"name": "VRTC", "from": ["3V3", "VBAT"], "through": "d_rtc", "feeds": ["rtc"]}
+    ],
     "connectors": {
         "CN1": {"type": "battery, 2 pins", "pins": ["BAT+", "BAT-"]},
         "CN2": {"type": "MX 1.25 mm, 4 pins", "pins": ["5V", 37, 38, "GND"]},
@@ -74,6 +156,26 @@
         "EXTEND2": {
             "type": "FPC4, 15 pins",
             "pins": ["GND", "GND", "NC", "NC", "NC", 28, 29, 30, 31, 32, 33, 34, "VDDA", "VDDA", "GND"]
+        },
+        "FPC5": {
+            "type": "CSI camera, FPC 0.3 mm, 15 pins",
+            "pins": [
+                "GND",
+                "CSI_DATA0_N",
+                "CSI_DATA0_P",
+                "GND",
+                "CSI_DATA1_N",
+                "CSI_DATA1_P",
+                "GND",
+                "CSI_CLK_N",
+                "CSI_CLK_P",
+                "GND",
+                "CSI_IO0",
+                "CSI_IO1",
+                8,
+                7,
+                "3V3"
+            ]
         }
     },
     "devices": {
@@ -129,6 +231,8 @@
         },
         "sound": {
             "chip": "es8311",
+            "ref": "U10",
+            "part": "ES8311-S",
             "on": {"i2c.i2c0": {}, "i2s.i2s0": {}},
             "pins": {"pa": 20},
             "config": {"sample_rate": 22050, "pa_voltage": 5.0, "codec_dac_voltage": 3.3},
@@ -141,17 +245,21 @@
         "boot": {"class": "button", "pins": {"in": {"gpio": 35, "active": "low"}}},
         "sd": {
             "class": "storage",
+            "ref": "TF1",
             "on": {"sdmmc.sdmmc0": {}},
             "config": {"media": "microsd"},
             "notes": "Fed by LDO channel 4 of the chip."
         },
         "rtc": {
             "chip": "rx8025t",
+            "ref": "U9",
+            "part": "RX8025T-UC",
             "on": {"i2c.i2c0": {}},
             "notes": "BT1 has room for a CR1220 backup cell; none is fitted."
         },
         "led": {
             "class": "led",
+            "ref": "LED1",
             "pins": {"data": 26},
             "config": {"kind": "ws2812", "count": 1},
             "notes": "LED1, beside the P4, on the side of the board that faces the back cover of the case."
@@ -159,11 +267,14 @@
         "battery": {
             "class": "battery_adc",
             "pins": {"in": 52},
-            "config": {"divider": "68k/100k"},
+            "config": {"divider": {"top_ohm": 68000, "bottom_ohm": 100000}},
             "notes": "A LiPo cell in the case, on CN1. The charger is an IP5306, with no line to the chip."
         },
         "radio": {
             "class": "radio",
+            "ref": "U7",
+            "maker": "espressif",
+            "part": "ESP32-C6",
             "on": {"sdio.sdio0": {}},
             "pins": {"io2": 6},
             "antenna": {"kind": "connector"},
@@ -174,6 +285,17 @@
             "class": "other",
             "pins": {"xtal_p": 0, "xtal_n": 1},
             "notes": "The 32.768 kHz crystal X2 of the chip."
-        }
-    }
+        },
+        "charger": {"class": "other", "ref": "U1", "maker": "injoinic", "part": "IP5306"},
+        "fuse": {"class": "other", "ref": "F1"},
+        "reg_3v3": {"class": "other", "ref": "U2", "maker": "ti", "part": "TLV62569"},
+        "reg_1v2": {"class": "other", "ref": "U3", "maker": "ti", "part": "TLV62569"},
+        "led_driver": {"class": "other", "ref": "IC1", "part": "MP3202"},
+        "amplifier": {"class": "other", "ref": "U11", "part": "NS4150"},
+        "usb_serial": {"class": "other", "ref": "U14", "maker": "wch", "part": "CH340C"},
+        "flash": {"class": "other", "ref": "U6", "part": "W25Q128"},
+        "q_vin": {"class": "other", "ref": "Q1", "part": "AO3401"},
+        "d_rtc": {"class": "other", "ref": "D7", "part": "BAT54C"}
+    },
+    "modules": {"camera": {"module": "ov02c10_csi", "on": {"csi.csi0": {}, "i2c.i2c0": {}}}}
 }

@@ -73,6 +73,30 @@ Writes `~/myproject/sdkconfig.defaults.board`: the board's defaults, then
 each module's. With `--reset` moves an existing `sdkconfig` to `sdkconfig.old`
 so the new defaults are read. See [choosing-a-board.md](choosing-a-board.md).
 
+## board_bom.py
+
+```sh
+python3 tools/board_bom.py local_terminal                               # one product
+python3 tools/board_bom.py local_terminal --units 10 --shop AliExpress  # ten, at the prices of one shop
+python3 tools/board_bom.py local_terminal --units 10 --duty 3 EUR       # with a duty per tariff code
+python3 tools/board_bom.py local_terminal --csv terminal.csv            # the lines for a spreadsheet
+```
+
+A line is what is bought as one: the board a project stands on, then the modules and devices
+the project adds, the same goods on one line. The chips of a bought board are not lines, and a
+board with `extends` is a variant, one purchase. So a product is written as `kind: project`
+over its base board.
+
+Prices are ranges, so a total is a range. A line with no price is named, and the total then
+reads "at least". Currencies are not converted. For a quantity the tool takes, per shop, the
+offer of the largest `qty` that the quantity reaches.
+
+Delivery and duty depend on the order, so they are not in the data. `--duty` adds an amount per
+tariff code: the fewest codes are those known, in one parcel; the most is every line in a parcel
+of its own. The tool does not know when a duty applies. In the EU, from 1 July 2026, it is
+[3 EUR per tariff classification on goods up to 150 EUR](https://commission.europa.eu/news-and-media/news/ensuring-fairness-and-safety-eur3-customs-duty-low-value-parcels-2026-06-29_en),
+so a larger order is outside this sum. Delivery is not counted at all.
+
 ## check_format.py
 
 ```sh
@@ -130,6 +154,7 @@ shape of what the glue calls.
 ## The CI workflow
 
 `.github/workflows/build.yml`: `check_boards.py --host-syntax` and
-`board_pins.py --all`, then `examples/hello_board` and `examples/hello_lvgl`
-built for every board under two versions of ESP-IDF, plus one build of
+`board_pins.py --all`, then `examples/hello_board` for every board and
+`examples/hello_lvgl` for every board with a graphics display, under two
+versions of ESP-IDF, plus one build of
 `hello_board` with the 2004 module, each in its own job. Add a board to the matrix when you add it to the data.

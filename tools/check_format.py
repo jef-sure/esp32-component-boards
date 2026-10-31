@@ -18,6 +18,7 @@ import tempfile
 
 import jsonschema
 
+import boards_gen
 import resolve
 import rules
 
@@ -141,6 +142,33 @@ def main():
         if resolved:
             reached[f"bad_{path.stem}.json"] = resolved
     print(f"bad: {len(bad)}")
+
+    # what a tool outside reads of a resolved board reaches it from every layer
+    gt911 = {"chip": "gt911", "on": {}}
+    for device, field, expected in ((gt911, "maker", "goodix"), (gt911, "compat", "goodix,gt911"), ({**gt911, "part": "GT911QM"}, "part", "GT911QM"),
+                                    ({"chip": "scd4x", "variant": "scd41"}, "part", "SCD41"), ({"chip": "scd4x", "variant": "scd41"}, "compat", "sensirion,scd41")):
+        if resolve.apply_type(device).get(field) != expected:
+            print(f"{device['chip']}: {field} is not {expected}")
+            failed += 1
+    module = reached["good_physical_module_power.json"]
+    if module["modules"]["reader"].get("revision") != "V2" or [step.get("name") for step in module["power"]][-1] != "reader_3V3" or "reader_chip" not in module["power"][-1]["feeds"]:
+        print("a module on a board lost its revision or the names of its power")
+        failed += 1
+
+    # a GPIO of a power step or a divider is taken, and the glue refuses what it cannot set
+    taken = {pin for pin, _, _ in boards_gen.pins_of(reached["good_physical_switched_rail.json"])} & {14}
+    taken |= {pin for pin, _, _ in boards_gen.pins_of(reached["good_physical_divider_switch.json"])} & {15}
+    if taken != {14, 15}:
+        print(f"pins_of: only {sorted(taken)} of 14 and 15 are seen as taken")
+        failed += 1
+    try:
+        boards_gen.read_board(TESTS / "good" / "physical_switched_rail.json")
+        print("the generator took a line of power it cannot set")
+        failed += 1
+    except ValueError as error:
+        if "cannot set the lines of power" not in str(error):
+            print(f"the generator refused for another reason: {error}")
+            failed += 1
 
     with tempfile.TemporaryDirectory() as out:
         for name, doc in reached.items():

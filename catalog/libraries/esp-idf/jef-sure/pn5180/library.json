@@ -7,6 +7,7 @@
     "name": "pn5180",
     "title": "PN5180",
     "url": "https://github.com/jef-sure/esp32-component-pn5180",
+    "license": "MIT",
     "install": [
         {"via": "registry"},
         {"via": "git", "url": "https://github.com/jef-sure/esp32-component-pn5180.git", "ref": "v{version}"}

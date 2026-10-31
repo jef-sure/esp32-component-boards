@@ -1,0 +1,45 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "rgb_with_timing",
+    "title": "An RGB panel set up over 3-wire SPI through an expander",
+    "mcu": {"target": "esp32s3"},
+    "checked": {"pins": {"level": "unchecked", "source": "shape only"}},
+    "buses": {
+        "i2c": {"i2c0": {"sda": 8, "scl": 9}},
+        "rgb": {
+            "lcd": {
+                "de": 18,
+                "vsync": 17,
+                "hsync": 16,
+                "pclk": 21,
+                "data": [0, 1, 2, 3, 4, 5, 6, 7, 38, 39, 40, 41, 42, 45, 46, 47]
+            }
+        },
+        "spi": {"soft0": {"mosi": {"via": "io", "bit": 3}, "miso": "nc", "sclk": {"via": "io", "bit": 2}}}
+    },
+    "devices": {
+        "io": {"chip": "tca9554", "on": {"i2c.i2c0": {}}},
+        "lcd": {
+            "chip": "st7701",
+            "on": {"rgb.lcd": {"role": "data"}, "spi.soft0": {"role": "control", "cs": {"via": "io", "bit": 1}}},
+            "config": {
+                "primary": true,
+                "panel": {"width": 480, "height": 480},
+                "timing": {
+                    "pclk_hz": 16000000,
+                    "hsync_pulse": 8,
+                    "hsync_back": 50,
+                    "hsync_front": 10,
+                    "vsync_pulse": 8,
+                    "vsync_back": 20,
+                    "vsync_front": 10,
+                    "pclk_edge": "falling",
+                    "de_active": "high"
+                }
+            },
+            "controls": {"orientation": {"start": {"x": "left-right", "y": "top-bottom", "swap": false}}}
+        }
+    }
+}

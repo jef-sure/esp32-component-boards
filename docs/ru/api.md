@@ -24,7 +24,7 @@ const struct board_info *board_info(void);
 ```c
 struct board_display {
     int   width, height; /* as it lies, in pixels */
-    int   mm_w, mm_h;    /* as it lies, in millimetres */
+    int   mm_w, mm_h;    /* as it lies, in millimetres; 0 when the data has no size */
     int   dir_x, dir_y;  /* BOARD_DIR_FORWARD: left to right, top to bottom; BOARD_DIR_BACKWARD: the other way */
     bool  swap_xy;
     const char *name; /* its name in the data, for the log */
@@ -180,7 +180,7 @@ bool board_bus_get(const char *bus, const char *field, long *out);
 в той же задаче: дисплей держит шину до конца пакета.
 
 `board_spi_taken` говорит, занят ли хост какой-либо шиной платы, SPI или QSPI,
-так что можно найти свободный хост. `board_bus_get("nfc_in", "cs", &pin)` даёт линии
+так что можно найти свободный хост. `board_bus_get("nfc_in_nfc", "cs", &pin)` даёт линии
 устройства, которое компонент не настраивает, по его имени в данных.
 `board_bus_get("sdio.sdio0", "clk", &pin)`
 читает любое число любой шины, которую называют данные, включая роды, которые

@@ -49,6 +49,7 @@ function post(items, spec) {
     for (const item of items) {
         const node = item.node;
         if ('with' in spec && !(isObject(node) && spec.with in node)) continue;
+        if ('without' in spec && isObject(node) && spec.without in node) continue;
         let value = item.value;
         if ('take' in spec) {
             if (!(isObject(node) && spec.take in node)) continue;
@@ -110,6 +111,19 @@ function check(doc, data) {
             }
         } else if (rule.kind === 'path') {
             for (const item of items) if (get(doc, item.value, {}) === MISSING) report(item.ctx);
+        } else if (rule.kind === 'apart') {
+            const groups = new Map();
+            for (const item of items) groups.set(item.ctx.group, [...(groups.get(item.ctx.group) || []), item]);
+            for (const group of groups.values()) {
+                group.sort((a, b) => a.value[0] - b.value[0] || a.value[1] - b.value[1] || (a.ctx.owner < b.ctx.owner ? -1 : a.ctx.owner > b.ctx.owner ? 1 : 0));
+                group.slice(1).forEach((high, i) => {
+                    const low = group[i];
+                    if (high.value[0] < low.value[1]) report({ ...low.ctx, owners: `${low.ctx.owner}, ${high.ctx.owner}` });
+                });
+            }
+        } else if (rule.kind === 'earlier') {
+            const at = new Map(select(doc, rule.among, sets).map((item) => [mark(item.value), +item.ctx['1']]));
+            for (const item of items) if (!(at.get(mark(item.value)) < +item.ctx['1'])) report(item.ctx);
         } else if (rule.kind === 'within') {
             for (const item of items) {
                 const { value, ctx } = item;

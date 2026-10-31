@@ -13,14 +13,15 @@ import re
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 ROOTS = [ROOT / "catalog"]  # check_format.py adds the entries of its cases
-FILES = {"mcu": "mcu.json", "devices": "device.json", "modules": "module.json", "boards": "board.json", "libraries": "library.json"}
+FILES = {"mcu": "mcu.json", "devices": "device.json", "modules": "module.json", "boards": "board.json", "libraries": "library.json", "connectors": "connector.json"}
 NOT_LINES = {"hz", "lanes", "lane_mbps", "phy_ldo_chan", "phy_ldo_mv", "baud", "data"}
 LINE = 120
-TYPE_FIELDS = ("class", "pins", "config", "controls", "provides", "start", "firmware")
-LIBRARY_HISTORY = ("chips", "transports", "interfaces", "groups", "values")
+TYPE_FIELDS = ("class", "maker", "part", "compat", "draw", "pins", "config", "controls", "provides", "start", "firmware")
+LIBRARY_HISTORY = ("license", "chips", "transports", "interfaces", "groups", "values")
 FIRMWARE_HISTORY = ("config", "controls", "provides")
-REFERENCES = {"over", "via", "left", "right", "after", "devices"}  # fields of a module that name its parts
+REFERENCES = {"over", "via", "left", "right", "after", "devices", "feeds", "from", "through", "name"}  # fields of a module that name its parts
 REVISION_HISTORY = ("limits", "provides", "controls", "sdkconfig")
+MODULE_FACTS = ("maker", "part", "revision", "mcu", "price", "tariff")  # what a board keeps of a module beside its parts
 
 
 class Refused(Exception):
@@ -134,8 +135,15 @@ def line(value):
     return {"gpio": value} if isinstance(value, int) and not isinstance(value, bool) else value
 
 
+def chips_of(device):
+    """The chips a device can be: one, or those it tries at start."""
+    return [device["chip"]] if "chip" in device else device.get("chip_try", [])
+
+
 def apply_type(device):
     if "chip" not in device:
+        for chip in chips_of(device):
+            load("devices", chip)
         return device
     entry = load("devices", device["chip"])
     base = {key: entry[key] for key in TYPE_FIELDS if key in entry}
@@ -180,14 +188,18 @@ def normal(device):
     for connection in (device.get("on") or {}).values():
         if "cs" in connection:
             connection["cs"] = line(connection["cs"])
-    buttons = (device.get("config") or {}).get("buttons")
-    if buttons:
-        device["config"]["buttons"] = {key: line(value) for key, value in buttons.items()}
+    config = device.get("config") or {}
+    if config.get("buttons"):
+        config["buttons"] = {key: line(value) for key, value in config["buttons"].items()}
+    if isinstance(config.get("divider"), dict) and "switch" in config["divider"]:
+        config["divider"]["switch"] = line(config["divider"]["switch"])
     return device
 
 
 def named(value, names):
-    return [names.get(item, item) for item in value] if isinstance(value, list) else names.get(value, value)
+    if isinstance(value, list):
+        return [named(item, names) for item in value]
+    return renamed(value, names) if isinstance(value, dict) else names.get(value, value)
 
 
 def renamed(value, names):
@@ -204,7 +216,7 @@ def joined(device, wiring):
     if not wiring:
         return device
     own = device.get("on") or {}
-    kinds = {*own, *(load("devices", device["chip"]).get("on") or {} if "chip" in device else ())}
+    kinds = {*own, *(kind for chip in chips_of(device) for kind in load("devices", chip).get("on") or {})}
     taken = {bus.split(".")[0]: bus for bus in wiring}
     on = {key: value for key, value in own.items() if key not in taken}
     for kind, bus in taken.items():
@@ -219,7 +231,8 @@ def use_module(doc, name, use):
     parts = module["devices"]
     if len(parts) > 1 and ({"pins", "config"} & use.keys() or any(use.get("on", {}).values())):
         raise Refused(f"{name}: a module of several parts takes its wiring by part, in devices: {', '.join(parts)}")
-    names = {part: f"{name}_{part}" for part in parts}
+    own = [*parts, *(step["name"] for step in module.get("power") or [] if "name" in step), *(["mcu"] if "mcu" in module else [])]
+    names = {part: f"{name}_{part}" for part in own}
     for part in use.get("devices") or {}:
         if part not in parts:
             raise Refused(f"{name}: the module {use['module']} has no part {part}")
@@ -230,15 +243,45 @@ def use_module(doc, name, use):
     for field in ("display_groups", "shared_pins", "connectors"):
         for own, entry in (module.get(field) or {}).items():
             doc.setdefault(field, {})[f"{name}_{own}"] = renamed(entry, names)
-    doc["power"] = (doc.get("power") or []) + (module.get("power") or [])
+    doc["power"] = (doc.get("power") or []) + renamed(module.get("power") or [], names)
     if not doc["power"]:
         del doc["power"]
-    return {"module": use["module"], "title": module["title"], **({"mcu": module["mcu"]} if "mcu" in module else {})}
+    return {"module": use["module"], "title": module["title"], **{key: module[key] for key in MODULE_FACTS if key in module}}
 
 
 def add_modules(doc):
     doc.setdefault("devices", {})
     doc["modules"] = {name: use_module(doc, name, use) for name, use in (doc.pop("modules", None) or {}).items()}
+
+
+def listed(value):
+    return value if isinstance(value, list) else [] if value is None else [value]
+
+
+def removed(doc):
+    """The devices a layer takes away with null, and those its bases took."""
+    names = {name for name, device in (doc.get("devices") or {}).items() if device is None}
+    return names | removed(load("modules" if doc.get("kind") == "module" else "boards", doc["extends"])) if doc.get("extends") else names
+
+
+def power_step(step, gone):
+    """A step in one form: its line, inputs that each name a step and the devices on the way from it, feeds without the devices a layer removed."""
+    if "line" in step:
+        step["line"] = line(step["line"])
+    if "from" in step:
+        inputs = [{"name": item} if isinstance(item, str) else item for item in listed(step.pop("from"))]
+        common = listed(step.pop("through", None))
+        step["inputs"] = [{**item, "through": listed(item.get("through")) + common} for item in inputs]
+    if "feeds" in step:
+        step["feeds"] = [name for name in step["feeds"] if name not in gone]
+    return step
+
+
+def connector_of(name, connector):
+    """The facts of a connector whose contacts a standard fixes."""
+    connector["facts"] = load("connectors", connector["of"])
+    if len(connector["pins"]) != len(connector["facts"]["pins"]):
+        raise Refused(f"connector {name}: {connector['of']} has {len(connector['facts']['pins'])} contacts, not {len(connector['pins'])}")
 
 
 def resolve(doc, overlays=()):
@@ -249,6 +292,12 @@ def resolve(doc, overlays=()):
         out["kind"] = "board"
     add_modules(out)
     out["devices"] = {name: normal(apply_type(device)) for name, device in (out.get("devices") or {}).items()}
+    gone = set().union(removed(doc), *map(removed, overlays)) - out["devices"].keys()
+    if "power" in out:
+        out["power"] = [power_step(step, gone) for step in out["power"]]
+    for name, connector in (out.get("connectors") or {}).items():
+        if "of" in connector:
+            connector_of(name, connector)
     if out.get("kind") == "board":
         for named in (out.get("buses") or {}).values():
             for bus in named.values():
@@ -257,8 +306,6 @@ def resolve(doc, overlays=()):
                         bus[key] = line(value)
                 if "data" in bus:
                     bus["data"] = [line(value) for value in bus["data"]]
-        for step in out.get("power") or []:
-            step["line"] = line(step["line"])
         for group in (out.get("shared_pins") or {}).values():
             group["line"] = line(group["line"])
         for connector in (out.get("connectors") or {}).values():

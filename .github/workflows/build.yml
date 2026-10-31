@@ -28,7 +28,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        board: [cyd_s028r, jc1060p470c, jc4827w543c, jc8012p4a1c, local_terminal]
+        board: [cyd_s028r, esp32_devkit, jc1060p470c, jc4827w543c, jc8012p4a1c, local_terminal]
         idf: [release-v5.5, v6.1]
         module: [""]
         include:
@@ -41,7 +41,7 @@ jobs:
         run: |
           python3 tools/board_select.py ${{ matrix.board }} ${{ matrix.module && format('--module {0}', matrix.module) || '' }} examples/hello_board
           python3 tools/board_select.py ${{ matrix.board }} examples/hello_lvgl
-          echo "target=$(python3 -c "import json; print(json.load(open('catalog/boards/${{ matrix.board }}/board.json'))['mcu']['target'])")" >> "$GITHUB_OUTPUT"
+          python3 -c "import sys; sys.path.insert(0, 'tools'); import resolve; board = resolve.resolve(resolve.load('boards', '${{ matrix.board }}')); print('target=' + board['mcu']['target']); print('graphics=' + str(any((device.get('config') or {}).get('kind') == 'graphics' for device in board['devices'].values())).lower())" >> "$GITHUB_OUTPUT"
         id: board
       - name: build hello_board
         uses: espressif/esp-idf-ci-action@v1
@@ -51,7 +51,7 @@ jobs:
           path: examples/hello_board
           command: idf.py build
       - name: build hello_lvgl
-        if: ${{ !matrix.module }}
+        if: ${{ !matrix.module && steps.board.outputs.graphics == 'true' }}
         uses: espressif/esp-idf-ci-action@v1
         with:
           esp_idf_version: ${{ matrix.idf }}

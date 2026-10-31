@@ -4,6 +4,7 @@
     "kind": "device",
     "name": "scd4x",
     "title": "Sensirion SCD4x",
+    "maker": "sensirion",
     "class": "sensor",
     "on": {"i2c": {"required": true, "address": "0x62"}},
     "provides": {
@@ -14,6 +15,8 @@
     "controls": {"mode": {"how": "driver", "values": ["periodic", "low_power", "single_shot"], "read": "command"}},
     "variants": {
         "scd40": {
+            "part": "SCD40",
+            "compat": "sensirion,scd40",
             "provides": {
                 "co2": {
                     "specified": [400, 2000],
@@ -23,6 +26,8 @@
             "controls": {"mode": {"values": ["periodic", "low_power"]}}
         },
         "scd41": {
+            "part": "SCD41",
+            "compat": "sensirion,scd41",
             "provides": {
                 "co2": {
                     "specified": [400, 5000],
@@ -35,6 +40,7 @@
             }
         },
         "scd43": {
+            "part": "SCD43",
             "provides": {
                 "co2": {
                     "specified": [400, 5000],

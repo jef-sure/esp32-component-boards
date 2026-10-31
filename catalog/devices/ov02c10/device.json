@@ -1,0 +1,22 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "ov02c10",
+    "title": "OmniVision OV02C10",
+    "maker": "omnivision",
+    "part": "OV02C10",
+    "class": "camera",
+    "on": {"csi": {"required": true, "role": "data"}, "i2c": {"required": true, "role": "control", "address": "0x36"}},
+    "provides": {"camera": {"width_max": 1920, "height_max": 1080, "formats": ["raw8", "raw10"]}},
+    "checked": {
+        "facts": {"level": "datasheet", "source": "OV02C10_CSP_DS_2.01, in the archive of the JC8012P4A1C"},
+        "id": {
+            "level": "hardware",
+            "covers": ["on.i2c"],
+            "by": "a test firmware on the JC1060P470C and the JC8012P4A1C",
+            "date": "2026-10-31",
+            "notes": "0x5602 read from register 0x300A at I2C address 0x36."
+        }
+    }
+}

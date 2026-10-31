@@ -59,6 +59,8 @@ def post(items, spec):
         node = item["node"]
         if "with" in spec and not (isinstance(node, dict) and spec["with"] in node):
             continue
+        if "without" in spec and isinstance(node, dict) and spec["without"] in node:
+            continue
         value = item["value"]
         if "take" in spec:
             if not (isinstance(node, dict) and spec["take"] in node):
@@ -129,6 +131,20 @@ def check(doc, data):
         elif kind == "path":
             for item in items:
                 if get(doc, item["value"], {}) is MISSING:
+                    found.append({"rule": rule["id"], "message": fill(message, item["ctx"])})
+        elif kind == "apart":
+            groups = {}
+            for item in items:
+                groups.setdefault(item["ctx"]["group"], []).append(item)
+            for group in groups.values():
+                group.sort(key=lambda item: (item["value"], item["ctx"]["owner"]))
+                for low, high in zip(group, group[1:]):
+                    if high["value"][0] < low["value"][1]:
+                        found.append({"rule": rule["id"], "message": fill(message, {**low["ctx"], "owners": ", ".join((low["ctx"]["owner"], high["ctx"]["owner"]))})})
+        elif kind == "earlier":
+            at = {mark(item["value"]): int(item["ctx"]["1"]) for item in select(doc, rule["among"], sets)}
+            for item in items:
+                if mark(item["value"]) not in at or at[mark(item["value"])] >= int(item["ctx"]["1"]):
                     found.append({"rule": rule["id"], "message": fill(message, item["ctx"])})
         elif kind == "within":
             for item in items:

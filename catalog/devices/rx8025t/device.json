@@ -4,6 +4,8 @@
     "kind": "device",
     "name": "rx8025t",
     "title": "Epson RX8025T real-time clock",
+    "maker": "epson",
+    "part": "RX8025T",
     "class": "rtc",
     "on": {"i2c": {"required": true}},
     "checked": {"facts": {"level": "schematic", "source": "JC1060P470C_I_W_Y-V1.0.pdf, U9 RX8025T-UC"}}

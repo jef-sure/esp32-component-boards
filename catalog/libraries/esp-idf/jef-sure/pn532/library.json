@@ -7,6 +7,7 @@
     "name": "pn532",
     "title": "PN532",
     "url": "https://github.com/jef-sure/esp32-component-pn532",
+    "license": "MIT",
     "install": [
         {"via": "registry"},
         {"via": "git", "url": "https://github.com/jef-sure/esp32-component-pn532.git", "ref": "v{version}"}

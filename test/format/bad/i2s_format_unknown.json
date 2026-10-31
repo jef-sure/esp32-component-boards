@@ -1,0 +1,14 @@
+{
+    "expect": "'dsd' is not one of",
+    "board": {
+        "format": "jef-sure/boards",
+        "format_version": 2,
+        "kind": "board",
+        "name": "i2s_format_unknown",
+        "title": "A format no port has",
+        "mcu": {"target": "esp32s3"},
+        "checked": {"pins": {"level": "unchecked", "source": "shape only"}},
+        "buses": {"i2s": {"i2s0": {"clk": 4, "din": 5}}},
+        "devices": {"mic": {"chip": "spm1423", "on": {"i2s.i2s0": {"format": "dsd"}}, "config": {"sample_rate": 16000}}}
+    }
+}

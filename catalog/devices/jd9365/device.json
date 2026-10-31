@@ -4,6 +4,8 @@
     "kind": "device",
     "name": "jd9365",
     "title": "JD9365",
+    "maker": "jadard",
+    "part": "JD9365DA-H3",
     "class": "display",
     "on": {"dsi": {"required": true}},
     "config": {"kind": "graphics"},

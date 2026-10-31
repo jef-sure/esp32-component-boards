@@ -148,5 +148,5 @@ espressif/esp_lcd_touch_gt911:
    без ESP-IDF.
 3. CI (`.github/workflows/build.yml`): `examples/hello_board` собирается для
    каждой платы, с модулем и без, под двумя версиями ESP-IDF, а
-   `examples/hello_lvgl` для каждой платы. Только это
+   `examples/hello_lvgl` для каждой платы с графическим дисплеем. Только это
    доказывает, что клей компонуется.

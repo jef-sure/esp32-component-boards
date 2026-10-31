@@ -1,0 +1,31 @@
+{
+  "expect": "does not match",
+  "board": {
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "mcu": {
+      "target": "esp32s3"
+    },
+    "checked": {
+      "pins": {
+        "level": "unchecked",
+        "source": "shape only"
+      }
+    },
+    "devices": {
+      "boot": {
+        "class": "button",
+        "pins": {
+          "in": {
+            "gpio": 0,
+            "active": "low"
+          }
+        }
+      }
+    },
+    "name": "tariff_with_dots",
+    "title": "A tariff code as it is printed",
+    "tariff": "8543.70"
+  }
+}

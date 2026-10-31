@@ -7,6 +7,7 @@
     "name": "esp_codec_dev",
     "title": "esp_codec_dev",
     "url": "https://components.espressif.com/components/espressif/esp_codec_dev",
+    "license": "Custom",
     "install": [
         {"via": "registry"},
         {"via": "git", "url": "https://github.com/espressif/esp-audio-dev.git", "path": "esp_codec_dev"}

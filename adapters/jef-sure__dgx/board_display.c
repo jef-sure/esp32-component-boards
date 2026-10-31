@@ -59,8 +59,9 @@ static bool start_group(const struct board_display_panel *panel, struct board_di
     d->screen        = screen;
     d->shown.width   = left.width + right.width;
     d->shown.height  = left.height > right.height ? left.height : right.height;
-    d->shown.mm_w    = left.mm_w + right.mm_w;
-    d->shown.mm_h    = left.mm_h > right.mm_h ? left.mm_h : right.mm_h;
+    bool sized       = left.mm_w && right.mm_w; /* the size of a group is known only when both are */
+    d->shown.mm_w    = sized ? left.mm_w + right.mm_w : 0;
+    d->shown.mm_h    = !sized ? 0 : left.mm_h > right.mm_h ? left.mm_h : right.mm_h;
     d->shown.dir_x   = BOARD_DIR_FORWARD;
     d->shown.dir_y   = BOARD_DIR_FORWARD;
     d->shown.swap_xy = false;

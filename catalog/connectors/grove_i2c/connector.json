@@ -1,0 +1,11 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "connector",
+    "name": "grove_i2c",
+    "title": "Grove, I2C",
+    "pitch_mm": 2.0,
+    "volts": [3.3, 5],
+    "pins": ["SCL", "SDA", "VCC", "GND"],
+    "checked": {"facts": {"level": "vendor-docs", "source": "wiki.seeedstudio.com/Grove_System", "date": "2026-10-31"}}
+}

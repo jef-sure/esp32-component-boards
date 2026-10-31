@@ -1,0 +1,18 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "mcu": {"target": "esp32s3"},
+    "checked": {"pins": {"level": "unchecked", "source": "shape only"}},
+    "name": "physical_connector_of",
+    "title": "A connector a standard fixes, and one the board fixes",
+    "buses": {"i2c": {"i2c0": {"sda": 8, "scl": 9}}},
+    "power": [{"name": "3V3", "source": "usb", "mv": 3300}],
+    "connectors": {
+        "J1": {"of": "stemma_qt", "pins": ["GND", "3V3", 8, 9]},
+        "J2": {"type": "SH 1.0 mm, 4 pins", "of": "qwiic", "pins": ["GND", "3V3", 8, 9]}
+    },
+    "devices": {
+        "gauge": {"class": "fuel_gauge", "on": {"i2c.i2c0": {"address": "0x55"}}, "part": "BQ27220", "maker": "ti"}
+    }
+}

@@ -1,0 +1,11 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "ov2640",
+    "title": "OV2640",
+    "class": "camera",
+    "on": {"dvp": {"required": true, "role": "data"}, "i2c": {"required": true, "role": "control", "address": "0x30"}},
+    "provides": {"camera": {"width_max": 1600, "height_max": 1200, "formats": ["jpeg", "rgb565"]}},
+    "checked": {"facts": {"level": "unchecked", "source": "shape only"}}
+}

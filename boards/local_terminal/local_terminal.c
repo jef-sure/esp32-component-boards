@@ -25,7 +25,7 @@ static const struct board_i2c_pins board_i2c_pins_of = {.port = I2C_NUM_0, .sda 
 /* Every bus of the board, its numbers by name: the kinds the component sets up and the
  * kinds it only keeps for the program, for a program that sets its own hardware up on the
  * board's wiring instead of copying pins. */
-static const struct board_bus_field board_bus_table[] = {{"i2c.i2c0", "scl", 22}, {"i2c.i2c0", "sda", 21}, {"spi.spi3", "miso", 19}, {"spi.spi3", "mosi", 23}, {"spi.spi3", "sclk", 18}, {"spi.spi2", "miso", 12}, {"spi.spi2", "mosi", 13}, {"spi.spi2", "sclk", 14}, {"nfc_in", "cs", 5}, {"nfc_out", "cs", 27}};
+static const struct board_bus_field board_bus_table[] = {{"i2c.i2c0", "scl", 22}, {"i2c.i2c0", "sda", 21}, {"spi.spi3", "miso", 19}, {"spi.spi3", "mosi", 23}, {"spi.spi3", "sclk", 18}, {"spi.spi2", "miso", 12}, {"spi.spi2", "mosi", 13}, {"spi.spi2", "sclk", 14}, {"led", "out", 2}, {"nfc_in_nfc", "cs", 5}, {"nfc_out_nfc", "cs", 27}};
 
 bool board_bus_get(const char *bus, const char *field, long *out)
 {
@@ -81,7 +81,8 @@ const struct board_touch_table board_touch_table = {.count = 0};
 
 const struct board_sound_table board_sound_table = {.count = 0};
 
-const struct board_button_table board_button_table = {.count = 0};
+static const struct board_button_entry button_entries[] = {{.name = "boot", .pin = 0, .active_low = true}};
+const struct board_button_table board_button_table = {.entries = button_entries, .count = 1};
 
 /* What the board has not: the rest of boards.h, returning false, so that the same program
  * links and runs on every board. */

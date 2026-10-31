@@ -83,6 +83,7 @@ GPIOS = {
 
 I2C_HZ_DEFAULT = 400000
 INPUT_LINES = ("in", "int", "irq", "te", "busy")  # lines of a device that only come in
+STARTED_CLASSES = {"display", "touch", "audio", "button"}  # the rest is kept as data
 
 MANIFEST_BEGIN = "  # boards: dependencies generated"
 MANIFEST_END = "  # boards: end of generated"
@@ -276,9 +277,32 @@ def parts_of(resolved):
 def lying(display):
     """The display as it lies: (width, height, mm_w, mm_h) after the swap of its orientation."""
     panel = display["panel"]
+    mm_w, mm_h = panel.get("mm_w", 0), panel.get("mm_h", 0)
     if display["original_orientation"].get("swap", False):
-        return panel["height"], panel["width"], panel["mm_h"], panel["mm_w"]
-    return panel["width"], panel["height"], panel["mm_w"], panel["mm_h"]
+        return panel["height"], panel["width"], mm_h, mm_w
+    return panel["width"], panel["height"], mm_w, mm_h
+
+
+def not_started(device):
+    """What the data of a device says and the glue cannot do yet."""
+    config = device.get("config") or {}
+    connections = (device.get("on") or {}).values()
+    found = []
+    if "chip_try" in device:
+        found.append("chip_try: a chip found at start")
+    if "timing" in config:
+        found.append("config.timing")
+    if config.get("clock", "mclk") != "mclk":
+        found.append("config.clock of bclk")
+    if any(connection.get("format", "std") != "std" for connection in connections):
+        found.append("an I2S format other than std")
+    if any(connection.get("sio") for connection in connections):
+        found.append("SPI with one data line")
+    if any(isinstance(line, dict) and "analog" in line for line in (device.get("pins") or {}).values()):
+        found.append("a button on a resistor ladder")
+    if "touch" in device["classes"] and "fingers" not in config:
+        found.append("a touch whose chip does not say its fingers")
+    return found
 
 
 def read_board(path):
@@ -295,7 +319,12 @@ def read_board(path):
     found = rules.check(resolved, RULES)
     if found:
         raise ValueError(f"{path}: " + "; ".join(item["message"] for item in found))
+    switched = [step.get("name", f"step {at}") for at, step in enumerate(resolved.get("power") or []) if "line" in step]
+    if switched:
+        raise ValueError(f"{path}: the glue cannot set the lines of power yet: {', '.join(switched)}")
     for name, device in resolved["devices"].items():
+        if STARTED_CLASSES & set(device["classes"]) and not_started(device):
+            raise ValueError(f"{path}: {name}: the glue cannot start this yet: {', '.join(not_started(device))}")
         if "touch" in device["classes"] and (device.get("config") or {}).get("over") == "none":
             raise ValueError(f"{path}: {name}: a touch with no display: DGX-DI has no pointer for it yet")
     characters = [name for name, device in resolved["devices"].items() if (device.get("config") or {}).get("kind") == "character"]
@@ -403,19 +432,20 @@ def read_board(path):
             if bus_of(data, bus_name) is None:
                 raise ValueError(f'the display\'s bus "{bus_name}" is not among the board\'s buses')
             panel = display.get("panel")
-            if not panel or not all(isinstance(panel.get(k), int) for k in ("width", "height", "mm_w", "mm_h")):
-                raise ValueError("the panel of the display lacks its size, in pixels or millimetres")
+            if not panel or not all(isinstance(panel.get(k), int) for k in ("width", "height")):
+                raise ValueError("the panel of the display lacks its size in pixels")
             depth = display.get("depth_bits", 16)
             depths = display["entry"]["supports"]["depth_bits"]
             if depth not in depths:
                 raise ValueError(f'depth_bits {depth} is not one the driver {driver} takes ({", ".join(map(str, depths))})')
-            if panel["width"] > panel["height"] and panel["mm_w"] < panel["mm_h"] or \
-               panel["width"] < panel["height"] and panel["mm_w"] > panel["mm_h"]:
-                raise ValueError("the panel's pixels and its millimetres lie different ways: both are the glass as the controller scans it")
-            ratio_px = panel["width"] / panel["height"]
-            ratio_mm = panel["mm_w"] / panel["mm_h"]
-            if abs(ratio_px - ratio_mm) / max(ratio_px, ratio_mm) > 0.2:
-                raise ValueError(f"the panel's pixels ({panel['width']}x{panel['height']}) and its millimetres ({panel['mm_w']}x{panel['mm_h']}) are not near one proportion")
+            if "mm_w" in panel:
+                if panel["width"] > panel["height"] and panel["mm_w"] < panel["mm_h"] or \
+                   panel["width"] < panel["height"] and panel["mm_w"] > panel["mm_h"]:
+                    raise ValueError("the panel's pixels and its millimetres lie different ways: both are the glass as the controller scans it")
+                ratio_px = panel["width"] / panel["height"]
+                ratio_mm = panel["mm_w"] / panel["mm_h"]
+                if abs(ratio_px - ratio_mm) / max(ratio_px, ratio_mm) > 0.2:
+                    raise ValueError(f"the panel's pixels ({panel['width']}x{panel['height']}) and its millimetres ({panel['mm_w']}x{panel['mm_h']}) are not near one proportion")
             orientation = display.get("original_orientation")
             names = resolve.library(display["library"])["values"]
             if not orientation or orientation.get("x") not in names["dir_x"] or orientation.get("y") not in names["dir_y"]:
@@ -508,10 +538,16 @@ def pins_of(board):
                     continue
                 # only MISO and I2S DIN are inputs; data lines are bidirectional and RD is driven by the chip
                 pins.append((value, f"{kind}.{own}.{key}", "in" if key in ("miso", "din") else "bus"))
+    for step in board.get("power") or []:
+        if isinstance(step.get("line"), dict) and "gpio" in step["line"]:
+            pins.append((step["line"]["gpio"], f"power.{step.get('name', 'strobe')}", "out"))
     for name, device in board["devices"].items():
         for line, value in sorted((device.get("pins") or {}).items()):
             if isinstance(value, dict) and "gpio" in value:
                 pins.append((value["gpio"], f"{name}.{line}", "in" if line in INPUT_LINES else "out"))
+        divider = (device.get("config") or {}).get("divider") or {}
+        if isinstance(divider.get("switch"), dict) and "gpio" in divider["switch"]:
+            pins.append((divider["switch"]["gpio"], f"{name}.divider", "out"))
         for connection in (device.get("on") or {}).values():
             if isinstance(connection.get("cs"), dict) and "gpio" in connection["cs"]:
                 pins.append((connection["cs"]["gpio"], f"{name}.cs", "out"))
@@ -870,7 +906,7 @@ def gen_c(board):
             out("}")
             out("")
             light = backlight if any(step.get("line") == "backlight" for step in entry.get("setup", ())) else "GPIO_NUM_NC"
-            rows.append(f"    {{.name = \"{shown['name']}\", .glass_w = {panel['width']}, .glass_h = {panel['height']}, .mm_w = {panel['mm_w']}, .mm_h = {panel['mm_h']}, "
+            rows.append(f"    {{.name = \"{shown['name']}\", .glass_w = {panel['width']}, .glass_h = {panel['height']}, .mm_w = {panel.get('mm_w', 0)}, .mm_h = {panel.get('mm_h', 0)}, "
                         f".dir_x = {library['values']['dir_x'][orientation['x']]}, .dir_y = {library['values']['dir_y'][orientation['y']]}, .swap_xy = {'true' if orientation.get('swap', False) else 'false'}, "
                         f".backlight = {light}, .backlight_on = {1 if shown.get('backlight_on_high', True) else 0}, .bus = display{i}_bus, .screen = display{i}_screen, .orientation = {entry['controls']['orientation']['call']}}},")
         grouped = [f"    {{.name = \"{name}\", .group = true, .left = {place[group['left']]}, .right = {place[group['right']]}}}," for name, group in group_rows]
@@ -1192,7 +1228,7 @@ def gen_table(boards, lang="en"):
             w, h, mm_w, mm_h = lying(display)
             bus = bus_parts(display["bus"]["bus"])[0]
             bus_name = {"dsi": "MIPI-DSI", "qspi": "QSPI", "spi": "SPI", "p8": "i80"}[bus]
-            disp = f"{w}x{h} {display['driver'].upper()}, {bus_name}, {mm_w}x{mm_h} mm"
+            disp = f"{w}x{h} {display['driver'].upper()}, {bus_name}" + (f", {mm_w}x{mm_h} mm" if mm_w else "")
         elif is_character(display):
             disp = f"{display['geometry']} {display['driver'].upper()}"
         else:

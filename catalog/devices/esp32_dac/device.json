@@ -4,6 +4,8 @@
     "kind": "device",
     "name": "esp32_dac",
     "title": "The DAC of the ESP32",
+    "maker": "espressif",
+    "compat": "espressif,esp32-dac",
     "class": "audio",
     "config": {"direction": "out"},
     "checked": {"facts": {"level": "hardware", "source": "boards-data, flashed or checked against the schematic"}}

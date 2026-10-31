@@ -1,0 +1,41 @@
+{
+  "format": "jef-sure/boards",
+  "format_version": 2,
+  "kind": "project",
+  "name": "project_counts_goods",
+  "title": "A project with goods that have no wiring",
+  "extends": "cyd_s028r",
+  "price": {
+    "paid": {
+      "shop": "a local shop",
+      "currency": "EUR",
+      "range": [
+        9,
+        9
+      ],
+      "date": "2026-10-31",
+      "source": "shape only"
+    }
+  },
+  "devices": {
+    "screws": {
+      "class": "other",
+      "part": "M3x8 screw",
+      "count": 4,
+      "tariff": "731815",
+      "price": {
+        "box": {
+          "shop": "AliExpress",
+          "currency": "EUR",
+          "range": [
+            0.05,
+            0.1
+          ],
+          "date": "2026-10-31",
+          "source": "shape only",
+          "qty": 100
+        }
+      }
+    }
+  }
+}

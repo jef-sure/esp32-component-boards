@@ -40,7 +40,7 @@
     "range": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "number" } },
     "classes": {
       "enum": ["display", "touch", "audio", "storage", "radio", "network", "nfc", "sensor", "io_expander", "pmic", "battery_adc", "adc", "camera", "imu", "rtc",
-               "button", "encoder", "keyboard", "gamepad", "led", "usb", "gps", "motor", "i2c_mux", "other"]
+               "button", "encoder", "keyboard", "gamepad", "led", "usb", "gps", "motor", "i2c_mux", "fuel_gauge", "other"]
     },
     "class": {
       "description": "One role, or several for a chip that has them. Tools read it as an array.",
@@ -48,6 +48,43 @@
         { "$ref": "#/$defs/classes" },
         { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/classes" } }
       ]
+    },
+    "maker": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$", "description": "Who makes it: a short name of ours. The name for devicetree is compat." },
+    "tariff": { "type": "string", "pattern": "^[0-9]{6,10}$", "description": "The customs tariff code of the goods: HS or CN, digits only. Duties on small parcels are counted by it." },
+    "price": {
+      "description": "What one unit costs, by offer: named entries, so a layer can add one. Costs of an order, as delivery and duty, are not here: they depend on the whole order.",
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/name" },
+      "additionalProperties": {
+        "type": "object",
+        "required": ["shop", "currency", "range", "date", "source"],
+        "additionalProperties": false,
+        "properties": {
+          "shop": { "type": "string", "minLength": 1 },
+          "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+          "range": { "$ref": "#/$defs/range", "description": "Lowest and highest price of one unit. Less than 3 is [0, 3]: a bound, not an invented low." },
+          "qty": { "type": "integer", "minimum": 1, "description": "The least quantity this price holds for. 1 when absent." },
+          "date": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+          "source": { "type": "string", "minLength": 1 },
+          "notes": { "$ref": "#/$defs/notes" }
+        }
+      }
+    },
+    "compat": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+,[a-z0-9._+-]+$",
+      "description": "The compatible of devicetree, where the chip has one. The only field kept for a format outside."
+    },
+    "draw": {
+      "description": "Current by mode, such as active or sleep, in mA. What it stands on goes in checked.",
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/name" },
+      "additionalProperties": {
+        "type": "object",
+        "required": ["ma"],
+        "additionalProperties": false,
+        "properties": { "ma": { "type": "number", "minimum": 0 }, "ma_peak": { "type": "number", "minimum": 0 } }
+      }
     },
     "notes": {
       "description": "What is special about this, in words, for a person: one text, or one entry for each thing. Tools show it and do not read it.",
@@ -70,6 +107,7 @@
           "covers": { "type": "array", "minItems": 1, "items": { "type": "string" }, "description": "Paths in this file, as devices.touch or connectors.CN1." },
           "source": { "type": "string", "description": "The document, its version and where it was found." },
           "by": { "type": "string", "description": "Who tried or read it." },
+          "unit": { "type": "string", "description": "Which board was tried: on_board names a model, this names one piece of it." },
           "date": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
           "result": { "enum": ["confirmed", "pending", "refuted"], "description": "confirmed when absent. refuted keeps a disagreement in sight; pending says what is still to be tried." },
           "notes": { "$ref": "#/$defs/notes" },
@@ -129,7 +167,7 @@
             "channel": { "type": "integer", "minimum": 0 },
             "active": { "enum": ["high", "low"] },
             "pull": { "enum": ["up", "down", "none"] },
-            "analog": { "$ref": "#/$defs/range", "description": "Read as an ADC value inside this range." }
+            "analog": { "$ref": "#/$defs/range", "description": "Read through the ADC: the window of this line in millivolts. Buttons on a resistor ladder share one GPIO, each with its window." }
           },
           "oneOf": [
             { "required": ["gpio"], "not": { "anyOf": [{ "required": ["via"] }, { "required": ["bit"] }, { "required": ["rail"] }, { "required": ["channel"] }] } },
@@ -152,6 +190,8 @@
         "dsi": { "type": "object", "additionalProperties": { "$ref": "#/$defs/busDsi" } },
         "p8": { "type": "object", "additionalProperties": { "$ref": "#/$defs/busP8" } },
         "rgb": { "type": "object", "additionalProperties": { "$ref": "#/$defs/busRgb" } },
+        "csi": { "type": "object", "additionalProperties": { "$ref": "#/$defs/busCsi" } },
+        "dvp": { "type": "object", "additionalProperties": { "$ref": "#/$defs/busDvp" } },
         "uart": { "type": "object", "propertyNames": { "pattern": "^uart[0-9]$" }, "additionalProperties": { "$ref": "#/$defs/busUart" } }
       },
       "additionalProperties": {
@@ -184,13 +224,14 @@
       "properties": { "sda": { "$ref": "#/$defs/line" }, "scl": { "$ref": "#/$defs/line" }, "hz": { "$ref": "#/$defs/hz" } }
     },
     "busI2s": {
-      "description": "Standard I2S has bclk and ws, PDM has clk.",
+      "description": "Standard I2S and TDM have bclk and ws, PDM has clk: \"nc\" for a PDM output with no clock line, into a filter. The extra data lines are of PDM. Whether a device on it uses std, tdm or pdm is in its connection: the two directions of a port can differ.",
       "type": "object",
       "anyOf": [{ "required": ["bclk", "ws"] }, { "required": ["clk"] }],
       "additionalProperties": false,
       "properties": {
         "mclk": { "$ref": "#/$defs/line" }, "bclk": { "$ref": "#/$defs/line" }, "ws": { "$ref": "#/$defs/line" }, "clk": { "$ref": "#/$defs/line" },
-        "dout": { "$ref": "#/$defs/line" }, "din": { "$ref": "#/$defs/line" }
+        "dout": { "$ref": "#/$defs/line" }, "din": { "$ref": "#/$defs/line" }, "dout2": { "$ref": "#/$defs/line" },
+        "din2": { "$ref": "#/$defs/line" }, "din3": { "$ref": "#/$defs/line" }, "din4": { "$ref": "#/$defs/line" }
       }
     },
     "busDsi": {
@@ -200,6 +241,26 @@
       "properties": {
         "lanes": { "enum": [1, 2] }, "lane_mbps": { "type": "integer", "minimum": 1 },
         "phy_ldo_chan": { "type": "integer" }, "phy_ldo_mv": { "type": "integer" }
+      }
+    },
+    "busCsi": {
+      "description": "MIPI CSI: the lanes have pins of their own, no GPIO. lane_mbps is of a mode of the sensor, when a board holds one.",
+      "type": "object",
+      "required": ["lanes"],
+      "additionalProperties": false,
+      "properties": {
+        "lanes": { "enum": [1, 2] }, "lane_mbps": { "type": "integer", "minimum": 1 },
+        "phy_ldo_chan": { "type": "integer" }, "phy_ldo_mv": { "type": "integer" }
+      }
+    },
+    "busDvp": {
+      "description": "The parallel camera port. de is HREF of the sensor; XCLK is a line of the camera, in its pins.",
+      "type": "object",
+      "required": ["pclk", "vsync", "de", "data"],
+      "additionalProperties": false,
+      "properties": {
+        "pclk": { "$ref": "#/$defs/line" }, "vsync": { "$ref": "#/$defs/line" }, "de": { "$ref": "#/$defs/line" }, "hsync": { "$ref": "#/$defs/line" },
+        "data": { "type": "array", "minItems": 8, "maxItems": 16, "items": { "$ref": "#/$defs/line" } }
       }
     },
     "busP8": {
@@ -239,6 +300,8 @@
         "hz": { "$ref": "#/$defs/hz" },
         "mode": { "enum": [0, 1, 2, 3] },
         "role": { "enum": ["data", "control"] },
+        "format": { "enum": ["std", "tdm", "pdm"], "description": "Of an I2S bus: how this device uses it. std when absent." },
+        "sio": { "type": "boolean", "description": "Of an SPI bus: data both ways on MOSI, MISO unused." },
         "required": { "type": "boolean", "description": "In a type: this kind of bus must be wired." }
       }
     },
@@ -291,6 +354,9 @@
           "description": "How it works: reader, peer_to_peer, card_emulation for NFC."
         },
         "targets_max": { "type": "integer", "minimum": 1, "description": "How many it handles at once." },
+        "width_max": { "type": "integer", "minimum": 1, "description": "Of a sensor: its largest picture." },
+        "height_max": { "type": "integer", "minimum": 1 },
+        "formats": { "type": "array", "uniqueItems": true, "items": { "type": "string" }, "description": "Of a sensor: the pixel formats it gives, as raw10 or rgb565." },
         "tx_ma_max": { "type": "number", "description": "The largest transmitter current." },
         "range_mm": { "type": "number", "description": "How far it works, with this antenna: measured, in checked." },
         "output": { "$ref": "#/$defs/range" },
@@ -315,11 +381,24 @@
     "device": {
       "description": "A device on a board or in a module. With chip, the entry of the catalog lies under it.",
       "type": "object",
+      "not": { "required": ["chip", "chip_try"] },
       "additionalProperties": false,
       "patternProperties": { "^x_": true },
       "properties": {
         "class": { "$ref": "#/$defs/class" },
+        "maker": { "$ref": "#/$defs/maker" },
+        "part": { "type": "string", "minLength": 1, "description": "The maker's part number, when the chip's entry does not say it or says less." },
+        "marking": { "type": "string", "minLength": 1, "description": "What the package shows, when the part is not known." },
+        "ref": { "type": "string", "minLength": 1, "description": "Its designator on the schematic, as U6." },
+        "count": { "type": "integer", "minimum": 1, "description": "How many of this one product takes, for what has no wiring of its own: screws, cables. 1 when absent." },
+        "price": { "$ref": "#/$defs/price" },
+        "tariff": { "$ref": "#/$defs/tariff" },
+        "draw": { "$ref": "#/$defs/draw" },
         "chip": { "$ref": "#/$defs/name" },
+        "chip_try": {
+          "description": "A chip found at start: one of these, in the order to try. It stands instead of chip, so the class is the device's own.",
+          "type": "array", "minItems": 2, "uniqueItems": true, "items": { "$ref": "#/$defs/name" }
+        },
         "variant": { "$ref": "#/$defs/name" },
         "on": { "$ref": "#/$defs/on" },
         "pins": { "$ref": "#/$defs/pins" },
@@ -373,6 +452,10 @@
       "required": ["class"],
       "properties": {
         "class": { "$ref": "#/$defs/class" },
+        "maker": { "$ref": "#/$defs/maker" },
+        "part": { "type": "string", "minLength": 1, "description": "The maker's part number; a family says it in each variant." },
+        "compat": { "$ref": "#/$defs/compat" },
+        "draw": { "$ref": "#/$defs/draw" },
         "on": { "$ref": "#/$defs/on" },
         "pins": { "$ref": "#/$defs/pins" },
         "config": { "type": "object" },
@@ -388,6 +471,9 @@
             "type": "object",
             "additionalProperties": false,
             "properties": {
+              "part": { "type": "string", "minLength": 1 },
+              "compat": { "$ref": "#/$defs/compat" },
+              "draw": { "$ref": "#/$defs/draw" },
               "config": { "type": "object" },
               "controls": { "$ref": "#/$defs/controls" },
               "provides": { "$ref": "#/$defs/provides" },
@@ -486,8 +572,8 @@
       "required": ["pins"],
       "properties": {
         "pitch_mm": { "type": "number" },
-        "volts": { "type": "number" },
-        "pins": { "type": "array", "items": { "type": "string" } }
+        "volts": { "description": "One voltage, or the range a device on it must take.", "oneOf": [{ "type": "number" }, { "$ref": "#/$defs/range" }] },
+        "pins": { "type": "array", "items": { "type": "string" }, "description": "What each contact carries, from contact 1." }
       }
     },
     "mcu": {
@@ -496,6 +582,8 @@
       "additionalProperties": false,
       "properties": {
         "target": { "$ref": "#/$defs/name", "description": "A directory of catalog/mcu/." },
+        "part": { "type": "string", "minLength": 1, "description": "The chip as its maker names it, as ESP32-D0WD-V3." },
+        "draw": { "$ref": "#/$defs/draw" },
         "flash_mb": { "type": "integer", "minimum": 1 },
         "psram_mb": { "type": "integer", "minimum": 0 },
         "notes": { "$ref": "#/$defs/notes" },
@@ -514,18 +602,52 @@
       }
     },
     "powerStep": {
+      "description": "A line of supply or a strobe. The list is the order of the start, so a step takes only from a step before it. A step with a name is a line of supply and owns its GPIO; one with none is a strobe on a line a device owns.",
       "type": "object",
-      "required": ["line"],
       "additionalProperties": false,
+      "anyOf": [{ "required": ["line"] }, { "required": ["source"] }, { "required": ["from"] }],
+      "not": { "required": ["source", "from"] },
+      "dependentRequired": { "source": ["name"], "from": ["name"], "through": ["from"] },
       "properties": {
-        "line": { "$ref": "#/$defs/line" },
+        "name": { "type": "string", "minLength": 1, "description": "As the schematic or the board writes it. A contact of a connector with this text is this line." },
+        "source": { "enum": ["usb", "vin", "battery", "connector"], "description": "Where a supply comes in. connector: a module takes it from the board it is on." },
+        "from": {
+          "description": "The step it takes from, or several, each with its own way in.",
+          "oneOf": [{ "type": "string", "minLength": 1 }, { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/powerInput" } }]
+        },
+        "through": { "$ref": "#/$defs/powerThrough" },
+        "regulator": { "enum": ["ldo", "buck", "boost", "charger"], "description": "How the voltage changes: an ldo passes its current on, the others convert power." },
+        "efficiency_percent": { "type": "number", "exclusiveMinimum": 0, "maximum": 100 },
+        "line": { "$ref": "#/$defs/line", "description": "What switches it, or the rail of a PMIC. A line a device owns stays there: why says it." },
         "level": { "enum": [0, 1] },
         "mv": { "type": "integer", "minimum": 0 },
+        "ma_max": { "type": "integer", "minimum": 0 },
+        "dropout_mv": { "$ref": "#/$defs/dropout" },
         "delay_ms": { "type": "integer", "minimum": 0 },
-        "feeds": { "type": "array", "items": { "$ref": "#/$defs/name" } },
+        "feeds": {
+          "description": "What it feeds: devices, mcu, or a step of a module. A chip on two lines is in both.",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
         "why": { "type": "string" }
       }
     },
+    "powerInput": {
+      "oneOf": [
+        { "type": "string", "minLength": 1 },
+        {
+          "type": "object",
+          "required": ["name"],
+          "additionalProperties": false,
+          "properties": { "name": { "type": "string", "minLength": 1 }, "through": { "$ref": "#/$defs/powerThrough" }, "dropout_mv": { "$ref": "#/$defs/dropout" } }
+        }
+      ]
+    },
+    "powerThrough": {
+      "description": "The device it goes through, or several in order: a regulator, a diode, a fuse.",
+      "oneOf": [{ "$ref": "#/$defs/name" }, { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/name" } }]
+    },
+    "dropout": { "type": "integer", "minimum": 0, "description": "What is lost from input to output: the least an ldo needs, the drop of a diode." },
     "resolved": {
       "description": "A board or module after the layers are merged and the catalog applied.",
       "type": "object",
@@ -534,7 +656,7 @@
         "devices": { "type": "object", "minProperties": 1, "additionalProperties": { "$ref": "#/$defs/resolvedDevice" } }
       },
       "if": { "properties": { "kind": { "const": "board" } } },
-      "then": { "required": ["mcu", "buses"] }
+      "then": { "required": ["mcu"] }
     },
     "resolvedDevice": {
       "type": "object",
@@ -547,7 +669,9 @@
         { "if": { "$ref": "#/$defs/isTouch" }, "then": { "$ref": "#/$defs/touch" } },
         { "if": { "$ref": "#/$defs/isAudio" }, "then": { "$ref": "#/$defs/audio" } },
         { "if": { "$ref": "#/$defs/isButton" }, "then": { "$ref": "#/$defs/button" } },
-        { "if": { "$ref": "#/$defs/isGamepad" }, "then": { "$ref": "#/$defs/gamepad" } }
+        { "if": { "$ref": "#/$defs/isGamepad" }, "then": { "$ref": "#/$defs/gamepad" } },
+        { "if": { "$ref": "#/$defs/isCamera" }, "then": { "$ref": "#/$defs/camera" } },
+        { "if": { "$ref": "#/$defs/isBatteryAdc" }, "then": { "$ref": "#/$defs/batteryAdc" } }
       ]
     },
     "isDisplay": { "required": ["classes"], "properties": { "classes": { "contains": { "const": "display" } } } },
@@ -555,8 +679,12 @@
     "isAudio": { "required": ["classes"], "properties": { "classes": { "contains": { "const": "audio" } } } },
     "isButton": { "required": ["classes"], "properties": { "classes": { "contains": { "const": "button" } } } },
     "isGamepad": { "required": ["classes"], "properties": { "classes": { "contains": { "const": "gamepad" } } } },
+    "isCamera": { "required": ["classes"], "properties": { "classes": { "contains": { "const": "camera" } } } },
+    "isBatteryAdc": { "required": ["classes"], "properties": { "classes": { "contains": { "const": "battery_adc" } } } },
+    "hasChip": { "anyOf": [{ "required": ["chip"] }, { "required": ["chip_try"] }] },
     "display": {
-      "required": ["chip", "on", "config"],
+      "$ref": "#/$defs/hasChip",
+      "required": ["on", "config"],
       "properties": {
         "on": { "minProperties": 1 },
         "config": {
@@ -578,7 +706,8 @@
         "primary": { "type": "boolean" },
         "panel": {
           "type": "object",
-          "required": ["width", "height", "mm_w", "mm_h"],
+          "required": ["width", "height"],
+          "dependentRequired": { "mm_w": ["mm_h"], "mm_h": ["mm_w"] },
           "additionalProperties": false,
           "properties": {
             "width": { "type": "integer", "minimum": 1 },
@@ -590,6 +719,19 @@
             "offset_x": { "type": "integer", "minimum": 0 },
             "offset_y": { "type": "integer", "minimum": 0 },
             "round": { "type": "boolean" }
+          }
+        },
+        "timing": {
+          "description": "Of a panel fed without pause, RGB or MIPI-DSI video. What it stands on goes in checked: a maker's figures are a hint until measured on the board.",
+          "type": "object",
+          "required": ["pclk_hz", "hsync_pulse", "hsync_back", "hsync_front", "vsync_pulse", "vsync_back", "vsync_front"],
+          "additionalProperties": false,
+          "properties": {
+            "pclk_hz": { "$ref": "#/$defs/hz" },
+            "hsync_pulse": { "type": "integer", "minimum": 0 }, "hsync_back": { "type": "integer", "minimum": 0 }, "hsync_front": { "type": "integer", "minimum": 0 },
+            "vsync_pulse": { "type": "integer", "minimum": 0 }, "vsync_back": { "type": "integer", "minimum": 0 }, "vsync_front": { "type": "integer", "minimum": 0 },
+            "pclk_edge": { "enum": ["rising", "falling"], "description": "The edge the panel takes data on. rising when absent." },
+            "hsync_active": { "enum": ["high", "low"] }, "vsync_active": { "enum": ["high", "low"] }, "de_active": { "enum": ["high", "low"] }
           }
         },
         "depth_bits": { "enum": [1, 2, 4, 8, 12, 16, 18, 24] },
@@ -634,18 +776,19 @@
       }
     },
     "touch": {
-      "required": ["chip", "on", "config"],
+      "$ref": "#/$defs/hasChip",
+      "required": ["on", "config"],
       "properties": {
         "on": { "minProperties": 1 },
         "config": {
           "type": "object",
-          "required": ["over", "x_max", "y_max", "fingers"],
+          "required": ["over", "x_max", "y_max"],
           "additionalProperties": false,
           "properties": {
             "over": { "description": "The display the touch lies over, or \"none\". The calibration is for that display.", "$ref": "#/$defs/name" },
             "x_max": { "type": "integer", "minimum": 1, "description": "The largest raw coordinate, not their number." },
             "y_max": { "type": "integer", "minimum": 1 },
-            "fingers": { "type": "integer", "minimum": 1 },
+            "fingers": { "type": "integer", "minimum": 1, "description": "It comes from the chip's entry; a board writes it when it differs." },
             "resistive": { "type": "boolean" },
             "calibrations": {
               "description": "What was measured on this panel, by the library that reads it: each has a form of its own. A list, the newest last, each with its rule; the last is taken for now.",
@@ -732,7 +875,8 @@
     },
     "knots": { "type": "array", "items": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "integer" } } },
     "audio": {
-      "required": ["chip", "config"],
+      "$ref": "#/$defs/hasChip",
+      "required": ["config"],
       "properties": {
         "config": {
           "type": "object",
@@ -741,9 +885,45 @@
           "properties": {
             "direction": { "enum": ["out", "in", "both"] },
             "sample_rate": { "type": "integer", "minimum": 1 },
+            "clock": { "enum": ["mclk", "bclk"], "description": "What the codec takes its clock from. mclk when absent." },
             "mixer_volume": { "type": "integer", "minimum": 0 },
             "pa_voltage": { "type": "number" },
             "codec_dac_voltage": { "type": "number" }
+          }
+        }
+      }
+    },
+    "camera": {
+      "description": "A sensor on a bus for its picture and usually I2C for its registers. chip may be missing: an imported board often does not name the sensor.",
+      "required": ["on"],
+      "properties": {
+        "on": { "minProperties": 1 },
+        "config": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "xclk_hz": { "$ref": "#/$defs/hz", "description": "The clock the board gives the sensor on pins.xclk." }
+          }
+        }
+      }
+    },
+    "batteryAdc": {
+      "properties": {
+        "config": {
+          "type": "object",
+          "properties": {
+            "divider": {
+              "description": "The battery through top_ohm to the ADC, bottom_ohm from there to ground. switch feeds it only for a reading, settle_us after that.",
+              "type": "object",
+              "required": ["top_ohm", "bottom_ohm"],
+              "additionalProperties": false,
+              "properties": {
+                "top_ohm": { "type": "integer", "minimum": 0 },
+                "bottom_ohm": { "type": "integer", "minimum": 1 },
+                "switch": { "$ref": "#/$defs/line" },
+                "settle_us": { "type": "integer", "minimum": 0 }
+              }
+            }
           }
         }
       }
@@ -904,6 +1084,7 @@
         },
         "owner": { "type": "string", "minLength": 1 },
         "url": { "type": "string" },
+        "license": { "type": "string", "minLength": 1, "description": "Of the version described, as an SPDX expression where it has one; history says when it was another." },
         "chips": { "type": "object", "additionalProperties": { "$ref": "#/$defs/libraryChip" } },
         "transports": { "type": "object", "additionalProperties": { "$ref": "#/$defs/libraryTransport" } },
         "interfaces": {
@@ -956,6 +1137,7 @@
       "additionalProperties": false,
       "properties": {
         "before": { "type": "string" },
+        "license": { "type": "string", "minLength": 1 },
         "chips": { "type": "object" },
         "transports": { "type": "object" },
         "interfaces": { "type": "object" },
@@ -1014,6 +1196,11 @@
       "description": "What a board and a module share: a module is a board used as a part of another. It may have a chip of its own, like a C6 on the SDIO of a P4.",
       "properties": {
         "extends": { "$ref": "#/$defs/name", "description": "The board this one is a variant of." },
+        "maker": { "$ref": "#/$defs/maker" },
+        "part": { "type": "string", "minLength": 1, "description": "The maker's name for this board or module." },
+        "revision": { "type": "string", "minLength": 1, "description": "The revision of the printed board this file describes, as its maker writes it." },
+        "price": { "$ref": "#/$defs/price" },
+        "tariff": { "$ref": "#/$defs/tariff" },
         "mcu": { "$ref": "#/$defs/mcu" },
         "buses": { "$ref": "#/$defs/buses" },
         "devices": { "type": "object", "propertyNames": { "$ref": "#/$defs/name" }, "additionalProperties": { "$ref": "#/$defs/device" } },
@@ -1085,10 +1272,12 @@
           "type": "object",
           "additionalProperties": {
             "type": "object",
-            "required": ["type", "pins"],
+            "required": ["pins"],
+            "anyOf": [{ "required": ["type"] }, { "required": ["of"] }],
             "additionalProperties": false,
             "properties": {
               "type": { "type": "string" },
+              "of": { "$ref": "#/$defs/name", "description": "A directory of catalog/connectors/: a connector whose contacts are fixed by a standard." },
               "pins": { "type": "array", "items": { "anyOf": [{ "$ref": "#/$defs/line" }, { "type": "string" }] } },
               "at": {
                 "type": "object",

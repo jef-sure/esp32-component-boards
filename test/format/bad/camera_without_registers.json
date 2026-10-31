@@ -1,0 +1,14 @@
+{
+    "expect": "camera: it needs a bus of kind i2c",
+    "board": {
+        "format": "jef-sure/boards",
+        "format_version": 2,
+        "kind": "board",
+        "name": "camera_without_registers",
+        "title": "A sensor with no I2C",
+        "mcu": {"target": "esp32p4"},
+        "checked": {"pins": {"level": "unchecked", "source": "shape only"}},
+        "buses": {"csi": {"csi0": {"lanes": 2}}},
+        "devices": {"camera": {"chip": "ov02c10", "on": {"csi.csi0": {}}}}
+    }
+}

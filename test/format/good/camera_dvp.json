@@ -1,0 +1,21 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "camera_dvp",
+    "title": "A parallel camera with its clock from the board",
+    "mcu": {"target": "esp32s3"},
+    "checked": {"pins": {"level": "unchecked", "source": "shape only"}},
+    "buses": {
+        "i2c": {"i2c0": {"sda": 4, "scl": 5}},
+        "dvp": {"cam": {"pclk": 13, "vsync": 6, "de": 7, "data": [11, 9, 8, 10, 12, 18, 17, 16]}}
+    },
+    "devices": {
+        "camera": {
+            "chip": "ov2640",
+            "on": {"dvp.cam": {}, "i2c.i2c0": {}},
+            "pins": {"xclk": 15, "rst": "nc", "pwdn": "nc"},
+            "config": {"xclk_hz": 20000000}
+        }
+    }
+}

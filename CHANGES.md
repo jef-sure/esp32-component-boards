@@ -67,6 +67,31 @@ committed, a program that asks by kind.
   set up keeps its lines as data: `board_bus_get("nfc_in", "cs", &pin)`.
 - `examples/hello_lvgl`: LVGL on the chosen board through DGX-LVGL.
 - Sound through an I2S amplifier with no codec: `"kind": "i2s"`.
+- What a trial import of 115 boards showed the format lacked: millimetres of a panel and
+  `fingers` of a touch are optional, `board_display.mm_w` and `mm_h` are 0 when not known;
+  `config.timing` of a panel; `format` of an I2S connection, `clock` of a codec, more PDM
+  lines; `sio` of an SPI connection; buttons on a resistor ladder with windows in
+  millivolts; `chip_try` for a chip found at start; the class `fuel_gauge`.
+- Cameras as data: the buses `csi` and `dvp`, the class `camera`. JC1060P470C and
+  JC8012P4A1C: the CSI bus, the connector, the OV02C10 as a module, its sensor read over
+  I2C on both boards. `esp-idf/guition/esp_cam_sensor`: the OV02C10 is in the maker's copy
+  of that library, not in the registry.
+- Physical facts: `maker`, `part`, `compat`, `marking`, `ref` and `draw` of a device, `maker`,
+  `part` and `revision` of a board and a module, `mcu.part`, `checked.*.unit`, `license` of a
+  library. `power` also holds the lines of supply: `name`, `source`, `from` with several ways
+  in, `through`, `regulator`, `ma_max`, `dropout_mv`, and `feeds` takes `mcu`. A part a program
+  does not see is a device of class `other`. The four boards have them, from their schematics.
+- A step of `power` with a name owns its GPIO, and `board_pins.py` shows it as taken. The
+  generator refuses a step with a `line`: it did not set them and said nothing.
+- `config.divider` of a battery is in ohms, with an optional `switch`.
+- `catalog/connectors/`: `of` names a connector a standard fixes: STEMMA QT, Qwiic, Grove.
+- `price` on a board, a module and a device, as named offers with a range, `tariff` for the
+  customs code, `count` for what has no wiring. `tools/board_bom.py` lists what to buy for a
+  product.
+- `esp32_devkit`, a standard dev board. `local_terminal` is now a project over it, with the
+  PN532 as modules, so its devices are `nfc_in_nfc` and `nfc_out_nfc`.
+- A board needs no `buses` in the data. `examples/hello_lvgl` is built in CI only for a
+  board with a graphics display: it does not link without one.
 - JC4827W543C: the amplifier, the BOOT button, the TF slot, the battery divider,
   the connectors, from its schematic. CYD S028R: the RGB LED, the light sensor,
   the connectors. JC8012P4A1C: the BOOT button.

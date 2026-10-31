@@ -1,0 +1,17 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "connector",
+    "name": "stemma_qt",
+    "title": "STEMMA QT",
+    "pitch_mm": 1.0,
+    "volts": [3, 5],
+    "pins": ["GND", "V+", "SDA", "SCL"],
+    "checked": {
+        "facts": {
+            "level": "vendor-docs",
+            "source": "learn.adafruit.com/introducing-adafruit-stemma-qt/technical-specs",
+            "date": "2026-10-31"
+        }
+    }
+}

@@ -4,6 +4,9 @@
     "kind": "board",
     "name": "jc4827w543c",
     "title": "Guition JC4827W543C",
+    "maker": "guition",
+    "part": "JC4827W543C",
+    "revision": "V1.1",
     "description": "4.3-inch 480x272 NV3041A on QSPI, GT911 touch on its own I2C; an ESP32-S3 with 8 MB octal PSRAM",
     "notes": [
         "GPIO0 is the BOOT button and, through R9, the TE line of the panel. TE stays off until the panel is set up for it; with TE on, BOOT cannot be read.",
@@ -54,6 +57,12 @@
             "date": "2026-10-30",
             "result": "pending",
             "notes": "the I2S starts and takes samples without errors; this says nothing of the amplifier"
+        },
+        "power": {
+            "level": "schematic",
+            "covers": ["power"],
+            "source": "JC4827W543 V1.1 and ESP32-4827A043 V0.2",
+            "date": "2026-10-31"
         }
     },
     "buses": {
@@ -62,6 +71,22 @@
         "qspi": {"spi2": {"hz": 40000000, "d0": 21, "d1": 48, "d2": 40, "d3": 39, "sclk": 47}},
         "i2c": {"i2c0": {"sda": 8, "scl": 4}}
     },
+    "power": [
+        {"name": "USB", "source": "usb", "mv": 5000, "why": "USB1, type C."},
+        {"name": "VIN", "source": "vin", "why": "Contact 1 of P1."},
+        {"name": "5V", "from": [{"name": "USB", "through": "d_usb"}, {"name": "VIN", "through": "q_vin"}]},
+        {"name": "BAT+", "source": "battery", "why": "P6."},
+        {"name": "VOUT-BAT", "from": ["5V", "BAT+"], "through": "charger", "regulator": "charger", "feeds": ["sound"]},
+        {
+            "name": "3V3",
+            "from": "VOUT-BAT",
+            "through": "reg_3v3",
+            "regulator": "buck",
+            "mv": 3300,
+            "feeds": ["mcu", "lcd", "touch", "sd"],
+            "why": "The net 3.3V of the schematic."
+        }
+    ],
     "shared_pins": {
         "boot_te": {
             "line": 0,
@@ -79,7 +104,11 @@
         "P7": {"type": "JST 1.25 mm, 2 pins", "pins": ["SPK+", "SPK-"]}
     },
     "devices": {
-        "battery": {"class": "battery_adc", "pins": {"in": 5}, "config": {"divider": "33k/100k"}},
+        "battery": {
+            "class": "battery_adc",
+            "pins": {"in": 5},
+            "config": {"divider": {"top_ohm": 33000, "bottom_ohm": 100000}}
+        },
         "lcd": {
             "chip": "nv3041a",
             "on": {"qspi.spi2": {"cs": 45}},
@@ -133,8 +162,21 @@
                 }
             }
         },
-        "sound": {"chip": "i2s_amp", "on": {"i2s.i2s0": {}}, "config": {"sample_rate": 22050}},
+        "sound": {"chip": "i2s_amp", "ref": "U4", "on": {"i2s.i2s0": {}}, "config": {"sample_rate": 22050}},
         "boot": {"class": "button", "pins": {"in": {"gpio": 0, "active": "low"}}},
-        "sd": {"class": "storage", "on": {"spi.spi3": {"cs": 10}}, "config": {"media": "microsd"}}
+        "sd": {"class": "storage", "ref": "TF1", "on": {"spi.spi3": {"cs": 10}}, "config": {"media": "microsd"}},
+        "s3_module": {"class": "other", "ref": "IC1", "maker": "espressif", "part": "ESP32-S3-WROOM-1"},
+        "charger": {
+            "class": "other",
+            "ref": "U2",
+            "notes": "The schematic gives no part number. Its pins are those of the IP5306 on the JC1060P470C."
+        },
+        "reg_3v3": {
+            "class": "other",
+            "ref": "U3",
+            "notes": "The schematic gives no part number: a buck converter by its pins and L3."
+        },
+        "d_usb": {"class": "other", "ref": "D1", "part": "1N5819W"},
+        "q_vin": {"class": "other", "ref": "Q1", "part": "AO3401"}
     }
 }

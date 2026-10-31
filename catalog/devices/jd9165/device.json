@@ -4,6 +4,8 @@
     "kind": "device",
     "name": "jd9165",
     "title": "JD9165",
+    "maker": "jadard",
+    "part": "JD9165",
     "class": "display",
     "on": {"dsi": {"required": true}},
     "config": {"kind": "graphics"},

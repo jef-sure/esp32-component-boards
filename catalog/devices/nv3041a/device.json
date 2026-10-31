@@ -4,6 +4,8 @@
     "kind": "device",
     "name": "nv3041a",
     "title": "NV3041A",
+    "maker": "newvision",
+    "part": "NV3041A",
     "class": "display",
     "on": {"qspi": {"required": true}},
     "config": {"kind": "graphics"},

@@ -1,0 +1,11 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "ov5647",
+    "title": "OV5647",
+    "class": "camera",
+    "on": {"csi": {"required": true, "role": "data"}, "i2c": {"required": true, "role": "control", "address": "0x36"}},
+    "provides": {"camera": {"width_max": 2592, "height_max": 1944, "formats": ["raw10"]}},
+    "checked": {"facts": {"level": "unchecked", "source": "shape only"}}
+}

@@ -1,0 +1,11 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "camera_sensor_unknown",
+    "title": "An imported board does not name the sensor",
+    "mcu": {"target": "esp32p4"},
+    "checked": {"pins": {"level": "unchecked", "source": "shape only"}},
+    "buses": {"i2c": {"i2c0": {"sda": 7, "scl": 8}}, "csi": {"csi0": {"lanes": 2}}},
+    "devices": {"camera": {"class": "camera", "on": {"csi.csi0": {}, "i2c.i2c0": {}}}}
+}

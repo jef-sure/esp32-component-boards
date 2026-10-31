@@ -1,0 +1,17 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "camera_found_at_start",
+    "title": "A CSI connector for either of two sensors",
+    "mcu": {"target": "esp32p4"},
+    "checked": {"pins": {"level": "unchecked", "source": "shape only"}},
+    "buses": {"i2c": {"i2c0": {"sda": 7, "scl": 8}}, "csi": {"csi0": {"lanes": 2}}},
+    "devices": {
+        "camera": {
+            "class": "camera",
+            "chip_try": ["ov02c10", "ov5647"],
+            "on": {"csi.csi0": {}, "i2c.i2c0": {"address": "0x36"}}
+        }
+    }
+}

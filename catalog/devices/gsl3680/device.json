@@ -4,6 +4,8 @@
     "kind": "device",
     "name": "gsl3680",
     "title": "Silead GSL3680",
+    "maker": "silead",
+    "part": "GSL3680",
     "class": "touch",
     "on": {"i2c": {"required": true}},
     "config": {"fingers": 5},

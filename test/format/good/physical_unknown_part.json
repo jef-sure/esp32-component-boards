@@ -1,0 +1,35 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "mcu": {"target": "esp32p4", "part": "ESP32P4NRW32", "revision": "1.3", "flash_mb": 16, "psram_mb": 32},
+    "checked": {
+        "pins": {"level": "schematic", "source": "shape only"},
+        "touch": {"level": "hardware", "covers": ["devices.touch"], "by": "Anton", "unit": "the one on the bench"}
+    },
+    "name": "physical_unknown_part",
+    "title": "Parts seen, not all named",
+    "revision": "V1.0",
+    "buses": {
+        "i2c": {"i2c0": {"sda": 7, "scl": 8}},
+        "rmii": {
+            "rmii0": {
+                "txd0": 34,
+                "txd1": 35,
+                "txen": 49,
+                "rxd0": 29,
+                "rxd1": 30,
+                "crs_dv": 28,
+                "ref_clk": 50,
+                "mdc": 31,
+                "mdio": 52
+            }
+        }
+    },
+    "devices": {
+        "ethernet": {"class": "network", "ref": "U4", "marking": "IC+", "on": {"rmii.rmii0": {}}},
+        "touch": {"class": "other", "on": {"i2c.i2c0": {"address": "0x5d"}}},
+        "rs485": {"class": "other", "ref": "U8", "marking": "unreadable"},
+        "backup_cell": {"class": "other", "ref": "BT1", "notes": "A holder with no cell in it: a person can fit one."}
+    }
+}

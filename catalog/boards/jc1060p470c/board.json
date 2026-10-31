@@ -4,9 +4,13 @@
     "kind": "board",
     "name": "jc1060p470c",
     "title": "Guition JC1060P470C",
+    "maker": "guition",
+    "part": "JC1060P470C",
+    "revision": "V1.0",
     "description": "7-inch 1024x600 JD9165 on MIPI-DSI, GT911 touch, ES8311 sound: an ESP32-P4 with Wi-Fi and BLE in an ESP32-C6 on the same module",
     "mcu": {
         "target": "esp32p4",
+        "part": "ESP32P4NRW32",
         "flash_mb": 16,
         "psram_mb": 32,
         "revision": "1.3",
@@ -42,7 +46,8 @@
                 "connectors",
                 "shared_pins",
                 "devices.battery",
-                "buses.i2s.i2s0.din"
+                "buses.i2s.i2s0.din",
+                "buses.csi"
             ],
             "source": "JC1060P470C_I_W_Y-V1.0.pdf",
             "date": "2026-10-31",
@@ -80,10 +85,38 @@
             "date": "2026-10-31",
             "result": "pending",
             "notes": "esp_codec_dev opens the ES8311 with no error. No speaker on the board seen, so nothing was heard."
+        },
+        "camera": {
+            "level": "hardware",
+            "covers": ["modules.camera"],
+            "by": "a test firmware",
+            "date": "2026-10-31",
+            "result": "pending",
+            "notes": "0x5602 read from register 0x300A at I2C address 0x36: an OV02C10 on the connector. No picture taken."
+        },
+        "clock_on_i2c": {
+            "level": "hardware",
+            "covers": ["devices.rtc"],
+            "by": "a test firmware",
+            "date": "2026-10-31",
+            "notes": "It answers at 0x32. The clock was not read."
+        },
+        "power": {
+            "level": "schematic",
+            "covers": ["power"],
+            "source": "JC1060P470C_I_W_Y-V1.0.pdf, vendor archive",
+            "date": "2026-10-31"
+        },
+        "power_figures": {
+            "level": "datasheet",
+            "covers": ["power"],
+            "source": "TLV62569: 2 A, step-down, ti.com/product/TLV62569",
+            "date": "2026-10-31"
         }
     },
     "buses": {
         "dsi": {"dsi0": {"lanes": 2, "lane_mbps": 750, "phy_ldo_chan": 3, "phy_ldo_mv": 2500}},
+        "csi": {"csi0": {"lanes": 2, "phy_ldo_chan": 3, "phy_ldo_mv": 2500}},
         "i2c": {"i2c0": {"sda": 7, "scl": 8}},
         "i2s": {"i2s0": {"mclk": 13, "bclk": 12, "ws": 10, "dout": 9, "din": 48}},
         "sdio": {"sdio0": {"clk": 18, "cmd": 19, "d0": 14, "d1": 15, "d2": 16, "d3": 17, "reset": 54}},
@@ -103,6 +136,54 @@
         "uart": {"uart0": {"tx": 37, "rx": 38}, "uart1": {"tx": 26, "rx": 27}},
         "sdmmc": {"sdmmc0": {"clk": 43, "cmd": 44, "d0": 39, "d1": 40, "d2": 41, "d3": 42}}
     },
+    "power": [
+        {"name": "USB", "source": "usb", "mv": 5000},
+        {"name": "VIN", "source": "vin", "why": "Contact 1 of CN2."},
+        {
+            "name": "5V",
+            "from": ["USB", {"name": "VIN", "through": "q_vin"}],
+            "feeds": ["rs485"],
+            "why": "The net USB5V_IN, on J4 and J5."
+        },
+        {"name": "BAT+", "source": "battery", "why": "CN4."},
+        {
+            "name": "VOUT-BAT",
+            "from": ["5V", "BAT+"],
+            "through": "charger",
+            "regulator": "charger",
+            "mv": 5000,
+            "feeds": ["amplifier"]
+        },
+        {
+            "name": "LEDA",
+            "from": "VOUT-BAT",
+            "through": "led_driver",
+            "regulator": "boost",
+            "feeds": ["lcd"],
+            "why": "EN of IC1 is LCD_PWM, the backlight line of the display on GPIO23."
+        },
+        {"name": "VCC5V", "from": "VOUT-BAT", "through": "fuse"},
+        {
+            "name": "3V3",
+            "from": "VCC5V",
+            "through": "reg_3v3",
+            "regulator": "buck",
+            "mv": 3300,
+            "ma_max": 2000,
+            "feeds": ["mcu", "radio", "lcd", "touch", "sound", "ethernet", "camera_sensor"],
+            "why": "The nets VCC3V3, ESP_3V3 and VDDA are one. The nets Codec_3V3 and PHY_3V3 hang on it through 0 ohm."
+        },
+        {"name": "ESP_LDO_VO4", "from": "3V3", "why": "LDO channel 4 of the chip."},
+        {
+            "name": "TF_VCC",
+            "from": "ESP_LDO_VO4",
+            "through": "q_sd",
+            "feeds": ["sd"],
+            "why": "R10 from GPIO45 to the gate of Q1 is marked NC and R13 holds the gate low, so Q1 stays on and no GPIO switches the card."
+        },
+        {"name": "VBAT", "source": "battery", "why": "BT1, room for a CR1220 cell."},
+        {"name": "VRTC", "from": ["3V3", "VBAT"], "through": "d_rtc", "feeds": ["rtc"]}
+    ],
     "shared_pins": {
         "boot_txd1": {
             "line": 35,
@@ -147,6 +228,26 @@
                 "C6_IO9",
                 8,
                 "C6_CHIP_PU"
+            ]
+        },
+        "FPC2": {
+            "type": "CSI camera, FPC 0.3 mm, 15 pins",
+            "pins": [
+                "GND",
+                "CSI_DATA0_N",
+                "CSI_DATA0_P",
+                "GND",
+                "CSI_DATA1_N",
+                "CSI_DATA1_P",
+                "GND",
+                "CSI_CLK_N",
+                "CSI_CLK_P",
+                "GND",
+                "CSI_IO0",
+                "CSI_IO1",
+                8,
+                7,
+                "3V3"
             ]
         }
     },
@@ -203,6 +304,8 @@
         },
         "sound": {
             "chip": "es8311",
+            "ref": "U1",
+            "part": "ES8311-S",
             "on": {"i2c.i2c0": {}, "i2s.i2s0": {}},
             "pins": {"pa": 11},
             "config": {"sample_rate": 22050, "pa_voltage": 5.0, "codec_dac_voltage": 3.3},
@@ -215,6 +318,8 @@
         "boot": {"class": "button", "pins": {"in": {"gpio": 35, "active": "low"}}},
         "ethernet": {
             "class": "network",
+            "ref": "U4",
+            "marking": "IC+",
             "on": {"rmii.rmii0": {}},
             "pins": {"rst": 51},
             "config": {"ref_clk": "from the PHY"},
@@ -226,17 +331,21 @@
         },
         "rs485": {
             "class": "network",
+            "ref": "U8",
             "on": {"uart.uart1": {}},
             "config": {"transceiver": "MAX485", "direction": "auto"},
             "notes": "Q3 and a 74LVC1G132 make the direction from TX: no GPIO sets it. U8, the TVS diodes and the fuses are fitted on the board seen; the marking of U8 is not read. J5 brings IO26 and IO27 out beside it."
         },
         "rtc": {
             "chip": "rx8025t",
+            "ref": "U9",
+            "part": "RX8025T-UC",
             "on": {"i2c.i2c0": {}},
             "notes": "BT1 has room for a CR1220 backup cell; none is fitted."
         },
         "sd": {
             "class": "storage",
+            "ref": "J1",
             "on": {"sdmmc.sdmmc0": {}},
             "config": {"media": "microsd"},
             "notes": "Fed by LDO channel 4 of the chip, through Q1."
@@ -251,8 +360,22 @@
         "battery": {
             "class": "battery_adc",
             "pins": {"in": 53},
-            "config": {"divider": "68k/100k"},
+            "config": {"divider": {"top_ohm": 68000, "bottom_ohm": 100000}},
             "notes": "R55 is 0R on the schematic. The charger is an IP5306, with no line to the chip."
-        }
-    }
+        },
+        "p4_module": {"class": "other", "ref": "U3", "maker": "guition", "part": "JC-ESP32P4-M3"},
+        "charger": {"class": "other", "ref": "U5", "maker": "injoinic", "part": "IP5306"},
+        "reg_3v3": {"class": "other", "ref": "AP1", "maker": "ti", "part": "TLV62569"},
+        "fuse": {
+            "class": "other",
+            "ref": "R22",
+            "notes": "Drawn as a resistor with the value 1A, where the JC8012P4A1C has the fuse F1."
+        },
+        "led_driver": {"class": "other", "ref": "IC1", "part": "MP3202"},
+        "amplifier": {"class": "other", "ref": "U2", "part": "NS4150"},
+        "q_vin": {"class": "other", "ref": "Q3", "part": "AO3401"},
+        "q_sd": {"class": "other", "ref": "Q1", "part": "AO3401"},
+        "d_rtc": {"class": "other", "ref": "D12", "part": "BAT54C"}
+    },
+    "modules": {"camera": {"module": "ov02c10_csi", "on": {"csi.csi0": {}, "i2c.i2c0": {}}}}
 }

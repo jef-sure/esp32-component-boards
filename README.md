@@ -47,6 +47,8 @@ is one peripheral among others. What a board can have today:
   the display and the touch panel this component sets up become an LVGL display
   and input device, see [examples/hello_lvgl](examples/hello_lvgl);
 - **sound**: an ES8311 codec on I2S, an amplifier on I2S, or the ESP32's own DAC;
+- a **camera**, as data for now: its bus, connector and sensor are described, the
+  component does not start it;
 - a **button**; and any **bus** the board wires, even one the component does not
   set up itself (the SDIO of a radio, the pins of an SD slot), kept as data the
   program can read.
@@ -86,10 +88,11 @@ codec library. See [docs/en/choosing-a-board.md](docs/en/choosing-a-board.md).
 | board | chip | display | touch | sound | button |
 |---|---|---|---|---|---|
 | CYD (ESP32-2432S028R) | ESP32 | 320x240 ILI9341, SPI, 58x43 mm | XPT2046 (resistive) | DAC, GPIO26 | yes |
+| ESP32 DevKit, 4 MB | ESP32 | none | none | none | yes |
 | Guition JC1060P470C | ESP32-P4 | 1024x600 JD9165, MIPI-DSI, 154x86 mm | GT911 | ES8311 | yes |
 | Guition JC4827W543C | ESP32-S3 | 480x272 NV3041A, QSPI, 95x54 mm | GT911 | I2S amplifier | yes |
 | Guition JC8012P4A1C | ESP32-P4 | 1280x800 JD9365, MIPI-DSI, 217x136 mm | GSL3680 (firmware embedded by the program) | ES8311 | yes |
-| Local terminal: ESP32, 2004 LCD, two PN532 | ESP32 | 20x4 HD44780 | none | none | none |
+| Local terminal: ESP32, 2004 LCD, two PN532 | ESP32 | 20x4 HD44780 | none | none | yes |
 <!-- boards:end -->
 
 A module rides whichever board is chosen: `board_select.py cyd_s028r --module
@@ -118,9 +121,10 @@ tools/check_format.py                  the schema, the rules and their cases in 
 tools/check_boards.py                  the generated is what the data says; pins do not collide; the API holds
 tools/board_pins.py                    the map of a board's pins and its tree
 tools/board_select.py                  choose the board for a project
+tools/board_bom.py                     what to buy for a product, with prices as ranges
 editor/                                the editor of format 1, to be replaced; rules.js, the rules for the next one
 examples/hello_board/                  the smallest program, built for every board in CI
-examples/hello_lvgl/                   LVGL through DGX-LVGL, built for every board in CI
+examples/hello_lvgl/                   LVGL through DGX-LVGL, built in CI for every board with a graphics display
 docs/en/, docs/ru/                     the documentation
 ```
 

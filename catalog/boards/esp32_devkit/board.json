@@ -1,0 +1,49 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "esp32_devkit",
+    "title": "ESP32 DevKit, 4 MB",
+    "description": "A standard ESP32 dev board with a CP210x USB bridge, a power LED, a second LED and a BOOT button",
+    "notes": [
+        "A board sold by many makers, so no maker is written and no schematic was read.",
+        "The pin of the LED is the usual one for this board. It was not tried on a unit."
+    ],
+    "mcu": {"target": "esp32", "part": "ESP32-D0WD-V3", "flash_mb": 4},
+    "devices": {
+        "boot": {"class": "button", "pins": {"in": {"gpio": 0, "active": "low"}}},
+        "led": {"class": "led", "pins": {"out": 2}},
+        "usb_serial": {"class": "other", "part": "CP210x"}
+    },
+    "price": {
+        "amazon": {
+            "shop": "Amazon",
+            "currency": "EUR",
+            "range": [6, 6],
+            "date": "2026-10-31",
+            "source": "Anton, from memory of earlier purchases"
+        },
+        "aliexpress": {
+            "shop": "AliExpress",
+            "currency": "EUR",
+            "range": [0, 3],
+            "date": "2026-10-31",
+            "source": "Anton, from memory of earlier purchases",
+            "notes": "Less than 3 euro, before delivery and the duty on small parcels in the EU."
+        }
+    },
+    "checked": {
+        "pins": {
+            "level": "unchecked",
+            "covers": ["devices.boot", "devices.led"],
+            "source": "Anton: a standard dev board with two LEDs; the pins are the usual ones of this board",
+            "date": "2026-10-31"
+        },
+        "chip": {
+            "level": "hardware",
+            "covers": ["mcu"],
+            "source": "esptool on the board of the local terminal: ESP32-D0WD-V3 rev 3.0, 4 MB, CP210x port",
+            "date": "2026-10-31"
+        }
+    }
+}

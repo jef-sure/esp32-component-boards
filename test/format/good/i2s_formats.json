@@ -1,0 +1,26 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "i2s_formats",
+    "title": "TDM on one port, PDM with two data lines on the other",
+    "mcu": {"target": "esp32s3"},
+    "checked": {"pins": {"level": "unchecked", "source": "shape only"}},
+    "buses": {
+        "i2c": {"i2c0": {"sda": 8, "scl": 9}},
+        "i2s": {
+            "i2s0": {"mclk": 2, "bclk": 17, "ws": 45, "dout": 15, "din": 16},
+            "i2s1": {"clk": 4, "din": 5, "din2": 6}
+        }
+    },
+    "devices": {
+        "codec": {
+            "chip": "es8311",
+            "on": {"i2c.i2c0": {}, "i2s.i2s0": {"format": "tdm"}},
+            "pins": {"pa": 46},
+            "config": {"sample_rate": 16000, "clock": "bclk"},
+            "controls": {"volume": {"start": 50}}
+        },
+        "mics": {"chip": "spm1423", "on": {"i2s.i2s1": {"format": "pdm"}}, "config": {"sample_rate": 16000}}
+    }
+}

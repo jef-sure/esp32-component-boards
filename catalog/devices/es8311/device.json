@@ -4,6 +4,8 @@
     "kind": "device",
     "name": "es8311",
     "title": "Everest ES8311 codec",
+    "maker": "everest",
+    "part": "ES8311",
     "class": "audio",
     "on": {"i2c": {"required": true, "address": "0x18", "role": "control"}, "i2s": {"required": true, "role": "data"}},
     "config": {"direction": "both"},

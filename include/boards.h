@@ -46,7 +46,7 @@ enum { BOARD_DIR_FORWARD = 1, BOARD_DIR_BACKWARD = -1 };
  */
 struct board_display {
     int   width, height; /* as it lies, in pixels */
-    int   mm_w, mm_h;    /* as measured with a ruler, lying as it is shown */
+    int   mm_w, mm_h;    /* as measured with a ruler, as it is shown; 0 when the data has no size */
     int   dir_x, dir_y;  /* how it lies now: BOARD_DIR_FORWARD or BOARD_DIR_BACKWARD */
     bool  swap_xy;       /* and whether its x runs along the columns of the panel */
     const char *name;    /* its name in the data, for the log */

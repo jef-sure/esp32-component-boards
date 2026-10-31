@@ -4,6 +4,8 @@
     "kind": "device",
     "name": "pn5180",
     "title": "NXP PN5180",
+    "maker": "nxp",
+    "part": "PN5180",
     "class": "nfc",
     "on": {"spi": {"required": true}},
     "provides": {

@@ -127,7 +127,7 @@
             "provides": {"light": {}}
         },
         "rgb": {
-            "class": "led",
+            "class": "led", "provides": {"led": {"variant": "rgb"}},
             "ref": "LED1",
             "part": "MHP5050RGBDT",
             "pins": {

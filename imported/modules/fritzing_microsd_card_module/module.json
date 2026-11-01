@@ -1,0 +1,19 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_microsd_card_module",
+    "title": "MicroSD Card Module",
+    "devices": {"sd_card": {"on": {"spi": {}}, "provides": {"sd_card": {}}, "class": "storage"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["GND", "VCC", "MISO", "MOSI", "SCK", "CS"]}},
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "microsdmodule.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

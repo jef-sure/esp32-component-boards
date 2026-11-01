@@ -1,0 +1,61 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_2_8_inch_captouch_tft",
+    "title": "Adafruit 2.8 inch Captouch TFT",
+    "devices": {
+        "display": {
+            "on": {"i2c": {}, "spi": {}},
+            "provides": {"display": {"variant": "tft"}, "touch_panel": {}},
+            "class": "other"
+        }
+    },
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "GND",
+                "VIN",
+                "CS",
+                "C/D_CLK",
+                "D/C_WR",
+                "RD",
+                "RST",
+                "LITE",
+                "IRQ",
+                "SCL",
+                "SDA",
+                "D0",
+                "D1",
+                "D2",
+                "D3",
+                "D4",
+                "D5",
+                "D6",
+                "D7",
+                "3.3V",
+                "MISO",
+                "MOSI",
+                "IM3",
+                "IM2",
+                "IM1",
+                "IM0",
+                "SD_CS",
+                "CARDDET"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "2090",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit 2.8 inch Captouch TFT.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

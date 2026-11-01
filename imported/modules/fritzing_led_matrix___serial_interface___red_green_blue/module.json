@@ -1,0 +1,21 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_led_matrix___serial_interface___red_green_blue",
+    "title": "LED Matrix - Serial Interface - Red/Green/Blue",
+    "devices": {
+        "display": {"on": {"spi": {}}, "provides": {"display": {}, "led": {"variant": "matrix"}}, "class": "other"}
+    },
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["VCC", "SCK", "CS", "MISO", "GND", "MOSI"]}},
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "RGB_matrix_v25.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

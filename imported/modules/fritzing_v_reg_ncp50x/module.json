@@ -1,0 +1,18 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_v_reg_ncp50x",
+    "title": "V_REG_NCP50X",
+    "devices": {"regulator": {"ways": [{"lines": ["in"]}], "provides": {"regulator": {}}, "class": "other"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["ADJ", "EN", "GND", "IN", "OUT"]}},
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "sparkfun-poweric-v_reg_ncp50x-.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

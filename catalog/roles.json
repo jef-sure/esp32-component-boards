@@ -1,0 +1,554 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "groups": [
+        {
+            "id": "show",
+            "text": "Show",
+            "roles": [
+                {
+                    "id": "display",
+                    "text": "Display",
+                    "class": "display",
+                    "words": "\\b(oled|lcd|tft|ips|e-?ink|e-?paper|display|retina|thinkink)\\b|ssd13\\d\\d|sh110\\d|st77\\d\\d|ili9\\d\\d\\d|ra8875|gc9a01|hub75|rgb (led )?matrix panel|\\bp[2-6] .*matrix",
+                    "variants": [
+                        {"id": "tft", "text": "TFT", "words": "\\b(tft|ips)\\b|st77\\d\\d|ili9\\d\\d\\d|gc9a01"},
+                        {"id": "oled", "text": "OLED", "words": "\\boled\\b|ssd13\\d\\d|sh110\\d"},
+                        {"id": "epaper", "text": "E-paper", "words": "e-?ink|e-?paper|thinkink"},
+                        {
+                            "id": "character",
+                            "text": "Character",
+                            "words": "character|char lcd|16x2|20x4|\\brgb lcd\\b",
+                            "needs": {"class": "display", "where": {"config.kind": "character"}}
+                        },
+                        {"id": "memory", "text": "Memory LCD", "words": "memory display|sharp"},
+                        {
+                            "id": "hub75",
+                            "text": "RGB LED panel, HUB75",
+                            "words": "hub75|rgb (led )?matrix panel|\\bp[2-6] .*matrix",
+                            "way": {
+                                "lines": [
+                                    "r1",
+                                    "g1",
+                                    "b1",
+                                    "r2",
+                                    "g2",
+                                    "b2",
+                                    "a",
+                                    "b",
+                                    "c",
+                                    "d",
+                                    "e",
+                                    "clk",
+                                    "lat",
+                                    "oe"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "shift_register",
+                            "text": "LEDs on shift registers",
+                            "words": "74hc595|shift register",
+                            "way": {"lines": ["data", "clock", "latch", "oe"], "ledc": 1}
+                        }
+                    ],
+                    "needs": {"class": "display"}
+                },
+                {
+                    "id": "led",
+                    "text": "LEDs",
+                    "class": "led",
+                    "words": "\\bled\\b|leds\\b|neopixel|dotstar|charlieplex\\w*|\\d+.segment|alphanumeric|ws28\\d\\d|sk68\\d\\d|apa102|is31fl\\d+|ht16k33|max72[12][19]",
+                    "variants": [
+                        {
+                            "id": "addressable",
+                            "text": "Addressable",
+                            "words": "neopixel|dotstar|ws28\\d\\d|sk68\\d\\d|apa102",
+                            "way": {"lines": ["data"], "high_min_mv": 3500}
+                        },
+                        {
+                            "id": "matrix",
+                            "text": "Matrix",
+                            "words": "matrix|charlieplex|is31fl\\d+|ht16k33|\\d+x\\d+ led|max72[12][19]"
+                        },
+                        {"id": "segment", "text": "Segments", "words": "\\d+.segment|alphanumeric|bargraph"},
+                        {"id": "rgb", "text": "RGB", "words": "\\brgb\\b", "way": {"lines": ["r", "g", "b"], "ledc": 3}},
+                        {"id": "single", "text": "One colour", "words": "\\bled\\b", "way": {"lines": ["a"], "ledc": 1}}
+                    ],
+                    "needs": {"class": "led"}
+                }
+            ]
+        },
+        {
+            "id": "sound",
+            "text": "Sound",
+            "roles": [
+                {
+                    "id": "speaker",
+                    "text": "Speaker amplifier",
+                    "class": "audio",
+                    "words": "amplifier|\\bamp\\b|class d|speaker|max983\\d\\d|tpa\\d{4}|pam\\d{4}",
+                    "variants": [
+                        {"id": "i2s", "text": "I2S", "words": "i2s|max983\\d\\d"},
+                        {"id": "analog", "text": "Analog", "words": "analog|tpa\\d{4}|pam\\d{4}|max98306"}
+                    ],
+                    "needs": {"class": "audio"}
+                },
+                {
+                    "id": "microphone",
+                    "text": "Microphone",
+                    "class": "audio",
+                    "words": "microphone|\\bmic\\b|sph06\\d\\d|ics-?4\\d{4}|max98\\d4|electret",
+                    "variants": [
+                        {"id": "i2s", "text": "I2S", "words": "i2s|sph06\\d\\d|ics-?4\\d{4}"},
+                        {"id": "pdm", "text": "PDM", "words": "\\bpdm\\b"},
+                        {"id": "analog", "text": "Analog", "words": "electret|max98\\d4"}
+                    ]
+                },
+                {
+                    "id": "codec",
+                    "text": "Audio codec",
+                    "class": "audio",
+                    "words": "codec|tlv320|\\bi2s dac\\b|es83\\d\\d|wm89\\d\\d|sgtl5000"
+                },
+                {
+                    "id": "player",
+                    "text": "Sound player",
+                    "class": "audio",
+                    "words": "mp3|vs10\\d\\d|audio fx|music maker|sound board"
+                },
+                {
+                    "id": "buzzer",
+                    "text": "Buzzer",
+                    "class": "buzzer",
+                    "words": "buzzer|piezo",
+                    "needs": {"class": "buzzer"}
+                },
+                {"id": "vibration", "text": "Vibration", "class": "other", "words": "haptic|drv2605|vibrat"}
+            ]
+        },
+        {
+            "id": "input",
+            "text": "Input",
+            "roles": [
+                {
+                    "id": "touch_panel",
+                    "text": "Touch panel",
+                    "class": "touch",
+                    "words": "touch ?screen|captouch|capacitive touch|resistive touch|tsc20\\d\\d|stmpe\\d+|ar1100|gt911|ft6\\d\\d\\d|xpt2046",
+                    "needs": {"class": "touch"}
+                },
+                {
+                    "id": "touch_keys",
+                    "text": "Touch keys",
+                    "class": "other",
+                    "words": "cap1188|mpr121|at42qt\\d+|touch sensor|capacitive touch sensor|touch pad"
+                },
+                {"id": "button", "text": "Buttons", "class": "button", "words": "\\bbutton|neokey|tactile"},
+                {
+                    "id": "encoder",
+                    "text": "Rotary encoder",
+                    "class": "encoder",
+                    "words": "rotary|encoder",
+                    "needs": {"class": "encoder"}
+                },
+                {
+                    "id": "joystick",
+                    "text": "Joystick",
+                    "class": "gamepad",
+                    "words": "joystick|gamepad|thumbstick",
+                    "needs": {"class": "gamepad"}
+                },
+                {
+                    "id": "keypad",
+                    "text": "Keypad",
+                    "class": "keyboard",
+                    "words": "keypad|keyboard|keyboard featherwing",
+                    "needs": {"class": "keyboard"}
+                }
+            ]
+        },
+        {
+            "id": "motion",
+            "text": "Motion and place",
+            "roles": [
+                {
+                    "id": "accelerometer",
+                    "text": "Accelerometer",
+                    "class": "imu",
+                    "words": "accel|adxl\\d+|msa\\d{3}|mma\\d+|lis\\d+[a-z]*(?<!mdl)\\b|lis3dh|mpu-?\\d{4}|icm-?\\d+|lsm\\d+|bno\\d+|[69].?dof|[69].?axis|fxos\\d+"
+                },
+                {
+                    "id": "gyroscope",
+                    "text": "Gyroscope",
+                    "class": "imu",
+                    "words": "gyro|l3gd\\d+|fxas\\d+|mpu-?\\d{4}|icm-?\\d+|lsm6\\w*|lsm9\\w*|bno\\d+|[69].?dof"
+                },
+                {
+                    "id": "magnetometer",
+                    "text": "Magnetometer",
+                    "class": "imu",
+                    "words": "magnetometer|compass|hmc\\d+|qmc\\d+|lis[23]mdl|mlx9039\\d|tlv493\\w*|lsm303\\w*|lsm9\\w*|bno\\d+|mmc\\d+|9.?dof|ak89\\d\\d|mpu-?9\\d{3}|fxos\\d+"
+                },
+                {
+                    "id": "orientation",
+                    "text": "Orientation",
+                    "class": "imu",
+                    "words": "bno\\d+|absolute orientation|bhi\\d+|ahrs"
+                },
+                {
+                    "id": "gps",
+                    "text": "GPS",
+                    "class": "gps",
+                    "words": "\\b(gps|gnss)\\b|venus\\d+|neo-?\\dm|ultimate gps",
+                    "needs": {"class": "gps"}
+                }
+            ]
+        },
+        {
+            "id": "environment",
+            "text": "Environment",
+            "roles": [
+                {
+                    "id": "temperature",
+                    "text": "Temperature",
+                    "class": "sensor",
+                    "words": "temperature|thermo\\w*|tmp\\d{2,3}|mcp9[86]\\d\\d|adt74\\d\\d|pct2075|sht[34]\\w*|hts221|bme[26]\\w*|ds18b20|dht\\d\\d|am23\\d\\d|aht\\d\\d|si70\\d\\d|max318\\d\\d",
+                    "variants": [
+                        {"id": "probe", "text": "Thermocouple", "words": "thermocouple|mcp960\\d|max318\\d\\d|ad8495"}
+                    ]
+                },
+                {
+                    "id": "humidity",
+                    "text": "Humidity",
+                    "class": "sensor",
+                    "words": "humidity|sht[34]\\w*|hts221|bme[26]\\w*|dht\\d\\d|am23\\d\\d|aht\\d\\d|si70\\d\\d"
+                },
+                {
+                    "id": "pressure",
+                    "text": "Air pressure",
+                    "class": "sensor",
+                    "words": "barometric|pressure|altimeter|bm[pe][0-9]+|lps\\d+\\w*|dps\\d+|mpl\\d+"
+                },
+                {
+                    "id": "air",
+                    "text": "Air quality",
+                    "class": "sensor",
+                    "words": "air quality|\\bgas\\b|\\bco2\\b|tvoc|\\bvoc\\b|ccs811|sgp\\d+|scd\\d+|sen5\\d|bme680|pm2|particulate|ens160",
+                    "variants": [
+                        {"id": "co2", "text": "CO2", "words": "\\bco2\\b|scd\\d+"},
+                        {"id": "voc", "text": "VOC", "words": "tvoc|\\bvoc\\b|ccs811|sgp\\d+|ens160|bme680"},
+                        {"id": "particles", "text": "Particles", "words": "sen5\\d|pm2|particulate"}
+                    ]
+                },
+                {
+                    "id": "light",
+                    "text": "Light",
+                    "class": "sensor",
+                    "words": "\\blux\\b|light sensor|bh1750|ltr-?\\d+|veml\\d+|tsl\\d+|ga1a\\w*|alspt\\w*|ambient light"
+                },
+                {
+                    "id": "color",
+                    "text": "Colour",
+                    "class": "sensor",
+                    "words": "color sensor|colour|as7341|tcs\\d+|apds-?9960"
+                },
+                {"id": "uv", "text": "UV", "class": "sensor", "words": "\\buv\\b|ltr390|guva\\S*|veml6075|si1145"},
+                {
+                    "id": "distance",
+                    "text": "Distance",
+                    "class": "sensor",
+                    "words": "distance|ranging|time.of.flight|\\btof\\b|vl53\\w*|vl6180\\w*|lidar|ultrasonic|hc-?sr04|vcnl\\d+|proximity",
+                    "variants": [
+                        {
+                            "id": "tof",
+                            "text": "Time of flight",
+                            "words": "time.of.flight|\\btof\\b|vl53\\w*|vl6180\\w*|lidar"
+                        },
+                        {"id": "ultrasonic", "text": "Ultrasonic", "words": "ultrasonic|hc-?sr04"},
+                        {"id": "infrared", "text": "Infrared", "words": "vcnl\\d+|proximity"}
+                    ]
+                },
+                {
+                    "id": "presence",
+                    "text": "Presence and gesture",
+                    "class": "sensor",
+                    "words": "gesture|apds-?9960|\\bpir\\b|motion sensor|ld24\\d\\d|radar"
+                },
+                {
+                    "id": "thermal",
+                    "text": "Thermal camera",
+                    "class": "sensor",
+                    "words": "thermal camera|amg8833|mlx90640|mlx90614|ir thermal"
+                },
+                {
+                    "id": "weight",
+                    "text": "Weight",
+                    "class": "sensor",
+                    "words": "load cell|hx711|nau7802|\\bweight\\b|\\bscale\\b"
+                },
+                {"id": "magnetic", "text": "Magnetic switch", "class": "sensor", "words": "\\bhall\\b|reed"}
+            ]
+        },
+        {
+            "id": "image",
+            "text": "Image",
+            "roles": [
+                {
+                    "id": "camera",
+                    "text": "Camera",
+                    "class": "camera",
+                    "words": "\\bcamera\\b|ov\\d{4}|imx\\d+",
+                    "variants": [
+                        {"id": "csi", "text": "MIPI CSI", "words": "\\bcsi\\b|mipi"},
+                        {"id": "dvp", "text": "Parallel", "words": "\\bdvp\\b|ov7670"},
+                        {"id": "spi", "text": "SPI", "words": "arducam|\\bspi\\b|ttl"}
+                    ],
+                    "needs": {"class": "camera"}
+                }
+            ]
+        },
+        {
+            "id": "identify",
+            "text": "Identify and protect",
+            "roles": [
+                {
+                    "id": "nfc",
+                    "text": "NFC and RFID",
+                    "class": "nfc",
+                    "words": "\\b(nfc|rfid)\\b|pn53\\d|pn5180|mfrc522|rc522|clrc663|sm130|st25",
+                    "needs": {"class": "nfc"}
+                },
+                {"id": "fingerprint", "text": "Fingerprint", "class": "other", "words": "fingerprint"},
+                {"id": "barcode", "text": "Barcode", "class": "other", "words": "barcode|qr code"},
+                {
+                    "id": "crypto",
+                    "text": "Crypto chip",
+                    "class": "other",
+                    "words": "atecc\\d+|atsha\\d+|crypto|secure element"
+                }
+            ]
+        },
+        {
+            "id": "link",
+            "text": "Connect",
+            "roles": [
+                {
+                    "id": "wifi",
+                    "text": "Wi-Fi",
+                    "class": "radio",
+                    "words": "wi-?fi|winc\\d+|rn-?1\\d\\d\\w*|airlift|esp-?at",
+                    "needs": {"provides": "wifi"}
+                },
+                {
+                    "id": "bluetooth",
+                    "text": "Bluetooth",
+                    "class": "radio",
+                    "words": "bluetooth|bluefruit|\\bble\\b|rn-?4\\d\\b|hm-?10",
+                    "needs": {"provides": "bluetooth"}
+                },
+                {
+                    "id": "lora",
+                    "text": "LoRa",
+                    "class": "radio",
+                    "words": "\\blora\\b|rfm9\\d\\w*|sx12\\d\\d|lr11\\d\\d"
+                },
+                {
+                    "id": "rf",
+                    "text": "Radio",
+                    "class": "radio",
+                    "words": "rfm[67]\\d\\w*|nrf24\\w*|xbee|\\brf\\b|transceiver|si47\\d\\d|cc1101|radio"
+                },
+                {
+                    "id": "cellular",
+                    "text": "Cellular",
+                    "class": "radio",
+                    "words": "cellular|\\bgsm\\b|\\blte\\b|fona|ge865|sim\\d{3,4}"
+                },
+                {
+                    "id": "ethernet",
+                    "text": "Ethernet",
+                    "class": "network",
+                    "words": "ethernet|wiz\\d+|w5\\d{3}|enc28j60|lan87\\d\\d",
+                    "needs": {"provides": "ethernet", "chip": "emac"}
+                },
+                {
+                    "id": "can",
+                    "text": "CAN",
+                    "class": "network",
+                    "words": "\\bcan\\b.*(bus|pal|feather|bff|wing)|mcp2515|mcp2551|tja10\\d\\d|sn65hvd"
+                },
+                {"id": "rs485", "text": "RS-485", "class": "network", "words": "rs-?485|max485"},
+                {"id": "rs232", "text": "RS-232", "class": "network", "words": "rs-?232|max3232"},
+                {
+                    "id": "usb",
+                    "text": "USB",
+                    "class": "usb",
+                    "words": "usb (host|serial|hub|to)|cp210\\w*|ch34\\w*|ftdi|ft232\\w*|ch9328|usb-?c? breakout"
+                },
+                {"id": "one_wire", "text": "1-Wire", "class": "other", "words": "1-?wire|ds248\\d\\w*|ds2413"},
+                {
+                    "id": "infrared",
+                    "text": "Infrared remote",
+                    "class": "other",
+                    "words": "infrared|\\bir (remote|receiver|transceiver|emitter|led)"
+                },
+                {"id": "midi", "text": "MIDI", "class": "other", "words": "\\bmidi\\b"}
+            ]
+        },
+        {
+            "id": "act",
+            "text": "Act",
+            "roles": [
+                {
+                    "id": "motor",
+                    "text": "Motor driver",
+                    "class": "motor",
+                    "words": "motor|stepper|a4988|drv8\\d+|tb6612\\w*|l298\\w*|l293\\w*",
+                    "variants": [
+                        {"id": "dc", "text": "DC", "words": "\\bdc\\b|tb6612\\w*|drv8871|l298\\w*|l293\\w*"},
+                        {"id": "stepper", "text": "Stepper", "words": "stepper|a4988|drv8825"}
+                    ]
+                },
+                {
+                    "id": "servo",
+                    "text": "Servo",
+                    "class": "motor",
+                    "words": "\\bservo\\b",
+                    "variants": [
+                        {
+                            "id": "ledc",
+                            "text": "One line",
+                            "words": "\\bservo\\b",
+                            "way": {"lines": ["signal"], "ledc": 1}
+                        }
+                    ]
+                },
+                {"id": "relay", "text": "Relay", "class": "other", "words": "\\brelay\\b"},
+                {"id": "fan", "text": "Fan control", "class": "other", "words": "\\bfan\\b|emc2101"}
+            ]
+        },
+        {
+            "id": "store",
+            "text": "Store",
+            "roles": [
+                {
+                    "id": "sd_card",
+                    "text": "SD card",
+                    "class": "storage",
+                    "words": "micro ?sd|sd card|\\bsd\\b|adalogger"
+                },
+                {"id": "flash", "text": "Flash memory", "class": "storage", "words": "flash|w25q\\w*"},
+                {
+                    "id": "fram",
+                    "text": "FRAM and EEPROM",
+                    "class": "storage",
+                    "words": "\\bfram\\b|eeprom|24lc\\d+|at24\\w*"
+                }
+            ]
+        },
+        {
+            "id": "time",
+            "text": "Time",
+            "roles": [
+                {
+                    "id": "rtc",
+                    "text": "Real-time clock",
+                    "class": "rtc",
+                    "words": "\\brtc\\b|real.?time clock|ds3231|ds1307|pcf85\\d\\d|rx8025|adalogger",
+                    "needs": {"class": "rtc"}
+                },
+                {
+                    "id": "clock",
+                    "text": "Clock generator",
+                    "class": "other",
+                    "words": "si5351\\w*|ds1077|clock generator|sit8\\d+"
+                }
+            ]
+        },
+        {
+            "id": "extend",
+            "text": "Add resources",
+            "roles": [
+                {
+                    "id": "i2c_mux",
+                    "text": "I2C multiplexer",
+                    "class": "i2c_mux",
+                    "words": "i2c (multiplexer|mux)|tca954\\d\\w*|pca954\\d\\w*",
+                    "needs": {"class": "i2c_mux"}
+                },
+                {
+                    "id": "io_expander",
+                    "text": "GPIO expander",
+                    "class": "io_expander",
+                    "words": "(gpio|i/o|io|port) expander|mcp230\\d\\d|pcf857\\d|tca95\\d\\d|aw9523|ds2413",
+                    "needs": {"class": "io_expander"}
+                },
+                {
+                    "id": "adc",
+                    "text": "ADC",
+                    "class": "adc",
+                    "words": "\\badc\\b|analog.to.digital|ads1\\d\\d\\d|pcf8591|mcp3\\d\\d\\d|nau7802"
+                },
+                {"id": "dac", "text": "DAC", "class": "other", "words": "\\bdac\\b|mcp47\\d\\d|ad569\\d|pcf8591"},
+                {"id": "pwm", "text": "PWM driver", "class": "other", "words": "pwm (driver|led)|pca9685|tlc59\\d+"},
+                {
+                    "id": "level",
+                    "text": "Level shifter",
+                    "class": "other",
+                    "words": "level.?(shift|boost)|shifter|txb01\\d\\d|txs01\\d\\d|bss138|74ahct|4050 hex|74lvc"
+                },
+                {
+                    "id": "potentiometer",
+                    "text": "Digital potentiometer",
+                    "class": "other",
+                    "words": "digital potentiometer|ds1841|ds3502|ad52\\d\\d|mcp4\\d{3}.*pot"
+                },
+                {
+                    "id": "switch",
+                    "text": "Analog switch",
+                    "class": "other",
+                    "words": "analog (matrix )?switch|adg7\\d\\d|cd74hc40\\d\\d"
+                },
+                {
+                    "id": "i2c_bus",
+                    "text": "I2C extender",
+                    "class": "other",
+                    "words": "i2c (extender|address translator|hub)|ltc43\\d\\d|tca4307|stemma qt \\d port"
+                }
+            ]
+        },
+        {
+            "id": "power",
+            "text": "Power",
+            "roles": [
+                {
+                    "id": "power_monitor",
+                    "text": "Current monitor",
+                    "class": "sensor",
+                    "words": "current sensor|power monitor|ina\\s?\\d{3}|ina3221|ammeter"
+                },
+                {
+                    "id": "fuel_gauge",
+                    "text": "Battery gauge",
+                    "class": "fuel_gauge",
+                    "words": "fuel gauge|max1704\\w*|lc709\\w*",
+                    "needs": {"class": "fuel_gauge"}
+                },
+                {
+                    "id": "charger",
+                    "text": "Battery charger",
+                    "class": "other",
+                    "words": "charger|lipo|bq2\\d+|mcp738\\w*|solar"
+                },
+                {
+                    "id": "regulator",
+                    "text": "Voltage regulator",
+                    "class": "other",
+                    "words": "\\bbuck\\b|\\bboost\\b|regulator|\\bldo\\b|converter"
+                },
+                {"id": "usb_pd", "text": "USB power", "class": "other", "words": "husb\\d+|\\bpd\\b|power delivery"}
+            ]
+        }
+    ]
+}

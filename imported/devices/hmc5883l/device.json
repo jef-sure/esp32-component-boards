@@ -1,0 +1,10 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "hmc5883l",
+    "title": "hmc5883l",
+    "class": ["imu"],
+    "checked": {"facts": {"level": "extracted", "source": "the boards that use it"}},
+    "on": {"i2c": {}}
+}

@@ -1,0 +1,26 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_sparkle_motion_wled_friend",
+    "title": "Adafruit Sparkle Motion WLED Friend",
+    "devices": {"led": {"on": {"i2c": {}}, "provides": {"led": {"variant": "addressable"}}, "class": "led"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": ["+24V", "3.3V", "IO10", "IO18", "IO9", "SDA", "SCL", "SENSOR", "S4", "S3", "S2", "S1", "GND"]
+        }
+    },
+    "maker": "adafruit",
+    "part": "6100",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit Sparkle Motion WLED Friend.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

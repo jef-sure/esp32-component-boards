@@ -1,0 +1,66 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_dc_stepper_featherwing",
+    "title": "Adafruit DC+Stepper FeatherWing",
+    "devices": {
+        "motor": {"on": {"i2c": {}, "spi": {}, "uart": {}}, "provides": {"motor": {"variant": "dc"}}, "class": "motor"}
+    },
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "VBAT",
+                "EN",
+                "USB",
+                "N",
+                "M",
+                "L",
+                "K",
+                "J",
+                "I",
+                "H",
+                "SCL",
+                "SDA",
+                "G",
+                "TX",
+                "RX",
+                "MISO",
+                "MOSI",
+                "SCK",
+                "F",
+                "E",
+                "D",
+                "C",
+                "B",
+                "A",
+                "GND",
+                "AREF",
+                "+3.3V",
+                "RESET",
+                "VMOTOR",
+                "M1B",
+                "M1A",
+                "M2A",
+                "M2B",
+                "M3B",
+                "M3A",
+                "M4A",
+                "M4B"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "2927",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit DC+Stepper FeatherWing.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

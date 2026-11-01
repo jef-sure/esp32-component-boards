@@ -41,7 +41,7 @@
         },
         {"id": "wifi", "text": "Wi-Fi", "type": "flag", "needs": {"provides": "wifi"}},
         {"id": "bluetooth", "text": "Bluetooth", "type": "flag", "needs": {"provides": "bluetooth"}},
-        {"id": "ethernet", "text": "Ethernet", "type": "flag", "needs": {"provides": "ethernet"}},
+        {"id": "ethernet", "text": "Ethernet", "type": "flag", "needs": {"provides": "ethernet", "chip": "emac"}},
         {"id": "poe", "text": "Power over Ethernet", "type": "flag", "when": {"ethernet": true}, "needs": {"provides": "poe"}},
         {"id": "taken", "text": "GPIOs already in use, as 14, 15, 16", "type": "text"},
         {"id": "budget", "text": "Budget for one kit", "type": "number", "top": true, "limit": {"measure": "price"}}

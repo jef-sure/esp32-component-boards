@@ -1,0 +1,43 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_mpr121_breakout",
+    "title": "MPR121 Breakout",
+    "devices": {"touch_panel": {"on": {"i2c": {}}, "provides": {"touch_panel": {}, "touch_keys": {}}, "chip": "mpr121"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "ADDR",
+                "~IRQ",
+                "SCL",
+                "SDA",
+                "ELE11",
+                "ELE10",
+                "ELE9",
+                "ELE8",
+                "ELE7",
+                "ELE6",
+                "ELE5",
+                "ELE4",
+                "ELE3",
+                "ELE2",
+                "ELE1",
+                "ELE0",
+                "3.3V",
+                "GND"
+            ]
+        }
+    },
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "MPR121-Breakout-v13.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

@@ -1,0 +1,52 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_tca8418_keypad_matrix_and_gpio_expander_breakout___stemma_qt",
+    "title": "Adafruit TCA8418 Keypad Matrix and GPIO Expander Breakout - STEMMA QT / Qwiic",
+    "devices": {"keypad": {"on": {"i2c": {}}, "provides": {"keypad": {}, "io_expander": {}}, "chip": "tca8418"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "VCC",
+                "3.3V",
+                "R1",
+                "R0",
+                "C0",
+                "C1",
+                "C2",
+                "C3",
+                "C4",
+                "C5",
+                "C6",
+                "C7",
+                "C8",
+                "C9",
+                "R2",
+                "R3",
+                "R4",
+                "R5",
+                "R6",
+                "R7",
+                "RST",
+                "INT",
+                "SDA",
+                "SCL",
+                "GND"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "4918",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit TCA8418 Keypad Matrix and GPIO Expander Breakout STEMMA.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

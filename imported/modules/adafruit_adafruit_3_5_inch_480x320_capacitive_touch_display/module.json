@@ -1,0 +1,56 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_3_5_inch_480x320_capacitive_touch_display",
+    "title": "Adafruit 3.5 inch 480x320 Capacitive Touch Display",
+    "devices": {
+        "display": {"on": {"i2c": {}}, "provides": {"display": {"variant": "tft"}, "touch_panel": {}}, "class": "other"}
+    },
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "+5V",
+                "VCC",
+                "CARDDET",
+                "SD_CS_5V",
+                "IM0",
+                "IM1",
+                "IM2",
+                "CTP_SCL_5V",
+                "CTP_SDA_5V",
+                "CTP_IRQ",
+                "SDO",
+                "SDI_5V",
+                "LCD_DATA7_5V",
+                "LCD_DATA6_5V",
+                "LCD_DATA5_5V",
+                "LCD_DATA4_5V",
+                "LCD_DATA3_5V",
+                "LCD_DATA2_5V",
+                "LCD_DATA1_5V",
+                "LCD_DATA0_5V",
+                "LCD_LITE",
+                "LCD_RST_5V",
+                "LCD_RD_5V",
+                "LCD_WR_5V",
+                "LCD_CS_5V",
+                "LCD_RS_5V",
+                "GND"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "5846",
+    "power": [{"name": "VCC", "source": "connector", "volts": 5}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit 3.5 inch 480x320 Capacitive Touch Display.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

@@ -16,8 +16,8 @@ import resolve
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
-FILES = {"boards": "board.json", "modules": "module.json"}
-ITEM = re.compile(r"^(boards|modules)/[a-z0-9_]+$")
+FILES = {"boards": "board.json", "modules": "module.json", "addons": "addon.json"}
+ITEM = re.compile(r"^(boards|modules|addons)/[a-z0-9_]+$")
 CURRENCY = re.compile(r"^[A-Z]{3}$")
 PRICE = re.compile(r"^(\d+(?:\.\d+)?)(?:\s*-\s*(\d+(?:\.\d+)?))?$")
 EMPTY = "_No response_"

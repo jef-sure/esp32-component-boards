@@ -1,0 +1,56 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "m5stack_boards_m5stack_core_2",
+    "title": "M5Stack Core2 v1.0 with ILI9341 LCD, FT5x06 touch, speaker, and SPI microSD",
+    "mcu": {"target": "esp32"},
+    "buses": {
+        "i2c": {"i2c0": {"sda": 21, "scl": 22}},
+        "spi": {"spi2": {"mosi": 23, "miso": 38, "sclk": 18}},
+        "i2s": {"i2s0": {"mclk": "nc", "bclk": 12, "ws": 0, "dout": 2, "din": "nc"}}
+    },
+    "devices": {
+        "pmu_power_manager": {"class": "pmic", "on": {"i2c.i2c0": {"address": "0x34"}}},
+        "display_lcd": {
+            "class": "display",
+            "on": {"spi.spi2": {"cs": 5, "hz": 40000000, "mode": 0}},
+            "pins": {"dc": 15},
+            "config": {
+                "kind": "graphics",
+                "panel": {"width": 320, "height": 240},
+                "primary": true,
+                "depth_bits": 16,
+                "invert": true,
+                "color_order": "bgr"
+            },
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "left-right", "y": "top-bottom", "swap": false}}
+            },
+            "chip": "ili9341"
+        },
+        "lcd_touch": {
+            "class": "touch",
+            "on": {"i2c.i2c0": {"address": "0x70"}},
+            "pins": {"int": 39},
+            "config": {"over": "display_lcd", "x_max": 320, "y_max": 240},
+            "chip": "ft5x06"
+        },
+        "audio_dac": {
+            "class": "audio",
+            "on": {"i2s.i2s0": {}},
+            "config": {"direction": "out", "sample_rate": 44100, "clock": "bclk"},
+            "chip": "i2s_amp"
+        },
+        "fs_sdcard": {"class": "storage", "config": {"media": "microsd"}, "on": {"spi.spi2": {"cs": 4}}}
+    },
+    "origin": {
+        "from": "m5stack_boards",
+        "ref": "0.6.1~2",
+        "path": "m5stack_core_2",
+        "license": "Espressif Modified MIT License",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "m5stack_boards 0.6.1~2"}}
+}

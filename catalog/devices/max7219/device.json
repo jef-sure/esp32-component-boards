@@ -1,0 +1,22 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "max7219",
+    "title": "MAX7219 LED display driver",
+    "class": "led",
+    "maker": "maxim",
+    "part": "MAX7219",
+    "high_min_mv": 3500,
+    "on": {"spi": {"hz": 10000000}},
+    "notes": [
+        "It keeps the picture itself. Chips go in a chain, DOUT to DIN, on one load line: the length of a chain takes no pins.",
+        "It drives 8 digits or rows of 8 LEDs. On 5 V a high input starts at 3.5 V, so a chip of 3.3 V falls short."
+    ],
+    "checked": {
+        "facts": {
+            "level": "datasheet",
+            "source": "MAX7219/MAX7221 datasheet: V+ 4.0 to 5.5 V, VIH 3.5 V, DOUT for a chain"
+        }
+    }
+}

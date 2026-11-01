@@ -1,0 +1,42 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_tsc2046_spi_resistive_touch_screen_controller",
+    "title": "Adafruit TSC2046 SPI Resistive Touch Screen Controller",
+    "devices": {"touch_panel": {"on": {"spi": {}}, "provides": {"touch_panel": {}}, "chip": "tsc2046"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "VDD",
+                "VREF",
+                "SCK",
+                "MISO",
+                "MOSI",
+                "CS",
+                "BUSY",
+                "X+",
+                "X-",
+                "Y+",
+                "Y-",
+                "!PENIRQ",
+                "AUX",
+                "VBAT",
+                "GND"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "5767",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit TSC2046 SPI Resistive Touch Screen Controller.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

@@ -1,0 +1,43 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_640x480_cmos_color_camera",
+    "title": "640x480 CMOS Color Camera",
+    "devices": {"camera": {"on": {"i2c": {}}, "provides": {"camera": {}}, "class": "camera"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "ENB",
+                "FVL",
+                "GND",
+                "LVL",
+                "MCK",
+                "PCK",
+                "RST",
+                "SCL",
+                "SDA",
+                "VCC",
+                "Y0",
+                "Y1",
+                "Y2",
+                "Y3",
+                "Y4",
+                "Y5",
+                "Y6",
+                "Y7"
+            ]
+        }
+    },
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "sparkfun-sensors-camera_cmos_con-plug.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

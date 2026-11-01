@@ -1,0 +1,19 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_humidity_sensor___hih_4030_breakout",
+    "title": "Humidity Sensor - HIH-4030 Breakout",
+    "devices": {"humidity": {"ways": [{"lines": ["out"]}], "provides": {"humidity": {}}, "chip": "hih4030"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["GND", "OUT", "VCC"]}},
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "HIH-4030_Breakout-v10.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

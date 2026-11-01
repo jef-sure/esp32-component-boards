@@ -1,0 +1,49 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_pn532_breakout",
+    "title": "Adafruit PN532 Breakout",
+    "devices": {"nfc": {"on": {"i2c": {}, "spi": {}, "uart": {}}, "provides": {"nfc": {}}, "chip": "pn532"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "GND",
+                "+5.0V",
+                "NSS/SCL/RX",
+                "MOSI/SDA/TX",
+                "VDD",
+                "SEL0",
+                "SEL1",
+                "AUX1",
+                "AUX2",
+                "P30/UART_RX",
+                "P31",
+                "P32",
+                "P33",
+                "P34/SIC_CLK",
+                "P35",
+                "SIGOUT",
+                "SIGIN",
+                "RSTPD_N",
+                "SCK",
+                "MISO",
+                "RSTOUT_N",
+                "IRQ"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "364",
+    "power": [{"name": "VCC", "source": "connector", "volts": 5}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit PN532 Breakout.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

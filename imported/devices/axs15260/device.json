@@ -1,0 +1,10 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "axs15260",
+    "title": "axs15260",
+    "class": ["display", "touch"],
+    "checked": {"facts": {"level": "extracted", "source": "the boards that use it"}},
+    "on": {"i2c": {}}
+}

@@ -1,0 +1,47 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "m5stack_boards_m5stack_stickc_plus2",
+    "title": "M5StickC PLUS2 (1.14 inch 135x240 ST7789V2 LCD, power latch, IMU, PDM mic, buzzer, IR)",
+    "mcu": {"target": "esp32"},
+    "buses": {
+        "i2c": {"i2c0": {"sda": 21, "scl": 22}},
+        "spi": {"spi2": {"mosi": 15, "miso": "nc", "sclk": 13}},
+        "i2s": {"i2s0": {"din": 34, "clk": 0}}
+    },
+    "devices": {
+        "display_lcd": {
+            "class": "display",
+            "on": {"spi.spi2": {"cs": 5, "hz": 40000000, "mode": 0}},
+            "pins": {"dc": 14, "rst": 12, "backlight": 27},
+            "config": {
+                "kind": "graphics",
+                "panel": {"width": 135, "height": 240},
+                "primary": true,
+                "depth_bits": 16,
+                "invert": true,
+                "color_order": "rgb"
+            },
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "left-right", "y": "top-bottom", "swap": false}},
+                "backlight": {"how": "backlight_pwm", "min": 0, "max": 100, "start": 100}
+            },
+            "chip": "st7789"
+        },
+        "status_led": {"class": "led", "pins": {"out": 19}},
+        "button_a": {"class": "button", "pins": {"in": {"gpio": 37, "active": "low"}}},
+        "button_b": {"class": "button", "pins": {"in": {"gpio": 39, "active": "low"}}},
+        "button_pwr": {"class": "button", "pins": {"in": {"gpio": 35, "active": "low"}}}
+    },
+    "origin": {
+        "from": "m5stack_boards",
+        "ref": "0.6.1~2",
+        "path": "m5stack_stickc_plus2",
+        "license": "Espressif Modified MIT License",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "m5stack_boards 0.6.1~2"}},
+    "power": [{"line": 4, "level": 1, "feeds": []}]
+}

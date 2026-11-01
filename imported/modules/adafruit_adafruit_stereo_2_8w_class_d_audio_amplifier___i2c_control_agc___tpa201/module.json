@@ -1,0 +1,48 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_stereo_2_8w_class_d_audio_amplifier___i2c_control_agc___tpa201",
+    "title": "Adafruit Stereo 2.8W Class D Audio Amplifier - I2C Control AGC - TPA2016",
+    "devices": {
+        "speaker": {
+            "on": {"i2c": {}},
+            "provides": {"speaker": {"variant": "analog"}},
+            "config": {"direction": "out"},
+            "chip": "tpa2016"
+        }
+    },
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "VDD",
+                "I2C_VCC",
+                "SHUTDOWN",
+                "IN_L_N",
+                "IN_L_P",
+                "IN_R_N",
+                "IN_R_P",
+                "SDA",
+                "SCL",
+                "OUT_R_N",
+                "OUT_R_P",
+                "OUT_L_N",
+                "OUT_L_P",
+                "GND"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "1712",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit Stereo 2.8W Class D Audio Amplifier - I2C Control AGC - TPA2016.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

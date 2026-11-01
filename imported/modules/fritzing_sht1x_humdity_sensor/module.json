@@ -1,0 +1,19 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_sht1x_humdity_sensor",
+    "title": "SHT1x Humdity Sensor",
+    "devices": {"humidity": {"ways": [{"lines": ["data"]}], "provides": {"humidity": {}}, "class": "sensor"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["DATA", "GND", "SCK", "VDD"]}},
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "sparkfun-sensors-sht1x-smd.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

@@ -1,0 +1,10 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "axs15231b",
+    "title": "axs15231b",
+    "class": ["display", "touch"],
+    "checked": {"facts": {"level": "extracted", "source": "the boards that use it"}},
+    "on": {"qspi": {}, "i2c": {}}
+}

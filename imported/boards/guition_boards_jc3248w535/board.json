@@ -1,0 +1,53 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "guition_boards_jc3248w535",
+    "title": "JC3248W535 QSPI display (hardware unverified)",
+    "mcu": {"target": "esp32s3"},
+    "buses": {
+        "qspi": {"spi2": {"d0": 21, "d1": 48, "d2": 40, "d3": 39, "sclk": 47}},
+        "i2c": {"i2c0": {"sda": 4, "scl": 8}},
+        "spi": {"spi3": {"mosi": 11, "miso": 13, "sclk": 12}}
+    },
+    "devices": {
+        "display_lcd": {
+            "class": "display",
+            "on": {"qspi.spi2": {"cs": 45, "hz": 40000000, "mode": 0}},
+            "pins": {"backlight": 1},
+            "config": {
+                "kind": "graphics",
+                "panel": {"width": 320, "height": 480},
+                "primary": true,
+                "depth_bits": 16,
+                "invert": false,
+                "color_order": "rgb"
+            },
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "left-right", "y": "top-bottom", "swap": false}},
+                "backlight": {"how": "backlight_pwm", "min": 0, "max": 100, "start": 100}
+            },
+            "chip": "axs15231b"
+        },
+        "lcd_touch": {
+            "class": "touch",
+            "on": {"i2c.i2c0": {"address": "0x76"}},
+            "pins": {},
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "left-right", "y": "top-bottom", "swap": false}}
+            },
+            "config": {"over": "display_lcd", "x_max": 320, "y_max": 480},
+            "chip": "axs15231b"
+        },
+        "fs_sdcard": {"class": "storage", "config": {"media": "microsd"}, "on": {"spi.spi3": {"cs": 10}}}
+    },
+    "origin": {
+        "from": "guition_boards",
+        "ref": "0.2.2",
+        "path": "jc3248w535",
+        "license": "MIT",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "guition_boards 0.2.2"}}
+}

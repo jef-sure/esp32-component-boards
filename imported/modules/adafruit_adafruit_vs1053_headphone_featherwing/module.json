@@ -1,0 +1,66 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_vs1053_headphone_featherwing",
+    "title": "Adafruit VS1053 Headphone FeatherWing",
+    "devices": {
+        "player": {
+            "on": {"i2c": {}, "spi": {}},
+            "provides": {"player": {}},
+            "config": {"direction": "out"},
+            "chip": "vs1053"
+        }
+    },
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "VBAT",
+                "EN",
+                "USB",
+                "N",
+                "M",
+                "L",
+                "XDCS",
+                "DREQ",
+                "MP3CS",
+                "SD_CS",
+                "SCL",
+                "SDA",
+                "RIGHT_OUT",
+                "AGND",
+                "G",
+                "MP3_RX",
+                "RX",
+                "MISO",
+                "MOSI",
+                "SCLK",
+                "F",
+                "E",
+                "D",
+                "C",
+                "B",
+                "A",
+                "GND",
+                "LEFT_OUT",
+                "MP3RST",
+                "!RESET",
+                "3.3V",
+                "AREF"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "3357",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit VS1053 Headphone FeatherWing.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

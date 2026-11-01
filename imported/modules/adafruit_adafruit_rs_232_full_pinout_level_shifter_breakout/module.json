@@ -1,0 +1,26 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_rs_232_full_pinout_level_shifter_breakout",
+    "title": "Adafruit RS-232 Full Pinout Level-Shifter Breakout",
+    "devices": {"rs232": {"on": {"uart": {}}, "provides": {"rs232": {}, "level": {}}, "chip": "rs232"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": ["VCC", "DCD", "RXD", "TXD", "DTR", "DSR", "RTS", "CTS", "RI", "!INVALID", "!FORCEOFF", "GND"]
+        }
+    },
+    "maker": "adafruit",
+    "part": "5988",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit RS-232 Full Pinout Level-Shifter Breakout.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

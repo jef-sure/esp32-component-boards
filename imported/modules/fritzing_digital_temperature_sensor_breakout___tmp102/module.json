@@ -1,0 +1,19 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_digital_temperature_sensor_breakout___tmp102",
+    "title": "Digital Temperature Sensor Breakout - TMP102",
+    "devices": {"temperature": {"on": {"i2c": {}}, "provides": {"temperature": {}}, "chip": "tmp102"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["V+", "SDA", "SCL", "GND", "ALERT", "ADD0"]}},
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "TMP102_Breakout-v11.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

@@ -1,0 +1,49 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_ina3221___triple_0_26_vdc___3_2_amp_power_monitor___stemma_qt",
+    "title": "Adafruit INA3221 - Triple 0-26 VDC, ±3.2 Amp Power Monitor - STEMMA QT / Qwiic",
+    "devices": {
+        "speaker": {
+            "on": {"i2c": {}},
+            "provides": {"speaker": {}, "power_monitor": {}},
+            "config": {"direction": "out"},
+            "chip": "ina3221"
+        }
+    },
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "VCC",
+                "SCL",
+                "SDA",
+                "VIN+3",
+                "VIN-3",
+                "VIN+2",
+                "VIN-2",
+                "VIN+1",
+                "VIN-1",
+                "WARNING",
+                "CRITICAL",
+                "TC",
+                "PVALID",
+                "VPU",
+                "GND"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "6062",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit INA3221 - Triple 0-26 VDC, ±3.2 Amp Power Monitor - STEMMA QT - Qwiic.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

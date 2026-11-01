@@ -1,0 +1,39 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "m5stack_boards_m5_atom_s3",
+    "title": "M5Stack AtomS3 with GC9A01 LCD and button",
+    "mcu": {"target": "esp32s3"},
+    "buses": {"spi": {"spi3": {"mosi": 21, "miso": "nc", "sclk": 17}}},
+    "devices": {
+        "display_lcd": {
+            "class": "display",
+            "on": {"spi.spi3": {"cs": 15, "hz": 40000000, "mode": 0}},
+            "pins": {"dc": 33, "rst": 34, "backlight": 16},
+            "config": {
+                "kind": "graphics",
+                "panel": {"width": 128, "height": 128},
+                "primary": true,
+                "depth_bits": 16,
+                "invert": true,
+                "color_order": "bgr"
+            },
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "right-left", "y": "bottom-top", "swap": false}},
+                "backlight": {"how": "backlight_pwm", "min": 0, "max": 100, "start": 100}
+            },
+            "chip": "gc9a01"
+        },
+        "boot_button": {"class": "button", "pins": {"in": {"gpio": 41, "active": "low"}}}
+    },
+    "origin": {
+        "from": "m5stack_boards",
+        "ref": "0.6.1~2",
+        "path": "m5_atom_s3",
+        "license": "Espressif Modified MIT License",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "m5stack_boards 0.6.1~2"}}
+}

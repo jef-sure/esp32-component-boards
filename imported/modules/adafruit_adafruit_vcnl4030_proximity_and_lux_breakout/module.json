@@ -1,0 +1,23 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_vcnl4030_proximity_and_lux_breakout",
+    "title": "Adafruit VCNL4030 Proximity and Lux Breakout",
+    "devices": {
+        "light": {"on": {"i2c": {}}, "provides": {"light": {}, "distance": {"variant": "infrared"}}, "chip": "vcnl4030"}
+    },
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["VCC", "3.3V", "INT", "SDA", "SCL", "GND"]}},
+    "maker": "adafruit",
+    "part": "6491",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit VCNL4030 Proximity and Lux Breakout.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

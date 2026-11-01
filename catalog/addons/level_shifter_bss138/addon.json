@@ -1,0 +1,18 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "addon",
+    "name": "level_shifter_bss138",
+    "title": "Level shifter, 4 channels, both ways",
+    "description": "BSS138 transistors between a low and a high side, each line both ways. The kind for I2C.",
+    "part": "BSS138",
+    "stands": "lines",
+    "channels": 4,
+    "both_ways": true,
+    "checked": {
+        "facts": {
+            "level": "vendor-docs",
+            "source": "Adafruit 757, 4-channel I2C-safe Bi-directional Logic Level Converter"
+        }
+    }
+}

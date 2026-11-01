@@ -275,7 +275,7 @@
             "notes": "BT1 has room for a CR1220 backup cell; none is fitted."
         },
         "led": {
-            "class": "led",
+            "class": "led", "provides": {"led": {"variant": "addressable"}},
             "ref": "LED1",
             "pins": {"data": 26},
             "config": {"kind": "ws2812", "count": 1},

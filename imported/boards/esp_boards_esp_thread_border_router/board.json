@@ -1,0 +1,19 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "esp_boards_esp_thread_border_router",
+    "title": "ESP Thread Border Router Board (ESP32-S3-WROOM-1 host + ESP32-H2-MINI-1 RCP)",
+    "mcu": {"target": "esp32s3"},
+    "buses": {"uart": {"uart1": {"tx": 18, "rx": 17, "rts": "nc", "cts": "nc"}}},
+    "devices": {"boot_button": {"class": "button", "pins": {"in": {"gpio": 0, "active": "low"}}}},
+    "origin": {
+        "from": "esp_boards",
+        "ref": "0.7.1",
+        "path": "esp_thread_border_router",
+        "license": "Espressif Modified MIT License",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "esp_boards 0.7.1"}}
+}

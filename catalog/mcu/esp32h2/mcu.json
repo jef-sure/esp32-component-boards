@@ -59,9 +59,45 @@
                 "gpio.high_mv_max"
             ],
             "source": "Espressif datasheet of the chip, DC characteristics: VIH at most VDD + 0.3 V, at VDD 3.3 V"
+        },
+        "platforms": {
+            "level": "vendor-docs",
+            "covers": [
+                "platforms"
+            ],
+            "source": "COMPATIBILITY.md of ESP-IDF"
         }
     },
     "limits": {
         "cpu_mhz": 64
+    },
+    "platforms": {
+        "esp-idf": {
+            "revisions": {
+                "0.1": {
+                    "since": "5.1"
+                },
+                "0.2": {
+                    "since": "5.1"
+                },
+                "1.2": {
+                    "required": {
+                        "5.1": "5.1.6",
+                        "5.2": "5.2.5",
+                        "5.3": "5.3.3",
+                        "5.4": "5.4.1",
+                        "5.5+": "5.5"
+                    },
+                    "recommended": {
+                        "5.1": "5.1.6",
+                        "5.2": "5.2.5",
+                        "5.3": "5.3.3",
+                        "5.4": "5.4.1",
+                        "5.5+": "5.5"
+                    }
+                }
+            },
+            "since": "5.1"
+        }
     }
 }

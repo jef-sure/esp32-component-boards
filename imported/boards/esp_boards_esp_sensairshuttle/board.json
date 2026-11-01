@@ -1,0 +1,67 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "esp_boards_esp_sensairshuttle",
+    "title": "ESP-SensairShuttle",
+    "mcu": {"target": "esp32c5"},
+    "buses": {
+        "i2c": {"i2c0": {"sda": 2, "scl": 3}},
+        "i2s": {"i2s0": {"dout": 7, "clk": "nc", "dout2": "nc"}},
+        "spi": {"spi2": {"mosi": 23, "miso": "nc", "sclk": 24}}
+    },
+    "devices": {
+        "audio_dac": {
+            "class": "audio",
+            "on": {"i2s.i2s0": {"format": "pdm"}},
+            "config": {"direction": "out", "sample_rate": 16000},
+            "chip": "pdm_out"
+        },
+        "audio_adc": {
+            "class": "audio",
+            "on": {},
+            "config": {"direction": "in", "sample_rate": 16000},
+            "chip": "adc_mic"
+        },
+        "display_lcd": {
+            "class": "display",
+            "on": {"spi.spi2": {"cs": 25, "hz": 20000000, "mode": 3, "sio": true}},
+            "pins": {"dc": 26},
+            "config": {
+                "kind": "graphics",
+                "panel": {"width": 240, "height": 284},
+                "primary": true,
+                "depth_bits": 16,
+                "invert": true,
+                "color_order": "rgb"
+            },
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "left-right", "y": "top-bottom", "swap": false}}
+            },
+            "chip": "ili9341"
+        },
+        "lcd_touch": {
+            "class": "touch",
+            "on": {"i2c.i2c0": {"address": "0x2a"}},
+            "pins": {},
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "left-right", "y": "bottom-top", "swap": false}}
+            },
+            "config": {"over": "display_lcd", "x_max": 240, "y_max": 284},
+            "chip": "cst816s"
+        },
+        "boot_button": {"class": "button", "pins": {"in": {"gpio": 28, "active": "low"}}},
+        "led_strip": {"class": "led", "pins": {"data": 27}, "config": {"kind": "ws2812", "count": 1}},
+        "bmi270_sensor": {"class": "imu", "chip": "bmi270_sensor"}
+    },
+    "origin": {
+        "from": "esp_boards",
+        "ref": "0.7.1",
+        "path": "esp_sensairshuttle",
+        "license": "Espressif Modified MIT License",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "esp_boards 0.7.1"}},
+    "power": [{"line": 5, "level": 0, "feeds": ["display_lcd"]}, {"line": 1, "level": 1, "feeds": ["audio_dac"]}]
+}

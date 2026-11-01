@@ -1,0 +1,18 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_linino_dogrj45",
+    "title": "linino dogRJ45",
+    "devices": {"ethernet": {"on": {"uart": {}}, "provides": {"ethernet": {}}, "class": "network"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["RX +", "RX -", "TX +", "TX -", "GND", "VCC_CT"]}},
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "linino_dogrj45(01).fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

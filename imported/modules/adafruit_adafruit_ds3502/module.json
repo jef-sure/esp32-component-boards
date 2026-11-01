@@ -1,0 +1,22 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_ds3502",
+    "title": "Adafruit DS3502",
+    "devices": {"potentiometer": {"on": {"i2c": {}}, "provides": {"potentiometer": {}}, "chip": "ds3502"}},
+    "connectors": {
+        "J1": {"type": "contacts of the part", "pins": ["V+", "VCC", "SCL", "SDA", "RL", "RW", "RH", "A0", "A1", "GND"]}
+    },
+    "maker": "adafruit",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit DS3502.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

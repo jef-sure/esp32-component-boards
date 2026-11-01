@@ -147,6 +147,13 @@
                 "gpio.strapping"
             ],
             "source": "ESP-IDF esp-idf, docs/en/api-reference/peripherals/gpio/esp32c61.inc"
+        },
+        "platforms": {
+            "level": "vendor-docs",
+            "covers": [
+                "platforms"
+            ],
+            "source": "COMPATIBILITY.md of ESP-IDF"
         }
     },
     "controls": {
@@ -161,5 +168,23 @@
     "limits": {
         "psram_mhz": 120,
         "cpu_mhz": 160
+    },
+    "platforms": {
+        "esp-idf": {
+            "revisions": {
+                "1.0": {
+                    "since": "5.5.2"
+                },
+                "1.1": {
+                    "required": {
+                        "5.5+": "5.5.2"
+                    },
+                    "recommended": {
+                        "5.5+": "5.5.2"
+                    }
+                }
+            },
+            "since": "5.5.2"
+        }
     }
 }

@@ -1,0 +1,29 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "m5stack_boards_m5stack_papers3",
+    "title": "M5PaperS3 (4.7 inch 960x540 16-grey parallel e-ink with GT911 touch, microSD, BMI270 IMU, BM8563 RTC)",
+    "mcu": {"target": "esp32s3"},
+    "buses": {"i2c": {"i2c0": {"sda": 41, "scl": 42}}, "spi": {"spi2": {"mosi": 38, "miso": 40, "sclk": 39}}},
+    "devices": {
+        "lcd_touch": {
+            "class": "touch",
+            "on": {"i2c.i2c0": {"address": "0x28"}},
+            "pins": {"int": 48},
+            "config": {"over": "none", "x_max": 540, "y_max": 960},
+            "chip": "gt911"
+        },
+        "fs_sdcard": {"class": "storage", "config": {"media": "microsd"}, "on": {"spi.spi2": {"cs": 47}}}
+    },
+    "origin": {
+        "from": "m5stack_boards",
+        "ref": "0.6.1~2",
+        "path": "m5stack_papers3",
+        "license": "Espressif Modified MIT License",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "m5stack_boards 0.6.1~2"}},
+    "power": [{"line": 45, "level": 1, "feeds": []}]
+}

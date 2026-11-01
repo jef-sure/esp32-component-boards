@@ -1,0 +1,19 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "esp_boards_esp32_devkitm_1",
+    "title": "ESP32-DevKitM-1",
+    "mcu": {"target": "esp32"},
+    "buses": {},
+    "devices": {"boot_button": {"class": "button", "pins": {"in": {"gpio": 0, "active": "low"}}}},
+    "origin": {
+        "from": "esp_boards",
+        "ref": "0.7.1",
+        "path": "esp32_devkitm_1",
+        "license": "Espressif Modified MIT License",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "esp_boards 0.7.1"}}
+}

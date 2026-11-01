@@ -1,0 +1,32 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_lsm6ds3tr_c___lis3mdl___precision_9_dof_imu___stemma_qt___qwii",
+    "title": "Adafruit LSM6DS3TR-C + LIS3MDL - Precision 9 DoF IMU - STEMMA QT / Qwiic",
+    "devices": {
+        "accelerometer": {
+            "on": {"i2c": {}},
+            "provides": {"accelerometer": {}, "gyroscope": {}, "magnetometer": {}},
+            "class": "imu"
+        }
+    },
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": ["VCC", "3.3V", "SDA", "SCL", "ADAG", "ADM", "INT1", "INT2", "INTM", "DRDY", "GND"]
+        }
+    },
+    "maker": "adafruit",
+    "part": "5543",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit LSM6DS3TR-C + LIS3MDL STEMMA.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

@@ -1,0 +1,23 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_vl6180_time_of_flight_sensor",
+    "title": "Adafruit VL6180 Time of Flight Sensor",
+    "devices": {
+        "light": {"on": {"i2c": {}}, "provides": {"light": {}, "distance": {"variant": "tof"}}, "chip": "vl6180"}
+    },
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["VCC", "SCL", "SDA", "XSHUT", "GPIO", "GND"]}},
+    "maker": "adafruit",
+    "part": "3316",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit VL6180 Time of Flight Sensor.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

@@ -1,0 +1,21 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_triple_axis_magnetometer___mmc5603___stemma_qt___qwiic",
+    "title": "Adafruit Triple-axis Magnetometer - MMC5603 - STEMMA QT / Qwiic",
+    "devices": {"magnetometer": {"on": {"i2c": {}}, "provides": {"magnetometer": {}}, "chip": "mmc5603"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["VCC", "3.3V", "SCL", "SDA", "GND"]}},
+    "maker": "adafruit",
+    "part": "5603",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit MMC5603 Triple-axis Magnetometer - STEMMA QT.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

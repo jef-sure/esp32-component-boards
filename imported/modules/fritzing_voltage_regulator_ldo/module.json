@@ -1,0 +1,18 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_voltage_regulator_ldo",
+    "title": "Voltage Regulator LDO",
+    "devices": {"regulator": {"ways": [{"lines": ["in"]}], "provides": {"regulator": {}}, "class": "other"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["BP", "EN", "GND", "IN", "OUT"]}},
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "sparkfun-poweric-v_reg_ldo-smd2.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

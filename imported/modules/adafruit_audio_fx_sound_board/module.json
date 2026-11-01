@@ -1,0 +1,51 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_audio_fx_sound_board",
+    "title": "Audio FX Sound Board",
+    "devices": {"player": {"on": {"uart": {}}, "provides": {"player": {}}, "class": "other"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "VIN",
+                "GND",
+                "VBUS",
+                "PWRBUTTON",
+                "TX",
+                "RX",
+                "UG",
+                "VOL+",
+                "VOL-",
+                "CS",
+                "R",
+                "L",
+                "ACT",
+                "10",
+                "9",
+                "8",
+                "7",
+                "6",
+                "5",
+                "4",
+                "3",
+                "2",
+                "1",
+                "0",
+                "RST"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "EZ-SFX.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

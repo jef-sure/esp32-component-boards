@@ -1,0 +1,26 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_grayscale_1_5__128x128_oled_graphic_display___stemma_qt___qwii",
+    "title": "Adafruit Grayscale 1.5\" 128x128 OLED Graphic Display - STEMMA QT / Qwiic",
+    "devices": {"display": {"on": {"i2c": {}}, "provides": {"display": {"variant": "oled"}}, "class": "other"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": ["3.3V", "VCC", "SDA", "SCL", "RST_5.0V", "CS_5.0V", "DC/SA0_5.0V", "GND"]
+        }
+    },
+    "maker": "adafruit",
+    "part": "4741",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit Grayscale 1.5in 128x128 OLED Graphic Display.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

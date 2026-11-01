@@ -1,0 +1,10 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "st7796",
+    "title": "st7796",
+    "class": ["display"],
+    "checked": {"facts": {"level": "extracted", "source": "the boards that use it"}},
+    "on": {"spi": {}}
+}

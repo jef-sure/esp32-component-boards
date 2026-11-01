@@ -1,0 +1,19 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_ambient_light_sensor__temt6000_breakout_board",
+    "title": "Ambient Light Sensor (TEMT6000 Breakout Board)",
+    "devices": {"light": {"ways": [{"lines": ["s"]}], "provides": {"light": {}}, "chip": "temt6000"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["VCC", "GND", "S"]}},
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "TEMT6000_Breakout-v12.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

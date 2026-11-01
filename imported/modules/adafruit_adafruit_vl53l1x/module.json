@@ -1,0 +1,21 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_vl53l1x",
+    "title": "Adafruit VL53L1X",
+    "devices": {"distance": {"on": {"i2c": {}}, "provides": {"distance": {"variant": "tof"}}, "chip": "vl53l1x"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["VCC", "SCL", "SDA", "GPIO", "XSHUT", "GND"]}},
+    "maker": "adafruit",
+    "part": "3967",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit VL53L1X Time of Flight Sensor.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

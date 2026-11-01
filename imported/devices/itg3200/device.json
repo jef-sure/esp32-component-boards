@@ -1,0 +1,10 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "itg3200",
+    "title": "itg3200",
+    "class": ["imu"],
+    "checked": {"facts": {"level": "extracted", "source": "the boards that use it"}},
+    "on": {"i2c": {}}
+}

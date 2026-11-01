@@ -1,0 +1,28 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_tft_2_2_inch_320x240_w_microsd",
+    "title": "TFT 2.2 inch 320x240 w microSD",
+    "devices": {
+        "display": {"on": {"spi": {}}, "provides": {"display": {"variant": "tft"}, "sd_card": {}}, "class": "other"}
+    },
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": ["VIN", "BACKLIGHT", "SCLK", "MISO", "MOSI", "LCDCS", "SDCS", "RESET", "DC", "GND"]
+        }
+    },
+    "maker": "adafruit",
+    "part": "1480",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit TFT 2.2 inch 320x240 w microSD.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

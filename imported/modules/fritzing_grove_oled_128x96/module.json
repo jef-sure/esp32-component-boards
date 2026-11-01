@@ -1,0 +1,19 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_grove_oled_128x96",
+    "title": "Grove OLED 128x96",
+    "devices": {"display": {"on": {"i2c": {}}, "provides": {"display": {"variant": "oled"}}, "class": "other"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["GND", "VCC", "SDA", "SCL"]}},
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "seeed_grove_oled_128x96.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

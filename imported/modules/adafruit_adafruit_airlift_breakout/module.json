@@ -1,0 +1,26 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_airlift_breakout",
+    "title": "Adafruit AirLift Breakout",
+    "devices": {"wifi": {"on": {"spi": {}}, "provides": {"wifi": {}}, "class": "radio"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": ["VIN", "3.3V", "SCK", "MISO", "MOSI", "CS", "ESP_BUSY", "RESET", "GPIO0", "RXD", "ESP_TX", "GND"]
+        }
+    },
+    "maker": "adafruit",
+    "part": "4201",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit AirLift Breakout.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

@@ -1,0 +1,21 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_sths34pf80_ir_presence_motion_sensor",
+    "title": "Adafruit STHS34PF80 IR Presence Motion Sensor",
+    "devices": {"presence": {"on": {"i2c": {}}, "provides": {"presence": {}}, "chip": "sths34pf80"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["VCC", "3.3V", "INT", "SDA", "SCL", "GND"]}},
+    "maker": "adafruit",
+    "part": "6426",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit STHS34PF80 IR Presence Motion Sensor.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

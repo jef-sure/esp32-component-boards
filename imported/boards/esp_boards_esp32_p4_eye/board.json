@@ -1,0 +1,61 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "esp_boards_esp32_p4_eye",
+    "title": "ESP32-P4-EYE Development Board",
+    "mcu": {"target": "esp32p4"},
+    "buses": {
+        "i2c": {"i2c0": {"sda": 14, "scl": 13}},
+        "i2s": {"i2s0": {"din": 21, "clk": 22}},
+        "spi": {"spi2": {"mosi": "nc", "miso": "nc", "sclk": 17}},
+        "sdmmc": {"sdmmc0": {}},
+        "csi": {"csi0": {}}
+    },
+    "devices": {
+        "audio_adc": {
+            "class": "audio",
+            "on": {"i2s.i2s0": {"format": "pdm"}},
+            "config": {"direction": "in", "sample_rate": 16000},
+            "chip": "pdm_mic"
+        },
+        "fs_sdcard": {"class": "storage", "config": {"media": "microsd"}, "on": {"sdmmc.sdmmc0": {}}},
+        "display_lcd": {
+            "class": "display",
+            "on": {"spi.spi2": {"cs": 18, "hz": 80000000, "mode": 3}},
+            "pins": {"dc": 19, "rst": 15, "backlight": 20},
+            "config": {"kind": "graphics", "panel": {"width": 240, "height": 240}, "primary": true, "invert": true},
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "left-right", "y": "top-bottom", "swap": false}},
+                "backlight": {"how": "backlight_pwm", "min": 0, "max": 100, "start": 100}
+            },
+            "chip": "st7789"
+        },
+        "camera": {
+            "class": "camera",
+            "on": {"i2c.i2c0": {"role": "control"}, "csi.csi0": {"role": "data"}},
+            "pins": {"xclk": 11, "rst": 26},
+            "config": {"xclk_hz": 24000000}
+        },
+        "button_1": {"class": "button", "pins": {"in": {"gpio": 3, "active": "low"}}},
+        "button_2": {"class": "button", "pins": {"in": {"gpio": 4, "active": "low"}}},
+        "button_3": {"class": "button", "pins": {"in": {"gpio": 5, "active": "low"}}},
+        "boot_button": {"class": "button", "pins": {"in": {"gpio": 35, "active": "low"}}},
+        "knob": {"class": "encoder", "pins": {"a": 48, "b": 47}},
+        "knob_button": {"class": "button", "pins": {"in": {"gpio": 2, "active": "low"}}},
+        "flashlight": {"class": "other", "pins": {"out": 23}}
+    },
+    "origin": {
+        "from": "esp_boards",
+        "ref": "0.7.1",
+        "path": "esp32_p4_eye",
+        "license": "Espressif Modified MIT License",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "esp_boards 0.7.1"}},
+    "power": [
+        {"line": 46, "level": 0, "feeds": ["fs_sdcard"]},
+        {"line": 12, "level": 1, "feeds": ["audio_adc", "camera", "display_lcd"]}
+    ]
+}

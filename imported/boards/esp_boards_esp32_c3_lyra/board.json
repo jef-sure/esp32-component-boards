@@ -1,0 +1,28 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "esp_boards_esp32_c3_lyra",
+    "title": "ESP32-C3-Lyra",
+    "mcu": {"target": "esp32c3"},
+    "buses": {"i2s": {"i2s0": {"dout": 3, "clk": "nc"}}},
+    "devices": {
+        "boot_button": {"class": "button", "pins": {"in": {"gpio": 9, "active": "low"}}},
+        "audio_adc": {"class": "audio", "on": {}, "config": {"direction": "in"}, "chip": "adc_mic"},
+        "audio_dac": {
+            "class": "audio",
+            "on": {"i2s.i2s0": {"format": "pdm"}},
+            "config": {"direction": "out", "sample_rate": 16000},
+            "chip": "pdm_out"
+        }
+    },
+    "origin": {
+        "from": "esp_boards",
+        "ref": "0.7.1",
+        "path": "esp32_c3_lyra",
+        "license": "Espressif Modified MIT License",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "esp_boards 0.7.1"}}
+}

@@ -1,0 +1,26 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_as7262_visible_spetral_sensor",
+    "title": "Adafruit AS7262 Visible Spetral Sensor",
+    "devices": {"other": {"on": {"i2c": {}, "uart": {}}, "chip": "as7262"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": ["3.3V", "VIN", "INT", "LED", "RESET", "TX/SDA", "RX/SCL", "GND"]
+        }
+    },
+    "maker": "adafruit",
+    "part": "3779",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit AS7262 Visible Spectral Sensor.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

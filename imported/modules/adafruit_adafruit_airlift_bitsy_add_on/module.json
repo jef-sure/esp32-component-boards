@@ -1,0 +1,54 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_airlift_bitsy_add_on",
+    "title": "Adafruit Airlift Bitsy Add-On",
+    "devices": {"wifi": {"on": {"i2c": {}, "spi": {}, "uart": {}}, "provides": {"wifi": {}}, "class": "radio"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "VBAT",
+                "VBUS",
+                "VHI",
+                "3.3V",
+                "!RESET",
+                "AREF",
+                "A0",
+                "A1",
+                "A2",
+                "A3",
+                "A4",
+                "A5",
+                "SCK",
+                "MOSI",
+                "MISO",
+                "D2",
+                "ESP_CS",
+                "ESP_RESET",
+                "ESP_BUSY",
+                "D10",
+                "D9",
+                "D7",
+                "D5",
+                "SCL",
+                "SDA",
+                "TX",
+                "RX",
+                "GND"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit Airlift Bitsy Add-On.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

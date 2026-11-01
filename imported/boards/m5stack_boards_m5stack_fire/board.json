@@ -1,0 +1,43 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "m5stack_boards_m5stack_fire",
+    "title": "M5Stack Fire v2.7 (2.0 inch 320x240 ILI9342C LCD, 3 buttons, 2x5 SK6812 RGB bars, speaker, microSD, 8 MB PSRAM)",
+    "mcu": {"target": "esp32"},
+    "buses": {"i2c": {"i2c0": {"sda": 21, "scl": 22}}, "spi": {"spi3": {"mosi": 23, "miso": 19, "sclk": 18}}},
+    "devices": {
+        "display_lcd": {
+            "class": "display",
+            "on": {"spi.spi3": {"cs": 14, "hz": 40000000, "mode": 0}},
+            "pins": {"dc": 27, "rst": 33, "backlight": 32},
+            "config": {
+                "kind": "graphics",
+                "panel": {"width": 320, "height": 240},
+                "primary": true,
+                "depth_bits": 16,
+                "invert": true,
+                "color_order": "bgr"
+            },
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "left-right", "y": "top-bottom", "swap": false}},
+                "backlight": {"how": "backlight_pwm", "min": 0, "max": 100, "start": 100}
+            },
+            "chip": "ili9341"
+        },
+        "fs_sdcard": {"class": "storage", "config": {"media": "microsd"}, "on": {"spi.spi3": {"cs": 4}}},
+        "led_strip": {"class": "led", "pins": {"data": 15}, "config": {"kind": "sk6812", "count": 10}},
+        "button_a": {"class": "button", "pins": {"in": {"gpio": 39, "active": "low"}}},
+        "button_b": {"class": "button", "pins": {"in": {"gpio": 38, "active": "low"}}},
+        "button_c": {"class": "button", "pins": {"in": {"gpio": 37, "active": "low"}}}
+    },
+    "origin": {
+        "from": "m5stack_boards",
+        "ref": "0.6.1~2",
+        "path": "m5stack_fire",
+        "license": "Espressif Modified MIT License",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "m5stack_boards 0.6.1~2"}}
+}

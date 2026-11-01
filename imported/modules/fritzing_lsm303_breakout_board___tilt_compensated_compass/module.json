@@ -1,0 +1,23 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_lsm303_breakout_board___tilt_compensated_compass",
+    "title": "LSM303 Breakout Board - Tilt-Compensated Compass",
+    "devices": {
+        "accelerometer": {"on": {"i2c": {}}, "provides": {"accelerometer": {}, "magnetometer": {}}, "chip": "lsm303"}
+    },
+    "connectors": {
+        "J1": {"type": "contacts of the part", "pins": ["SCL_M", "SDA_M", "DRDY", "SA0", "VCC", "GND", "INT2", "INT1"]}
+    },
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "LSM303 breakout board-v11.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

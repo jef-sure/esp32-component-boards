@@ -1,0 +1,23 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "m5stack_boards_m5stack_atoms3_lite",
+    "title": "AtomS3-Lite Development Kit",
+    "mcu": {"target": "esp32s3"},
+    "buses": {},
+    "devices": {
+        "led_strip": {"class": "led", "pins": {"data": 35}, "config": {"kind": "ws2812", "count": 1}},
+        "user_button": {"class": "button", "pins": {"in": {"gpio": 41, "active": "low"}}},
+        "ir_tx": {"class": "other", "pins": {"out": 4}}
+    },
+    "origin": {
+        "from": "m5stack_boards",
+        "ref": "0.6.1~2",
+        "path": "m5stack_atoms3_lite",
+        "license": "Espressif Modified MIT License",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "m5stack_boards 0.6.1~2"}}
+}

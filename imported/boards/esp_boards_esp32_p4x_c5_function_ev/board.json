@@ -1,0 +1,67 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "esp_boards_esp32_p4x_c5_function_ev",
+    "title": "ESP32-P4X-C5-Function-EV-Board (ESP32-P4 with ESP32-C5-MINI-1 dual-band companion, 1024x600 MIPI-DSI touch panel, MIPI-CSI camera)",
+    "mcu": {"target": "esp32p4"},
+    "buses": {
+        "i2c": {"i2c0": {"sda": 7, "scl": 8}},
+        "i2s": {"i2s0": {"mclk": 13, "bclk": 12, "ws": 10, "dout": 9, "din": 11}},
+        "dsi": {"dsi0": {"lanes": 2, "lane_mbps": 1000, "phy_ldo_chan": 3, "phy_ldo_mv": 2500}},
+        "sdmmc": {"sdmmc0": {}},
+        "csi": {"csi0": {"phy_ldo_chan": 3, "phy_ldo_mv": 2500}}
+    },
+    "devices": {
+        "audio_dac": {
+            "class": "audio",
+            "on": {"i2s.i2s0": {"format": "tdm"}, "i2c.i2c0": {"address": "0x30"}},
+            "config": {"direction": "both", "sample_rate": 48000, "clock": "bclk"},
+            "chip": "es8311"
+        },
+        "fs_sdcard": {"class": "storage", "config": {"media": "microsd"}, "on": {"sdmmc.sdmmc0": {}}},
+        "boot_button": {"class": "button", "pins": {"in": {"gpio": 35, "active": "low"}}},
+        "display_lcd": {
+            "class": "display",
+            "on": {"dsi.dsi0": {}},
+            "pins": {"rst": 27, "backlight": 26},
+            "config": {
+                "kind": "graphics",
+                "panel": {"width": 1024, "height": 600},
+                "primary": true,
+                "depth_bits": 16,
+                "color_order": "rgb"
+            },
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "left-right", "y": "top-bottom", "swap": false}},
+                "backlight": {"how": "backlight_pwm", "min": 0, "max": 100}
+            },
+            "chip": "ek79007"
+        },
+        "lcd_touch": {
+            "class": "touch",
+            "on": {"i2c.i2c0": {"address": "0x5d"}},
+            "pins": {},
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "right-left", "y": "bottom-top", "swap": false}}
+            },
+            "config": {"over": "display_lcd", "x_max": 1024, "y_max": 600},
+            "chip": "gt911"
+        },
+        "camera": {
+            "class": "camera",
+            "on": {"i2c.i2c0": {"role": "control"}, "csi.csi0": {"role": "data"}},
+            "pins": {},
+            "config": {}
+        }
+    },
+    "origin": {
+        "from": "esp_boards",
+        "ref": "0.7.1",
+        "path": "esp32_p4x_c5_function_ev",
+        "license": "Espressif Modified MIT License",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "esp_boards 0.7.1"}}
+}

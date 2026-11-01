@@ -1,0 +1,55 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_bicolor_8x8_ht16k33_stemma",
+    "title": "Adafruit Bicolor 8x8 HT16K33 STEMMA",
+    "devices": {"led": {"on": {"i2c": {}}, "provides": {"led": {"variant": "matrix"}}, "chip": "ht16k33"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "VDD",
+                "SDA",
+                "SCL",
+                "A2",
+                "23",
+                "22",
+                "A1",
+                "20",
+                "19",
+                "A0",
+                "17",
+                "16",
+                "15",
+                "14",
+                "13",
+                "1",
+                "N$42",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+                "10",
+                "11",
+                "12",
+                "GND"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "902",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit Bicolor 8x8 HT16K33 STEMMA.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

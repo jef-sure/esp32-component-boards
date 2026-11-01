@@ -1,0 +1,23 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_bmp280",
+    "title": "Adafruit BMP280",
+    "devices": {"pressure": {"on": {"i2c": {}, "spi": {}}, "provides": {"pressure": {}}, "chip": "bmp280"}},
+    "connectors": {
+        "J1": {"type": "contacts of the part", "pins": ["VCC", "3.3V", "SCK/SCL", "SDO/ADR", "SDI/SDA", "CS", "GND"]}
+    },
+    "maker": "adafruit",
+    "part": "2651",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit BMP280.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

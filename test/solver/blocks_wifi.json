@@ -1,0 +1,5 @@
+{
+    "title": "Wi-Fi is a role the board provides: no module, and the P4 does not fit",
+    "answers": {"blocks": [{"role": "wifi"}]},
+    "says": "no wi-fi on this board"
+}

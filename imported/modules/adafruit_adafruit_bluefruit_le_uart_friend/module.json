@@ -1,0 +1,23 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_bluefruit_le_uart_friend",
+    "title": "Adafruit Bluefruit LE UART Friend",
+    "devices": {"bluetooth": {"on": {"uart": {}}, "provides": {"bluetooth": {}}, "class": "radio"}},
+    "connectors": {
+        "J1": {"type": "contacts of the part", "pins": ["DFU", "GND", "RTS", "VIN", "RXI", "TXO", "CTS", "MODE"]}
+    },
+    "maker": "adafruit",
+    "part": "2479",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit Bluefruit LE UART Friend.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

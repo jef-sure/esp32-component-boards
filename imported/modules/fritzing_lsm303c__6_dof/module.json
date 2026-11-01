@@ -1,0 +1,41 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_lsm303c__6_dof",
+    "title": "LSM303C (6 DOF)",
+    "devices": {
+        "accelerometer": {
+            "on": {"i2c": {}},
+            "provides": {"accelerometer": {}, "gyroscope": {}, "magnetometer": {}},
+            "chip": "lsm303c"
+        }
+    },
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "GND",
+                "VDD_IO",
+                "SDA/SDI/SDO",
+                "SCL/SCLK",
+                "INT_XL",
+                "DRDY_MAG",
+                "!CS_XL",
+                "VCC",
+                "!CS_MAG",
+                "INT_MAG"
+            ]
+        }
+    },
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "SparkFun_LSM303C_6_DOF_IMU_Breakout.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

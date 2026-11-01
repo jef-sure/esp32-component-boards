@@ -1,0 +1,22 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "m5stack_boards_m5stack_stamp_s3",
+    "title": "M5Stamp S3 Development Board",
+    "mcu": {"target": "esp32s3"},
+    "buses": {},
+    "devices": {
+        "led_strip": {"class": "led", "pins": {"data": 21}, "config": {"kind": "ws2812", "count": 1}},
+        "boot_button": {"class": "button", "pins": {"in": {"gpio": 0, "active": "low"}}}
+    },
+    "origin": {
+        "from": "m5stack_boards",
+        "ref": "0.6.1~2",
+        "path": "m5stack_stamp_s3",
+        "license": "Espressif Modified MIT License",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "m5stack_boards 0.6.1~2"}}
+}

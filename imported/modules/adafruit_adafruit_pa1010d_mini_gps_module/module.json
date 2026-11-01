@@ -1,0 +1,26 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_pa1010d_mini_gps_module",
+    "title": "Adafruit PA1010D Mini GPS Module",
+    "devices": {"gps": {"on": {"i2c": {}, "uart": {}}, "provides": {"gps": {}}, "chip": "pa1010d"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": ["VCC", "3.3V", "SCL", "SDA", "!RESET", "1PPS", "RXI", "TXO", "WAKEUP", "GND"]
+        }
+    },
+    "maker": "adafruit",
+    "part": "4415",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit PA1010D Mini GPS Module.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

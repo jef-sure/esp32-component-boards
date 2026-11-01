@@ -1,0 +1,38 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_2_0_inch_240x320_ips_tft",
+    "title": "Adafruit 2.0 inch 240x320 IPS TFT",
+    "devices": {"display": {"on": {"spi": {}}, "provides": {"display": {"variant": "tft"}}, "class": "other"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "3.3V",
+                "VIN",
+                "SCLK_5V",
+                "MISO",
+                "MOSI_5V",
+                "LCDCS_5V",
+                "RESET_5V",
+                "DC_5V",
+                "SDCS_5V",
+                "BACKLIGHT",
+                "GND"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "4311",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit 2.0 inch 240x320 IPS TFT.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

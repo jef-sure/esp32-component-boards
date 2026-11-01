@@ -1,0 +1,28 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_mcp9601",
+    "title": "Adafruit MCP9601",
+    "devices": {
+        "temperature": {"on": {"i2c": {}}, "provides": {"temperature": {"variant": "probe"}}, "chip": "mcp9601"}
+    },
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": ["VIN", "-", "+", "SDA", "SCL", "ALERT1", "ALERT2", "ALERT3", "ALERT4", "ADDR", "GND"]
+        }
+    },
+    "maker": "adafruit",
+    "part": "5165",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit MCP9601.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

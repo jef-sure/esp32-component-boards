@@ -1,0 +1,10 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "tsl2591",
+    "title": "tsl2591",
+    "class": ["sensor"],
+    "checked": {"facts": {"level": "extracted", "source": "the boards that use it"}},
+    "on": {"i2c": {}}
+}

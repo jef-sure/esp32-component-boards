@@ -142,6 +142,31 @@ Takes a price from an issue of the form `price.yml` and adds it to the file of i
 issue comes from anyone, so it is only read as fields, and `.github/workflows/reports.yml` gives it through a file. The
 workflow opens a pull request, and a person merges it. `check_format.py` tries the tool on good and bad reports.
 
+## import_board_manager.py
+
+Takes the boards of esp_board_manager packs into `imported/`, a tree in the layout of `catalog/` that the tools read
+after it. A pack is data from the net: it is unpacked apart and only read.
+
+```sh
+python3 tools/import_board_manager.py esp_boards=PATH guition_boards=PATH --date 2026-11-01
+```
+
+It gives no value a pack does not, takes no DSI timings and no init commands, writes no `shared_pins`. What the format
+refuses goes to `imported/report.json` with its reason, beside the pins of the boards the catalog has against the
+packs and what the format has no place for. `check_format.py` checks the result and these rules.
+
+## import_fritzing.py
+
+Takes modules from Fritzing parts into `imported/modules/`. Run it after `import_board_manager.py`, which rewrites
+`imported/devices/`.
+
+```sh
+python3 tools/import_fritzing.py adafruit=PATH fritzing=PATH --ref adafruit=COMMIT --date 2026-11-01
+```
+
+Only facts are taken: the contacts, the supply they name, the part number. A module needs a bus its contacts show.
+Its roles come from the words of `catalog/roles.json`, and from the sections of a shop when `--shop` names a copy of its list, which also gives the price and leaves out what is no longer sold.
+
 ## sync_versions.py
 
 ```sh

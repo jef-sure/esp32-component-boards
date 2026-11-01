@@ -1,0 +1,9 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "ip101",
+    "title": "ip101",
+    "class": ["network"],
+    "checked": {"facts": {"level": "extracted", "source": "the boards that use it"}}
+}

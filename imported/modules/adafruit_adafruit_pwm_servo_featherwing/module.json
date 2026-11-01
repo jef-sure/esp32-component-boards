@@ -1,0 +1,71 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_pwm_servo_featherwing",
+    "title": "Adafruit PWM Servo Featherwing",
+    "devices": {
+        "servo": {
+            "on": {"i2c": {}, "spi": {}, "uart": {}},
+            "provides": {"servo": {"variant": "ledc"}},
+            "class": "motor"
+        }
+    },
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "V+",
+                "GND",
+                "PWRIN",
+                "PWM_7",
+                "PWM_6",
+                "PWM_5",
+                "PWM_4",
+                "PWM_3",
+                "PWM_2",
+                "PWM_1",
+                "PWM_0",
+                "G",
+                "TX",
+                "RX",
+                "MISO",
+                "MOSI",
+                "SCK",
+                "F",
+                "E",
+                "D",
+                "C",
+                "B",
+                "A",
+                "AREF",
+                "+3.3V",
+                "RESET",
+                "VBAT",
+                "EN",
+                "USB",
+                "N",
+                "M",
+                "L",
+                "K",
+                "J",
+                "I",
+                "H",
+                "SCL",
+                "SDA"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "2928",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit PWM Servo Featherwing.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

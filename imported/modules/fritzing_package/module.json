@@ -1,0 +1,38 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_package",
+    "title": "Package:",
+    "devices": {"gyroscope": {"on": {"i2c": {}}, "provides": {"gyroscope": {}}, "class": "imu"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "CS",
+                "GND",
+                "INT1",
+                "INT2",
+                "PLL",
+                "RSDVG",
+                "RSVDG",
+                "RSVDV",
+                "SCL",
+                "SDA_SDI",
+                "SDO",
+                "VDD",
+                "VDDIO"
+            ]
+        }
+    },
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "sparkfun-sensors-l3g4200d-.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

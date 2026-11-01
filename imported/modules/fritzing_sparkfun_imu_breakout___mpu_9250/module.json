@@ -1,0 +1,31 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_sparkfun_imu_breakout___mpu_9250",
+    "title": "SparkFun IMU Breakout - MPU-9250",
+    "devices": {
+        "accelerometer": {
+            "on": {"i2c": {}},
+            "provides": {"accelerometer": {}, "gyroscope": {}, "magnetometer": {}},
+            "chip": "mpu9250"
+        }
+    },
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": ["SCL/SCLK", "SDA/SDI", "VDD", "GND", "AUX_CL", "FSYNC", "AUX_DA", "VDDIO", "AD0/SDO", "!CS", "INT"]
+        }
+    },
+    "part": "13762",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "Sparkfun_IMU_Breakout_MPU-9250.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

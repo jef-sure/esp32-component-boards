@@ -1,0 +1,41 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_lsm6dsox",
+    "title": "Adafruit_LSM6DSOX",
+    "devices": {
+        "accelerometer": {"on": {"i2c": {}}, "provides": {"accelerometer": {}, "gyroscope": {}}, "class": "imu"}
+    },
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "VCC",
+                "3.3V",
+                "SCX",
+                "SDX",
+                "SDO_AUX",
+                "OCS_AUX",
+                "INT1",
+                "INT2",
+                "SCL",
+                "SDA",
+                "SDO",
+                "CS_5V",
+                "GND"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit LSM6DSOX.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

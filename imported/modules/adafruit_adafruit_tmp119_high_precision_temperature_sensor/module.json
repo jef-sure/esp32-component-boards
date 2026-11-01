@@ -1,0 +1,21 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_tmp119_high_precision_temperature_sensor",
+    "title": "Adafruit TMP119 High-Precision Temperature Sensor",
+    "devices": {"temperature": {"on": {"i2c": {}}, "provides": {"temperature": {}}, "chip": "tmp119"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["VCC", "ADDR", "INT", "SDA", "SCL", "GND"]}},
+    "maker": "adafruit",
+    "part": "6482",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit TMP119 High-Precision Temperature Sensor.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

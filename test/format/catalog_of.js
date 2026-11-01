@@ -3,7 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const FILES = { mcu: 'mcu.json', devices: 'device.json', modules: 'module.json', boards: 'board.json', connectors: 'connector.json' };
+const FILES = { mcu: 'mcu.json', devices: 'device.json', modules: 'module.json', addons: 'addon.json', boards: 'board.json', connectors: 'connector.json' };
 const read = (file) => JSON.parse(fs.readFileSync(file));
 const below = (dir) => (fs.existsSync(dir) ? fs.readdirSync(dir).sort().map((name) => path.join(dir, name)) : []);
 

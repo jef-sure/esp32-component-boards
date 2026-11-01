@@ -1,0 +1,23 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_ina237_85v_10a_16_bit_dc_current_voltage_power_monitor___stemm",
+    "title": "Adafruit INA237 85V 10A 16-bit DC Current Voltage Power Monitor - STEMMA QT",
+    "devices": {"power_monitor": {"on": {"i2c": {}}, "provides": {"power_monitor": {}}, "chip": "ina237"}},
+    "connectors": {
+        "J1": {"type": "contacts of the part", "pins": ["VCC", "VIN+", "VBUS", "VIN-", "ALERT", "SDA", "SCL", "GND"]}
+    },
+    "maker": "adafruit",
+    "part": "6340",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit INA237 85V 10A 16-bit DC Current Voltage Power Monitor - STEMMA QT.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

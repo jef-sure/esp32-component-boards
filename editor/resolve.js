@@ -5,7 +5,7 @@
 
 function boardResolver(catalog) {
     const NOT_LINES = new Set(['hz', 'lanes', 'lane_mbps', 'phy_ldo_chan', 'phy_ldo_mv', 'baud', 'data']);
-    const TYPE_FIELDS = ['class', 'maker', 'part', 'compat', 'draw', 'pins', 'config', 'controls', 'provides', 'start', 'firmware', 'ways'];
+    const TYPE_FIELDS = ['class', 'maker', 'part', 'compat', 'draw', 'pins', 'config', 'controls', 'provides', 'start', 'firmware', 'ways', 'high_min_mv'];
     const LIBRARY_HISTORY = ['license', 'chips', 'transports', 'interfaces', 'groups', 'values'];
     const FIRMWARE_HISTORY = ['config', 'controls', 'provides'];
     const REFERENCES = new Set(['over', 'via', 'left', 'right', 'after', 'devices', 'feeds', 'from', 'through', 'name', 'logic']); // fields of a module that name its parts

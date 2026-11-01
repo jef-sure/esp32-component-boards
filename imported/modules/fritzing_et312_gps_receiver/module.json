@@ -1,0 +1,24 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_et312_gps_receiver",
+    "title": "ET312 GPS Receiver",
+    "devices": {"gps": {"on": {"uart": {}}, "provides": {"gps": {}}, "chip": "et312"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": ["BATT", "GND1", "GND2", "GND3", "GND4", "GND5", "GND6", "GND7", "GPIO1", "RF", "RX", "TX", "VCC"]
+        }
+    },
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "sparkfun-rf-et312-smd.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

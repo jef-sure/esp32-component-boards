@@ -1,0 +1,23 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_usb_type_c_power_delivery_dummy___i2c_or_switchable___husb238",
+    "title": "Adafruit USB Type C Power Delivery Dummy - I2C or Switchable - HUSB238 - STEMMA QT",
+    "devices": {"usb_pd": {"on": {"i2c": {}}, "provides": {"usb_pd": {}}, "chip": "husb238"}},
+    "connectors": {
+        "J1": {"type": "contacts of the part", "pins": ["VBUS", "VOUT", "2", "N$2", "D+", "D-", "SDA", "SCL", "GND"]}
+    },
+    "maker": "adafruit",
+    "part": "5991",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit USB Type C Power Delivery Dummy - I2C or Switchable - HUSB238 - STEMMA QT.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

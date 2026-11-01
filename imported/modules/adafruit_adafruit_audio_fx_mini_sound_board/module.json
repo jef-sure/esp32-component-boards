@@ -1,0 +1,46 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_audio_fx_mini_sound_board",
+    "title": "Adafruit Audio FX Mini Sound Board",
+    "devices": {"player": {"on": {"uart": {}}, "provides": {"player": {}}, "class": "other"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "GND",
+                "ACT",
+                "GPIO0_7",
+                "GPIO0_6",
+                "GPIO0_5",
+                "GPIO0_4",
+                "GPIO0_3",
+                "GPIO0_2",
+                "GPIO0_1",
+                "GPIO0_0",
+                "RST",
+                "VIN",
+                "VBUS",
+                "TX",
+                "RX_5V",
+                "UG",
+                "CS",
+                "R_AC",
+                "L_AC"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "2342",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit Audio FX Mini Sound Board.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

@@ -1,0 +1,26 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_ltc4316_i2c_address_translator___stemma_qt___qwiic",
+    "title": "Adafruit LTC4316 I2C Address Translator - Stemma QT / Qwiic",
+    "devices": {"i2c_bus": {"on": {"i2c": {}}, "provides": {"i2c_bus": {}}, "chip": "ltc4316"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": ["VCC", "SCL_IN", "SDA_IN", "SCL_OUT", "SDA_OUT", "READY", "ENABLE", "XORL", "GND"]
+        }
+    },
+    "maker": "adafruit",
+    "part": "5914",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit LTC4316 I2C Address Translator.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

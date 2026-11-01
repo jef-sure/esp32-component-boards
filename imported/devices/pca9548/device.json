@@ -1,0 +1,10 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "pca9548",
+    "title": "pca9548",
+    "class": ["i2c_mux"],
+    "checked": {"facts": {"level": "extracted", "source": "the boards that use it"}},
+    "on": {"i2c": {}}
+}

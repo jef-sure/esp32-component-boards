@@ -44,6 +44,13 @@
         "facts": {
             "level": "vendor-docs",
             "source": "ESP-IDF esp-idf, components/soc/esp32c2, soc_caps.h"
+        },
+        "platforms": {
+            "level": "vendor-docs",
+            "covers": [
+                "platforms"
+            ],
+            "source": "COMPATIBILITY.md of ESP-IDF"
         }
     },
     "controls": {
@@ -57,5 +64,48 @@
     },
     "limits": {
         "cpu_mhz": 120
+    },
+    "platforms": {
+        "esp-idf": {
+            "revisions": {
+                "1.0": {
+                    "since": "5.0"
+                },
+                "1.1": {
+                    "since": "5.0"
+                },
+                "1.2": {
+                    "required": {
+                        "5.0": "5.0",
+                        "5.1": "5.1",
+                        "5.2": "5.2",
+                        "5.3+": "5.3"
+                    },
+                    "recommended": {
+                        "5.0": "5.0.7",
+                        "5.1": "5.1.4",
+                        "5.2": "5.2.2",
+                        "5.3+": "5.3"
+                    }
+                },
+                "2.0": {
+                    "required": {
+                        "5.0": "5.0.8",
+                        "5.1": "5.1.5*",
+                        "5.2": "5.2.4",
+                        "5.3": "5.3.2*",
+                        "5.4+": "5.4"
+                    },
+                    "recommended": {
+                        "5.0": "5.0.8",
+                        "5.1": "5.1.5",
+                        "5.2": "5.2.4",
+                        "5.3": "5.3.2",
+                        "5.4+": "5.4"
+                    }
+                }
+            },
+            "since": "5.0"
+        }
     }
 }

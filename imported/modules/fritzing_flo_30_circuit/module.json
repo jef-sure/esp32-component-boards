@@ -1,0 +1,19 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_flo_30_circuit",
+    "title": "FLO-30 Circuit",
+    "devices": {"other": {"on": {"uart": {}}, "chip": "flo30"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["GND", "TX", "RX", "Vcc", "PRB"]}},
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "atlas-sientific_FLO-30 Circuit.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

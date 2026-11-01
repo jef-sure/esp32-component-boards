@@ -1,0 +1,43 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_ads7830_8_channel_8_bit_adc",
+    "title": "Adafruit ADS7830 8-Channel 8-Bit ADC",
+    "devices": {"adc": {"on": {"i2c": {}}, "provides": {"adc": {}}, "chip": "ads7830"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "VCC",
+                "A0",
+                "A1",
+                "A2",
+                "A3",
+                "A4",
+                "A5",
+                "A6",
+                "A7",
+                "SDA",
+                "SCL",
+                "REF",
+                "ADDR0",
+                "ADDR1",
+                "GND",
+                "COM"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "5836",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit ADS7830 8-Channel 8-Bit ADC.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

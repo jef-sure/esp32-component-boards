@@ -1,0 +1,27 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_at42qt1010_standalone_momentary_capacitive_touch_sensor",
+    "title": "Adafruit AT42QT1010 Standalone Momentary Capacitive Touch Sensor",
+    "devices": {
+        "touch_panel": {
+            "ways": [{"lines": ["out"]}],
+            "provides": {"touch_panel": {}, "touch_keys": {}},
+            "chip": "at42qt1010"
+        }
+    },
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["LEDA", "VDD", "OUT", "GND", "CAPPAD"]}},
+    "maker": "adafruit",
+    "part": "1374",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit AT42QT1010 Standalone Momentary Capacitive Touch Sensor.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

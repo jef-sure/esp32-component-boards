@@ -79,7 +79,6 @@ input.wrong { border-color: var(--wrong); }
 
 header .views { position: static; padding: 0; border: 0; background: none; }
 
-.select { display: grid; grid-template-columns: 320px minmax(0, 1fr); height: calc(100vh - 44px); }
 .questions { overflow: auto; padding: 12px; border-right: 1px solid var(--line); }
 .questions h2 { margin: 0 0 10px; font-size: 16px; }
 .question { display: grid; gap: 2px; margin-bottom: 10px; }
@@ -117,3 +116,20 @@ li.unknown .mark, li.do .mark { color: var(--accent); }
 .pins tr.free td:first-child { color: var(--good); font-weight: 600; }
 .pins tr.shared td:first-child { color: var(--accent); font-weight: 600; }
 .link { display: inline; margin-right: 6px; padding: 0; border: 0; background: none; color: var(--accent); }
+
+/* The first screen: the palette of roles, the canvas, the kits. */
+.select { display: grid; grid-template-columns: 230px minmax(340px, 1fr) minmax(380px, 1.2fr); height: calc(100vh - 44px); }
+.select > * { overflow: auto; padding: 10px 12px; }
+.palette { border-right: 1px solid var(--line); }
+.palette input[type=search] { width: 100%; box-sizing: border-box; }
+.palette h3 { margin: 12px 0 4px; font-size: 12px; color: var(--muted); }
+.role { display: flex; justify-content: space-between; width: 100%; margin: 1px 0; border-color: transparent; background: none; text-align: left; cursor: grab; }
+.role:hover { background: var(--soft); }
+.more p { margin: 4px 0; font-size: 13px; }
+.role.empty { color: var(--muted); }
+.canvas { background: var(--soft); border-right: 1px solid var(--line); }
+.task { width: 100%; box-sizing: border-box; margin-bottom: 10px; padding: 6px; border: 1px solid var(--line); border-radius: 6px; font: inherit; color: inherit; background: light-dark(#fff, #1b1d22); resize: vertical; }
+.blocks { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; margin-bottom: 14px; }
+.block { display: grid; gap: 4px; padding: 8px; border: 1px solid var(--line); border-radius: 6px; background: light-dark(#fff, #1b1d22); }
+.block header { display: flex; justify-content: space-between; height: auto; padding: 0; border: 0; }
+.block label { display: grid; gap: 1px; font-size: 12px; color: var(--muted); }

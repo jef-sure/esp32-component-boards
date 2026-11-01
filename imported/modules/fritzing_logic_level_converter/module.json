@@ -1,0 +1,23 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_logic_level_converter",
+    "title": "Logic Level Converter",
+    "devices": {"level": {"on": {"uart": {}}, "provides": {"level": {}, "regulator": {}}, "class": "other"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": ["TX2_LV", "RX2_LV", "GND", "LV", "RX_LV", "TX_LV", "TX_HV", "RX_HV", "HV", "RX2_HV", "TX2_HV"]
+        }
+    },
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "Level-Converter-v11.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

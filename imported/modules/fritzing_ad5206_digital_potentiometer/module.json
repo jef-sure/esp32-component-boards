@@ -1,0 +1,49 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_ad5206_digital_potentiometer",
+    "title": "AD5206 Digital Potentiometer",
+    "devices": {"potentiometer": {"on": {"spi": {}}, "provides": {"potentiometer": {}}, "chip": "ad5206"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "B1",
+                "CLK",
+                "W1",
+                "Vss",
+                "A1",
+                "B5",
+                "A2",
+                "W2",
+                "B2",
+                "A4",
+                "W4",
+                "B4",
+                "A6",
+                "W6",
+                "W5",
+                "B6",
+                "A5",
+                "Gnd",
+                "B3",
+                "CS",
+                "W3",
+                "Vdd",
+                "A3",
+                "SDI"
+            ]
+        }
+    },
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "SMD_AD5206.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

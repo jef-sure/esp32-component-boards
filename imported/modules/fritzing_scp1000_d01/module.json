@@ -1,0 +1,38 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_scp1000_d01",
+    "title": "SCP1000_D01",
+    "devices": {"pressure": {"on": {"spi": {}}, "provides": {"pressure": {}}, "class": "sensor"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "ATST",
+                "AVDD",
+                "AVSS",
+                "CLK",
+                "CSB",
+                "DRDY",
+                "DVDD",
+                "DVDDS",
+                "DVSS",
+                "MISO",
+                "MOSI",
+                "PD",
+                "SCK",
+                "TRIG"
+            ]
+        }
+    },
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "sparkfun-sensors-scp1000_d01-smd.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

@@ -1,0 +1,70 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "guition_boards_esp32_8048s050",
+    "title": "ESP32-8048S050 RGB display (hardware unverified)",
+    "mcu": {"target": "esp32s3"},
+    "buses": {
+        "i2c": {"i2c0": {"sda": 19, "scl": 20}},
+        "spi": {"spi2": {"mosi": 11, "miso": 13, "sclk": 12}},
+        "rgb": {
+            "display_lcd": {
+                "de": 40,
+                "vsync": 41,
+                "hsync": 39,
+                "pclk": 42,
+                "data": [8, 3, 46, 9, 1, 5, 6, 7, 15, 16, 4, 45, 48, 47, 21, 14],
+                "hz": 16000000
+            }
+        }
+    },
+    "devices": {
+        "display_lcd": {
+            "class": "display",
+            "on": {"rgb.display_lcd": {}},
+            "pins": {"backlight": 2},
+            "config": {
+                "kind": "graphics",
+                "panel": {"width": 800, "height": 480},
+                "primary": true,
+                "depth_bits": 16,
+                "invert": false,
+                "color_order": "rgb",
+                "timing": {
+                    "pclk_hz": 16000000,
+                    "hsync_pulse": 4,
+                    "hsync_back": 8,
+                    "hsync_front": 8,
+                    "vsync_pulse": 4,
+                    "vsync_back": 8,
+                    "vsync_front": 8
+                }
+            },
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "left-right", "y": "top-bottom", "swap": false}}
+            },
+            "chip": "st7262"
+        },
+        "lcd_touch": {
+            "class": "touch",
+            "on": {"i2c.i2c0": {"address": "0x5d"}},
+            "pins": {"rst": {"gpio": 38, "active": "low"}},
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "left-right", "y": "top-bottom", "swap": false}}
+            },
+            "config": {"over": "display_lcd", "x_max": 800, "y_max": 480},
+            "chip": "gt911"
+        },
+        "fs_sdcard": {"class": "storage", "config": {"media": "microsd"}, "on": {"spi.spi2": {"cs": 10}}}
+    },
+    "origin": {
+        "from": "guition_boards",
+        "ref": "0.2.2",
+        "path": "esp32_8048s050",
+        "license": "MIT",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "guition_boards 0.2.2"}}
+}

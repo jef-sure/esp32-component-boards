@@ -1,0 +1,27 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_icm20649_rev_b",
+    "title": "ICM20649 rev B",
+    "devices": {
+        "accelerometer": {"on": {"i2c": {}}, "provides": {"accelerometer": {}, "gyroscope": {}}, "chip": "icm20649"}
+    },
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": ["VCC", "3.3V", "INT1", "INT2", "SCL_EXT", "SDA_EXT", "FSYNC_IN", "SCL", "SDA", "AD0", "CS", "GND"]
+        }
+    },
+    "maker": "adafruit",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit ICM20649.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

@@ -1,0 +1,9 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "axp2101",
+    "title": "axp2101",
+    "class": ["pmic"],
+    "checked": {"facts": {"level": "extracted", "source": "the boards that use it"}}
+}

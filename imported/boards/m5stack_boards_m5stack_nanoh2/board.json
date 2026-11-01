@@ -1,0 +1,25 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "m5stack_boards_m5stack_nanoh2",
+    "title": "M5NanoH2 Development Board (Thread / Zigbee / BLE)",
+    "mcu": {"target": "esp32h2"},
+    "buses": {},
+    "devices": {
+        "led_strip": {"class": "led", "pins": {"data": 11}, "config": {"kind": "ws2812", "count": 1}},
+        "blue_led": {"class": "led", "pins": {"out": 4}},
+        "ir_tx": {"class": "other", "pins": {"out": 3}},
+        "user_button": {"class": "button", "pins": {"in": {"gpio": 9, "active": "low"}}}
+    },
+    "origin": {
+        "from": "m5stack_boards",
+        "ref": "0.6.1~2",
+        "path": "m5stack_nanoh2",
+        "license": "Espressif Modified MIT License",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "m5stack_boards 0.6.1~2"}},
+    "power": [{"line": 10, "level": 1, "feeds": ["led_strip"]}]
+}

@@ -1,0 +1,52 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "m5stack_boards_m5stack_cardputer_adv",
+    "title": "M5Stack Cardputer Adv (1.14 inch 240x135 ST7789V2 LCD, TCA8418 keyboard, ES8311 audio, microSD)",
+    "mcu": {"target": "esp32s3"},
+    "buses": {
+        "i2c": {"i2c0": {"sda": 8, "scl": 9}},
+        "spi": {"spi3": {"mosi": 35, "miso": "nc", "sclk": 36}, "spi2": {"mosi": 14, "miso": 39, "sclk": 40}},
+        "i2s": {"i2s0": {"mclk": "nc", "bclk": 41, "ws": 43, "dout": 42, "din": 46}}
+    },
+    "devices": {
+        "display_lcd": {
+            "class": "display",
+            "on": {"spi.spi3": {"cs": 37, "hz": 40000000, "mode": 0, "sio": true}},
+            "pins": {"dc": 34, "rst": 33, "backlight": 38},
+            "config": {
+                "kind": "graphics",
+                "panel": {"width": 240, "height": 135},
+                "primary": true,
+                "depth_bits": 16,
+                "invert": true,
+                "color_order": "rgb"
+            },
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "left-right", "y": "bottom-top", "swap": true}},
+                "backlight": {"how": "backlight_pwm", "min": 0, "max": 100, "start": 100}
+            },
+            "chip": "st7789"
+        },
+        "fs_sdcard": {"class": "storage", "config": {"media": "microsd"}, "on": {"spi.spi2": {"cs": 12}}},
+        "audio_dac": {
+            "class": "audio",
+            "on": {"i2s.i2s0": {}, "i2c.i2c0": {"address": "0x30"}},
+            "config": {"direction": "both", "sample_rate": 48000, "clock": "bclk"},
+            "chip": "es8311"
+        },
+        "led_strip": {"class": "led", "pins": {"data": 21}, "config": {"kind": "ws2812", "count": 1}},
+        "ir_tx": {"class": "other", "pins": {"out": 44}},
+        "boot_button": {"class": "button", "pins": {"in": {"gpio": 0, "active": "low"}}}
+    },
+    "origin": {
+        "from": "m5stack_boards",
+        "ref": "0.6.1~2",
+        "path": "m5stack_cardputer_adv",
+        "license": "Espressif Modified MIT License",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "m5stack_boards 0.6.1~2"}}
+}

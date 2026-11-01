@@ -1,0 +1,9 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "bq27220",
+    "title": "bq27220",
+    "class": ["fuel_gauge"],
+    "checked": {"facts": {"level": "extracted", "source": "the boards that use it"}}
+}

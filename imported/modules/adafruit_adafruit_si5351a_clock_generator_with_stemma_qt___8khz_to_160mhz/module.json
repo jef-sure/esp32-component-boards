@@ -1,0 +1,23 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_si5351a_clock_generator_with_stemma_qt___8khz_to_160mhz",
+    "title": "Adafruit Si5351A Clock Generator with STEMMA QT - 8KHz to 160MHz",
+    "devices": {"clock": {"on": {"i2c": {}}, "provides": {"clock": {}}, "class": "other"}},
+    "connectors": {
+        "J1": {"type": "contacts of the part", "pins": ["VCC", "3.3V", "CLK0", "CLK1", "CLK2", "SCL", "SDA", "GND"]}
+    },
+    "maker": "adafruit",
+    "part": "5640",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit Si5351A Clock Generator with STEMMA QT.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

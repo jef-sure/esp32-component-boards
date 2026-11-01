@@ -1,0 +1,28 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_max4466_electret_microphone_amplifier",
+    "title": "Adafruit MAX4466 Electret Microphone Amplifier",
+    "devices": {
+        "speaker": {
+            "ways": [{"lines": ["out"]}],
+            "provides": {"speaker": {}, "microphone": {"variant": "analog"}},
+            "config": {"direction": "in"},
+            "chip": "max4466"
+        }
+    },
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["VCC", "OUT", "GND"]}},
+    "maker": "adafruit",
+    "part": "1063",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit MAX4466 Electret Microphone Amplifier.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

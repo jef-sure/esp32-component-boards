@@ -1,0 +1,21 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_mcp9808",
+    "title": "Adafruit MCP9808",
+    "devices": {"temperature": {"on": {"i2c": {}}, "provides": {"temperature": {}}, "chip": "mcp9808"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["VCC", "SCL", "SDA", "ALERT", "A0", "GND"]}},
+    "maker": "adafruit",
+    "part": "5027",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit MCP9808.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

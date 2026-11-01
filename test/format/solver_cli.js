@@ -17,8 +17,14 @@ const loader = boardResolver(catalog);
 const checksOf = documentChecks({ schema: read(path.join(ROOT, 'format.schema.json')), rules: read(path.join(ROOT, 'rules.json')), loader, schemaReader, check, pinProblems });
 const rates = read(path.join(ROOT, 'rates.json')).rates;
 const schema = read(path.join(ROOT, 'format.schema.json'));
-const solver = kitSolver({ catalog, loader, questions: read(path.join(ROOT, 'questions.json')).questions, rates, levels: schema.$defs.level.enum, checksOf, pinMap });
+const roles = read(path.join(ROOT, 'roles.json')).groups;
+const solver = kitSolver({ catalog, loader, questions: read(path.join(ROOT, 'questions.json')).questions, roles, rates, levels: schema.$defs.level.enum, checksOf, pinMap });
 const selections = schemaReader({ $defs: schema.$defs });
+// The catalog with imported/ behind it, for the cases that say "imported".
+const wider = catalogOf([ROOT, path.join(__dirname, '../../imported-shops'), path.join(__dirname, '../../imported')]);
+const widerLoader = boardResolver(wider);
+const widerChecks = documentChecks({ schema, rules: read(path.join(ROOT, 'rules.json')), loader: widerLoader, schemaReader, check, pinProblems });
+const widerSolver = kitSolver({ catalog: wider, loader: widerLoader, questions: read(path.join(ROOT, 'questions.json')).questions, roles, rates, levels: schema.$defs.level.enum, checksOf: widerChecks, pinMap });
 
 const wrong = [];
 const projects = new Map();
@@ -44,7 +50,7 @@ function holdsForEvery(kits, say) {
         const devices = loader.resolve(kit.project).devices;
         const isDisplay = (use) => Object.keys(devices).some((name) => name.startsWith(`${use}_`) && (devices[name].classes || []).includes('display'));
         for (const [use, { on }] of Object.entries(kit.project.modules)) {
-            for (const bus of Object.keys(on)) {
+            for (const bus of Object.keys(on || {})) {
                 const sharing = Object.entries(kit.project.modules).filter(([other, entry]) => other !== use && bus in (entry.on || {}));
                 if (isDisplay(use) && !bus.startsWith('i2c.') && sharing.length) say(`${kit.name}: ${sharing[0][0]} shares the bus of the display, ${bus}`);
                 const [kind, own] = bus.split('.');
@@ -65,7 +71,7 @@ for (const name of names) {
     Object.assign(catalog.modules, given.modules || {});
     const keptRates = { ...rates };
     Object.assign(rates, given.rates || {});
-    const kits = solver.solve(given.answers);
+    const kits = (given.imported ? widerSolver : solver).solve(given.answers);
     const fit = kits.filter((kit) => kit.fits);
     const say = (text) => wrong.push(`${name}: ${text}`);
     const same = (kit, want) =>
@@ -105,14 +111,15 @@ for (const name of names) {
         if (JSON.stringify(kit?.project.modules[given.fed.use].supply) !== JSON.stringify(given.fed.supply)) say(`fed by ${JSON.stringify(kit?.project.modules[given.fed.use].supply)}`);
     }
     if (given.says && !kits.some((kit) => kit.says.some((line) => line.text.includes(given.says)))) say(`no kit says "${given.says}"`);
-    for (const kit of fit) if (kit.project && checksOf(kit.project).problems.length) say(`${kit.name}: its project does not pass the checks`);
-    holdsForEvery(kits, say);
+    for (const kit of fit) if (kit.project && (given.imported ? widerChecks : checksOf)(kit.project).problems.length) say(`${kit.name}: its project does not pass the checks`);
+    if (given.imported && !kits.some((kit) => kit.imported && kit.fits)) say('no imported board fits');
+    if (!given.imported) holdsForEvery(kits, say);
     if (fit[0]) for (const error of selections.errors({ $ref: '#/$defs/selection' }, JSON.parse(JSON.stringify(solver.selectionOf(fit[0], kits, given.answers, 'EUR'))))) say(`selection: ${error.path.join('.')}: ${error.message}`);
     for (const module of Object.keys(given.modules || {})) delete catalog.modules[module];
     Object.assign(rates, keptRates);
     for (const [board, price] of prices) catalog.boards[board].price = price;
     for (const [board, doc] of kept) catalog.boards[board] = doc;
     // a module of a case is not in the catalog the generator reads
-    if (!given.modules) for (const kit of fit) if (kit.project && !projects.has(JSON.stringify(kit.project))) projects.set(JSON.stringify(kit.project), kit.project);
+    if (!given.modules && !given.imported) for (const kit of fit) if (kit.project && !projects.has(JSON.stringify(kit.project))) projects.set(JSON.stringify(kit.project), kit.project);
 }
 console.log(JSON.stringify({ cases: names.length, wrong, projects: [...projects.values()] }));

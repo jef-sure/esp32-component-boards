@@ -1,0 +1,62 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_vs1053_codec___microsd_breakout___mp3_wav_midi_ogg",
+    "title": "Adafruit VS1053 Codec + MicroSD Breakout - MP3/WAV/MIDI/OGG",
+    "devices": {
+        "codec": {
+            "on": {"spi": {}, "uart": {}},
+            "provides": {"codec": {}, "player": {}, "midi": {}, "sd_card": {}},
+            "config": {"direction": "out"},
+            "chip": "vs1053"
+        }
+    },
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "VIN",
+                "3.3V",
+                "AGND",
+                "CS_5V",
+                "DREQ",
+                "GPIO0",
+                "GPIO1",
+                "GPIO2",
+                "GPIO3",
+                "GPIO4",
+                "GPIO5",
+                "GPIO6",
+                "GPIO7",
+                "XDCS_5V",
+                "TX",
+                "SDCS_5V",
+                "SD_DETECT",
+                "SCLK_5V",
+                "RX_5V",
+                "RST_5V",
+                "R_OUT",
+                "MOSI_5V",
+                "MISO",
+                "MIC_P",
+                "MIC_N",
+                "LINE2",
+                "L_OUT",
+                "GND"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "1381",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit VS1053 MicroSD Breakout.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

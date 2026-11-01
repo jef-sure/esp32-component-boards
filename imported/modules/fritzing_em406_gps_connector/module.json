@@ -1,0 +1,19 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_em406_gps_connector",
+    "title": "EM406 GPS Connector",
+    "devices": {"gps": {"on": {"uart": {}}, "provides": {"gps": {}}, "chip": "em406"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["1PPS", "GND1", "GND2", "RX", "TX", "VCC"]}},
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "sparkfun-connectors-em406-.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

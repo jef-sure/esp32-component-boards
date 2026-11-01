@@ -1,0 +1,63 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "esp_boards_esp32_s3_eye",
+    "title": "ESP32-S3-EYE",
+    "mcu": {"target": "esp32s3"},
+    "buses": {
+        "i2c": {"i2c0": {"sda": 4, "scl": 5}},
+        "i2s": {"i2s0": {"mclk": "nc", "bclk": 41, "ws": 42, "din": 2}},
+        "spi": {"spi3": {"mosi": 47, "miso": "nc", "sclk": 21}},
+        "sdmmc": {"sdmmc0": {}},
+        "dvp": {"cam": {"pclk": 13, "vsync": 6, "de": 7, "data": [11, 9, 8, 10, 12, 18, 17, 16]}}
+    },
+    "devices": {
+        "audio_adc": {
+            "class": "audio",
+            "on": {"i2s.i2s0": {}},
+            "config": {"direction": "in", "sample_rate": 48000},
+            "chip": "i2s_mic"
+        },
+        "fs_sdcard": {"class": "storage", "config": {"media": "microsd"}, "on": {"sdmmc.sdmmc0": {}}},
+        "display_lcd": {
+            "class": "display",
+            "on": {"spi.spi3": {"cs": 44, "hz": 80000000, "mode": 0}},
+            "pins": {"dc": 43, "backlight": 48},
+            "config": {
+                "kind": "graphics",
+                "panel": {"width": 240, "height": 240},
+                "primary": true,
+                "depth_bits": 16,
+                "invert": true,
+                "color_order": "rgb"
+            },
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "left-right", "y": "top-bottom", "swap": false}},
+                "backlight": {"how": "backlight_pwm", "min": 0, "max": 100, "start": 100}
+            },
+            "chip": "st7789"
+        },
+        "camera": {
+            "class": "camera",
+            "on": {"i2c.i2c0": {"role": "control"}, "dvp.cam": {"role": "data"}},
+            "pins": {"xclk": 15},
+            "config": {"xclk_hz": 16000000}
+        },
+        "adc_button_group_button_4": {"class": "button", "pins": {"in": {"gpio": 1, "analog": [190, 600]}}},
+        "adc_button_group_button_3": {"class": "button", "pins": {"in": {"gpio": 1, "analog": [600, 1400]}}},
+        "adc_button_group_button_2": {"class": "button", "pins": {"in": {"gpio": 1, "analog": [1400, 2195]}}},
+        "adc_button_group_button_1": {"class": "button", "pins": {"in": {"gpio": 1, "analog": [2195, 2705]}}},
+        "boot_button": {"class": "button", "pins": {"in": {"gpio": 0, "active": "low"}}},
+        "status_led": {"class": "led", "pins": {"out": 3}}
+    },
+    "origin": {
+        "from": "esp_boards",
+        "ref": "0.7.1",
+        "path": "esp32_s3_eye",
+        "license": "Espressif Modified MIT License",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "esp_boards 0.7.1"}}
+}

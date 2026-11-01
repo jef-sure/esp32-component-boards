@@ -1,0 +1,53 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_mcp23017_i2c_i_o_expander",
+    "title": "MCP23017 I2C I/O Expander",
+    "devices": {"io_expander": {"on": {"i2c": {}}, "provides": {"io_expander": {}}, "chip": "mcp23017"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "A0",
+                "GPB6",
+                "A1",
+                "GPB7",
+                "A2",
+                "VDD",
+                "RESET",
+                "INTB",
+                "INTA",
+                "GPA0",
+                "GPA1",
+                "GPA2",
+                "GPA3",
+                "GPA4",
+                "GPA5",
+                "GPA6",
+                "GPA7",
+                "GPB0",
+                "VSS",
+                "GPB1",
+                "GPB2",
+                "NC",
+                "GPB3",
+                "SCL",
+                "GPB4",
+                "SDA",
+                "GPB5"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "MCP23017.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

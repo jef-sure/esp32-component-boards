@@ -1,0 +1,28 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "esp_friends_boards_esp32_c5_spot",
+    "title": "ESP32-C5 Spot AI Voice Interaction Module",
+    "mcu": {"target": "esp32c5"},
+    "buses": {"i2c": {"i2c0": {"sda": 25, "scl": 26}}, "i2s": {"i2s0": {"bclk": 7, "ws": 8, "dout": 9, "din": 6}}},
+    "devices": {
+        "power_control": {"class": "other", "pins": {"out": 2}},
+        "audio_adc": {
+            "class": "audio",
+            "on": {"i2s.i2s0": {}, "i2c.i2c0": {"address": "0x30"}},
+            "config": {"direction": "both", "sample_rate": 48000, "clock": "bclk"},
+            "chip": "es8311"
+        }
+    },
+    "origin": {
+        "from": "esp_friends_boards",
+        "ref": "0.6.1",
+        "path": "esp32_c5_spot",
+        "license": "Espressif Modified MIT License",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "esp_friends_boards 0.6.1"}},
+    "power": [{"line": 0, "level": 1, "feeds": ["audio_adc"]}]
+}

@@ -1,0 +1,26 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_ens160_mox_gas_sensor___sciosense_ccs811_upgrade___stemma_qt",
+    "title": "Adafruit ENS160 MOX Gas Sensor - Sciosense CCS811 Upgrade - STEMMA QT / Qwiic",
+    "devices": {"air": {"on": {"i2c": {}}, "provides": {"air": {"variant": "voc"}}, "chip": "ens160"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": ["VCC", "3.3V", "!CS", "!INT", "SCL/SCK", "SDO/ADR", "SDA/MOSI", "GND"]
+        }
+    },
+    "maker": "adafruit",
+    "part": "5606",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit ENS160 MOX Gas Sensor - Sciosense CCS811 Upgrade - STEMMA QT.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

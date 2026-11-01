@@ -12,12 +12,12 @@ import pathlib
 import re
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-ROOTS = [ROOT / "catalog"]  # check_format.py adds the entries of its cases
+ROOTS = [ROOT / "catalog", ROOT / "imported-shops", ROOT / "imported"]  # the catalog goes first; check_format.py adds the entries of its cases
 LOCAL_BOARDS = "components/local-boards"  # what is a program's own, in the layout of catalog/
-FILES = {"mcu": "mcu.json", "devices": "device.json", "modules": "module.json", "boards": "board.json", "libraries": "library.json", "connectors": "connector.json"}
+FILES = {"mcu": "mcu.json", "devices": "device.json", "modules": "module.json", "addons": "addon.json", "boards": "board.json", "libraries": "library.json", "connectors": "connector.json"}
 NOT_LINES = {"hz", "lanes", "lane_mbps", "phy_ldo_chan", "phy_ldo_mv", "baud", "data"}
 LINE = 120
-TYPE_FIELDS = ("class", "maker", "part", "compat", "draw", "pins", "config", "controls", "provides", "start", "firmware", "ways")
+TYPE_FIELDS = ("class", "maker", "part", "compat", "draw", "pins", "config", "controls", "provides", "start", "firmware", "ways", "high_min_mv")
 LIBRARY_HISTORY = ("license", "chips", "transports", "interfaces", "groups", "values")
 FIRMWARE_HISTORY = ("config", "controls", "provides")
 REFERENCES = {"over", "via", "left", "right", "after", "devices", "feeds", "from", "through", "name", "logic"}  # fields of a module that name its parts

@@ -1,0 +1,10 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "cc3000",
+    "title": "cc3000",
+    "class": ["radio"],
+    "checked": {"facts": {"level": "extracted", "source": "the boards that use it"}},
+    "on": {"spi": {}, "uart": {}}
+}

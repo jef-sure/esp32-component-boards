@@ -1,0 +1,22 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "esp_boards_esp32_c6_devkitm_1",
+    "title": "ESP32-C6-DevKitM-1",
+    "mcu": {"target": "esp32c6"},
+    "buses": {},
+    "devices": {
+        "led_strip": {"class": "led", "pins": {"data": 8}, "config": {"kind": "ws2812", "count": 1}},
+        "boot_button": {"class": "button", "pins": {"in": {"gpio": 9, "active": "low"}}}
+    },
+    "origin": {
+        "from": "esp_boards",
+        "ref": "0.7.1",
+        "path": "esp32_c6_devkitm_1",
+        "license": "Espressif Modified MIT License",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "esp_boards 0.7.1"}}
+}

@@ -111,8 +111,63 @@ def pin_table(target):
     return pins, notes
 
 
+def versions(text):
+    """A version as written in COMPATIBILITY.md, without its v and +."""
+    return text.strip().lstrip("v").rstrip("+")
+
+
+def since_first(sections):
+    """The earliest version of a chip: "initial" goes before any number."""
+    found = [entry["since"] for entry in sections.values() if "since" in entry]
+    return min(found, key=lambda value: [0] if value == "initial" else [1, *map(int, value.split("."))]) if found else None
+
+
+def compatibility():
+    """What COMPATIBILITY.md of ESP-IDF says of each chip: since which version, by revision. A revision it does not name stays out."""
+    chips = {}
+    chip, revisions = None, []
+    for row in (IDF / "COMPATIBILITY.md").read_text().splitlines():
+        if row.startswith("### "):
+            chip = re.sub(r"\s*&.*", "", row[4:]).strip().lower().replace("-", "")
+            revisions = []
+            chips[chip] = {"revisions": {}}
+        elif row.startswith("## "):
+            chip = None
+        elif chip is None:
+            continue
+        elif row.startswith("#### "):
+            revisions = [name.lstrip("v") for name in re.findall(r"v\d+\.\d+", row)]
+            for revision in re.findall(r"v(\d+)\.(\d+) - v\d+\.(\d+)", row):
+                revisions = [f"{revision[0]}.{minor}" for minor in range(int(revision[1]), int(revision[2]) + 1)]
+            for revision in revisions:
+                chips[chip]["revisions"].setdefault(revision, {})
+        elif "Preview support since ESP-IDF" in row:
+            chips[chip]["preview"] = versions(re.search(r"(v[\d.]*\d)", row)[1])
+        elif "Supported since initial version" in row:
+            for revision in revisions:
+                chips[chip]["revisions"][revision]["since"] = "initial"
+        elif "Supported since ESP-IDF" in row:
+            for revision in revisions:
+                chips[chip]["revisions"][revision]["since"] = versions(re.search(r"(v[\d.]*\d)", row)[1])
+        elif row.startswith("| release/"):
+            branch, recommended, required = [cell.strip() for cell in row.strip("|").split("|")]
+            key = versions(branch.replace("release/", "").replace(" and above", "")) + ("+" if "and above" in branch else "")
+            for revision in revisions:
+                chips[chip]["revisions"][revision].setdefault("required", {})[key] = versions(required)
+                chips[chip]["revisions"][revision].setdefault("recommended", {})[key] = versions(recommended)
+    for entry in chips.values():
+        entry["revisions"] = {revision: about for revision, about in entry["revisions"].items() if about}
+        first = since_first(entry["revisions"])
+        if first:
+            entry["since"] = first
+        if not entry["revisions"]:
+            del entry["revisions"]
+    return chips
+
+
 def main():
     made = []
+    supported = compatibility()
     for target_dir in sorted((IDF / "components/soc").glob("esp32*")):
         target = target_dir.name
         caps = next((p for p in (target_dir / "include/soc/soc_caps.h", target_dir / "register/soc/soc_caps.h") if p.exists()), None)
@@ -156,6 +211,9 @@ def main():
             entry["sdkconfig"] = {"revision": f"CONFIG_{prefix}_REV_MIN_{{value}}", "psram_mhz": "CONFIG_SPIRAM_SPEED_{value}M", "cpu_mhz": "CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_{value}", "lines": []}
             entry["revisions"] = {"described": "3.99", "options": [int(n) for n in re.findall(rf"config {prefix}_REV_MIN_(\d+)\b", kconfig)],
                                   "history": [{"before": "3.0", "limits": older, "sdkconfig": {"lines": [f"CONFIG_{prefix}_SELECTS_REV_LESS_V3=y"]}}]}
+        if target in supported:
+            entry["platforms"] = {"esp-idf": supported[target]}
+            entry["checked"]["platforms"] = {"level": "vendor-docs", "covers": ["platforms"], "source": "COMPATIBILITY.md of ESP-IDF"}
         path = ROOT / "catalog/mcu" / target / "mcu.json"
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(entry, indent=4) + "\n")

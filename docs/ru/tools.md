@@ -144,6 +144,31 @@ python3 tools/make_mcu.py [каталог ESP-IDF]
 угодно, поэтому он читается только как поля, а `.github/workflows/reports.yml` передаёт его через файл. Действие
 открывает pull request, сливает его человек. `check_format.py` проверяет инструмент на хороших и плохих отчётах.
 
+## import_board_manager.py
+
+Переносит платы из пакетов esp_board_manager в `imported/`, дерево в раскладке `catalog/`, которое инструменты читают
+после него. Пакет это данные из сети: он распаковывается отдельно и только читается.
+
+```sh
+python3 tools/import_board_manager.py esp_boards=PATH guition_boards=PATH --date 2026-11-01
+```
+
+Инструмент не подставляет значений, которых нет в пакете, не берёт тайминги DSI и команды инициализации, не пишет
+`shared_pins`. То, что формат отвергает, попадает в `imported/report.json` с причиной, туда же идут пины плат из
+каталога в сравнении с пакетами и то, для чего в формате нет места. `check_format.py` проверяет результат и эти правила.
+
+## import_fritzing.py
+
+Переносит модули из деталей Fritzing в `imported/modules/`. Запускается после `import_board_manager.py`, который
+переписывает `imported/devices/`.
+
+```sh
+python3 tools/import_fritzing.py adafruit=PATH fritzing=PATH --ref adafruit=COMMIT --date 2026-11-01
+```
+
+Берутся только факты: контакты, питание по их именам, номер детали. Модулю нужна шина, которую видно по контактам.
+Роли идут из слов `catalog/roles.json` и из разделов магазина, если `--shop` указывает на копию его списка; она же даёт цену и убирает то, что больше не продаётся.
+
 ## sync_versions.py
 
 ```sh

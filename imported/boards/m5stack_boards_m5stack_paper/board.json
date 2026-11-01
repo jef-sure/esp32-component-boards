@@ -1,0 +1,36 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "m5stack_boards_m5stack_paper",
+    "title": "M5Paper v1.1 (4.7 inch 960x540 IT8951 e-ink with GT911 touch, side wheel, microSD, SHT30, BM8563 RTC)",
+    "mcu": {"target": "esp32"},
+    "buses": {"i2c": {"i2c0": {"sda": 21, "scl": 22}}, "spi": {"spi2": {"mosi": 12, "miso": 13, "sclk": 14}}},
+    "devices": {
+        "lcd_touch": {
+            "class": "touch",
+            "on": {"i2c.i2c0": {"address": "0x28"}},
+            "pins": {"int": 36},
+            "config": {"over": "none", "x_max": 540, "y_max": 960},
+            "chip": "gt911"
+        },
+        "fs_sdcard": {"class": "storage", "config": {"media": "microsd"}, "on": {"spi.spi2": {"cs": 4}}},
+        "wheel_up": {"class": "button", "pins": {"in": {"gpio": 37, "active": "low"}}},
+        "wheel_press": {"class": "button", "pins": {"in": {"gpio": 38, "active": "low"}}},
+        "wheel_down": {"class": "button", "pins": {"in": {"gpio": 39, "active": "low"}}}
+    },
+    "origin": {
+        "from": "m5stack_boards",
+        "ref": "0.6.1~2",
+        "path": "m5stack_paper",
+        "license": "Espressif Modified MIT License",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "m5stack_boards 0.6.1~2"}},
+    "power": [
+        {"line": 2, "level": 1, "feeds": []},
+        {"line": 23, "level": 1, "feeds": []},
+        {"line": 5, "level": 1, "feeds": []}
+    ]
+}

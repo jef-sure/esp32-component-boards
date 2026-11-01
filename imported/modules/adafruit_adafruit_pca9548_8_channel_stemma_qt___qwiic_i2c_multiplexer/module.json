@@ -1,0 +1,49 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_pca9548_8_channel_stemma_qt___qwiic_i2c_multiplexer",
+    "title": "Adafruit PCA9548 8-Channel STEMMA QT / Qwiic I2C Multiplexer",
+    "devices": {"i2c_mux": {"on": {"i2c": {}}, "provides": {"i2c_mux": {}}, "chip": "pca9548"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "VCC",
+                "VCCIO",
+                "RESET",
+                "SDA",
+                "SCL",
+                "0SDA",
+                "0SCL",
+                "1SDA",
+                "1SCL",
+                "2SDA",
+                "2SCL",
+                "3SDA",
+                "3SCL",
+                "4SDA",
+                "4SCL",
+                "5SDA",
+                "5SCL",
+                "6SDA",
+                "6SCL",
+                "7SDA",
+                "7SCL",
+                "GND"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "5626",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit PCA9548 STEMMA I2C Multiplexer.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

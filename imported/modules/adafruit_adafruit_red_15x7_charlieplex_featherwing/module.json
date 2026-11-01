@@ -1,0 +1,61 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_red_15x7_charlieplex_featherwing",
+    "title": "Adafruit Red 15x7 CharliePlex FeatherWing",
+    "devices": {
+        "display": {
+            "on": {"i2c": {}, "spi": {}, "uart": {}},
+            "provides": {"display": {}, "led": {"variant": "matrix"}},
+            "class": "other"
+        }
+    },
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "RESET",
+                "VCC",
+                "AREF",
+                "GND",
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F",
+                "SCK",
+                "MOSI",
+                "MISO",
+                "RX",
+                "TX",
+                "G",
+                "SDA",
+                "SCL",
+                "H",
+                "I",
+                "J",
+                "K",
+                "L",
+                "M",
+                "N",
+                "USB",
+                "EN",
+                "VBAT"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "3134",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit Red 15x7 CharliePlex FeatherWing.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

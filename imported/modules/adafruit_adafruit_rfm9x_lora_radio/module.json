@@ -1,0 +1,42 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_rfm9x_lora_radio",
+    "title": "Adafruit RFM9x LoRa Radio",
+    "devices": {"lora": {"on": {"spi": {}}, "provides": {"lora": {}, "rf": {}}, "class": "radio"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "DIO1",
+                "DIO2",
+                "DIO3",
+                "DIO4",
+                "DIO5",
+                "ANTENNA",
+                "VIN",
+                "GND",
+                "EN",
+                "DIO0",
+                "SCK",
+                "MISO",
+                "MOSI",
+                "CS",
+                "RST"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "3072",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit RFM9x LoRa Radio.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

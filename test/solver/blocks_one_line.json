@@ -1,0 +1,6 @@
+{
+    "title": "Addressable LEDs take one line of their own and no bus",
+    "imported": true,
+    "answers": {"blocks": [{"role": "led", "variant": "addressable", "name": "strip"}]},
+    "says": "on GPIO"
+}

@@ -1,0 +1,48 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_lilypad_xbee",
+    "title": "LilyPad XBee",
+    "devices": {"rf": {"on": {"uart": {}}, "provides": {"rf": {}}, "class": "radio"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "RESET",
+                "1",
+                "TX-O",
+                "RX-I",
+                "3.3V",
+                "5",
+                "GND",
+                "D5",
+                "RTS",
+                "D3",
+                "D2",
+                "D1",
+                "D0",
+                "VCC",
+                "D4",
+                "CTS",
+                "ON",
+                "VREF",
+                "RES",
+                "D11",
+                "D12",
+                "DTR",
+                "RSSI"
+            ]
+        }
+    },
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "LilyPad-XBee-v15.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

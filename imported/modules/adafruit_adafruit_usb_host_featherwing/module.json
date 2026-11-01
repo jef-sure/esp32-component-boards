@@ -1,0 +1,57 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_usb_host_featherwing",
+    "title": "Adafruit USB Host FeatherWing",
+    "devices": {"usb": {"on": {"i2c": {}, "spi": {}, "uart": {}}, "provides": {"usb": {}}, "class": "usb"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "VBAT",
+                "VBUS",
+                "5V_EN",
+                "3.3V",
+                "A",
+                "AREF",
+                "B",
+                "C",
+                "CS",
+                "D",
+                "E",
+                "EN",
+                "F",
+                "G",
+                "GPX",
+                "H",
+                "I",
+                "TX",
+                "SDA",
+                "SCL",
+                "SCK",
+                "RX",
+                "RESET",
+                "N",
+                "MOSI",
+                "MISO",
+                "M",
+                "L",
+                "IRQ",
+                "GND"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "5858",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit USB Host FeatherWing.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

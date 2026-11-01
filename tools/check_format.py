@@ -20,6 +20,7 @@ import copy
 import json
 import pathlib
 import random
+import re
 import shutil
 import subprocess
 import sys
@@ -40,10 +41,11 @@ RAW = jsonschema.Draft202012Validator(SCHEMA)
 RESOLVED = jsonschema.Draft202012Validator({"$ref": "#/$defs/resolved", "$defs": SCHEMA["$defs"]})
 QUESTIONS = jsonschema.Draft202012Validator({"$ref": "#/$defs/questions", "$defs": SCHEMA["$defs"]})
 RATES = jsonschema.Draft202012Validator({"$ref": "#/$defs/rates", "$defs": SCHEMA["$defs"]})
+ROLES = jsonschema.Draft202012Validator({"$ref": "#/$defs/roles", "$defs": SCHEMA["$defs"]})
 RULES = json.loads((ROOT / "catalog" / "rules.json").read_text())
 FILE_RULES = {**RULES, "rules": [rule for rule in RULES["rules"] if rule.get("in_files")]}
 LEVELS = SCHEMA["$defs"]["level"]["enum"]
-resolve.ROOTS.append(TESTS / "catalog")
+resolve.ROOTS.insert(1, TESTS / "catalog")  # before imported/: a stub there must not hide a chip of the cases
 
 
 def no_nulls(value):
@@ -210,11 +212,36 @@ def reports_refused():
     return wrong
 
 
+def roles_problems(doc):
+    """The schema of roles.json, one name for one role, and words that compile."""
+    problems = errors_of(ROLES, doc, "roles")
+    roles = [role for group in doc["groups"] for role in group["roles"]]
+    names = [role["id"] for role in roles]
+    problems += [f"role {name} twice" for name in sorted({name for name in names if names.count(name) > 1})]
+    for item in [*roles, *(variant for role in roles for variant in role.get("variants", []))]:
+        try:
+            re.compile(item["words"])
+        except re.error as error:
+            problems.append(f"{item['id']}: {error}")
+    return problems
+
+
+def imported_problems(doc):
+    """What an import must keep to: where a board came from, how far it is trusted, and what is never taken from a pack."""
+    problems = [] if "origin" in doc else ["no origin"]
+    if {entry.get("level") for entry in doc.get("checked", {}).values()} != {"extracted"}:
+        problems.append("its level is not extracted")
+    if "shared_pins" in doc:
+        problems.append("shared_pins is for a person to write")
+    on_dsi = [name for name, device in doc["devices"].items() if "timing" in (device.get("config") or {}) and any(bus.startswith("dsi.") for bus in device.get("on") or {})]
+    return problems + [f"{name}: DSI timings are measured on a board" for name in on_dsi]
+
+
 def main():
     failed = 0
     reached = {}
 
-    files = [path for root in (ROOT / "catalog", TESTS / "catalog") for path in sorted(root.rglob("*.json")) if path.parent != root]
+    files = [path for root in (ROOT / "catalog", ROOT / "imported", ROOT / "imported-shops", TESTS / "catalog") for path in sorted(root.rglob("*.json")) if path.parent != root]
     for path in files:
         doc = json.loads(path.read_text())
         problems = errors_of(RAW, doc, "schema")
@@ -237,6 +264,21 @@ def main():
         if resolved:
             reached[f"data_{path.parent.name}.json"] = resolved
         failed += bool(problems)
+
+    # a chip of the cases may share its name with a stub of imported/: the cases stay out of its way here
+    resolve.ROOTS.remove(TESTS / "catalog")
+    imported = [path for root in ("imported", "imported-shops") for pattern in ("boards/*/board.json", "modules/*/module.json") for path in sorted((ROOT / root).glob(pattern))]
+    for path in imported:
+        doc = json.loads(path.read_text())
+        problems, resolved = stages(doc)
+        problems += imported_problems(doc)
+        for problem in problems:
+            print(f"{path.relative_to(ROOT)}: {problem}")
+        if resolved:
+            reached[f"data_{path.parent.name}.json"] = resolved
+        failed += bool(problems)
+    resolve.ROOTS.insert(1, TESTS / "catalog")
+    print(f"imported: {len(imported)} boards and modules")
 
     # what a revision of a chip sets
     for revision, expected in (("1.3", ["CONFIG_ESP32P4_SELECTS_REV_LESS_V3=y", "CONFIG_ESP32P4_REV_MIN_100=y", "CONFIG_SPIRAM_SPEED_200M=y", "CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_360=y"]),
@@ -356,6 +398,7 @@ def main():
 
     problems = errors_of(QUESTIONS, json.loads((ROOT / "catalog" / "questions.json").read_text()), "questions")
     problems += errors_of(RATES, json.loads((ROOT / "catalog" / "rates.json").read_text()), "rates")
+    problems += roles_problems(json.loads((ROOT / "catalog" / "roles.json").read_text()))
     failed += reports_refused()
     run = subprocess.run(["node", str(TESTS / "page_cli.js")], capture_output=True, text=True)
     print(run.stdout.strip() + run.stderr.strip()[-300:])

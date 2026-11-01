@@ -1,0 +1,26 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_ads1115_16_bit_adc",
+    "title": "Adafruit ADS1115 16-Bit ADC",
+    "devices": {"adc": {"on": {"i2c": {}}, "provides": {"adc": {}}, "chip": "ads1115"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": ["VCC", "AVDD", "AIN3", "AIN2", "AIN1", "AIN0", "AGND", "SCL", "SDA", "ADDR", "ALERT", "GND"]
+        }
+    },
+    "maker": "adafruit",
+    "part": "1085",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit ADS1115 16-Bit ADC STEMMA.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

@@ -1,0 +1,25 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "m5stack_boards_m5stack_nanoc6",
+    "title": "M5NanoC6 Development Board",
+    "mcu": {"target": "esp32c6"},
+    "buses": {},
+    "devices": {
+        "led_strip": {"class": "led", "pins": {"data": 20}, "config": {"kind": "ws2812", "count": 1}},
+        "blue_led": {"class": "led", "pins": {"out": 7}},
+        "ir_tx": {"class": "other", "pins": {"out": 3}},
+        "user_button": {"class": "button", "pins": {"in": {"gpio": 9, "active": "low"}}}
+    },
+    "origin": {
+        "from": "m5stack_boards",
+        "ref": "0.6.1~2",
+        "path": "m5stack_nanoc6",
+        "license": "Espressif Modified MIT License",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "m5stack_boards 0.6.1~2"}},
+    "power": [{"line": 19, "level": 1, "feeds": ["led_strip"]}]
+}

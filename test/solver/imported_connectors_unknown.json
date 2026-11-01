@@ -1,0 +1,8 @@
+{
+    "title": "An imported board does not say which pins come out",
+    "imported": true,
+    "answers": {
+        "nfc_readers": 1
+    },
+    "says": "its connectors are not in the data"
+}

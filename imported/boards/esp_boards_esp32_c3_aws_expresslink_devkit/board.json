@@ -1,0 +1,24 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "esp_boards_esp32_c3_aws_expresslink_devkit",
+    "title": "ESP32-C3-AWS-ExpressLink-DevKit",
+    "mcu": {"target": "esp32c3"},
+    "buses": {"uart": {"uart1": {"tx": 19, "rx": 18, "rts": "nc", "cts": "nc"}}},
+    "devices": {
+        "event_signal": {"class": "other", "pins": {"out": 10}},
+        "led_red": {"class": "led", "pins": {"out": 2}},
+        "led_green": {"class": "led", "pins": {"out": 8}},
+        "led_blue": {"class": "led", "pins": {"out": 9}}
+    },
+    "origin": {
+        "from": "esp_boards",
+        "ref": "0.7.1",
+        "path": "esp32_c3_aws_expresslink_devkit",
+        "license": "Espressif Modified MIT License",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "esp_boards 0.7.1"}}
+}

@@ -1,0 +1,9 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "lp5562",
+    "title": "lp5562",
+    "class": ["led"],
+    "checked": {"facts": {"level": "extracted", "source": "the boards that use it"}}
+}

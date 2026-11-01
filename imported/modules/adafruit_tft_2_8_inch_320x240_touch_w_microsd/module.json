@@ -1,0 +1,58 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_tft_2_8_inch_320x240_touch_w_microsd",
+    "title": "TFT 2.8 inch 320x240 Touch w microSD",
+    "devices": {
+        "display": {"on": {"spi": {}}, "provides": {"display": {"variant": "tft"}, "sd_card": {}}, "class": "other"}
+    },
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "+5V",
+                "3.3V",
+                "SCLK",
+                "MISO",
+                "LCD_RD",
+                "MOSI",
+                "LCD_CS",
+                "LCD_DC",
+                "LCD_RST",
+                "LCD_Y+",
+                "LCD_X+",
+                "LCD_Y-",
+                "LCD_X-",
+                "IM3",
+                "IM2",
+                "IM1",
+                "IM0",
+                "SD_CS",
+                "CARDDET",
+                "LCD_LITE",
+                "LCD_DATA0",
+                "LCD_DATA1",
+                "LCD_DATA2",
+                "LCD_DATA3",
+                "LCD_DATA4",
+                "LCD_DATA5",
+                "LCD_DATA6",
+                "LCD_DATA7",
+                "GND"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "1770",
+    "power": [{"name": "VCC", "source": "connector", "volts": 5}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit TFT 2.8 inch 320x240 Touch w microSD.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

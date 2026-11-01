@@ -1,0 +1,26 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_monochrome_1_12in_128x128_oled",
+    "title": "Adafruit Monochrome 1.12in 128x128 OLED",
+    "devices": {"display": {"on": {"i2c": {}}, "provides": {"display": {"variant": "oled"}}, "class": "other"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": ["3.3V", "VCC", "CS_5.0V", "RST_5.0V", "DC/SA0_5.0V", "SCL", "SDA", "GND"]
+        }
+    },
+    "maker": "adafruit",
+    "part": "5297",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit Monochrome 1.12in 128x128 OLED.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

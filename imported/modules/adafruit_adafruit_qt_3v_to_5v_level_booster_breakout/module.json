@@ -1,0 +1,23 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_qt_3v_to_5v_level_booster_breakout",
+    "title": "Adafruit QT 3V to 5V Level Booster Breakout",
+    "devices": {"level": {"on": {"i2c": {}}, "provides": {"level": {}}, "class": "other"}},
+    "connectors": {
+        "J1": {"type": "contacts of the part", "pins": ["VCC", "5.0V", "SDA_5V", "SCL_5V", "SDA_LV", "SCL_LV", "GND"]}
+    },
+    "maker": "adafruit",
+    "part": "5649",
+    "power": [{"name": "VCC", "source": "connector", "volts": 5}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit QT 3V to 5V Level Booster Breakout.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

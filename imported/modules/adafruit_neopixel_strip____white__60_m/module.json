@@ -1,0 +1,26 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_neopixel_strip____white__60_m",
+    "title": "Neopixel Strip -- White (60/m)",
+    "devices": {
+        "led": {
+            "ways": [{"lines": ["data"], "high_min_mv": 3500}],
+            "provides": {"led": {"variant": "addressable"}},
+            "class": "led"
+        }
+    },
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["GND", "DO", "+5V", "DI"]}},
+    "maker": "adafruit",
+    "power": [{"name": "VCC", "source": "connector", "volts": 5}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "neo60M_W.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

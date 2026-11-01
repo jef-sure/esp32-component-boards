@@ -1,0 +1,23 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_ds18b20_1_wire_temperature_sensor",
+    "title": "DS18B20 1-Wire Temperature Sensor",
+    "devices": {
+        "temperature": {"ways": [{"lines": ["dq"]}], "provides": {"temperature": {}, "one_wire": {}}, "chip": "ds18b20"}
+    },
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["GND", "VDD", "DQ"]}},
+    "maker": "adafruit",
+    "part": "18B20",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "DS18B20 1-Wire Temperature Sensor.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

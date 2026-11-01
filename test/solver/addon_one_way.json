@@ -1,0 +1,6 @@
+{
+    "title": "Addressable LEDs only listen and want more than 3.3 V: a one way shifter",
+    "imported": true,
+    "answers": {"blocks": [{"role": "led", "variant": "addressable", "name": "strip"}]},
+    "says": "Level shifter, 4 channels, one way between the chip"
+}

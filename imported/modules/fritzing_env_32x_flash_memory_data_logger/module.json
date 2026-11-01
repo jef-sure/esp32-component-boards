@@ -1,0 +1,19 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_env_32x_flash_memory_data_logger",
+    "title": "ENV-32X Flash Memory Data Logger",
+    "devices": {"flash": {"on": {"uart": {}}, "provides": {"flash": {}}, "chip": "env32x"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["TX", "RX", "Vcc", "GND"]}},
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "atlas-sientific_ENV-32X.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

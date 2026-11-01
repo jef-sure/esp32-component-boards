@@ -1,0 +1,21 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_st25dv16_i2c_rfid_eeprom_breakout",
+    "title": "Adafruit ST25DV16 I2C RFID EEPROM Breakout",
+    "devices": {"nfc": {"on": {"i2c": {}}, "provides": {"nfc": {}, "fram": {}}, "chip": "st25dv16"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["VCC", "VEH", "SCL", "SDA", "GPO", "GND"]}},
+    "maker": "adafruit",
+    "part": "4701",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit ST25DV16 I2C RFID EEPROM Breakout.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

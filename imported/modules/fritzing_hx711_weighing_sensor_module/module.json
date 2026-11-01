@@ -1,0 +1,24 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_hx711_weighing_sensor_module",
+    "title": "HX711 Weighing Sensor Module",
+    "devices": {"weight": {"on": {"uart": {}}, "provides": {"weight": {}}, "chip": "hx711"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": ["VCC", "GND", "DO/RX", "CK/TX", "E+", "E-", "A+", "A-", "B+", "B-"]
+        }
+    },
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "hx711_weightsensor.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

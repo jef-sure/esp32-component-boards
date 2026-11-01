@@ -1,0 +1,24 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_openlog",
+    "title": "OpenLog",
+    "devices": {"sd_card": {"on": {"spi": {}, "uart": {}}, "provides": {"sd_card": {}}, "class": "storage"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": ["DTR", "RXI", "TXO", "VCC", "GND", "RST", "SCK", "MOSI", "MISO"]
+        }
+    },
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "OpenLog.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

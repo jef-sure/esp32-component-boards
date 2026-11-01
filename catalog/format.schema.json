@@ -8,7 +8,7 @@
   "properties": {
     "format": { "const": "jef-sure/boards" },
     "format_version": { "const": 2 },
-    "kind": { "enum": ["board", "module", "device", "library", "mcu", "connector", "project"] },
+    "kind": { "enum": ["board", "module", "addon", "device", "library", "mcu", "connector", "project"] },
     "name": { "type": "string", "minLength": 1 },
     "title": { "type": "string", "minLength": 1 },
     "description": { "type": "string" },
@@ -23,6 +23,7 @@
     { "if": { "properties": { "kind": { "const": "board" } } }, "then": { "$ref": "#/$defs/boardFile" } },
     { "if": { "properties": { "kind": { "const": "project" } } }, "then": { "$ref": "#/$defs/boardFile", "required": ["extends"] } },
     { "if": { "properties": { "kind": { "const": "module" } } }, "then": { "$ref": "#/$defs/moduleFile" } },
+    { "if": { "properties": { "kind": { "const": "addon" } } }, "then": { "$ref": "#/$defs/addonFile" } },
     { "if": { "properties": { "kind": { "const": "device" } } }, "then": { "$ref": "#/$defs/deviceFile" } },
     { "if": { "properties": { "kind": { "const": "mcu" } } }, "then": { "$ref": "#/$defs/mcuFile" } },
     { "if": { "properties": { "kind": { "const": "connector" } } }, "then": { "$ref": "#/$defs/connectorFile" } },
@@ -246,7 +247,6 @@
     "busCsi": {
       "description": "MIPI CSI: the lanes have pins of their own, no GPIO. lane_mbps is of a mode of the sensor, when a board holds one.",
       "type": "object",
-      "required": ["lanes"],
       "additionalProperties": false,
       "properties": {
         "lanes": { "enum": [1, 2] }, "lane_mbps": { "type": "integer", "minimum": 1 },
@@ -397,6 +397,7 @@
       "patternProperties": { "^x_": true },
       "properties": {
         "class": { "$ref": "#/$defs/class" },
+        "high_min_mv": { "type": "integer", "minimum": 1, "description": "The least its inputs take as a high level, when it is more than a chip of 3.3 V gives." },
         "maker": { "$ref": "#/$defs/maker" },
         "part": { "type": "string", "minLength": 1, "description": "The maker's part number, when the chip's entry does not say it or says less." },
         "marking": { "type": "string", "minLength": 1, "description": "What the package shows, when the part is not known." },
@@ -462,9 +463,23 @@
     },
     "boardFile": { "$ref": "#/$defs/assembly" },
     "moduleFile": { "$ref": "#/$defs/assembly", "required": ["devices"] },
+    "addonFile": {
+      "description": "A part that stands in the way of something instead of on a bus: lines, a supply or a port come in and go out, and it adds something on the way. It takes no pins of the chip.",
+      "required": ["stands"],
+      "properties": {
+        "stands": { "enum": ["lines", "power", "port"], "description": "What it stands on." },
+        "maker": { "$ref": "#/$defs/maker" },
+        "part": { "type": "string", "minLength": 1 },
+        "price": { "$ref": "#/$defs/price" },
+        "do": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "channels": { "type": "integer", "minimum": 1, "description": "How many lines one of them takes." },
+        "both_ways": { "type": "boolean", "description": "Of lines: a line works in both directions, as I2C needs." }
+      }
+    },
     "deviceFile": {
       "required": ["class"],
       "properties": {
+        "high_min_mv": { "type": "integer", "minimum": 1 },
         "identify": {
           "description": "How a program tells this chip from its clones: a register and what it holds in the original.",
           "type": "object",
@@ -517,6 +532,31 @@
     "mcuFile": {
       "required": ["gpio"],
       "properties": {
+        "platforms": {
+          "type": "object",
+          "description": "Which versions of a platform take this chip, by the name of the platform. A revision the source does not name is not here.",
+          "propertyNames": { "$ref": "#/$defs/word" },
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "since": { "type": "string", "description": "The first version that takes it, or initial." },
+              "preview": { "type": "string", "description": "The first version with preview support." },
+              "revisions": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "since": { "type": "string" },
+                    "required": { "type": "object", "additionalProperties": { "type": "string" }, "description": "The lowest version that runs it, by release branch; 5.4+ is that branch and above." },
+                    "recommended": { "type": "object", "additionalProperties": { "type": "string" } }
+                  }
+                }
+              }
+            }
+          }
+        },
         "gpio": {
           "type": "object",
           "required": ["count", "valid", "input_only"],
@@ -674,6 +714,7 @@
       "required": ["lines"],
       "additionalProperties": false,
       "properties": {
+        "high_min_mv": { "type": "integer", "minimum": 1, "description": "The least a line takes as a high level." },
         "lines": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
         "ledc": { "type": "integer", "minimum": 1, "description": "The LEDC channels one device takes this way." },
         "gives": { "type": "object", "additionalProperties": { "type": "number" }, "description": "The figures of this way, as swing_v across a piezo disc." },
@@ -956,6 +997,58 @@
         }
       }
     },
+    "roles": {
+      "description": "catalog/roles.json: what a part can be for, by groups, and the variants that change what it takes. A palette comes from it. A part names its roles in provides.",
+      "type": "object",
+      "required": ["format", "format_version", "groups"],
+      "additionalProperties": false,
+      "properties": {
+        "format": { "const": "jef-sure/boards" },
+        "format_version": { "const": 2 },
+        "groups": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "text", "roles"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "$ref": "#/$defs/name" },
+              "text": { "type": "string", "minLength": 1 },
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["id", "text", "class", "words"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": { "$ref": "#/$defs/name" },
+                    "text": { "type": "string", "minLength": 1 },
+                    "class": { "$ref": "#/$defs/classes" },
+                    "words": { "type": "string", "description": "A regular expression: what the name of a part says when it has this role. A hint for an import, not a fact about a part." },
+                    "needs": { "$ref": "#/$defs/questionNeed", "description": "How parts of this role are found when a class or what a board provides tells it; otherwise by provides of the part." },
+                    "variants": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": ["id", "text", "words"],
+                        "additionalProperties": false,
+                        "properties": {
+                          "id": { "$ref": "#/$defs/name" },
+                          "text": { "type": "string", "minLength": 1 },
+                          "words": { "type": "string" },
+                          "needs": { "$ref": "#/$defs/questionNeed" },
+                          "way": { "$ref": "#/$defs/way" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "questionNeed": {
       "description": "What an answer asks of a board: a device of a class, or what the board provides.",
       "type": "object",
@@ -963,7 +1056,8 @@
       "properties": {
         "class": { "$ref": "#/$defs/class" },
         "where": { "type": "object", "additionalProperties": { "type": "string" }, "description": "What the device must have, by the path of the field." },
-        "provides": { "type": "string", "minLength": 1 }
+        "provides": { "type": "string", "minLength": 1 },
+        "chip": { "type": "string", "minLength": 1, "description": "What the chip must provide for it. An imported board that does not say is then an unknown, not a no." }
       }
     },
     "calibration": {
@@ -1032,7 +1126,6 @@
       "properties": {
         "config": {
           "type": "object",
-          "required": ["sample_rate"],
           "additionalProperties": false,
           "properties": {
             "direction": { "enum": ["out", "in", "both"] },

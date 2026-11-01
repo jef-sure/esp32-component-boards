@@ -1,0 +1,48 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "esp_boards_esp32_s3_box_lite",
+    "title": "ESP32-S3-BOX-Lite",
+    "mcu": {"target": "esp32s3"},
+    "buses": {
+        "i2c": {"i2c0": {"sda": 8, "scl": 18}},
+        "i2s": {"i2s0": {"mclk": 2, "bclk": 17, "ws": 47, "dout": 15, "din": 16}},
+        "spi": {"spi3": {"mosi": 6, "miso": "nc", "sclk": 7}}
+    },
+    "devices": {
+        "boot_button": {"class": "button", "pins": {"in": {"gpio": 0, "active": "low"}}},
+        "audio_dac": {
+            "class": "audio",
+            "on": {"i2s.i2s0": {}, "i2c.i2c0": {"address": "0x10"}},
+            "config": {"direction": "out", "sample_rate": 16000},
+            "chip": "es8156"
+        },
+        "audio_adc": {
+            "class": "audio",
+            "on": {"i2s.i2s0": {}, "i2c.i2c0": {"address": "0x20"}},
+            "config": {"direction": "in", "sample_rate": 16000},
+            "chip": "es7243e"
+        },
+        "display_lcd": {
+            "class": "display",
+            "on": {"spi.spi3": {"cs": 5, "hz": 40000000, "mode": 0}},
+            "pins": {"dc": 4, "rst": 48, "backlight": 45},
+            "config": {"kind": "graphics", "panel": {"width": 320, "height": 240}, "primary": true, "invert": true},
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "left-right", "y": "bottom-top", "swap": true}},
+                "backlight": {"how": "backlight_pwm", "min": 0, "max": 100}
+            },
+            "chip": "st7789"
+        }
+    },
+    "origin": {
+        "from": "esp_boards",
+        "ref": "0.7.1",
+        "path": "esp32_s3_box_lite",
+        "license": "Espressif Modified MIT License",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "esp_boards 0.7.1"}}
+}

@@ -1,0 +1,68 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "esp_friends_boards_esp_ditto",
+    "title": "ESP-Ditto Development Board",
+    "mcu": {"target": "esp32c5"},
+    "buses": {
+        "i2c": {"i2c0": {"sda": 2, "scl": 3}},
+        "i2s": {"i2s0": {"dout": 9, "clk": "nc"}},
+        "parlio": {"display_lcd": {"clk": 1, "dc": 7, "d0": 0}},
+        "spi": {"spi2": {"mosi": 25, "miso": "nc", "sclk": 24}}
+    },
+    "devices": {
+        "display_lcd": {
+            "class": "display",
+            "on": {"parlio.display_lcd": {"cs": 26}},
+            "pins": {},
+            "config": {
+                "kind": "graphics",
+                "panel": {"width": 284, "height": 240},
+                "primary": true,
+                "depth_bits": 16,
+                "color_order": "rgb"
+            },
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "left-right", "y": "bottom-top", "swap": true}}
+            },
+            "chip": "ili9341"
+        },
+        "lcd_touch": {
+            "class": "touch",
+            "on": {"i2c.i2c0": {"address": "0x2a"}},
+            "pins": {},
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "left-right", "y": "bottom-top", "swap": true}}
+            },
+            "config": {"over": "display_lcd", "x_max": 240, "y_max": 284},
+            "chip": "cst816s"
+        },
+        "camera": {
+            "class": "camera",
+            "on": {"i2c.i2c0": {"role": "control"}, "spi.spi2": {"role": "data", "cs": 27}},
+            "pins": {"xclk": 23}
+        },
+        "audio_dac": {
+            "class": "audio",
+            "on": {"i2s.i2s0": {"format": "pdm"}},
+            "config": {"direction": "out", "sample_rate": 16000},
+            "chip": "pdm_out"
+        },
+        "audio_adc": {
+            "class": "audio",
+            "on": {},
+            "config": {"direction": "in", "sample_rate": 16000},
+            "chip": "adc_mic"
+        }
+    },
+    "origin": {
+        "from": "esp_friends_boards",
+        "ref": "0.6.1",
+        "path": "esp_Ditto",
+        "license": "Espressif Modified MIT License",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "esp_friends_boards 0.6.1"}}
+}

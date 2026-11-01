@@ -1,0 +1,72 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_sparkfun_stepoko",
+    "title": "SparkFun Stepoko",
+    "devices": {
+        "motor": {"on": {"spi": {}, "uart": {}}, "provides": {"motor": {"variant": "stepper"}}, "class": "motor"}
+    },
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "MISO-D12-LIMIT-Z",
+                "5V",
+                "SCK-D13-SPINDLE_DIR",
+                "MOSI-D11-SPINDLE_PWM",
+                "RESET",
+                "GND",
+                "Limit XYZ (shared)",
+                "Limit X",
+                "VIN",
+                "ESTOP-LOGIC",
+                "VCC",
+                "A0-RESET/ABORT",
+                "A1-FEED_HOLD",
+                "A2-CYCLE_START/RESUME",
+                "A3-COOLANT_ENABLE",
+                "A4",
+                "A5-PROBE",
+                "AREF",
+                "RXI",
+                "TXO",
+                "A7",
+                "A6",
+                "Limit Y",
+                "Limit Z",
+                "Probe (switch)",
+                "E-Stop (switch)",
+                "STEP_ENABLE",
+                "D2-STEP-X",
+                "D3-STEP-Y",
+                "D4-STEP-Z",
+                "D7-DIR-Z",
+                "D6-DIR-Y",
+                "D5-DIR-X",
+                "X A+",
+                "X A-",
+                "X B+",
+                "X B-",
+                "Y A+",
+                "Y A-",
+                "Y B+",
+                "Y B-",
+                "Z A+",
+                "Z A-",
+                "Z B+",
+                "Z B-"
+            ]
+        }
+    },
+    "power": [{"name": "VCC", "source": "connector", "volts": 5}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "SparkFun_Stepoko.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

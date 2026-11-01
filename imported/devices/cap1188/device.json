@@ -1,0 +1,10 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "cap1188",
+    "title": "cap1188",
+    "class": ["other"],
+    "checked": {"facts": {"level": "extracted", "source": "the boards that use it"}},
+    "on": {"spi": {}}
+}

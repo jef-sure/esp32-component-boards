@@ -1,0 +1,62 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_amg8833_ir_camera_featherwing",
+    "title": "Adafruit AMG8833 IR Camera FeatherWing",
+    "devices": {
+        "thermal": {
+            "on": {"i2c": {}, "spi": {}, "uart": {}},
+            "provides": {"thermal": {}, "camera": {}},
+            "chip": "amg8833"
+        }
+    },
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "VCC",
+                "VBAT",
+                "RESET",
+                "AREF",
+                "A0",
+                "A1",
+                "A2",
+                "A3",
+                "A4",
+                "A5",
+                "SCK",
+                "MOSI",
+                "MISO",
+                "RX",
+                "TX",
+                "D4",
+                "EN",
+                "USB",
+                "D13",
+                "D12",
+                "D11",
+                "D10",
+                "D9",
+                "D6",
+                "D5",
+                "SCL",
+                "SDA",
+                "INT",
+                "GND"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "3622",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit AMG8833 IR Camera FeatherWing.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

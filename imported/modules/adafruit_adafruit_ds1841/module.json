@@ -1,0 +1,20 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_ds1841",
+    "title": "Adafruit DS1841",
+    "devices": {"potentiometer": {"on": {"i2c": {}}, "provides": {"potentiometer": {}}, "chip": "ds1841"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["VCC", "A0", "A1", "RH", "SCL", "SDA", "RW", "GND"]}},
+    "maker": "adafruit",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit DS1841.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

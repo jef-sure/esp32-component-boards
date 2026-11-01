@@ -1,0 +1,13 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "addon",
+    "name": "level_shifter_74ahct125",
+    "title": "Level shifter, 4 channels, one way",
+    "description": "A 74AHCT125 from 3 V to 5 V, one way only. The kind for addressable LEDs and for lines that only listen.",
+    "part": "74AHCT125",
+    "stands": "lines",
+    "channels": 4,
+    "both_ways": false,
+    "checked": {"facts": {"level": "vendor-docs", "source": "Adafruit 1787, 74AHCT125 Quad Level-Shifter"}}
+}

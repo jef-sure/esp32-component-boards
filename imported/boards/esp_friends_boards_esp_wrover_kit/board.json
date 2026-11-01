@@ -1,0 +1,40 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "esp_friends_boards_esp_wrover_kit",
+    "title": "ESP-WROVER-KIT with ST7789 LCD, buttons, LED, and microSD",
+    "mcu": {"target": "esp32"},
+    "buses": {"spi": {"spi2": {"mosi": 23, "miso": 25, "sclk": 19}, "spi3": {"mosi": 15, "miso": 2, "sclk": 14}}},
+    "devices": {
+        "display_lcd": {
+            "class": "display",
+            "on": {"spi.spi2": {"cs": 22, "hz": 40000000, "mode": 0}},
+            "pins": {"dc": 21, "rst": 18, "backlight": 5},
+            "config": {
+                "kind": "graphics",
+                "panel": {"width": 320, "height": 240},
+                "primary": true,
+                "depth_bits": 16,
+                "color_order": "bgr"
+            },
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "left-right", "y": "top-bottom", "swap": false}},
+                "backlight": {"how": "backlight_pwm", "min": 0, "max": 100, "start": 100}
+            },
+            "chip": "st7789"
+        },
+        "boot_button": {"class": "button", "pins": {"in": {"gpio": 0, "active": "low"}}},
+        "led_blue": {"class": "led", "pins": {"out": 4}},
+        "fs_sdcard": {"class": "storage", "config": {"media": "microsd"}, "on": {"spi.spi3": {"cs": 13}}}
+    },
+    "origin": {
+        "from": "esp_friends_boards",
+        "ref": "0.6.1",
+        "path": "esp_wrover_kit",
+        "license": "Espressif Modified MIT License",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "esp_friends_boards 0.6.1"}}
+}

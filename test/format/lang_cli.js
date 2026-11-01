@@ -21,6 +21,13 @@ for (const question of JSON.parse(fs.readFileSync(path.join(CATALOG, 'questions.
     for (const choice of question.choices || []) texts.add(choice.text);
 }
 const read = (file) => JSON.parse(fs.readFileSync(file));
+for (const group of read(path.join(CATALOG, 'roles.json')).groups) {
+    texts.add(group.text);
+    for (const role of group.roles) {
+        texts.add(role.text);
+        for (const variant of role.variants || []) texts.add(variant.text);
+    }
+}
 for (const name of fs.readdirSync(path.join(CATALOG, 'modules'))) {
     for (const text of read(path.join(CATALOG, 'modules', name, 'module.json')).do ?? []) texts.add(text);
 }

@@ -1,0 +1,26 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_ds2482s_800_8_channel_i2c_to_1_wire_bus_adapter",
+    "title": "Adafruit DS2482S-800 8 Channel I2C to 1-Wire Bus Adapter",
+    "devices": {"one_wire": {"on": {"i2c": {}}, "provides": {"one_wire": {}}, "chip": "ds2482s"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": ["VCC", "OW0", "OW1", "OW2", "OW3", "OW4", "OW5", "OW6", "OW7", "SCL", "SDA", "A0", "A1", "GND"]
+        }
+    },
+    "maker": "adafruit",
+    "part": "6027",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit DS2482S-800 8 Channel I2C to 1-Wire Bus Adapter.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

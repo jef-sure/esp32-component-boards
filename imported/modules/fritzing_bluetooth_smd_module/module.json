@@ -1,0 +1,46 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_bluetooth_smd_module",
+    "title": "Bluetooth SMD Module",
+    "devices": {"bluetooth": {"on": {"spi": {}, "uart": {}}, "provides": {"bluetooth": {}, "rf": {}}, "class": "radio"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "GND",
+                "PCM_CLK",
+                "PCM_IN",
+                "PCM_OUT",
+                "PCM_SYNC",
+                "PIO_2_CONNECT",
+                "PIO_3_INT",
+                "PIO_4_FACRST",
+                "PIO_5_STATUS",
+                "PIO_6",
+                "PIO_7",
+                "RESET",
+                "SPI_CLK",
+                "SPI_CSB",
+                "SPI_MISO",
+                "SPI_MOSI",
+                "UART_CTS",
+                "UART_RTS",
+                "UART_RX",
+                "UART_TX",
+                "VCC"
+            ]
+        }
+    },
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "sparkfun-rf-blueradio_br-c40a-bas.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

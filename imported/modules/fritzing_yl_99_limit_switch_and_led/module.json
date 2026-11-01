@@ -1,0 +1,21 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_yl_99_limit_switch_and_led",
+    "title": "YL-99 Limit switch and LED",
+    "devices": {
+        "led": {"ways": [{"lines": ["a"], "ledc": 1}], "provides": {"led": {"variant": "single"}}, "chip": "yl99"}
+    },
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["VCC", "GND", "OUT"]}},
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "yl99_1.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

@@ -1,0 +1,58 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "esp_boards_esp32_s3_box_3",
+    "title": "ESP32-S3-BOX-3",
+    "mcu": {"target": "esp32s3"},
+    "buses": {
+        "i2c": {"i2c0": {"sda": 8, "scl": 18}},
+        "i2s": {"i2s0": {"mclk": 2, "bclk": 17, "ws": 45, "dout": 15, "din": 16}},
+        "spi": {"spi2": {"mosi": 6, "miso": "nc", "sclk": 7}},
+        "sdmmc": {"sdmmc0": {"clk": 11, "cmd": 14, "d0": 9, "d1": 13, "d2": 42, "d3": 12}}
+    },
+    "devices": {
+        "boot_button": {"class": "button", "pins": {"in": {"gpio": 0, "active": "low"}}},
+        "audio_dac": {
+            "class": "audio",
+            "on": {"i2s.i2s0": {"format": "tdm"}, "i2c.i2c0": {"address": "0x30"}},
+            "config": {"direction": "out", "sample_rate": 48000},
+            "chip": "es8311"
+        },
+        "audio_adc": {
+            "class": "audio",
+            "on": {"i2s.i2s0": {"format": "tdm"}, "i2c.i2c0": {"address": "0x40"}},
+            "config": {"direction": "in", "sample_rate": 48000, "clock": "bclk"},
+            "chip": "es7210"
+        },
+        "fs_sdcard": {"class": "storage", "config": {"media": "microsd"}, "on": {"sdmmc.sdmmc0": {}}},
+        "display_lcd": {
+            "class": "display",
+            "on": {"spi.spi2": {"cs": 5, "hz": 20000000, "mode": 0, "sio": true}},
+            "pins": {"dc": 4, "rst": {"gpio": 48, "active": "high"}, "backlight": 47},
+            "config": {"kind": "graphics", "panel": {"width": 320, "height": 240}, "primary": true},
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "right-left", "y": "bottom-top", "swap": false}},
+                "backlight": {"how": "backlight_pwm", "min": 0, "max": 100}
+            },
+            "chip": "ili9341"
+        },
+        "lcd_touch": {
+            "class": "touch",
+            "on": {"i2c.i2c0": {"address": "0x5d"}},
+            "pins": {"int": 3},
+            "config": {"over": "display_lcd", "x_max": 320, "y_max": 240},
+            "chip_try": ["gt911", "tt21100"]
+        }
+    },
+    "origin": {
+        "from": "esp_boards",
+        "ref": "0.7.1",
+        "path": "esp32_s3_box_3",
+        "license": "Espressif Modified MIT License",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "esp_boards 0.7.1"}},
+    "power": [{"line": 43, "level": 0, "feeds": ["fs_sdcard"]}]
+}

@@ -1,0 +1,20 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_altitude_pressure_sensor___mpl3115a2_breakout",
+    "title": "Altitude/Pressure Sensor - MPL3115A2 Breakout",
+    "devices": {"pressure": {"on": {"i2c": {}}, "provides": {"pressure": {}}, "chip": "mpl3115a2"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["INT2", "INT1", "SDA", "SCL", "VCC", "GND"]}},
+    "part": "11084",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "MPL3115A2_breakout.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

@@ -1,0 +1,20 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_contrib_adafruit_hdc1008_temperature_humidity_sensor",
+    "title": "Adafruit HDC1008 Temperature Humidity Sensor",
+    "devices": {"temperature": {"on": {"i2c": {}}, "provides": {"temperature": {}, "humidity": {}}, "chip": "hdc1008"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["VDD", "GND", "SCL", "SDA", "RDY", "A1", "A0"]}},
+    "part": "2635",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "fritzing_contrib",
+        "ref": "27535f2",
+        "path": "adafruit_cb2ac9799ba2257534286cb3b7dd1680_1_30.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing_contrib 27535f2"}}
+}

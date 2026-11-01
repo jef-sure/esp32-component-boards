@@ -1,0 +1,19 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_ifr520_mos_module",
+    "title": "IFR520 MOS module",
+    "devices": {"other": {"ways": [{"lines": ["sig"]}], "chip": "ifr520"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["SIG", "VCC", "GND", "V+", "V-", "VIN"]}},
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "IFR520_MOS_module.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

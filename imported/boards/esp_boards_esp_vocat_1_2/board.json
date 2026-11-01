@@ -1,0 +1,61 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "esp_boards_esp_vocat_1_2",
+    "title": "ESP-VoCat V1.2",
+    "mcu": {"target": "esp32s3"},
+    "buses": {
+        "i2c": {"i2c0": {"sda": 2, "scl": 1}},
+        "i2s": {"i2s0": {"mclk": 42, "bclk": 40, "ws": 39, "dout": 41, "din": 3}},
+        "qspi": {"spi2": {"d0": 46, "d1": 13, "d2": 11, "d3": 12, "sclk": 18}},
+        "sdmmc": {"sdmmc0": {"clk": 16, "cmd": 38, "d0": 17}}
+    },
+    "devices": {
+        "boot_button": {"class": "button", "pins": {"in": {"gpio": 0, "active": "low"}}},
+        "audio_dac": {
+            "class": "audio",
+            "on": {"i2s.i2s0": {"format": "tdm"}, "i2c.i2c0": {"address": "0x30"}},
+            "config": {"direction": "out", "sample_rate": 48000},
+            "chip": "es8311"
+        },
+        "audio_adc": {
+            "class": "audio",
+            "on": {"i2s.i2s0": {"format": "tdm"}, "i2c.i2c0": {"address": "0x40"}},
+            "config": {"direction": "in", "sample_rate": 48000, "clock": "bclk"},
+            "chip": "es7210"
+        },
+        "fs_sdcard": {"class": "storage", "config": {"media": "microsd"}, "on": {"sdmmc.sdmmc0": {}}},
+        "display_lcd": {
+            "class": "display",
+            "on": {"qspi.spi2": {"cs": 14, "mode": 0}},
+            "pins": {"dc": 45, "rst": {"gpio": 47, "active": "high"}, "backlight": 44},
+            "config": {"kind": "graphics", "panel": {"width": 360, "height": 360}, "primary": true},
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "left-right", "y": "top-bottom", "swap": false}}
+            },
+            "chip": "st77916"
+        },
+        "lcd_touch": {
+            "class": "touch",
+            "on": {"i2c.i2c0": {"address": "0x2a"}},
+            "pins": {"int": 10},
+            "config": {"over": "display_lcd", "x_max": 360, "y_max": 360},
+            "chip": "cst816s"
+        },
+        "led_green": {"class": "led", "pins": {"out": 43}}
+    },
+    "origin": {
+        "from": "esp_boards",
+        "ref": "0.7.1",
+        "path": "esp_vocat_1_2",
+        "license": "Espressif Modified MIT License",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "esp_boards 0.7.1"}},
+    "power": [
+        {"line": 48, "level": 1, "feeds": ["audio_adc", "audio_dac"]},
+        {"line": 9, "level": 0, "feeds": ["display_lcd", "fs_sdcard"]}
+    ]
+}

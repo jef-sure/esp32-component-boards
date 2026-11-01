@@ -1,0 +1,26 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_mlx90393",
+    "title": "Adafruit MLX90393",
+    "devices": {"magnetometer": {"on": {"i2c": {}}, "provides": {"magnetometer": {}}, "chip": "mlx90393"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": ["VCC", "3.3V", "SCL", "SDA", "INT_3V", "A0_3V", "A1_3V", "SENB", "INT/TRIG_3V", "MISO_3V", "GND"]
+        }
+    },
+    "maker": "adafruit",
+    "part": "4022",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit MLX90393.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

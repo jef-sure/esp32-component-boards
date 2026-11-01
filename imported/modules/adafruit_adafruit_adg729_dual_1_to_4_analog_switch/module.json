@@ -1,0 +1,43 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_adg729_dual_1_to_4_analog_switch",
+    "title": "Adafruit ADG729 Dual 1-to-4 Analog Switch",
+    "devices": {"switch": {"on": {"i2c": {}}, "provides": {"switch": {}}, "chip": "adg729"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "VCC",
+                "S1A",
+                "S2A",
+                "S3A",
+                "S4A",
+                "S1B",
+                "S2B",
+                "S3B",
+                "S4B",
+                "SDA",
+                "SCL",
+                "A0",
+                "A1",
+                "DA",
+                "DB",
+                "GND"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "5932",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit ADG729 Dual 1-to-4 Analog Switch.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

@@ -1,0 +1,49 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_xbee_usb_mini_adapter",
+    "title": "XBee USB Mini Adapter",
+    "devices": {"rf": {"on": {"uart": {}}, "provides": {"rf": {}}, "class": "radio"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "VCC",
+                "DOUT",
+                "DIN",
+                "DO8",
+                "RESET",
+                "PWM0/RSSI",
+                "PWM1",
+                "[RESERVED]",
+                "DTR/SLEEP_RQ/DI8",
+                "GND",
+                "AD4/DIO4",
+                "CTS/DIO7",
+                "ON/SLEEP",
+                "VREF",
+                "ASSOC/AD5/DIO5",
+                "RTS/AD5/DIO6",
+                "AD3/DIO3",
+                "AD2/DIO2",
+                "AD1/DIO1",
+                "AD0/DIO0",
+                "RST",
+                "RXD",
+                "TXD",
+                "5V"
+            ]
+        }
+    },
+    "power": [{"name": "VCC", "source": "connector", "volts": 5}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "xbee_usb_mini_adapter.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

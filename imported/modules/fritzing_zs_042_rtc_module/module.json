@@ -1,0 +1,19 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_zs_042_rtc_module",
+    "title": "ZS-042 RTC Module",
+    "devices": {"fram": {"on": {"i2c": {}}, "provides": {"fram": {}, "rtc": {}}, "chip": "zs042"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["GND", "VCC", "SDA", "SCL", "SQW", "32K"]}},
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "rtc_ds3231_breakout.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

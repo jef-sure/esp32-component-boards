@@ -1,0 +1,21 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_barometric_pressure_sensor",
+    "title": "Barometric Pressure Sensor",
+    "devices": {"pressure": {"on": {"spi": {}}, "provides": {"pressure": {}}, "class": "sensor"}},
+    "connectors": {
+        "J1": {"type": "contacts of the part", "pins": ["MOSI", "SCK", "3.3V", "GND", "DRDY", "CSB", "MISO"]}
+    },
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "Barometric Pressure Sensor.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

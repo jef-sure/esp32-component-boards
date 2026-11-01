@@ -1,0 +1,40 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_lightblue_bean",
+    "title": "LightBlue Bean",
+    "devices": {
+        "accelerometer": {"on": {"spi": {}}, "provides": {"accelerometer": {}, "bluetooth": {}}, "class": "imu"}
+    },
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "VCC",
+                "D5/SCK",
+                "D4/MISO",
+                "D3/MOSI",
+                "D2",
+                "D1",
+                "D0",
+                "AIN_A1",
+                "AIN_A0",
+                "1",
+                "GND",
+                "Reset",
+                "BAT"
+            ]
+        }
+    },
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "Bean_revE.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

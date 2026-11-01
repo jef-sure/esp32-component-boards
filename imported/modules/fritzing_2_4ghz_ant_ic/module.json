@@ -1,0 +1,44 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_2_4ghz_ant_ic",
+    "title": "2.4GHz ANT IC",
+    "devices": {"rf": {"on": {"uart": {}}, "provides": {"rf": {}}, "class": "radio"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "ANT1",
+                "ANT2",
+                "BR1",
+                "BR2",
+                "DVDD",
+                "EXT32K",
+                "IREF",
+                "PORTSEL",
+                "RTS",
+                "RXD",
+                "SLEEP",
+                "SUSPEND",
+                "TXD",
+                "VDD",
+                "VDD_PA",
+                "VSS",
+                "VSS_PA",
+                "XC1",
+                "XC2"
+            ]
+        }
+    },
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "sparkfun-rf-nrf24ap1-smd.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

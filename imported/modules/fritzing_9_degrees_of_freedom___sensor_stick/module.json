@@ -1,0 +1,25 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_9_degrees_of_freedom___sensor_stick",
+    "title": "9 Degrees of Freedom - Sensor Stick",
+    "devices": {
+        "accelerometer": {
+            "on": {"i2c": {}},
+            "provides": {"accelerometer": {}, "gyroscope": {}, "magnetometer": {}, "magnetic": {}},
+            "class": "imu"
+        }
+    },
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["SCL", "SDA", "GND", "VCC"]}},
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "9DoF-Stick-v13.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

@@ -540,6 +540,8 @@ def pins_of(board):
     for kind, named in (board.get("buses") or {}).items():
         for own, bus in (named or {}).items():
             for key, value in sorted((bus or {}).items()):
+                if isinstance(value, list):  # the data lines of RGB and DVP
+                    pins.extend((line["gpio"], f"{kind}.{own}.{key}{at}", "bus") for at, line in enumerate(value) if isinstance(line, dict) and "gpio" in line)
                 if key in resolve.NOT_LINES or not isinstance(value, int):
                     continue
                 # only MISO and I2S DIN are inputs; data lines are bidirectional and RD is driven by the chip
@@ -599,8 +601,9 @@ def pin_problems(board):
             problems.append(f"GPIO {pin} ({owner}) is input only on an {target}, and {owner} drives it")
         owners.setdefault(pin, []).append(owner)
     shared = {group["line"].get("gpio") for group in (board.get("shared_pins") or {}).values() if isinstance(group["line"], dict)}
+    ladder = {line["gpio"] for device in (board.get("devices") or {}).values() for line in (device.get("pins") or {}).values() if isinstance(line, dict) and "analog" in line}
     for pin, names in sorted(owners.items()):
-        if pin in shared:
+        if pin in shared or pin in ladder:
             continue
         if len(names) > 1:
             problems.append(f"GPIO {pin} has two owners: {', '.join(names)}")

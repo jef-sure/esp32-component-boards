@@ -1,0 +1,43 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_can_bus_bff",
+    "title": "Adafruit CAN Bus BFF",
+    "devices": {"can": {"on": {"i2c": {}, "spi": {}, "uart": {}}, "provides": {"can": {}}, "class": "network"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "3.3V",
+                "+5V",
+                "A0",
+                "A1",
+                "A2",
+                "A3",
+                "MISO",
+                "MOSI",
+                "SCK",
+                "RX",
+                "TX",
+                "SDA",
+                "SCL",
+                "CAN_H",
+                "CAN_L",
+                "GND"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "5877",
+    "power": [{"name": "VCC", "source": "connector", "volts": 5}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit CAN Bus BFF.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

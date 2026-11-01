@@ -1,0 +1,19 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_color_sensor_breakout_adjd_s311",
+    "title": "Color Sensor Breakout ADJD-S311",
+    "devices": {"color": {"on": {"i2c": {}}, "provides": {"color": {}}, "class": "sensor"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["SCL", "SDA", "CLK", "SLP", "GND", "LED", "VCC"]}},
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "Color_Sensor_Breakout_ADJD_S311.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

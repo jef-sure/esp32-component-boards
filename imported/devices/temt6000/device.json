@@ -1,0 +1,9 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "temt6000",
+    "title": "temt6000",
+    "class": ["sensor"],
+    "checked": {"facts": {"level": "extracted", "source": "the boards that use it"}}
+}

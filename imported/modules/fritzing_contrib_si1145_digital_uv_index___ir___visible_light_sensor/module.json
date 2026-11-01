@@ -1,0 +1,20 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_contrib_si1145_digital_uv_index___ir___visible_light_sensor",
+    "title": "SI1145 Digital UV Index + IR + Visible Light Sensor",
+    "devices": {"light": {"on": {"i2c": {}}, "provides": {"light": {}, "uv": {}}, "chip": "si1145"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["+5V", "+3V3", "INT", "LED", "SCL", "SDA", "GND"]}},
+    "part": "1777",
+    "power": [{"name": "VCC", "source": "connector", "volts": 5}],
+    "origin": {
+        "from": "fritzing_contrib",
+        "ref": "27535f2",
+        "path": "adafruit_107b6b54e8c206d354d96b469fef7c74_1_7F.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing_contrib 27535f2"}}
+}

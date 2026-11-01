@@ -1,0 +1,6 @@
+{
+    "title": "A gyroscope on the canvas: a module of that role from imported data, on a board of the catalog first",
+    "imported": true,
+    "answers": {"blocks": [{"role": "gyroscope", "name": ""}]},
+    "says": "on I2C"
+}

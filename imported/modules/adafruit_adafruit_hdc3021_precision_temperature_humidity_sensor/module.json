@@ -1,0 +1,21 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_hdc3021_precision_temperature_humidity_sensor",
+    "title": "Adafruit HDC3021 Precision Temperature Humidity Sensor",
+    "devices": {"temperature": {"on": {"i2c": {}}, "provides": {"temperature": {}, "humidity": {}}, "chip": "hdc3021"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["VCC", "!RESET", "ALERT", "SDA", "SCL", "GND"]}},
+    "maker": "adafruit",
+    "part": "5989",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit HDC3021 Precision Temperature Humidity Sensor.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

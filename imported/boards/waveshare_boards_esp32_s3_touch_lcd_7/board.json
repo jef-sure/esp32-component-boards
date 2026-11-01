@@ -1,0 +1,74 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "waveshare_boards_esp32_s3_touch_lcd_7",
+    "title": "Waveshare ESP32-S3-Touch-LCD-7 (N16R8)",
+    "mcu": {"target": "esp32s3"},
+    "buses": {
+        "i2c": {"i2c0": {"sda": 8, "scl": 9}},
+        "uart": {
+            "uart1": {"tx": 15, "rx": 16, "rts": "nc", "cts": "nc"},
+            "uart2": {"tx": 43, "rx": 44, "rts": "nc", "cts": "nc"}
+        },
+        "spi": {"spi2": {"mosi": 11, "miso": 13, "sclk": 12}},
+        "rgb": {
+            "display_lcd": {
+                "de": 5,
+                "vsync": 3,
+                "hsync": 46,
+                "pclk": 7,
+                "data": [14, 38, 18, 17, 10, 39, 0, 45, 48, 47, 21, 1, 2, 42, 41, 40],
+                "hz": 16000000
+            }
+        }
+    },
+    "devices": {
+        "display_lcd": {
+            "class": "display",
+            "on": {"rgb.display_lcd": {}},
+            "pins": {},
+            "config": {
+                "kind": "graphics",
+                "panel": {"width": 800, "height": 480},
+                "primary": true,
+                "depth_bits": 16,
+                "invert": false,
+                "color_order": "rgb",
+                "timing": {
+                    "pclk_hz": 16000000,
+                    "hsync_pulse": 4,
+                    "hsync_back": 8,
+                    "hsync_front": 8,
+                    "vsync_pulse": 4,
+                    "vsync_back": 8,
+                    "vsync_front": 8,
+                    "pclk_edge": "falling"
+                }
+            },
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "left-right", "y": "top-bottom", "swap": false}}
+            },
+            "chip": "generic_rgb"
+        },
+        "lcd_touch": {
+            "class": "touch",
+            "on": {"i2c.i2c0": {"address": "0x5d"}},
+            "pins": {"int": {"gpio": 4, "active": "low"}},
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "left-right", "y": "top-bottom", "swap": false}}
+            },
+            "config": {"over": "display_lcd", "x_max": 800, "y_max": 480},
+            "chip": "gt911"
+        }
+    },
+    "origin": {
+        "from": "waveshare_boards",
+        "ref": "0.1.3",
+        "path": "boards/esp32_s3_touch_lcd_7",
+        "license": "Apache-2.0",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "waveshare_boards 0.1.3"}}
+}

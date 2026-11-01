@@ -1,0 +1,58 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "waveshare_boards_esp32_s3_touch_amoled_1_75c",
+    "title": "ESP32-S3-Touch-AMOLED-1.75C Development Board",
+    "mcu": {"target": "esp32s3"},
+    "buses": {
+        "i2c": {"i2c0": {"sda": 15, "scl": 14}},
+        "i2s": {"i2s0": {"mclk": 16, "bclk": 9, "ws": 45, "dout": 8, "din": 10}},
+        "qspi": {"spi2": {"d0": 4, "d1": 5, "d2": 6, "d3": 7, "sclk": 38}}
+    },
+    "devices": {
+        "axp2101_power_manager": {"class": "pmic", "chip": "axp2101"},
+        "audio_dac": {
+            "class": "audio",
+            "on": {"i2s.i2s0": {}, "i2c.i2c0": {"address": "0x30"}},
+            "pins": {"pa": 46},
+            "config": {"direction": "out", "sample_rate": 48000},
+            "chip": "es8311"
+        },
+        "audio_adc": {
+            "class": "audio",
+            "on": {"i2s.i2s0": {}, "i2c.i2c0": {"address": "0x40"}},
+            "config": {"direction": "in", "sample_rate": 48000},
+            "chip": "es7210"
+        },
+        "display_lcd": {
+            "class": "display",
+            "on": {"qspi.spi2": {"cs": 12, "mode": 0}},
+            "pins": {"rst": 1},
+            "config": {"kind": "graphics", "panel": {"width": 466, "height": 466}, "primary": true},
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "left-right", "y": "top-bottom", "swap": false}}
+            },
+            "chip": "co5300"
+        },
+        "lcd_touch": {
+            "class": "touch",
+            "on": {"i2c.i2c0": {"address": "0x5a"}},
+            "pins": {"int": 11, "rst": 2},
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "right-left", "y": "bottom-top", "swap": false}}
+            },
+            "config": {"over": "display_lcd", "x_max": 466, "y_max": 466},
+            "chip": "cst9217"
+        }
+    },
+    "origin": {
+        "from": "waveshare_boards",
+        "ref": "0.1.3",
+        "path": "boards/esp32_s3_touch_amoled_1_75c",
+        "license": "Apache-2.0",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "waveshare_boards 0.1.3"}}
+}

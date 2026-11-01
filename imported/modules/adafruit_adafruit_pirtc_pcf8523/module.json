@@ -1,0 +1,21 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_pirtc_pcf8523",
+    "title": "Adafruit PiRTC PCF8523",
+    "devices": {"rtc": {"on": {"i2c": {}}, "provides": {"rtc": {}}, "chip": "pcf8523"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["3.3V", "SDA", "SCL", "GND", "+5V"]}},
+    "maker": "adafruit",
+    "part": "3386",
+    "power": [{"name": "VCC", "source": "connector", "volts": 5}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit PiRTC PCF8523.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

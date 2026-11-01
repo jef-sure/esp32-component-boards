@@ -1,0 +1,50 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_tca9548a",
+    "title": "Adafruit TCA9548A",
+    "devices": {"i2c_mux": {"on": {"i2c": {}}, "provides": {"i2c_mux": {}, "io_expander": {}}, "chip": "tca9548a"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "2SDA",
+                "2SCL",
+                "3SDA",
+                "3SCL",
+                "4SDA",
+                "4SCL",
+                "5SDA",
+                "5SCL",
+                "6SDA",
+                "6SCL",
+                "7SDA",
+                "7SCL",
+                "VCC",
+                "GND",
+                "INPUTSDA",
+                "INPUTSCL",
+                "RESET",
+                "A0",
+                "A1",
+                "A2",
+                "0SDA",
+                "0SCL",
+                "1SDA",
+                "1SCL"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit TCA9548A.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

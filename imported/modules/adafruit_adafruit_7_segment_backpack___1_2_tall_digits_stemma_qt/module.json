@@ -1,0 +1,48 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_7_segment_backpack___1_2_tall_digits_stemma_qt",
+    "title": "Adafruit 7-Segment Backpack - 1.2 Tall Digits STEMMA QT",
+    "devices": {"led": {"on": {"i2c": {}}, "provides": {"led": {"variant": "segment"}}, "class": "led"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "VIN",
+                "VDDIO",
+                "SCL",
+                "SCL_IO",
+                "SDA",
+                "SDA_IO",
+                "A0",
+                "A1",
+                "A2",
+                "1",
+                "N$3",
+                "N$4",
+                "N$5",
+                "2",
+                "8",
+                "N$10",
+                "16",
+                "9",
+                "15",
+                "14",
+                "GND"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "1271",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit 7-Segment Backpack - 1.2 Tall Digits STEMMA QT.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

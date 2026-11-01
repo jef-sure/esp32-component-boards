@@ -1,0 +1,79 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "guition_boards_jc1060f570c",
+    "title": "JC1060F570C_I",
+    "mcu": {"target": "esp32s31"},
+    "buses": {
+        "i2c": {"i2c0": {"sda": 2, "scl": 3}},
+        "i2s": {"i2s0": {"mclk": "nc", "bclk": 54, "ws": 47, "dout": 56, "din": 16}},
+        "sdmmc": {"sdmmc0": {}},
+        "rgb": {
+            "display_lcd": {
+                "de": 43,
+                "vsync": 45,
+                "hsync": 44,
+                "pclk": 40,
+                "data": [36, 37, 38, 39, 46, 7, 35, 48, 49, 50, 51, 4, 5, 0, 1, 6],
+                "hz": 34000000
+            }
+        }
+    },
+    "devices": {
+        "audio_dac": {
+            "class": "audio",
+            "on": {"i2s.i2s0": {"format": "tdm"}, "i2c.i2c0": {"address": "0x20"}},
+            "pins": {"pa": 42},
+            "config": {"direction": "both", "sample_rate": 48000, "clock": "bclk"},
+            "chip": "es8389"
+        },
+        "fs_sdcard": {"class": "storage", "config": {"media": "microsd"}, "on": {"sdmmc.sdmmc0": {}}},
+        "display_lcd": {
+            "class": "display",
+            "on": {"rgb.display_lcd": {}},
+            "pins": {"backlight": 52},
+            "config": {
+                "kind": "graphics",
+                "panel": {"width": 1024, "height": 600},
+                "primary": true,
+                "depth_bits": 16,
+                "invert": false,
+                "color_order": "bgr",
+                "timing": {
+                    "pclk_hz": 34000000,
+                    "hsync_pulse": 24,
+                    "hsync_back": 160,
+                    "hsync_front": 136,
+                    "vsync_pulse": 1,
+                    "vsync_back": 23,
+                    "vsync_front": 11,
+                    "pclk_edge": "falling"
+                }
+            },
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "left-right", "y": "top-bottom", "swap": false}}
+            },
+            "chip": "generic_rgb"
+        },
+        "lcd_touch": {
+            "class": "touch",
+            "on": {"i2c.i2c0": {"address": "0x5d"}},
+            "pins": {},
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "left-right", "y": "top-bottom", "swap": false}}
+            },
+            "config": {"over": "display_lcd", "x_max": 1024, "y_max": 600},
+            "chip": "gt911"
+        }
+    },
+    "origin": {
+        "from": "guition_boards",
+        "ref": "0.2.2",
+        "path": "jc1060f570c",
+        "license": "MIT",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "guition_boards 0.2.2"}}
+}

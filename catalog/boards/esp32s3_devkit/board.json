@@ -13,7 +13,7 @@
     "buses": {"uart": {"uart0": {"tx": 43, "rx": 44}}},
     "devices": {
         "boot": {"class": "button", "pins": {"in": {"gpio": 0, "active": "low"}}},
-        "led": {"class": "led", "pins": {"data": 48}, "config": {"kind": "ws2812", "count": 1}},
+        "led": {"class": "led", "provides": {"led": {"variant": "addressable"}}, "pins": {"data": 48}, "config": {"kind": "ws2812", "count": 1}},
         "usb_serial": {"class": "other", "part": "CH343", "on": {"uart.uart0": {}}}
     },
     "power": [

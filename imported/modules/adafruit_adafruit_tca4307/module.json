@@ -1,0 +1,26 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_tca4307",
+    "title": "Adafruit TCA4307",
+    "devices": {"i2c_bus": {"on": {"i2c": {}}, "provides": {"i2c_bus": {}}, "chip": "tca4307"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": ["VCC", "SCL_IN", "SDA_IN", "EN", "READY", "SCL_OUT", "SDA_OUT", "GND"]
+        }
+    },
+    "maker": "adafruit",
+    "part": "5159",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit TCA4307.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

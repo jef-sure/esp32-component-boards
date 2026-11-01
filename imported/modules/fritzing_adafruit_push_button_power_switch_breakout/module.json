@@ -1,0 +1,18 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_adafruit_push_button_power_switch_breakout",
+    "title": "Adafruit Push-button Power Switch Breakout",
+    "devices": {"button": {"ways": [{"lines": ["in"]}], "provides": {"button": {}}, "class": "other"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["IN", "OUT", "GND", "OFF"]}},
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "powerbutton_adafruit.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

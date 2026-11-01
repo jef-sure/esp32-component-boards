@@ -1,0 +1,19 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_real_time_clock_module___ds1307_rtc_breakout_board",
+    "title": "Real Time Clock Module - DS1307 RTC Breakout Board",
+    "devices": {"rtc": {"on": {"i2c": {}}, "provides": {"rtc": {}}, "chip": "ds1307"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["5V", "GND", "SQW", "SCL", "SDA"]}},
+    "power": [{"name": "VCC", "source": "connector", "volts": 5}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "Real_Time_Clock_Module___DS1307_RTC_Breakout_Board.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

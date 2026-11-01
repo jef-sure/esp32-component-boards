@@ -1,0 +1,88 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "guition_boards_jc5454f328",
+    "title": "JC5454F328 540x540 RGB display with AXS15260 capacitive touch",
+    "mcu": {"target": "esp32s31"},
+    "buses": {
+        "i2c": {"i2c0": {"sda": 44, "scl": 45}, "i2c1": {"sda": 53, "scl": 54}},
+        "i2s": {
+            "i2s0": {"mclk": "nc", "bclk": 49, "ws": 51, "dout": 61, "din": "nc"},
+            "i2s1": {"mclk": 55, "bclk": 56, "ws": 57, "dout": "nc", "din": 59}
+        },
+        "sdmmc": {"sdmmc0": {}},
+        "rgb": {
+            "display_lcd": {
+                "de": 38,
+                "vsync": 37,
+                "hsync": 35,
+                "pclk": 18,
+                "data": [13, 14, 15, 16, 17, 7, 8, 9, 10, 11, 12, 2, 3, 4, 5, 6],
+                "hz": 34000000
+            }
+        },
+        "spi": {"soft0": {"mosi": 40, "miso": "nc", "sclk": 42}}
+    },
+    "devices": {
+        "fs_sdcard": {"class": "storage", "config": {"media": "microsd"}, "on": {"sdmmc.sdmmc0": {}}},
+        "display_lcd": {
+            "class": "display",
+            "on": {"rgb.display_lcd": {"role": "data"}, "spi.soft0": {"role": "control", "cs": 36}},
+            "pins": {"rst": 19, "backlight": 48},
+            "config": {
+                "kind": "graphics",
+                "panel": {"width": 540, "height": 540},
+                "primary": true,
+                "depth_bits": 16,
+                "invert": false,
+                "color_order": "bgr",
+                "timing": {
+                    "pclk_hz": 34000000,
+                    "hsync_pulse": 20,
+                    "hsync_back": 160,
+                    "hsync_front": 160,
+                    "vsync_pulse": 4,
+                    "vsync_back": 20,
+                    "vsync_front": 80
+                }
+            },
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "left-right", "y": "top-bottom", "swap": false}},
+                "backlight": {"how": "backlight_pwm", "min": 0, "max": 100}
+            },
+            "chip": "axs15260"
+        },
+        "lcd_touch": {
+            "class": "touch",
+            "on": {"i2c.i2c0": {"address": "0x76"}},
+            "pins": {"int": {"gpio": 46, "active": "low"}},
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "left-right", "y": "top-bottom", "swap": false}}
+            },
+            "config": {"over": "display_lcd", "x_max": 540, "y_max": 540},
+            "chip": "axs15260"
+        },
+        "audio_dac": {
+            "class": "audio",
+            "on": {"i2s.i2s0": {}},
+            "config": {"direction": "out", "sample_rate": 48000, "clock": "bclk"},
+            "chip": "i2s_amp"
+        },
+        "audio_adc": {
+            "class": "audio",
+            "on": {"i2s.i2s1": {}, "i2c.i2c1": {"address": "0x40"}},
+            "config": {"direction": "in", "sample_rate": 48000},
+            "chip": "es7210"
+        }
+    },
+    "origin": {
+        "from": "guition_boards",
+        "ref": "0.2.2",
+        "path": "jc5454f328",
+        "license": "MIT",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "guition_boards 0.2.2"}}
+}

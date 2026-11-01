@@ -1,0 +1,27 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_mpu6050",
+    "title": "Adafruit MPU6050",
+    "devices": {
+        "accelerometer": {"on": {"i2c": {}}, "provides": {"accelerometer": {}, "gyroscope": {}}, "chip": "mpu6050"}
+    },
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": ["VCC", "3.3V", "CLKIN", "FSYNC_IN", "SDA_EXT", "SCL_EXT", "SDA", "SCL", "AD0", "INT", "GND"]
+        }
+    },
+    "maker": "adafruit",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit MPU6050.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

@@ -1,0 +1,20 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_husb238_usb_c_pd_breakout",
+    "title": "Adafruit HUSB238 USB-C PD Breakout",
+    "devices": {"usb_pd": {"on": {"i2c": {}}, "provides": {"usb_pd": {}}, "chip": "husb238"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["VOUT", "D+", "D-", "SDA", "SCL", "GND"]}},
+    "maker": "adafruit",
+    "part": "5807",
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit HUSB238 USB-C PD Breakout.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

@@ -1,0 +1,26 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_ano_rotary_encoder_to_i2c_adapter___no_encoder",
+    "title": "Adafruit ANO Rotary Encoder to I2C Adapter - No Encoder",
+    "devices": {"encoder": {"on": {"i2c": {}}, "provides": {"encoder": {}}, "class": "encoder"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": ["VCC", "ENC_A", "ENC_B", "INT", "SCL", "SDA", "SW1", "SW3", "SW2", "SW4", "SW5", "UPDI", "GND"]
+        }
+    },
+    "maker": "adafruit",
+    "part": "5740",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit ANO Rotary Encoder to I2C Adapter - No Encoder.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

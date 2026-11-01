@@ -1,0 +1,29 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "esp_boards_esp_dualkey",
+    "title": "ESP-DualKey (two-key ESP32-S3 macro key with WS2812 backlight and Li-ion battery)",
+    "mcu": {"target": "esp32s3"},
+    "buses": {
+        "uart": {
+            "uart1": {"tx": 47, "rx": 48, "rts": "nc", "cts": "nc"},
+            "uart2": {"tx": 6, "rx": 5, "rts": "nc", "cts": "nc"}
+        }
+    },
+    "devices": {
+        "led_strip": {"class": "led", "pins": {"data": 21}, "config": {"kind": "ws2812", "count": 2}},
+        "key_1": {"class": "button", "pins": {"in": {"gpio": 0, "active": "low"}}},
+        "key_2": {"class": "button", "pins": {"in": {"gpio": 17, "active": "low"}}}
+    },
+    "origin": {
+        "from": "esp_boards",
+        "ref": "0.7.1",
+        "path": "esp_dualkey",
+        "license": "Espressif Modified MIT License",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "esp_boards 0.7.1"}},
+    "power": [{"line": 40, "level": 0, "feeds": ["led_strip"]}]
+}

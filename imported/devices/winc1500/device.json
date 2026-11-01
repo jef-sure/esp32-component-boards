@@ -1,0 +1,10 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "winc1500",
+    "title": "winc1500",
+    "class": ["radio"],
+    "checked": {"facts": {"level": "extracted", "source": "the boards that use it"}},
+    "on": {"spi": {}, "uart": {}}
+}

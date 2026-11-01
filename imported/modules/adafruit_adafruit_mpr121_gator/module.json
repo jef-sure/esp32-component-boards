@@ -1,0 +1,42 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_mpr121_gator",
+    "title": "Adafruit MPR121 Gator",
+    "devices": {"touch_keys": {"on": {"i2c": {}}, "provides": {"touch_keys": {}}, "chip": "mpr121"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "VCC",
+                "SDA",
+                "SCL",
+                "ELEC0",
+                "ELEC1",
+                "ELEC2",
+                "ELEC3",
+                "ELEC4",
+                "ELEC5",
+                "ELEC6",
+                "ELEC7",
+                "ELEC8",
+                "ELEC9",
+                "ELEC10",
+                "ELEC11",
+                "GND"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit MPR121 Gator.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

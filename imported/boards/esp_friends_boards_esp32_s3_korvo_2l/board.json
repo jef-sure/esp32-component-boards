@@ -1,0 +1,37 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "esp_friends_boards_esp32_s3_korvo_2l",
+    "title": "ESP32-S3 Korvo 2L",
+    "mcu": {"target": "esp32s3"},
+    "buses": {
+        "i2c": {"i2c0": {"sda": 17, "scl": 18}},
+        "i2s": {"i2s0": {"bclk": 9, "ws": 45, "dout": 8, "din": 10}},
+        "sdmmc": {"sdmmc0": {"clk": 6, "cmd": 7, "d0": 4}}
+    },
+    "devices": {
+        "audio_dac": {
+            "class": "audio",
+            "on": {"i2s.i2s0": {}, "i2c.i2c0": {"address": "0x30"}},
+            "config": {"direction": "both", "sample_rate": 48000, "clock": "bclk"},
+            "chip": "es8311"
+        },
+        "fs_sdcard": {"class": "storage", "config": {"media": "microsd"}, "on": {"sdmmc.sdmmc0": {}}},
+        "adc_button_group_volume_up": {"class": "button", "pins": {"in": {"gpio": 5, "analog": [190, 600]}}},
+        "adc_button_group_volume_down": {"class": "button", "pins": {"in": {"gpio": 5, "analog": [600, 965]}}},
+        "adc_button_group_set": {"class": "button", "pins": {"in": {"gpio": 5, "analog": [965, 1380]}}},
+        "adc_button_group_play": {"class": "button", "pins": {"in": {"gpio": 5, "analog": [1380, 1815]}}},
+        "adc_button_group_mute": {"class": "button", "pins": {"in": {"gpio": 5, "analog": [1815, 2195]}}},
+        "adc_button_group_rec": {"class": "button", "pins": {"in": {"gpio": 5, "analog": [2195, 2705]}}}
+    },
+    "origin": {
+        "from": "esp_friends_boards",
+        "ref": "0.6.1",
+        "path": "esp32_s3_korvo_2l",
+        "license": "Espressif Modified MIT License",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "esp_friends_boards 0.6.1"}}
+}

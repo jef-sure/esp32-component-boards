@@ -1,0 +1,23 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_ds3231_stemma_qt",
+    "title": "Adafruit DS3231 STEMMA QT",
+    "devices": {"rtc": {"on": {"i2c": {}}, "provides": {"rtc": {}}, "chip": "ds3231"}},
+    "connectors": {
+        "J1": {"type": "contacts of the part", "pins": ["VCC", "VBAT", "SCL", "SDA", "32KHZ", "SQW", "!RTC_RST", "GND"]}
+    },
+    "maker": "adafruit",
+    "part": "5188",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit DS3231 STEMMA QT.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

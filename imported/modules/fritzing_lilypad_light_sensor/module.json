@@ -1,0 +1,18 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_lilypad_light_sensor",
+    "title": "LilyPad Light Sensor",
+    "devices": {"light": {"ways": [{"lines": ["s"]}], "provides": {"light": {}}, "class": "sensor"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["+", "-", "S"]}},
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "LilyPad-Light Sensor-v13.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

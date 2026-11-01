@@ -1,0 +1,47 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "m5stack_boards_m5dial",
+    "title": "M5Dial with GC9A01 LCD, FT5x06 touch, button, and rotary knob",
+    "mcu": {"target": "esp32s3"},
+    "buses": {"i2c": {"i2c0": {"sda": 11, "scl": 12}}, "spi": {"spi3": {"mosi": 5, "miso": "nc", "sclk": 6}}},
+    "devices": {
+        "display_lcd": {
+            "class": "display",
+            "on": {"spi.spi3": {"cs": 7, "hz": 40000000, "mode": 0}},
+            "pins": {"dc": 4, "rst": 8, "backlight": 9},
+            "config": {
+                "kind": "graphics",
+                "panel": {"width": 240, "height": 240},
+                "primary": true,
+                "depth_bits": 16,
+                "invert": true,
+                "color_order": "bgr"
+            },
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "left-right", "y": "top-bottom", "swap": false}},
+                "backlight": {"how": "backlight_pwm", "min": 0, "max": 100, "start": 100}
+            },
+            "chip": "gc9a01"
+        },
+        "lcd_touch": {
+            "class": "touch",
+            "on": {"i2c.i2c0": {"address": "0x70"}},
+            "pins": {"int": 14},
+            "config": {"over": "display_lcd", "x_max": 240, "y_max": 240},
+            "chip": "ft5x06"
+        },
+        "knob": {"class": "encoder", "pins": {"a": 41, "b": 40}},
+        "knob_button": {"class": "button", "pins": {"in": {"gpio": 42, "active": "low"}}}
+    },
+    "origin": {
+        "from": "m5stack_boards",
+        "ref": "0.6.1~2",
+        "path": "m5dial",
+        "license": "Espressif Modified MIT License",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "m5stack_boards 0.6.1~2"}}
+}

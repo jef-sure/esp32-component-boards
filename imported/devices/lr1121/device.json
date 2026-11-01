@@ -1,0 +1,9 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "lr1121",
+    "title": "lr1121",
+    "class": ["radio"],
+    "checked": {"facts": {"level": "extracted", "source": "the boards that use it"}}
+}

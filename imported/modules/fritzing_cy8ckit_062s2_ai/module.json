@@ -1,0 +1,40 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_cy8ckit_062s2_ai",
+    "title": "CY8CKIT-062S2-AI",
+    "devices": {"presence": {"on": {"i2c": {}, "uart": {}}, "provides": {"presence": {}}, "class": "sensor"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "UART_RX",
+                "UART_TX",
+                "SDA",
+                "SCL",
+                "3V3",
+                "GND",
+                "P9_0",
+                "P9_1",
+                "P9_2",
+                "P9_3",
+                "P9_4",
+                "P9_5",
+                "P9_6",
+                "P9_7"
+            ]
+        }
+    },
+    "part": "8CKIT-062S2-AI",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "Infineon_CY8CKIT-062S2-AI.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

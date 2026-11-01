@@ -1,0 +1,48 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "guition_boards_esp32_2424s012",
+    "title": "ESP32-2424S012 SPI display (hardware unverified)",
+    "mcu": {"target": "esp32c3"},
+    "buses": {"spi": {"spi2": {"mosi": 7, "miso": "nc", "sclk": 6}}, "i2c": {"i2c0": {"sda": 4, "scl": 5}}},
+    "devices": {
+        "display_lcd": {
+            "class": "display",
+            "on": {"spi.spi2": {"cs": 10, "hz": 80000000, "mode": 0}},
+            "pins": {"dc": 2, "backlight": 3},
+            "config": {
+                "kind": "graphics",
+                "panel": {"width": 240, "height": 240},
+                "primary": true,
+                "depth_bits": 16,
+                "invert": true,
+                "color_order": "bgr"
+            },
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "right-left", "y": "top-bottom", "swap": false}},
+                "backlight": {"how": "backlight_pwm", "min": 0, "max": 100, "start": 100}
+            },
+            "chip": "gc9a01"
+        },
+        "lcd_touch": {
+            "class": "touch",
+            "on": {"i2c.i2c0": {"address": "0x2a"}},
+            "pins": {"rst": {"gpio": 1, "active": "low"}},
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "left-right", "y": "top-bottom", "swap": false}}
+            },
+            "config": {"over": "display_lcd", "x_max": 240, "y_max": 240},
+            "chip": "cst816s"
+        }
+    },
+    "origin": {
+        "from": "guition_boards",
+        "ref": "0.2.2",
+        "path": "esp32_2424s012",
+        "license": "MIT",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "guition_boards 0.2.2"}}
+}

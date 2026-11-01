@@ -1,0 +1,33 @@
+{
+    "title": "A chained MAX7219 module takes one select line, 5 V and a one way shifter",
+    "answers": {
+        "blocks": [
+            {
+                "role": "led",
+                "variant": "matrix",
+                "name": "wall"
+            }
+        ]
+    },
+    "kit": {
+        "name": "esp32_devkit",
+        "modules": {
+            "max7219_4in1": 1
+        },
+        "on": {
+            "max7219_4in1": "spi"
+        }
+    },
+    "says": "Level shifter, 4 channels, one way between the chip",
+    "wiring": {
+        "board": "esp32_devkit",
+        "use": "wall",
+        "lines": [
+            "mosi",
+            "sclk",
+            "cs",
+            "VCC",
+            "GND"
+        ]
+    }
+}

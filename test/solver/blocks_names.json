@@ -1,0 +1,6 @@
+{
+    "title": "Two blocks of one role are one need: the same reader twice, under the names of the blocks",
+    "answers": {"blocks": [{"role": "nfc", "name": "nfc_in"}, {"role": "nfc", "name": "nfc_out"}]},
+    "kit": {"name": "esp32_devkit", "modules": {"pn532_module": 2}},
+    "says": "the distance between the readers is not given"
+}

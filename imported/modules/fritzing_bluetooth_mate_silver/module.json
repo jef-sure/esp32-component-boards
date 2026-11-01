@@ -1,0 +1,19 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_bluetooth_mate_silver",
+    "title": "Bluetooth Mate Silver",
+    "devices": {"bluetooth": {"on": {"uart": {}}, "provides": {"bluetooth": {}}, "class": "radio"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["RTS_5V", "RX_5V", "TX_5V", "VCC", "CTS_5V", "GND"]}},
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "ArduinoBluetoothMatev13.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

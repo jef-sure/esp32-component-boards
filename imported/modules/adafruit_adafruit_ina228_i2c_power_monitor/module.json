@@ -1,0 +1,23 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_ina228_i2c_power_monitor",
+    "title": "Adafruit INA228 I2C Power Monitor",
+    "devices": {"power_monitor": {"on": {"i2c": {}}, "provides": {"power_monitor": {}}, "chip": "ina228"}},
+    "connectors": {
+        "J1": {"type": "contacts of the part", "pins": ["VCC", "VIN+", "VBUS", "VIN-", "ALERT", "SCL", "SDA", "GND"]}
+    },
+    "maker": "adafruit",
+    "part": "5832",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit INA228 I2C Power Monitor.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

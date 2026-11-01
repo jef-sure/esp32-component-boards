@@ -1,0 +1,10 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "co5300",
+    "title": "co5300",
+    "class": ["display"],
+    "checked": {"facts": {"level": "extracted", "source": "the boards that use it"}},
+    "on": {"qspi": {}}
+}

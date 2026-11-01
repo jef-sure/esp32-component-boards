@@ -1,0 +1,21 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_mcp4725",
+    "title": "Adafruit MCP4725",
+    "devices": {"dac": {"on": {"i2c": {}}, "provides": {"dac": {}}, "chip": "mcp4725"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["VCC", "VOUT", "SCL", "SDA", "A0", "GND"]}},
+    "maker": "adafruit",
+    "part": "935",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit MCP4725.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

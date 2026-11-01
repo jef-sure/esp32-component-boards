@@ -1,0 +1,56 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_2_8inch_resistive_tft",
+    "title": "Adafruit 2.8inch Resistive TFT",
+    "devices": {"display": {"on": {"spi": {}}, "provides": {"display": {"variant": "tft"}}, "class": "other"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "GND",
+                "VIN",
+                "LCD_CS",
+                "LCD_CD_SCK",
+                "LCD_WR_DC",
+                "LCD_RD",
+                "LCD_RST",
+                "LCD_LITE",
+                "LCD_X+",
+                "LCD_Y+",
+                "LCD_X-",
+                "LCD_Y-",
+                "LCD_DATA0",
+                "LCD_DATA1",
+                "LCD_DATA2",
+                "LCD_DATA3",
+                "LCD_DATA4",
+                "LCD_DATA5",
+                "LCD_DATA6",
+                "LCD_DATA7",
+                "+3.3V",
+                "MISO",
+                "MOSI",
+                "IM3",
+                "IM2",
+                "IM1",
+                "IM0",
+                "SD_CS",
+                "CARDDET"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "1770",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit 2.8inch Resistive TFT.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

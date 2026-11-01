@@ -1,0 +1,55 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_128x64_oled_featherwing",
+    "title": "Adafruit 128x64 OLED FeatherWing",
+    "devices": {"display": {"on": {"i2c": {}}, "provides": {"display": {"variant": "oled"}}, "class": "other"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "3.3V",
+                "!RESET",
+                "3",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+                "10",
+                "11",
+                "12",
+                "13",
+                "14",
+                "15",
+                "16",
+                "28",
+                "27",
+                "26",
+                "25",
+                "24",
+                "23",
+                "22",
+                "J",
+                "I",
+                "H",
+                "SCL",
+                "SDA",
+                "GND"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "4650",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit 128x64 OLED FeatherWing.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

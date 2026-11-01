@@ -1,0 +1,72 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_adxl343_adt7410_featherwing",
+    "title": "Adafruit ADXL343/ADT7410 FeatherWing",
+    "devices": {
+        "accelerometer": {"on": {"i2c": {}}, "provides": {"accelerometer": {}, "temperature": {}}, "chip": "adxl343"}
+    },
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "VBAT",
+                "3.3V",
+                "1",
+                "16",
+                "3",
+                "14",
+                "5",
+                "12",
+                "6",
+                "11",
+                "7",
+                "10",
+                "8",
+                "N$19",
+                "9",
+                "N$18",
+                "N$17",
+                "N$16",
+                "N$15",
+                "13",
+                "N$14",
+                "N$13",
+                "15",
+                "N$12",
+                "N$11",
+                "2",
+                "27",
+                "USB",
+                "4",
+                "25",
+                "24",
+                "23",
+                "22",
+                "21",
+                "20",
+                "19",
+                "SDA",
+                "SCL",
+                "INT1",
+                "INT2",
+                "CT",
+                "INT",
+                "GND"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "4147",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit ADXL343 ADT7410 FeatherWing.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

@@ -1,0 +1,20 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_tlv493d",
+    "title": "Adafruit TLV493D",
+    "devices": {"magnetometer": {"on": {"i2c": {}}, "provides": {"magnetometer": {}}, "chip": "tlv493d"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["VCC", "3.3V", "SCL", "SDA", "GND"]}},
+    "maker": "adafruit",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit TLV493D.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

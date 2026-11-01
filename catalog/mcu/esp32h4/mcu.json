@@ -188,9 +188,21 @@
                 "gpio.strapping"
             ],
             "source": "ESP-IDF esp-idf, docs/en/api-reference/peripherals/gpio/esp32h4.inc"
+        },
+        "platforms": {
+            "level": "vendor-docs",
+            "covers": [
+                "platforms"
+            ],
+            "source": "COMPATIBILITY.md of ESP-IDF"
         }
     },
     "limits": {
         "psram_mhz": 64
+    },
+    "platforms": {
+        "esp-idf": {
+            "preview": "6.0"
+        }
     }
 }

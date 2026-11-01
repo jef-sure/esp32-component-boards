@@ -1,0 +1,66 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "guition_boards_jc3636f118",
+    "title": "JC3636F118 QSPI display with CST816S capacitive touch",
+    "mcu": {"target": "esp32s31"},
+    "buses": {
+        "i2s": {"i2s1": {"mclk": "nc", "bclk": 53, "ws": 51, "dout": 52, "din": "nc"}, "i2s0": {"din": 37, "clk": 39}},
+        "qspi": {"spi2": {"d0": 14, "d1": 15, "d2": 16, "d3": 17, "sclk": 12}},
+        "i2c": {"i2c0": {"sda": 11, "scl": 10}},
+        "sdmmc": {"sdmmc0": {"clk": 24, "cmd": 25, "d0": 20, "d1": 21, "d2": 22, "d3": 23}}
+    },
+    "devices": {
+        "audio_dac": {
+            "class": "audio",
+            "on": {"i2s.i2s1": {}},
+            "config": {"direction": "out", "sample_rate": 48000},
+            "chip": "i2s_amp"
+        },
+        "audio_adc": {
+            "class": "audio",
+            "on": {"i2s.i2s0": {"format": "pdm"}},
+            "config": {"direction": "in", "sample_rate": 16000},
+            "chip": "pdm_mic"
+        },
+        "display_lcd": {
+            "class": "display",
+            "on": {"qspi.spi2": {"cs": 13, "hz": 80000000, "mode": 0}},
+            "pins": {"rst": 18, "backlight": 5},
+            "config": {
+                "kind": "graphics",
+                "panel": {"width": 360, "height": 360},
+                "primary": true,
+                "depth_bits": 16,
+                "invert": true,
+                "color_order": "rgb"
+            },
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "left-right", "y": "top-bottom", "swap": false}},
+                "backlight": {"how": "backlight_pwm", "min": 0, "max": 100, "start": 100}
+            },
+            "chip": "st77916"
+        },
+        "lcd_touch": {
+            "class": "touch",
+            "on": {"i2c.i2c0": {"address": "0x2a"}},
+            "pins": {"int": {"gpio": 8, "active": "low"}, "rst": {"gpio": 9, "active": "low"}},
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "left-right", "y": "top-bottom", "swap": false}}
+            },
+            "config": {"over": "display_lcd", "x_max": 360, "y_max": 360},
+            "chip": "cst816s"
+        },
+        "fs_sdcard": {"class": "storage", "config": {"media": "microsd"}, "on": {"sdmmc.sdmmc0": {}}}
+    },
+    "origin": {
+        "from": "guition_boards",
+        "ref": "0.2.2",
+        "path": "jc3636f118",
+        "license": "MIT",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "guition_boards 0.2.2"}}
+}

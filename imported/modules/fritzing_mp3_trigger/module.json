@@ -1,0 +1,53 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_mp3_trigger",
+    "title": "MP3 Trigger",
+    "devices": {"player": {"on": {"uart": {}}, "provides": {"player": {}}, "class": "other"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "NC1",
+                "TX",
+                "RX-I",
+                "USBVCC",
+                "NC2",
+                "GND",
+                "VBUS",
+                "XRES",
+                "TRIG18",
+                "TRIG17",
+                "T18",
+                "T17",
+                "T16",
+                "T15",
+                "T14",
+                "T13",
+                "T12",
+                "T11",
+                "T10",
+                "T9",
+                "T8",
+                "T7",
+                "T6",
+                "T5",
+                "T4",
+                "T3",
+                "T2",
+                "T1"
+            ]
+        }
+    },
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "mp3-trigger-v22.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

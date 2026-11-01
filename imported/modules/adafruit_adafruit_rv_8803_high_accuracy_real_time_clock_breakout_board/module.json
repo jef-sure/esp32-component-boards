@@ -1,0 +1,23 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_rv_8803_high_accuracy_real_time_clock_breakout_board",
+    "title": "Adafruit RV-8803 High Accuracy Real Time Clock Breakout Board",
+    "devices": {"rtc": {"on": {"i2c": {}}, "provides": {"rtc": {}}, "chip": "rv8803"}},
+    "connectors": {
+        "J1": {"type": "contacts of the part", "pins": ["VCC", "CLKOE", "INT", "EVI", "SQW", "SDA", "SCL", "GND"]}
+    },
+    "maker": "adafruit",
+    "part": "6538",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit RV-8803 High Accuracy Real Time Clock Breakout Board.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

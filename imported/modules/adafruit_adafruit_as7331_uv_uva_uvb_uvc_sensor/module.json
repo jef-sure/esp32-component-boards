@@ -1,0 +1,21 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_as7331_uv_uva_uvb_uvc_sensor",
+    "title": "Adafruit AS7331 UV UVA UVB UVC Sensor",
+    "devices": {"uv": {"on": {"i2c": {}}, "provides": {"uv": {}}, "chip": "as7331"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["VCC", "SDA", "SCL", "READY", "SYN", "GND"]}},
+    "maker": "adafruit",
+    "part": "6476",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit AS7331 UV UVA UVB UVC Sensor.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

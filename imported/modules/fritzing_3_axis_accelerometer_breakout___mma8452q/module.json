@@ -1,0 +1,19 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_3_axis_accelerometer_breakout___mma8452q",
+    "title": "3-Axis Accelerometer Breakout - MMA8452Q",
+    "devices": {"accelerometer": {"on": {"i2c": {}}, "provides": {"accelerometer": {}}, "chip": "mma8452q"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["3.3V", "SDA", "SCL", "I2", "I1", "GND"]}},
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "3_Axis_Accelerometer_Breakout___MMA8452Q.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

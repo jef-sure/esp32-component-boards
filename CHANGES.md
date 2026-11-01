@@ -137,6 +137,27 @@ committed, a program that asks by kind.
   before the wires, so a display does not come first for one wire less. `"used": false` on a device of a
   project: its pins stay taken, no library comes for it, its `board_*_init` returns false. A kit sets it on
   what was not asked for, but not on the display a touch that was asked for lies over.
+- `tools/import_board_manager.py` takes the boards of esp_board_manager packs into `imported/`, a tree the checks
+  read after `catalog/`, with no glue and no build. It gives no value a pack does not, takes no DSI timings and
+  writes no `shared_pins`. `lanes` of a CSI bus and `sample_rate` of a sound are no longer required by the format.
+- The solver and the page read `imported/`. A board with no supply lines or connectors in its data takes a module as
+  an unknown of the kit, an imported board says nothing of what its chip can do as an unknown, and such a board makes
+  no project yet. `tools/make_mcu.py` writes `platforms` into a chip: since which ESP-IDF it is taken, by revision,
+  from COMPATIBILITY.md of ESP-IDF. The map of pins counts the data lines of RGB and DVP, and buttons on a ladder.
+- The page runs the solver in a worker, so an answer no longer stops it.
+- `tools/import_fritzing.py` takes modules from Fritzing parts into `imported/modules/`: the contacts, the supply they
+  name, the part number. With a copy of a shop's list it also takes the price and the sections of a part, and leaves
+  out what is no longer sold.
+- `catalog/roles.json`: what a part can be for, by groups, with the variants that change what it takes. A part names
+  its roles in `provides`. The words of a role are a hint for an import.
+- `kind: addon` in `catalog/addons/`: a part that stands in the way of lines, a supply or a port and takes no pins. A
+  kit adds a level shifter by itself where a level needs one: both ways for lines a module drives, one way for lines
+  that only listen, by the channels of one.
+- `max7219` and the module `max7219_4in1`: its chain takes no pins, and `high_min_mv` of a chip brings a level shifter.
+  The LEDs of the boards name their variant.
+- The first screen is a palette of roles, a canvas of blocks with a variant, a name and their settings, and the kits.
+  Blocks of one role are one need under their names. A field keeps a description of the device. A part with no bus is
+  wired by its first way.
 - A DSI bus needs its speed only with a panel on it, so `esp32_p4_eth` lists its free connector.
 - A question for the GPIOs already in use, for something added to wiring that exists.
 - Reports from people: issue forms for a price and for a board, `.github/workflows/reports.yml` and

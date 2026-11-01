@@ -1,0 +1,22 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_mpl3115a2_i2c_barometric_pressure__altitude__temperature_sensor",
+    "title": "MPL3115A2 I2C Barometric Pressure, Altitude, Temperature Sensor",
+    "devices": {
+        "temperature": {"on": {"i2c": {}}, "provides": {"temperature": {}, "pressure": {}}, "chip": "mpl3115a2"}
+    },
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["VIN", "+3V3", "INT1", "INT2", "SDA", "SCL", "GND"]}},
+    "maker": "adafruit",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit MPL3115A2 I2C Barometric Pressure, Altitude, Temperature Sensor.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

@@ -1,0 +1,26 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "waveshare_boards_esp32_s3_lr1121_epaper_2_9",
+    "title": "Waveshare ESP32-S3-LR1121-ePaper-2.9",
+    "mcu": {"target": "esp32s3"},
+    "buses": {"i2c": {"i2c0": {"sda": 13, "scl": 14}}, "spi": {"spi2": {"mosi": 45, "miso": 46, "sclk": 40}}},
+    "devices": {
+        "status_led": {"class": "led", "pins": {"data": 21}, "config": {"kind": "ws2812", "count": 1}},
+        "epaper_ssd16xx": {"class": "other", "chip": "ssd16xx_290"},
+        "rtc_pcf85063a": {"class": "rtc", "chip": "pcf85063a"},
+        "bat_axp2602": {"class": "pmic", "chip": "axp2602"},
+        "radio_lr1121": {"class": "radio", "on": {"spi.spi2": {"cs": "nc"}}, "pins": {}, "chip": "lr1121"}
+    },
+    "origin": {
+        "from": "waveshare_boards",
+        "ref": "0.1.3",
+        "path": "boards/esp32_s3_lr1121_epaper_2_9",
+        "license": "Apache-2.0",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "waveshare_boards 0.1.3"}},
+    "power": [{"line": "nc", "level": 1, "feeds": ["epaper_ssd16xx"]}]
+}

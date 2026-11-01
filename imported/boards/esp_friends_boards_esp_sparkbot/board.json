@@ -1,0 +1,63 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "esp_friends_boards_esp_sparkbot",
+    "title": "ESP32-S3 SparkBot",
+    "mcu": {"target": "esp32s3"},
+    "buses": {
+        "i2c": {"i2c0": {"sda": 4, "scl": 5}},
+        "spi": {"spi3": {"mosi": "nc", "miso": "nc", "sclk": 21}},
+        "i2s": {"i2s0": {"mclk": 45, "bclk": 39, "ws": 41, "dout": 42, "din": 40}},
+        "dvp": {"cam": {"pclk": 13, "vsync": 6, "de": 7, "data": [11, 9, 8, 10, 12, 18, 17, 16]}}
+    },
+    "devices": {
+        "display_lcd": {
+            "class": "display",
+            "on": {"spi.spi3": {"cs": 44, "hz": 40000000, "mode": 0}},
+            "pins": {"dc": 43, "backlight": 46},
+            "config": {
+                "kind": "graphics",
+                "panel": {"width": 240, "height": 240},
+                "primary": true,
+                "depth_bits": 16,
+                "invert": true,
+                "color_order": "rgb"
+            },
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "left-right", "y": "top-bottom", "swap": false}},
+                "backlight": {"how": "backlight_pwm", "min": 0, "max": 100, "start": 100}
+            },
+            "chip": "st7789"
+        },
+        "audio_dac": {
+            "class": "audio",
+            "on": {"i2s.i2s0": {}},
+            "config": {"direction": "out", "sample_rate": 16000},
+            "chip": "i2s_amp"
+        },
+        "audio_adc": {
+            "class": "audio",
+            "on": {"i2s.i2s0": {}},
+            "config": {"direction": "in", "sample_rate": 16000},
+            "chip": "i2s_mic"
+        },
+        "camera": {
+            "class": "camera",
+            "on": {"i2c.i2c0": {"role": "control"}, "dvp.cam": {"role": "data"}},
+            "pins": {"xclk": 15},
+            "config": {"xclk_hz": 20000000}
+        },
+        "imu_sensor": {"class": "imu", "chip": "bmi270"},
+        "status_led": {"class": "led", "pins": {"out": 3}}
+    },
+    "origin": {
+        "from": "esp_friends_boards",
+        "ref": "0.6.1",
+        "path": "esp_sparkbot",
+        "license": "Espressif Modified MIT License",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "esp_friends_boards 0.6.1"}}
+}

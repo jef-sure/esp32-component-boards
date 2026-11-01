@@ -1,0 +1,46 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_fona___mini_cellular_gsm_breakout",
+    "title": "Adafruit FONA - Mini Cellular GSM Breakout",
+    "devices": {"cellular": {"on": {"uart": {}}, "provides": {"cellular": {}}, "class": "radio"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "ADC",
+                "GND",
+                "VBAT",
+                "VCCIO",
+                "NETSTAT_5V",
+                "RXD_5V",
+                "TXD_5V",
+                "RI_5V",
+                "PWRKEY_5V",
+                "PWRSTAT_5V",
+                "RESET_5V",
+                "SPEAKER2-",
+                "SPEAKER2+",
+                "MIC2+",
+                "MIC2-",
+                "Bz-",
+                "Bz+",
+                "PWM",
+                "+5V",
+                "GSM_ANT"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "power": [{"name": "VCC", "source": "connector", "volts": 5}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit FONA - Mini Cellular GSM SMA Breakout.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

@@ -1,4 +1,6 @@
 [
+    "addons/level_shifter_74ahct125/addon.json",
+    "addons/level_shifter_bss138/addon.json",
     "boards/cyd_s028r/board.json",
     "boards/esp32_devkit/board.json",
     "boards/esp32_p4_eth/board.json",
@@ -20,6 +22,7 @@
     "devices/ili9341/device.json",
     "devices/jd9165/device.json",
     "devices/jd9365/device.json",
+    "devices/max7219/device.json",
     "devices/mfrc522/device.json",
     "devices/nv3041a/device.json",
     "devices/ov02c10/device.json",
@@ -62,6 +65,7 @@
     "modules/clrc663_module/module.json",
     "modules/lcd12864_st7920/module.json",
     "modules/lcd2004_pcf8574/module.json",
+    "modules/max7219_4in1/module.json",
     "modules/ov02c10_csi/module.json",
     "modules/piezo_disc/module.json",
     "modules/pn5180_module/module.json",
@@ -72,5 +76,6 @@
     "modules/waveshare_poe_b/module.json",
     "questions.json",
     "rates.json",
+    "roles.json",
     "rules.json"
 ]

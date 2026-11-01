@@ -1,0 +1,61 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "guition_boards_jc1060p470_i_w_y",
+    "title": "JC1060P470C_I_W_Y (with enclosure, IP101 Ethernet)",
+    "mcu": {"target": "esp32p4"},
+    "buses": {
+        "i2c": {"i2c0": {"sda": 7, "scl": 8}},
+        "i2s": {"i2s0": {"mclk": 13, "bclk": 12, "ws": 10, "dout": 9, "din": 48}},
+        "dsi": {"dsi0": {"lanes": 2, "lane_mbps": 750, "phy_ldo_chan": 3, "phy_ldo_mv": 2500}},
+        "uart": {"uart1": {"tx": 26, "rx": 27, "rts": "nc", "cts": "nc"}},
+        "sdmmc": {"sdmmc0": {}}
+    },
+    "devices": {
+        "audio_dac": {
+            "class": "audio",
+            "on": {"i2s.i2s0": {"format": "tdm"}, "i2c.i2c0": {"address": "0x30"}},
+            "pins": {"pa": 11},
+            "config": {"direction": "both", "sample_rate": 44100, "clock": "bclk"},
+            "chip": "es8311"
+        },
+        "display_lcd": {
+            "class": "display",
+            "on": {"dsi.dsi0": {}},
+            "pins": {"rst": 0, "backlight": 23},
+            "config": {
+                "kind": "graphics",
+                "panel": {"width": 1024, "height": 600},
+                "primary": true,
+                "depth_bits": 24,
+                "color_order": "rgb"
+            },
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "left-right", "y": "top-bottom", "swap": false}},
+                "backlight": {"how": "backlight_pwm", "min": 0, "max": 100}
+            },
+            "chip": "jd9165"
+        },
+        "lcd_touch": {
+            "class": "touch",
+            "on": {"i2c.i2c0": {"address": "0x5d"}},
+            "pins": {},
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "left-right", "y": "top-bottom", "swap": false}}
+            },
+            "config": {"over": "display_lcd", "x_max": 1024, "y_max": 600},
+            "chip": "gt911"
+        },
+        "fs_sdcard": {"class": "storage", "config": {"media": "microsd"}, "on": {"sdmmc.sdmmc0": {}}}
+    },
+    "origin": {
+        "from": "guition_boards",
+        "ref": "0.2.2",
+        "path": "jc1060p470_i_w_y",
+        "license": "MIT",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "guition_boards 0.2.2"}}
+}

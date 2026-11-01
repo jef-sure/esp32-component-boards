@@ -60,6 +60,15 @@ const host = {
         if (!answer.ok) return null;
         const paths = await answer.json();
         const texts = await Promise.all(paths.map(async (path) => (await fetch(`../catalog/${path}`)).text()));
+        return { ...(await this.fetchImported('imported')), ...(await this.fetchImported('imported-shops')), ...Object.fromEntries(paths.map((path, i) => [path, texts[i]])) };
+    },
+
+    // A tree of imported data. imported-shops/ is not published: a page elsewhere has none, and the catalog goes over both.
+    async fetchImported(tree) {
+        const answer = await fetch(`../${tree}/index.json`);
+        if (!answer.ok) return {};
+        const paths = await answer.json();
+        const texts = await Promise.all(paths.map(async (path) => (await fetch(`../${tree}/${path}`)).text()));
         return Object.fromEntries(paths.map((path, i) => [path, texts[i]]));
     },
 

@@ -1,0 +1,28 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_1_27_inch_16_bit_color_oled_w_microsd_holder",
+    "title": "1.27 inch 16-bit Color OLED w microSD holder",
+    "devices": {
+        "display": {"on": {"spi": {}}, "provides": {"display": {"variant": "oled"}, "sd_card": {}}, "class": "other"}
+    },
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": ["VIN", "3.3V", "MOSI", "CLK", "DC", "RESET", "OLEDCS", "SDCS", "MISO", "SD_CD", "GND"]
+        }
+    },
+    "maker": "adafruit",
+    "part": "1673",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit 1.27 inch 16-bit Color OLED w microSD holder.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

@@ -1,0 +1,42 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_led_arcade_button_1x4_stemma_qt",
+    "title": "Adafruit LED Arcade Button 1x4 STEMMA QT",
+    "devices": {"led": {"on": {"i2c": {}}, "provides": {"led": {"variant": "single"}, "button": {}}, "class": "led"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "VCC",
+                "5.0V",
+                "SW1",
+                "LED1",
+                "SW2",
+                "LED2",
+                "SW3",
+                "LED3",
+                "SW4",
+                "LED4",
+                "SCL",
+                "SDA",
+                "INT",
+                "UPDI",
+                "GND"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "5296",
+    "power": [{"name": "VCC", "source": "connector", "volts": 5}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit LED Arcade Button 1x4 STEMMA QT.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

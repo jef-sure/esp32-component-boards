@@ -1,0 +1,49 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_5x5_neopixel_grid_bff",
+    "title": "Adafruit 5x5 NeoPixel Grid BFF",
+    "devices": {
+        "led": {
+            "on": {"i2c": {}, "spi": {}, "uart": {}},
+            "provides": {"led": {"variant": "addressable"}},
+            "class": "led"
+        }
+    },
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "3.3V",
+                "+5V",
+                "P$1",
+                "MOSI",
+                "MISO",
+                "SCK",
+                "RX_A7",
+                "N$25",
+                "A0",
+                "A1",
+                "A2",
+                "A3",
+                "SDA",
+                "SCL",
+                "TX_A6",
+                "GND"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "5646",
+    "power": [{"name": "VCC", "source": "connector", "volts": 5}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit 5x5 NeoPixel Grid BFF.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

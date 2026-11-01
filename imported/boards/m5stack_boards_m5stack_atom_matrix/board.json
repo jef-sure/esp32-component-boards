@@ -1,0 +1,23 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "m5stack_boards_m5stack_atom_matrix",
+    "title": "ATOM Matrix Development Board (5x5 RGB LED matrix)",
+    "mcu": {"target": "esp32"},
+    "buses": {"i2c": {"i2c0": {"sda": 25, "scl": 21}}},
+    "devices": {
+        "led_strip": {"class": "led", "pins": {"data": 27}, "config": {"kind": "ws2812", "count": 25}},
+        "user_button": {"class": "button", "pins": {"in": {"gpio": 39, "active": "low"}}},
+        "ir_tx": {"class": "other", "pins": {"out": 12}}
+    },
+    "origin": {
+        "from": "m5stack_boards",
+        "ref": "0.6.1~2",
+        "path": "m5stack_atom_matrix",
+        "license": "Espressif Modified MIT License",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "m5stack_boards 0.6.1~2"}}
+}

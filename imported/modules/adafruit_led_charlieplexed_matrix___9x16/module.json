@@ -1,0 +1,53 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_led_charlieplexed_matrix___9x16",
+    "title": "LED Charlieplexed Matrix - 9x16",
+    "devices": {"led": {"on": {"i2c": {}}, "provides": {"led": {"variant": "matrix"}}, "class": "led"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "VCC",
+                "SCL",
+                "SDA",
+                "B1",
+                "B2",
+                "B3",
+                "B4",
+                "B5",
+                "B6",
+                "B7",
+                "B8",
+                "B9",
+                "A1",
+                "A2",
+                "A3",
+                "A4",
+                "A5",
+                "A6",
+                "A7",
+                "A8",
+                "A9",
+                "SHUTD",
+                "INTB",
+                "ADDR",
+                "AUDIO",
+                "GND"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "2974",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit Charlieplex 9x16 Cool White.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

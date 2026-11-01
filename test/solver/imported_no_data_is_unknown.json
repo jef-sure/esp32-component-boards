@@ -1,0 +1,17 @@
+{
+    "title": "An imported board with no supply lines and no connectors in its data takes a module as an unknown, behind the boards that have them",
+    "imported": true,
+    "answers": {
+        "nfc_readers": 2
+    },
+    "first": {
+        "name": "esp32_devkit",
+        "modules": {
+            "pn532_module": 2
+        },
+        "on": {
+            "pn532_module": "spi"
+        }
+    },
+    "says": "its supply lines are not in the data"
+}

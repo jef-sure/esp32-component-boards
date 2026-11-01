@@ -277,8 +277,11 @@ const SelectPage = {
         const store = useEditor();
         const fit = computed(() => store.kits.filter((kit) => kit.fits));
         const others = computed(() => store.kits.filter((kit) => !kit.fits));
+        // One card a board: the kits come sorted, so its first is its best, and the rest wait behind it.
+        const boards = computed(() => [...Map.groupBy(fit.value, (kit) => kit.name).values()].map(([first, ...rest]) => ({ first, rest })));
         const asked = computed(() => Object.values(store.answers).some((answer) => (Array.isArray(answer) ? answer.length : answer && answer !== 'none')));
         const addOutput = () => store.answers.outputs.push({ kind: 'tone', hz: undefined, ppm: undefined, jitter: 'any', bits: 8, pins: 1, live: false });
+        Vue.watch(() => [store.loaded, store.stamp, store.language, store.currency, store.answers], () => store.askKits(), { deep: true, immediate: true });
         // a plan belongs to the answers it was made for
         Vue.watch(() => store.answers, (answers) => {
             store.plan = null;
@@ -286,16 +289,46 @@ const SelectPage = {
         }, { deep: true });
         const money = (price) => (!price ? '' : !price.known ? translate(store.language, 'price not known') : `${price.low === price.high ? price.low : `${price.low}–${price.high}`} ${price.currency}${price.missing.length ? ' + ?' : ''}`);
         const priceLink = (item) => reportLink({ template: 'price.yml', item, currency: store.currency });
-        return { store, host, fit, others, asked, addOutput, money, numberOf, priceLink, MARKS };
+        const filter = Vue.ref('');
+        const groups = computed(() => store.palette.map((group) => ({ ...group, roles: group.roles.filter((role) => translate(store.language, role.text).toLowerCase().includes(filter.value.toLowerCase())) })).filter((group) => group.roles.length));
+        const roleOf = (id) => store.palette.flatMap((group) => group.roles).find((role) => role.id === id);
+        const nameOf = (event) => event.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '_').replace(/^[^a-z]+/, '').replace(/_+$/, '');
+        // what limits a part of a role holds for all its blocks: it is asked on the first
+        const firstOfRole = (at) => store.answers.blocks.findIndex((block) => block.role === store.answers.blocks[at].role) === at;
+        const outputsQuestion = computed(() => store.questions.find((question) => question.type === 'outputs'));
+        return { store, host, fit, boards, others, asked, addOutput, money, numberOf, priceLink, MARKS, filter, groups, roleOf, nameOf, outputsQuestion, firstOfRole };
     },
     template: `
         <div class="select">
-            <form class="questions" @submit.prevent>
+            <aside class="palette">
+                <h2>{{ t('Roles') }}</h2>
+                <input type="search" v-model="filter" :placeholder="t('find a role')">
+                <section v-for="group in groups" :key="group.id">
+                    <h3>{{ t(group.text) }}</h3>
+                    <button v-for="role in group.roles" :key="role.id" type="button" class="role" :class="{ empty: !role.count }" draggable="true"
+                        @dragstart="$event.dataTransfer.setData('text/plain', role.id)" @click="store.addBlock(role.id)">{{ t(role.text) }} <span class="note">{{ role.count }}</span></button>
+                </section>
+            </aside>
+            <form class="canvas" @submit.prevent @dragover.prevent @drop.prevent="store.addBlock($event.dataTransfer.getData('text/plain'))">
                 <h2>{{ t("Let's build something great!") }}</h2>
-                <div v-for="question in store.questions" :key="question.id" class="question">
-                    <label v-if="question.type === 'flag'"><input type="checkbox" v-model="store.answers[question.id]"> {{ t(question.text) }}</label>
-                    <template v-else-if="question.type === 'outputs'">
-                        <label>{{ t(question.text) }}</label>
+                <textarea class="task" rows="3" v-model="store.answers.task" :placeholder="t('What the device does, who uses it and where it stands')"></textarea>
+                <p v-if="!store.answers.blocks.length" class="hint">{{ t('Put here what the device needs: click a role or drag it.') }}</p>
+                <div class="blocks">
+                    <article v-for="(block, i) in store.answers.blocks" :key="i" class="block">
+                        <header><b>{{ t(roleOf(block.role).text) }}</b><button class="drop" @click.prevent="store.answers.blocks.splice(i, 1)">×</button></header>
+                        <label v-if="roleOf(block.role).variants">{{ t('Variant') }}
+                            <select v-model="block.variant"><option :value="undefined">{{ t('any') }}</option>
+                                <option v-for="variant in roleOf(block.role).variants" :key="variant.id" :value="variant.id">{{ t(variant.text) }}</option></select></label>
+                        <label>{{ t('Name') }} <input type="text" :value="block.name" :placeholder="block.role" @change="block.name = nameOf($event)"></label>
+                        <label v-for="question in firstOfRole(i) ? store.settings(roleOf(block.role)) : []" :key="question.id">{{ t(question.text) }}
+                            <select v-if="question.type === 'choice'" :value="store.answers[question.id] ?? question.choices[0].value" @change="store.answers[question.id] = $event.target.value">
+                                <option v-for="choice in question.choices" :key="choice.value" :value="choice.value">{{ t(choice.text) }}</option></select>
+                            <input v-else type="number" min="0" step="any" :value="store.answers[question.id]" @change="store.answers[question.id] = numberOf($event, question)"></label>
+                    </article>
+                </div>
+                <div class="question">
+                    <template v-if="outputsQuestion">
+                        <label>{{ t(outputsQuestion.text) }}</label>
                         <div v-for="(output, i) in store.answers.outputs" :key="i" class="output">
                             <select v-model="output.kind"><option value="tone">{{ t('tone') }}</option><option value="pwm">PWM</option></select>
                             <label><input type="number" min="0" step="any" v-model.number="output.hz"> {{ t('Hz') }}</label>
@@ -311,15 +344,8 @@ const SelectPage = {
                         <button @click.prevent="addOutput">{{ t('add an output') }}</button>
                         <div v-if="store.answers.outputs.length" class="hint">{{ t('Frequencies are calculated, not measured.') }}</div>
                     </template>
-                    <template v-else>
-                        <label>{{ t(question.text) }}</label>
-                        <select v-if="question.type === 'choice'" :value="store.answers[question.id] ?? question.choices[0].value" @change="store.answers[question.id] = $event.target.value">
-                            <option v-for="choice in question.choices" :key="choice.value" :value="choice.value">{{ t(choice.text) }}</option>
-                        </select>
-                        <input v-else-if="question.type === 'text'" type="text" v-model="store.answers[question.id]">
-                        <input v-else type="number" min="0" :max="question.max" :step="question.type === 'count' ? 1 : 'any'" :value="store.answers[question.id]" @change="store.answers[question.id] = numberOf($event, question)">
-                    </template>
                 </div>
+                <div class="question"><label>{{ t('GPIOs already in use, as 14, 15, 16') }}</label><input type="text" v-model="store.answers.taken"></div>
             </form>
             <div class="kits">
                 <section v-if="store.plan" class="plan">
@@ -347,10 +373,11 @@ idf.py reconfigure build flash monitor</pre>
                     </div>
                 </section>
                 <p class="summary"><b>{{ t(fit.length === 1 ? '{0} kit fits' : '{0} kits fit', fit.length) }}</b>
+                    <span v-if="store.solving" class="hint">{{ t('counting…') }}</span>
                     <span class="hint">{{ t(asked ? 'The fewest unknowns first, then the fewest modules, the least you did not ask for and the fewest wires; the price counts last, or after the unknowns with a budget.' : 'Nothing is asked yet, so every board fits.') }}</span></p>
                 <p class="project"><label>{{ t('Project name') }} <input type="text" v-model="store.projectName"></label>
                     <span class="hint">{{ t('An empty folder gets a whole project. A folder with a program gets only its board.') }}</span></p>
-                <article v-for="kit in fit" :key="kit.name + kit.modules.map((item) => item.name).join()" class="kit">
+                <article v-for="{ first: kit, rest } in boards" :key="kit.name" class="kit">
                     <img v-if="kit.picture" class="picture" :src="'../catalog/' + kit.picture" :alt="kit.title">
                     <h3>{{ kit.headline }} <span class="note">{{ money(kit.price) }}</span></h3>
                     <ul><li v-for="line in kit.says" :key="line.text" :class="line.level"><span class="mark">{{ MARKS[line.level] }}</span> {{ line.text }}</li></ul>
@@ -360,8 +387,13 @@ idf.py reconfigure build flash monitor</pre>
                         <div v-for="module in kit.wiring" :key="module.use" class="wiring"><b>{{ module.title }}</b>
                             <span v-for="wire in module.lines" :key="wire.line"><code>{{ wire.line }}</code> → {{ wire.to }}</span></div>
                     </details>
-                    <button v-if="host.canOpenFolder" @click="store.planProject(kit)">{{ t('make a project…') }}</button>
+                    <button v-if="host.canOpenFolder && !kit.imported" @click="store.planProject(kit)">{{ t('make a project…') }}</button>
+                    <span v-if="kit.imported" class="hint">{{ t('imported: no project until this board is in the catalog') }}</span>
                     <span v-else class="hint">{{ t('Writing a project into a folder takes Chromium.') }}</span>
+                    <details v-if="rest.length" class="more"><summary>{{ t('{0} more on this board', rest.length) }}</summary>
+                        <p v-for="other in rest" :key="other.headline">{{ other.headline }} <span class="note">{{ money(other.price) }}</span>
+                            <button v-if="host.canOpenFolder && !other.imported" @click="store.planProject(other)">{{ t('make a project…') }}</button></p>
+                    </details>
                 </article>
                 <p v-if="!fit.length">{{ t('Nothing fits these answers.') }}</p>
                 <details v-if="others.length" class="others"><summary>{{ t('What does not fit, and why ({0})', others.length) }}</summary>

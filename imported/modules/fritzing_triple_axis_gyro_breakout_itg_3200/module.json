@@ -1,0 +1,21 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_triple_axis_gyro_breakout_itg_3200",
+    "title": "Triple Axis Gyro Breakout ITG-3200",
+    "devices": {"gyroscope": {"on": {"i2c": {}}, "provides": {"gyroscope": {}}, "chip": "itg3200"}},
+    "connectors": {
+        "J1": {"type": "contacts of the part", "pins": ["VCC", "VLOGIC", "GND", "INT", "CLKIN", "SDA", "SCL"]}
+    },
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "ITG-3200-v11.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

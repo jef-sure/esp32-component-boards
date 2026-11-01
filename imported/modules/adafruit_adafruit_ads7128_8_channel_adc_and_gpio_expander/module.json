@@ -1,0 +1,40 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_ads7128_8_channel_adc_and_gpio_expander",
+    "title": "Adafruit ADS7128 8-Channel ADC and GPIO Expander",
+    "devices": {"io_expander": {"on": {"i2c": {}}, "provides": {"io_expander": {}, "adc": {}}, "chip": "ads7128"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "DVDD",
+                "AVDD",
+                "A0",
+                "A1",
+                "A2",
+                "A3",
+                "A4",
+                "A5",
+                "A6",
+                "A7",
+                "SDA",
+                "SCL",
+                "ALERT",
+                "ADDR",
+                "GND"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit ADS7128 8-Channel ADC and GPIO Expander.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

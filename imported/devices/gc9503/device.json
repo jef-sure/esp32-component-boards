@@ -1,0 +1,9 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "gc9503",
+    "title": "gc9503",
+    "class": ["display"],
+    "checked": {"facts": {"level": "extracted", "source": "the boards that use it"}}
+}

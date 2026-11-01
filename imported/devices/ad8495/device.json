@@ -1,0 +1,9 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "ad8495",
+    "title": "ad8495",
+    "class": ["other", "sensor"],
+    "checked": {"facts": {"level": "extracted", "source": "the boards that use it"}}
+}

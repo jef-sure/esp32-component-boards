@@ -1,0 +1,50 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "esp_boards_esp32_c3_lcdkit",
+    "title": "ESP32-C3-LCDKit with GC9A01 LCD, speaker, knob, and LED",
+    "mcu": {"target": "esp32c3"},
+    "buses": {
+        "spi": {"spi2": {"mosi": 0, "miso": "nc", "sclk": 1}},
+        "i2s": {"i2s0": {"mclk": "nc", "bclk": "nc", "ws": "nc", "dout": 3, "din": "nc"}}
+    },
+    "devices": {
+        "display_lcd": {
+            "class": "display",
+            "on": {"spi.spi2": {"cs": 7, "hz": 80000000, "mode": 0}},
+            "pins": {"dc": 2, "backlight": 5},
+            "config": {
+                "kind": "graphics",
+                "panel": {"width": 240, "height": 240},
+                "primary": true,
+                "depth_bits": 16,
+                "invert": true,
+                "color_order": "bgr"
+            },
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "right-left", "y": "top-bottom", "swap": false}},
+                "backlight": {"how": "backlight_pwm", "min": 0, "max": 100, "start": 100}
+            },
+            "chip": "gc9a01"
+        },
+        "knob": {"class": "encoder", "pins": {"a": 10, "b": 6}},
+        "knob_button": {"class": "button", "pins": {"in": {"gpio": 9, "active": "low"}}},
+        "audio_dac": {
+            "class": "audio",
+            "on": {"i2s.i2s0": {"format": "pdm"}},
+            "config": {"direction": "out", "sample_rate": 22050, "clock": "bclk"},
+            "chip": "pdm_out"
+        },
+        "led_strip": {"class": "led", "pins": {"data": 8}, "config": {"kind": "ws2812", "count": 1}}
+    },
+    "origin": {
+        "from": "esp_boards",
+        "ref": "0.7.1",
+        "path": "esp32_c3_lcdkit",
+        "license": "Espressif Modified MIT License",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "esp_boards 0.7.1"}}
+}

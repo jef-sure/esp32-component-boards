@@ -1,0 +1,60 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_music_maker_featherwing_with_amp",
+    "title": "Adafruit Music Maker FeatherWing with Amp",
+    "devices": {"speaker": {"on": {"i2c": {}, "spi": {}}, "provides": {"speaker": {}, "player": {}}, "class": "other"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "OUT_LEFT-",
+                "OUT_LEFT+",
+                "OUT_RIGHT+",
+                "OUT_RIGHT-",
+                "VBAT",
+                "EN",
+                "USB",
+                "N",
+                "M",
+                "L",
+                "XDCS",
+                "DREQ",
+                "MP3CS",
+                "SD_CS",
+                "SCL",
+                "SDA",
+                "G",
+                "MP3_RX",
+                "UART_RX",
+                "MISO",
+                "MOSI",
+                "SCLK",
+                "F",
+                "E",
+                "D",
+                "C",
+                "B",
+                "A",
+                "GND",
+                "MP3RST",
+                "!RESET",
+                "3.3V",
+                "AREF"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "3436",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit Music Maker FeatherWing with Amp.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

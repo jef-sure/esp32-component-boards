@@ -1,0 +1,22 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_contrib_adafruit_tcs34725_rgb_color_sensor",
+    "title": "Adafruit TCS34725 RGB Color Sensor",
+    "devices": {"color": {"on": {"i2c": {}}, "provides": {"color": {}}, "chip": "tcs34725"}},
+    "connectors": {
+        "J1": {"type": "contacts of the part", "pins": ["VIN", "GND", "+3V3", "SCL", "SDA", "INT", "LED_EN"]}
+    },
+    "part": "1334",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "fritzing_contrib",
+        "ref": "27535f2",
+        "path": "adafruit_79e03929cd60efb5be394548d08bdfc7_1_87.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing_contrib 27535f2"}}
+}

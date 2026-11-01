@@ -1,0 +1,55 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_midi_featherwing_kit__3_5mm_jacks",
+    "title": "Adafruit MIDI FeatherWing Kit (3.5mm Jacks)",
+    "devices": {"midi": {"on": {"i2c": {}, "spi": {}, "uart": {}}, "provides": {"midi": {}}, "class": "other"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "RESET",
+                "3.3V",
+                "AREF",
+                "GND",
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F",
+                "SCK",
+                "MOSI",
+                "MISO",
+                "MIDI_RX",
+                "MIDI_TX",
+                "G",
+                "VBAT",
+                "EN",
+                "USB",
+                "N",
+                "M",
+                "L",
+                "K",
+                "J",
+                "I",
+                "H",
+                "SCL",
+                "SDA"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "4740",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit MIDI FeatherWing Kit (3.5mm Jacks).fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

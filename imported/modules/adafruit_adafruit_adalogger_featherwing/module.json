@@ -1,0 +1,63 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_adalogger_featherwing",
+    "title": "Adafruit Adalogger FeatherWing",
+    "devices": {
+        "sd_card": {
+            "on": {"i2c": {}, "spi": {}, "uart": {}},
+            "provides": {"sd_card": {}, "rtc": {}},
+            "class": "storage"
+        }
+    },
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "INT1",
+                "EN",
+                "USB",
+                "N",
+                "M",
+                "L",
+                "CS",
+                "J",
+                "I",
+                "H",
+                "SCL",
+                "SDA",
+                "G",
+                "TX",
+                "RX",
+                "MISO",
+                "MOSI",
+                "SCK",
+                "F",
+                "E",
+                "D",
+                "C",
+                "B",
+                "A",
+                "GND",
+                "AREF",
+                "+3V3",
+                "RESET",
+                "VBAT",
+                "SD_CS"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "2922",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit Adalogger FeatherWing.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

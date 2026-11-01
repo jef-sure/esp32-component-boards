@@ -1,0 +1,23 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_drv2605l",
+    "title": "Adafruit DRV2605L",
+    "devices": {"vibration": {"on": {"i2c": {}}, "provides": {"vibration": {}}, "chip": "drv2605l"}},
+    "connectors": {
+        "J1": {"type": "contacts of the part", "pins": ["VIN", "GND", "SCL", "SDA", "IN/TRIG", "OUT+", "OUT-"]}
+    },
+    "maker": "adafruit",
+    "part": "2305",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit DRV2605L.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

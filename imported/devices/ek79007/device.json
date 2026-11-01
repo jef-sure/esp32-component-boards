@@ -1,0 +1,10 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "ek79007",
+    "title": "ek79007",
+    "class": ["display"],
+    "checked": {"facts": {"level": "extracted", "source": "the boards that use it"}},
+    "on": {"dsi": {}}
+}

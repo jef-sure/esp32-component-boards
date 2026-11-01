@@ -1,0 +1,60 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "waveshare_boards_esp32_s3_touch_amoled_1_8",
+    "title": "ESP32-S3-Touch-AMOLED-1.8 V1 Development Board (SH8601 / FT3168)",
+    "mcu": {"target": "esp32s3"},
+    "buses": {
+        "i2c": {"i2c0": {"sda": 15, "scl": 14}},
+        "i2s": {"i2s0": {"mclk": 16, "bclk": 9, "ws": 45, "dout": 8, "din": 10}},
+        "qspi": {"spi2": {"d0": 4, "d1": 5, "d2": 6, "d3": 7, "sclk": 11}},
+        "sdmmc": {"sdmmc0": {"clk": 2, "cmd": 1, "d0": 3}}
+    },
+    "devices": {
+        "gpio_expander": {
+            "class": "io_expander",
+            "on": {"i2c.i2c0": {"address": "0x40"}},
+            "config": {"pins": 8},
+            "chip": "tca9554"
+        },
+        "axp2101_power_manager": {"class": "pmic", "chip": "axp2101"},
+        "audio_dac": {
+            "class": "audio",
+            "on": {"i2s.i2s0": {}, "i2c.i2c0": {"address": "0x30"}},
+            "pins": {"pa": 46},
+            "config": {"direction": "both", "sample_rate": 48000},
+            "start": {"after": ["gpio_expander", "axp2101_power_manager"]},
+            "chip": "es8311"
+        },
+        "display_lcd": {
+            "class": "display",
+            "on": {"qspi.spi2": {"cs": 12, "mode": 0}},
+            "pins": {},
+            "config": {"kind": "graphics", "panel": {"width": 368, "height": 448}, "primary": true},
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "left-right", "y": "top-bottom", "swap": false}}
+            },
+            "start": {"after": ["gpio_expander", "axp2101_power_manager"]},
+            "chip": "sh8601"
+        },
+        "lcd_touch": {
+            "class": "touch",
+            "on": {"i2c.i2c0": {"address": "0x70"}},
+            "pins": {"int": 21},
+            "config": {"over": "display_lcd", "x_max": 368, "y_max": 448},
+            "start": {"after": ["gpio_expander", "axp2101_power_manager"]},
+            "chip": "ft5x06"
+        },
+        "fs_sdcard": {"class": "storage", "config": {"media": "microsd"}, "on": {"sdmmc.sdmmc0": {}}}
+    },
+    "origin": {
+        "from": "waveshare_boards",
+        "ref": "0.1.3",
+        "path": "boards/esp32_s3_touch_amoled_1_8",
+        "license": "Apache-2.0",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "waveshare_boards 0.1.3"}}
+}

@@ -1,0 +1,66 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "guition_boards_jc3636w518",
+    "title": "JC3636W518 QSPI display (hardware unverified)",
+    "mcu": {"target": "esp32s3"},
+    "buses": {
+        "i2s": {"i2s1": {"mclk": 21, "bclk": 18, "ws": 16, "dout": 17, "din": "nc"}, "i2s0": {"din": 46, "clk": 45}},
+        "qspi": {"spi2": {"d0": 11, "d1": 12, "d2": 13, "d3": 14, "sclk": 9}},
+        "i2c": {"i2c0": {"sda": 7, "scl": 8}},
+        "sdmmc": {"sdmmc0": {"clk": 3, "cmd": 4, "d0": 2, "d1": 1, "d2": 6, "d3": 5}}
+    },
+    "devices": {
+        "audio_dac": {
+            "class": "audio",
+            "on": {"i2s.i2s1": {}},
+            "config": {"direction": "out", "sample_rate": 48000},
+            "chip": "i2s_amp"
+        },
+        "audio_adc": {
+            "class": "audio",
+            "on": {"i2s.i2s0": {"format": "pdm"}},
+            "config": {"direction": "in", "sample_rate": 16000},
+            "chip": "pdm_mic"
+        },
+        "display_lcd": {
+            "class": "display",
+            "on": {"qspi.spi2": {"cs": 10, "hz": 80000000, "mode": 0}},
+            "pins": {"rst": 47, "backlight": 15},
+            "config": {
+                "kind": "graphics",
+                "panel": {"width": 360, "height": 360},
+                "primary": true,
+                "depth_bits": 16,
+                "invert": true,
+                "color_order": "rgb"
+            },
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "left-right", "y": "top-bottom", "swap": false}},
+                "backlight": {"how": "backlight_pwm", "min": 0, "max": 100, "start": 100}
+            },
+            "chip": "st77916"
+        },
+        "lcd_touch": {
+            "class": "touch",
+            "on": {"i2c.i2c0": {"address": "0x2a"}},
+            "pins": {"rst": {"gpio": 40, "active": "low"}},
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "left-right", "y": "top-bottom", "swap": false}}
+            },
+            "config": {"over": "display_lcd", "x_max": 360, "y_max": 360},
+            "chip": "cst816s"
+        },
+        "fs_sdcard": {"class": "storage", "config": {"media": "microsd"}, "on": {"sdmmc.sdmmc0": {}}}
+    },
+    "origin": {
+        "from": "guition_boards",
+        "ref": "0.2.2",
+        "path": "jc3636w518",
+        "license": "MIT",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "guition_boards 0.2.2"}}
+}

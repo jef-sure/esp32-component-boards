@@ -1,0 +1,21 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_neokey_1x4_qt_i2c",
+    "title": "Adafruit NeoKey 1x4 QT I2C",
+    "devices": {"button": {"on": {"i2c": {}}, "provides": {"button": {}}, "class": "other"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["VCC", "3.3V", "SCL", "SDA", "INT", "GND"]}},
+    "maker": "adafruit",
+    "part": "4980",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit NeoKey 1x4 QT I2C.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

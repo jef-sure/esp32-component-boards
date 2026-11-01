@@ -2,7 +2,7 @@
 // the data comes from schema.js, resolve.js, rules.js and pins.js, the same as the tools in Python check.
 'use strict';
 
-const FILES = { boards: 'board.json', modules: 'module.json', devices: 'device.json', mcu: 'mcu.json', connectors: 'connector.json' };
+const FILES = { boards: 'board.json', modules: 'module.json', addons: 'addon.json', devices: 'device.json', mcu: 'mcu.json', connectors: 'connector.json' };
 const READ_ONLY_GROUPS = new Set(['mcu']); // written by tools/make_mcu.py
 const LOADED = ['facts', 'classes', 'libraries', 'inputs']; // what the loader adds, not a field to edit
 const ROOT_FIELDS = new Set(['format', 'format_version', 'kind', 'name', 'title', 'description', 'extends', 'notes', 'images', 'origin', 'provides']);
@@ -35,7 +35,7 @@ const ISSUES = 'https://github.com/jef-sure/esp32-component-boards/issues/new';
 
 // A form of the repository with its fields filled: the person sends it from their own account, and the page sends nothing.
 const reportLink = (fields) => `${ISSUES}?${new URLSearchParams(fields)}`;
-const library = { catalog: null, entries: {}, localFiles: null, schema: null, rules: null, reader: null, loader: null, levels: [], checksOf: null, questions: [], rates: null, solver: null };
+const library = { worker: null, asked: 0, sent: null, catalog: null, entries: {}, localFiles: null, schema: null, rules: null, reader: null, loader: null, levels: [], checksOf: null, questions: [], rates: null, solver: null };
 
 // The entries of a tree in the layout of the catalog. What a program has of its own wins over the catalog.
 function readTree(files, local) {
@@ -54,7 +54,7 @@ function readTree(files, local) {
 }
 
 function readCatalog(files) {
-    library.catalog = { boards: {}, modules: {}, devices: {}, mcu: {}, connectors: {}, libraries: {} };
+    library.catalog = { boards: {}, modules: {}, addons: {}, devices: {}, mcu: {}, connectors: {}, libraries: {} };
     library.entries = {};
     readTree(files, false);
     const catalog = library.catalog;
@@ -66,7 +66,8 @@ function readCatalog(files) {
     library.checksOf = documentChecks({ schema: library.schema, rules: library.rules, loader: library.loader, schemaReader, check, pinProblems });
     library.questions = JSON.parse(files['questions.json']).questions;
     library.rates = JSON.parse(files['rates.json']);
-    library.solver = kitSolver({ catalog, loader: library.loader, questions: library.questions, rates: library.rates.rates, levels: library.levels, t: (text, ...values) => translate(useEditor().language, text, ...values), checksOf: library.checksOf, pinMap });
+    library.roles = JSON.parse(files['roles.json']).groups;
+    library.solver = kitSolver({ catalog, loader: library.loader, questions: library.questions, roles: library.roles, rates: library.rates.rates, levels: library.levels, t: (text, ...values) => translate(useEditor().language, text, ...values), checksOf: library.checksOf, pinMap });
 }
 
 function labelOf(key, value) {
@@ -145,19 +146,34 @@ const useEditor = Pinia.defineStore('editor', {
         hasLocal: false, // a program's local-boards is open: what is new goes there
         stamp: 0, // changes when something outside the reactive state does
         page: 'select',
-        answers: { outputs: [], ...JSON.parse(localStorage.getItem(PREFERENCES.answers) ?? '{}') },
+        answers: { outputs: [], blocks: [], ...JSON.parse(localStorage.getItem(PREFERENCES.answers) ?? '{}') },
         language: localStorage.getItem(PREFERENCES.language) || (navigator.language.startsWith('ru') ? 'ru' : 'en'),
         currency: localStorage.getItem(PREFERENCES.currency) || 'EUR',
         projectName: 'my_project',
         plan: null, // what a project is about to get, shown before anything is written
+        kits: [],
+        solving: false,
     }),
     getters: {
         entry(state) {
             state.stamp;
             return state.key ? library.entries[state.key] : null;
         },
+        // The roles by groups, with how many parts of the catalog each has.
+        palette(state) {
+            state.stamp;
+            const parts = [...Object.values(library.catalog?.modules ?? {}), ...Object.values(library.catalog?.boards ?? {})];
+            const classOf = (device) => [].concat(device.class ?? library.catalog?.devices[device.chip]?.class ?? []);
+            const has = (role, device) => Boolean(device.provides?.[role.id]) || (role.needs?.class && classOf(device).includes(role.needs.class));
+            const count = (role) => parts.filter((part) => Object.values(part.devices ?? {}).some((device) => has(role, device))).length;
+            return (library.roles ?? []).map((group) => ({ ...group, roles: group.roles.map((role) => ({ ...role, count: count(role) })) }));
+        },
+        // What a block asks besides its variant: the questions that limit parts of its class.
+        settings(state) {
+            return (role) => library.questions.filter((question) => question.limit?.of && question.limit.of === role.needs?.class && library.solver.holds(question, { ...state.answers, nfc_readers: state.answers.blocks.filter((block) => block.role === role.id).length }));
+        },
         readOnly() {
-            return !this.entry || READ_ONLY_GROUPS.has(this.entry.group);
+            return !this.entry || READ_ONLY_GROUPS.has(this.entry.group) || Boolean(this.entry.doc.origin); // what is imported is regenerated
         },
         groups(state) {
             state.stamp;
@@ -203,11 +219,6 @@ const useEditor = Pinia.defineStore('editor', {
             state.stamp;
             return library.rates ? [library.rates.base, ...Object.keys(library.rates.rates)] : [];
         },
-        kits(state) {
-            state.stamp;
-            state.language;
-            return state.loaded ? library.solver.solve({ ...copied(state.answers), currency: state.currency }) : [];
-        },
         saved() {
             return this.plain ? `${catalogJson(this.plain)}\n` : '';
         },
@@ -216,7 +227,44 @@ const useEditor = Pinia.defineStore('editor', {
         },
     },
     actions: {
+        addBlock(role) {
+            this.answers.blocks.push({ role, variant: undefined, name: '' });
+        },
+        // The worker answers the last question only; a page it cannot start on answers by itself.
+        startWorker() {
+            try {
+                library.worker = new Worker('solver_worker.js');
+            } catch {
+                return;
+            }
+            library.worker.onmessage = ({ data }) => {
+                if (data.id !== library.asked) return;
+                this.kits = data.kits;
+                this.solving = false;
+            };
+            library.worker.onerror = () => {
+                library.worker = null;
+                this.solving = false;
+                this.askKits();
+            };
+        },
+        askKits() {
+            if (!this.loaded) return;
+            const answers = { ...copied(this.answers), currency: this.currency };
+            if (!library.worker) {
+                this.kits = library.solver.solve(answers);
+                return;
+            }
+            const message = { id: ++library.asked, answers, language: this.language };
+            if (library.sent !== this.stamp) {
+                message.documents = { catalog: library.catalog, schema: library.schema, rules: library.rules, questions: library.questions, roles: library.roles, rates: library.rates.rates };
+                library.sent = this.stamp;
+            }
+            this.solving = true;
+            library.worker.postMessage(message);
+        },
         async start() {
+            this.startWorker();
             await this.run(async () => {
                 const files = await host.fetchCatalog();
                 if (files) this.load(files);

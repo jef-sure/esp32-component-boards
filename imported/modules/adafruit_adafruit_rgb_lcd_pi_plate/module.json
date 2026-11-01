@@ -1,0 +1,53 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_rgb_lcd_pi_plate",
+    "title": "Adafruit RGB LCD Pi Plate",
+    "devices": {
+        "display": {
+            "on": {"i2c": {}, "spi": {}, "uart": {}},
+            "provides": {"display": {"variant": "character"}},
+            "class": "other"
+        }
+    },
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "3.3V",
+                "+5V",
+                "SDA",
+                "SCL",
+                "GND",
+                "GPIO4",
+                "TXD",
+                "RXD",
+                "GPIO17",
+                "GPIO18",
+                "GPIO27",
+                "GPIO22",
+                "GPIO23",
+                "GPIO24",
+                "MOSI",
+                "MISO",
+                "GPIO25",
+                "SCK",
+                "SPI_CE0",
+                "SPI_CE1"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "1109",
+    "power": [{"name": "VCC", "source": "connector", "volts": 5}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit RGB LCD Pi Plate.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

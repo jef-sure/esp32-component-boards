@@ -1,0 +1,19 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_compass_module___hmc6352",
+    "title": "Compass Module - HMC6352",
+    "devices": {"magnetometer": {"on": {"i2c": {}}, "provides": {"magnetometer": {}}, "chip": "hmc6352"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["GND", "VCC", "SDA", "SCL"]}},
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "HMC6352-v18.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

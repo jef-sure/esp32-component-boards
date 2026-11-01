@@ -1,0 +1,5 @@
+{
+    "title": "A buzzer of the catalog is a part with no bus: it is wired by its first way",
+    "answers": {"blocks": [{"role": "buzzer"}]},
+    "kit": {"name": "esp32_devkit", "modules": {"piezo_disc": 1}}
+}

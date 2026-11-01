@@ -1,0 +1,55 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_ht16k33_breakout_16x8_led_matrix_driver",
+    "title": "HT16K33 Breakout 16x8 LED Matrix Driver",
+    "devices": {"led": {"on": {"i2c": {}}, "provides": {"led": {"variant": "matrix"}}, "chip": "ht16k33"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "VDD",
+                "C0",
+                "C1",
+                "C2",
+                "C3",
+                "C4",
+                "C5",
+                "C6",
+                "C7",
+                "A15",
+                "A14",
+                "A13",
+                "A12",
+                "A11",
+                "SDA",
+                "SCL",
+                "A0",
+                "A1",
+                "A2",
+                "A3",
+                "A4",
+                "A5",
+                "A6",
+                "A7",
+                "A8",
+                "A9",
+                "A10",
+                "GND"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "1427",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit HT16K33 Breakout 16x8 LED Matrix Driver.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

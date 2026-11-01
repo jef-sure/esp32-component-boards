@@ -1,0 +1,20 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_bmp085_pressure_sensor",
+    "title": "BMP085 Pressure Sensor",
+    "devices": {"pressure": {"on": {"i2c": {}}, "provides": {"pressure": {}}, "chip": "bmp085"}},
+    "connectors": {
+        "J1": {"type": "contacts of the part", "pins": ["EOC", "GND", "NC", "SCL", "SDA", "VDDA", "VDDD", "XCLR"]}
+    },
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "sparkfun-sensors-bmp085-.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

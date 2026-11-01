@@ -1,0 +1,20 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_contrib_hmc5883l_triple_axis_magnetometer",
+    "title": "HMC5883L Triple-axis Magnetometer",
+    "devices": {"magnetometer": {"on": {"i2c": {}}, "provides": {"magnetometer": {}}, "chip": "hmc5883l"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["VIN", "3.3V", "RDY", "SCL", "SDA", "GND"]}},
+    "part": "1746",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "fritzing_contrib",
+        "ref": "27535f2",
+        "path": "adafruit_2d459a7ab102a5fe885fef0d2637801e_1_32.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing_contrib 27535f2"}}
+}

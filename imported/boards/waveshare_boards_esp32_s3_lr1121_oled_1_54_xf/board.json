@@ -1,0 +1,41 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "waveshare_boards_esp32_s3_lr1121_oled_1_54_xf",
+    "title": "Waveshare ESP32-S3-LR1121-OLED-1.54-XF common digital board",
+    "mcu": {"target": "esp32s3"},
+    "buses": {
+        "i2c": {"i2c0": {"sda": 13, "scl": 14}},
+        "spi": {"spi3": {"mosi": 45, "miso": 46, "sclk": 40}},
+        "i2s": {"i2s0": {"mclk": 17, "bclk": 18, "ws": 21, "dout": 16, "din": 15}},
+        "sdmmc": {"sdmmc0": {"clk": 12, "cmd": 10, "d0": 11}}
+    },
+    "devices": {
+        "button_boot": {"class": "button", "pins": {"in": {"gpio": 0, "active": "low"}}},
+        "button_power": {"class": "button", "pins": {"in": {"gpio": 4, "active": "low"}}},
+        "button_menu": {"class": "button", "pins": {"in": {"gpio": 5, "active": "low"}}},
+        "button_ptt": {"class": "button", "pins": {"in": {"gpio": 6, "active": "low"}}},
+        "button_rtc_irq": {"class": "button", "pins": {"in": {"gpio": 7, "active": "low"}}},
+        "radio": {
+            "class": "radio",
+            "on": {"spi.spi3": {"cs": 42, "hz": 8000000, "mode": 0}},
+            "pins": {"irq": 38, "rst": 39},
+            "chip": "lr1121"
+        },
+        "oled": {"class": "other", "chip": "ssd1309"},
+        "rtc": {"class": "rtc", "chip": "pcf85063a"},
+        "battery": {"class": "fuel_gauge", "chip": "bq27220"},
+        "audio": {"class": "other", "chip": "es8311_es7210"},
+        "sdcard": {"class": "storage", "config": {"media": "microsd"}, "on": {"sdmmc.sdmmc0": {}}}
+    },
+    "origin": {
+        "from": "waveshare_boards",
+        "ref": "0.1.3",
+        "path": "boards/esp32_s3_lr1121_oled_1_54_xf",
+        "license": "Apache-2.0",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "waveshare_boards 0.1.3"}}
+}

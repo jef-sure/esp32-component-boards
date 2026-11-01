@@ -1,0 +1,9 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "hih4030",
+    "title": "hih4030",
+    "class": ["sensor"],
+    "checked": {"facts": {"level": "extracted", "source": "the boards that use it"}}
+}

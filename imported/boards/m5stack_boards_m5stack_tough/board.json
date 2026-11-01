@@ -1,0 +1,43 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "m5stack_boards_m5stack_tough",
+    "title": "M5Stack Tough (sealed 2.0 inch 320x240 ILI9342C touch LCD, NS4168 speaker, microSD, RS485, AXP192 PMU)",
+    "mcu": {"target": "esp32"},
+    "buses": {
+        "i2c": {"i2c0": {"sda": 21, "scl": 22}},
+        "spi": {"spi3": {"mosi": 23, "miso": 38, "sclk": 18}},
+        "i2s": {"i2s0": {"mclk": "nc", "bclk": 12, "ws": 0, "dout": 2, "din": "nc"}},
+        "uart": {"uart2": {"tx": 19, "rx": 27, "rts": "nc", "cts": "nc"}}
+    },
+    "devices": {
+        "display_lcd": {
+            "class": "display",
+            "on": {"spi.spi3": {"cs": 5, "hz": 40000000, "mode": 0}},
+            "pins": {"dc": 15},
+            "config": {
+                "kind": "graphics",
+                "panel": {"width": 320, "height": 240},
+                "primary": true,
+                "depth_bits": 16,
+                "invert": true,
+                "color_order": "bgr"
+            },
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "left-right", "y": "top-bottom", "swap": false}}
+            },
+            "chip": "ili9341"
+        },
+        "fs_sdcard": {"class": "storage", "config": {"media": "microsd"}, "on": {"spi.spi3": {"cs": 4}}}
+    },
+    "origin": {
+        "from": "m5stack_boards",
+        "ref": "0.6.1~2",
+        "path": "m5stack_tough",
+        "license": "Espressif Modified MIT License",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "m5stack_boards 0.6.1~2"}}
+}

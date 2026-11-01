@@ -1,0 +1,20 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_luxeon_led",
+    "title": "Luxeon LED",
+    "devices": {
+        "led": {"ways": [{"lines": ["a"], "ledc": 1}], "provides": {"led": {"variant": "single"}}, "class": "led"}
+    },
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["A", "C", "S"]}},
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "sparkfun-led-luxeon-smd.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

@@ -1,0 +1,19 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_strawberrylinux_sht25_sensor_module",
+    "title": "StrawberryLinux SHT25 Sensor module",
+    "devices": {"temperature": {"on": {"i2c": {}}, "provides": {"temperature": {}, "humidity": {}}, "chip": "sht25"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["VCC", "SCL", "SDA", "GND"]}},
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "SL-SHT-25-RealSize_4be6181ca26c416ea6944fbbfc5094eb_2.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

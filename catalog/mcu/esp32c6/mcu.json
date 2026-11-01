@@ -198,6 +198,13 @@
                 "gpio.strapping"
             ],
             "source": "ESP-IDF esp-idf, docs/en/api-reference/peripherals/gpio/esp32c6.inc"
+        },
+        "platforms": {
+            "level": "vendor-docs",
+            "covers": [
+                "platforms"
+            ],
+            "source": "COMPATIBILITY.md of ESP-IDF"
         }
     },
     "controls": {
@@ -211,5 +218,32 @@
     },
     "limits": {
         "cpu_mhz": 160
+    },
+    "platforms": {
+        "esp-idf": {
+            "revisions": {
+                "0.0": {
+                    "since": "5.1"
+                },
+                "0.1": {
+                    "since": "5.1"
+                },
+                "0.2": {
+                    "required": {
+                        "5.1": "5.1",
+                        "5.2": "5.2",
+                        "5.3": "5.3",
+                        "5.4+": "5.4"
+                    },
+                    "recommended": {
+                        "5.1": "5.1.5",
+                        "5.2": "5.2.4",
+                        "5.3": "5.3.2",
+                        "5.4+": "5.4"
+                    }
+                }
+            },
+            "since": "5.1"
+        }
     }
 }

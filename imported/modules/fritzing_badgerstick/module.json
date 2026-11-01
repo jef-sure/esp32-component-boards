@@ -1,0 +1,55 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_badgerstick",
+    "title": "BadgerStick",
+    "devices": {"led": {"on": {"spi": {}, "uart": {}}, "provides": {"led": {"variant": "single"}}, "class": "led"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "5V",
+                "GND",
+                "D-",
+                "D+",
+                "D9",
+                "D8",
+                "D7",
+                "D6",
+                "D5",
+                "D4",
+                "D3",
+                "D2",
+                "RESET",
+                "RXI",
+                "TXO",
+                "DTR",
+                "3.3V",
+                "VCC",
+                "A5",
+                "A4",
+                "A3",
+                "A2",
+                "A1",
+                "A0",
+                "SCK",
+                "MISO",
+                "MOSI",
+                "D10",
+                "A6",
+                "A7"
+            ]
+        }
+    },
+    "power": [{"name": "VCC", "source": "connector", "volts": 5}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "SparkFun_BadgerStick.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

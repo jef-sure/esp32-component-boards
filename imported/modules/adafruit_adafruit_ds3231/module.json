@@ -1,0 +1,23 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_ds3231",
+    "title": "Adafruit DS3231",
+    "devices": {"rtc": {"on": {"i2c": {}}, "provides": {"rtc": {}}, "chip": "ds3231"}},
+    "connectors": {
+        "J1": {"type": "contacts of the part", "pins": ["Vin", "GND", "SCL", "SDA", "BAT", "32KHZ", "SQW", "!RTC_RST"]}
+    },
+    "maker": "adafruit",
+    "part": "3013",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adaruit DS3231.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

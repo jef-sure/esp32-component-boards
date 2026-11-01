@@ -1,0 +1,42 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_fpc_breakout___pi_5_dsi___rp2350_hstx",
+    "title": "Adafruit FPC Breakout - Pi 5 DSI - RP2350 HSTX",
+    "devices": {"other": {"on": {"i2c": {}}, "chip": "rp2350"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "CAM_3V3",
+                "D0-",
+                "D0+",
+                "D1-",
+                "D1+",
+                "CK-",
+                "CK+",
+                "D2-",
+                "D2+",
+                "D3-",
+                "D3+",
+                "CAM_IO0",
+                "CAM_IO1",
+                "CAM_SCL",
+                "CAM_SDA",
+                "GND"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "6014",
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit FPC Breakout - Pi 5 DSI - RP2350 HSTX.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

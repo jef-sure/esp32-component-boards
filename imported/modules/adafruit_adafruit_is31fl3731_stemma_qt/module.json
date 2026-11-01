@@ -1,0 +1,54 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_is31fl3731_stemma_qt",
+    "title": "Adafruit IS31FL3731 STEMMA QT",
+    "devices": {"led": {"on": {"i2c": {}}, "provides": {"led": {"variant": "matrix"}}, "chip": "is31fl3731"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "VCC",
+                "CA1",
+                "CA2",
+                "CA3",
+                "CA4",
+                "CA5",
+                "CA6",
+                "CA7",
+                "CA8",
+                "CA9",
+                "SHUTDOWN",
+                "INTB",
+                "ADDR",
+                "AUDIOIN",
+                "SDA",
+                "SCL",
+                "CB1",
+                "CB2",
+                "CB3",
+                "CB4",
+                "CB5",
+                "CB6",
+                "CB7",
+                "CB8",
+                "CB9",
+                "REXT",
+                "GND"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "2946",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit IS31FL3731 STEMMA QT.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

@@ -1,0 +1,26 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_ultimate_gps_v3",
+    "title": "Adafruit Ultimate GPS v3",
+    "devices": {"gps": {"on": {"uart": {}}, "provides": {"gps": {}}, "class": "gps"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": ["1PPS", "VIN", "GND", "RX", "TX", "FIX", "VBACKUP", "ENABLE", "3.3V"]
+        }
+    },
+    "maker": "adafruit",
+    "part": "746",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit Ultimate GPS v3.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

@@ -1,0 +1,5 @@
+{
+    "title": "A 2004 pulls I2C to 5 V: the kit takes a level shifter that works both ways",
+    "answers": {"display": "character"},
+    "says": "Level shifter, 4 channels, both ways between the chip"
+}

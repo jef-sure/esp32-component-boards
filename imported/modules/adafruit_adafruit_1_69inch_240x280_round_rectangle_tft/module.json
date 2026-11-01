@@ -1,0 +1,26 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_1_69inch_240x280_round_rectangle_tft",
+    "title": "Adafruit 1.69inch 240x280 Round Rectangle TFT",
+    "devices": {"display": {"on": {"spi": {}}, "provides": {"display": {"variant": "tft"}}, "class": "other"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": ["VIN", "+3V3", "SCK", "MISO", "MOSI", "TFTCS", "TFTRST", "TFTDC", "CARDCS", "LITE", "GND"]
+        }
+    },
+    "maker": "adafruit",
+    "part": "5206",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit 1.69inch 240x280 Round Rectangle TFT.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

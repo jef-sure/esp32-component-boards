@@ -1,0 +1,22 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_ina_260",
+    "title": "INA 260",
+    "devices": {"power_monitor": {"on": {"i2c": {}}, "provides": {"power_monitor": {}}, "class": "sensor"}},
+    "connectors": {
+        "J1": {"type": "contacts of the part", "pins": ["VCC", "VBUS", "IN+", "IN-", "ALERT", "SDA", "SCL", "GND"]}
+    },
+    "maker": "adafruit",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit INA260.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

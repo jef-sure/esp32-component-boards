@@ -1,0 +1,21 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_opt4048_xyz_color_sensor",
+    "title": "Adafruit OPT4048 XYZ Color Sensor",
+    "devices": {"color": {"on": {"i2c": {}}, "provides": {"color": {}}, "chip": "opt4048"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["VCC", "SCL", "SDA", "INT", "ADDR", "GND"]}},
+    "maker": "adafruit",
+    "part": "6335",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit OPT4048 XYZ Color Sensor.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

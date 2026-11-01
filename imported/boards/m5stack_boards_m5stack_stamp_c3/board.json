@@ -1,0 +1,22 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "m5stack_boards_m5stack_stamp_c3",
+    "title": "M5Stamp C3 Development Board",
+    "mcu": {"target": "esp32c3"},
+    "buses": {},
+    "devices": {
+        "led_strip": {"class": "led", "pins": {"data": 2}, "config": {"kind": "sk6812", "count": 1}},
+        "user_button": {"class": "button", "pins": {"in": {"gpio": 3, "active": "low"}}}
+    },
+    "origin": {
+        "from": "m5stack_boards",
+        "ref": "0.6.1~2",
+        "path": "m5stack_stamp_c3",
+        "license": "Espressif Modified MIT License",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "m5stack_boards 0.6.1~2"}}
+}

@@ -1,0 +1,51 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_pcf8575",
+    "title": "Adafruit PCF8575",
+    "devices": {"rtc": {"on": {"i2c": {}}, "provides": {"rtc": {}, "io_expander": {}}, "chip": "pcf8575"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "VCC",
+                "SCL",
+                "SDA",
+                "GPA0",
+                "GPA1",
+                "GPA2",
+                "GPA3",
+                "GPA4",
+                "GPA5",
+                "GPA6",
+                "GPA7",
+                "INTA",
+                "A0",
+                "A1",
+                "A2",
+                "GPB7",
+                "GPB6",
+                "GPB5",
+                "GPB4",
+                "GPB3",
+                "GPB2",
+                "GPB1",
+                "GPB0",
+                "GND"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "5611",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit PCF8575.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

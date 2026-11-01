@@ -1,0 +1,8 @@
+{
+    "title": "An imported board on a chip with a MAC that lists no PHY: that is open, not a no",
+    "imported": true,
+    "answers": {
+        "ethernet": true
+    },
+    "says": "the imported data does not say"
+}

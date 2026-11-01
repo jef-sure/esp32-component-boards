@@ -1,0 +1,26 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_mini_sparkle_motion",
+    "title": "Adafruit Mini Sparkle Motion",
+    "devices": {"led": {"on": {"i2c": {}}, "provides": {"led": {"variant": "addressable"}}, "class": "led"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": ["+5V", "3.3V", "SCL", "SDA", "SENSOR", "S1", "S2", "IO14", "IO27", "IO25", "IO26", "GND"]
+        }
+    },
+    "maker": "adafruit",
+    "part": "6160",
+    "power": [{"name": "VCC", "source": "connector", "volts": 5}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit Mini Sparkle Motion.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

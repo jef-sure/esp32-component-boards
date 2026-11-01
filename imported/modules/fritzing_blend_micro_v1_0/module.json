@@ -1,0 +1,53 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_blend_micro_v1_0",
+    "title": "Blend Micro v1.0",
+    "devices": {
+        "bluetooth": {"on": {"i2c": {}, "spi": {}, "uart": {}}, "provides": {"bluetooth": {}}, "class": "radio"}
+    },
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "D8/A8",
+                "D5/PWM",
+                "D3/SCL/PWM",
+                "D2/SDA",
+                "D1/TX",
+                "D0/RX",
+                "RST",
+                "MISO",
+                "MOSI",
+                "CLK",
+                "SS",
+                "VIN",
+                "GND",
+                "D9/PWM/A9",
+                "D10/PWM/A10",
+                "D11/PWM",
+                "D12/A11",
+                "D13/PWM/LED",
+                "A0",
+                "A1",
+                "A2",
+                "A3",
+                "A4",
+                "A5",
+                "AREF",
+                "V33"
+            ]
+        }
+    },
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "blend_micro1.0.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

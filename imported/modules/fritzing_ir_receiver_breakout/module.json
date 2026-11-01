@@ -1,0 +1,19 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_ir_receiver_breakout",
+    "title": "IR Receiver Breakout",
+    "devices": {"infrared": {"ways": [{"lines": ["out"]}], "provides": {"infrared": {}}, "class": "other"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["GND", "OUT", "VCC"]}},
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "IR_Receiver_v14.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

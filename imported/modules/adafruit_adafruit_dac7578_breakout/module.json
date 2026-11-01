@@ -1,0 +1,42 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_dac7578_breakout",
+    "title": "Adafruit DAC7578 Breakout",
+    "devices": {"dac": {"on": {"i2c": {}}, "provides": {"dac": {}}, "chip": "dac7578"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "VCC",
+                "VREFIN",
+                "VOUTA",
+                "VOUTB",
+                "VOUTC",
+                "VOUTD",
+                "VOUTE",
+                "VOUTF",
+                "VOUTG",
+                "VOUTH",
+                "SCL",
+                "SDA",
+                "!LDAC",
+                "!CLR",
+                "GND"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "6223",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit DAC7578 Breakout.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

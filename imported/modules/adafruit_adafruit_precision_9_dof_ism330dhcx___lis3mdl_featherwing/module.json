@@ -1,0 +1,71 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_precision_9_dof_ism330dhcx___lis3mdl_featherwing",
+    "title": "Adafruit Precision 9-DoF ISM330DHCX + LIS3MDL FeatherWing",
+    "devices": {
+        "accelerometer": {
+            "on": {"i2c": {}, "spi": {}, "uart": {}},
+            "provides": {"accelerometer": {}, "gyroscope": {}, "magnetometer": {}},
+            "chip": "ism330dhcx"
+        }
+    },
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "VBAT",
+                "3.3V",
+                "RESET",
+                "AREF",
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F",
+                "SCK",
+                "MOSI",
+                "MISO",
+                "RX",
+                "TX",
+                "G",
+                "INTM",
+                "DRDY",
+                "AD_M",
+                "CS_M",
+                "EN",
+                "USB",
+                "N",
+                "M",
+                "L",
+                "K",
+                "J",
+                "I",
+                "H",
+                "SCL",
+                "SDA",
+                "INT1",
+                "INT2",
+                "AD_AG",
+                "CS_AG",
+                "SDO_EX",
+                "OCS_EX",
+                "GND"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "4569",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit Precision 9-DoF ISM330DHCX + LIS3MDL FeatherWing.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

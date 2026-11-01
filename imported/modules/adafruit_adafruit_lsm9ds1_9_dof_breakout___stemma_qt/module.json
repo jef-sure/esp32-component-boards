@@ -1,0 +1,47 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_lsm9ds1_9_dof_breakout___stemma_qt",
+    "title": "Adafruit LSM9DS1 9-DoF Breakout - Stemma QT",
+    "devices": {
+        "accelerometer": {
+            "on": {"i2c": {}},
+            "provides": {"accelerometer": {}, "gyroscope": {}, "magnetometer": {}},
+            "class": "imu"
+        }
+    },
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "3.3V",
+                "VCC",
+                "GND",
+                "DRDY_M",
+                "INT_M",
+                "INT1_AG",
+                "INT2_AG",
+                "DEN_5V",
+                "SCL",
+                "SDA",
+                "CS_AG_5V",
+                "CS_M_5V",
+                "SDO_M",
+                "SDO_AG"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "4634",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit LSM9DS1 9DoF Breakout Stemma QT.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

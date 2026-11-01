@@ -12,6 +12,7 @@ examples/*/components/local-boards/CMakeLists.txt
 examples/*/components/local-boards/Kconfig.projbuild
 examples/*/components/local-boards/boards/*/*.c
 examples/*/components/local-boards/boards/*/board.cmake
+/imported-shops/
 /PLAN*
 # assistants: instructions, plans and settings stay out of the repository
 /CLAUDE.md

@@ -1,0 +1,27 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_dotstar_high_density_8x8_grid___64_rgb_led_pixel_matrix",
+    "title": "Adafruit DotStar High Density 8x8 Grid - 64 RGB LED Pixel Matrix",
+    "devices": {
+        "led": {
+            "ways": [{"lines": ["data"], "high_min_mv": 3500}],
+            "provides": {"led": {"variant": "addressable"}},
+            "class": "led"
+        }
+    },
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["VDD", "CIN", "N$1", "DIN", "N$2", "GND"]}},
+    "maker": "adafruit",
+    "part": "3444",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit DotStar High Density 8x8 Grid - 64 RGB LED Pixel Matrix.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

@@ -1,0 +1,20 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_ttl_serial_jpeg_camera",
+    "title": "TTL Serial JPEG Camera",
+    "devices": {"camera": {"on": {"uart": {}}, "provides": {"camera": {"variant": "spi"}}, "class": "camera"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["TX", "RX", "GND", "5V", "CVBS"]}},
+    "maker": "adafruit",
+    "power": [{"name": "VCC", "source": "connector", "volts": 5}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "TTL Serial JPEG Camera.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

@@ -1,0 +1,23 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_is31fl3741",
+    "title": "Adafruit IS31FL3741",
+    "devices": {"led": {"on": {"i2c": {}}, "provides": {"led": {"variant": "matrix"}}, "chip": "is31fl3741"}},
+    "connectors": {
+        "J1": {"type": "contacts of the part", "pins": ["VCC", "SCL", "SDA", "SHUTDOWN", "ADDR", "INT", "GND"]}
+    },
+    "maker": "adafruit",
+    "part": "5201",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit IS31FL3741.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

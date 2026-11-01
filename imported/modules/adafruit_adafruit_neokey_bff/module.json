@@ -1,0 +1,43 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_neokey_bff",
+    "title": "Adafruit NeoKey BFF",
+    "devices": {"button": {"on": {"i2c": {}, "spi": {}, "uart": {}}, "provides": {"button": {}}, "class": "other"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "3.3V",
+                "+5V",
+                "A0",
+                "A1",
+                "A2",
+                "A3",
+                "SDA",
+                "SCL",
+                "TX",
+                "MOSI",
+                "MISO",
+                "SCK",
+                "RX",
+                "NEOPIX",
+                "SWITCH",
+                "GND"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "5695",
+    "power": [{"name": "VCC", "source": "connector", "volts": 5}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit NeoKey BFF.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

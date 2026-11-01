@@ -1,0 +1,52 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_i2s_amp_bff",
+    "title": "Adafruit I2S Amp BFF",
+    "devices": {
+        "speaker": {
+            "on": {"i2c": {}, "spi": {}, "uart": {}, "i2s": {}},
+            "provides": {"speaker": {"variant": "i2s"}},
+            "class": "other"
+        }
+    },
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "3V",
+                "+5V",
+                "MISO",
+                "MOSI",
+                "SCK",
+                "RX",
+                "BCLK",
+                "LRCLK",
+                "DIN",
+                "A0",
+                "A1",
+                "A2",
+                "A3",
+                "SDA",
+                "SCL",
+                "TX",
+                "VO+",
+                "VO-",
+                "GND"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "5770",
+    "power": [{"name": "VCC", "source": "connector", "volts": 5}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit I2S Amp BFF.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

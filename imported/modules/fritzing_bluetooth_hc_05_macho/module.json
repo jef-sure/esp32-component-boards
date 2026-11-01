@@ -1,0 +1,19 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_bluetooth_hc_05_macho",
+    "title": "Bluetooth HC-05 Macho",
+    "devices": {"bluetooth": {"on": {"uart": {}}, "provides": {"bluetooth": {}}, "chip": "hc05"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["State", "TXD", "RXD", "VCC", "Key", "GND"]}},
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "HC-05-male_fix.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

@@ -1,0 +1,51 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "m5stack_boards_m5stack_sticks3",
+    "title": "M5StickS3 (1.14 inch 135x240 ST7789P3 LCD, ES8311 codec, BMI270 IMU, IR TX/RX)",
+    "mcu": {"target": "esp32s3"},
+    "buses": {
+        "i2c": {"i2c0": {"sda": 47, "scl": 48}},
+        "spi": {"spi2": {"mosi": 39, "miso": "nc", "sclk": 40}},
+        "i2s": {"i2s0": {"mclk": 18, "bclk": 17, "ws": 15, "dout": 14, "din": 16}}
+    },
+    "devices": {
+        "audio_dac": {
+            "class": "audio",
+            "on": {"i2s.i2s0": {"format": "tdm"}, "i2c.i2c0": {"address": "0x30"}},
+            "config": {"direction": "both", "sample_rate": 48000},
+            "chip": "es8311"
+        },
+        "display_lcd": {
+            "class": "display",
+            "on": {"spi.spi2": {"cs": 41, "hz": 40000000, "mode": 0}},
+            "pins": {"dc": 45, "rst": 21, "backlight": 38},
+            "config": {
+                "kind": "graphics",
+                "panel": {"width": 135, "height": 240},
+                "primary": true,
+                "depth_bits": 16,
+                "invert": true,
+                "color_order": "rgb"
+            },
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "left-right", "y": "top-bottom", "swap": false}},
+                "backlight": {"how": "backlight_pwm", "min": 0, "max": 100, "start": 100}
+            },
+            "chip": "st7789"
+        },
+        "ir_tx": {"class": "other", "pins": {"out": 46}},
+        "button_key1": {"class": "button", "pins": {"in": {"gpio": 11, "active": "low"}}},
+        "button_key2": {"class": "button", "pins": {"in": {"gpio": 12, "active": "low"}}}
+    },
+    "origin": {
+        "from": "m5stack_boards",
+        "ref": "0.6.1~2",
+        "path": "m5stack_sticks3",
+        "license": "Espressif Modified MIT License",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "m5stack_boards 0.6.1~2"}}
+}

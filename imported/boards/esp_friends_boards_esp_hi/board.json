@@ -1,0 +1,48 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "esp_friends_boards_esp_hi",
+    "title": "ESP-HI AI Voice Interaction Module",
+    "mcu": {"target": "esp32c3"},
+    "buses": {
+        "i2s": {"i2s0": {"dout": 6, "clk": "nc", "dout2": "nc"}},
+        "spi": {"spi2": {"mosi": 4, "miso": "nc", "sclk": 5}}
+    },
+    "devices": {
+        "audio_adc": {"class": "audio", "on": {}, "config": {"direction": "in"}, "chip": "adc_mic"},
+        "audio_dac": {
+            "class": "audio",
+            "on": {"i2s.i2s0": {"format": "pdm"}},
+            "config": {"direction": "out", "sample_rate": 24000},
+            "chip": "pdm_out"
+        },
+        "display_lcd": {
+            "class": "display",
+            "on": {"spi.spi2": {"cs": "nc"}},
+            "pins": {"dc": 10},
+            "config": {
+                "kind": "graphics",
+                "panel": {"width": 160, "height": 80},
+                "primary": true,
+                "depth_bits": 16,
+                "invert": true,
+                "color_order": "rgb"
+            },
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "left-right", "y": "bottom-top", "swap": true}}
+            },
+            "chip": "ili9341"
+        },
+        "boot_button": {"class": "button", "pins": {"in": {"gpio": 9, "active": "low"}}}
+    },
+    "origin": {
+        "from": "esp_friends_boards",
+        "ref": "0.6.1",
+        "path": "esp_hi",
+        "license": "Espressif Modified MIT License",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "esp_friends_boards 0.6.1"}}
+}

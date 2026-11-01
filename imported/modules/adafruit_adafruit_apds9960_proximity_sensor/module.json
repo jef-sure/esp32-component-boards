@@ -1,0 +1,27 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_apds9960_proximity_sensor",
+    "title": "Adafruit APDS9960 Proximity Sensor",
+    "devices": {
+        "color": {
+            "on": {"i2c": {}},
+            "provides": {"color": {}, "distance": {"variant": "infrared"}, "presence": {}},
+            "chip": "apds9960"
+        }
+    },
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["VCC", "3.3V", "SCL", "SDA", "INT", "GND"]}},
+    "maker": "adafruit",
+    "part": "3595",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit APDS9960 Proximity Sensor.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

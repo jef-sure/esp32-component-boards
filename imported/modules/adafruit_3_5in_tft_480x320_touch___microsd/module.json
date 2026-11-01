@@ -1,0 +1,66 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_3_5in_tft_480x320_touch___microsd",
+    "title": "3.5in TFT 480x320 Touch + MicroSD",
+    "devices": {
+        "display": {
+            "on": {"spi": {}},
+            "provides": {"display": {"variant": "tft"}, "touch_panel": {}, "sd_card": {}},
+            "class": "other"
+        }
+    },
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "GND",
+                "3-5V",
+                "CS",
+                "C/D",
+                "WR/SPI CLK",
+                "RD",
+                "RST",
+                "Backlite/Lite",
+                "LCD_X+",
+                "LCD_Y+",
+                "LCD_X-",
+                "LCD_Y-",
+                "LCD_DATA0_5V",
+                "LCD_DATA1_5V",
+                "LCD_DATA2_5V",
+                "LCD_DATA3_5V",
+                "LCD_DATA4_5V",
+                "LCD_DATA5_5V",
+                "LCD_DATA6_5V",
+                "LCD_DATA7_5V",
+                "+5V",
+                "3.3V out",
+                "LCD_WR_5V",
+                "MISO",
+                "MOSI",
+                "LCD_CS_5V",
+                "LCD_RS_5V",
+                "LCD_RST_5V",
+                "LCD_LITE",
+                "IM2",
+                "IM1",
+                "IM0",
+                "Card CS",
+                "Card Detect"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "power": [{"name": "VCC", "source": "connector", "volts": 5}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "3.5in 480x320.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

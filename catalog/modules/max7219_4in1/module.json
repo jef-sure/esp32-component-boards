@@ -1,0 +1,34 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "max7219_4in1",
+    "title": "MAX7219 matrix, four 8x8 in a row",
+    "description": "Four red 8x8 matrices with a MAX7219 each, chained, on five wires",
+    "power": [{"name": "VCC", "source": "connector", "volts": [4, 5.5]}],
+    "devices": {
+        "matrix": {
+            "chip": "max7219",
+            "logic": "none",
+            "provides": {"led": {"variant": "matrix"}},
+            "config": {"kind": "max7219", "count": 32}
+        }
+    },
+    "connectors": {"J1": {"type": "5 wires", "pins": ["VCC", "GND", "DIN", "CS", "CLK"]}},
+    "price": {
+        "aliexpress": {
+            "shop": "AliExpress",
+            "currency": "EUR",
+            "range": [3.69, 4.09],
+            "date": "2026-11-01",
+            "source": "A listing of Anton, Tenstar Robot: 4.09, from 5 pieces 3.69"
+        }
+    },
+    "checked": {
+        "listing": {
+            "level": "unchecked",
+            "covers": ["connectors", "power"],
+            "source": "A listing of AliExpress; the order of the wires is not read from a board, and no such module has been tried"
+        }
+    }
+}

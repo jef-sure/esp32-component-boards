@@ -1,0 +1,19 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_grove_3_axis_digital_accelerometer_16g",
+    "title": "Grove 3 Axis Digital Accelerometer 16g",
+    "devices": {"button": {"on": {"i2c": {}}, "provides": {"button": {}, "accelerometer": {}}, "class": "other"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["GND", "VCC", "SDA", "SCL"]}},
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "seeed_grove_3axis_digital_accelerometer_16g.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

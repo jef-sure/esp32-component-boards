@@ -1,0 +1,53 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_pcm5122_i2s_dac_with_line_level_output",
+    "title": "Adafruit PCM5122 I2S DAC with Line Level Output",
+    "devices": {
+        "codec": {
+            "on": {"i2c": {}, "spi": {}},
+            "provides": {"codec": {}, "dac": {}},
+            "config": {"direction": "out"},
+            "chip": "pcm5122"
+        }
+    },
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "VIN",
+                "ADDR1/MISO/FMT",
+                "ADDR2/SDOUT",
+                "AGAIN",
+                "MODE1",
+                "MODE2/CS",
+                "SDA/MOSI",
+                "SCL/SCK",
+                "ATT0",
+                "FILTER",
+                "DEMPH",
+                "WORDSEL_IN",
+                "DATA_IN",
+                "BITCLK_IN",
+                "MCLK",
+                "MUTE",
+                "OUTL",
+                "OUTR",
+                "AGND"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "6421",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit PCM5122 I2S DAC with Line Level Output.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

@@ -1,0 +1,21 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_vl530x_time_of_flight_distance_sensor",
+    "title": "Adafruit VL530X Time of Flight Distance Sensor",
+    "devices": {"distance": {"on": {"i2c": {}}, "provides": {"distance": {"variant": "tof"}}, "chip": "vl530x"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["VCC", "SCL", "SDA", "GPIO", "XSHUT", "GND"]}},
+    "maker": "adafruit",
+    "part": "3317",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit VL53L0X Time of Flight Distance Sensor.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

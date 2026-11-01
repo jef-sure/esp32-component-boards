@@ -1,0 +1,52 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_i2c_to_8_channel_solenoid_driver",
+    "title": "Adafruit I2C to 8 Channel Solenoid Driver",
+    "devices": {"motor": {"on": {"i2c": {}}, "provides": {"motor": {}}, "class": "motor"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "V+",
+                "VCC",
+                "OUT0",
+                "OUT1",
+                "OUT2",
+                "OUT3",
+                "OUT4",
+                "OUT5",
+                "OUT6",
+                "OUT7",
+                "A0",
+                "A1",
+                "A2",
+                "INTB",
+                "GPB7",
+                "GPB6",
+                "GPB5",
+                "GPB4",
+                "GPB3",
+                "GPB2",
+                "GPB1",
+                "GPB0",
+                "SDA",
+                "SCL",
+                "GND"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "6318",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit I2C to 8 Channel Solenoid Driver.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

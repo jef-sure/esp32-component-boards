@@ -1,0 +1,28 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_oled_color_0_96_inch_96x64_w_microsd",
+    "title": "OLED Color 0.96 inch 96x64 w microSD",
+    "devices": {
+        "display": {"on": {"spi": {}}, "provides": {"display": {"variant": "oled"}, "sd_card": {}}, "class": "other"}
+    },
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": ["V+", "SD_CS", "OLED_CS", "RESET", "DC", "SCK", "MOSI", "SD_MISO", "SD_CD", "GND"]
+        }
+    },
+    "maker": "adafruit",
+    "part": "684",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit OLED Color 0.96 inch 96x64 w microSD.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

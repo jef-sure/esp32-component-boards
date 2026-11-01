@@ -1,0 +1,42 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_rfm69hcw_transceiver_radio",
+    "title": "Adafruit RFM69HCW Transceiver Radio",
+    "devices": {"rf": {"on": {"spi": {}}, "provides": {"rf": {}}, "chip": "rfm69hcw"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "DIO1",
+                "DIO2",
+                "DIO3",
+                "DIO4",
+                "DIO5",
+                "ANTENNA",
+                "VIN",
+                "GND",
+                "EN",
+                "DIO0",
+                "SCK",
+                "MISO",
+                "MOSI",
+                "CS",
+                "RST"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "3070",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit RFM69HCW Transceiver Radio.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

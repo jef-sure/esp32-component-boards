@@ -1,0 +1,10 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "ad5206",
+    "title": "ad5206",
+    "class": ["other"],
+    "checked": {"facts": {"level": "extracted", "source": "the boards that use it"}},
+    "on": {"spi": {}}
+}

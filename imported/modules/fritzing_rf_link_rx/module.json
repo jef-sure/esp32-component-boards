@@ -1,0 +1,19 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_rf_link_rx",
+    "title": "RF-LINK_RX",
+    "devices": {"rf": {"ways": [{"lines": ["data"]}], "provides": {"rf": {}}, "class": "radio"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["+5V", "ANT", "DATA", "GND"]}},
+    "power": [{"name": "VCC", "source": "connector", "volts": 5}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "sparkfun-rf-rf-link_rx-.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

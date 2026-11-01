@@ -1,0 +1,39 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_contrib_2_13in_tri_color_eink_display",
+    "title": "2.13in Tri-Color eInk Display",
+    "devices": {"display": {"on": {"spi": {}}, "provides": {"display": {"variant": "epaper"}}, "class": "other"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "VIN",
+                "3.3V",
+                "SCLK",
+                "MISO",
+                "MOSI",
+                "DISPCS",
+                "DC",
+                "SRAMCS",
+                "SDCS",
+                "RESET",
+                "BUSY",
+                "ENABLE",
+                "GND"
+            ]
+        }
+    },
+    "part": "4086",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "fritzing_contrib",
+        "ref": "27535f2",
+        "path": "adafruit_634c898de88f576afe676ee2b70b5543_1_97.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing_contrib 27535f2"}}
+}

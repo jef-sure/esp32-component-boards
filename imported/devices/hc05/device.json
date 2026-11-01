@@ -1,0 +1,10 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "hc05",
+    "title": "hc05",
+    "class": ["radio"],
+    "checked": {"facts": {"level": "extracted", "source": "the boards that use it"}},
+    "on": {"uart": {}}
+}

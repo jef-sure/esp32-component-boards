@@ -1,0 +1,41 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_pca9546_4_channel_stemma_qt_i2c_multiplexer",
+    "title": "Adafruit PCA9546 4-Channel STEMMA QT I2C Multiplexer",
+    "devices": {"i2c_mux": {"on": {"i2c": {}}, "provides": {"i2c_mux": {}}, "chip": "pca9546"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "VCC",
+                "VCCIO",
+                "RESET",
+                "0SDA",
+                "0SCL",
+                "1SDA",
+                "1SCL",
+                "SCL",
+                "SDA",
+                "2SDA",
+                "2SCL",
+                "3SDA",
+                "3SCL",
+                "GND"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "5664",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit PCA9546 4-Channel STEMMA QT I2C Multiplexer.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

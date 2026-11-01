@@ -1,0 +1,25 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "esp_boards_esp32_meshkit_sense",
+    "title": "ESP32-MeshKit-Sense v1.1 (ESP32-WROOM-32D, HTS221 + BH1750FVI, e-paper connector)",
+    "mcu": {"target": "esp32"},
+    "buses": {"i2c": {"i2c1": {"sda": 33, "scl": 32}}, "spi": {"spi2": {"mosi": 23, "miso": "nc", "sclk": 22}}},
+    "devices": {
+        "wake_button": {"class": "button", "pins": {"in": {"gpio": 34, "active": "low"}}},
+        "boot_button": {"class": "button", "pins": {"in": {"gpio": 0, "active": "low"}}},
+        "led_wifi": {"class": "led", "pins": {"out": 15}},
+        "led_network": {"class": "led", "pins": {"out": 4}}
+    },
+    "origin": {
+        "from": "esp_boards",
+        "ref": "0.7.1",
+        "path": "esp32_meshkit_sense",
+        "license": "Espressif Modified MIT License",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "esp_boards 0.7.1"}},
+    "power": [{"line": 27, "level": 0, "feeds": []}, {"line": 14, "level": 0, "feeds": []}]
+}

@@ -1,0 +1,50 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_16_channel_12_bit_pwm_servo_driver___i2c",
+    "title": "16-Channel 12-bit PWM Servo Driver - I2C",
+    "devices": {"servo": {"on": {"i2c": {}}, "provides": {"servo": {"variant": "ledc"}}, "class": "motor"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "PWRIN",
+                "VCC",
+                "5.0V",
+                "SDA",
+                "SCL",
+                "OE",
+                "PWM0",
+                "PWM1",
+                "PWM2",
+                "PWM3",
+                "PWM4",
+                "PWM5",
+                "PWM6",
+                "PWM7",
+                "PWM8",
+                "PWM9",
+                "PWM10",
+                "PWM11",
+                "PWM12",
+                "PWM13",
+                "PWM14",
+                "PWM15",
+                "GND"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "815",
+    "power": [{"name": "VCC", "source": "connector", "volts": 5}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit 16-Channel 12-bit PWM Servo Driver - I2C.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

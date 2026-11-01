@@ -12,7 +12,7 @@
     "mcu": {"target": "esp32", "part": "ESP32-D0WD-V3", "flash_mb": 4},
     "devices": {
         "boot": {"class": "button", "pins": {"in": {"gpio": 0, "active": "low"}}},
-        "led": {"class": "led", "pins": {"out": 2}},
+        "led": {"class": "led", "provides": {"led": {"variant": "single"}}, "pins": {"out": 2}},
         "usb_serial": {"class": "other", "part": "CP210x"}
     },
     "power": [

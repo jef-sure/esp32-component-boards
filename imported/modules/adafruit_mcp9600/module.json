@@ -1,0 +1,27 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_mcp9600",
+    "title": "MCP9600",
+    "devices": {
+        "temperature": {"on": {"i2c": {}}, "provides": {"temperature": {"variant": "probe"}}, "chip": "mcp9600"}
+    },
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": ["VIN", "SDA", "SCL", "ADDR", "ALERT1", "ALERT2", "ALERT4", "ALERT3", "+", "-", "GND"]
+        }
+    },
+    "maker": "adafruit",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit MCP9600.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

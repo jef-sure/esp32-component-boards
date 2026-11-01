@@ -1,0 +1,45 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_tlv320dac3100_i2s_dac",
+    "title": "Adafruit TLV320DAC3100 I2S DAC",
+    "devices": {"codec": {"on": {"i2c": {}}, "provides": {"codec": {}, "dac": {}}, "class": "other"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "VIN",
+                "MICBIAS",
+                "AIN1",
+                "AIN2",
+                "GPIO1",
+                "!RESET",
+                "OUTR",
+                "OUTL",
+                "MIC",
+                "SCL",
+                "SDA",
+                "DATA_IN",
+                "WORDSEL_IN",
+                "BITCLK_IN",
+                "MCLK",
+                "SPKM",
+                "SPKP",
+                "AGND"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "6309",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit TLV320DAC3100 I2S DAC.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

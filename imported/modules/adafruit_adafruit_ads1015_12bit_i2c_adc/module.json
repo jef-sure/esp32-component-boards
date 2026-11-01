@@ -1,0 +1,26 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_ads1015_12bit_i2c_adc",
+    "title": "Adafruit ADS1015 12Bit I2C ADC",
+    "devices": {"adc": {"on": {"i2c": {}}, "provides": {"adc": {}}, "chip": "ads1015"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": ["AIN3", "AIN2", "AIN1", "AIN0", "ALERT", "ADDR", "SDA", "SCL", "GND", "VDD"]
+        }
+    },
+    "maker": "adafruit",
+    "part": "1083",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit ADS1015 12Bit I2C ADC.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

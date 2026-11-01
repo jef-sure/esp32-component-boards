@@ -1,0 +1,42 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_microsd_card_bff",
+    "title": "Adafruit microSD Card BFF",
+    "devices": {"sd_card": {"on": {"i2c": {}, "spi": {}, "uart": {}}, "provides": {"sd_card": {}}, "class": "storage"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "3.3V",
+                "+5V",
+                "MOSI",
+                "MISO",
+                "SCK",
+                "RX",
+                "A0",
+                "A1",
+                "A2",
+                "A3",
+                "SDA",
+                "SCL",
+                "TX",
+                "SD_CS",
+                "GND"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "5683",
+    "power": [{"name": "VCC", "source": "connector", "volts": 5}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit microSD Card BFF.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

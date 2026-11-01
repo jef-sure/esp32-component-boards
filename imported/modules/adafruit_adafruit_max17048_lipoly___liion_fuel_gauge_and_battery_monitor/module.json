@@ -1,0 +1,23 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_max17048_lipoly___liion_fuel_gauge_and_battery_monitor",
+    "title": "Adafruit MAX17048 LiPoly / LiIon Fuel Gauge and Battery Monitor",
+    "devices": {"fuel_gauge": {"on": {"i2c": {}}, "provides": {"fuel_gauge": {}, "charger": {}}, "chip": "max17048"}},
+    "connectors": {
+        "J1": {"type": "contacts of the part", "pins": ["VCC", "VBAT", "SCL", "SDA", "INT", "QSTART", "GND"]}
+    },
+    "maker": "adafruit",
+    "part": "5580",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit MAX17048 LiPoly LiIon Fuel Gauge and Battery Monitor.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

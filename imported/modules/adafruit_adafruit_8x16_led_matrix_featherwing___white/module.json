@@ -1,0 +1,57 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_8x16_led_matrix_featherwing___white",
+    "title": "Adafruit 8x16 LED Matrix FeatherWing - White",
+    "devices": {
+        "led": {"on": {"i2c": {}, "spi": {}, "uart": {}}, "provides": {"led": {"variant": "matrix"}}, "class": "led"}
+    },
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "RESET",
+                "VDD",
+                "AREF",
+                "GND",
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F",
+                "SCK",
+                "MOSI",
+                "MISO",
+                "RX",
+                "TX",
+                "G",
+                "SDA",
+                "SCL",
+                "H",
+                "I",
+                "J",
+                "K",
+                "L",
+                "M",
+                "N",
+                "USB",
+                "EN",
+                "VBAT"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "3149",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit 8x16 LED Matrix FeatherWing - White.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

@@ -1,0 +1,49 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_aw9523",
+    "title": "Adafruit AW9523",
+    "devices": {"io_expander": {"on": {"i2c": {}}, "provides": {"io_expander": {}}, "chip": "aw9523"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "VCC",
+                "SCL",
+                "SDA",
+                "INT",
+                "RST",
+                "P0_0",
+                "P1_1",
+                "P1_2",
+                "P1_3",
+                "P1_0",
+                "P1_7",
+                "P1_6",
+                "P1_5",
+                "P1_4",
+                "P0_7",
+                "P0_6",
+                "P0_5",
+                "P0_4",
+                "P0_3",
+                "P0_2",
+                "P0_1",
+                "GND"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "4886",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit AW9523.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

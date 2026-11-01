@@ -1,0 +1,53 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_mcp23017_stemma_qt",
+    "title": "Adafruit MCP23017 STEMMA QT",
+    "devices": {"io_expander": {"on": {"i2c": {}}, "provides": {"io_expander": {}}, "chip": "mcp23017"}},
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "VCC",
+                "SCL",
+                "SDA",
+                "RESET",
+                "GPA0",
+                "GPA1",
+                "GPA2",
+                "GPA3",
+                "GPA4",
+                "GPA5",
+                "GPA6",
+                "GPA7",
+                "INTA",
+                "INTB",
+                "A0",
+                "A1",
+                "A2",
+                "GPB0",
+                "GPB1",
+                "GPB2",
+                "GPB3",
+                "GPB4",
+                "GPB5",
+                "GPB6",
+                "GPB7",
+                "GND"
+            ]
+        }
+    },
+    "maker": "adafruit",
+    "part": "5346",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit MCP23017 STEMMA QT.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

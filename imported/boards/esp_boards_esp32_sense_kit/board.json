@@ -1,0 +1,23 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "esp_boards_esp32_sense_kit",
+    "title": "ESP32-Sense-Kit mainboard (touch-sensor evaluation kit, CH455G segment display, RGB LED)",
+    "mcu": {"target": "esp32"},
+    "buses": {"i2c": {"i2c0": {"sda": 22, "scl": 23}}},
+    "devices": {
+        "led_red": {"class": "other", "pins": {"out": 18}},
+        "led_green": {"class": "other", "pins": {"out": 21}},
+        "led_blue": {"class": "other", "pins": {"out": 19}}
+    },
+    "origin": {
+        "from": "esp_boards",
+        "ref": "0.7.1",
+        "path": "esp32_sense_kit",
+        "license": "Espressif Modified MIT License",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "esp_boards 0.7.1"}}
+}

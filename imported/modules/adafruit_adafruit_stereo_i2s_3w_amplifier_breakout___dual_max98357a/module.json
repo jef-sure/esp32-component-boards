@@ -1,0 +1,33 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_stereo_i2s_3w_amplifier_breakout___dual_max98357a",
+    "title": "Adafruit Stereo I2S 3W Amplifier Breakout - Dual MAX98357A",
+    "devices": {
+        "speaker": {
+            "on": {"i2s": {}},
+            "provides": {"speaker": {"variant": "i2s"}},
+            "config": {"direction": "out"},
+            "chip": "max98357a"
+        }
+    },
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": ["VDD", "BCLK", "LRCLK", "DIN", "GAIN", "RO+", "RO-", "LO+", "LO-", "GND"]
+        }
+    },
+    "maker": "adafruit",
+    "part": "6513",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit Stereo I2S 3W Amplifier Breakout - Dual MAX98357A.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

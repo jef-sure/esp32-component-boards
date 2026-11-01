@@ -1,0 +1,21 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_mcp3421_18_bit_adc",
+    "title": "Adafruit MCP3421 18-Bit ADC",
+    "devices": {"adc": {"on": {"i2c": {}}, "provides": {"adc": {}}, "chip": "mcp3421"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["VCC", "VIN+", "VIN-", "SCL", "SDA", "GND"]}},
+    "maker": "adafruit",
+    "part": "5870",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit MCP3421 18-Bit ADC.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

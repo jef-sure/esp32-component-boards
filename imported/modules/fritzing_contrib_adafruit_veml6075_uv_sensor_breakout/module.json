@@ -1,0 +1,20 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_contrib_adafruit_veml6075_uv_sensor_breakout",
+    "title": "Adafruit VEML6075 UV Sensor Breakout",
+    "devices": {"light": {"on": {"i2c": {}}, "provides": {"light": {}, "uv": {}}, "chip": "veml6075"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["VIN", "3.3V", "SCL", "SDA", "GND"]}},
+    "part": "3964",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "fritzing_contrib",
+        "ref": "27535f2",
+        "path": "adafruit_7d08c4e2b598fb300dbff7e6365bb638_1_E9.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing_contrib 27535f2"}}
+}

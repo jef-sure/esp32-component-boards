@@ -1,0 +1,21 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_sen54_or_sen55_adapter_breakout",
+    "title": "Adafruit SEN54 or SEN55 Adapter Breakout",
+    "devices": {"air": {"on": {"i2c": {}}, "provides": {"air": {"variant": "particles"}}, "chip": "sen54"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["VCC", "SCL", "SDA", "GND"]}},
+    "maker": "adafruit",
+    "part": "5964",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit SEN54 or SEN55 Adapter Breakout.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

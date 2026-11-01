@@ -1,0 +1,28 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_i2s_mems_microphone_breakout___ics_43434",
+    "title": "Adafruit I2S MEMS Microphone Breakout - ICS-43434",
+    "devices": {
+        "microphone": {
+            "on": {"i2s": {}},
+            "provides": {"microphone": {"variant": "i2s"}},
+            "config": {"direction": "in"},
+            "chip": "ics43434"
+        }
+    },
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["VDD", "BCLK", "DATA", "WS", "SELECT", "GND"]}},
+    "maker": "adafruit",
+    "part": "6049",
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit I2S MEMS Microphone Breakout - ICS-43434.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

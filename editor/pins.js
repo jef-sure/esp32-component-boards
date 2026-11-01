@@ -11,6 +11,8 @@ function pinsOf(board) {
     for (const [kind, named] of Object.entries(board.buses || {})) {
         for (const [own, bus] of Object.entries(named || {})) {
             for (const key of Object.keys(bus || {}).sort()) {
+                // the data lines of RGB and DVP are a list
+                if (Array.isArray(bus[key])) bus[key].forEach((line, at) => Number.isInteger(line?.gpio) && add(line.gpio, `${kind}.${own}.${key}${at}`, 'bus'));
                 if (PIN_NOT_LINES.has(key) || !Number.isInteger(bus[key]?.gpio)) continue;
                 add(bus[key].gpio, `${kind}.${own}.${key}`, key === 'miso' || key === 'din' ? 'in' : 'bus');
             }
@@ -68,11 +70,12 @@ function pinProblems(board) {
     if (!gpio) return [];
     const problems = [];
     const shared = sharedPins(board);
+    const ladder = new Set(Object.values(board.devices || {}).flatMap((device) => Object.values(device.pins || {})).filter((line) => line?.analog).map((line) => line.gpio));
     const owners = new Map();
     for (const { pin, owner, direction } of pinsOf(board)) {
         if (!gpio.valid.includes(pin)) problems.push(`GPIO ${pin} (${owner}) is no GPIO of an ${board.mcu.target}`);
         if (direction !== 'in' && gpio.input_only.includes(pin)) problems.push(`GPIO ${pin} (${owner}) is input only on an ${board.mcu.target}, and ${owner} drives it`);
-        owners.set(pin, [...(owners.get(pin) || []), owner]);
+        if (!ladder.has(pin)) owners.set(pin, [...(owners.get(pin) || []), owner]);
     }
     for (const pin of [...owners.keys()].sort((a, b) => a - b)) {
         if (!shared.has(pin) && owners.get(pin).length > 1) problems.push(`GPIO ${pin} has two owners: ${owners.get(pin).join(', ')}`);

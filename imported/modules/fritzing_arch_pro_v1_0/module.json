@@ -1,0 +1,66 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_arch_pro_v1_0",
+    "title": "Arch Pro V1.0",
+    "devices": {
+        "ethernet": {"on": {"i2c": {}, "spi": {}, "uart": {}}, "provides": {"ethernet": {}}, "class": "network"}
+    },
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": [
+                "D0",
+                "D1",
+                "D2",
+                "D3",
+                "D4",
+                "D5",
+                "D6",
+                "D7",
+                "IOREF",
+                "RESERVE",
+                "RESET",
+                "3V3",
+                "5V",
+                "GND",
+                "VIN",
+                "A0",
+                "A1",
+                "A2",
+                "A3",
+                "A4",
+                "A5",
+                "D8",
+                "D9",
+                "D10",
+                "D11",
+                "D12",
+                "D13",
+                "AREF",
+                "SDA",
+                "SCL",
+                "G_SDA",
+                "G_SCL",
+                "G_RX",
+                "G_TX",
+                "MISO",
+                "CLK",
+                "MOSI",
+                "SSEL",
+                "NC"
+            ]
+        }
+    },
+    "power": [{"name": "VCC", "source": "connector", "volts": 5}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "seeed_arch_pro_v1.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

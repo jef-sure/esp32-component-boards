@@ -1,0 +1,41 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "m5stack_boards_m5_atom_s3r",
+    "title": "M5Stack AtomS3R with the current ST7735 LCD revision, LP5562 backlight, and button",
+    "mcu": {"target": "esp32s3"},
+    "buses": {"spi": {"spi3": {"mosi": 21, "miso": "nc", "sclk": 15}}, "i2c": {"i2c0": {"sda": 45, "scl": 0}}},
+    "devices": {
+        "lp5562_backlight": {"class": "led", "chip": "lp5562"},
+        "display_lcd": {
+            "class": "display",
+            "on": {"spi.spi3": {"cs": 14, "hz": 40000000, "mode": 0}},
+            "pins": {"dc": 42, "rst": 48},
+            "config": {
+                "kind": "graphics",
+                "panel": {"width": 128, "height": 128},
+                "primary": true,
+                "depth_bits": 16,
+                "invert": true,
+                "color_order": "bgr"
+            },
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "right-left", "y": "bottom-top", "swap": false}}
+            },
+            "start": {"after": ["lp5562_backlight"]},
+            "chip": "st7735"
+        },
+        "boot_button": {"class": "button", "pins": {"in": {"gpio": 41, "active": "low"}}},
+        "bmi270_sensor_hub": {"class": "imu", "chip": "bmi270_sensor_hub"}
+    },
+    "origin": {
+        "from": "m5stack_boards",
+        "ref": "0.6.1~2",
+        "path": "m5_atom_s3r",
+        "license": "Espressif Modified MIT License",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "m5stack_boards 0.6.1~2"}}
+}

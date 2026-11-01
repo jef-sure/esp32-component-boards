@@ -1,0 +1,21 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "adafruit_adafruit_sgp41_multi_pixel_gas_sensor_breakout___voc___nox___stemma_qt",
+    "title": "Adafruit SGP41 Multi-Pixel Gas Sensor Breakout - VOC & NOx - STEMMA QT",
+    "devices": {"air": {"on": {"i2c": {}}, "provides": {"air": {"variant": "voc"}}, "chip": "sgp41"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["VCC", "3.3V", "SCL", "SDA", "GND"]}},
+    "maker": "adafruit",
+    "part": "6455",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "adafruit",
+        "ref": "c7bbe2d",
+        "path": "Adafruit SGP41 Multi-Pixel Gas Sensor Breakout - VOC & NOx - STEMMA QT.fzpz",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+}

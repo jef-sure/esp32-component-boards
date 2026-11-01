@@ -1,0 +1,54 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "esp_boards_esp32_s3_usb_otg",
+    "title": "ESP32-S3-USB-OTG (1.3-inch 240x240 ST7789 LCD, USB host/device switching)",
+    "mcu": {"target": "esp32s3"},
+    "buses": {
+        "spi": {"spi3": {"mosi": 7, "miso": "nc", "sclk": 6}},
+        "sdmmc": {"sdmmc0": {"clk": 36, "cmd": 35, "d0": 37, "d1": 38, "d2": 33, "d3": 34}}
+    },
+    "devices": {
+        "display_lcd": {
+            "class": "display",
+            "on": {"spi.spi3": {"cs": 5, "hz": 40000000, "mode": 0}},
+            "pins": {"dc": 4, "rst": 8, "backlight": 9},
+            "config": {
+                "kind": "graphics",
+                "panel": {"width": 240, "height": 240},
+                "primary": true,
+                "depth_bits": 16,
+                "invert": true,
+                "color_order": "rgb"
+            },
+            "controls": {
+                "orientation": {"how": "driver", "start": {"x": "left-right", "y": "top-bottom", "swap": false}},
+                "backlight": {"how": "backlight_pwm", "min": 0, "max": 100, "start": 100}
+            },
+            "chip": "st7789"
+        },
+        "fs_sdcard": {"class": "storage", "config": {"media": "microsd"}, "on": {"sdmmc.sdmmc0": {}}},
+        "usb_mode_select": {"class": "other", "pins": {"out": 18}},
+        "led_green": {"class": "led", "pins": {"out": 15}},
+        "led_yellow": {"class": "led", "pins": {"out": 16}},
+        "button_ok": {"class": "button", "pins": {"in": {"gpio": 0, "active": "low"}}},
+        "button_up": {"class": "button", "pins": {"in": {"gpio": 10, "active": "low"}}},
+        "button_dw": {"class": "button", "pins": {"in": {"gpio": 11, "active": "low"}}},
+        "button_menu": {"class": "button", "pins": {"in": {"gpio": 14, "active": "low"}}}
+    },
+    "origin": {
+        "from": "esp_boards",
+        "ref": "0.7.1",
+        "path": "esp32_s3_usb_otg",
+        "license": "Espressif Modified MIT License",
+        "tool": "tools/import_board_manager.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"pack": {"level": "extracted", "source": "esp_boards 0.7.1"}},
+    "power": [
+        {"line": 12, "level": 1, "feeds": []},
+        {"line": 13, "level": 1, "feeds": []},
+        {"line": 17, "level": 1, "feeds": []}
+    ]
+}

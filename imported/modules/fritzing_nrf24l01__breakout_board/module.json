@@ -1,0 +1,21 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_nrf24l01__breakout_board",
+    "title": "NRF24L01+ Breakout Board",
+    "devices": {"rf": {"on": {"spi": {}}, "provides": {"rf": {}}, "chip": "nrf24l01"}},
+    "connectors": {
+        "J1": {"type": "contacts of the part", "pins": ["GND", "VCC", "CE", "CS", "SCK", "MOSI", "MISO", "IRQ"]}
+    },
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "NRF24L01+_breakout.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

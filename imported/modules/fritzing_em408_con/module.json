@@ -1,0 +1,19 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_em408_con",
+    "title": "EM408_CON",
+    "devices": {"gps": {"on": {"uart": {}}, "provides": {"gps": {}}, "class": "gps"}},
+    "connectors": {"J1": {"type": "contacts of the part", "pins": ["EN", "GND", "RX", "TX", "VCC"]}},
+    "power": [{"name": "VCC", "source": "connector"}],
+    "origin": {
+        "from": "fritzing",
+        "ref": "27535f2",
+        "path": "sparkfun-connectors-em408_con-.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing 27535f2"}}
+}

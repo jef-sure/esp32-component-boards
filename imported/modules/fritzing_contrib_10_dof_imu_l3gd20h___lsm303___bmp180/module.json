@@ -1,0 +1,31 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "fritzing_contrib_10_dof_imu_l3gd20h___lsm303___bmp180",
+    "title": "10-DOF IMU L3GD20H + LSM303 + BMP180",
+    "devices": {
+        "accelerometer": {
+            "on": {"i2c": {}},
+            "provides": {"accelerometer": {}, "gyroscope": {}, "magnetometer": {}, "pressure": {}},
+            "chip": "lsm303"
+        }
+    },
+    "connectors": {
+        "J1": {
+            "type": "contacts of the part",
+            "pins": ["VIN", "3.3V", "SCL", "SDA", "GYR_INT", "GYR_RDY", "LSM_INT1", "LSM_INT2", "LSM_DRDY", "GND"]
+        }
+    },
+    "part": "1604",
+    "power": [{"name": "VCC", "source": "connector", "volts": 3.3}],
+    "origin": {
+        "from": "fritzing_contrib",
+        "ref": "27535f2",
+        "path": "adafruit_49fc4d85260bbc33d064f6627ef083a2_1_7B.fzp",
+        "license": "CC-BY-SA-3.0",
+        "tool": "tools/import_fritzing.py",
+        "date": "2026-11-01"
+    },
+    "checked": {"part": {"level": "extracted", "source": "fritzing_contrib 27535f2"}}
+}

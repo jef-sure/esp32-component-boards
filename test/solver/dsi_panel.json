@@ -1,8 +1,7 @@
 {
-    "title": "A DSI panel takes the free bus of the board on a ribbon, and its timings stay an unknown",
+    "title": "A DSI panel takes the free bus of a board on a ribbon, and its timings stay an unknown",
     "answers": {"display": "graphics"},
-    "change": {"jc1060p470c": {"devices": {"lcd": null, "touch": null}, "power": null, "checked": null}},
     "modules": {"dsi_panel": {"format": "jef-sure/boards", "format_version": 2, "kind": "module", "name": "dsi_panel", "title": "A DSI panel", "devices": {"lcd": {"chip": "jd9165", "on": {"dsi": {}}, "config": {"primary": true, "panel": {"width": 1024, "height": 600, "mm_w": 154, "mm_h": 86}, "depth_bits": 16}}}}},
-    "kit": {"name": "jc1060p470c", "modules": {"dsi_panel": 1}, "on": {"dsi_panel": "dsi"}},
+    "kit": {"name": "esp32_p4_eth", "modules": {"dsi_panel": 1}, "on": {"dsi_panel": "dsi"}},
     "says": "its timings are measured on a board"
 }

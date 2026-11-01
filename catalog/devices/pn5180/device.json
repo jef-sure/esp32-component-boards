@@ -13,6 +13,9 @@
         "nfc": {
             "standards": ["iso14443a", "iso14443b", "felica", "iso15693", "iso18000_3m3", "iso18092"],
             "freq_mhz": [13.56, 13.56],
+            "features": ["lpcd", "dpc", "awc", "crypto1"],
+            "frame_bytes": 260,
+            "stack": "host",
             "tx_mw_max": 1375,
             "modes": ["reader", "peer_to_peer", "card_emulation"]
         }

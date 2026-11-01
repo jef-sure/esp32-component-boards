@@ -10,7 +10,7 @@
     "description": "An ESP32-P4 with 100 Mbit Ethernet on an IP101, an ES8311 with a microphone and a speaker output, a microSD slot, MIPI CSI and DSI connectors, a 40-pin header in the layout of a Pico. No radio.",
     "notes": [
         "No Wi-Fi and no Bluetooth: the schematic has no radio chip and the ESP32-P4 has none.",
-        "The DSI connector J2 has no bus here: the speed of a bus is that of a panel, measured on a board."
+        "The DSI connector J2 is free. Its speed comes with a panel, measured on a board."
     ],
     "mcu": {
         "target": "esp32p4",
@@ -39,6 +39,7 @@
         }
     },
     "buses": {
+        "dsi": {"dsi0": {"lanes": 2}},
         "csi": {"csi0": {"lanes": 2}},
         "i2c": {"i2c0": {"sda": 7, "scl": 8}},
         "i2s": {"i2s0": {"mclk": 13, "bclk": 12, "ws": 10, "dout": 9, "din": 11}},

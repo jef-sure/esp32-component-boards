@@ -1,0 +1,53 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "mfrc522",
+    "title": "NXP MFRC522",
+    "maker": "nxp",
+    "part": "MFRC522",
+    "class": "nfc",
+    "on": {
+        "spi": {
+            "hz": 10000000
+        },
+        "i2c": {},
+        "uart": {}
+    },
+    "identify": {
+        "register": "VersionReg 0x37",
+        "values": [
+            "0x91",
+            "0x92"
+        ]
+    },
+    "provides": {
+        "nfc": {
+            "standards": [
+                "iso14443a"
+            ],
+            "freq_mhz": [
+                13.56,
+                13.56
+            ],
+            "features": [
+                "crypto1"
+            ],
+            "frame_bytes": 64,
+            "stack": "host",
+            "modes": [
+                "reader"
+            ]
+        }
+    },
+    "notes": [
+        "Cheap modules often carry a clone, such as the FM17522: VersionReg tells them apart."
+    ],
+    "checked": {
+        "facts": {
+            "level": "community",
+            "source": "The comparison of modules of Anton, 2026-11-01; not checked against the datasheet",
+            "date": "2026-11-01"
+        }
+    }
+}

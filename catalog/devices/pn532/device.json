@@ -14,6 +14,9 @@
             "standards": ["iso14443a", "iso14443b", "felica", "iso18092"],
             "targets_max": 2,
             "freq_mhz": [13.56, 13.56],
+            "features": ["crypto1"],
+            "frame_bytes": 262,
+            "stack": "firmware",
             "tx_mw_max": 750,
             "modes": ["reader", "peer_to_peer", "card_emulation"]
         }

@@ -1,0 +1,37 @@
+name: A price
+description: What you paid, or saw, for a board or a module of the catalog.
+title: "price: "
+labels: [price]
+body:
+  - type: input
+    id: item
+    attributes:
+      label: Item
+      description: As in the catalog, such as modules/pn532_module or boards/esp32_devkit.
+    validations:
+      required: true
+  - type: input
+    id: shop
+    attributes:
+      label: Shop
+    validations:
+      required: true
+  - type: input
+    id: currency
+    attributes:
+      label: Currency
+      description: Three letters, such as EUR, USD or INR.
+    validations:
+      required: true
+  - type: input
+    id: price
+    attributes:
+      label: Price of one
+      description: One number, or a range as 3-5. Without delivery.
+    validations:
+      required: true
+  - type: input
+    id: qty
+    attributes:
+      label: Sold by
+      description: How many in a pack, when it is not sold by one.

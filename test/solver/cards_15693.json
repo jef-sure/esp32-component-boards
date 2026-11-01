@@ -1,0 +1,6 @@
+{
+    "title": "ISO 15693 cards rule out the PN532 and the RC522, and the CLRC663 comes after the PN5180: it has no library here",
+    "answers": {"nfc_readers": 1, "nfc_cards": "iso15693"},
+    "first": {"name": "esp32_devkit", "modules": {"pn5180_module": 1}},
+    "says": "the catalog has no library for its chip"
+}

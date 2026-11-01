@@ -16,7 +16,9 @@ const catalog = catalogOf([ROOT]);
 const loader = boardResolver(catalog);
 const checksOf = documentChecks({ schema: read(path.join(ROOT, 'format.schema.json')), rules: read(path.join(ROOT, 'rules.json')), loader, schemaReader, check, pinProblems });
 const rates = read(path.join(ROOT, 'rates.json')).rates;
-const solver = kitSolver({ catalog, loader, questions: read(path.join(ROOT, 'questions.json')).questions, rates, checksOf, pinMap });
+const schema = read(path.join(ROOT, 'format.schema.json'));
+const solver = kitSolver({ catalog, loader, questions: read(path.join(ROOT, 'questions.json')).questions, rates, levels: schema.$defs.level.enum, checksOf, pinMap });
+const selections = schemaReader({ $defs: schema.$defs });
 
 const wrong = [];
 const projects = new Map();
@@ -88,6 +90,10 @@ for (const name of names) {
     }
     if (given.picture && kits.find((item) => item.name === given.picture.board)?.picture !== given.picture.file) say('the picture of a kit is not there');
     if (given.quiet && kits.find((item) => item.name === given.quiet.board)?.says.some((line) => line.text.includes(given.quiet.text))) say(`${given.quiet.board} says "${given.quiet.text}"`);
+    if (given.avoids) {
+        const kit = fit.find((item) => item.name === given.avoids.board);
+        if (!kit?.wires.length || kit.wires.some((wire) => given.avoids.pins.includes(wire.pin))) say(`${given.avoids.board} uses a pin it was told is in use`);
+    }
     if (given.fed) {
         const kit = fit.find((item) => item.name === given.fed.board && item.project?.modules[given.fed.use]);
         if (JSON.stringify(kit?.project.modules[given.fed.use].supply) !== JSON.stringify(given.fed.supply)) say(`fed by ${JSON.stringify(kit?.project.modules[given.fed.use].supply)}`);
@@ -95,6 +101,7 @@ for (const name of names) {
     if (given.says && !kits.some((kit) => kit.says.some((line) => line.text.includes(given.says)))) say(`no kit says "${given.says}"`);
     for (const kit of fit) if (kit.project && checksOf(kit.project).problems.length) say(`${kit.name}: its project does not pass the checks`);
     holdsForEvery(kits, say);
+    if (fit[0]) for (const error of selections.errors({ $ref: '#/$defs/selection' }, JSON.parse(JSON.stringify(solver.selectionOf(fit[0], kits, given.answers, 'EUR'))))) say(`selection: ${error.path.join('.')}: ${error.message}`);
     for (const module of Object.keys(given.modules || {})) delete catalog.modules[module];
     Object.assign(rates, keptRates);
     for (const [board, price] of prices) catalog.boards[board].price = price;

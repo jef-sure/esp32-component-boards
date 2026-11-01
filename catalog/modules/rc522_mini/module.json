@@ -1,0 +1,67 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "rc522_mini",
+    "title": "RC522 mini module",
+    "price": {
+        "aliexpress": {
+            "shop": "AliExpress",
+            "currency": "EUR",
+            "range": [
+                1.25,
+                1.25
+            ],
+            "date": "2026-11-01",
+            "source": "Anton: EC Buying, approximate"
+        }
+    },
+    "power": [
+        {
+            "name": "VCC",
+            "source": "connector",
+            "volts": [
+                3,
+                3.6
+            ],
+            "feeds": [
+                "nfc"
+            ]
+        }
+    ],
+    "devices": {
+        "nfc": {
+            "chip": "mfrc522",
+            "on": {
+                "spi": {}
+            },
+            "antenna": {
+                "kind": "on_board"
+            },
+            "logic": "VCC",
+            "provides": {
+                "nfc": {
+                    "range_mm": [
+                        10,
+                        30
+                    ]
+                }
+            }
+        }
+    },
+    "notes": [
+        "Contacts NSS, SCK, MOSI, MISO, RST, GND, 3.3V: IRQ does not come out. A small antenna, almost surely a clone of the chip."
+    ],
+    "checked": {
+        "facts": {
+            "level": "community",
+            "source": "The comparison of modules of Anton, 2026-11-01; not checked against the datasheet",
+            "date": "2026-11-01",
+            "covers": [
+                "power",
+                "devices.nfc",
+                "price"
+            ]
+        }
+    }
+}

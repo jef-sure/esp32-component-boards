@@ -26,6 +26,7 @@ header h1 { margin: 0; font-size: 15px; }
 .path { color: var(--muted); font-family: ui-monospace, monospace; font-size: 12px; }
 .say { color: var(--muted); font-size: 12px; }
 .say.wrong, .wrong { color: var(--wrong); }
+.banner { margin: 0; padding: 8px 12px; border-bottom: 1px solid var(--wrong); color: var(--wrong); font-weight: 600; }
 .good { color: var(--good); }
 .start { padding: 24px; color: var(--muted); }
 
@@ -87,6 +88,7 @@ header .views { position: static; padding: 0; border: 0; background: none; }
 .output input:not([type=checkbox]) { width: 84px; }
 .output label { display: inline-flex; gap: 4px; align-items: center; }
 .summary { margin: 0 0 8px; }
+.kit .hint a { margin-left: 8px; }
 .summary b { margin-right: 8px; }
 .wiring { margin-bottom: 6px; }
 .wiring b { display: block; }

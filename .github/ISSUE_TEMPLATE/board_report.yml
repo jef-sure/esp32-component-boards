@@ -1,0 +1,23 @@
+name: A board or a module
+description: A board or a module the catalog does not have, with what examples/board_report found on it.
+title: "board: "
+labels: [board-report]
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Name
+      description: What is printed on it, and where it was bought.
+    validations:
+      required: true
+  - type: textarea
+    id: report
+    attributes:
+      label: Report
+      description: The line of examples/board_report that starts with BOARD_REPORT. Leave it empty for a module.
+      render: json
+  - type: textarea
+    id: more
+    attributes:
+      label: What the program cannot know
+      description: The display, what you wired, a link to a schematic.

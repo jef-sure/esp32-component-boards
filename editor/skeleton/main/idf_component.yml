@@ -4,3 +4,4 @@ dependencies:
   jef-sure/boards:
     git: https://github.com/jef-sure/esp32-component-boards.git
     version: main
+@DEPENDENCIES@

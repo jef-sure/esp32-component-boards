@@ -10,14 +10,22 @@
 
 @WIRES@
 
+## The libraries
+
+@LIBRARIES@
+
 ## The first build
 
 The board is chosen before the first build: the dependencies come from what it has.
-`board_select.py` is in a checkout of https://github.com/jef-sure/esp32-component-boards.
+The first `reconfigure` fetches the component, and `board_select.py` comes with it.
 
 ```sh
-python3 path/to/boards/tools/board_select.py @BOARD@ .
-idf.py build flash monitor
+idf.py reconfigure
+python3 managed_components/jef-sure__boards/tools/board_select.py --reset @BOARD@ .
+idf.py reconfigure build flash monitor
 ```
+
+`selection.json` keeps how this kit was chosen: the answers, what fits too and why the rest does not. Open
+this folder on the page of the component to see it again.
 
 After changing the board of a project already built, run `idf.py reconfigure build`.

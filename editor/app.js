@@ -266,7 +266,11 @@ const NewDocument = {
 const MARKS = { yes: '✓', no: '✗', unknown: '?', do: '→' };
 
 // Which question a board and its modules answer: the first screen.
-const numberOf = (event) => (event.target.value === '' ? undefined : Number(event.target.value));
+const numberOf = (event, question) => {
+    if (event.target.value === '') return undefined;
+    const value = Number(event.target.value);
+    return question?.type === 'count' ? Math.min(Math.max(Math.floor(value), 0), question.max ?? value) : value;
+};
 
 const SelectPage = {
     setup() {
@@ -276,9 +280,13 @@ const SelectPage = {
         const asked = computed(() => Object.values(store.answers).some((answer) => (Array.isArray(answer) ? answer.length : answer && answer !== 'none')));
         const addOutput = () => store.answers.outputs.push({ kind: 'tone', hz: undefined, ppm: undefined, jitter: 'any', bits: 8, pins: 1, live: false });
         // a plan belongs to the answers it was made for
-        Vue.watch(() => store.answers, () => { store.plan = null; }, { deep: true });
+        Vue.watch(() => store.answers, (answers) => {
+            store.plan = null;
+            localStorage.setItem(PREFERENCES.answers, JSON.stringify(answers));
+        }, { deep: true });
         const money = (price) => (!price ? '' : !price.known ? translate(store.language, 'price not known') : `${price.low === price.high ? price.low : `${price.low}–${price.high}`} ${price.currency}${price.missing.length ? ' + ?' : ''}`);
-        return { store, host, fit, others, asked, addOutput, money, numberOf, MARKS };
+        const priceLink = (item) => reportLink({ template: 'price.yml', item, currency: store.currency });
+        return { store, host, fit, others, asked, addOutput, money, numberOf, priceLink, MARKS };
     },
     template: `
         <div class="select">
@@ -308,7 +316,8 @@ const SelectPage = {
                         <select v-if="question.type === 'choice'" :value="store.answers[question.id] ?? question.choices[0].value" @change="store.answers[question.id] = $event.target.value">
                             <option v-for="choice in question.choices" :key="choice.value" :value="choice.value">{{ t(choice.text) }}</option>
                         </select>
-                        <input v-else type="number" min="0" :max="question.max" step="any" :value="store.answers[question.id]" @input="store.answers[question.id] = numberOf($event)">
+                        <input v-else-if="question.type === 'text'" type="text" v-model="store.answers[question.id]">
+                        <input v-else type="number" min="0" :max="question.max" :step="question.type === 'count' ? 1 : 'any'" :value="store.answers[question.id]" @change="store.answers[question.id] = numberOf($event, question)">
                     </template>
                 </div>
             </form>
@@ -327,12 +336,14 @@ const SelectPage = {
                     <details v-for="row in store.plan.rows.filter((item) => item.state === 'changes')" :key="row.path"><summary>{{ t('{0}: what lies there and what would', row.path) }}</summary>
                         <div class="both"><pre>{{ row.old }}</pre><pre>{{ row.text }}</pre></div>
                     </details>
-                    <p v-if="store.plan.needsComponent" class="locked">{{ t('This project does not name jef-sure/boards. Add it to main/idf_component.yml yourself: the file stays as it is.') }}</p>
+                    <div v-if="store.plan.manifestLines.length" class="locked">{{ t('Add these to main/idf_component.yml yourself: the file stays as it is.') }}
+                        <pre>{{ store.plan.manifestLines.join('\\n') }}</pre></div>
                     <p v-if="!store.plan.written"><button @click="store.writeProject()">{{ t('write') }}</button> <button @click="store.plan = null">{{ t('cancel') }}</button></p>
                     <div v-else>
                         <p class="good">{{ t('{0} file(s) written, nothing else touched.', store.plan.written.length) }}</p>
-                        <pre>python3 path/to/boards/tools/board_select.py {{ store.plan.board }} .
-idf.py {{ store.plan.mode === 'create' ? 'build' : 'reconfigure build' }} flash monitor</pre>
+                        <pre>idf.py reconfigure
+python3 managed_components/jef-sure__boards/tools/board_select.py --reset {{ store.plan.board }} .
+idf.py reconfigure build flash monitor</pre>
                     </div>
                 </section>
                 <p class="summary"><b>{{ t(fit.length === 1 ? '{0} kit fits' : '{0} kits fit', fit.length) }}</b>
@@ -343,6 +354,8 @@ idf.py {{ store.plan.mode === 'create' ? 'build' : 'reconfigure build' }} flash 
                     <img v-if="kit.picture" class="picture" :src="'../catalog/' + kit.picture" :alt="kit.title">
                     <h3>{{ kit.headline }} <span class="note">{{ money(kit.price) }}</span></h3>
                     <ul><li v-for="line in kit.says" :key="line.text" :class="line.level"><span class="mark">{{ MARKS[line.level] }}</span> {{ line.text }}</li></ul>
+                    <p v-if="kit.price.unpriced.length" class="hint">{{ t('Know a price?') }}
+                        <a v-for="item in kit.price.unpriced" :key="item.item" target="_blank" rel="noopener" :href="priceLink(item.item)">{{ item.title }}</a></p>
                     <details v-if="kit.wiring.length"><summary>{{ t('the wires') }}</summary>
                         <div v-for="module in kit.wiring" :key="module.use" class="wiring"><b>{{ module.title }}</b>
                             <span v-for="wire in module.lines" :key="wire.line"><code>{{ wire.line }}</code> → {{ wire.to }}</span></div>
@@ -391,7 +404,6 @@ const app = createApp({
                 <button :disabled="store.readOnly || !store.edited(store.entry)" @click="store.save()">save</button>
             </template>
             <span class="say">{{ store.note }}</span>
-            <span class="say wrong">{{ store.error }}</span>
             <span class="top">
                 <template v-if="store.page === 'select'">
                     <label v-for="question in store.topQuestions" :key="question.id">{{ t(question.text) }}
@@ -402,6 +414,7 @@ const app = createApp({
                 <select v-model="store.language" :aria-label="store.language"><option v-for="(language, code) in LANGUAGES" :key="code" :value="code">{{ language.title }}</option></select>
             </span>
         </header>
+        <p v-if="store.error" class="banner">{{ store.error }}</p>
         <p v-if="!store.loaded" class="start">The page is not served from the repository, so it has no catalog: open the folder of the repository.
             A program or its <code>local-boards</code> comes after it.</p>
         <select-page v-else-if="store.page === 'select'"></select-page>

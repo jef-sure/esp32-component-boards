@@ -1,0 +1,5 @@
+{
+    "title": "A count stays in the range of its question, and whole",
+    "answers": {"nfc_readers": 9.5},
+    "kit": {"name": "esp32_devkit", "modules": {"pn532_module": 4}}
+}

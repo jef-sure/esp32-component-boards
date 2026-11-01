@@ -3,6 +3,15 @@
 A board is a directory in `catalog/boards/` with two files. Everything else is
 generated.
 
+## Or send a report
+
+Nobody has to write the data to get a board into the catalog. Build `examples/board_report` for your chip with
+`idf.py set-target`, flash it, and copy the line that starts with `BOARD_REPORT` into the form
+[a board or a module](https://github.com/jef-sure/esp32-component-boards/issues/new?template=board_report.yml),
+with what a program cannot know: the display, the PSRAM, a schematic. The program drives no pin unless you set
+the pins of an I2C bus in `idf.py menuconfig`: on an unknown board a pin may be anything. A MAC address is not in
+the report.
+
 ## 1. Describe it
 
 Copy the nearest board:

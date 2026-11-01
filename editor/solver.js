@@ -18,7 +18,7 @@ const PRESCALES_TRIED = 8; // the smallest prescalers that fit: a larger one onl
 const MM_IN_INCH = 25.4;
 const cents = (value) => Math.round(value * 100) / 100;
 
-function kitSolver({ catalog, loader, questions, rates, checksOf, pinMap, t = (text, ...values) => text.replace(/\{(\d)\}/g, (_, i) => values[+i]) }) {
+function kitSolver({ catalog, loader, questions, rates, levels, checksOf, pinMap, t = (text, ...values) => text.replace(/\{(\d)\}/g, (_, i) => values[+i]) }) {
     const shortOfPins = (wanted, left) => t('it takes {0} more pins and {1} free ones come out of this board', wanted, left);
     const valueAt = (node, path) => path.split('.').reduce((at, key) => (at === undefined || at === null ? undefined : at[key]), node);
     const isClass = (device, need) => (device.classes || []).includes(need.class) && Object.entries(need.where || {}).every(([path, value]) => valueAt(device, path) === value);
@@ -33,8 +33,10 @@ function kitSolver({ catalog, loader, questions, rates, checksOf, pinMap, t = (t
     // What a question can limit: where the figure lies, and what to say when a part falls short or has no figure.
     const MEASURES = {
         diagonal_in: { of: diagonalOf, short: (asked) => t('the display is smaller than {0} inches', asked), unknown: 'the size of the display is not in the data' },
-        range_mm: { of: (device) => device.provides?.nfc?.range_mm ?? null, short: (asked) => t('no reader that reaches {0} mm', asked), unknown: 'the reading distance is not in the data' },
+        range_mm: { of: (device) => [].concat(device.provides?.nfc?.range_mm ?? null)[0], short: (asked) => t('no reader that reaches {0} mm', asked), unknown: 'the reading distance is not in the data' },
     };
+
+    MEASURES.standard = { of: (device) => device.provides?.nfc?.standards ?? null, fits: (standards, asked) => standards.includes(asked), short: (asked) => t('no reader of {0}', asked), unknown: 'the standards are not in the data' };
 
     function holds(question, answers) {
         return Object.entries(question.when || {}).every(([id, value]) => (value === true ? Boolean(answers[id]) : answers[id] === value));
@@ -130,11 +132,13 @@ function kitSolver({ catalog, loader, questions, rates, checksOf, pinMap, t = (t
         return { problem };
     }
 
-    function limitOf(need, wanted) {
-        const question = questions.find((item) => item.limit?.of === need.class);
-        const asked = question && wanted.limits[question.limit.measure];
-        return asked ? { asked, ...MEASURES[question.limit.measure] } : null;
+    // What the answers ask of a part of this kind: a class may have several questions.
+    function limitsOf(need, wanted) {
+        return questions.filter((item) => item.limit?.of && item.limit.of === need.class && wanted.limits[item.limit.measure] !== undefined)
+            .map((item) => ({ asked: wanted.limits[item.limit.measure], fits: (value, asked) => value >= asked, ...MEASURES[item.limit.measure] }));
     }
+
+    const meets = (limit, device) => limit.of(device) === null || limit.fits(limit.of(device), limit.asked);
 
     // What the answers ask for: {class or provides, count, title}, and the numbers that limit them.
     function wantedBy(answers) {
@@ -145,14 +149,15 @@ function kitSolver({ catalog, loader, questions, rates, checksOf, pinMap, t = (t
             if (!holds(question, answers) || answer === undefined || answer === null || answer === '' || answer === false || answer === 0) continue;
             const choice = (question.choices || []).find((item) => item.value === answer);
             if (question.limit) {
-                limits[question.limit.measure] = answer;
+                if (answer !== 'any') limits[question.limit.measure] = answer;
                 continue;
             }
             const need = choice ? choice.needs : question.needs;
-            if (need) needs.push({ ...need, count: question.type === 'count' ? answer : 1, title: t(choice ? choice.text : question.text) });
+            if (need) needs.push({ ...need, count: question.type === 'count' ? Math.min(Math.floor(answer), question.max ?? answer) : 1, title: t(choice ? choice.text : question.text) });
         }
         const outputs = (answers.outputs || []).filter((output) => output.hz > 0).map((output) => ({ ...output, ppm: output.ppm === '' ? undefined : output.ppm, bits: output.kind === 'pwm' ? output.bits : undefined }));
-        return { needs, limits, outputs, currency: answers.currency || KIT_CURRENCY };
+        const taken = String(answers.taken ?? '').match(/\d+/g)?.map(Number) ?? [];
+        return { needs, limits, outputs, taken, currency: answers.currency || KIT_CURRENCY };
     }
 
     const rateOf = (currency) => (currency === KIT_CURRENCY ? 1 : rates[currency]);
@@ -252,8 +257,8 @@ function kitSolver({ catalog, loader, questions, rates, checksOf, pinMap, t = (t
     }
 
     // A project of a board and the modules picked, or {problem} when the pins or the hosts run out.
-    function projectOf(name, board, picks) {
-        const pins = freePins(board);
+    function projectOf(name, board, picks, taken) {
+        const pins = freePins(board).filter((pin) => !taken.includes(pin));
         const buses = {};
         const modules = {};
         const devices = {};
@@ -309,7 +314,7 @@ function kitSolver({ catalog, loader, questions, rates, checksOf, pinMap, t = (t
     }
 
     // Tries the ways to wire a choice of modules; the checks of the tools take the first that holds.
-    function wired(name, board, shortfalls, choice) {
+    function wired(name, board, shortfalls, choice, taken) {
         const unfed = choice.find((module) => !supplyOf(board, module));
         if (unfed) return { problem: t('{0}: no line of this board gives the voltage it takes', unfed.title) };
         const ways = choice.map((module) => transportsOf(module.device));
@@ -317,14 +322,15 @@ function kitSolver({ catalog, loader, questions, rates, checksOf, pinMap, t = (t
         const problems = new Set();
         for (const transports of product(ways)) {
             const picks = picksFor(shortfalls, choice, transports);
-            const project = projectOf(name, board, picks);
+            const project = projectOf(name, board, picks, taken);
             if (project.problem) {
                 problems.add(project.problem);
                 continue;
             }
             const checks = checksOf(project);
             if (!checks.problems.length) return { project, picks, resolved: checks.resolved };
-            problems.add(checks.problems[0].text);
+            const clash = checks.problems[0].text.match(/have address (\S+) on (\S+)/);
+            problems.add(clash ? t('two devices would have one address, {0}, on {1}', clash[1], clash[2]) : checks.problems[0].text);
         }
         return { problem: [...problems].join('; ') };
     }
@@ -355,6 +361,19 @@ function kitSolver({ catalog, loader, questions, rates, checksOf, pinMap, t = (t
             for (const wires of [...Object.values(on || {}), pins || {}]) for (const [line, pin] of Object.entries(wires)) rows.push({ what: pick.use, line, pin });
         }
         return rows;
+    }
+
+    // The libraries of a kit: the board starts those with an adapter, the rest are for the program to start.
+    function librariesOf(resolved) {
+        const found = new Map();
+        for (const [name, device] of Object.entries(resolved.devices)) {
+            if (!device.library) continue;
+            const record = catalog.libraries[device.library];
+            const chip = device.libraries?.[device.library];
+            if (!found.has(device.library)) found.set(device.library, { name: `${record.owner}/${record.name}`, version: device.library_at, own: !chip?.adapter, header: chip?.header, call: chip?.init?.[0]?.call, bus: Object.keys(device.on || {})[0], url: record.url, registry: record.install.some((way) => way.via === 'registry'), devices: [] });
+            found.get(device.library).devices.push(name);
+        }
+        return [...found.values()];
     }
 
     // The wires of each module, as a person with the module in hand connects them.
@@ -399,6 +418,7 @@ function kitSolver({ catalog, loader, questions, rates, checksOf, pinMap, t = (t
     function priceOf(doc, picks, currency) {
         const own = rangeOf(doc.price, currency);
         const missing = own ? [] : [doc.title ?? doc.name];
+        const unpriced = own ? [] : [{ title: doc.title ?? doc.name, item: `boards/${doc.name}` }];
         let low = own ? own[0] : 0;
         let high = own ? own[1] : 0;
         let known = Boolean(own);
@@ -415,9 +435,12 @@ function kitSolver({ catalog, loader, questions, rates, checksOf, pinMap, t = (t
                 high += range[1] * bought;
                 if (bought > count) packs.push({ title, bought, cost: cents(range[0] * bought) });
                 known = true;
-            } else missing.push(title);
+            } else {
+                missing.push(title);
+                unpriced.push({ title, item: `modules/${name}` });
+            }
         }
-        return { low: cents(low), high: cents(high), currency, missing, known, packs };
+        return { low: cents(low), high: cents(high), currency, missing, unpriced, known, packs };
     }
 
     function kitsOfBoard(name, wanted) {
@@ -449,33 +472,31 @@ function kitSolver({ catalog, loader, questions, rates, checksOf, pinMap, t = (t
                 say('yes', t('{0} is on the board', need.title));
                 continue;
             }
-            const limit = limitOf(need, wanted);
+            const limits = limitsOf(need, wanted);
             const on = Object.values(board.devices).filter((device) => isClass(device, need));
-            const large = on.filter((device) => !limit || limit.of(device) === null || limit.of(device) >= limit.asked);
-            if (limit && on.length > large.length) {
-                say('no', limit.short(limit.asked));
+            const large = on.filter((device) => limits.every((limit) => meets(limit, device)));
+            if (on.length > large.length) {
+                const short = limits.find((limit) => on.some((device) => !meets(limit, device)));
+                say('no', short.short(short.asked));
                 return rejected();
             }
-            if (limit && large.some((device) => limit.of(device) === null)) say('unknown', t(limit.unknown));
+            for (const limit of limits) if (large.some((device) => limit.of(device) === null)) say('unknown', t(limit.unknown));
             if (large.length) say('yes', t('{0} is on the board', need.title));
             if (large.length < need.count) shortfalls.push({ need, count: need.count - large.length });
         }
         if (!shortfalls.length) return [kit(name, doc, board, says, null, [])];
-        const reaching = (need, module) => {
-            const limit = limitOf(need, wanted);
-            return !limit || limit.of(module.device) === null || limit.of(module.device) >= limit.asked;
-        };
+        const reaching = (need, module) => limitsOf(need, wanted).every((limit) => meets(limit, module.device));
         const output = (need) => ({ name: need.use, title: t('output {0}: {1} timer {2}, {3} Hz', need.index + 1, plan.sources[plan.chosen[need.index].name].title, plan.chosen[need.index].timer, wanted.outputs[need.index].hz), device: { ways: [need.way] }, power: [] });
         const found = shortfalls.map(({ need }) => (need.output ? [output(need)] : modulesWith(need).filter((module) => reaching(need, module))));
         const lacking = shortfalls.find((_, i) => !found[i].length);
         if (lacking) {
-            const limit = limitOf(lacking.need, wanted);
-            say('no', limit && modulesWith(lacking.need).length ? limit.short(limit.asked) : t('the catalog has no module for: {0}', titleOf(lacking.need)));
+            const short = limitsOf(lacking.need, wanted).find((limit) => modulesWith(lacking.need).some((module) => !meets(limit, module.device)));
+            say('no', short ? short.short(short.asked) : t('the catalog has no module for: {0}', titleOf(lacking.need)));
             return rejected();
         }
         const kits = [];
         for (const choice of product(found)) {
-            const result = wired(name, board, shortfalls, choice);
+            const result = wired(name, board, shortfalls, choice, wanted.taken);
             if (result.project) kits.push(kit(name, doc, result.resolved, [...says], result.project, result.picks, board));
             else kits.push({ name, title: doc.title ?? name, fits: false, says: [...says, { level: 'no', text: result.problem }], modules: [], wires: [], price: null, project: null });
         }
@@ -506,8 +527,7 @@ function kitSolver({ catalog, loader, questions, rates, checksOf, pinMap, t = (t
             for (const text of switchesOf(picks)) lines.push({ level: 'do', text });
             if (project) lines.push(...levelsOf(resolved, picks));
             for (const pick of new Map(picks.filter((item) => !item.way).map((item) => [item.module.name, item])).values()) {
-                const limit = limitOf(pick.need, wanted);
-                if (limit && limit.of(pick.module.device) === null) lines.push({ level: 'unknown', text: `${pick.module.title}: ${t(limit.unknown)}` });
+                for (const limit of limitsOf(pick.need, wanted)) if (limit.of(pick.module.device) === null) lines.push({ level: 'unknown', text: `${pick.module.title}: ${t(limit.unknown)}` });
                 for (const text of catalog.modules[pick.module.name].do ?? []) lines.push({ level: 'do', text: `${pick.module.title}: ${t(text)}` });
                 if (!KIT_BUSES[pick.transport].fixed) continue;
                 lines.push({ level: 'do', text: t('{0}: a ribbon to the {1} connector', pick.module.title, pick.transport.toUpperCase()) });
@@ -515,6 +535,18 @@ function kitSolver({ catalog, loader, questions, rates, checksOf, pinMap, t = (t
             }
             const price = priceOf({ ...source, price: board.price }, picks, wanted.currency);
             for (const pack of price.packs) lines.push({ level: 'do', text: t('{0}: sold by {1}, {2} {3} the pack', pack.title, pack.bought, pack.cost, price.currency) });
+            if (project && loader.trust(resolved, 'connectors', levels)[0].endsWith('unchecked')) lines.push({ level: 'do', text: t('{0}: its connectors are from memory: check them against the board before wiring', source.title ?? boardName) });
+            for (const pick of new Map(picks.filter((item) => !item.way).map((item) => [item.module.name, item])).values()) {
+                if (!resolved.devices[`${pick.use}_${pick.module.part}`]?.library) lines.push({ level: 'unknown', text: t('{0}: the catalog has no library for its chip', pick.module.title) });
+            }
+            for (const item of modules) {
+                const entries = Object.values(catalog.modules[item.name].checked ?? {});
+                if (entries.some((entry) => entry.level === 'unchecked' && entry.covers?.includes('power'))) lines.push({ level: 'do', text: t('{0}: its supply and levels are not measured', item.title) });
+            }
+            const libraries = librariesOf(resolved);
+            for (const item of libraries.filter((library) => library.own)) lines.push({ level: 'do', text: t('{0} {1}: the project gets it, the program starts {2} with {3}()', item.name, item.version, item.devices.join(', '), item.call) });
+            const started = libraries.filter((library) => !library.own);
+            if (started.length) lines.push({ level: 'yes', text: t('the board starts: {0}', started.map((item) => `${item.name} ${item.version}`).join(', ')) });
             for (const title of price.missing) lines.push({ level: 'unknown', text: t('no price for {0}', title) });
             const fits = wanted.limits.price === undefined || !price.known || price.low <= wanted.limits.price;
             if (!fits) lines.push({ level: 'no', text: t('it costs at least {0} {1}', price.low, price.currency) });
@@ -522,7 +554,7 @@ function kitSolver({ catalog, loader, questions, rates, checksOf, pinMap, t = (t
             const headline = [title, ...modules.map(named)].join(' + ');
             const pictures = Object.values(board.images || {});
             const picture = pictures.find((item) => item.shows === 'front') ?? pictures[0];
-            return { name: boardName, title, headline, picture: picture ? `boards/${boardName}/${picture.file}` : null, fits, says: lines, modules, wires: project ? wiresOf(base, project, picks) : [], wiring: project ? wiringOf(base, project, picks) : [], price, project, free: freePins(resolved).length };
+            return { name: boardName, title, headline, libraries, picture: picture ? `boards/${boardName}/${picture.file}` : null, fits, says: lines, modules, wires: project ? wiresOf(base, project, picks) : [], wiring: project ? wiringOf(base, project, picks) : [], price, project, free: freePins(resolved).length };
         }
     }
 
@@ -539,7 +571,23 @@ function kitSolver({ catalog, loader, questions, rates, checksOf, pinMap, t = (t
         );
     }
 
-    return { solve, holds };
+    // What a project keeps of how it was chosen, so that the choice can be read and made again.
+    function selectionOf(kit, kits, answers, currency) {
+        const others = kits.filter((item) => item !== kit);
+        return {
+            ...KIT_FORMAT,
+            currency,
+            answers,
+            board: kit.name,
+            modules: kit.modules.map(({ name, count, on }) => ({ name, count, on })),
+            libraries: kit.libraries.map(({ name, version }) => ({ name, version })),
+            says: kit.says.map(({ level, text }) => ({ level, text })),
+            others: others.filter((item) => item.fits).map((item) => item.headline),
+            rejected: others.filter((item) => !item.fits).map((item) => ({ board: item.name, why: item.says.filter((line) => line.level === 'no').map((line) => line.text) })),
+        };
+    }
+
+    return { solve, holds, selectionOf };
 }
 
 if (typeof module !== 'undefined') module.exports = { kitSolver };

@@ -8,7 +8,7 @@
         {"name": "VCC", "source": "connector", "volts": [3.3, 5.5]},
         {"name": "3V3", "from": "VCC", "regulator": "ldo", "mv": 3300, "feeds": ["nfc"]}
     ],
-    "devices": {"nfc": {"chip": "pn532", "antenna": {"kind": "on_board"}, "logic": "3V3", "provides": {"nfc": {"range_mm": 40}}}},
+    "devices": {"nfc": {"chip": "pn532", "antenna": {"kind": "on_board"}, "logic": "3V3", "provides": {"nfc": {"range_mm": [40, 60], "reads": [{"card": "DESFire EV1", "through_mm": 4.6, "mm": 30}, {"card": "MIFARE Classic 1K", "through_mm": 4.6, "mm": 20}]}}}},
     "price": {
         "aliexpress": {
             "shop": "AliExpress",
@@ -24,7 +24,7 @@
             "covers": ["devices.nfc.provides.nfc.range_mm"],
             "by": "Anton",
             "date": "2026-10-31",
-            "notes": "from experience"
+            "notes": "from experience; the distances through a lid are of the time clock, by eye, 2026-10-14"
         },
         "levels": {
             "level": "unchecked",

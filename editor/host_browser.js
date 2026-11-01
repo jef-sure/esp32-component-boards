@@ -78,7 +78,7 @@ const host = {
         if (local) await readFolder(local, '', files);
         this.localFolder = local;
         this.localProgram = local ? null : picked;
-        return { local: true, files };
+        return { local: true, files, selection: await this.readIn(picked, 'selection.json') };
     },
 
     // What an <input webkitdirectory> gives: the paths start at the folder picked.

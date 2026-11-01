@@ -377,9 +377,8 @@ def read_board(path):
                     if bus.get(signal) is not None and not isinstance(bus.get(signal), int):
                         raise ValueError(f'the bus i2s.{own} has a {signal} that is not a pin')
             elif kind == "dsi":
-                for key in ("lanes", "lane_mbps", "phy_ldo_chan", "phy_ldo_mv"):
-                    if not isinstance(bus.get(key), int):
-                        raise ValueError(f'the bus dsi.{own} lacks its "{key}"')
+                if not isinstance(bus.get("lanes"), int):
+                    raise ValueError(f'the bus dsi.{own} lacks its "lanes"')
             elif kind == "p8":
                 for signal in ("d0", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "wr", "dc", "hz"):
                     if not isinstance(bus.get(signal), int):
@@ -453,6 +452,10 @@ def read_board(path):
             if not orientation or orientation.get("x") not in names["dir_x"] or orientation.get("y") not in names["dir_y"]:
                 raise ValueError("the original_orientation of the display is not left-right/right-left x top-bottom/bottom-top")
             kind = bus_parts(bus_name)[0]
+            if kind == "dsi":
+                for key in ("lane_mbps", "phy_ldo_chan", "phy_ldo_mv"):
+                    if not isinstance(bus_of(data, bus_name).get(key), int):
+                        raise ValueError(f'the bus {bus_name} of a panel lacks its "{key}"')
             for line in display["entry"]["supports"].get("lines") or {"spi": ("cs", "dc"), "qspi": ("cs",), "p8": ("cs",), "dsi": ()}[kind]:
                 if line not in display["bus"]:
                     raise ValueError(f'the display lacks its "{line}" line')

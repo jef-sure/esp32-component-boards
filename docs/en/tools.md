@@ -136,6 +136,12 @@ Writes `catalog/mcu/` from `soc_caps.h` of ESP-IDF.
 Writes `catalog/rates.json` from the reference rates of the European Central Bank, so that prices in
 any currency compare on the page. It needs the network and nothing else; the page only reads the file.
 
+## take_report.py
+
+Takes a price from an issue of the form `price.yml` and adds it to the file of its item as an offer. The text of an
+issue comes from anyone, so it is only read as fields, and `.github/workflows/reports.yml` gives it through a file. The
+workflow opens a pull request, and a person merges it. `check_format.py` tries the tool on good and bad reports.
+
 ## sync_versions.py
 
 ```sh

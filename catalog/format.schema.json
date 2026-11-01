@@ -236,10 +236,10 @@
     },
     "busDsi": {
       "type": "object",
-      "required": ["lanes", "lane_mbps"],
+      "required": ["lanes"],
       "additionalProperties": false,
       "properties": {
-        "lanes": { "enum": [1, 2] }, "lane_mbps": { "type": "integer", "minimum": 1 },
+        "lanes": { "enum": [1, 2] }, "lane_mbps": { "type": "integer", "minimum": 1, "description": "Of a panel, measured on a board: a board with a connector and no panel has none." },
         "phy_ldo_chan": { "type": "integer" }, "phy_ldo_mv": { "type": "integer" }
       }
     },
@@ -361,7 +361,15 @@
         "freq_mhz": { "$ref": "#/$defs/range", "description": "The carrier, lowest and highest. One frequency is [13.56, 13.56]." },
         "tx_mw_max": { "type": "number", "minimum": 0, "description": "The most the transmitter takes from its supply. What leaves the antenna is less: radiated_mw." },
         "radiated_mw": { "type": "number", "minimum": 0, "description": "What leaves the antenna. It depends on the antenna, so a module or a board keeps it, measured, in checked." },
-        "range_mm": { "type": "number", "description": "How far it works, with this antenna: measured, in checked." },
+        "range_mm": { "oneOf": [{ "type": "number" }, { "$ref": "#/$defs/range" }], "description": "How far it works, with this antenna. A range is a guide from experience; the low end counts against what is asked." },
+        "reads": {
+          "type": "array",
+          "description": "Distances measured: by card and through what.",
+          "items": { "type": "object", "required": ["card", "mm"], "additionalProperties": false, "properties": { "card": { "type": "string", "minLength": 1 }, "through_mm": { "type": "number", "minimum": 0 }, "mm": { "type": "number", "minimum": 0 } } }
+        },
+        "features": { "type": "array", "uniqueItems": true, "items": { "type": "string" }, "description": "What the chip does by itself, as lpcd, dpc, awc, crypto1 for NFC." },
+        "frame_bytes": { "type": "integer", "minimum": 1, "description": "The largest frame or FIFO of the chip." },
+        "stack": { "enum": ["firmware", "host"], "description": "Who runs ISO 14443-4: the firmware of the chip or the program." },
         "output": { "$ref": "#/$defs/range" },
         "specified": { "$ref": "#/$defs/range" },
         "accuracy": {
@@ -456,6 +464,13 @@
     "deviceFile": {
       "required": ["class"],
       "properties": {
+        "identify": {
+          "description": "How a program tells this chip from its clones: a register and what it holds in the original.",
+          "type": "object",
+          "required": ["register", "values"],
+          "additionalProperties": false,
+          "properties": { "register": { "type": "string", "minLength": 1 }, "values": { "type": "array", "minItems": 1, "items": { "type": "string" } } }
+        },
         "class": { "$ref": "#/$defs/class" },
         "maker": { "$ref": "#/$defs/maker" },
         "part": { "type": "string", "minLength": 1, "description": "The maker's part number; a family says it in each variant." },
@@ -632,6 +647,24 @@
         "min_hz": { "type": "integer", "minimum": 1 },
         "max_hz": { "type": "integer", "minimum": 1 },
         "signals": { "type": "array", "items": { "type": "string", "minLength": 1 }, "description": "Clocks of the board it can bring to a pin." }
+      }
+    },
+    "selection": {
+      "description": "selection.json of a project: how its kit was chosen, written by the page and read back when the folder is opened.",
+      "type": "object",
+      "required": ["format", "format_version", "currency", "answers", "board", "modules", "libraries", "says", "others", "rejected"],
+      "additionalProperties": false,
+      "properties": {
+        "format": { "const": "jef-sure/boards" },
+        "format_version": { "type": "integer" },
+        "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+        "answers": { "type": "object", "description": "By the id of the question." },
+        "board": { "$ref": "#/$defs/name" },
+        "modules": { "type": "array", "items": { "type": "object" } },
+        "libraries": { "type": "array", "items": { "type": "object" } },
+        "says": { "type": "array", "items": { "type": "object" }, "description": "What the kit said, as it was shown." },
+        "others": { "type": "array", "items": { "type": "string" }, "description": "The kits that fit too." },
+        "rejected": { "type": "array", "items": { "type": "object" }, "description": "The boards that did not fit, and why." }
       }
     },
     "way": {
@@ -898,7 +931,7 @@
       "properties": {
         "id": { "$ref": "#/$defs/name" },
         "text": { "type": "string", "minLength": 1 },
-        "type": { "enum": ["choice", "flag", "count", "number", "outputs"], "description": "outputs: a list of tones and PWM signals, each with its frequency and what it needs." },
+        "type": { "enum": ["choice", "flag", "count", "number", "text", "outputs"], "description": "outputs: a list of tones and PWM signals, each with its frequency and what it needs." },
         "top": { "type": "boolean", "description": "Shown in the top row of the page, not among the questions about the hardware." },
         "max": { "type": "integer", "minimum": 1, "description": "The most a count takes." },
         "when": { "type": "object", "description": "It is asked only when these answers are given, by the id of the question. true: any answer but none." },
@@ -908,7 +941,7 @@
           "type": "object",
           "required": ["measure"],
           "additionalProperties": false,
-          "properties": { "measure": { "enum": ["diagonal_in", "range_mm", "price"] }, "of": { "type": "string", "description": "The class it is measured on." } }
+          "properties": { "measure": { "enum": ["diagonal_in", "range_mm", "standard", "price"] }, "of": { "type": "string", "description": "The class it is measured on." } }
         },
         "choices": {
           "type": "array",

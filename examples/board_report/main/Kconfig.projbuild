@@ -1,0 +1,13 @@
+menu "Board report"
+
+config REPORT_I2C_SDA
+    int "SDA of an I2C bus to scan, -1 for none"
+    default -1
+    help
+        Set the pins only when you know them: with -1 the program drives no pin at all.
+
+config REPORT_I2C_SCL
+    int "SCL of an I2C bus to scan, -1 for none"
+    default -1
+
+endmenu

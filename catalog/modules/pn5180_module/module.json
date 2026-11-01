@@ -8,8 +8,8 @@
         {"name": "5V", "source": "connector", "volts": [4.5, 5.5], "feeds": ["nfc"]},
         {"name": "3V3", "source": "connector", "volts": [3, 3.6], "feeds": ["nfc"]}
     ],
-    "devices": {"nfc": {"chip": "pn5180", "on": {"spi": {}}, "antenna": {"kind": "on_board"}, "logic": "3V3"}},
-    "notes": ["Stronger in the field than the PN532 module, from experience; no figure in mm yet."],
+    "devices": {"nfc": {"chip": "pn5180", "on": {"spi": {}}, "antenna": {"kind": "on_board"}, "logic": "3V3", "provides": {"nfc": {"range_mm": [80, 120]}}}},
+    "notes": ["Stronger in the field than the PN532 module, from experience. The range is a guide from the comparison of Anton, not measured."],
     "price": {
         "aliexpress": {
             "shop": "AliExpress",

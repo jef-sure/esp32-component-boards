@@ -1,0 +1,73 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "clrc663_module",
+    "title": "CLRC663 module",
+    "price": {
+        "aliexpress": {
+            "shop": "AliExpress",
+            "currency": "EUR",
+            "range": [
+                7.39,
+                7.39
+            ],
+            "date": "2026-11-01",
+            "source": "Anton: EC Buying, approximate"
+        }
+    },
+    "power": [
+        {
+            "name": "VCC",
+            "source": "connector",
+            "volts": [
+                3,
+                3.6
+            ],
+            "feeds": [
+                "nfc"
+            ]
+        }
+    ],
+    "devices": {
+        "nfc": {
+            "chip": "clrc663",
+            "on": {
+                "spi": {}
+            },
+            "antenna": {
+                "kind": "on_board"
+            },
+            "logic": "VCC",
+            "provides": {
+                "nfc": {
+                    "range_mm": [
+                        40,
+                        80
+                    ]
+                }
+            }
+        }
+    },
+    "notes": [
+        "3.3 V only on this module, so less than the chip can do. The range is a guess from the words: well beyond an RC522. Jumpers set IFSEL: check them on the module."
+    ],
+    "checked": {
+        "facts": {
+            "level": "community",
+            "source": "The comparison of modules of Anton, 2026-11-01; not checked against the datasheet",
+            "date": "2026-11-01",
+            "covers": [
+                "power",
+                "devices.nfc",
+                "price"
+            ]
+        }
+    },
+    "mechanics": {
+        "outline_mm": [
+            59,
+            39
+        ]
+    }
+}

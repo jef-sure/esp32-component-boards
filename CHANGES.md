@@ -121,6 +121,23 @@ committed, a program that asks by kind.
   `waveshare_poe_b`. Built, not flashed.
 - The speed of a display on its connection goes before that of its bus. A display with no line back gets a
   bus with no MISO from the solver.
+- A kit names its libraries. Those the board does not start go into the written project and its README,
+  and a plan for an existing program shows the lines to add to `main/idf_component.yml`.
+- `tools/check_format.py` compiles the templates of the page.
+- A project keeps `selection.json`: the answers, the kit, what fits too and why the rest does not. Opening
+  the folder brings the answers back.
+- NFC chips and modules: the MFRC522 and CLRC663, `rc522_module`, `rc522_mini`, `clrc663_module`, from a
+  comparison not yet checked against datasheets; `features`, `frame_bytes`, `stack`, `reads`, a range as
+  `range_mm`, `identify` for clones. A question asks which cards, and a chip with no library in the catalog
+  counts as an unknown of its kit.
+- A DSI bus needs its speed only with a panel on it, so `esp32_p4_eth` lists its free connector.
+- A question for the GPIOs already in use, for something added to wiring that exists.
+- Reports from people: issue forms for a price and for a board, `.github/workflows/reports.yml` and
+  `tools/take_report.py` turn a price into a pull request, and a card links to the form for what has no
+  price. The page only opens a link. `examples/board_report` prints what a board can say about itself.
+- A kit says which connectors come from memory and which supplies are not measured.
+- The page keeps its answers over a reload, holds a count to its range, and shows an error under the top
+  row. The commands of a new project take `board_select.py` from `managed_components`.
 - A kit counts what is sold by the pack at the price of the pack.
 - A character display may stand beside a graphics display: the glue has a slot for each. Built on a
   JC1060P470C, not flashed.

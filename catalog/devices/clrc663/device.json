@@ -1,0 +1,52 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "clrc663",
+    "title": "NXP CLRC663",
+    "maker": "nxp",
+    "part": "CLRC663",
+    "class": "nfc",
+    "on": {
+        "spi": {
+            "hz": 10000000
+        },
+        "i2c": {},
+        "uart": {}
+    },
+    "provides": {
+        "nfc": {
+            "standards": [
+                "iso14443a",
+                "iso14443b",
+                "felica",
+                "iso15693",
+                "iso18000_3m3"
+            ],
+            "freq_mhz": [
+                13.56,
+                13.56
+            ],
+            "features": [
+                "lpcd",
+                "crypto1"
+            ],
+            "frame_bytes": 512,
+            "stack": "host",
+            "modes": [
+                "reader",
+                "peer_to_peer_initiator"
+            ]
+        }
+    },
+    "notes": [
+        "IFSEL pins choose the interface."
+    ],
+    "checked": {
+        "facts": {
+            "level": "community",
+            "source": "The comparison of modules of Anton, 2026-11-01; not checked against the datasheet",
+            "date": "2026-11-01"
+        }
+    }
+}

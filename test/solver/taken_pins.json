@@ -1,0 +1,5 @@
+{
+    "title": "Pins already in use stay out of a kit",
+    "answers": {"outputs": [{"kind": "tone", "hz": 440, "pins": 2}], "taken": "4, 18"},
+    "avoids": {"board": "esp32_devkit", "pins": [4, 18]}
+}

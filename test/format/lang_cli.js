@@ -15,7 +15,7 @@ for (const file of ['solver.js', 'app.js']) {
         for (const quoted of call[1].matchAll(/(['"])((?:(?!\1).)+)\1/g)) if (/[a-z] |^[a-z]+$|\{0\}/.test(quoted[2])) texts.add(quoted[2]);
     }
 }
-for (const name of ['the size of the display is not in the data', 'the reading distance is not in the data']) texts.add(name);
+for (const name of ['the size of the display is not in the data', 'the reading distance is not in the data', 'the standards are not in the data']) texts.add(name);
 for (const question of JSON.parse(fs.readFileSync(path.join(CATALOG, 'questions.json'))).questions) {
     texts.add(question.text);
     for (const choice of question.choices || []) texts.add(choice.text);

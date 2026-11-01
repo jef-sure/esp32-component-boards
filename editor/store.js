@@ -10,7 +10,6 @@ const FORMAT = { format: 'jef-sure/boards', format_version: 2 };
 const NAME = /^[a-z0-9_]+$/;
 const REPOSITORY_ONLY = /^(\.git|\.gitignore|\.gitattributes|README.*|LICENSE.*)$/i; // a folder with only these is still empty for a new project
 const LOCAL_BOARD = (name) => `components/local-boards/boards/${name}/board.json`;
-const COMPONENT_LINE = 'jef-sure/boards';
 const SKELETON = [
     ['skeleton/CMakeLists.txt', 'CMakeLists.txt'],
     ['skeleton/gitignore', '.gitignore'],
@@ -28,7 +27,14 @@ const valueAt = (doc, path) => path.reduce((node, key) => (node === undefined ||
 const isCollection = (v) => (isPlain(v) || Array.isArray(v)) && Object.keys(v).length > 0 && Object.values(v).every(isPlain);
 
 // What the page has read, kept out of reactive state: the loader clones entries, which a proxy does not allow.
-const PREFERENCES = { language: 'boards.language', currency: 'boards.currency' }; // keys of localStorage
+const COMPONENT_NAME = 'jef-sure/boards';
+const COMPONENT_LINES = `  ${COMPONENT_NAME}:\n    git: https://github.com/jef-sure/esp32-component-boards.git\n    version: main`;
+const PREFERENCES = { language: 'boards.language', currency: 'boards.currency', answers: 'boards.answers' }; // keys of localStorage
+const SELECTION = 'selection.json';
+const ISSUES = 'https://github.com/jef-sure/esp32-component-boards/issues/new';
+
+// A form of the repository with its fields filled: the person sends it from their own account, and the page sends nothing.
+const reportLink = (fields) => `${ISSUES}?${new URLSearchParams(fields)}`;
 const library = { catalog: null, entries: {}, localFiles: null, schema: null, rules: null, reader: null, loader: null, levels: [], checksOf: null, questions: [], rates: null, solver: null };
 
 // The entries of a tree in the layout of the catalog. What a program has of its own wins over the catalog.
@@ -60,7 +66,7 @@ function readCatalog(files) {
     library.checksOf = documentChecks({ schema: library.schema, rules: library.rules, loader: library.loader, schemaReader, check, pinProblems });
     library.questions = JSON.parse(files['questions.json']).questions;
     library.rates = JSON.parse(files['rates.json']);
-    library.solver = kitSolver({ catalog, loader: library.loader, questions: library.questions, rates: library.rates.rates, t: (text, ...values) => translate(useEditor().language, text, ...values), checksOf: library.checksOf, pinMap });
+    library.solver = kitSolver({ catalog, loader: library.loader, questions: library.questions, rates: library.rates.rates, levels: library.levels, t: (text, ...values) => translate(useEditor().language, text, ...values), checksOf: library.checksOf, pinMap });
 }
 
 function labelOf(key, value) {
@@ -87,10 +93,19 @@ function treeOf(value, layers, path) {
 }
 
 function wiresText(kit) {
-    if (!kit.wires.length) return 'None: the board has it all.';
-    const rows = kit.wires.map((wire) => `| ${wire.what} | ${wire.line} | ${wire.pin} |`);
-    return ['| what | line | GPIO |', '|---|---|---|', ...rows].join('\n');
+    if (!kit.wiring.length) return 'None: the board has it all.';
+    const rows = kit.wiring.flatMap((module) => module.lines.map((wire) => `| ${module.title} | ${wire.line} | ${wire.to} |`));
+    return ['| what | line | to |', '|---|---|---|', ...rows].join('\n');
 }
+
+function librariesText(kit) {
+    const rows = kit.libraries.map((library) => (library.own
+        ? `- \`${library.name}\` ${library.version}, for ${library.devices.join(', ')}: in \`main/idf_component.yml\`, and the program starts it: \`${library.header}\`, \`${library.call}()\`. \`board_bus_get()\` gives its pins, by the name of the device, and the lines of its bus by \`${library.bus}\`.`
+        : `- \`${library.name}\` ${library.version}, for ${library.devices.join(', ')}: comes with the board, which starts it.`));
+    return rows.join('\n') || 'None.';
+}
+
+const dependencyOf = (library) => (library.registry ? `  ${library.name}: "^${library.version}"` : `  ${library.name}:\n    git: ${library.url}`);
 
 // The files of a new project: the templates of the page, and the smallest program of the component.
 async function skeletonOf(kit, name, board) {
@@ -103,6 +118,8 @@ async function skeletonOf(kit, name, board) {
         '@BOARD@': board,
         '@PARTS@': [...parts, ...notes].join('\n'),
         '@WIRES@': wiresText(kit),
+        '@LIBRARIES@': librariesText(kit),
+        '@DEPENDENCIES@': kit.libraries.filter((library) => library.own).map(dependencyOf).join('\n'),
     };
     const files = {};
     for (const [from, to] of SKELETON) {
@@ -128,7 +145,7 @@ const useEditor = Pinia.defineStore('editor', {
         hasLocal: false, // a program's local-boards is open: what is new goes there
         stamp: 0, // changes when something outside the reactive state does
         page: 'select',
-        answers: { outputs: [] },
+        answers: { outputs: [], ...JSON.parse(localStorage.getItem(PREFERENCES.answers) ?? '{}') },
         language: localStorage.getItem(PREFERENCES.language) || (navigator.language.startsWith('ru') ? 'ru' : 'en'),
         currency: localStorage.getItem(PREFERENCES.currency) || 'EUR',
         projectName: 'my_project',
@@ -211,7 +228,13 @@ const useEditor = Pinia.defineStore('editor', {
         async openPicked(list) {
             await this.run(async () => this.take(await host.readPicked(list)));
         },
-        take({ local, files }) {
+        take({ local, files, selection }) {
+            if (selection) {
+                const saved = JSON.parse(selection);
+                this.answers = { outputs: [], ...saved.answers };
+                this.currency = saved.currency;
+                this.page = 'select';
+            }
             if (!local) {
                 this.load(files);
                 return;
@@ -290,14 +313,15 @@ const useEditor = Pinia.defineStore('editor', {
                 const board = kit.project ? name : kit.name;
                 if (kit.project) files[LOCAL_BOARD(name)] = `${catalogJson({ ...kit.project, name, title: `${kit.title} with ${kit.modules.map((item) => item.title).join(', ')}` })}\n`;
                 if (mode === 'create') Object.assign(files, await skeletonOf(kit, name, board));
+                files[SELECTION] = `${JSON.stringify(library.solver.selectionOf(kit, this.kits, copied(this.answers), this.currency), null, 4)}\n`;
                 const rows = [];
                 for (const [path, text] of Object.entries(files)) {
                     const old = await host.readIn(folder, path);
-                    const state = old === null ? 'new' : old === text ? 'same' : path === LOCAL_BOARD(name) ? 'changes' : 'kept';
+                    const state = old === null ? 'new' : old === text ? 'same' : path === LOCAL_BOARD(name) || path === SELECTION ? 'changes' : 'kept';
                     rows.push({ path, text, old, state, replace: false });
                 }
                 const manifest = mode === 'update' ? await host.readIn(folder, 'main/idf_component.yml') : null;
-                this.plan = { folder: Vue.markRaw(folder), folderName: folder.name, mode, rows, board, written: null, needsComponent: mode === 'update' && !(manifest ?? '').includes(COMPONENT_LINE) };
+                this.plan = { folder: Vue.markRaw(folder), folderName: folder.name, mode, rows, board, written: null, manifestLines: mode === 'update' ? [...(manifest?.includes(COMPONENT_NAME) ? [] : [COMPONENT_LINES]), ...kit.libraries.filter((library) => library.own && !manifest?.includes(library.name)).map(dependencyOf)] : [] };
             });
         },
         // Writes what is new and what was ticked. Nothing else is touched and nothing is removed.

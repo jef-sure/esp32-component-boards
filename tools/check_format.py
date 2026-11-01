@@ -20,6 +20,7 @@ import copy
 import json
 import pathlib
 import random
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -29,6 +30,7 @@ import jsonschema
 import boards_gen
 import resolve
 import rules
+import take_report
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 TESTS = ROOT / "test" / "format"
@@ -184,6 +186,30 @@ def editor_differs(reached):
     return len(raw), sum(not RAW.is_valid(doc) for doc in raw.values()), differ
 
 
+def reports_refused():
+    """take_report.py takes a price from an issue and nothing else: the text of an issue comes from anyone."""
+    wrong = 0
+    with tempfile.TemporaryDirectory() as folder:
+        catalog = pathlib.Path(folder)
+        shutil.copytree(ROOT / "catalog" / "modules" / "pn532_module", catalog / "modules" / "pn532_module")
+        body = "### Item\n\n{item}\n\n### Shop\n\n{shop}\n\n### Currency\n\n{currency}\n\n### Price of one\n\n{price}\n\n### Sold by\n\n{qty}\n"
+        fine = {"item": "modules/pn532_module", "shop": "Some shop", "currency": "USD", "price": "3-5", "qty": "_No response_"}
+        take_report.take(body.format(**fine), 7, catalog, "2026-11-01")
+        offer = json.loads((catalog / "modules" / "pn532_module" / "module.json").read_text())["price"]["report_7"]
+        if offer != {"shop": "Some shop", "currency": "USD", "range": [3.0, 5.0], "date": "2026-11-01", "source": "Issue 7, as reported"}:
+            print(f"take_report.py wrote {offer}")
+            wrong += 1
+        for field, value in (("item", "../../etc/passwd"), ("item", "modules/pn5180_module"), ("item", "modules/x; rm -rf /"), ("currency", "dollars"), ("price", "free"), ("price", "5-3"), ("qty", "many"), ("shop", "x" * 61)):
+            try:
+                take_report.take(body.format(**{**fine, field: value}), 8, catalog, "2026-11-01")
+                print(f"take_report.py took {field}: {value}")
+                wrong += 1
+            except ValueError:
+                pass
+    print(f"reports: {'0' if not wrong else wrong} wrong")
+    return wrong
+
+
 def main():
     failed = 0
     reached = {}
@@ -330,6 +356,10 @@ def main():
 
     problems = errors_of(QUESTIONS, json.loads((ROOT / "catalog" / "questions.json").read_text()), "questions")
     problems += errors_of(RATES, json.loads((ROOT / "catalog" / "rates.json").read_text()), "rates")
+    failed += reports_refused()
+    run = subprocess.run(["node", str(TESTS / "page_cli.js")], capture_output=True, text=True)
+    print(run.stdout.strip() + run.stderr.strip()[-300:])
+    failed += run.returncode != 0
     run = subprocess.run(["node", str(TESTS / "lang_cli.js")], capture_output=True, text=True)
     print(run.stdout.strip())
     failed += run.returncode != 0

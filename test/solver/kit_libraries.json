@@ -1,0 +1,5 @@
+{
+    "title": "A kit names the library a program has to start, and the board starts the rest",
+    "answers": {"display": "character", "nfc_readers": 2},
+    "says": "jef-sure/pn532 0.7.5: the project gets it, the program starts nfc_1_nfc, nfc_2_nfc with pn532_init()"
+}

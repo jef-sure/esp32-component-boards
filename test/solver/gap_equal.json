@@ -1,0 +1,5 @@
+{
+    "title": "A gap equal to the longest reach is not enough",
+    "answers": {"nfc_readers": 2, "nfc_gap_mm": 60},
+    "without": "pn532_module"
+}

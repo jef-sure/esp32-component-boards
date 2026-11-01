@@ -130,11 +130,17 @@ committed, a program that asks by kind.
   comparison not yet checked against datasheets; `features`, `frame_bytes`, `stack`, `reads`, a range as
   `range_mm`, `identify` for clones. A question asks which cards, and a chip with no library in the catalog
   counts as an unknown of its kit.
+- From two readers on, a question asks the distance between their antennas: the longest `range_mm` of a
+  reader has to stay under it, and left empty it counts as an unknown of the kit. The rule is not measured
+  on two readers. `when` takes `{"at_least": n}`. A kit whose answers each have a module but not together
+  says so.
 - A DSI bus needs its speed only with a panel on it, so `esp32_p4_eth` lists its free connector.
 - A question for the GPIOs already in use, for something added to wiring that exists.
 - Reports from people: issue forms for a price and for a board, `.github/workflows/reports.yml` and
   `tools/take_report.py` turn a price into a pull request, and a card links to the form for what has no
   price. The page only opens a link. `examples/board_report` prints what a board can say about itself.
+  A second run of one issue replaces its branch and opens no second pull request; a closed issue is left
+  alone.
 - A kit says which connectors come from memory and which supplies are not measured.
 - The page keeps its answers over a reload, holds a count to its range, and shows an error under the top
   row. The commands of a new project take `board_select.py` from `managed_components`.

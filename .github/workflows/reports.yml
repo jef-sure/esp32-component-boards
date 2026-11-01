@@ -11,12 +11,19 @@ permissions:
   pull-requests: write
   issues: write
 
+# A form with a label may give two events, and a label may be set again: the runs of one issue go one by one.
+concurrency:
+  group: report-${{ github.event.issue.number }}
+
 jobs:
   price:
-    if: contains(github.event.issue.labels.*.name, 'price')
+    if: github.event.issue.state == 'open' && contains(github.event.issue.labels.*.name, 'price') && (github.event.action == 'opened' || github.event.label.name == 'price')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - name: Take the price
         id: take
         env:
@@ -45,5 +52,8 @@ jobs:
           git switch -c "report-$NUMBER"
           git add catalog
           git commit -m "add a price from issue $NUMBER"
-          git push origin "report-$NUMBER"
-          gh pr create --fill --body "Closes #$NUMBER"
+          # report-N belongs to this job: another run takes the issue as it stands now.
+          git push --force origin "report-$NUMBER"
+          if [ "$(gh pr list --head "report-$NUMBER" --json number --jq length)" = 0 ]; then
+            gh pr create --fill --body "Closes #$NUMBER"
+          fi

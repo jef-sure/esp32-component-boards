@@ -1,0 +1,6 @@
+{
+    "title": "A reader that reaches 60 mm reaches past 100 mm too: each answer alone has a reader, both together have none",
+    "answers": {"nfc_readers": 2, "nfc_range_mm": 60, "nfc_gap_mm": 100},
+    "fit": [],
+    "says": "no module takes all these answers together"
+}

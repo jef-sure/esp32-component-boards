@@ -934,14 +934,14 @@
         "type": { "enum": ["choice", "flag", "count", "number", "text", "outputs"], "description": "outputs: a list of tones and PWM signals, each with its frequency and what it needs." },
         "top": { "type": "boolean", "description": "Shown in the top row of the page, not among the questions about the hardware." },
         "max": { "type": "integer", "minimum": 1, "description": "The most a count takes." },
-        "when": { "type": "object", "description": "It is asked only when these answers are given, by the id of the question. true: any answer but none." },
+        "when": { "type": "object", "description": "It is asked only when these answers are given, by the id of the question. true: any answer but none; {\"at_least\": n}: a count of n or more." },
         "needs": { "$ref": "#/$defs/questionNeed" },
         "limit": {
           "description": "What a number limits instead of asking for a part.",
           "type": "object",
           "required": ["measure"],
           "additionalProperties": false,
-          "properties": { "measure": { "enum": ["diagonal_in", "range_mm", "standard", "price"] }, "of": { "type": "string", "description": "The class it is measured on." } }
+          "properties": { "measure": { "enum": ["diagonal_in", "range_mm", "gap_mm", "standard", "price"] }, "of": { "type": "string", "description": "The class it is measured on." } }
         },
         "choices": {
           "type": "array",

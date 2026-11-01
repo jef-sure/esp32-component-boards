@@ -31,15 +31,18 @@ function kitSolver({ catalog, loader, questions, rates, levels, checksOf, pinMap
     }
 
     // What a question can limit: where the figure lies, and what to say when a part falls short or has no figure.
+    const reachOf = (device) => [].concat(device.provides?.nfc?.range_mm ?? null);
     const MEASURES = {
         diagonal_in: { of: diagonalOf, short: (asked) => t('the display is smaller than {0} inches', asked), unknown: 'the size of the display is not in the data' },
-        range_mm: { of: (device) => [].concat(device.provides?.nfc?.range_mm ?? null)[0], short: (asked) => t('no reader that reaches {0} mm', asked), unknown: 'the reading distance is not in the data' },
+        range_mm: { of: (device) => reachOf(device)[0], short: (asked) => t('no reader that reaches {0} mm', asked), unknown: 'the reading distance is not in the data' },
+        // Two readers share a card when the longest reach of one gets to the other.
+        gap_mm: { of: (device) => reachOf(device).at(-1), fits: (reach, gap) => reach < gap, short: (asked) => t('no reader that stays under {0} mm: a card at one is read by the other too', asked), unknown: 'the longest reading distance is not in the data', unanswered: 'the distance between the readers is not given: a card at one may be read by the other too' },
     };
 
     MEASURES.standard = { of: (device) => device.provides?.nfc?.standards ?? null, fits: (standards, asked) => standards.includes(asked), short: (asked) => t('no reader of {0}', asked), unknown: 'the standards are not in the data' };
 
     function holds(question, answers) {
-        return Object.entries(question.when || {}).every(([id, value]) => (value === true ? Boolean(answers[id]) : answers[id] === value));
+        return Object.entries(question.when || {}).every(([id, value]) => (value === true ? Boolean(answers[id]) : value.at_least ? answers[id] >= value.at_least : answers[id] === value));
     }
 
     const ppmOf = (setting) => Math.round((1e8 * (setting.hz - setting.wanted)) / setting.wanted) / 100;
@@ -157,7 +160,8 @@ function kitSolver({ catalog, loader, questions, rates, levels, checksOf, pinMap
         }
         const outputs = (answers.outputs || []).filter((output) => output.hz > 0).map((output) => ({ ...output, ppm: output.ppm === '' ? undefined : output.ppm, bits: output.kind === 'pwm' ? output.bits : undefined }));
         const taken = String(answers.taken ?? '').match(/\d+/g)?.map(Number) ?? [];
-        return { needs, limits, outputs, taken, currency: answers.currency || KIT_CURRENCY };
+        const unanswered = questions.filter((question) => MEASURES[question.limit?.measure]?.unanswered && holds(question, answers) && limits[question.limit.measure] === undefined);
+        return { needs, limits, unanswered, outputs, taken, currency: answers.currency || KIT_CURRENCY };
     }
 
     const rateOf = (currency) => (currency === KIT_CURRENCY ? 1 : rates[currency]);
@@ -472,6 +476,7 @@ function kitSolver({ catalog, loader, questions, rates, levels, checksOf, pinMap
                 say('yes', t('{0} is on the board', need.title));
                 continue;
             }
+            for (const question of wanted.unanswered) if (question.limit.of === need.class) say('unknown', t(MEASURES[question.limit.measure].unanswered));
             const limits = limitsOf(need, wanted);
             const on = Object.values(board.devices).filter((device) => isClass(device, need));
             const large = on.filter((device) => limits.every((limit) => meets(limit, device)));
@@ -490,8 +495,10 @@ function kitSolver({ catalog, loader, questions, rates, levels, checksOf, pinMap
         const found = shortfalls.map(({ need }) => (need.output ? [output(need)] : modulesWith(need).filter((module) => reaching(need, module))));
         const lacking = shortfalls.find((_, i) => !found[i].length);
         if (lacking) {
-            const short = limitsOf(lacking.need, wanted).find((limit) => modulesWith(lacking.need).some((module) => !meets(limit, module.device)));
-            say('no', short ? short.short(short.asked) : t('the catalog has no module for: {0}', titleOf(lacking.need)));
+            const modules = modulesWith(lacking.need);
+            const short = limitsOf(lacking.need, wanted).find((limit) => !modules.some((module) => meets(limit, module.device)));
+            if (!modules.length) say('no', t('the catalog has no module for: {0}', titleOf(lacking.need)));
+            else say('no', short ? short.short(short.asked) : t('no module takes all these answers together'));
             return rejected();
         }
         const kits = [];

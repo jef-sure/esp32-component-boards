@@ -1,0 +1,6 @@
+{
+    "title": "Two readers and no distance: a kit fits and says what it could not judge",
+    "answers": {"nfc_readers": 2},
+    "kit": {"name": "esp32_devkit", "modules": {"pn5180_module": 2}},
+    "says": "the distance between the readers is not given"
+}

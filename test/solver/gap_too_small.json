@@ -1,0 +1,6 @@
+{
+    "title": "Readers closer than any reader of the catalog can stay",
+    "answers": {"nfc_readers": 2, "nfc_gap_mm": 25},
+    "fit": [],
+    "says": "no reader that stays under 25 mm"
+}

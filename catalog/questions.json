@@ -24,6 +24,7 @@
         {"id": "outputs", "text": "Tones and PWM", "type": "outputs"},
         {"id": "nfc_readers", "text": "NFC readers", "type": "count", "max": 4, "needs": {"class": "nfc"}},
         {"id": "nfc_range_mm", "text": "Reading distance at least, mm, with the wall of the case", "type": "number", "when": {"nfc_readers": true}, "limit": {"measure": "range_mm", "of": "nfc"}},
+        {"id": "nfc_gap_mm", "text": "Distance between the antennas of the readers, mm", "type": "number", "when": {"nfc_readers": {"at_least": 2}}, "limit": {"measure": "gap_mm", "of": "nfc"}},
         {
             "id": "nfc_cards",
             "text": "Cards to read",

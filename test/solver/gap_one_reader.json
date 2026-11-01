@@ -1,0 +1,6 @@
+{
+    "title": "One reader: an old answer about the distance is not asked and limits nothing",
+    "answers": {"nfc_readers": 1, "nfc_gap_mm": 25},
+    "kit": {"name": "esp32_devkit", "modules": {"pn5180_module": 1}},
+    "quiet": {"board": "esp32_devkit", "text": "distance between the readers"}
+}

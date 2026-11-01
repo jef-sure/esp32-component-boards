@@ -94,6 +94,7 @@ for (const name of names) {
         const kit = fit.find((item) => item.name === given.avoids.board);
         if (!kit?.wires.length || kit.wires.some((wire) => given.avoids.pins.includes(wire.pin))) say(`${given.avoids.board} uses a pin it was told is in use`);
     }
+    if (given.without && fit.some((kit) => kit.modules.some((module) => module.name === given.without))) say(`a kit with ${given.without} fits`);
     if (given.fed) {
         const kit = fit.find((item) => item.name === given.fed.board && item.project?.modules[given.fed.use]);
         if (JSON.stringify(kit?.project.modules[given.fed.use].supply) !== JSON.stringify(given.fed.supply)) say(`fed by ${JSON.stringify(kit?.project.modules[given.fed.use].supply)}`);

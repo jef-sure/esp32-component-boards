@@ -1,0 +1,45 @@
+{
+  "format": "jef-sure/boards",
+  "format_version": 2,
+  "kind": "board",
+  "mcu": {
+    "target": "esp32s3"
+  },
+  "checked": {
+    "pins": {
+      "level": "unchecked",
+      "source": "shape only"
+    }
+  },
+  "name": "nfc_module_measured",
+  "title": "A module whose transmitter was measured",
+  "buses": {
+    "spi": {
+      "spi2": {
+        "mosi": 12,
+        "miso": 11,
+        "sclk": 13
+      }
+    }
+  },
+  "modules": {
+    "reader": {
+      "module": "pn532_module",
+      "on": {
+        "spi.spi2": {
+          "cs": 10
+        }
+      },
+      "devices": {
+        "nfc": {
+          "provides": {
+            "nfc": {
+              "tx_mw_max": 330,
+              "radiated_mw": 20
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -64,12 +64,19 @@
             "result": "pending",
             "notes": "0x5602 read from register 0x300A at I2C address 0x36: an OV02C10 on the connector. No picture taken."
         },
+        "battery": {
+            "level": "hardware",
+            "covers": ["devices.battery"],
+            "by": "a test firmware",
+            "date": "2026-10-31",
+            "notes": "GPIO 52 reads 2.49 V, 4.18 V before the divider, on USB with the battery of the case. The ADC was calibrated by the chip, not compared with a meter."
+        },
         "clock_on_i2c": {
             "level": "hardware",
             "covers": ["devices.rtc"],
             "by": "a test firmware",
             "date": "2026-10-31",
-            "notes": "It answers at 0x32. The clock was not read."
+            "notes": "It answers at 0x32 and the seconds advance. VLF is set: with no backup cell the time is lost at power off."
         },
         "power": {
             "level": "schematic",
@@ -198,35 +205,36 @@
                 "over": "lcd",
                 "x_max": 1663,
                 "y_max": 895,
-                "calibrations": {
-                    "esp-idf/jef-sure/dgx-di": [
-                        {
-                            "rule": "the newest",
-                            "notes": "Measured before the versions were kept: measured_with is not known.",
-                            "x_min": 0,
-                            "x_max": 1663,
-                            "y_min": 0,
-                            "y_max": 895,
-                            "width": 800,
-                            "height": 1280,
-                            "flags": 6,
-                            "knots_x": 3,
-                            "knots_y": 3,
-                            "rounds": 3,
-                            "affine": [65301, 579, 774524, -221, 66564, -691501],
-                            "x": [[44, 48], [407, 399], [747, 751]],
-                            "y": [[47, 48], [642, 640], [1230, 1231]],
-                            "down_ms": 50,
-                            "up_ms": 60,
-                            "blink_ms": 22,
-                            "gap_ms": 0,
-                            "off_tenths": 181,
-                            "worst_tenths": 220,
-                            "left_tenths": 50,
-                            "left_worst_tenths": 110
+                "calibrations": [
+                    {
+                        "rule": "the newest",
+                        "notes": "Measured before the versions were kept: measured_with is not known. The places are worked back from the calibration of DGX-DI: where it placed each target, not the touches themselves.",
+                        "x_max": 1663,
+                        "y_max": 895,
+                        "width": 800,
+                        "height": 1280,
+                        "left_up": {"meant": [48, 48], "device": [74, 859]},
+                        "right_up": {"meant": [751, 48], "device": [77, 69]},
+                        "left_down": {"meant": [48, 1231], "device": [1588, 871]},
+                        "right_down": {"meant": [751, 1231], "device": [1591, 81]},
+                        "up": {"meant": [399, 48], "device": [76, 451]},
+                        "down": {"meant": [399, 1231], "device": [1590, 463]},
+                        "left": {"meant": [48, 640], "device": [835, 865]},
+                        "right": {"meant": [751, 640], "device": [839, 75]},
+                        "middle": {"meant": [399, 640], "device": [837, 457]},
+                        "libraries": {
+                            "esp-idf/jef-sure/dgx-di": {
+                                "rounds": 3,
+                                "blink_ms": 22,
+                                "gap_ms": 0,
+                                "off_tenths": 181,
+                                "worst_tenths": 220,
+                                "left_tenths": 50,
+                                "left_worst_tenths": 110
+                            }
                         }
-                    ]
-                }
+                    }
+                ]
             }
         },
         "sound": {
@@ -235,7 +243,7 @@
             "part": "ES8311-S",
             "on": {"i2c.i2c0": {}, "i2s.i2s0": {}},
             "pins": {"pa": 20},
-            "config": {"sample_rate": 22050, "pa_voltage": 5.0, "codec_dac_voltage": 3.3},
+            "config": {"sample_rate": 22050, "pa_voltage": 5, "codec_dac_voltage": 3.3},
             "controls": {"volume": {"start": 25}},
             "notes": [
                 "MIC1 feeds the codec and ASDOUT comes in on GPIO11. Only the output is set up.",

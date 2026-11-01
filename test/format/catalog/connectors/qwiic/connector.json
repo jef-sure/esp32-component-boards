@@ -4,7 +4,7 @@
     "kind": "connector",
     "name": "qwiic",
     "title": "Qwiic",
-    "pitch_mm": 1.0,
+    "pitch_mm": 1,
     "volts": 3.3,
     "pins": ["GND", "3V3", "SDA", "SCL"],
     "checked": {"facts": {"level": "unchecked", "source": "from memory, for the shape of the format only"}}

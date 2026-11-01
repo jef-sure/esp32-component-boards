@@ -3,6 +3,9 @@
 
 Usage: board_select.py BOARD [--module MODULE ...] [--reset] PROJECT_DIR
 
+BOARD is a board of the catalog, or a board of the program: components/local-boards/boards/BOARD/board.json
+in the project. The glue of a board of the program is made there, beside its data.
+
 Writes PROJECT_DIR/sdkconfig.defaults.board: the board's sdkconfig.defaults (its chip, its
 memory, its flash, and the two lines that choose it: CONFIG_IDF_TARGET and
 CONFIG_BOARD_SELECT_<BOARD>=y), then the defaults of every module named. The project's
@@ -25,8 +28,10 @@ lies: a checkout beside the project or managed_components/jef-sure__boards/.
 
 import argparse
 import pathlib
+import re
 import sys
 
+import boards_gen
 import resolve
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -44,9 +49,20 @@ def defaults_of(name, what):
     return defaults.read_text()
 
 
+def local_defaults(local, name):
+    """The sdkconfig.defaults of a board of the program: its own, or the one of the board it extends with the choice changed."""
+    own = local / "boards" / name / "sdkconfig.defaults"
+    if own.exists():
+        return own.read_text()
+    base = resolve.load("boards", name).get("extends")
+    if not base:
+        raise SystemExit(f"{own}: write it, the board extends nothing to take it from")
+    return re.sub(r"^CONFIG_BOARD_SELECT_\w+=y$", f"CONFIG_BOARD_SELECT_{name.upper()}=y", defaults_of(base, "board"), flags=re.M)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("board", help="the board's directory name in catalog/boards/")
+    parser.add_argument("board", help="the board's directory name in catalog/boards/ or in components/local-boards/boards/ of the project")
     parser.add_argument("project", type=pathlib.Path, help="the project's directory (where its CMakeLists.txt is)")
     parser.add_argument("--module", action="append", default=[], help="a module the board carries (its directory name in catalog/modules/); may repeat")
     parser.add_argument("--revision", help="the revision of the chip, when it is not the one the data of the board names: 3.1")
@@ -58,7 +74,12 @@ def main():
              + (f", with {', '.join(args.module)}" if args.module else "")
              + "\n# Read before the project's own sdkconfig.defaults. Made from the data of the component: do not edit,\n"
              "# run board_select.py again to change the board.\n"]
-    parts.append(defaults_of(args.board, "board"))
+    local = resolve.add_project(args.project)
+    if (local / "boards" / args.board / "board.json").exists():
+        boards_gen.write_local(local)
+        parts.append(local_defaults(local, args.board))
+    else:
+        parts.append(defaults_of(args.board, "board"))
     mcu = resolve.chain(resolve.load("boards", args.board))["mcu"]
     lines = resolve.chip_settings(mcu, args.revision)
     if lines:

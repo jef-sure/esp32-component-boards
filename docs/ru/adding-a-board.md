@@ -79,10 +79,25 @@ cd examples/hello_board && idf.py build flash monitor
 
 ## Собственная плата вне компонента
 
-Генератор входит в пакет компонента. Проект может держать собственный
-`catalog/boards/myboard/` и запускать `tools/boards_gen.py --data myproject/catalog/boards
---out myproject/boards myboard`, чтобы получить клей, который компилирует сам.
-Сделать так, чтобы меню компонента предлагало такую плату, планируется (выбор
-платы — это именованный Kconfig choice, который другой Kconfig может
-расширить); пока проект компилирует клей в собственном компоненте и называет
-нужные ему библиотеки в собственном манифесте.
+В каталоге лежат платы и модули, которые может купить каждый. То, что вы соединили и назвали сами,
+остаётся в вашей программе: `components/local-boards/`, дерево того же вида, что `catalog/`.
+
+```
+components/local-boards/
+    boards/my_board/board.json       kind project поверх платы каталога или kind board
+    modules/my_display/module.json   модуль, которого нет в каталоге
+    devices/my_chip/device.json      чип, которого нет в каталоге
+```
+
+Инструменты читают это дерево раньше каталога. Имя платы программы не должно совпадать с именем
+платы каталога.
+
+```sh
+python3 путь/к/boards/tools/board_select.py my_board .
+idf.py build
+```
+
+`board_select.py` создаёт клей рядом с данными, записывает `CMakeLists.txt` и `Kconfig.projbuild`
+этой папки, и плата появляется в меню плат. Если у платы нет своего `sdkconfig.defaults`, берётся
+файл платы, которую она расширяет. Пины проверяются так же, как у плат каталога:
+`tools/board_pins.py my_board --project .`. `examples/local_boards` — такая программа.

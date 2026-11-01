@@ -89,13 +89,13 @@ codec library. See [docs/en/choosing-a-board.md](docs/en/choosing-a-board.md).
 |---|---|---|---|---|---|
 | CYD (ESP32-2432S028R) | ESP32 | 320x240 ILI9341, SPI, 58x43 mm | XPT2046 (resistive) | DAC, GPIO26 | yes |
 | ESP32 DevKit, 4 MB | ESP32 | none | none | none | yes |
+| ESP32-S3 DevKit, 16 MB, 8 MB PSRAM | ESP32-S3 | none | none | none | yes |
 | Guition JC1060P470C | ESP32-P4 | 1024x600 JD9165, MIPI-DSI, 154x86 mm | GT911 | ES8311 | yes |
 | Guition JC4827W543C | ESP32-S3 | 480x272 NV3041A, QSPI, 95x54 mm | GT911 | I2S amplifier | yes |
 | Guition JC8012P4A1C | ESP32-P4 | 1280x800 JD9365, MIPI-DSI, 217x136 mm | GSL3680 (firmware embedded by the program) | ES8311 | yes |
-| Local terminal: ESP32, 2004 LCD, two PN532 | ESP32 | 20x4 HD44780 | none | none | yes |
 <!-- boards:end -->
 
-A module rides whichever board is chosen: `board_select.py cyd_s028r --module
+A module is connected to whichever board is chosen: `board_select.py cyd_s028r --module
 lcd2004_pcf8574 .` adds a 20x4 character LCD on the board's I2C bus.
 
 The GSL3680 of the
@@ -122,9 +122,10 @@ tools/check_boards.py                  the generated is what the data says; pins
 tools/board_pins.py                    the map of a board's pins and its tree
 tools/board_select.py                  choose the board for a project
 tools/board_bom.py                     what to buy for a product, with prices as ranges
-editor/                                the editor of format 1, to be replaced; rules.js, the rules for the next one
+editor/                                the editor: a tree, the card of a node, the map of pins; any static server from the root, then /editor/
 examples/hello_board/                  the smallest program, built for every board in CI
 examples/hello_lvgl/                   LVGL through DGX-LVGL, built in CI for every board with a graphics display
+examples/local_boards/                 a board and a module of the program itself, in components/local-boards/
 docs/en/, docs/ru/                     the documentation
 ```
 
@@ -170,9 +171,12 @@ the matrix of `.github/workflows/build.yml`. `examples/hello_board` and
 `examples/hello_lvgl` were flashed on a CYD S028R, a JC4827W543C and a JC1060P470C
 under ESP-IDF 6.1: the display, the touch and the sound start without errors in
 the log. Touch coordinates were checked by finger on all three and are correct.
-On the JC1060P470C the picture was checked too, colors and orientation. On the
-local terminal the 2004 module shows its text. On the JC8012P4A1C, flashed too, the display starts and the sound of
-`hello_board` was heard. Its touch needs the firmware the program embeds, and
-that was not run.
+On the JC1060P470C the picture was checked too, colors and orientation. The 2004
+module shows its text on an ESP32 dev board. On the JC8012P4A1C, flashed too, the display starts and the sound of
+`hello_board` was heard. Its touch needs the firmware the program embeds: with it the log is clean,
+and nobody has tried it by finger.
+
+The display module `tft153_st77916` ran on `esp32s3_devkit` as a board of a program, with a clean log;
+nobody has looked at its picture. `esp32_devkit` ran as the base of a board of a program.
 
 License: MIT.

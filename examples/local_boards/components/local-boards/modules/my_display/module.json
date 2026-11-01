@@ -1,0 +1,16 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "my_display",
+    "title": "A round 360x360 display module",
+    "description": "A module the catalog does not have: the program describes it itself",
+    "devices": {
+        "lcd": {
+            "chip": "st77916",
+            "on": {"qspi": {}},
+            "config": {"primary": true, "panel": {"width": 360, "height": 360}, "depth_bits": 16},
+            "controls": {"orientation": {"start": {"x": "left-right", "y": "top-bottom", "swap": false}}}
+        }
+    }
+}

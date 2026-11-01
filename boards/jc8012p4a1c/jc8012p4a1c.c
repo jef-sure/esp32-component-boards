@@ -79,8 +79,8 @@ static struct board_display_started displays_started[1];
 const struct board_display_table board_display_table = {.panels = display_panels, .started = displays_started, .count = 1};
 
 /* touch: gsl3680 on i2c.i2c0, the calibration of its measured board. */
-static const dgx_di_calibration_t touch0_calibration = {.version = 1, .size = sizeof(dgx_di_calibration_t), .x_min = 0, .x_max = 1663, .y_min = 0, .y_max = 895, .width = 800, .height = 1280, .flags = 6, .knots_x = 3, .knots_y = 3, .rounds = 3, .affine = {65301, 579, 774524, -221, 66564, -691501}, .x = {{44, 48}, {407, 399}, {747, 751}}, .y = {{47, 48}, {642, 640}, {1230, 1231}}, .down_ms = 50, .up_ms = 60, .blink_ms = 22, .gap_ms = 0, .off_tenths = 181, .worst_tenths = 220, .left_tenths = 50, .left_worst_tenths = 110};
-static const struct board_touch_calibration touch0_calibrated = {.calibration = &touch0_calibration, .placeholder = false};
+static const dgx_di_aim_t touch0_aims[] = {{.meant_x = 48, .meant_y = 48, .x = 74, .y = 859}, {.meant_x = 751, .meant_y = 48, .x = 77, .y = 69}, {.meant_x = 48, .meant_y = 1231, .x = 1588, .y = 871}, {.meant_x = 751, .meant_y = 1231, .x = 1591, .y = 81}, {.meant_x = 399, .meant_y = 48, .x = 76, .y = 451}, {.meant_x = 399, .meant_y = 1231, .x = 1590, .y = 463}, {.meant_x = 48, .meant_y = 640, .x = 835, .y = 865}, {.meant_x = 751, .meant_y = 640, .x = 839, .y = 75}, {.meant_x = 399, .meant_y = 640, .x = 837, .y = 457}};
+static const struct board_touch_calibration touch0_calibrated = {.aims = touch0_aims, .count = 9, .width = 800, .height = 1280, .blink_ms = 22, .gap_ms = 0, .placeholder = false};
 static const struct board_touch_panel touch0_panel = {.x_max = 1664, .y_max = 896, .rst = GPIO_NUM_22, .irq = GPIO_NUM_21, .fingers = 5};
 static dgx_di_gsl3680_t touch0_device;
 

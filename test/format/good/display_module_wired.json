@@ -1,0 +1,25 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "project",
+    "name": "display_module_wired",
+    "extends": "esp32s3_devkit",
+    "title": "A display module wired to a dev board",
+    "description": "A graphics display in a module: the project holds the wires",
+    "buses": {"qspi": {"spi2": {"hz": 40000000, "d0": 11, "d1": 13, "d2": 14, "d3": 9, "sclk": 12}}},
+    "modules": {
+        "screen": {
+            "module": "tft153_st77916",
+            "on": {"qspi.spi2": {"cs": 10}},
+            "pins": {"rst": 8, "backlight": {"gpio": 18, "active": "high"}, "te": 17}
+        }
+    },
+    "checked": {
+        "wiring": {
+            "level": "vendor-code",
+            "covers": ["buses.qspi", "devices.screen_lcd"],
+            "source": "~/dgx-bench/st77916_test/main/main.c, the pins this module ran with",
+            "date": "2026-10-31"
+        }
+    }
+}

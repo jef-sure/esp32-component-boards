@@ -146,35 +146,36 @@
             "pins": {"int": 36},
             "config": {
                 "over": "lcd",
-                "calibrations": {
-                    "esp-idf/jef-sure/dgx-di": [
-                        {
-                            "rule": "the newest",
-                            "notes": "Measured before the versions were kept: measured_with is not known.",
-                            "x_min": 0,
-                            "x_max": 4095,
-                            "y_min": 0,
-                            "y_max": 4095,
-                            "width": 240,
-                            "height": 320,
-                            "flags": 1,
-                            "knots_x": 3,
-                            "knots_y": 3,
-                            "rounds": 3,
-                            "affine": [74051, -652, -886661, 173, 75199, -702795],
-                            "x": [[30, 30], [119, 119], [209, 209]],
-                            "y": [[30, 30], [159, 160], [289, 289]],
-                            "down_ms": 130,
-                            "up_ms": 30,
-                            "blink_ms": 101,
-                            "gap_ms": 0,
-                            "off_tenths": 164,
-                            "worst_tenths": 290,
-                            "left_tenths": 18,
-                            "left_worst_tenths": 30
+                "calibrations": [
+                    {
+                        "rule": "the newest",
+                        "notes": "Measured before the versions were kept: measured_with is not known. The places are the medians of the touches in the log.",
+                        "x_max": 4095,
+                        "y_max": 4095,
+                        "width": 240,
+                        "height": 320,
+                        "left_up": {"meant": [30, 30], "device": [3432, 439]},
+                        "right_up": {"meant": [209, 30], "device": [751, 479]},
+                        "left_down": {"meant": [30, 289], "device": [3398, 3346]},
+                        "right_down": {"meant": [209, 289], "device": [702, 3328]},
+                        "up": {"meant": [119, 30], "device": [2064, 464]},
+                        "down": {"meant": [119, 289], "device": [2037, 3370]},
+                        "left": {"meant": [30, 160], "device": [3395, 1907]},
+                        "right": {"meant": [209, 160], "device": [656, 1874]},
+                        "middle": {"meant": [119, 160], "device": [2081, 1902]},
+                        "libraries": {
+                            "esp-idf/jef-sure/dgx-di": {
+                                "rounds": 3,
+                                "blink_ms": 101,
+                                "gap_ms": 0,
+                                "off_tenths": 164,
+                                "worst_tenths": 290,
+                                "left_tenths": 18,
+                                "left_worst_tenths": 30
+                            }
                         }
-                    ]
-                }
+                    }
+                ]
             }
         },
         "sound": {"chip": "esp32_dac", "pins": {"out": 26, "pa": "nc"}, "config": {"sample_rate": 22050}},

@@ -1,6 +1,6 @@
 # Modules
 
-A module is a device that is not a board of its own but rides a bus of
+A module is a device that is not a board of its own but is connected to a bus of
 whichever board is chosen. Today there is one: the 2004 character LCD on a
 PCF8574 I2C backpack, the common 20x4 display with four pins (VCC, GND, SDA,
 SCL).

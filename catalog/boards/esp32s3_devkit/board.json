@@ -1,0 +1,34 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "esp32s3_devkit",
+    "title": "ESP32-S3 DevKit, 16 MB, 8 MB PSRAM",
+    "description": "A standard ESP32-S3 dev board with two USB-C ports, a CH343 USB bridge on one of them, an RGB LED and a BOOT button",
+    "notes": [
+        "A board sold by many makers, so no maker is written and no schematic was read.",
+        "The RGB LED is on GPIO 48 on the unit tried. On some boards of this kind it is on GPIO 38."
+    ],
+    "mcu": {"target": "esp32s3", "flash_mb": 16, "psram_mb": 8},
+    "devices": {
+        "boot": {"class": "button", "pins": {"in": {"gpio": 0, "active": "low"}}},
+        "led": {"class": "led", "pins": {"data": 48}, "config": {"kind": "ws2812", "count": 1}},
+        "usb_serial": {"class": "other", "part": "CH343"}
+    },
+    "checked": {
+        "pins": {
+            "level": "hardware",
+            "covers": ["devices.boot", "devices.led"],
+            "by": "Anton, by eye",
+            "date": "2026-11-01",
+            "notes": "s3_led: red on GPIO 48 and no blue on GPIO 38, green while BOOT is held."
+        },
+        "chip": {
+            "level": "hardware",
+            "covers": ["mcu"],
+            "by": "esptool",
+            "date": "2026-10-31",
+            "notes": "ESP32-S3 rev 0.2, embedded PSRAM 8 MB, flash 16 MB, the port is a CH343. esp_psram finds 8 MB with the octal mode of sdkconfig.defaults."
+        }
+    }
+}

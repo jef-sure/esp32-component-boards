@@ -87,6 +87,11 @@ STARTED_CLASSES = {"display", "touch", "audio", "button"}  # the rest is kept as
 
 MANIFEST_BEGIN = "  # boards: dependencies generated"
 MANIFEST_END = "  # boards: end of generated"
+LOCAL_CMAKE = """# The boards of this program, made by tools/board_select.py: do not edit by hand. A component only for
+# its Kconfig.projbuild: jef-sure/boards compiles the glue of the chosen board with its own.
+idf_component_register()
+"""
+CATALOG_INDEX = "index.json"
 TABLE_BEGIN = "<!-- boards:table -->"
 TABLE_END = "<!-- boards:end -->"
 
@@ -413,7 +418,7 @@ def read_board(path):
                 if i2c_address(transport.get("address")) is None:
                     raise ValueError('a character LCD on I2C needs the 7-bit address of its backpack, e.g. "0x27"')
                 if not is_module and bus_of(data, bus_name) is None:
-                    raise ValueError(f'the character LCD rides the board\'s bus "{bus_name}", which the board does not wire')
+                    raise ValueError(f'the character LCD is on the board\'s bus "{bus_name}", which the board does not wire')
             elif kind == "gpio":
                 width = bus_parts(bus_name)[1]
                 pins = transport.get("pins", {})
@@ -424,7 +429,7 @@ def read_board(path):
                     if not isinstance(pins.get(signal), int):
                         raise ValueError(f'the character LCD on gpio.{width} lacks its "{signal}" pin')
             else:
-                raise ValueError('a character LCD rides one of three transports: "i2c.<own>" (a PCF8574 backpack), "gpio.4bit", "gpio.8bit"')
+                raise ValueError('a character LCD is on one of three transports: "i2c.<own>" (a PCF8574 backpack), "gpio.4bit", "gpio.8bit"')
         elif is_pixel(display):
             bus_name = display.get("bus", {}).get("bus")
             if not bus_name or bus_parts(bus_name)[0] not in display["entry"]["on"]:
@@ -462,20 +467,17 @@ def read_board(path):
         display = next((shown for shown in data.get("displays") or [] if shown["name"] == touch.get("over")), None)
         if not is_pixel(display):
             raise ValueError("a touch panel needs a graphics display: the board has none")
-        takers = (touch["library"], *resolve.library(touch["library"]).get("adapter", {}).get("with", ()))
-        reader = next((name for name in takers if name in (touch.get("calibrations") or {})), None)
-        if not reader:
-            raise ValueError(f"the touch has no calibration for {', '.join(takers)}: measure the board (dgx_di_calibrate_measure) and put it in the data; measured: false marks a placeholder")
-        calibration = touch["calibration"] = touch["calibrations"][reader][-1]  # the newest: one for the versions in use is for later
-        for key in ("x_min", "x_max", "y_min", "y_max", "width", "height", "flags", "knots_x", "knots_y", "rounds", "affine", "x", "y",
-                    "down_ms", "up_ms", "blink_ms", "gap_ms", "off_tenths", "worst_tenths", "left_tenths", "left_worst_tenths"):
+        if not touch.get("calibrations"):
+            raise ValueError("the touch has no calibration: measure the board (dgx_di_calibrate_measure) and put it in the data; measured: false marks a placeholder")
+        calibration = touch["calibration"] = touch["calibrations"][-1]  # the newest: one for the versions in use is for later
+        for key in ("x_max", "y_max", "width", "height", "left_up", "right_up", "left_down", "right_down"):
             if key not in calibration:
                 raise ValueError(f'the calibration lacks its "{key}"')
         if "measured" in calibration and not isinstance(calibration["measured"], bool):
             raise ValueError("calibration.measured is true or false")
         if not isinstance(touch.get("x_max"), int) or not isinstance(touch.get("y_max"), int):
             raise ValueError("the touch lacks its x_max and y_max, the range of its coordinates")
-        # DGX-DI compares these with the device and the display, and refuses a calibration that differs
+        # the glue compares these with the device and the display, and refuses a calibration that differs
         if (calibration["x_max"], calibration["y_max"]) != (touch["x_max"], touch["y_max"]):
             raise ValueError("the calibration is for another panel: its x_max/y_max differ from the touch's")
         panel = display["panel"]
@@ -484,14 +486,14 @@ def read_board(path):
         if not touch.get("bus") or bus_of(data, touch["bus"]) is None:
             raise ValueError(f'the touch\'s bus "{touch.get("bus")}" is not among the board\'s buses')
         if touch["kind"] in ("gt911", "gsl3680") and bus_parts(touch["bus"])[0] != "i2c":
-            raise ValueError(f'a {touch["kind"]} rides a board\'s I2C bus: bus is its name, "i2c.i2c0"')
+            raise ValueError(f'a {touch["kind"]} is on an I2C bus of the board: bus is its name, "i2c.i2c0"')
         if touch["kind"] == "gt911":
             for address in touch.get("address_try") or ["0x5d"]:
                 if i2c_address(address) not in (0x5D, 0x14):
-                    raise ValueError(f'a GT911 answers at 0x5d or 0x14, not {address}')
+                    raise ValueError(f'a GT911 has address 0x5d or 0x14, not {address}')
         if touch["kind"] == "esp_lcd_touch":
             if bus_parts(touch["bus"])[0] != "spi":
-                raise ValueError('a touch of the esp_lcd_touch kind rides a board\'s SPI bus: bus is its name, "spi.spi3"')
+                raise ValueError('a touch of the esp_lcd_touch kind is on an SPI bus of the board: bus is its name, "spi.spi3"')
             for line in ("cs", "irq"):
                 if not isinstance(touch.get(line), int):
                     raise ValueError(f'the touch lacks its "{line}" pin')
@@ -668,21 +670,10 @@ def derive_requires(board):
 # the C glue
 # ---------------------------------------------------------------------------------------------
 
-def c_calibration(cal):
-    """The calibration as a C initializer, the fields of dgx_di_calibration_t in order."""
-    def knot(points, count):
-        return ", ".join("{%d, %d}" % (p[0], p[1]) for p in points[:count])
-    return (
-        f".version = 1, .size = sizeof(dgx_di_calibration_t), "
-        f".x_min = {cal['x_min']}, .x_max = {cal['x_max']}, .y_min = {cal['y_min']}, .y_max = {cal['y_max']}, "
-        f".width = {cal['width']}, .height = {cal['height']}, .flags = {cal['flags']}, "
-        f".knots_x = {cal['knots_x']}, .knots_y = {cal['knots_y']}, .rounds = {cal['rounds']}, "
-        f".affine = {{{', '.join(str(v) for v in cal['affine'])}}}, "
-        f".x = {{{knot(cal['x'], cal['knots_x'])}}}, .y = {{{knot(cal['y'], cal['knots_y'])}}}, "
-        f".down_ms = {cal['down_ms']}, .up_ms = {cal['up_ms']}, .blink_ms = {cal['blink_ms']}, .gap_ms = {cal['gap_ms']}, "
-        f".off_tenths = {cal['off_tenths']}, .worst_tenths = {cal['worst_tenths']}, "
-        f".left_tenths = {cal['left_tenths']}, .left_worst_tenths = {cal['left_worst_tenths']}"
-    )
+def c_aims(cal):
+    """The places of a calibration as the initializers of dgx_di_aim_t."""
+    places = [value for value in cal.values() if isinstance(value, dict) and "meant" in value]
+    return [f"{{.meant_x = {p['meant'][0]}, .meant_y = {p['meant'][1]}, .x = {p['device'][0]}, .y = {p['device'][1]}}}" for p in places]
 
 
 def c_gpio(num):
@@ -931,8 +922,12 @@ def gen_c(board):
                 out("/* The calibration below is a placeholder, not measured on a board: the touch works, only not")
                 out(" * straight; board_touch_start says so. Measure the board (dgx_di_calibrate_measure) and put the")
                 out(" * numbers in the data. */")
-            out(f"static const dgx_di_calibration_t touch{i}_calibration = {{{c_calibration(cal)}}};")
-            out(f"static const struct board_touch_calibration touch{i}_calibrated = {{.calibration = &touch{i}_calibration, .placeholder = {'false' if measured else 'true'}}};")
+            aims = c_aims(cal)
+            takers = (touch["library"], *resolve.library(touch["library"]).get("adapter", {}).get("with", ()))
+            own = next((part for name, part in (cal.get("libraries") or {}).items() if name in takers), {})
+            out(f"static const dgx_di_aim_t touch{i}_aims[] = {{{', '.join(aims)}}};")
+            out(f"static const struct board_touch_calibration touch{i}_calibrated = {{.aims = touch{i}_aims, .count = {len(aims)}, .width = {cal['width']}, .height = {cal['height']}, "
+                f".blink_ms = {own.get('blink_ms', 0)}, .gap_ms = {own.get('gap_ms', 0)}, .placeholder = {'false' if measured else 'true'}}};")
             irq = touch.get("irq") if kind == "esp_lcd_touch" else touch.get("int")
             out(f"static const struct board_touch_panel touch{i}_panel = {{.x_max = {touch['x_max'] + 1}, .y_max = {touch['y_max'] + 1}, .rst = {c_gpio(touch.get('rst'))}, .irq = {c_gpio(irq)}, .fingers = {touch.get('fingers', 1)}}};")
             if kind == "gt911":
@@ -976,7 +971,7 @@ def gen_c(board):
             out(f"/* {sound['name']}: {sound['kind']} at {rate} Hz. */")
             if sound["kind"] == "es8311":
                 out(f"static const struct board_sound_es8311 sound{i}_codec = {{.i2s = &board_i2s_{iown}, .i2c_port = I2C_NUM_{i2c_port}, .address = {i2c_address(sound['address']):#04x}, .pa = {pa},")
-                out(f"                                                     .pa_voltage = {sound.get('pa_voltage', 5.0)}f, .codec_dac_voltage = {sound.get('codec_dac_voltage', 3.3)}f, .volume = {sound['volume']}, .rate = {rate}}};")
+                out(f"                                                     .pa_voltage = {float(sound.get('pa_voltage', 5.0))}f, .codec_dac_voltage = {float(sound.get('codec_dac_voltage', 3.3))}f, .volume = {sound['volume']}, .rate = {rate}}};")
                 out("")
             out(f"static bool sound{i}_start(int index, board_sound_source_t source)")
             out("{")
@@ -1112,6 +1107,60 @@ def kconfig_help(text, indent="        "):
     return "\n".join(indent + l for l in lines)
 
 
+def kconfig_board(board):
+    """The entry of a board in the choice."""
+    L = [f"config {choice_symbol(board)}", f"    bool \"{menu_text(board)}\"", f"    depends on IDF_TARGET_{board['mcu']['target'].upper()}"]
+    selects = [symbol for shown in board.get("displays") or [] if is_pixel(shown) for symbol in transport_of(shown)["select"] + shown["entry"]["select"]]
+    for group in (board.get("display_groups") or {}).values():
+        selects += resolve.library(board["display"]["library"])["groups"][group["how"]]["select"]
+    L.extend(f"    select {symbol}" for symbol in dict.fromkeys(selects))
+    L.extend(["    help", kconfig_help(board["description"] + "."), ""])
+    return L
+
+
+def gen_local_kconfig(boards):
+    """Kconfig.projbuild of the component local-boards: ESP-IDF reads it before the Kconfig of the component, so its defaults come first."""
+    L = ["# The boards of this program, made by tools/board_select.py from boards/: do not edit by hand.",
+         "# They join the choice of jef-sure/boards and raise the same hidden symbols.",
+         "choice BOARD_SELECT", "    prompt \"Board the program runs on\"", ""]
+    for board in boards:
+        L.extend(kconfig_board(board))
+    L.extend(["endchoice", ""])
+    features = {}
+    for board in boards:
+        L.extend([f"config BOARD_{board['name'].upper()}", "    int", f"    default 1 if {choice_symbol(board)}", "    default 0", ""])
+        for feature in features_of(board):
+            features.setdefault(feature, []).append(choice_symbol(board))
+    for feature in sorted(features):
+        L.extend([f"config {feature}", "    int", f"    default 1 if {' || '.join(features[feature])}", ""])
+    return "\n".join(L)
+
+
+def read_local(local):
+    """The boards of a program. A board of the catalog cannot be one of them: they would meet in the choice."""
+    boards = []
+    for path in sorted(local.glob("boards/*/board.json")):
+        board = read_board(path)
+        if board["name"] != path.parent.name:
+            raise ValueError(f'{path}: the board names itself "{board["name"]}", its directory is "{path.parent.name}"')
+        if (ROOT / "catalog" / "boards" / board["name"]).exists():
+            raise ValueError(f'{path}: the catalog has a board "{board["name"]}", give yours another name')
+        board["local"] = True
+        boards.append(board)
+    return boards
+
+
+def write_local(local):
+    """Everything generated of the component local-boards: its boards stay in its own directory, not in the catalog."""
+    boards = read_local(local)
+    texts = {local / "Kconfig.projbuild": gen_local_kconfig(boards), local / "CMakeLists.txt": LOCAL_CMAKE}
+    for board in boards:
+        texts[local / "boards" / board["name"] / f"{board['name']}.c"] = gen_c(board)
+        texts[local / "boards" / board["name"] / "board.cmake"] = gen_cmake(board)
+    for path, text in texts.items():
+        path.write_text(text)
+
+
 def gen_kconfig(boards, modules):
     L = []
     out = L.append
@@ -1136,21 +1185,11 @@ def gen_kconfig(boards, modules):
     out("    bool \"None: the program sets its hardware up itself\"")
     out("")
     for board in boards:
-        out(f"config {choice_symbol(board)}")
-        out(f"    bool \"{menu_text(board)}\"")
-        out(f"    depends on IDF_TARGET_{board['mcu']['target'].upper()}")
-        selects = [symbol for shown in board.get("displays") or [] if is_pixel(shown) for symbol in transport_of(shown)["select"] + shown["entry"]["select"]]
-        for group in (board.get("display_groups") or {}).values():
-            selects += resolve.library(board["display"]["library"])["groups"][group["how"]]["select"]
-        for symbol in dict.fromkeys(selects):
-            out(f"    select {symbol}")
-        out("    help")
-        out(kconfig_help(board["description"] + "."))
-        out("")
+        L.extend(kconfig_board(board))
     out("endchoice")
     out("")
     if modules:
-        out("# A module is not a board of its own: it rides whichever board the choice above picked, and")
+        out("# A module is not a board of its own: it is on whichever board the choice above picked, and")
         out("# its glue comes in beside the board's (its sdkconfig.defaults turns it on, read after the board's).")
         for module in modules:
             out(f"config {module_symbol(module)}")
@@ -1252,13 +1291,15 @@ def gen_table(boards, lang="en"):
 
 
 def has_glue(module_file):
-    """A module the component sets up: a chip of it has a library with an adapter."""
+    """A module the component sets up with --module: a chip of it has an adapter. A panel takes its wires from a project."""
     devices = json.loads(module_file.read_text())["devices"].values()
-    return any(entry.get("adapter") for device in devices for entry in resolve.libraries_of(device.get("chip")).values())
+    return any(entry.get("adapter", {}).get("kind") not in (None, "panel") for device in devices for entry in resolve.libraries_of(device.get("chip")).values())
 
 
 def data_path(board):
     """Where the data of a board or a module lies, for the comments of what is generated."""
+    if board.get("local"):
+        return f"{resolve.LOCAL_BOARDS}/boards/{board['name']}/board.json"
     return f"catalog/modules/{board['name']}/module.json" if board.get("module") else f"catalog/boards/{board['name']}/board.json"
 
 
@@ -1275,6 +1316,12 @@ def read_all(data_dir):
     return boards, modules
 
 
+def gen_catalog_index(root):
+    """The files of the catalog, for the page of the editor to fetch: a server gives no listing to rely on."""
+    catalog = root / "catalog"
+    return resolve.dump(sorted(path.relative_to(catalog).as_posix() for path in catalog.rglob("*.json") if path.name != CATALOG_INDEX)) + "\n"
+
+
 def generated_texts(root, boards, modules):
     """Every file --all writes, path -> text, the files with markers made from their current text."""
     texts = {}
@@ -1282,6 +1329,7 @@ def generated_texts(root, boards, modules):
         texts[root / "boards" / board["name"] / f"{board['name']}.c"] = gen_c(board)
         texts[root / "boards" / board["name"] / "board.cmake"] = gen_cmake(board)
     texts[root / "boards" / "boards.cmake"] = gen_boards_cmake(boards, modules)
+    texts[root / "catalog" / CATALOG_INDEX] = gen_catalog_index(root)
     texts[root / "Kconfig"] = gen_kconfig(boards, modules)
     manifest = root / "idf_component.yml"
     texts[manifest] = replace_between(manifest.read_text(), MANIFEST_BEGIN, MANIFEST_END, gen_manifest_block(boards), str(manifest))

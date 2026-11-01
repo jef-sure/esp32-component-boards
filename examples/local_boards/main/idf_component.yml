@@ -1,0 +1,10 @@
+## The example takes the component it lies in by directory (EXTRA_COMPONENT_DIRS in the
+## project's CMakeLists.txt), so it names no dependency on it here. A project of its own does:
+##
+##   dependencies:
+##     jef-sure/boards: "^0.0.1"
+##
+## and the component's own manifest brings what the chosen board needs by its rules.
+dependencies:
+  idf:
+    version: ">=5.5"

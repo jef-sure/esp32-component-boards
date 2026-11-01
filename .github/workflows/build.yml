@@ -28,7 +28,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        board: [cyd_s028r, esp32_devkit, jc1060p470c, jc4827w543c, jc8012p4a1c, local_terminal]
+        board: [cyd_s028r, esp32_devkit, esp32s3_devkit, jc1060p470c, jc4827w543c, jc8012p4a1c]
         idf: [release-v5.5, v6.1]
         module: [""]
         include:
@@ -57,4 +57,24 @@ jobs:
           esp_idf_version: ${{ matrix.idf }}
           target: ${{ steps.board.outputs.target }}
           path: examples/hello_lvgl
+          command: idf.py build
+
+  local-boards:
+    name: a board of the program on ESP-IDF ${{ matrix.idf }}
+    needs: check
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        idf: [release-v5.5, v6.1]
+    steps:
+      - uses: actions/checkout@v4
+      - name: choose the board
+        run: python3 tools/board_select.py my_board examples/local_boards
+      - name: build examples/local_boards
+        uses: espressif/esp-idf-ci-action@v1
+        with:
+          esp_idf_version: ${{ matrix.idf }}
+          target: esp32s3
+          path: examples/local_boards
           command: idf.py build

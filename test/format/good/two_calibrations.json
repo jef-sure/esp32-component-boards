@@ -3,11 +3,28 @@
     "format_version": 2,
     "kind": "board",
     "name": "two_calibrations",
-    "title": "A panel measured for two libraries",
+    "title": "A measurement with a part for each of two libraries",
     "extends": "jc1060p470c",
     "devices": {
         "touch": {
-            "config": {"calibrations": {"esp-idf/lvgl/lvgl": [{"points": [[48, 48, 49, 48], [975, 975, 552, 551]]}]}}
+            "config": {
+                "calibrations": [
+                    {
+                        "x_max": 1023,
+                        "y_max": 599,
+                        "width": 1024,
+                        "height": 600,
+                        "left_up": {"meant": [0, 0], "device": [6, 5]},
+                        "right_up": {"meant": [1023, 0], "device": [1019, 7]},
+                        "left_down": {"meant": [0, 599], "device": [4, 596]},
+                        "right_down": {"meant": [1023, 599], "device": [1020, 594]},
+                        "libraries": {
+                            "esp-idf/jef-sure/dgx-di": {"rounds": 3, "blink_ms": 22, "gap_ms": 0},
+                            "esp-idf/lvgl/lvgl": {"long_press_ms": 400}
+                        }
+                    }
+                ]
+            }
         }
     }
 }

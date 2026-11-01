@@ -79,10 +79,10 @@ python3 tools/board_select.py jc1060p470c --module lcd2004_pcf8574 --reset ~/myp
 ## board_bom.py
 
 ```sh
-python3 tools/board_bom.py local_terminal                               # одно изделие
-python3 tools/board_bom.py local_terminal --units 10 --shop AliExpress  # десять, по ценам одного магазина
-python3 tools/board_bom.py local_terminal --units 10 --duty 3 EUR       # со сбором на тарифный код
-python3 tools/board_bom.py local_terminal --csv terminal.csv            # строки для таблицы
+python3 tools/board_bom.py my_board --project .                        # одно изделие
+python3 tools/board_bom.py my_board --project . --units 10 --shop AliExpress  # десять, по ценам одного магазина
+python3 tools/board_bom.py my_board --project . --units 10 --duty 3 EUR  # со сбором на тарифный код
+python3 tools/board_bom.py my_board --project . --csv my_board.csv      # строки для таблицы
 ```
 
 Строка — это то, что покупается целиком: базовая плата проекта, затем модули и устройства,
@@ -109,7 +109,8 @@ python3 tools/check_format.py
 Нужны `jsonschema` и `node`; первый есть в Python из ESP-IDF. Проверяет каждый файл
 `catalog/` и `test/format/catalog/` по `catalog/format.schema.json`, каждую плату через
 слияние и правила, случаи `test/format/good/` и `test/format/bad/`, а также что
-`tools/rules.py` и `editor/rules.js` находят одно и то же.
+`tools/rules.py` и `editor/rules.js` находят одно и то же, а `tools/resolve.py` и
+`editor/resolve.js` дают одно и то же для каждого документа, прошедшего схему.
 
 ## board_pins.py и свободные пины
 
@@ -143,8 +144,37 @@ python3 tools/sync_versions.py
 
 ## Редактор
 
-`editor/index.html` читает только формат 1 и файлы каталога не открывает. Его заменит
-редактор на дереве. Пока правьте JSON руками и запускайте `tools/check_format.py`.
+`editor/index.html` правит файлы каталога. Ему не нужны ни сборка, ни сеть, только статический сервер
+из корня репозитория: Live Server из VS Code или
+
+```sh
+python3 -m http.server 8000
+```
+
+Откройте на этом сервере `/editor/`: каталог загрузится сам. `open a folder` принимает программу
+или её `components/local-boards`, чтобы править платы этой программы. Принимает и папку репозитория:
+тогда Chromium сохраняет прямо в каталог. Страницу, открытую из файла, некому обслужить, поэтому там
+сначала нужен репозиторий.
+
+Слева список документов каталога, рядом дерево открытого. `card` показывает поля узла и то, что
+схема говорит о каждом: написанное в файле обычным текстом, унаследованное серым. Значение,
+введённое поверх унаследованного, попадает в этот файл. В файле с `extends` крестик на
+унаследованном поле пишет `null`: поле убирается здесь, а база остаётся как есть. `pins` — карта
+GPIO, `json` — файл в том виде, как он сохранится, и собранная плата, как её читают инструменты.
+
+Каждое изменение проходит те же проверки, что и в инструментах: схему, загрузчик, правила и карту
+пинов. Проблемы перечислены над карточкой. Chromium сохраняет в открытую папку; без неё или в другом
+браузере страница отдаёт файл, и его надо положить на место руками. Затем запустите
+`tools/boards_gen.py --all`, а для платы программы `tools/board_select.py`.
+
+Платы программы показаны отдельно, поверх каталога, и новое попадает туда. Без программы новый
+документ попадает в каталог, поэтому `project` не предлагается.
+
+Файлы `catalog/mcu/` пишет `tools/make_mcu.py`, поэтому здесь они только для чтения. Так же и часть
+модуля на плате: её правят в модуле или через `modules` платы.
+
+`tools/check_format.py` сверяет `editor/schema.js`, `editor/pins.js` и JSON, который сохраняет
+страница, с инструментами на Python: на всех документах и на их испорченных копиях.
 
 ## test/fake
 

@@ -41,7 +41,9 @@ void app_main(void)
 
     struct board_display display = {0};
     if (board_display_init(&display)) {
-        printf("the display: %d x %d pixels, %d x %d mm\n", display.width, display.height, display.mm_w, display.mm_h);
+        printf("the display: %d x %d pixels", display.width, display.height);
+        if (display.mm_w) printf(", %d x %d mm", display.mm_w, display.mm_h);
+        printf("\n");
 #if CONFIG_BOARD_DISPLAY_GRAPHICS
         /* a frame: white, a blue bar at the top, so that the orientation and the order of the colors are seen */
         dgx_screen_t *screen = board_dgx_screen(&display);

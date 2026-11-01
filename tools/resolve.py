@@ -13,6 +13,7 @@ import re
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 ROOTS = [ROOT / "catalog"]  # check_format.py adds the entries of its cases
+LOCAL_BOARDS = "components/local-boards"  # what is a program's own, in the layout of catalog/
 FILES = {"mcu": "mcu.json", "devices": "device.json", "modules": "module.json", "boards": "board.json", "libraries": "library.json", "connectors": "connector.json"}
 NOT_LINES = {"hz", "lanes", "lane_mbps", "phy_ldo_chan", "phy_ldo_mv", "baud", "data"}
 LINE = 120
@@ -26,6 +27,14 @@ MODULE_FACTS = ("maker", "part", "revision", "mcu", "price", "tariff")  # what a
 
 class Refused(Exception):
     pass
+
+
+def add_project(project):
+    """Reads the local-boards of a program before the catalog. Returns that directory."""
+    local = pathlib.Path(project).resolve() / LOCAL_BOARDS
+    if local not in ROOTS:
+        ROOTS.insert(0, local)
+    return local
 
 
 def load(kind, name):

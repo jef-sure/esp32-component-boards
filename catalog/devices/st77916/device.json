@@ -1,0 +1,19 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "st77916",
+    "title": "ST77916",
+    "maker": "sitronix",
+    "part": "ST77916",
+    "class": "display",
+    "on": {"qspi": {}, "spi": {}},
+    "config": {"kind": "graphics"},
+    "controls": {"orientation": {"how": "driver", "read": "none"}},
+    "checked": {
+        "facts": {
+            "level": "hardware",
+            "source": "esp32-component-dgx, include/drivers/st77916.h and CHANGES 0.10: a round panel of 360x360 on QSPI"
+        }
+    }
+}

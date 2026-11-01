@@ -76,10 +76,10 @@ so the new defaults are read. See [choosing-a-board.md](choosing-a-board.md).
 ## board_bom.py
 
 ```sh
-python3 tools/board_bom.py local_terminal                               # one product
-python3 tools/board_bom.py local_terminal --units 10 --shop AliExpress  # ten, at the prices of one shop
-python3 tools/board_bom.py local_terminal --units 10 --duty 3 EUR       # with a duty per tariff code
-python3 tools/board_bom.py local_terminal --csv terminal.csv            # the lines for a spreadsheet
+python3 tools/board_bom.py my_board --project .                        # one product
+python3 tools/board_bom.py my_board --project . --units 10 --shop AliExpress  # ten, at the prices of one shop
+python3 tools/board_bom.py my_board --project . --units 10 --duty 3 EUR  # with a duty per tariff code
+python3 tools/board_bom.py my_board --project . --csv my_board.csv      # the lines for a spreadsheet
 ```
 
 A line is what is bought as one: the board a project stands on, then the modules and devices
@@ -106,8 +106,9 @@ python3 tools/check_format.py
 Needs `jsonschema` and `node`; the Python of ESP-IDF has the first. Checks every
 file of `catalog/` and `test/format/catalog/` against
 `catalog/format.schema.json`, every board through the merge and the rules, the
-cases of `test/format/good/` and `test/format/bad/`, and that `tools/rules.py` and
-`editor/rules.js` find the same.
+cases of `test/format/good/` and `test/format/bad/`, that `tools/rules.py` and
+`editor/rules.js` find the same, and that `tools/resolve.py` and `editor/resolve.js`
+give the same for every document that passes the schema.
 
 ## board_pins.py and the free pins
 
@@ -141,9 +142,38 @@ is built against and requires, from the tags of git the versions the registry ha
 
 ## The editor
 
-`editor/index.html` reads format 1 only and does not open the files of the catalog.
-It is to be replaced by an editor on a tree. Until then edit the JSON by hand and
-run `tools/check_format.py`.
+`editor/index.html` edits the files of the catalog. It needs no build and no network, only a
+static server from the root of the repository: Live Server of VS Code, or
+
+```sh
+python3 -m http.server 8000
+```
+
+Open `/editor/` on that server: the catalog loads by itself. `open a folder` takes a program or
+its `components/local-boards`, to edit the boards of that program. It takes the folder of the
+repository too, and then Chromium saves into the catalog in place. A page opened from a file has no
+server to load from, so there the repository comes first.
+
+On the left are the documents of the catalog, next to them the tree of the one open. `card` shows
+the fields of a node with what the schema says of each: what the file writes in plain text, what
+it inherits in grey. A value typed over an inherited one goes into this file. In a file with
+`extends`, × on an inherited field writes `null`, which takes it out here and leaves the base as it
+is. `pins` is the map of the GPIOs, `json` the file as it will be saved and the resolved board as the
+tools read it.
+
+Every change runs the same checks as the tools: the schema, the loader, the rules and the map of
+pins. The problems are listed above the card. Chromium saves into the folder opened; without one,
+or in another browser, the page gives a download to put in place by hand. Then run
+`tools/boards_gen.py --all`, or `tools/board_select.py` for a board of a program.
+
+The boards of a program are listed apart, over the catalog, and what is new goes there. Without a
+program a new document goes into the catalog, so `project` is not offered.
+
+The files of `catalog/mcu/` are written by `tools/make_mcu.py`, so they are read only here. The same
+holds for a part of a module on a board: change it in the module, or through `modules` of the board.
+
+`tools/check_format.py` compares `editor/schema.js`, `editor/pins.js` and the JSON the page saves with
+the tools in Python, on every document and on spoiled copies of them.
 
 ## test/fake
 

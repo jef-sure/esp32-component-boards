@@ -7,12 +7,14 @@
     "maker": "nxp",
     "part": "PN532",
     "class": "nfc",
+    "draw": {"rf_on": {"ma": 100, "ma_peak": 150}, "sleep": {"ma": 0.045}},
     "on": {"i2c": {"address": "0x24"}, "spi": {}, "uart": {}},
     "provides": {
         "nfc": {
             "standards": ["iso14443a", "iso14443b", "felica", "iso18092"],
             "targets_max": 2,
-            "tx_ma_max": 150,
+            "freq_mhz": [13.56, 13.56],
+            "tx_mw_max": 750,
             "modes": ["reader", "peer_to_peer", "card_emulation"]
         }
     },
@@ -28,7 +30,7 @@
     "checked": {
         "facts": {
             "level": "datasheet",
-            "source": "UM0701-02 PN532 User Manual, InListPassiveTarget: 2 targets at most; NXP PN532_C1.pdf for the current, seen in an excerpt"
+            "source": "UM0701-02 PN532 User Manual, InListPassiveTarget: 2 targets at most; NXP PN532_C1.pdf Rev. 3.6: 13.56 MHz, ITVDD 150 mA at most at VBAT 5 V, total supply below 100 mA with the recommended antenna tuning and 150 mA at most at VBAT 3.4 V, soft power down 45 uA at most"
         },
         "wiring": {
             "level": "datasheet",
@@ -43,5 +45,9 @@
             "notes": "pn532_get_firmware_version gave 0x32010607 on both modules of the terminal"
         }
     },
-    "notes": ["A Jewel card is one target only.", "The range is that of the antenna: see the modules."]
+    "notes": [
+        "A Jewel card is one target only.",
+        "The range is that of the antenna: see the modules.",
+        "tx_mw_max is the supply of the transmitter, 5 V at 150 mA. The datasheet gives no radiated power."
+    ]
 }

@@ -18,6 +18,7 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "tools"))
 import boards_gen  # noqa: E402
+import resolve  # noqa: E402
 
 
 def pin_map(board):
@@ -105,8 +106,11 @@ def main():
     parser.add_argument("--all", action="store_true")
     parser.add_argument("--free", nargs="?", const="", metavar="WORD", help="the pins left for what will be connected; ADC, DAC or TOUCH narrows them")
     parser.add_argument("--json", action="store_true", help="the whole map of the pins as JSON")
+    parser.add_argument("--project", type=pathlib.Path, help="the program whose components/local-boards to read as well")
     args = parser.parse_args()
     boards, modules = boards_gen.read_all(ROOT / "catalog")
+    if args.project:
+        boards += boards_gen.read_local(resolve.add_project(args.project))
     if args.all:
         for board in boards:
             problems = boards_gen.pin_problems(board)

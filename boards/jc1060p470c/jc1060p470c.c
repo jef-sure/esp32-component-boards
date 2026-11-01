@@ -81,8 +81,8 @@ static struct board_display_started displays_started[1];
 const struct board_display_table board_display_table = {.panels = display_panels, .started = displays_started, .count = 1};
 
 /* touch: gt911 on i2c.i2c0, the calibration of its measured board. */
-static const dgx_di_calibration_t touch0_calibration = {.version = 1, .size = sizeof(dgx_di_calibration_t), .x_min = 0, .x_max = 1023, .y_min = 0, .y_max = 599, .width = 1024, .height = 600, .flags = 0, .knots_x = 3, .knots_y = 3, .rounds = 3, .affine = {66150, 221, -683737, 460, 66859, -1265431}, .x = {{48, 48}, {512, 512}, {975, 975}}, .y = {{49, 48}, {298, 300}, {552, 551}}, .down_ms = 0, .up_ms = 60, .blink_ms = 0, .gap_ms = 0, .off_tenths = 101, .worst_tenths = 210, .left_tenths = 33, .left_worst_tenths = 70};
-static const struct board_touch_calibration touch0_calibrated = {.calibration = &touch0_calibration, .placeholder = false};
+static const dgx_di_aim_t touch0_aims[] = {{.meant_x = 48, .meant_y = 48, .x = 58, .y = 67}, {.meant_x = 975, .meant_y = 48, .x = 976, .y = 60}, {.meant_x = 48, .meant_y = 551, .x = 56, .y = 560}, {.meant_x = 975, .meant_y = 551, .x = 974, .y = 553}, {.meant_x = 512, .meant_y = 48, .x = 517, .y = 63}, {.meant_x = 512, .meant_y = 551, .x = 516, .y = 556}, {.meant_x = 48, .meant_y = 300, .x = 57, .y = 311}, {.meant_x = 975, .meant_y = 300, .x = 975, .y = 304}, {.meant_x = 512, .meant_y = 300, .x = 517, .y = 307}};
+static const struct board_touch_calibration touch0_calibrated = {.aims = touch0_aims, .count = 9, .width = 1024, .height = 600, .blink_ms = 0, .gap_ms = 0, .placeholder = false};
 static const struct board_touch_panel touch0_panel = {.x_max = 1024, .y_max = 600, .rst = GPIO_NUM_22, .irq = GPIO_NUM_21, .fingers = 5};
 static const uint8_t touch0_addresses[] = {0x5d, 0x14};
 static const struct board_touch_gt911 touch0_driver = {.panel = &touch0_panel, .addresses = touch0_addresses, .address_count = 2, .i2c_hz = 400000};

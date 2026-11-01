@@ -94,12 +94,33 @@
             "result": "pending",
             "notes": "0x5602 read from register 0x300A at I2C address 0x36: an OV02C10 on the connector. No picture taken."
         },
+        "ethernet_id": {
+            "level": "hardware",
+            "covers": ["devices.ethernet"],
+            "by": "a test firmware",
+            "date": "2026-10-31",
+            "notes": "By MDIO on GPIO 31 and 52 with the reset on GPIO 51: one PHY, at address 1, id 0243 0c54, link down with no cable. No frame was sent."
+        },
+        "touch_id": {
+            "level": "hardware",
+            "covers": ["devices.touch"],
+            "by": "a test firmware",
+            "date": "2026-10-31",
+            "notes": "Registers at 0x5D and at 0x14 give the same: product 911, firmware 0x1060, 1024x600, 5 fingers. So one chip answers at both addresses when nothing has set its address."
+        },
+        "battery": {
+            "level": "hardware",
+            "covers": ["devices.battery"],
+            "by": "a test firmware",
+            "date": "2026-10-31",
+            "notes": "GPIO 53 reads 2.50 V, 4.21 V before the divider, on USB with no battery. The ADC was calibrated by the chip, not compared with a meter."
+        },
         "clock_on_i2c": {
             "level": "hardware",
             "covers": ["devices.rtc"],
             "by": "a test firmware",
             "date": "2026-10-31",
-            "notes": "It answers at 0x32. The clock was not read."
+            "notes": "It answers at 0x32 and the seconds advance. VLF is set and the weekday is not valid: with no backup cell the time is lost at power off."
         },
         "power": {
             "level": "schematic",
@@ -271,35 +292,36 @@
                 "over": "lcd",
                 "x_max": 1023,
                 "y_max": 599,
-                "calibrations": {
-                    "esp-idf/jef-sure/dgx-di": [
-                        {
-                            "rule": "the newest",
-                            "notes": "Measured before the versions were kept: measured_with is not known.",
-                            "x_min": 0,
-                            "x_max": 1023,
-                            "y_min": 0,
-                            "y_max": 599,
-                            "width": 1024,
-                            "height": 600,
-                            "flags": 0,
-                            "knots_x": 3,
-                            "knots_y": 3,
-                            "rounds": 3,
-                            "affine": [66150, 221, -683737, 460, 66859, -1265431],
-                            "x": [[48, 48], [512, 512], [975, 975]],
-                            "y": [[49, 48], [298, 300], [552, 551]],
-                            "down_ms": 0,
-                            "up_ms": 60,
-                            "blink_ms": 0,
-                            "gap_ms": 0,
-                            "off_tenths": 101,
-                            "worst_tenths": 210,
-                            "left_tenths": 33,
-                            "left_worst_tenths": 70
+                "calibrations": [
+                    {
+                        "rule": "the newest",
+                        "notes": "Measured before the versions were kept: measured_with is not known. The places are worked back from the calibration of DGX-DI: where it placed each target, not the touches themselves.",
+                        "x_max": 1023,
+                        "y_max": 599,
+                        "width": 1024,
+                        "height": 600,
+                        "left_up": {"meant": [48, 48], "device": [58, 67]},
+                        "right_up": {"meant": [975, 48], "device": [976, 60]},
+                        "left_down": {"meant": [48, 551], "device": [56, 560]},
+                        "right_down": {"meant": [975, 551], "device": [974, 553]},
+                        "up": {"meant": [512, 48], "device": [517, 63]},
+                        "down": {"meant": [512, 551], "device": [516, 556]},
+                        "left": {"meant": [48, 300], "device": [57, 311]},
+                        "right": {"meant": [975, 300], "device": [975, 304]},
+                        "middle": {"meant": [512, 300], "device": [517, 307]},
+                        "libraries": {
+                            "esp-idf/jef-sure/dgx-di": {
+                                "rounds": 3,
+                                "blink_ms": 0,
+                                "gap_ms": 0,
+                                "off_tenths": 101,
+                                "worst_tenths": 210,
+                                "left_tenths": 33,
+                                "left_worst_tenths": 70
+                            }
                         }
-                    ]
-                }
+                    }
+                ]
             }
         },
         "sound": {
@@ -308,7 +330,7 @@
             "part": "ES8311-S",
             "on": {"i2c.i2c0": {}, "i2s.i2s0": {}},
             "pins": {"pa": 11},
-            "config": {"sample_rate": 22050, "pa_voltage": 5.0, "codec_dac_voltage": 3.3},
+            "config": {"sample_rate": 22050, "pa_voltage": 5, "codec_dac_voltage": 3.3},
             "controls": {"volume": {"start": 25}},
             "notes": [
                 "MIC1 is fitted: ASDOUT of the codec comes in on GPIO48. Only the output is set up.",
@@ -319,13 +341,15 @@
         "ethernet": {
             "class": "network",
             "ref": "U4",
+            "maker": "icplus",
+            "part": "IP101",
             "marking": "IC+",
             "on": {"rmii.rmii0": {}},
             "pins": {"rst": 51},
-            "config": {"ref_clk": "from the PHY"},
+            "config": {"ref_clk": "from the PHY", "phy_address": 1},
             "controls": {"enabled": {"how": "driver", "values": ["off", "on"], "start": "off", "read": "none"}},
             "notes": [
-                "U4 has the logo of IC Plus; the part number is not read and the schematic has none. 25 MHz crystal; its 50 MHz output feeds RMII_CLK. The LAN transformer is a JXD B1603S.",
+                "U4 has the logo of IC Plus and no readable number; the schematic has none. Its id over MDIO is 0243 0c54: IC Plus, model 5, the id the IP101 driver of ESP-IDF checks. It does not say the letters after IP101. 25 MHz crystal; its 50 MHz output feeds RMII_CLK. The LAN transformer is a JXD B1603S.",
                 "TXD1 is GPIO35, the line of the BOOT button: a program that starts Ethernet loses the button."
             ]
         },

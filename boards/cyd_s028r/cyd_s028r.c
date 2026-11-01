@@ -86,8 +86,8 @@ static struct board_display_started displays_started[1];
 const struct board_display_table board_display_table = {.panels = display_panels, .started = displays_started, .count = 1};
 
 /* touch: atanisoft/esp_lcd_touch_xpt2046 on spi.spi3, the calibration of its measured board. */
-static const dgx_di_calibration_t touch0_calibration = {.version = 1, .size = sizeof(dgx_di_calibration_t), .x_min = 0, .x_max = 4095, .y_min = 0, .y_max = 4095, .width = 240, .height = 320, .flags = 1, .knots_x = 3, .knots_y = 3, .rounds = 3, .affine = {74051, -652, -886661, 173, 75199, -702795}, .x = {{30, 30}, {119, 119}, {209, 209}}, .y = {{30, 30}, {159, 160}, {289, 289}}, .down_ms = 130, .up_ms = 30, .blink_ms = 101, .gap_ms = 0, .off_tenths = 164, .worst_tenths = 290, .left_tenths = 18, .left_worst_tenths = 30};
-static const struct board_touch_calibration touch0_calibrated = {.calibration = &touch0_calibration, .placeholder = false};
+static const dgx_di_aim_t touch0_aims[] = {{.meant_x = 30, .meant_y = 30, .x = 3432, .y = 439}, {.meant_x = 209, .meant_y = 30, .x = 751, .y = 479}, {.meant_x = 30, .meant_y = 289, .x = 3398, .y = 3346}, {.meant_x = 209, .meant_y = 289, .x = 702, .y = 3328}, {.meant_x = 119, .meant_y = 30, .x = 2064, .y = 464}, {.meant_x = 119, .meant_y = 289, .x = 2037, .y = 3370}, {.meant_x = 30, .meant_y = 160, .x = 3395, .y = 1907}, {.meant_x = 209, .meant_y = 160, .x = 656, .y = 1874}, {.meant_x = 119, .meant_y = 160, .x = 2081, .y = 1902}};
+static const struct board_touch_calibration touch0_calibrated = {.aims = touch0_aims, .count = 9, .width = 240, .height = 320, .blink_ms = 101, .gap_ms = 0, .placeholder = false};
 static const struct board_touch_panel touch0_panel = {.x_max = 4096, .y_max = 4096, .rst = GPIO_NUM_NC, .irq = GPIO_NUM_36, .fingers = 1};
 static const struct board_touch_spi touch0_driver = {.panel = &touch0_panel, .host = SPI3_HOST, .cs = GPIO_NUM_33, .hz = 1000000, .create = esp_lcd_touch_new_spi_xpt2046};
 static dgx_di_esp_lcd_touch_t touch0_device;

@@ -5,15 +5,20 @@
 #include "boards_dgx.h"
 #include "boards_dgx_di.h"
 
+/* The points of the data, made into a calibration of DGX-DI at start. */
 struct board_touch_calibration {
-    const dgx_di_calibration_t *calibration;
-    bool                        placeholder; /* not measured */
+    const dgx_di_aim_t *aims;
+    int                 count;
+    int                 width, height;    /* of the display it was measured under, in its own orientation */
+    int                 blink_ms, gap_ms; /* how the panel blinked: how it is steadied */
+    bool                placeholder;      /* not measured */
 };
 
 /* What DGX-DI keeps for a panel: one for each, given by the glue. */
 struct board_touch_slot {
-    dgx_di_pointer_t pointer;
-    dgx_di_device_t *device; /* NULL until it is up */
+    dgx_di_pointer_t     pointer;
+    dgx_di_calibration_t calibration; /* the pointer keeps it, it does not copy it */
+    dgx_di_device_t     *device;      /* NULL until it is up */
 };
 struct board_touch_slots {
     struct board_touch_slot *slots;

@@ -7,7 +7,7 @@
     "description": "A standard ESP32 dev board with a CP210x USB bridge, a power LED, a second LED and a BOOT button",
     "notes": [
         "A board sold by many makers, so no maker is written and no schematic was read.",
-        "The pin of the LED is the usual one for this board. It was not tried on a unit."
+        "The LED follows GPIO 2. With an internal pull-up that pin reads about 0 V, lower than an LED to ground gives, so something else is on the line too; what it is is not known."
     ],
     "mcu": {"target": "esp32", "part": "ESP32-D0WD-V3", "flash_mb": 4},
     "devices": {
@@ -35,9 +35,16 @@
     "checked": {
         "pins": {
             "level": "unchecked",
-            "covers": ["devices.boot", "devices.led"],
-            "source": "Anton: a standard dev board with two LEDs; the pins are the usual ones of this board",
+            "covers": ["devices.boot"],
+            "source": "Anton: a standard dev board with two LEDs; the pin is the usual one of this board",
             "date": "2026-10-31"
+        },
+        "led": {
+            "level": "hardware",
+            "covers": ["devices.led"],
+            "by": "Anton, by eye",
+            "date": "2026-11-01",
+            "notes": "On the board of the local terminal the LED blinks while terminal_test toggles GPIO 2. A blink does not show which level lights it."
         },
         "chip": {
             "level": "hardware",

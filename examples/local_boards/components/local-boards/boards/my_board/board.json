@@ -1,0 +1,17 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "project",
+    "name": "my_board",
+    "extends": "esp32s3_devkit",
+    "title": "ESP32-S3 DevKit with my display",
+    "description": "The display module of this program connected to a dev board of the catalog by wires",
+    "buses": {"qspi": {"spi2": {"hz": 40000000, "d0": 11, "d1": 13, "d2": 14, "d3": 9, "sclk": 12}}},
+    "modules": {
+        "screen": {
+            "module": "my_display",
+            "on": {"qspi.spi2": {"cs": 10}},
+            "pins": {"rst": 8, "backlight": {"gpio": 18, "active": "high"}, "te": 17}
+        }
+    }
+}

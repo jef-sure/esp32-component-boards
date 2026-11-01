@@ -2,10 +2,10 @@
     "format": "jef-sure/boards",
     "format_version": 2,
     "kind": "project",
-    "name": "local_terminal",
+    "name": "two_readers_on_a_devkit",
     "extends": "esp32_devkit",
-    "title": "Local terminal: ESP32, 2004 LCD, two PN532",
-    "description": "An attendance terminal: an ESP32 dev board, two PN532 on SPI2 and SPI3 and a 2004 LCD on I2C",
+    "title": "Two readers and a character display on a dev board",
+    "description": "Modules on a board by the project that wires them",
     "notes": [
         "The 2004 LCD is the module lcd2004_pcf8574 on the I2C bus of the board.",
         "The PN532 modules take SPI on their I0, I1 switches."
@@ -29,8 +29,8 @@
             "level": "hardware",
             "covers": ["devices.nfc_in_nfc", "devices.nfc_out_nfc"],
             "by": "log of terminal_test",
-            "date": "2026-10-31",
-            "notes": "both PN532 read cards over SPI with these pins: 515 reads in three minutes, no errors"
+            "date": "2026-11-01",
+            "notes": "both PN532 read cards over SPI with these pins: 515 reads in three minutes, no errors. After the move to modules both give firmware 0x32010607 through board_bus_get with the names of the modules, and Anton saw cards read with terminal_test."
         }
     }
 }

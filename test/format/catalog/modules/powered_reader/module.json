@@ -7,6 +7,8 @@
     "maker": "someone",
     "part": "RD-1",
     "revision": "V2",
+    "tariff": "847130",
+    "price": {"one": {"shop": "a shop", "currency": "EUR", "range": [1, 2], "date": "2026-10-31", "source": "shape only"}},
     "power": [
         {"name": "VIN", "source": "connector"},
         {"name": "3V3", "from": "VIN", "through": "reg", "regulator": "ldo", "mv": 3300, "feeds": ["chip"]}

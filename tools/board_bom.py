@@ -140,12 +140,15 @@ def write_csv(path, rows):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("board")
+    parser.add_argument("board", help="a board of the catalog, or of the program given by --project")
+    parser.add_argument("--project", type=pathlib.Path, help="the program whose components/local-boards to read before the catalog")
     parser.add_argument("--units", type=int, default=1, help="how many products are built")
     parser.add_argument("--shop", help="use only the prices of this shop")
     parser.add_argument("--duty", nargs=2, metavar=("AMOUNT", "CURRENCY"), help="a duty on each tariff code in the order")
     parser.add_argument("--csv", type=pathlib.Path, help="write the lines to this file as well")
     args = parser.parse_args()
+    if args.project:
+        resolve.add_project(args.project)
     if args.units < 1:
         parser.error("--units must be 1 or more")
     try:

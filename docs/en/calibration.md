@@ -9,13 +9,27 @@ the tuning of a MIPI-DSI bus.
 A touch panel reports raw coordinates in its own range (`x_max`, `y_max` of
 the data). DGX-DI maps them onto the display with a calibration measured on a
 real board: an affine transform plus three correction knots per axis, and the
-timing of how a finger appears and leaves (`down_ms`, `up_ms`, `blink_ms`).
-The data of every board carries one, under `config.calibrations` of the touch, by the library
-that reads it: each library has a form of its own, and a panel may keep one for each. A library
-keeps a list, the newest last. `measured_with` of an entry says which versions it was measured
-with, since a change in a library can make a calibration wrong, `rule` says in words when it holds
-and `notes` what else is known. No tool reads `rule` yet: the glue takes the last entry. The glue
-hands it to the pointer at `board_touch_start`.
+timing of how a finger appears and leaves.
+
+`config.calibrations` of the touch keeps what was measured, not that transform: a list with one
+entry a measurement, the newest last. An entry holds the places aimed at, each named for where it
+is on the display in its own orientation: `left_up`, `right_up`, `left_down`, `right_down`, and
+`up`, `down`, `left`, `right`, `middle` when they were measured. Each has `meant`, the pixel aimed
+at, and `device`, what the touch controller reported there. The corners are required: TFT_eSPI and
+LovyanGFX calibrate by four corners. They aim at the corners themselves and DGX-DI aims further
+in, so an export has to extend the places to the corners. No tool exports them yet.
+
+`x_max`, `y_max`, `width` and `height` say what the entry was measured with. `libraries` holds what
+only one library uses. For DGX-DI that is `blink_ms` and `gap_ms`, how the panel behaved, and
+`rounds` and the `*_tenths` figures, how the measurement went.
+
+`board_touch_start` makes the calibration of DGX-DI from the places with
+`dgx_di_calibration_make()`, and its timing with `dgx_di_calibration_steady()`. The transform is
+not in the data, so it cannot disagree with the places.
+
+`measured_with` of an entry says which versions it was measured with, since a change in a library
+can make a calibration wrong, `rule` says in words when it holds and `notes` what else is known. No
+tool reads `rule` yet: the glue takes the last entry.
 
 A calibration is measured on **one** board of a kind. Another board of the
 same kind is close, not identical; if it matters, measure again. A calibration
@@ -52,9 +66,17 @@ else draw meanwhile.
 Save the log and give it to the tool, which writes the numbers into the board and
 drops `measured`: `python3 tools/board_calibration.py <board> < log.txt`. Then run
 `tools/boards_gen.py --all` and build.
-The log at the next start says how far off touches were before and after
-(`off_tenths`, `left_tenths`: tenths of a pixel), which is a good check that
-the right numbers landed.
+`off_tenths` and `left_tenths` of the entry say how far off the touches were without and with the
+calibration, in tenths of a pixel, as the measurement found them.
+
+The tool takes each place from the touches in the log, as their median. The calibration made from
+them at start is the one the log printed: on the CYD S028R every number is the same. A text with
+only the C initializer gives places worked back from it, where the calibration placed each target.
+Those of the JC1060P470C, JC4827W543C and JC8012P4A1C were made that way, since their logs are
+gone, and their calibrations are up to 2 pixels from the records they came from.
+
+Nine places are worth measuring: four corners alone lose what bends. On the JC8012P4A1C a
+calibration of the corners is up to 13 pixels from one of the nine places.
 
 A board whose calibration was never measured has `"measured": false`: the
 glue warns at start and the README table says so.

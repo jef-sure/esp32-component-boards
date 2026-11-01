@@ -4,7 +4,7 @@
     "kind": "connector",
     "name": "stemma_qt",
     "title": "STEMMA QT",
-    "pitch_mm": 1.0,
+    "pitch_mm": 1,
     "volts": [3, 5],
     "pins": ["GND", "V+", "SDA", "SCL"],
     "checked": {

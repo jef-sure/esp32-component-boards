@@ -38,6 +38,13 @@ config BOARD_SELECT_ESP32_DEVKIT
         A standard ESP32 dev board with a CP210x USB bridge, a power LED, a
         second LED and a BOOT button.
 
+config BOARD_SELECT_ESP32S3_DEVKIT
+    bool "ESP32-S3 DevKit, 16 MB, 8 MB PSRAM"
+    depends on IDF_TARGET_ESP32S3
+    help
+        A standard ESP32-S3 dev board with two USB-C ports, a CH343 USB bridge
+        on one of them, an RGB LED and a BOOT button.
+
 config BOARD_SELECT_JC1060P470C
     bool "Guition JC1060P470C: 1024x600 JD9165, GT911 touch, ES8311 sound"
     depends on IDF_TARGET_ESP32P4
@@ -65,16 +72,9 @@ config BOARD_SELECT_JC8012P4A1C
         10.1-inch 800x1280 JD9365 on MIPI-DSI (lying 1280x800), GSL3680 touch
         (firmware written into it at start), ES8311 sound.
 
-config BOARD_SELECT_LOCAL_TERMINAL
-    bool "Local terminal: ESP32, 2004 LCD, two PN532: 20x4 HD44780"
-    depends on IDF_TARGET_ESP32
-    help
-        An attendance terminal: an ESP32 dev board, two PN532 on SPI2 and SPI3
-        and a 2004 LCD on I2C.
-
 endchoice
 
-# A module is not a board of its own: it rides whichever board the choice above picked, and
+# A module is not a board of its own: it is on whichever board the choice above picked, and
 # its glue comes in beside the board's (its sdkconfig.defaults turns it on, read after the board's).
 config BOARD_MODULE_LCD2004_PCF8574
     bool "2004 character LCD on a PCF8574 backpack: 20x4 HD44780"
@@ -96,6 +96,11 @@ config BOARD_ESP32_DEVKIT
     default 1 if BOARD_SELECT_ESP32_DEVKIT
     default 0
 
+config BOARD_ESP32S3_DEVKIT
+    int
+    default 1 if BOARD_SELECT_ESP32S3_DEVKIT
+    default 0
+
 config BOARD_JC1060P470C
     int
     default 1 if BOARD_SELECT_JC1060P470C
@@ -111,11 +116,6 @@ config BOARD_JC8012P4A1C
     default 1 if BOARD_SELECT_JC8012P4A1C
     default 0
 
-config BOARD_LOCAL_TERMINAL
-    int
-    default 1 if BOARD_SELECT_LOCAL_TERMINAL
-    default 0
-
 # What the chosen board and the modules have, as the rules need it: a graphics display
 # brings DGX, a touch brings DGX-DI and its driver, sound with an ES8311 brings esp_codec_dev,
 # a character display brings hd44780. Derived from the data, so the data of a board and the
@@ -127,7 +127,7 @@ config BOARD_DISPLAY_GRAPHICS
 
 config BOARD_DISPLAY_HD44780
     int
-    default 1 if BOARD_SELECT_LOCAL_TERMINAL || BOARD_MODULE_LCD2004_PCF8574
+    default 1 if BOARD_MODULE_LCD2004_PCF8574
     default 0
 
 config BOARD_MODULE_CHARACTER_DISPLAY

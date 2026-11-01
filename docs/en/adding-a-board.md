@@ -80,10 +80,25 @@ generator. `check_boards.py` in CI refuses a commit where they disagree.
 
 ## A board of your own, outside the component
 
-The generator is in the component's package. A project may keep its own
-`catalog/boards/myboard/` and run `tools/boards_gen.py --data myproject/catalog/boards
---out myproject/boards myboard` to get glue it compiles itself. Making the
-component's menu offer such a board is planned (the choice is a named Kconfig
-choice, which another Kconfig can extend); for now the project compiles the
-glue in a component of its own and names the libraries it needs in its own
-manifest.
+The catalog holds boards and modules anyone can buy. What you connected yourself, and what you
+named yourself, stays in your program: `components/local-boards/`, a tree in the layout of `catalog/`.
+
+```
+components/local-boards/
+    boards/my_board/board.json       kind project over a board of the catalog, or kind board
+    modules/my_display/module.json   a module the catalog does not have
+    devices/my_chip/device.json      a chip the catalog does not have
+```
+
+The tools read this tree before the catalog. A board of the program must not take the name of a
+board of the catalog.
+
+```sh
+python3 path/to/boards/tools/board_select.py my_board .
+idf.py build
+```
+
+`board_select.py` makes the glue beside the data and writes `CMakeLists.txt` and `Kconfig.projbuild`
+of that directory, and the board joins the menu of the boards. Without a `sdkconfig.defaults` of its
+own a board takes the one of the board it extends. A wire of the board is checked like one of the catalog:
+`tools/board_pins.py my_board --project .`. `examples/local_boards` is such a program.

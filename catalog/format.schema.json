@@ -357,7 +357,9 @@
         "width_max": { "type": "integer", "minimum": 1, "description": "Of a sensor: its largest picture." },
         "height_max": { "type": "integer", "minimum": 1 },
         "formats": { "type": "array", "uniqueItems": true, "items": { "type": "string" }, "description": "Of a sensor: the pixel formats it gives, as raw10 or rgb565." },
-        "tx_ma_max": { "type": "number", "description": "The largest transmitter current." },
+        "freq_mhz": { "$ref": "#/$defs/range", "description": "The carrier, lowest and highest. One frequency is [13.56, 13.56]." },
+        "tx_mw_max": { "type": "number", "minimum": 0, "description": "The most the transmitter takes from its supply. What leaves the antenna is less: radiated_mw." },
+        "radiated_mw": { "type": "number", "minimum": 0, "description": "What leaves the antenna. It depends on the antenna, so a module or a board keeps it, measured, in checked." },
         "range_mm": { "type": "number", "description": "How far it works, with this antenna: measured, in checked." },
         "output": { "$ref": "#/$defs/range" },
         "specified": { "$ref": "#/$defs/range" },
@@ -791,41 +793,19 @@
             "fingers": { "type": "integer", "minimum": 1, "description": "It comes from the chip's entry; a board writes it when it differs." },
             "resistive": { "type": "boolean" },
             "calibrations": {
-              "description": "What was measured on this panel, by the library that reads it: each has a form of its own. A list, the newest last, each with its rule; the last is taken for now.",
-              "type": "object",
-              "propertyNames": { "$ref": "#/$defs/libraryId" },
-              "additionalProperties": { "type": "array", "minItems": 1, "items": { "type": "object" } },
-              "properties": { "esp-idf/jef-sure/dgx-di": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/calibration" } } }
+              "description": "What was measured on this panel, one entry a measurement, the newest last; the last is taken for now.",
+              "type": "array",
+              "minItems": 1,
+              "items": { "$ref": "#/$defs/calibration" }
             }
           }
         }
       }
     },
     "calibration": {
+      "description": "The places aimed at, each named for where it is on the display in its own orientation. The corners are required: TFT_eSPI and LovyanGFX calibrate by them. What only one library uses lies under libraries.",
       "type": "object",
-      "required": [
-        "x_min",
-        "x_max",
-        "y_min",
-        "y_max",
-        "width",
-        "height",
-        "flags",
-        "knots_x",
-        "knots_y",
-        "rounds",
-        "affine",
-        "x",
-        "y",
-        "down_ms",
-        "up_ms",
-        "blink_ms",
-        "gap_ms",
-        "off_tenths",
-        "worst_tenths",
-        "left_tenths",
-        "left_worst_tenths"
-      ],
+      "required": ["x_max", "y_max", "width", "height", "left_up", "right_up", "left_down", "right_down"],
       "additionalProperties": false,
       "properties": {
         "rule": { "type": "string", "description": "When this measurement holds, in words for now: tools do not read it yet." },
@@ -837,43 +817,51 @@
           "additionalProperties": { "type": "string" }
         },
         "measured": { "type": "boolean" },
-        "x_min": { "type": "integer" },
-        "x_max": { "type": "integer" },
-        "y_min": { "type": "integer" },
+        "x_max": { "type": "integer", "description": "The range of the touch it was measured with." },
         "y_max": { "type": "integer" },
-        "width": { "type": "integer" },
+        "width": { "type": "integer", "description": "The size of the display it was measured under, in its own orientation." },
         "height": { "type": "integer" },
-        "flags": { "type": "integer", "minimum": 0, "maximum": 255 },
-        "knots_x": { "type": "integer", "minimum": 0 },
-        "knots_y": { "type": "integer", "minimum": 0 },
-        "rounds": { "type": "integer", "minimum": 0 },
-        "affine": { "type": "array", "minItems": 6, "maxItems": 6, "items": { "type": "integer" } },
-        "x": { "$ref": "#/$defs/knots" },
-        "y": { "$ref": "#/$defs/knots" },
-        "down_ms": { "type": "integer" },
-        "up_ms": { "type": "integer" },
-        "blink_ms": { "type": "integer" },
-        "gap_ms": { "type": "integer" },
-        "off_tenths": { "type": "integer" },
-        "worst_tenths": { "type": "integer" },
-        "left_tenths": { "type": "integer" },
-        "left_worst_tenths": { "type": "integer" },
-        "raw": {
-          "description": "The points of the measurement, for libraries whose format cannot hold the affine and the knots (TFT_eSPI calData).",
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": ["meant", "taken"],
-            "additionalProperties": false,
-            "properties": {
-              "meant": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "integer" } },
-              "taken": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "integer" } }
-            }
-          }
+        "left_up": { "$ref": "#/$defs/touchPoint" },
+        "right_up": { "$ref": "#/$defs/touchPoint" },
+        "left_down": { "$ref": "#/$defs/touchPoint" },
+        "right_down": { "$ref": "#/$defs/touchPoint" },
+        "up": { "$ref": "#/$defs/touchPoint" },
+        "down": { "$ref": "#/$defs/touchPoint" },
+        "left": { "$ref": "#/$defs/touchPoint" },
+        "right": { "$ref": "#/$defs/touchPoint" },
+        "middle": { "$ref": "#/$defs/touchPoint" },
+        "libraries": {
+          "description": "What only one library uses, by library.",
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/libraryId" },
+          "additionalProperties": { "type": "object" },
+          "properties": { "esp-idf/jef-sure/dgx-di": { "$ref": "#/$defs/calibrationDgxDi" } }
         }
       }
     },
-    "knots": { "type": "array", "items": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "integer" } } },
+    "touchPoint": {
+      "type": "object",
+      "required": ["meant", "device"],
+      "additionalProperties": false,
+      "properties": {
+        "meant": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "integer" }, "description": "Where it was aimed, in pixels of the display in its own orientation." },
+        "device": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "integer" }, "description": "What the touch controller reported there, in its own coordinates." }
+      }
+    },
+    "calibrationDgxDi": {
+      "description": "What dgx_di_calibrate_measure adds to the points. The glue makes the record of DGX-DI from the points at start.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "rounds": { "type": "integer", "minimum": 0, "description": "Rounds of targets the measurement took." },
+        "blink_ms": { "type": "integer", "minimum": 0, "description": "The longest the panel showed a finger near the glass." },
+        "gap_ms": { "type": "integer", "minimum": 0, "description": "The longest it lost a finger held." },
+        "off_tenths": { "type": "integer", "minimum": 0, "description": "How far off the touches were without the calibration, on average, in tenths of a pixel." },
+        "worst_tenths": { "type": "integer", "minimum": 0 },
+        "left_tenths": { "type": "integer", "minimum": 0, "description": "And with it." },
+        "left_worst_tenths": { "type": "integer", "minimum": 0 }
+      }
+    },
     "audio": {
       "$ref": "#/$defs/hasChip",
       "required": ["config"],

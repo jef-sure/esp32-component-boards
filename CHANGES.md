@@ -57,14 +57,15 @@ committed, a program that asks by kind.
 - A module has the fields of a board and may have a chip of its own. On a board it is named in
   `modules`, its parts `<use>_<part>`.
 - The revision of a chip chooses its settings: `mcu.revision`, `board_select.py --revision`.
-- Calibrations by library and by measurement: `config.calibrations`, `measured_with`.
+- Calibrations by measurement: `config.calibrations` is a list of the places aimed at, each named
+  for where it is, `left_up` and the rest, for any library; `libraries` holds what only one uses,
+  `measured_with` the versions. The glue makes the calibration of DGX-DI from the places at start.
 - What each pin can do and who has it: `gpio.pins` of `catalog/mcu/`, `board_pins.py --free`.
 - JC1060P470C: Ethernet, RS-485, the RTC, the TF slot, the battery divider, the connectors, from its
   schematic.
 - Several graphics displays on a board: `board_display_count()`, `board_display_init_at()`; two shown
   as one screen through `display_groups`.
-- The local terminal: an ESP32 with two PN532 and the 2004 module. A device the component does not
-  set up keeps its lines as data: `board_bus_get("nfc_in", "cs", &pin)`.
+- A device the component does not set up keeps its lines as data: `board_bus_get("nfc_in", "cs", &pin)`.
 - `examples/hello_lvgl`: LVGL on the chosen board through DGX-LVGL.
 - Sound through an I2S amplifier with no codec: `"kind": "i2s"`.
 - What a trial import of 115 boards showed the format lacked: millimetres of a panel and
@@ -88,8 +89,19 @@ committed, a program that asks by kind.
 - `price` on a board, a module and a device, as named offers with a range, `tariff` for the
   customs code, `count` for what has no wiring. `tools/board_bom.py` lists what to buy for a
   product.
-- `esp32_devkit`, a standard dev board. `local_terminal` is now a project over it, with the
-  PN532 as modules, so its devices are `nfc_in_nfc` and `nfc_out_nfc`.
+- `freq_mhz`, `tx_mw_max` and `radiated_mw` of a transmitter. The PN532 and the PN5180 have
+  the carrier, the most their transmitter takes and `draw` from their datasheets.
+- `editor/resolve.js`, the loader in JS. `check_format.py` compares it with `tools/resolve.py`.
+- The editor is new and reads format 2: a tree, the card of a node from the schema, the map of pins,
+  the checks of the tools on every change. Vue and Pinia are in `editor/vendor/`. The editor of
+  format 1 is gone. `check_format.py` compares `editor/schema.js`, `editor/pins.js` and the JSON it
+  saves with Python.
+- `esp32s3_devkit`, a standard dev board with two USB-C ports, and `tft153_st77916`, a round
+  360x360 display module.
+- `esp32_devkit`, a standard dev board.
+- A board of a program: `components/local-boards/` of the project, a tree in the layout of `catalog/`,
+  read before it. `board_select.py` makes its glue there and the board joins the menu.
+  `examples/local_boards`. The catalog holds no projects: `check_format.py` refuses one.
 - A board needs no `buses` in the data. `examples/hello_lvgl` is built in CI only for a
   board with a graphics display: it does not link without one.
 - JC4827W543C: the amplifier, the BOOT button, the TF slot, the battery divider,

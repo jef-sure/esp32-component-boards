@@ -13,6 +13,8 @@ describes every file. `tools/check_format.py` checks them.
 | `catalog/mcu/<target>/mcu.json` | a chip: its GPIOs, hosts and what it has. Made from ESP-IDF by `tools/make_mcu.py` |
 | `catalog/connectors/<type>/connector.json` | a type of connector: pins, voltage |
 | `catalog/rules.json` | what makes a board wrong and a schema cannot see |
+| `catalog/index.json` | the list of these files for the page of the editor, made by `tools/boards_gen.py --all` |
+| `components/local-boards/` of a program | what is the program's own, in the same layout: read before the catalog |
 
 Names are lowercase letters, digits and `_`: they become Kconfig symbols.
 
@@ -345,9 +347,16 @@ layer and is checked against `min`, `max` and `values`.
 ```
 
 `output` is what it can report, `specified` is where the maker promises accuracy.
-Other figures depend on the kind, such as `standards`, `targets_max`, `tx_ma_max`
-and `range_mm` of an NFC reader. A figure lies with what sets it: a limit of the
+Other figures depend on the kind, such as `standards`, `targets_max` and `range_mm`
+of an NFC reader. A figure lies with what sets it: a limit of the
 chip here, a limit of a library in its record, see [Libraries](#libraries).
+
+A transmitter has `freq_mhz`, the carrier as a range, and two figures of power.
+`tx_mw_max` is the most it takes from its supply, from the chip's datasheet; its current by
+mode is in `draw`.
+`radiated_mw` is what leaves the antenna: it depends on the antenna, so a module or a
+board keeps it, measured, with a `checked` entry. A datasheet of an NFC reader gives no
+radiated power. A part of a module inherits the figures of its chip and can replace them.
 
 An antenna is not the
 chip's: a module or a board names it in `antenna` (`kind`: `on_board`, `connector`,

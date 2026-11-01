@@ -7,11 +7,13 @@
     "maker": "nxp",
     "part": "PN5180",
     "class": "nfc",
+    "draw": {"rf_on": {"ma": 180, "ma_peak": 250}, "sleep": {"ma": 0.015}},
     "on": {"spi": {"required": true}},
     "provides": {
         "nfc": {
             "standards": ["iso14443a", "iso14443b", "felica", "iso15693", "iso18000_3m3", "iso18092"],
-            "tx_ma_max": 250,
+            "freq_mhz": [13.56, 13.56],
+            "tx_mw_max": 1375,
             "modes": ["reader", "peer_to_peer", "card_emulation"]
         }
     },
@@ -23,10 +25,12 @@
     },
     "notes": [
         "Drives an antenna of its own choice: the range is that of the antenna, see the modules.",
-        "The chip sets no limit of cards at once: 14 is the scan of the library, for ISO14443A."
+        "The chip sets no limit of cards at once: 14 is the scan of the library, for ISO14443A.",
+        "tx_mw_max is the supply of the transmitter, TVDD 5.5 V at 250 mA. The datasheet gives no radiated power.",
+        "draw is the current on pin TVDD alone when the field is on, and the standby current."
     ],
     "checked": {
-        "facts": {"level": "datasheet", "source": "PN5180A0XX_C3_C4.pdf Rev. 4.0, features"},
+        "facts": {"level": "datasheet", "source": "PN5180A0XX_C3_C4.pdf Rev. 4.0, features and quick reference data"},
         "firmware": {
             "level": "vendor-code",
             "covers": ["firmware", "controls.lpcd_reference"],

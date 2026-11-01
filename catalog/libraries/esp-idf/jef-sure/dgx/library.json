@@ -391,7 +391,8 @@
                     "ok": "none"
                 }
             },
-            "setup": [{"control": "orientation"}]
+            "setup": [{"control": "orientation"}],
+            "adapter": {"kind": "panel"}
         },
         "st7920": {
             "header": "drivers/st7920.h",

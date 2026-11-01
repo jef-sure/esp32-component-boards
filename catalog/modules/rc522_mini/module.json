@@ -8,45 +8,26 @@
         "aliexpress": {
             "shop": "AliExpress",
             "currency": "EUR",
-            "range": [
-                1.25,
-                1.25
-            ],
+            "range": [1.25, 1.25],
             "date": "2026-11-01",
             "source": "Anton: EC Buying, approximate"
+        },
+        "report_1": {
+            "shop": "Test of the report channel",
+            "currency": "EUR",
+            "range": [1.25, 1.25],
+            "date": "2026-11-01",
+            "source": "Issue 1, as reported"
         }
     },
-    "power": [
-        {
-            "name": "VCC",
-            "source": "connector",
-            "volts": [
-                3,
-                3.6
-            ],
-            "feeds": [
-                "nfc"
-            ]
-        }
-    ],
+    "power": [{"name": "VCC", "source": "connector", "volts": [3, 3.6], "feeds": ["nfc"]}],
     "devices": {
         "nfc": {
             "chip": "mfrc522",
-            "on": {
-                "spi": {}
-            },
-            "antenna": {
-                "kind": "on_board"
-            },
+            "on": {"spi": {}},
+            "antenna": {"kind": "on_board"},
             "logic": "VCC",
-            "provides": {
-                "nfc": {
-                    "range_mm": [
-                        10,
-                        30
-                    ]
-                }
-            }
+            "provides": {"nfc": {"range_mm": [10, 30]}}
         }
     },
     "notes": [
@@ -57,11 +38,7 @@
             "level": "community",
             "source": "The comparison of modules of Anton, 2026-11-01; not checked against the datasheet",
             "date": "2026-11-01",
-            "covers": [
-                "power",
-                "devices.nfc",
-                "price"
-            ]
+            "covers": ["power", "devices.nfc", "price"]
         }
     }
 }

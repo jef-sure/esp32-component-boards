@@ -1,0 +1,34 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "questions": [
+        {
+            "id": "display",
+            "text": "What shows things to the user?",
+            "type": "choice",
+            "choices": [
+                {"value": "none", "text": "Nothing"},
+                {"value": "character", "text": "A character display", "needs": {"class": "display", "where": {"config.kind": "character"}}},
+                {"value": "graphics", "text": "A graphics display", "needs": {"class": "display", "where": {"config.kind": "graphics"}}}
+            ]
+        },
+        {
+            "id": "diagonal_in",
+            "text": "Its diagonal at least, inches",
+            "type": "number",
+            "when": {"display": "graphics"},
+            "limit": {"measure": "diagonal_in", "of": "display"}
+        },
+        {"id": "touch", "text": "A touch panel", "type": "flag", "needs": {"class": "touch"}},
+        {"id": "sound", "text": "Sound", "type": "flag", "needs": {"class": "audio"}},
+        {"id": "beepers", "text": "Piezo discs", "type": "count", "max": 8, "needs": {"class": "buzzer"}},
+        {"id": "beep_swing_v", "text": "Swing across each disc at least, V: 3.3 on one pin, 6.6 on two", "type": "number", "when": {"beepers": true}, "limit": {"measure": "swing_v", "of": "buzzer"}},
+        {"id": "nfc_readers", "text": "NFC readers", "type": "count", "max": 4, "needs": {"class": "nfc"}},
+        {"id": "nfc_range_mm", "text": "Reading distance at least, mm, with the wall of the case", "type": "number", "when": {"nfc_readers": true}, "limit": {"measure": "range_mm", "of": "nfc"}},
+        {"id": "wifi", "text": "Wi-Fi", "type": "flag", "needs": {"provides": "wifi"}},
+        {"id": "bluetooth", "text": "Bluetooth", "type": "flag", "needs": {"provides": "bluetooth"}},
+        {"id": "ethernet", "text": "Ethernet", "type": "flag", "needs": {"provides": "ethernet"}},
+        {"id": "poe", "text": "Power over Ethernet", "type": "flag", "when": {"ethernet": true}, "needs": {"provides": "poe"}},
+        {"id": "budget_eur", "text": "Budget for one, euro", "type": "number", "limit": {"measure": "price_eur"}}
+    ]
+}

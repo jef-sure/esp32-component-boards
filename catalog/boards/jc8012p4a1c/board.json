@@ -19,6 +19,15 @@
         "revision": "3.2",
         "notes": "The display reads 160 MB/s from the PSRAM within a row: at 200 MHz a moving picture leaves it short now and then and the screen flashes light blue for a frame. 250 MHz leaves it enough, so revision 3 is needed here."
     },
+    "price": {
+        "aliexpress": {
+            "shop": "AliExpress",
+            "currency": "EUR",
+            "range": [70, 70],
+            "date": "2026-11-01",
+            "source": "Anton: an approximate AliExpress price for Germany"
+        }
+    },
     "checked": {
         "pins": {"level": "schematic", "source": "JC8012P4A1.pdf, vendor archive", "date": "2026-10-28"},
         "sound": {
@@ -284,6 +293,7 @@
             "maker": "espressif",
             "part": "ESP32-C6",
             "on": {"sdio.sdio0": {}},
+            "provides": {"wifi": {}, "bluetooth": {}},
             "pins": {"io2": 6},
             "antenna": {"kind": "connector"},
             "config": {"chip": "esp32-c6"},

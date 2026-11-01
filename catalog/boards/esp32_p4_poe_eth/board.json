@@ -1,0 +1,20 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "esp32_p4_poe_eth",
+    "extends": "esp32_p4_eth",
+    "title": "Waveshare ESP32-P4-POE-ETH",
+    "part": "ESP32-P4-POE-ETH",
+    "description": "The ESP32-P4-ETH sold with a PoE module on its header H7",
+    "price": {
+        "aliexpress": {
+            "shop": "AliExpress",
+            "currency": "EUR",
+            "range": [28, 28],
+            "date": "2026-11-01",
+            "source": "Anton: an approximate AliExpress price, with the PoE module"
+        }
+    },
+    "modules": {"poe": {"module": "waveshare_poe_b"}}
+}

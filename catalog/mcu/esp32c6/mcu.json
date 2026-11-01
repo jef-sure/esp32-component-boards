@@ -40,6 +40,7 @@
             30
         ],
         "input_only": [],
+        "high_mv_max": 3600,
         "strapping": [
             4,
             5,
@@ -170,7 +171,9 @@
     },
     "hosts": {
         "spi": 2,
-        "i2c": 2
+        "i2c": 2,
+        "uart": 2,
+        "ledc": 6
     },
     "provides": {
         "wifi": {},
@@ -181,6 +184,13 @@
         "facts": {
             "level": "vendor-docs",
             "source": "ESP-IDF esp-idf, components/soc/esp32c6, soc_caps.h"
+        },
+        "levels": {
+            "level": "datasheet",
+            "covers": [
+                "gpio.high_mv_max"
+            ],
+            "source": "Espressif datasheet of the chip, DC characteristics: VIH at most VDD + 0.3 V, at VDD 3.3 V"
         },
         "pins": {
             "level": "vendor-docs",

@@ -38,6 +38,20 @@ config BOARD_SELECT_ESP32_DEVKIT
         A standard ESP32 dev board with a CP210x USB bridge, a power LED, a
         second LED and a BOOT button.
 
+config BOARD_SELECT_ESP32_P4_ETH
+    bool "Waveshare ESP32-P4-ETH: ES8311 sound"
+    depends on IDF_TARGET_ESP32P4
+    help
+        An ESP32-P4 with 100 Mbit Ethernet on an IP101, an ES8311 with a
+        microphone and a speaker output, a microSD slot, MIPI CSI and DSI
+        connectors, a 40-pin header in the layout of a Pico. No radio..
+
+config BOARD_SELECT_ESP32_P4_POE_ETH
+    bool "Waveshare ESP32-P4-POE-ETH: ES8311 sound"
+    depends on IDF_TARGET_ESP32P4
+    help
+        The ESP32-P4-ETH sold with a PoE module on its header H7.
+
 config BOARD_SELECT_ESP32S3_DEVKIT
     bool "ESP32-S3 DevKit, 16 MB, 8 MB PSRAM"
     depends on IDF_TARGET_ESP32S3
@@ -96,6 +110,16 @@ config BOARD_ESP32_DEVKIT
     default 1 if BOARD_SELECT_ESP32_DEVKIT
     default 0
 
+config BOARD_ESP32_P4_ETH
+    int
+    default 1 if BOARD_SELECT_ESP32_P4_ETH
+    default 0
+
+config BOARD_ESP32_P4_POE_ETH
+    int
+    default 1 if BOARD_SELECT_ESP32_P4_POE_ETH
+    default 0
+
 config BOARD_ESP32S3_DEVKIT
     int
     default 1 if BOARD_SELECT_ESP32S3_DEVKIT
@@ -142,7 +166,7 @@ config BOARD_SOUND_DAC
 
 config BOARD_SOUND_ES8311
     int
-    default 1 if BOARD_SELECT_JC1060P470C || BOARD_SELECT_JC8012P4A1C
+    default 1 if BOARD_SELECT_ESP32_P4_ETH || BOARD_SELECT_ESP32_P4_POE_ETH || BOARD_SELECT_JC1060P470C || BOARD_SELECT_JC8012P4A1C
     default 0
 
 config BOARD_SOUND_I2S

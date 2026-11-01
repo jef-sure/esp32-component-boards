@@ -1,0 +1,6 @@
+{
+    "title": "Without a budget fewer wires come before a lower price",
+    "answers": {"nfc_readers": 1},
+    "modules": {"cheap_reader": {"format": "jef-sure/boards", "format_version": 2, "kind": "module", "name": "cheap_reader", "title": "A cheap reader with more wires", "power": [{"name": "5V", "source": "connector", "volts": [4.5, 5.5], "feeds": ["nfc"]}, {"name": "3V3", "source": "connector", "volts": [3, 3.6], "feeds": ["nfc"]}], "devices": {"nfc": {"chip": "pn5180", "on": {"spi": {}}, "antenna": {"kind": "on_board"}, "logic": "3V3"}}, "price": {"shop": {"shop": "test", "currency": "EUR", "range": [1, 1], "date": "2026-11-01", "source": "the case"}}}},
+    "first": {"modules": {"pn532_module": 1}}
+}

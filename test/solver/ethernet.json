@@ -1,0 +1,6 @@
+{
+    "title": "Ethernet is a port on the board: a chip with a MAC and no PHY does not count",
+    "answers": {"ethernet": true},
+    "fit": ["esp32_p4_eth", "esp32_p4_poe_eth", "jc1060p470c"],
+    "says": "no ethernet on this board"
+}

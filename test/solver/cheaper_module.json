@@ -1,0 +1,5 @@
+{
+    "title": "With a budget the price comes right after the unknowns: the cheaper of two readers first",
+    "answers": {"display": "character", "nfc_readers": 2, "budget_eur": 50},
+    "first": {"name": "esp32_devkit", "modules": {"lcd2004_pcf8574": 1, "pn532_module": 2}}
+}

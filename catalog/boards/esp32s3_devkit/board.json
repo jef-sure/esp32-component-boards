@@ -10,12 +10,55 @@
         "The RGB LED is on GPIO 48 on the unit tried. On some boards of this kind it is on GPIO 38."
     ],
     "mcu": {"target": "esp32s3", "flash_mb": 16, "psram_mb": 8},
+    "buses": {"uart": {"uart0": {"tx": 43, "rx": 44}}},
     "devices": {
         "boot": {"class": "button", "pins": {"in": {"gpio": 0, "active": "low"}}},
         "led": {"class": "led", "pins": {"data": 48}, "config": {"kind": "ws2812", "count": 1}},
-        "usb_serial": {"class": "other", "part": "CH343"}
+        "usb_serial": {"class": "other", "part": "CH343", "on": {"uart.uart0": {}}}
+    },
+    "power": [
+        {"name": "5V", "source": "usb", "mv": 5000, "why": "From USB, on contact 21 of J1."},
+        {"name": "3V3", "from": "5V", "regulator": "ldo", "mv": 3300, "feeds": ["mcu"]}
+    ],
+    "connectors": {
+        "J1": {
+            "type": "2.54 mm header, 22 pins",
+            "pins": ["3V3", "3V3", "RST", 4, 5, 6, 7, 15, 16, 17, 18, 8, 3, 46, 9, 10, 11, 12, 13, 14, "5V", "GND"]
+        },
+        "J3": {
+            "type": "2.54 mm header, 22 pins",
+            "pins": ["GND", 43, 44, 1, 2, 42, 41, 40, 39, 38, 37, 36, 35, 0, 45, 48, 47, 21, 20, 19, "GND", "GND"]
+        }
+    },
+    "price": {
+        "ebay": {
+            "shop": "eBay.de",
+            "currency": "EUR",
+            "range": [7, 10],
+            "date": "2026-11-01",
+            "source": "Listings of N16R8 boards found by a search, before delivery, not a purchase"
+        }
     },
     "checked": {
+        "power": {
+            "level": "unchecked",
+            "covers": ["power"],
+            "source": "The usual dev board, from memory",
+            "date": "2026-11-01"
+        },
+        "console": {
+            "level": "hardware",
+            "covers": ["buses.uart", "devices.usb_serial"],
+            "by": "the logs of this board, read on the CH343 port",
+            "date": "2026-11-01",
+            "notes": "The log of ESP-IDF comes on UART0, GPIO 43 and 44 by default, and it comes out of this port."
+        },
+        "headers": {
+            "level": "unchecked",
+            "covers": ["connectors"],
+            "source": "the usual headers of a 44-pin ESP32-S3 dev board, from memory; the pins of the ST77916 wired to this unit are all on J1",
+            "date": "2026-11-01"
+        },
         "pins": {
             "level": "hardware",
             "covers": ["devices.boot", "devices.led"],

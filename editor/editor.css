@@ -74,6 +74,30 @@ input.wrong { border-color: var(--wrong); }
 .nested > summary { cursor: pointer; }
 .more { display: flex; gap: 6px; margin-top: 6px; }
 
+header .views { position: static; padding: 0; border: 0; background: none; }
+
+.select { display: grid; grid-template-columns: 320px minmax(0, 1fr); height: calc(100vh - 44px); }
+.questions { overflow: auto; padding: 12px; border-right: 1px solid var(--line); }
+.questions h2 { margin: 0 0 10px; font-size: 16px; }
+.question { display: grid; gap: 2px; margin-bottom: 10px; }
+.kits { overflow: auto; padding: 12px; }
+.project { display: flex; gap: 10px; align-items: center; margin-top: 0; }
+.kit { max-width: 760px; margin-bottom: 12px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 6px; }
+.kit h3 { margin: 0 0 6px; font-size: 15px; }
+.kit ul { margin: 0 0 8px; padding: 0; list-style: none; }
+.mark { display: inline-block; width: 16px; font-weight: 600; }
+li.yes .mark { color: var(--good); }
+li.no .mark { color: var(--wrong); }
+li.unknown .mark, li.do .mark { color: var(--accent); }
+.others { max-width: 760px; }
+.plan { max-width: 760px; margin-bottom: 14px; padding: 8px 12px; border: 2px solid var(--accent); border-radius: 6px; }
+.plan h3 { margin: 0 0 6px; font-size: 15px; }
+.plan table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.plan td { padding: 2px 8px 2px 0; border-bottom: 1px solid var(--line); }
+.plan tr.changes td:last-child { color: var(--wrong); }
+.plan pre { font: 12px/1.4 ui-monospace, monospace; padding: 6px 8px; background: var(--soft); border-radius: 4px; overflow: auto; }
+.both { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
 .pins { border-collapse: collapse; width: 100%; font-size: 13px; }
 .pins th, .pins td { padding: 2px 8px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
 .pins tr.free td:first-child { color: var(--good); font-weight: 600; }

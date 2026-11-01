@@ -99,6 +99,33 @@ committed, a program that asks by kind.
 - `esp32s3_devkit`, a standard dev board with two USB-C ports, and `tft153_st77916`, a round
   360x360 display module.
 - `esp32_devkit`, a standard dev board.
+- The page starts with what to build: a form from `catalog/questions.json`, kits of a board and
+  modules with the wires and the reasons, a project written into a folder. The solver only proposes:
+  the checks of the tools decide about each kit, and the generator about the kits of `test/solver/`.
+  The headers of `esp32_devkit` and `esp32s3_devkit` are in the data, from memory, `unchecked`.
+- A chip names the lines it needs beside a bus: `lines` of `on`. The PN5180 needs BUSY and RST, and a
+  board without them is refused. The ESP32-C6 on JC1060P470C and JC8012P4A1C provides Wi-Fi and
+  Bluetooth in the data; the ESP32-P4 itself has neither.
+- Approximate AliExpress prices from Anton: CYD, JC1060P470C, JC4827W543C, JC8012P4A1C, the PN532 and
+  PN5180 modules. Prices from a search of listings: the 2004 module and `esp32s3_devkit`.
+- The order of kits: the unknowns, the modules, the wires, then the price. A budget moves the price
+  right after the unknowns.
+- Questions for Ethernet, Power over Ethernet and the reading distance of a reader. `provides.ethernet`
+  is now a port, given by the device with the PHY; the MAC of a chip is `provides.emac`.
+- Supply and levels: `volts` on a step of `power`, `logic` on a device, `supply` on a module of a
+  board or a project, `gpio.high_mv_max` on a chip, from the datasheets. The solver feeds each module
+  and asks for a level shifter where the lines of a module go above what the pins take.
+- The solver wires QSPI and UART, and a DSI module takes a free bus of the board. `hosts.uart` on a chip.
+  A display on SPI or QSPI gets a bus of its own.
+- The Waveshare ESP32-P4-ETH and ESP32-P4-POE-ETH, from the schematic of Waveshare, and the module
+  `waveshare_poe_b`. Built, not flashed.
+- A kit counts what is sold by the pack at the price of the pack.
+- DGX 0.10.3 at least: under ESP-IDF 6.1 a QSPI display on the IO MUX pins of SPI2 stayed dark.
+- The ST7920 as a chip of the glue, and the module `lcd12864_st7920`. `mechanics` on a board or a
+  module: outline, holes, what it takes to mount it; `window_mm` of a panel.
+- Piezo discs: the class `buzzer`, `ways` for a device with no bus. Each disc takes a line and a LEDC
+  channel, or two of each for more swing, counted against `hosts.ledc` of the chip.
+- `board_select.py` says `idf.py reconfigure build` for a project already built.
 - A board of a program: `components/local-boards/` of the project, a tree in the layout of `catalog/`,
   read before it. `board_select.py` makes its glue there and the board joins the menu.
   `examples/local_boards`. The catalog holds no projects: `check_format.py` refuses one.

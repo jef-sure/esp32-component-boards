@@ -1,0 +1,7 @@
+{
+    "title": "More swing takes two lines for each disc, and that is what the chip has channels for",
+    "answers": {"beepers": 4, "beep_swing_v": 6},
+    "kit": {"name": "esp32s3_devkit", "modules": {"piezo_disc": 4}},
+    "says": "the legs to two GPIOs of its own",
+    "lines": {"board": "esp32s3_devkit", "count": 8}
+}

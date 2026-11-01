@@ -1,34 +1,10 @@
 // Runs resolve.js over what a file gives and prints the results, for check_format.py to compare with resolve.py.
 'use strict';
-const fs = require('fs');
 const path = require('path');
 const { boardResolver } = require('../../editor/resolve.js');
+const { catalogOf, read } = require('./catalog_of.js');
 
 const ROOTS = [path.join(__dirname, '../../catalog'), path.join(__dirname, 'catalog')];
-const FILES = { mcu: 'mcu.json', devices: 'device.json', modules: 'module.json', boards: 'board.json', connectors: 'connector.json' };
-const read = (file) => JSON.parse(fs.readFileSync(file));
-const below = (dir) => (fs.existsSync(dir) ? fs.readdirSync(dir).sort().map((name) => path.join(dir, name)) : []);
-
-function catalogOf(roots) {
-    const catalog = { libraries: {} };
-    for (const root of roots) {
-        for (const [kind, file] of Object.entries(FILES)) {
-            catalog[kind] = catalog[kind] || {};
-            for (const dir of below(path.join(root, kind))) {
-                const name = path.basename(dir);
-                if (!(name in catalog[kind]) && fs.existsSync(path.join(dir, file))) catalog[kind][name] = read(path.join(dir, file));
-            }
-        }
-        for (const ecosystem of below(path.join(root, 'libraries'))) {
-            for (const dir of below(ecosystem).flatMap(below)) {
-                const record = read(path.join(dir, 'library.json'));
-                const id = `${record.ecosystem}/${record.owner}/${record.name}`;
-                if (!(id in catalog.libraries)) catalog.libraries[id] = record;
-            }
-        }
-    }
-    return catalog;
-}
 
 const loader = boardResolver(catalogOf(ROOTS));
 const given = read(process.argv[2]);

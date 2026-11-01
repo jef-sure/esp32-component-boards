@@ -4,8 +4,21 @@
     "kind": "module",
     "name": "pn5180_module",
     "title": "PN5180 module with its antenna on the board",
-    "devices": {"nfc": {"chip": "pn5180", "on": {"spi": {}}, "antenna": {"kind": "on_board"}}},
+    "power": [
+        {"name": "5V", "source": "connector", "volts": [4.5, 5.5], "feeds": ["nfc"]},
+        {"name": "3V3", "source": "connector", "volts": [3, 3.6], "feeds": ["nfc"]}
+    ],
+    "devices": {"nfc": {"chip": "pn5180", "on": {"spi": {}}, "antenna": {"kind": "on_board"}, "logic": "3V3"}},
     "notes": ["Stronger in the field than the PN532 module, from experience; no figure in mm yet."],
+    "price": {
+        "aliexpress": {
+            "shop": "AliExpress",
+            "currency": "EUR",
+            "range": [5, 5],
+            "date": "2026-11-01",
+            "source": "Anton: an approximate AliExpress price"
+        }
+    },
     "checked": {
         "field": {
             "level": "hardware",
@@ -13,6 +26,12 @@
             "by": "Anton",
             "date": "2026-10-31",
             "notes": "from experience"
+        },
+        "levels": {
+            "level": "unchecked",
+            "covers": ["power", "devices.nfc.logic"],
+            "source": "The usual module with contacts 5V and 3.3V: 5 V for the transmitter, 3.3 V for the chip and its lines. Not measured on a module.",
+            "date": "2026-11-01"
         }
     }
 }

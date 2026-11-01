@@ -1,0 +1,10 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "project",
+    "name": "pn5180_wired",
+    "title": "A PN5180 with its lines",
+    "extends": "esp32_devkit",
+    "buses": {"spi": {"spi2": {"mosi": 19, "miso": 21, "sclk": 22}}},
+    "modules": {"nfc": {"module": "pn5180_module", "on": {"spi.spi2": {"cs": 23}}, "pins": {"busy": 25, "rst": 26}}}
+}

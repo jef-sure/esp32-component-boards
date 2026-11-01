@@ -7,16 +7,28 @@ const READ_ONLY_GROUPS = new Set(['mcu']); // written by tools/make_mcu.py
 const LOADED = ['facts', 'classes', 'libraries', 'inputs']; // what the loader adds, not a field to edit
 const ROOT_FIELDS = new Set(['format', 'format_version', 'kind', 'name', 'title', 'description', 'extends', 'notes', 'images', 'origin', 'provides']);
 const FORMAT = { format: 'jef-sure/boards', format_version: 2 };
+const NAME = /^[a-z0-9_]+$/;
+const REPOSITORY_ONLY = /^(\.git|\.gitignore|\.gitattributes|README.*|LICENSE.*)$/i; // a folder with only these is still empty for a new project
+const LOCAL_BOARD = (name) => `components/local-boards/boards/${name}/board.json`;
+const COMPONENT_LINE = 'jef-sure/boards';
+const SKELETON = [
+    ['skeleton/CMakeLists.txt', 'CMakeLists.txt'],
+    ['skeleton/gitignore', '.gitignore'],
+    ['skeleton/README.md', 'README.md'],
+    ['skeleton/main/CMakeLists.txt', 'main/CMakeLists.txt'],
+    ['skeleton/main/idf_component.yml', 'main/idf_component.yml'],
+    ['../examples/hello_board/main/main.c', 'main/main.c'],
+    ['../examples/hello_board/sdkconfig.defaults', 'sdkconfig.defaults'],
+];
 const TREE_ORDER = ['mcu', 'power', 'buses', 'devices', 'modules', 'connectors', 'shared_pins', 'display_groups', 'price', 'checked'];
 
 const isPlain = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
 const copied = (v) => (v === undefined ? undefined : JSON.parse(JSON.stringify(v)));
 const valueAt = (doc, path) => path.reduce((node, key) => (node === undefined || node === null ? undefined : node[key]), doc);
-const dropNulls = (v) => (isPlain(v) ? Object.fromEntries(Object.entries(v).filter(([, item]) => item !== null).map(([key, item]) => [key, dropNulls(item)])) : v);
 const isCollection = (v) => (isPlain(v) || Array.isArray(v)) && Object.keys(v).length > 0 && Object.values(v).every(isPlain);
 
 // What the page has read, kept out of reactive state: the loader clones entries, which a proxy does not allow.
-const library = { catalog: null, entries: {}, localFiles: null, schema: null, rules: null, reader: null, resolvedReader: null, loader: null, levels: [] };
+const library = { catalog: null, entries: {}, localFiles: null, schema: null, rules: null, reader: null, loader: null, levels: [], checksOf: null, questions: [], solver: null };
 
 // The entries of a tree in the layout of the catalog. What a program has of its own wins over the catalog.
 function readTree(files, local) {
@@ -42,38 +54,11 @@ function readCatalog(files) {
     library.schema = JSON.parse(files['format.schema.json']);
     library.rules = JSON.parse(files['rules.json']);
     library.reader = schemaReader(library.schema);
-    library.resolvedReader = schemaReader({ $defs: library.schema.$defs });
     library.loader = boardResolver(catalog);
     library.levels = library.schema.$defs.level.enum;
-}
-
-function checksOf(doc) {
-    const problems = [];
-    const say = (stage, text, path = null) => problems.push({ stage, text, path });
-    const { reader, resolvedReader, schema, rules, loader } = library;
-    for (const error of reader.errors(schema, doc.extends ? dropNulls(doc) : doc)) say('schema', `${error.path.join('.') || 'the file'}: ${error.message}`, error.path);
-    if (!['board', 'project', 'module'].includes(doc.kind)) {
-        for (const found of check(doc, { ...rules, rules: rules.rules.filter((rule) => rule.in_files) })) say('rule', found.message);
-        return { problems, resolved: null, layers: doc };
-    }
-    let resolved = null;
-    let layers = doc;
-    try {
-        layers = loader.chain(structuredClone(doc));
-        resolved = loader.resolve(doc);
-    } catch (error) {
-        say('resolve', error.message);
-    }
-    if (resolved) {
-        for (const error of resolvedReader.errors({ $ref: '#/$defs/resolved' }, resolved)) say('resolved', `${error.path.join('.') || 'the board'}: ${error.message}`, error.path);
-        try {
-            for (const found of check(resolved, rules)) say('rule', found.message);
-            for (const text of pinProblems(resolved)) say('pins', text);
-        } catch (error) {
-            say('rule', error.message);
-        }
-    }
-    return { problems, resolved, layers };
+    library.checksOf = documentChecks({ schema: library.schema, rules: library.rules, loader: library.loader, schemaReader, check, pinProblems });
+    library.questions = JSON.parse(files['questions.json']).questions;
+    library.solver = kitSolver({ catalog, loader: library.loader, questions: library.questions, checksOf: library.checksOf, pinMap });
 }
 
 function labelOf(key, value) {
@@ -99,6 +84,33 @@ function treeOf(value, layers, path) {
         });
 }
 
+function wiresText(kit) {
+    if (!kit.wires.length) return 'None: the board has it all.';
+    const rows = kit.wires.map((wire) => `| ${wire.what} | ${wire.line} | ${wire.pin} |`);
+    return ['| what | line | GPIO |', '|---|---|---|', ...rows].join('\n');
+}
+
+// The files of a new project: the templates of the page, and the smallest program of the component.
+async function skeletonOf(kit, name, board) {
+    const parts = [`- ${kit.title}`, ...kit.modules.map((item) => `- ${item.count} x ${item.title}, on ${item.on.toUpperCase()}`)];
+    const notes = kit.says.filter((line) => line.level === 'do').map((line) => `- ${line.text}`);
+    const fill = {
+        '@NAME@': name,
+        '@TITLE@': name,
+        '@BOARD_TITLE@': kit.title,
+        '@BOARD@': board,
+        '@PARTS@': [...parts, ...notes].join('\n'),
+        '@WIRES@': wiresText(kit),
+    };
+    const files = {};
+    for (const [from, to] of SKELETON) {
+        const answer = await fetch(from);
+        if (!answer.ok) throw new Error(`${from}: ${answer.status}`);
+        files[to] = Object.entries(fill).reduce((text, [mark, value]) => text.replaceAll(mark, value), await answer.text());
+    }
+    return files;
+}
+
 const useEditor = Pinia.defineStore('editor', {
     state: () => ({
         loaded: false,
@@ -113,6 +125,10 @@ const useEditor = Pinia.defineStore('editor', {
         jsonResolved: false,
         hasLocal: false, // a program's local-boards is open: what is new goes there
         stamp: 0, // changes when something outside the reactive state does
+        page: 'select',
+        answers: {},
+        projectName: 'my_project',
+        plan: null, // what a project is about to get, shown before anything is written
     }),
     getters: {
         entry(state) {
@@ -142,7 +158,7 @@ const useEditor = Pinia.defineStore('editor', {
             return copied(state.doc);
         },
         checks() {
-            return this.plain ? checksOf(this.plain) : { problems: [], resolved: null, layers: null };
+            return this.plain ? library.checksOf(this.plain) : { problems: [], resolved: null, layers: null };
         },
         shown() {
             return this.checks.resolved ?? this.plain;
@@ -153,6 +169,14 @@ const useEditor = Pinia.defineStore('editor', {
         pins() {
             const board = this.checks.resolved;
             return board?.mcu?.facts?.gpio ? pinMap(board) : null;
+        },
+        questions(state) {
+            state.stamp;
+            return library.questions.filter((question) => library.solver.holds(question, state.answers));
+        },
+        kits(state) {
+            state.stamp;
+            return state.loaded ? library.solver.solve(copied(state.answers)) : [];
         },
         saved() {
             return this.plain ? `${catalogJson(this.plain)}\n` : '';
@@ -239,6 +263,45 @@ const useEditor = Pinia.defineStore('editor', {
             else if (Array.isArray(node)) node.splice(last, 1);
             else delete node[last];
             this.changed();
+        },
+        // What a project gets: the folder decides. Nothing is written here.
+        async planProject(kit) {
+            await this.run(async () => {
+                const name = this.projectName;
+                if (!NAME.test(name)) throw new Error('a project name is lowercase letters, digits and _');
+                if (kit.project && library.catalog.boards[name]) throw new Error(`the catalog has a board ${name}: give the project another name`);
+                const { folder, names } = await host.pickProject();
+                const mode = names.includes('CMakeLists.txt') ? 'update' : names.every((item) => REPOSITORY_ONLY.test(item)) ? 'create' : null;
+                if (!mode) throw new Error(`${folder.name}: not empty and not a program: nothing is written there`);
+                const files = {};
+                const board = kit.project ? name : kit.name;
+                if (kit.project) files[LOCAL_BOARD(name)] = `${catalogJson({ ...kit.project, name, title: `${kit.title} with ${kit.modules.map((item) => item.title).join(', ')}` })}\n`;
+                if (mode === 'create') Object.assign(files, await skeletonOf(kit, name, board));
+                const rows = [];
+                for (const [path, text] of Object.entries(files)) {
+                    const old = await host.readIn(folder, path);
+                    const state = old === null ? 'new' : old === text ? 'same' : path === LOCAL_BOARD(name) ? 'changes' : 'kept';
+                    rows.push({ path, text, old, state, replace: false });
+                }
+                const manifest = mode === 'update' ? await host.readIn(folder, 'main/idf_component.yml') : null;
+                this.plan = { folder: Vue.markRaw(folder), folderName: folder.name, mode, rows, board, written: null, needsComponent: mode === 'update' && !(manifest ?? '').includes(COMPONENT_LINE) };
+            });
+        },
+        // Writes what is new and what was ticked. Nothing else is touched and nothing is removed.
+        async writeProject() {
+            await this.run(async () => {
+                const plan = this.plan;
+                const chosen = plan.rows.filter((row) => row.state === 'new' || (row.state === 'changes' && row.replace));
+                // the folder may have changed since the list was made: a file that appeared is somebody's
+                for (const row of chosen) {
+                    if ((await host.readIn(plan.folder, row.path)) !== row.old) throw new Error(`${row.path} changed after the list was made: nothing is written, make the list again`);
+                }
+                for (const row of chosen) {
+                    await host.writeIn(plan.folder, row.path, row.text);
+                    if ((await host.readIn(plan.folder, row.path)) !== row.text) throw new Error(`${row.path}: what lies there is not what was written`);
+                }
+                plan.written = chosen.map((row) => row.path);
+            });
         },
         // A field a layer takes out of what it inherits stays in the file as null.
         removeInherited(path) {

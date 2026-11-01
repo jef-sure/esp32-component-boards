@@ -1,0 +1,6 @@
+{
+    "title": "A touch panel on a dev board: the catalog has no such module",
+    "answers": {"touch": true},
+    "fit": ["cyd_s028r", "jc1060p470c", "jc4827w543c", "jc8012p4a1c"],
+    "says": "no module for"
+}

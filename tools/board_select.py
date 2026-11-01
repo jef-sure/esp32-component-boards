@@ -96,7 +96,8 @@ def main():
             print(f"{sdkconfig}: moved to sdkconfig.old, the new board's defaults will be read")
         else:
             print(f"{sdkconfig} exists: ESP-IDF reads the defaults only into a new one. Remove it (or --reset) for the board to change.")
-    print("Now: idf.py build")
+    # the rules of the manifest are read when a project is configured: a build of another board keeps that board's dependencies
+    print("Now: idf.py reconfigure build" if (args.project / "build").exists() else "Now: idf.py build")
     return 0
 
 

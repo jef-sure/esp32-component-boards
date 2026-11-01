@@ -8,7 +8,7 @@
     "part": "PN5180",
     "class": "nfc",
     "draw": {"rf_on": {"ma": 180, "ma_peak": 250}, "sleep": {"ma": 0.015}},
-    "on": {"spi": {"required": true}},
+    "on": {"spi": {"required": true, "lines": ["busy", "rst"]}},
     "provides": {
         "nfc": {
             "standards": ["iso14443a", "iso14443b", "felica", "iso15693", "iso18000_3m3", "iso18092"],

@@ -26,7 +26,7 @@ dependencies:
     matches:
       - if: "$CONFIG{BOARD_TOUCH_GT911} == 1"
   jef-sure/dgx:
-    version: "^0.10.1"
+    version: "^0.10.3"
     matches:
       - if: "$CONFIG{BOARD_DISPLAY_GRAPHICS} == 1"
   jef-sure/dgx-di:

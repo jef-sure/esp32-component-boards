@@ -4,6 +4,7 @@
     "kind": "module",
     "name": "ov02c10_csi",
     "title": "OV02C10 camera on a 15-pin CSI ribbon",
+    "notes": ["Sold with the JC1060P470C and the JC8012P4A1C: it has no price of its own."],
     "description": "A 2-megapixel sensor with its own clock on the ribbon: two CSI lanes for the picture, I2C for its registers, 3.3 V from the connector",
     "devices": {"sensor": {"chip": "ov02c10", "on": {"csi": {}, "i2c": {}}}}
 }

@@ -263,8 +263,82 @@ const NewDocument = {
     `,
 };
 
+const MARKS = { yes: '✓', no: '✗', unknown: '?', do: '→' };
+
+// Which question a board and its modules answer: the first screen.
+const SelectPage = {
+    setup() {
+        const store = useEditor();
+        const fit = computed(() => store.kits.filter((kit) => kit.fits));
+        const others = computed(() => store.kits.filter((kit) => !kit.fits));
+        const money = (price) => (!price ? '' : !price.known ? 'price not known' : `${price.low === price.high ? price.low : `${price.low}–${price.high}`} EUR${price.missing.length ? ' + ?' : ''}`);
+        const number = (event) => (event.target.value === '' ? undefined : Number(event.target.value));
+        return { store, host, fit, others, money, number, MARKS };
+    },
+    template: `
+        <div class="select">
+            <form class="questions" @submit.prevent>
+                <h2>Let's build something great!</h2>
+                <div v-for="question in store.questions" :key="question.id" class="question">
+                    <label v-if="question.type === 'flag'"><input type="checkbox" v-model="store.answers[question.id]"> {{ question.text }}</label>
+                    <template v-else>
+                        <label>{{ question.text }}</label>
+                        <select v-if="question.type === 'choice'" v-model="store.answers[question.id]">
+                            <option v-for="choice in question.choices" :key="choice.value" :value="choice.value">{{ choice.text }}</option>
+                        </select>
+                        <input v-else type="number" min="0" :max="question.max" step="any" :value="store.answers[question.id]" @input="store.answers[question.id] = number($event)">
+                    </template>
+                </div>
+            </form>
+            <div class="kits">
+                <section v-if="store.plan" class="plan">
+                    <h3>{{ store.plan.mode === 'create' ? 'A new project in' : 'The project' }} {{ store.plan.folderName }}</h3>
+                    <table>
+                        <tr v-for="row in store.plan.rows" :key="row.path" :class="row.state">
+                            <td><code>{{ row.path }}</code></td>
+                            <td v-if="row.state === 'new'">new</td>
+                            <td v-else-if="row.state === 'same'">the same, left as it is</td>
+                            <td v-else-if="row.state === 'kept'">it is there, left as it is</td>
+                            <td v-else><label><input type="checkbox" v-model="row.replace"> it differs: replace it</label></td>
+                        </tr>
+                    </table>
+                    <details v-for="row in store.plan.rows.filter((item) => item.state === 'changes')" :key="row.path"><summary>{{ row.path }}: what lies there and what would</summary>
+                        <div class="both"><pre>{{ row.old }}</pre><pre>{{ row.text }}</pre></div>
+                    </details>
+                    <p v-if="store.plan.needsComponent" class="locked">This project does not name jef-sure/boards. Add it to <code>main/idf_component.yml</code> yourself: the file stays as it is.</p>
+                    <p v-if="!store.plan.written"><button @click="store.writeProject()">write</button> <button @click="store.plan = null">cancel</button></p>
+                    <div v-else>
+                        <p class="good">{{ store.plan.written.length }} file(s) written, nothing else touched.</p>
+                        <pre>python3 path/to/boards/tools/board_select.py {{ store.plan.board }} .
+idf.py {{ store.plan.mode === 'create' ? 'build' : 'reconfigure build' }} flash monitor</pre>
+                    </div>
+                </section>
+                <p class="project"><label>Project name <input type="text" v-model="store.projectName"></label>
+                    <span class="hint">An empty folder gets a whole project. A folder with a program gets only its board.</span></p>
+                <article v-for="kit in fit" :key="kit.name + kit.modules.map((item) => item.name).join()" class="kit">
+                    <h3>{{ kit.title }} <span class="note">{{ money(kit.price) }}</span></h3>
+                    <ul><li v-for="line in kit.says" :key="line.text" :class="line.level"><span class="mark">{{ MARKS[line.level] }}</span> {{ line.text }}</li></ul>
+                    <details v-if="kit.wires.length || kit.supply.length"><summary>the wires ({{ kit.wires.length }}, power apart)</summary>
+                        <table class="pins"><tr v-for="wire in kit.wires" :key="wire.what + wire.line"><td>{{ wire.what }}</td><td>{{ wire.line }}</td><td>GPIO {{ wire.pin }}</td></tr>
+                            <tr v-for="wire in kit.supply" :key="'power' + wire.what + wire.line"><td>{{ wire.what }}</td><td>{{ wire.line }}</td><td>{{ wire.from }}</td></tr></table>
+                    </details>
+                    <button v-if="host.canOpenFolder" @click="store.planProject(kit)">make a project…</button>
+                    <span v-else class="hint">Writing a project into a folder takes Chromium.</span>
+                </article>
+                <p v-if="!fit.length">Nothing fits these answers.</p>
+                <details v-if="others.length" class="others"><summary>What does not fit, and why ({{ others.length }})</summary>
+                    <article v-for="kit in others" :key="kit.name" class="kit">
+                        <h3>{{ kit.title }}</h3>
+                        <ul><li v-for="line in kit.says" :key="line.text" :class="line.level"><span class="mark">{{ MARKS[line.level] }}</span> {{ line.text }}</li></ul>
+                    </article>
+                </details>
+            </div>
+        </div>
+    `,
+};
+
 const app = createApp({
-    components: { TreeItem, NodeCard, PinMap, NewDocument },
+    components: { TreeItem, NodeCard, PinMap, NewDocument, SelectPage },
     setup() {
         const store = useEditor();
         Vue.onMounted(() => store.start());
@@ -274,10 +348,14 @@ const app = createApp({
     },
     template: `
         <header>
-            <h1>boards editor</h1>
+            <h1>boards</h1>
+            <span class="views">
+                <button :class="{ here: store.page === 'select' }" @click="store.page = 'select'">select</button>
+                <button :class="{ here: store.page === 'edit' }" @click="store.page = 'edit'">edit</button>
+            </span>
             <button v-if="host.canOpenFolder" title="a program or its local-boards; the repository, to save into the catalog" @click="store.openFolder()">open a folder</button>
             <label v-else class="button">open a folder<input type="file" webkitdirectory hidden @change="store.openPicked($event.target.files)"></label>
-            <template v-if="store.entry">
+            <template v-if="store.entry && store.page === 'edit'">
                 <span class="path">{{ store.entry.path }}</span>
                 <span v-if="store.edited(store.entry)" class="tag open">edited</span>
                 <button :disabled="store.readOnly || !store.edited(store.entry)" @click="store.save()">save</button>
@@ -287,6 +365,7 @@ const app = createApp({
         </header>
         <p v-if="!store.loaded" class="start">The page is not served from the repository, so it has no catalog: open the folder of the repository.
             A program or its <code>local-boards</code> comes after it.</p>
+        <select-page v-else-if="store.page === 'select'"></select-page>
         <main v-else>
             <nav class="documents">
                 <input type="search" v-model="store.filter" placeholder="filter">

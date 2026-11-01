@@ -456,7 +456,7 @@ def read_board(path):
             if not orientation or orientation.get("x") not in names["dir_x"] or orientation.get("y") not in names["dir_y"]:
                 raise ValueError("the original_orientation of the display is not left-right/right-left x top-bottom/bottom-top")
             kind = bus_parts(bus_name)[0]
-            for line in {"spi": ("cs", "dc"), "qspi": ("cs",), "p8": ("cs",), "dsi": ()}[kind]:
+            for line in display["entry"]["supports"].get("lines") or {"spi": ("cs", "dc"), "qspi": ("cs",), "p8": ("cs",), "dsi": ()}[kind]:
                 if line not in display["bus"]:
                     raise ValueError(f'the display lacks its "{line}" line')
         else:
@@ -879,7 +879,9 @@ def gen_c(board):
             out(f"static dgx_bus_protocols_t *display{i}_bus(void)")
             out("{")
             values = {**transport.get("defaults", {}), **{key: value if key in resolve.NOT_LINES else c_gpio(value) for key, value in bus.items()}, "host": f"{(own or '').upper()}_HOST"}
-            values.update({line: c_gpio(db[line]) for line in ("cs", "dc") if line in db})
+            own_select = "{cs}" in entry["init"][0]["args"]  # the driver of such a chip holds its select itself, so the bus has none
+            values.update({"dc": "GPIO_NUM_NC", **{line: c_gpio(db[line]) for line in ("cs", "dc") if line in db and not (own_select and line == "cs")}})
+            values.setdefault("cs", "GPIO_NUM_NC")
             if bus_name in shared:
                 out(f"    if (!board_glue_spi_host(&board_spi_{own})) return NULL;")
                 out(f"    return {fill_call(transport['shared'], values)};")
@@ -889,7 +891,7 @@ def gen_c(board):
             out("")
             backlight = c_gpio(shown.get("backlight"))
             order = "bgr" if shown.get("color_order") == "bgr" else "rgb"
-            values = {"bus": "bus", "rst": c_gpio(shown.get("rst")), "backlight": backlight, "depth": shown.get("depth_bits", 16),
+            values = {"bus": "bus", "rst": c_gpio(shown.get("rst")), "cs": c_gpio(db.get("cs")), "backlight": backlight, "depth": shown.get("depth_bits", 16),
                       "color": library["values"]["color_order"][order], "width": panel["width"], "height": panel["height"]}
             out(f"static dgx_screen_t *display{i}_screen(dgx_bus_protocols_t *bus)")
             out("{")

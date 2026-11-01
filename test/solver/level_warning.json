@@ -1,0 +1,6 @@
+{
+    "title": "A 2004 at 5 V on a chip of 3.3 V: it is proposed, with a warning about its lines",
+    "answers": {"display": "character"},
+    "kit": {"name": "esp32_devkit", "modules": {"lcd2004_pcf8574": 1}},
+    "says": "put a level shifter on them"
+}

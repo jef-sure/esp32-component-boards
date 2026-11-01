@@ -1,0 +1,5 @@
+{
+    "title": "One PN532 and a character display share one I2C bus: they have different addresses",
+    "answers": {"display": "character", "nfc_readers": 1},
+    "kit": {"name": "esp32_devkit", "modules": {"lcd2004_pcf8574": 1, "pn532_module": 1}, "on": {"pn532_module": "i2c", "lcd2004_pcf8574": "i2c"}}
+}

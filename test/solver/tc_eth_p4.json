@@ -1,0 +1,7 @@
+{
+    "title": "The time clock of tc-eth-p4: Ethernet with PoE, a 12864 on its own SPI, two PN532 on another, four piezo discs in the cover at the largest swing",
+    "answers": {"display": "graphics", "nfc_readers": 2, "ethernet": true, "poe": true, "beepers": 4, "beep_swing_v": 6},
+    "first": {"name": "esp32_p4_poe_eth", "modules": {"lcd12864_st7920": 1, "pn532_module": 2, "piezo_disc": 4}, "on": {"lcd12864_st7920": "spi", "pn532_module": "spi"}},
+    "says": "the legs to two GPIOs of its own",
+    "lines": {"board": "esp32_p4_poe_eth", "count": 17}
+}

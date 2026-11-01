@@ -12,8 +12,10 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 IDF = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else os.path.expanduser("~/.espressif/v6.1/esp-idf"))
 PROVIDES = {"SOC_WIFI_SUPPORTED": "wifi", "SOC_BT_SUPPORTED": "bluetooth", "SOC_DAC_SUPPORTED": "dac", "SOC_USB_OTG_SUPPORTED": "usb_otg",
-            "SOC_MIPI_DSI_SUPPORTED": "mipi_dsi", "SOC_LCD_RGB_SUPPORTED": "lcd_rgb", "SOC_EMAC_SUPPORTED": "ethernet",
+            "SOC_MIPI_DSI_SUPPORTED": "mipi_dsi", "SOC_LCD_RGB_SUPPORTED": "lcd_rgb", "SOC_EMAC_SUPPORTED": "emac",
             "SOC_SDMMC_HOST_SUPPORTED": "sdmmc", "SOC_TOUCH_SENSOR_SUPPORTED": "touch_pads", "SOC_TWAI_SUPPORTED": "twai"}
+# the datasheets of these chips, DC characteristics: VIH is at most VDD + 0.3 V, here at a VDD of 3.3 V
+GPIO_HIGH_MV_MAX = {target: 3600 for target in ("esp32", "esp32s2", "esp32s3", "esp32c3", "esp32c5", "esp32c6", "esp32h2", "esp32p4", "esp32s31")}
 # esp_wifi.h: the unit of esp_wifi_set_max_tx_power() is 0.25 dBm, the range 8 to 84, after esp_wifi_start()
 WIFI_TX_POWER = {"how": "wifi_tx_power", "min": 8, "max": 84, "unit": "0.25 dBm", "read": "command"}
 
@@ -105,9 +107,12 @@ def main():
             continue
         entry = {"format": "jef-sure/boards", "format_version": 2, "kind": "mcu", "name": target, "title": target.upper().replace("ESP32", "ESP32-").rstrip("-"),
                  "gpio": {"count": count, "valid": bits(valid, 64), "input_only": bits(valid & ~out, 64)},
-                 "hosts": {key: value for key, value in (("spi", number(found.get("SOC_SPI_PERIPH_NUM"), found)), ("i2c", number(found.get("SOC_I2C_NUM"), found))) if value is not None},
+                 "hosts": {key: value for key, value in (("spi", number(found.get("SOC_SPI_PERIPH_NUM"), found)), ("i2c", number(found.get("SOC_I2C_NUM"), found)), ("uart", number(found.get("SOC_UART_HP_NUM") or found.get("SOC_UART_NUM"), found)), ("ledc", number(found.get("SOC_LEDC_CHANNEL_NUM"), found))) if value is not None},
                  "provides": {name: {} for symbol, name in PROVIDES.items() if found.get(symbol) == "1"},
                  "checked": {"facts": {"level": "vendor-docs", "source": f"ESP-IDF {IDF.name}, components/soc/{target}, soc_caps.h"}}}
+        if target in GPIO_HIGH_MV_MAX:
+            entry["gpio"]["high_mv_max"] = GPIO_HIGH_MV_MAX[target]
+            entry["checked"]["levels"] = {"level": "datasheet", "covers": ["gpio.high_mv_max"], "source": "Espressif datasheet of the chip, DC characteristics: VIH at most VDD + 0.3 V, at VDD 3.3 V"}
         if "wifi" in entry["provides"]:
             entry["controls"] = {"wifi_tx_power": WIFI_TX_POWER}
         pins, notes = pin_table(target)

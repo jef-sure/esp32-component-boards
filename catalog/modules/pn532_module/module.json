@@ -4,7 +4,20 @@
     "kind": "module",
     "name": "pn532_module",
     "title": "PN532 module with its antenna on the board",
-    "devices": {"nfc": {"chip": "pn532", "antenna": {"kind": "on_board"}, "provides": {"nfc": {"range_mm": 40}}}},
+    "power": [
+        {"name": "VCC", "source": "connector", "volts": [3.3, 5.5]},
+        {"name": "3V3", "from": "VCC", "regulator": "ldo", "mv": 3300, "feeds": ["nfc"]}
+    ],
+    "devices": {"nfc": {"chip": "pn532", "antenna": {"kind": "on_board"}, "logic": "3V3", "provides": {"nfc": {"range_mm": 40}}}},
+    "price": {
+        "aliexpress": {
+            "shop": "AliExpress",
+            "currency": "EUR",
+            "range": [3, 3],
+            "date": "2026-11-01",
+            "source": "Anton: an approximate AliExpress price"
+        }
+    },
     "checked": {
         "range": {
             "level": "hardware",
@@ -12,6 +25,12 @@
             "by": "Anton",
             "date": "2026-10-31",
             "notes": "from experience"
+        },
+        "levels": {
+            "level": "unchecked",
+            "covers": ["power", "devices.nfc.logic"],
+            "source": "The usual red module with an LDO to 3.3 V for the chip. Not measured on a module.",
+            "date": "2026-11-01"
         }
     }
 }

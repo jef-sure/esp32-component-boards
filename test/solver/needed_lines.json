@@ -1,0 +1,5 @@
+{
+    "title": "Four PN5180 want BUSY and RST each and do not fit on a dev board; four PN532 do",
+    "answers": {"nfc_readers": 4},
+    "kit": {"name": "esp32_devkit", "modules": {"pn532_module": 4}, "on": {"pn532_module": "spi"}}
+}

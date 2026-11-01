@@ -1,0 +1,61 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "lcd12864_st7920",
+    "title": "12864 LCD on an ST7920",
+    "description": "A 128x64 monochrome LCD in serial mode: E is the clock, R/W the data, RS the chip select, PSB to ground",
+    "price": {
+        "anton": {
+            "shop": "not named",
+            "currency": "EUR",
+            "range": [6.5, 6.5],
+            "date": "2026-11-01",
+            "source": "Anton: about 6.5 euro"
+        }
+    },
+    "mechanics": {
+        "outline_mm": [93, 70],
+        "holes": [
+            {"x_mm": -44.2, "y_mm": 32.5, "d_mm": 3},
+            {"x_mm": 44.2, "y_mm": 32.5, "d_mm": 3},
+            {"x_mm": -44.2, "y_mm": -32.7, "d_mm": 3},
+            {"x_mm": 44.2, "y_mm": -32.7, "d_mm": 3}
+        ],
+        "do": "a board of 93 x 70 mm: it takes a frame of its own, 110 x 80 mm in the time clock, on four M2 screws"
+    },
+    "power": [
+        {"name": "VCC", "source": "connector", "volts": [4.5, 5.5], "feeds": ["lcd"]}
+    ],
+    "devices": {
+        "lcd": {
+            "chip": "st7920",
+            "on": {"spi": {"hz": 1000000}},
+            "logic": "none",
+            "config": {"primary": true, "panel": {"width": 128, "height": 64, "window_mm": [79.6, 52.2]}, "depth_bits": 1},
+            "controls": {"orientation": {"start": {"x": "left-right", "y": "top-bottom", "swap": false}}},
+            "notes": "V0 on the module sets the contrast. The viewing angle of the blue negative is poor from below."
+        }
+    },
+    "checked": {
+        "wiring": {
+            "level": "hardware",
+            "covers": ["devices.lcd.on", "devices.lcd.config"],
+            "by": "the firmware of tc-eth-p4, 1 MHz, 128x64",
+            "date": "2026-10-14"
+        },
+        "mechanics": {
+            "level": "hardware",
+            "covers": ["mechanics", "devices.lcd.config.panel.window_mm"],
+            "by": "Anton: the board measured, and the printed frame of ~/freecad/tc-eth-poe holds it",
+            "date": "2026-10-14",
+            "notes": "The size of the holes, 3 mm, is assumed in the model. window_mm is the opening of the frame, not the area of the pixels, which is not measured."
+        },
+        "levels": {
+            "level": "unchecked",
+            "covers": ["power"],
+            "source": "A 5 V module; the 3.3 V lines of an ESP32 drive it in tc-eth-p4. Not measured.",
+            "date": "2026-11-01"
+        }
+    }
+}

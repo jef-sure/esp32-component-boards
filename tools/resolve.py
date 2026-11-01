@@ -17,10 +17,10 @@ LOCAL_BOARDS = "components/local-boards"  # what is a program's own, in the layo
 FILES = {"mcu": "mcu.json", "devices": "device.json", "modules": "module.json", "boards": "board.json", "libraries": "library.json", "connectors": "connector.json"}
 NOT_LINES = {"hz", "lanes", "lane_mbps", "phy_ldo_chan", "phy_ldo_mv", "baud", "data"}
 LINE = 120
-TYPE_FIELDS = ("class", "maker", "part", "compat", "draw", "pins", "config", "controls", "provides", "start", "firmware")
+TYPE_FIELDS = ("class", "maker", "part", "compat", "draw", "pins", "config", "controls", "provides", "start", "firmware", "ways")
 LIBRARY_HISTORY = ("license", "chips", "transports", "interfaces", "groups", "values")
 FIRMWARE_HISTORY = ("config", "controls", "provides")
-REFERENCES = {"over", "via", "left", "right", "after", "devices", "feeds", "from", "through", "name"}  # fields of a module that name its parts
+REFERENCES = {"over", "via", "left", "right", "after", "devices", "feeds", "from", "through", "name", "logic"}  # fields of a module that name its parts
 REVISION_HISTORY = ("limits", "provides", "controls", "sdkconfig")
 MODULE_FACTS = ("maker", "part", "revision", "mcu", "price", "tariff")  # what a board keeps of a module beside its parts
 
@@ -173,7 +173,7 @@ def apply_type(device):
         if "address" in connection:
             connection.pop("address_try", None)
     out["on"] = wired or {key: {k: v for k, v in value.items() if k != "required"} for key, value in (device.get("on") or {}).items()}
-    out["wants"] = {key: {"required": bool(value.get("required"))} for key, value in (entry.get("on") or {}).items()}
+    out["wants"] = {key: {"required": bool(value.get("required")), **({"lines": value["lines"]} if "lines" in value else {})} for key, value in (entry.get("on") or {}).items()}
     libraries = libraries_of(device["chip"])
     if "library" not in out and len(libraries) == 1:
         out["library"] = next(iter(libraries))
@@ -234,6 +234,15 @@ def joined(device, wiring):
     return {**device, "on": on}
 
 
+def supplied(steps, supply, name):
+    """The steps a module takes from its board, on the lines the wiring names."""
+    open_steps = {step.get("name") for step in steps if step.get("source") == "connector"}
+    for step in supply:
+        if step not in open_steps:
+            raise Refused(f"{name}: no step {step} to feed")
+    return [{**{key: item for key, item in step.items() if key != "source"}, "from": supply[step["name"]]} if step.get("name") in supply else step for step in steps]
+
+
 def use_module(doc, name, use):
     module = chain(load("modules", use["module"]))
     add_modules(module)
@@ -252,7 +261,7 @@ def use_module(doc, name, use):
     for field in ("display_groups", "shared_pins", "connectors"):
         for own, entry in (module.get(field) or {}).items():
             doc.setdefault(field, {})[f"{name}_{own}"] = renamed(entry, names)
-    doc["power"] = (doc.get("power") or []) + renamed(module.get("power") or [], names)
+    doc["power"] = (doc.get("power") or []) + supplied(renamed(module.get("power") or [], names), {names.get(step, step): line for step, line in (use.get("supply") or {}).items()}, name)
     if not doc["power"]:
         del doc["power"]
     return {"module": use["module"], "title": module["title"], **{key: module[key] for key in MODULE_FACTS if key in module}}

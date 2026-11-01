@@ -1,0 +1,6 @@
+{
+    "title": "What a board has needs no module",
+    "answers": {"display": "graphics", "touch": true, "sound": true},
+    "first": {"modules": {}},
+    "fit": ["cyd_s028r", "jc1060p470c", "jc4827w543c", "jc8012p4a1c"]
+}

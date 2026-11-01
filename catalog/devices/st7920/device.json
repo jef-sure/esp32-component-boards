@@ -1,0 +1,17 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "st7920",
+    "title": "ST7920",
+    "maker": "sitronix",
+    "part": "ST7920",
+    "class": "display",
+    "on": {"spi": {}},
+    "config": {"kind": "graphics"},
+    "controls": {"orientation": {"how": "driver", "read": "none"}},
+    "notes": ["Its serial interface only takes data: there is no line back. Chip select is active high and the driver holds it for a transfer."],
+    "checked": {
+        "facts": {"level": "hardware", "source": "esp32-component-dgx, include/drivers/st7920.h; the firmware of tc-eth-p4, oriented on the bench in ~/dgx-bench/st7920_orient"}
+    }
+}

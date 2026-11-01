@@ -89,6 +89,8 @@ codec library. See [docs/en/choosing-a-board.md](docs/en/choosing-a-board.md).
 |---|---|---|---|---|---|
 | CYD (ESP32-2432S028R) | ESP32 | 320x240 ILI9341, SPI, 58x43 mm | XPT2046 (resistive) | DAC, GPIO26 | yes |
 | ESP32 DevKit, 4 MB | ESP32 | none | none | none | yes |
+| Waveshare ESP32-P4-ETH | ESP32-P4 | none | none | ES8311 | yes |
+| Waveshare ESP32-P4-POE-ETH | ESP32-P4 | none | none | ES8311 | yes |
 | ESP32-S3 DevKit, 16 MB, 8 MB PSRAM | ESP32-S3 | none | none | none | yes |
 | Guition JC1060P470C | ESP32-P4 | 1024x600 JD9165, MIPI-DSI, 154x86 mm | GT911 | ES8311 | yes |
 | Guition JC4827W543C | ESP32-S3 | 480x272 NV3041A, QSPI, 95x54 mm | GT911 | I2S amplifier | yes |
@@ -122,7 +124,7 @@ tools/check_boards.py                  the generated is what the data says; pins
 tools/board_pins.py                    the map of a board's pins and its tree
 tools/board_select.py                  choose the board for a project
 tools/board_bom.py                     what to buy for a product, with prices as ranges
-editor/                                the editor: a tree, the card of a node, the map of pins; any static server from the root, then /editor/
+editor/                                the page: what to build, a kit, a project; and the editor. Any static server from the root, then /editor/
 examples/hello_board/                  the smallest program, built for every board in CI
 examples/hello_lvgl/                   LVGL through DGX-LVGL, built in CI for every board with a graphics display
 examples/local_boards/                 a board and a module of the program itself, in components/local-boards/
@@ -176,7 +178,8 @@ module shows its text on an ESP32 dev board. On the JC8012P4A1C, flashed too, th
 `hello_board` was heard. Its touch needs the firmware the program embeds: with it the log is clean,
 and nobody has tried it by finger.
 
-The display module `tft153_st77916` ran on `esp32s3_devkit` as a board of a program, with a clean log;
-nobody has looked at its picture. `esp32_devkit` ran as the base of a board of a program.
+The display module `tft153_st77916` ran on `esp32s3_devkit` as a board of a program, and its picture
+was seen. On those pins ESP-IDF 6.1 needs DGX 0.10.3: the SPI driver of 6.1 takes a quad bus for an
+octal one. `esp32_devkit` ran as the base of a board of a program.
 
 License: MIT.

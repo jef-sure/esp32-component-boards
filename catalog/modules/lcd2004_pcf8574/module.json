@@ -5,7 +5,27 @@
     "name": "lcd2004_pcf8574",
     "title": "2004 character LCD on a PCF8574 backpack",
     "description": "A 20x4 HD44780 on the common I2C backpack (P0 RS, P1 RW, P2 E, P3 backlight, P4-P7 D4-D7): not a board of its own, a display any board's I2C bus can carry",
+    "power": [
+        {"name": "VCC", "source": "connector", "volts": [4.5, 5.5], "feeds": ["lcd"]}
+    ],
     "devices": {
-        "lcd": {"chip": "hd44780", "on": {"i2c": {"address": "0x27"}}, "config": {"primary": true, "geometry": "20x4"}}
+        "lcd": {"chip": "hd44780", "on": {"i2c": {"address": "0x27"}}, "logic": "VCC", "config": {"primary": true, "geometry": "20x4"}}
+    },
+    "price": {
+        "ebay": {
+            "shop": "eBay.de",
+            "currency": "EUR",
+            "range": [7, 12],
+            "date": "2026-11-01",
+            "source": "Listings found by a search, not a purchase"
+        }
+    },
+    "checked": {
+        "levels": {
+            "level": "unchecked",
+            "covers": ["power", "devices.lcd.logic"],
+            "source": "The usual backpack: the LCD takes 5 V, SDA and SCL are pulled up to VCC on the module. Not measured on a module.",
+            "date": "2026-11-01"
+        }
     }
 }

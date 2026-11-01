@@ -20,6 +20,15 @@
         "flash_mb": 4,
         "notes": "the ESP32 has two SPI hosts for the program: SPI2 the display, SPI3 the touch; the SD slot's pins (23, 19, 18, cs 5) have no host left and are data only (buses.sdspi.sd)"
     },
+    "price": {
+        "aliexpress": {
+            "shop": "AliExpress",
+            "currency": "EUR",
+            "range": [20, 20],
+            "date": "2026-11-01",
+            "source": "Anton: an approximate AliExpress price for Germany"
+        }
+    },
     "checked": {
         "pins": {
             "level": "schematic",

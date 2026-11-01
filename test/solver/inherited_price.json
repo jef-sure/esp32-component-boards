@@ -1,0 +1,6 @@
+{
+    "title": "A variant with no price of its own costs what its base costs",
+    "answers": {"ethernet": true, "poe": true},
+    "change": {"esp32_p4_poe_eth": {"price": null}},
+    "cost": {"board": "esp32_p4_poe_eth", "low": 20}
+}

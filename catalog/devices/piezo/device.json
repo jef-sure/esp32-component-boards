@@ -1,0 +1,25 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "piezo",
+    "title": "Bare piezo disc",
+    "class": "buzzer",
+    "ways": [
+        {"lines": ["a"], "ledc": 1, "gives": {"swing_v": 3.3}, "do": "one leg to its GPIO, the other to ground"},
+        {"lines": ["a", "b"], "ledc": 2, "gives": {"swing_v": 6.6}, "do": "the legs to two GPIOs of its own, in antiphase: one LEDC timer, hpoint of the second channel half a period"}
+    ],
+    "notes": [
+        "Each disc has its own LEDC channels and lines, as on the bench: a louder sound takes two lines for a disc, not more discs on one line.",
+        "Glued by its whole area to a wall of a case, a disc makes the wall sound: in the time clock four discs in the cover at the largest swing.",
+        "A square wave is heard at 220 and 440 Hz, where a sine is not: its harmonics reach the resonance of the disc."
+    ],
+    "checked": {
+        "ways": {
+            "level": "hardware",
+            "covers": ["ways"],
+            "by": "the bench of ~/freecad/tc-eth-poe/piezo-test, four 27 mm discs on an ESP32",
+            "date": "2026-10-15"
+        }
+    }
+}

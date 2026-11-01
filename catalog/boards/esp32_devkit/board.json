@@ -15,6 +15,20 @@
         "led": {"class": "led", "pins": {"out": 2}},
         "usb_serial": {"class": "other", "part": "CP210x"}
     },
+    "power": [
+        {"name": "VIN", "source": "vin", "mv": 5000, "why": "5 V from USB, or from this contact."},
+        {"name": "3V3", "from": "VIN", "regulator": "ldo", "mv": 3300, "feeds": ["mcu"]}
+    ],
+    "connectors": {
+        "left": {
+            "type": "2.54 mm header, 15 pins",
+            "pins": ["EN", 36, 39, 34, 35, 32, 33, 25, 26, 27, 14, 12, 13, "GND", "VIN"]
+        },
+        "right": {
+            "type": "2.54 mm header, 15 pins",
+            "pins": ["3V3", "GND", 15, 2, 4, 16, 17, 5, 18, 19, 21, 3, 1, 22, 23]
+        }
+    },
     "price": {
         "amazon": {
             "shop": "Amazon",
@@ -35,8 +49,8 @@
     "checked": {
         "pins": {
             "level": "unchecked",
-            "covers": ["devices.boot"],
-            "source": "Anton: a standard dev board with two LEDs; the pin is the usual one of this board",
+            "covers": ["devices.boot", "connectors", "power"],
+            "source": "Anton: a standard dev board with two LEDs; the pin and the headers are the usual ones of the 30-pin board, from memory",
             "date": "2026-10-31"
         },
         "led": {

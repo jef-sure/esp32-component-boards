@@ -1,0 +1,5 @@
+{
+    "title": "What a board provides: a chip with Wi-Fi or a part that has it",
+    "answers": {"wifi": true, "bluetooth": true},
+    "fit": ["cyd_s028r", "esp32_devkit", "esp32s3_devkit", "jc1060p470c", "jc4827w543c", "jc8012p4a1c"]
+}

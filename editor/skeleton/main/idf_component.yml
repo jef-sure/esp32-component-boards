@@ -1,0 +1,6 @@
+dependencies:
+  idf:
+    version: ">=5.5"
+  jef-sure/boards:
+    git: https://github.com/jef-sure/esp32-component-boards.git
+    version: main

@@ -1,0 +1,5 @@
+{
+    "title": "Discs sold in twenties cost a pack, however few a kit takes",
+    "answers": {"beepers": 4},
+    "cost": {"board": "esp32_devkit", "module": "piezo_disc", "low": 6.79}
+}

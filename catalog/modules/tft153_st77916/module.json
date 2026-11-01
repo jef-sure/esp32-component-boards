@@ -5,14 +5,42 @@
     "name": "tft153_st77916",
     "title": "Round 1.53-inch TFT on an ST77916",
     "description": "A round 360x360 display module on QSPI, marked TFT 1.53 1.0. Not a board of its own: a project wires it to one.",
+    "power": [
+        {"name": "VCC", "source": "connector", "volts": [3, 3.6], "feeds": ["lcd"]}
+    ],
     "devices": {
         "lcd": {
             "chip": "st77916",
             "part": "TFT 1.53 1.0",
-            "on": {"qspi": {}},
-            "config": {"primary": true, "panel": {"width": 360, "height": 360}, "depth_bits": 16},
+            "on": {"qspi": {"hz": 40000000}},
+            "logic": "VCC",
+            "config": {"primary": true, "panel": {"width": 360, "height": 360, "mm_w": 27, "mm_h": 27}, "depth_bits": 16},
             "controls": {"orientation": {"start": {"x": "left-right", "y": "top-bottom", "swap": false}}},
-            "notes": "The glass is marked T150XV-C16-04. Its size in mm is not measured."
+            "notes": "The glass is marked T150XV-C16-04. The size in mm is that of the ST77916 example of esp32-component-dgx-lvgl, not measured."
+        }
+    },
+    "price": {
+        "aliexpress": {
+            "shop": "AliExpress",
+            "currency": "EUR",
+            "range": [5.29, 5.29],
+            "date": "2026-11-01",
+            "source": "Anton: a listing of a 1.5-inch 360x360 ST77916 module, with VAT, before duty"
+        }
+    },
+    "checked": {
+        "picture": {
+            "level": "hardware",
+            "covers": ["devices.lcd.on", "devices.lcd.config.panel.width", "devices.lcd.config.panel.height"],
+            "by": "Anton: hello_lvgl on esp32s3_devkit with the pins of the bench, ESP-IDF 6.1, DGX 0.10.3",
+            "date": "2026-11-01",
+            "notes": "These pins are the IO MUX set of SPI2: under ESP-IDF 6.1 they stay dark with a DGX older than 0.10.3."
+        },
+        "levels": {
+            "level": "unchecked",
+            "covers": ["power", "devices.lcd.logic"],
+            "source": "A panel of 3.3 V logic. The supply of the module on the bench is not written down.",
+            "date": "2026-11-01"
         }
     }
 }

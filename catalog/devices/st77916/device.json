@@ -7,7 +7,7 @@
     "maker": "sitronix",
     "part": "ST77916",
     "class": "display",
-    "on": {"qspi": {}, "spi": {}},
+    "on": {"qspi": {"lines": ["rst", "backlight"]}, "spi": {}},
     "config": {"kind": "graphics"},
     "controls": {"orientation": {"how": "driver", "read": "none"}},
     "checked": {

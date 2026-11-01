@@ -20,7 +20,7 @@
 /* Every bus of the board, its numbers by name: the kinds the component sets up and the
  * kinds it only keeps for the program, for a program that sets its own hardware up on the
  * board's wiring instead of copying pins. */
-static const struct board_bus_field board_bus_table[] = {{"led", "data", 48}};
+static const struct board_bus_field board_bus_table[] = {{"uart.uart0", "rx", 44}, {"uart.uart0", "tx", 43}, {"led", "data", 48}};
 
 bool board_bus_get(const char *bus, const char *field, long *out)
 {

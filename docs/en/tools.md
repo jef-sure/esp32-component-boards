@@ -140,17 +140,59 @@ python3 tools/sync_versions.py
 Fills `versions` of the `esp-idf` library records: from the component registry what each version
 is built against and requires, from the tags of git the versions the registry has not. A version the registry does not have yet stays as written.
 
-## The editor
+## The page
 
-`editor/index.html` edits the files of the catalog. It needs no build and no network, only a
-static server from the root of the repository: Live Server of VS Code, or
+`editor/index.html` answers what to build and on what, and edits the files of the catalog. It needs no
+build and no network, only a static server from the root of the repository: Live Server of VS Code, or
 
 ```sh
 python3 -m http.server 8000
 ```
 
-Open `/editor/` on that server: the catalog loads by itself. `open a folder` takes a program or
-its `components/local-boards`, to edit the boards of that program. It takes the folder of the
+Open `/editor/` on that server: the catalog loads by itself.
+
+### select
+
+The form comes from `catalog/questions.json`. Every board of the catalog gets a verdict at once: what
+it has, the modules it lacks with the wires for them, the price, and what the data does not say,
+marked `?`. Boards that do not fit are listed with the reason. The solver only proposes: each kit
+is a project, and the checks of the tools decide about it. So two PN532 go on SPI by themselves,
+because the rules refuse one I2C address twice.
+
+The solver wires I2C, SPI, QSPI and UART and the lines a chip needs beside its bus, such as BUSY and
+RST of the PN5180. A DSI module takes a free DSI bus of the board on a ribbon, and its timings stay an
+unknown of the kit, because they are measured on a board. The solver takes free pins that come out to
+a connector and leaves strapping pins, the pins of the flash and those of the console alone. It joins
+a bus of the board only when the lines of that bus come out and no display holds it, and it lists
+those lines too. For each module it picks the lowest line of power that fits and comes out, and it
+asks for a level shifter when the lines of a module go above what the pins of the chip take, see
+[Supply and levels](data-format.md#supply-and-levels). It does not add up currents.
+
+Kits come in this order: those that fit, the fewest unknowns, the fewest modules, the fewest wires,
+then the price. A budget makes the price a criterion: it then comes right after the unknowns, and a
+missing price counts as an unknown. `tools/check_format.py` gives the kits of `test/solver/` to the
+generator as well.
+
+`make a project…` asks for a folder, and the folder decides what happens:
+
+- an empty folder, or one with only `.git`, a README, a licence and `.gitignore`, gets a whole
+  project. What already lies there stays;
+- a folder with a `CMakeLists.txt` is a program, and gets only its board in `components/local-boards/`;
+- any other folder is refused.
+
+The list of what would happen comes first and nothing is written before `write`. A board file that
+differs is replaced only when ticked, and nothing is ever removed. If a file changed after the list
+was made, nothing is written at all. A kit that needs no module gets no
+board file: the project names the board of the catalog. The page does not talk to GitHub: the result
+is a folder, for git or for nothing.
+
+The board is chosen before the first build, because the dependencies follow from what it has:
+`board_select.py`, then `idf.py build`. In a project built for another board run
+`idf.py reconfigure build`; `board_select.py` says so.
+
+### edit
+
+`open a folder` takes a program or its `components/local-boards`, to edit the boards of that program. It takes the folder of the
 repository too, and then Chromium saves into the catalog in place. A page opened from a file has no
 server to load from, so there the repository comes first.
 

@@ -167,7 +167,9 @@
     },
     "hosts": {
         "spi": 3,
-        "i2c": 2
+        "i2c": 2,
+        "uart": 2,
+        "ledc": 8
     },
     "provides": {
         "bluetooth": {},

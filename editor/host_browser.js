@@ -32,20 +32,18 @@ async function catalogOf(picked) {
     return inside && (await fileIn(inside, CATALOG_MARK)) ? inside : null;
 }
 
-// The local-boards a folder is or holds. A program without them gets the folder.
+// The local-boards a folder is or holds, null when it does not.
 async function localOf(picked) {
     const [parent, name] = LOCAL_BOARDS;
     if (picked.name === name) return picked;
     const components = await folderIn(picked, parent);
-    const local = components && (await folderIn(components, name));
-    if (local) return local;
-    if (!(await fileIn(picked, 'CMakeLists.txt'))) return null;
-    return (await picked.getDirectoryHandle(parent, { create: true })).getDirectoryHandle(name, { create: true });
+    return components && folderIn(components, name);
 }
 
 const host = {
     folder: null,
     localFolder: null,
+    localProgram: null, // a program with no local-boards yet: they are made when the first file is saved
 
     get canOpenFolder() {
         return typeof window.showDirectoryPicker === 'function';
@@ -76,9 +74,10 @@ const host = {
             return { local: false, files };
         }
         const local = await localOf(picked);
-        if (!local) throw new Error(`${picked.name}: neither a catalog nor a program: no ${CATALOG_MARK}, no ${LOCAL_BOARDS.join('/')}, no CMakeLists.txt`);
-        await readFolder(local, '', files);
+        if (!local && !(await fileIn(picked, 'CMakeLists.txt'))) throw new Error(`${picked.name}: neither a catalog nor a program: no ${CATALOG_MARK}, no ${LOCAL_BOARDS.join('/')}, no CMakeLists.txt`);
+        if (local) await readFolder(local, '', files);
         this.localFolder = local;
+        this.localProgram = local ? null : picked;
         return { local: true, files };
     },
 
@@ -95,7 +94,41 @@ const host = {
         return { local: !mark, files };
     },
 
+    // A folder for a project: {folder, names}, the names of what lies in it.
+    async pickProject() {
+        const folder = await window.showDirectoryPicker({ mode: 'readwrite' });
+        const names = [];
+        for await (const [name] of folder.entries()) names.push(name);
+        return { folder, names };
+    },
+
+    // The text of a file under a folder, null when it is not there.
+    async readIn(folder, path) {
+        const parts = path.split('/');
+        const name = parts.pop();
+        let at = folder;
+        for (const part of parts) {
+            at = await folderIn(at, part);
+            if (!at) return null;
+        }
+        const file = await fileIn(at, name);
+        return file ? (await file.getFile()).text() : null;
+    },
+
+    async writeIn(folder, path, text) {
+        const parts = path.split('/');
+        const name = parts.pop();
+        let at = folder;
+        for (const part of parts) at = await at.getDirectoryHandle(part, { create: true });
+        const writable = await (await at.getFileHandle(name, { create: true })).createWritable();
+        await writable.write(text);
+        await writable.close();
+    },
+
     async write(path, text, local = false) {
+        if (local && !this.localFolder && this.localProgram) {
+            this.localFolder = await (await this.localProgram.getDirectoryHandle(LOCAL_BOARDS[0], { create: true })).getDirectoryHandle(LOCAL_BOARDS[1], { create: true });
+        }
         const root = local ? this.localFolder : this.folder;
         if (!root) {
             const link = document.createElement('a');
@@ -105,13 +138,7 @@ const host = {
             URL.revokeObjectURL(link.href);
             return false;
         }
-        const parts = path.split('/');
-        const name = parts.pop();
-        let folder = root;
-        for (const part of parts) folder = await folder.getDirectoryHandle(part, { create: true });
-        const writable = await (await folder.getFileHandle(name, { create: true })).createWritable();
-        await writable.write(text);
-        await writable.close();
+        await this.writeIn(root, path, text);
         return true;
     },
 };

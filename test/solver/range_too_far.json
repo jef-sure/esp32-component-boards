@@ -1,0 +1,6 @@
+{
+    "title": "Further than the PN532 module reaches: the PN5180 stays, its distance not known, and the page says so",
+    "answers": {"nfc_readers": 1, "nfc_range_mm": 60},
+    "kit": {"name": "esp32_devkit", "modules": {"pn5180_module": 1}},
+    "says": "the reading distance is not in the data"
+}

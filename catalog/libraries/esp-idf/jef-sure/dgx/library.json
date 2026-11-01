@@ -12,7 +12,7 @@
         {"via": "registry"},
         {"via": "git", "url": "https://github.com/jef-sure/esp32-component-dgx.git", "ref": "{version}"}
     ],
-    "described": "0.10.2",
+    "described": "0.10.3",
     "description": "Graphics on displays of SPI, QSPI, 8-bit parallel, MIPI-DSI and I2C, with its own panel drivers.",
     "values": {
         "color_order": {"rgb": "DgxScreenRGB", "bgr": "DgxScreenBGR"},
@@ -406,7 +406,7 @@
                     "ok": {"not": "NULL"}
                 }
             ],
-            "supports": {"depth_bits": [1]},
+            "supports": {"depth_bits": [1], "lines": ["cs"]},
             "controls": {
                 "orientation": {
                     "call": "dgx_st7920_orientation",
@@ -414,11 +414,12 @@
                     "ok": "none"
                 }
             },
-            "setup": [{"control": "orientation"}]
+            "setup": [{"control": "orientation"}],
+            "adapter": {"kind": "panel"}
         }
     },
     "adapter": {
-        "version": "^0.10.1",
+        "version": "^0.10.3",
         "symbol": "BOARD_DISPLAY_GRAPHICS",
         "requires": ["esp_driver_gpio"],
         "notes": "0.10.0 is not in the registry.",

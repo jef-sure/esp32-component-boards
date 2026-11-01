@@ -1,0 +1,18 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "waveshare_poe_b",
+    "title": "Waveshare PoE module (B)",
+    "description": "Takes power from the pairs of an RJ45 on the header of a board and gives it 5 V",
+    "devices": {"poe": {"class": "other", "provides": {"poe": {}}}},
+    "notes": ["Waveshare offers no schematic of the module on the page of the board."],
+    "checked": {
+        "poe": {
+            "level": "hardware",
+            "covers": ["devices.poe"],
+            "by": "Anton: the board in the case of tc-eth-p4 runs on it",
+            "date": "2026-10-14"
+        }
+    }
+}

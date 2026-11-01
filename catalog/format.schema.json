@@ -40,7 +40,7 @@
     "range": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "number" } },
     "classes": {
       "enum": ["display", "touch", "audio", "storage", "radio", "network", "nfc", "sensor", "io_expander", "pmic", "battery_adc", "adc", "camera", "imu", "rtc",
-               "button", "encoder", "keyboard", "gamepad", "led", "usb", "gps", "motor", "i2c_mux", "fuel_gauge", "other"]
+               "button", "encoder", "keyboard", "gamepad", "led", "buzzer", "usb", "gps", "motor", "i2c_mux", "fuel_gauge", "other"]
     },
     "class": {
       "description": "One role, or several for a chip that has them. Tools read it as an array.",
@@ -294,6 +294,7 @@
       "additionalProperties": false,
       "patternProperties": { "^x_": true },
       "properties": {
+        "lines": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 }, "description": "In a type: the lines the chip needs beside this bus, which a board wires in pins." },
         "address": { "$ref": "#/$defs/address" },
         "address_try": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/address" } },
         "cs": { "$ref": "#/$defs/line" },
@@ -404,14 +405,16 @@
         "variant": { "$ref": "#/$defs/name" },
         "on": { "$ref": "#/$defs/on" },
         "pins": { "$ref": "#/$defs/pins" },
+        "logic": { "type": "string", "minLength": 1, "description": "The step of power a high level on the lines of this device reaches: where its pull-ups go, or what its outputs drive. none: it puts nothing on them, as a display with no line back." },
         "config": { "type": "object" },
         "controls": { "$ref": "#/$defs/controls" },
         "provides": { "$ref": "#/$defs/provides" },
+        "ways": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/way" } },
         "start": { "$ref": "#/$defs/start" },
         "antenna": { "$ref": "#/$defs/antenna" },
         "notes": { "$ref": "#/$defs/notes" },
         "classes": { "type": "array", "description": "Made by the loader: class as an array." },
-        "wants": { "type": "object", "description": "Made by the loader: the kinds of bus the type asks for." },
+        "wants": { "type": "object", "description": "Made by the loader: the kinds of bus the type asks for, with the lines each needs." },
         "library": {
           "$ref": "#/$defs/libraryId",
           "description": "Which library of the chip this device uses; the loader fills it in when the catalog has one."
@@ -463,6 +466,7 @@
         "config": { "type": "object" },
         "controls": { "$ref": "#/$defs/controls" },
         "provides": { "$ref": "#/$defs/provides" },
+        "ways": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/way" } },
         "start": { "$ref": "#/$defs/start" },
         "notes": { "$ref": "#/$defs/notes" },
         "variants": {
@@ -505,6 +509,7 @@
             "count": { "type": "integer" },
             "valid": { "type": "array", "items": { "$ref": "#/$defs/gpio" } },
             "input_only": { "type": "array", "items": { "$ref": "#/$defs/gpio" } },
+            "high_mv_max": { "type": "integer", "minimum": 0, "description": "The most a pin takes as a high level, at the usual supply of its domain." },
             "strapping": { "type": "array", "items": { "$ref": "#/$defs/gpio" } },
             "pins": {
               "description": "What each GPIO can do besides being one, by its number. From the documentation of ESP-IDF.",
@@ -570,11 +575,43 @@
         }
       }
     },
+    "volts": { "description": "One voltage, or the range a device on it must take.", "oneOf": [{ "type": "number" }, { "$ref": "#/$defs/range" }] },
+    "sizeMm": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "number", "exclusiveMinimum": 0 } },
+    "mechanics": {
+      "description": "The board as a thing to fit in a case. Coordinates from its centre, y up.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "outline_mm": { "$ref": "#/$defs/sizeMm" },
+        "holes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["x_mm", "y_mm", "d_mm"],
+            "additionalProperties": false,
+            "properties": { "x_mm": { "type": "number" }, "y_mm": { "type": "number" }, "d_mm": { "type": "number", "exclusiveMinimum": 0 } }
+          }
+        },
+        "do": { "type": "string", "minLength": 1, "description": "What it takes to mount it." }
+      }
+    },
+    "way": {
+      "description": "One way to wire a device with no bus: its lines, and what it gives on them. The fewest lines come first.",
+      "type": "object",
+      "required": ["lines"],
+      "additionalProperties": false,
+      "properties": {
+        "lines": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "ledc": { "type": "integer", "minimum": 1, "description": "The LEDC channels one device takes this way." },
+        "gives": { "type": "object", "additionalProperties": { "type": "number" }, "description": "The figures of this way, as swing_v across a piezo disc." },
+        "do": { "type": "string", "minLength": 1, "description": "What a person does to wire it." }
+      }
+    },
     "connectorFile": {
       "required": ["pins"],
       "properties": {
         "pitch_mm": { "type": "number" },
-        "volts": { "description": "One voltage, or the range a device on it must take.", "oneOf": [{ "type": "number" }, { "$ref": "#/$defs/range" }] },
+        "volts": { "$ref": "#/$defs/volts" },
         "pins": { "type": "array", "items": { "type": "string" }, "description": "What each contact carries, from contact 1." }
       }
     },
@@ -623,6 +660,7 @@
         "line": { "$ref": "#/$defs/line", "description": "What switches it, or the rail of a PMIC. A line a device owns stays there: why says it." },
         "level": { "enum": [0, 1] },
         "mv": { "type": "integer", "minimum": 0 },
+        "volts": { "$ref": "#/$defs/volts", "description": "What a step with source connector takes from the board." },
         "ma_max": { "type": "integer", "minimum": 0 },
         "dropout_mv": { "$ref": "#/$defs/dropout" },
         "delay_ms": { "type": "integer", "minimum": 0 },
@@ -714,6 +752,7 @@
           "properties": {
             "width": { "type": "integer", "minimum": 1 },
             "height": { "type": "integer", "minimum": 1 },
+            "window_mm": { "$ref": "#/$defs/sizeMm", "description": "The opening that shows the panel, where the area of its pixels is not measured." },
             "mm_w": { "type": "number", "exclusiveMinimum": 0 },
             "mm_h": { "type": "number", "exclusiveMinimum": 0 },
             "memory_width": { "type": "integer", "minimum": 1 },
@@ -800,6 +839,57 @@
             }
           }
         }
+      }
+    },
+    "questions": {
+      "description": "catalog/questions.json: what the selection asks. The form of the page comes from it.",
+      "type": "object",
+      "required": ["format", "format_version", "questions"],
+      "additionalProperties": false,
+      "properties": {
+        "format": { "const": "jef-sure/boards" },
+        "format_version": { "const": 2 },
+        "questions": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/question" } }
+      }
+    },
+    "question": {
+      "type": "object",
+      "required": ["id", "text", "type"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/name" },
+        "text": { "type": "string", "minLength": 1 },
+        "type": { "enum": ["choice", "flag", "count", "number"] },
+        "max": { "type": "integer", "minimum": 1, "description": "The most a count takes." },
+        "when": { "type": "object", "description": "It is asked only when these answers are given, by the id of the question. true: any answer but none." },
+        "needs": { "$ref": "#/$defs/questionNeed" },
+        "limit": {
+          "description": "What a number limits instead of asking for a part.",
+          "type": "object",
+          "required": ["measure"],
+          "additionalProperties": false,
+          "properties": { "measure": { "enum": ["diagonal_in", "range_mm", "swing_v", "price_eur"] }, "of": { "type": "string", "description": "The class it is measured on." } }
+        },
+        "choices": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "required": ["value", "text"],
+            "additionalProperties": false,
+            "properties": { "value": { "type": "string" }, "text": { "type": "string", "minLength": 1 }, "needs": { "$ref": "#/$defs/questionNeed" } }
+          }
+        }
+      }
+    },
+    "questionNeed": {
+      "description": "What an answer asks of a board: a device of a class, or what the board provides.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "class": { "$ref": "#/$defs/class" },
+        "where": { "type": "object", "additionalProperties": { "type": "string" }, "description": "What the device must have, by the path of the field." },
+        "provides": { "type": "string", "minLength": 1 }
       }
     },
     "calibration": {
@@ -1189,6 +1279,7 @@
         "revision": { "type": "string", "minLength": 1, "description": "The revision of the printed board this file describes, as its maker writes it." },
         "price": { "$ref": "#/$defs/price" },
         "tariff": { "$ref": "#/$defs/tariff" },
+        "mechanics": { "$ref": "#/$defs/mechanics" },
         "mcu": { "$ref": "#/$defs/mcu" },
         "buses": { "$ref": "#/$defs/buses" },
         "devices": { "type": "object", "propertyNames": { "$ref": "#/$defs/name" }, "additionalProperties": { "$ref": "#/$defs/device" } },
@@ -1205,6 +1296,11 @@
               "on": { "$ref": "#/$defs/on" },
               "config": { "type": "object" },
               "pins": { "$ref": "#/$defs/pins" },
+              "supply": {
+                "type": "object",
+                "description": "The line of the board each step of the module with source connector takes from, by the name of the step.",
+                "additionalProperties": { "type": "string", "minLength": 1 }
+              },
               "devices": {
                 "type": "object",
                 "description": "The wiring of each part of the module, by its name there: a layer over that part.",

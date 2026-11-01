@@ -1,0 +1,6 @@
+{
+    "title": "A module only on UART: a port for each, the console left alone",
+    "answers": {"nfc_readers": 2, "nfc_range_mm": 200},
+    "modules": {"long_uart": {"format": "jef-sure/boards", "format_version": 2, "kind": "module", "name": "long_uart", "title": "A reader on UART", "devices": {"nfc": {"class": "nfc", "on": {"uart": {}}, "provides": {"nfc": {"range_mm": 300}}}}}},
+    "kit": {"name": "esp32_devkit", "modules": {"long_uart": 2}, "on": {"long_uart": "uart"}}
+}

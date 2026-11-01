@@ -12,7 +12,9 @@ Checks of the data format. Needs jsonschema and node: the Python of ESP-IDF has 
 6. resolve.py and editor/resolve.js give the same for every document that passes the schema;
 7. jsonschema and editor/schema.js agree on every document and on spoiled copies of them, dump of
    resolve.py and catalogJson of resolve.js write the same, boards_gen.py and editor/pins.js find
-   the same pins.
+   the same pins;
+8. the solver of the editor gives what the cases of test/solver/ expect, and catalog/questions.json
+   passes the schema.
 """
 import copy
 import json
@@ -34,6 +36,7 @@ SCHEMA = json.loads((ROOT / "catalog" / "format.schema.json").read_text())
 jsonschema.Draft202012Validator.check_schema(SCHEMA)
 RAW = jsonschema.Draft202012Validator(SCHEMA)
 RESOLVED = jsonschema.Draft202012Validator({"$ref": "#/$defs/resolved", "$defs": SCHEMA["$defs"]})
+QUESTIONS = jsonschema.Draft202012Validator({"$ref": "#/$defs/questions", "$defs": SCHEMA["$defs"]})
 RULES = json.loads((ROOT / "catalog" / "rules.json").read_text())
 FILE_RULES = {**RULES, "rules": [rule for rule in RULES["rules"] if rule.get("in_files")]}
 LEVELS = SCHEMA["$defs"]["level"]["enum"]
@@ -323,6 +326,27 @@ def main():
     documents_read, refused, differ = editor_differs(reached)
     print(f"Python and the editor: {documents_read} documents, {refused} refused by the schema, {len(differ)} differ {differ[:5]}")
     failed += bool(differ)
+
+    problems = errors_of(QUESTIONS, json.loads((ROOT / "catalog" / "questions.json").read_text()), "questions")
+    run = subprocess.run(["node", str(TESTS / "solver_cli.js")], capture_output=True, text=True)
+    if run.returncode:
+        problems.append(run.stderr[:800])
+    else:
+        found = json.loads(run.stdout)
+        problems += found["wrong"]
+        with tempfile.TemporaryDirectory() as out:
+            for at, project in enumerate(found["projects"]):
+                path = pathlib.Path(out) / "boards" / f"kit{at}" / "board.json"
+                path.parent.mkdir(parents=True)
+                path.write_text(json.dumps({**project, "name": f"kit{at}"}))
+                try:
+                    boards_gen.read_board(path)
+                except ValueError as error:
+                    problems.append(f"the generator refuses a kit over {project['extends']}: {error}")
+        print(f"the solver: {found['cases']} cases, {len(found['projects'])} kits, {len(problems)} wrong")
+    for problem in problems:
+        print(problem)
+    failed += bool(problems)
 
     for name, path in (("data_jc4827w543c.json", "devices.sound"), ("data_cyd_s028r.json", "devices.touch"), ("good_cyd_s028r_v3.json", "devices.touch"), ("good_imported_like.json", "devices.lcd")):
         print(f"{name[:-5]} {path}: {resolve.trust(reached[name], path, LEVELS)}")

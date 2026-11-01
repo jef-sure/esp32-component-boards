@@ -28,7 +28,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        board: [cyd_s028r, esp32_devkit, esp32s3_devkit, jc1060p470c, jc4827w543c, jc8012p4a1c]
+        board: [cyd_s028r, esp32_devkit, esp32_p4_eth, esp32_p4_poe_eth, esp32s3_devkit, jc1060p470c, jc4827w543c, jc8012p4a1c]
         idf: [release-v5.5, v6.1]
         module: [""]
         include:

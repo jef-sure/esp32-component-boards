@@ -1,0 +1,5 @@
+{
+    "title": "Without a budget the price counts last: fewer wires come first, whatever the board costs",
+    "answers": {"display": "character", "nfc_readers": 2},
+    "first": {"modules": {"lcd2004_pcf8574": 1, "pn532_module": 2}}
+}

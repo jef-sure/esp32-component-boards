@@ -1,0 +1,6 @@
+{
+    "title": "Power over Ethernet takes a board that has it: the port alone is not enough",
+    "answers": {"ethernet": true, "poe": true},
+    "fit": ["esp32_p4_poe_eth"],
+    "says": "no power over ethernet on this board"
+}

@@ -1,0 +1,145 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "esp32_p4_eth",
+    "title": "Waveshare ESP32-P4-ETH",
+    "maker": "waveshare",
+    "part": "ESP32-P4-ETH",
+    "revision": "Rev1.1",
+    "description": "An ESP32-P4 with 100 Mbit Ethernet on an IP101, an ES8311 with a microphone and a speaker output, a microSD slot, MIPI CSI and DSI connectors, a 40-pin header in the layout of a Pico. No radio.",
+    "notes": [
+        "No Wi-Fi and no Bluetooth: the schematic has no radio chip and the ESP32-P4 has none.",
+        "The DSI connector J2 has no bus here: the speed of a bus is that of a panel, measured on a board."
+    ],
+    "mcu": {
+        "target": "esp32p4",
+        "part": "ESP32P4NRW32",
+        "flash_mb": 32,
+        "psram_mb": 32,
+        "revision": "1.3",
+        "notes": "Revision 1.3 on the board of Anton; a board bought now may have another."
+    },
+    "price": {
+        "aliexpress": {
+            "shop": "AliExpress",
+            "currency": "EUR",
+            "range": [20, 20],
+            "date": "2026-11-01",
+            "source": "Anton: an approximate AliExpress price, without PoE"
+        }
+    },
+    "checked": {
+        "pins": {"level": "schematic", "source": "ESP32-P4-ETH-datasheet.pdf of Waveshare, sheet Rev1.1, and its silkscreen", "date": "2026-11-01"},
+        "ethernet_pins": {
+            "level": "hardware",
+            "covers": ["devices.ethernet", "buses.rmii"],
+            "by": "the sdkconfig of tc-eth-p4, which runs on this board: MDC 31, MDIO 52, reset 51, PHY address 1",
+            "date": "2026-10-14"
+        }
+    },
+    "buses": {
+        "csi": {"csi0": {"lanes": 2}},
+        "i2c": {"i2c0": {"sda": 7, "scl": 8}},
+        "i2s": {"i2s0": {"mclk": 13, "bclk": 12, "ws": 10, "dout": 9, "din": 11}},
+        "rmii": {
+            "rmii0": {
+                "txd0": 34,
+                "txd1": 35,
+                "txen": 49,
+                "rxd0": 29,
+                "rxd1": 30,
+                "crs_dv": 28,
+                "ref_clk": 50,
+                "mdc": 31,
+                "mdio": 52
+            }
+        },
+        "uart": {"uart0": {"tx": 37, "rx": 38}},
+        "sdmmc": {"sdmmc0": {"clk": 43, "cmd": 44, "d0": 39, "d1": 40, "d2": 41, "d3": 42}}
+    },
+    "power": [
+        {"name": "USB", "source": "usb", "mv": 5000, "why": "The net USB0_5V, the Type-C connector H2."},
+        {"name": "PoE", "source": "vin", "mv": 5000, "why": "Contact 5 of H7: a PoE module gives 5 V on the net VCC1_5V."},
+        {"name": "VCC1_5V", "from": [{"name": "USB", "through": "q_usb"}, "PoE"], "why": "Contact 40 of P1."},
+        {"name": "VCC_5V", "from": "VCC1_5V", "through": "d_5v", "feeds": ["amplifier"], "why": "Contact 39 of P1."},
+        {
+            "name": "ESP_3V3",
+            "from": "VCC_5V",
+            "through": "reg_3v3",
+            "regulator": "buck",
+            "mv": 3300,
+            "ma_max": 3000,
+            "feeds": ["mcu", "ethernet", "flash"]
+        },
+        {"name": "A3V3", "from": "VCC_5V", "through": "reg_audio", "regulator": "ldo", "mv": 3300, "feeds": ["sound", "mic"]},
+        {"name": "ESP_LDO_VO4", "from": "ESP_3V3", "why": "LDO channel 4 of the chip."},
+        {
+            "name": "TF_VCC",
+            "from": "ESP_LDO_VO4",
+            "through": "q_sd",
+            "feeds": ["sd"],
+            "why": "GPIO45 goes to the gate of Q1 and R22 holds the gate low, so the card has power until a program drives GPIO45 high."
+        }
+    ],
+    "shared_pins": {
+        "boot_txd1": {
+            "line": 35,
+            "devices": ["ethernet", "boot"],
+            "only_while": {"device": "ethernet", "control": "enabled", "value": "off"}
+        }
+    },
+    "connectors": {
+        "P1": {
+            "type": "2.54 mm header, 2x20 pins, the layout of a Pico",
+            "pins": [54, 19, "GND", 18, 17, 16, 15, "GND", 14, 6, 5, 4, "GND", 3, 2, 8, 7, "GND", 24, 25, 48, 47, "GND", 46, 33, 32, 27, "GND", 26, "ESP_EN", 23, 22, "GND", 21, 20, "ESP_3V3", "3V3_EN", "GND", "VCC_5V", "VCC1_5V"]
+        },
+        "H7": {"type": "header of a PoE module, 6 pins", "pins": ["RJ78", "RJ45", "RJ36", "RJ12", "VCC1_5V", "GND"]},
+        "J3": {"type": "USB 2.0 OTG, 4 pins", "pins": ["VCC_5V", "USBD_N", "USBD_P", "GND"]},
+        "H6": {"type": "MX 1.25 mm, 2 pins, a speaker", "pins": ["PA_OUTL+", "PA_OUTL-"]},
+        "J4": {"type": "RJ45 with the taps of its transformers on H7", "pins": ["TD+", "TD-", "RD+", "RD-"]}
+    },
+    "devices": {
+        "boot": {"class": "button", "pins": {"in": {"gpio": 35, "active": "low"}}},
+        "ethernet": {
+            "class": "network",
+            "ref": "U10",
+            "maker": "icplus",
+            "part": "IP101GRI",
+            "on": {"rmii.rmii0": {}},
+            "provides": {"ethernet": {}},
+            "pins": {"rst": 51},
+            "config": {"ref_clk": "from the PHY", "phy_address": 1},
+            "controls": {"enabled": {"how": "driver", "values": ["off", "on"], "start": "off", "read": "none"}},
+            "notes": "25 MHz crystal Y3; its 50 MHz output feeds RMII_CLK on GPIO50. TXD1 is GPIO35, the line of the BOOT button: a program that starts Ethernet loses the button."
+        },
+        "sound": {
+            "chip": "es8311",
+            "ref": "U9",
+            "part": "ES8311",
+            "on": {"i2c.i2c0": {}, "i2s.i2s0": {}},
+            "pins": {"pa": 53},
+            "config": {"sample_rate": 22050, "pa_voltage": 5, "codec_dac_voltage": 3.3},
+            "controls": {"volume": {"start": 25}},
+            "notes": "MIC1 is fitted: ASDOUT of the codec comes in on GPIO11. H6 takes a speaker of 8 ohm."
+        },
+        "sd": {
+            "class": "storage",
+            "ref": "TF1",
+            "on": {"sdmmc.sdmmc0": {}},
+            "config": {"media": "microsd"},
+            "notes": "Fed by LDO channel 4 of the chip, through Q1."
+        },
+        "usb_serial": {"class": "other", "ref": "U4", "part": "CH343P", "on": {"uart.uart0": {}}},
+        "amplifier": {"class": "other", "ref": "U11", "part": "NS4150B"},
+        "mic": {"class": "other", "ref": "MIC1"},
+        "flash": {"class": "other", "ref": "U7", "part": "GD25Q256EYIGR"},
+        "q_usb": {"class": "other", "ref": "Q2", "part": "AO3401"},
+        "d_5v": {"class": "other", "ref": "D2", "part": "MBR230LSFT1G"},
+        "reg_3v3": {"class": "other", "ref": "U1", "part": "MP1658GTF-Z"},
+        "reg_core": {"class": "other", "ref": "U3", "part": "MP1605GTF-Z"},
+        "reg_audio": {"class": "other", "ref": "U8", "part": "RT9193-33PB"},
+        "q_sd": {"class": "other", "ref": "Q1", "part": "SI2301CDS"},
+        "esd_lan": {"class": "other", "ref": "D1", "part": "RClamp0524PATCT"}
+    }
+}

@@ -22,6 +22,15 @@
         "psram_mhz": 80,
         "notes": "the QSPI bus divides 80 MHz by a whole number; 80 MHz garbles the picture on this board, so it runs at 40"
     },
+    "price": {
+        "aliexpress": {
+            "shop": "AliExpress",
+            "currency": "EUR",
+            "range": [25, 25],
+            "date": "2026-11-01",
+            "source": "Anton: an approximate AliExpress price for Germany"
+        }
+    },
     "checked": {
         "pins": {
             "level": "schematic",

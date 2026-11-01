@@ -1,0 +1,5 @@
+{
+    "title": "A bus of the board joins a kit only when it comes out: the CYD cannot take a reader",
+    "answers": {"nfc_readers": 1},
+    "kit": {"name": "esp32_devkit", "modules": {"pn5180_module": 1}, "on": {"pn5180_module": "spi"}}
+}

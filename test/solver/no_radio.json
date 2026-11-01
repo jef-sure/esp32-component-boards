@@ -1,0 +1,7 @@
+{
+    "title": "A chip with no radio on a board with no part that has one",
+    "answers": {"wifi": true},
+    "change": {"jc1060p470c": {"devices": {"radio": null}}},
+    "fit": ["cyd_s028r", "esp32_devkit", "esp32s3_devkit", "jc4827w543c", "jc8012p4a1c"],
+    "says": "no wi-fi on this board"
+}

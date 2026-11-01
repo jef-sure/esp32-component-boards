@@ -1,0 +1,7 @@
+{
+    "title": "A board that costs more than the budget does not fit and says so; one with no price stays with a question mark",
+    "answers": {"budget_eur": 10, "wifi": true},
+    "prices": {"esp32_devkit": [20, 25]},
+    "says": "it costs at least 20 euro",
+    "fit": ["esp32s3_devkit"]
+}

@@ -1,0 +1,5 @@
+{
+    "title": "A bus a display holds stays closed even when its lines come out: DGX does not release it",
+    "answers": {"nfc_readers": 2},
+    "change": {"cyd_s028r": {"connectors": {"X1": {"type": "a test", "pins": [13, 12, 14]}}}}
+}

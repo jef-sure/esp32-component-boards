@@ -54,18 +54,26 @@ void app_main(void)
         return;
     }
 
+    bool can_press = false;
 #if CONFIG_BOARD_TOUCH
     struct board_touch touch;
     dgx_di_pointer_t  *pointer = board_touch_start(&board, &touch) ? board_dgx_di_pointer(&touch) : NULL;
     if (pointer) dgx_lvgl_pointer_create(display, pointer);
     else ESP_LOGI(TAG, "board_touch_start: no touch panel");
+    can_press = pointer != NULL;
 #endif
 
-    lv_obj_t *button = lv_button_create(lv_screen_active());
-    lv_obj_center(button);
-    lv_obj_t *text = lv_label_create(button);
-    lv_label_set_text(text, "Press me");
-    lv_obj_add_event_cb(button, pressed, LV_EVENT_CLICKED, text);
+    if (can_press) {
+        lv_obj_t *button = lv_button_create(lv_screen_active());
+        lv_obj_center(button);
+        lv_obj_t *text = lv_label_create(button);
+        lv_label_set_text(text, "Press me");
+        lv_obj_add_event_cb(button, pressed, LV_EVENT_CLICKED, text);
+    } else {
+        lv_obj_t *text = lv_label_create(lv_screen_active());
+        lv_obj_center(text);
+        lv_label_set_text(text, board_info()->title);
+    }
     ESP_LOGI(TAG, "%s: %dx%d, a buffer of %lu bytes", board_info()->name, board.width, board.height, (unsigned long)size);
 
     for (;;) {

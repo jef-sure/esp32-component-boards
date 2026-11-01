@@ -1,0 +1,6 @@
+{
+    "title": "A module that takes 3.3 V to 5.5 V is fed from the lowest line that fits",
+    "answers": {"nfc_readers": 1},
+    "kit": {"name": "esp32_devkit", "modules": {"pn532_module": 1}},
+    "fed": {"board": "esp32_devkit", "use": "nfc", "supply": {"VCC": "3V3"}}
+}

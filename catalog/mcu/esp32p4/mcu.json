@@ -64,6 +64,7 @@
             54
         ],
         "input_only": [],
+        "high_mv_max": 3600,
         "strapping": [
             34,
             35,
@@ -269,13 +270,15 @@
     },
     "hosts": {
         "spi": 3,
-        "i2c": 3
+        "i2c": 3,
+        "uart": 5,
+        "ledc": 8
     },
     "provides": {
         "usb_otg": {},
         "mipi_dsi": {},
         "lcd_rgb": {},
-        "ethernet": {},
+        "emac": {},
         "sdmmc": {},
         "touch_pads": {},
         "twai": {}
@@ -284,6 +287,13 @@
         "facts": {
             "level": "vendor-docs",
             "source": "ESP-IDF esp-idf, components/soc/esp32p4, soc_caps.h"
+        },
+        "levels": {
+            "level": "datasheet",
+            "covers": [
+                "gpio.high_mv_max"
+            ],
+            "source": "Espressif datasheet of the chip, DC characteristics: VIH at most VDD + 0.3 V, at VDD 3.3 V"
         },
         "pins": {
             "level": "vendor-docs",

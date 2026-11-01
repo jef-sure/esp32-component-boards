@@ -1,0 +1,7 @@
+{
+    "title": "Each piezo disc takes a line of its own, while nothing asks for more swing",
+    "answers": {"beepers": 4},
+    "kit": {"name": "esp32_devkit", "modules": {"piezo_disc": 4}},
+    "says": "one leg to its GPIO",
+    "lines": {"board": "esp32_devkit", "count": 4}
+}

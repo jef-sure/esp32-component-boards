@@ -5,10 +5,10 @@
 
 function boardResolver(catalog) {
     const NOT_LINES = new Set(['hz', 'lanes', 'lane_mbps', 'phy_ldo_chan', 'phy_ldo_mv', 'baud', 'data']);
-    const TYPE_FIELDS = ['class', 'maker', 'part', 'compat', 'draw', 'pins', 'config', 'controls', 'provides', 'start', 'firmware'];
+    const TYPE_FIELDS = ['class', 'maker', 'part', 'compat', 'draw', 'pins', 'config', 'controls', 'provides', 'start', 'firmware', 'ways'];
     const LIBRARY_HISTORY = ['license', 'chips', 'transports', 'interfaces', 'groups', 'values'];
     const FIRMWARE_HISTORY = ['config', 'controls', 'provides'];
-    const REFERENCES = new Set(['over', 'via', 'left', 'right', 'after', 'devices', 'feeds', 'from', 'through', 'name']); // fields of a module that name its parts
+    const REFERENCES = new Set(['over', 'via', 'left', 'right', 'after', 'devices', 'feeds', 'from', 'through', 'name', 'logic']); // fields of a module that name its parts
     const REVISION_HISTORY = ['limits', 'provides', 'controls', 'sdkconfig'];
     const MODULE_FACTS = ['maker', 'part', 'revision', 'mcu', 'price', 'tariff']; // what a board keeps of a module beside its parts
 
@@ -143,7 +143,7 @@ function boardResolver(catalog) {
             if (has(connection, 'address')) delete connection.address_try;
         }
         out.on = isFilled(wired) ? wired : mapped(on, notRequired);
-        out.wants = mapped(entry.on || {}, (value) => ({ required: Boolean(value.required) }));
+        out.wants = mapped(entry.on || {}, (value) => ({ required: Boolean(value.required), ...(has(value, 'lines') ? { lines: value.lines } : {}) }));
         const libraries = librariesOf(device.chip);
         if (!has(out, 'library') && Object.keys(libraries).length === 1) out.library = Object.keys(libraries)[0];
         if (has(libraries, out.library)) {
@@ -197,6 +197,17 @@ function boardResolver(catalog) {
         return { ...device, on };
     }
 
+    // The steps a module takes from its board, on the lines the wiring names.
+    function supplied(steps, supply, name) {
+        const open = new Set(steps.filter((step) => step.source === 'connector').map((step) => step.name));
+        for (const step of supply.keys()) if (!open.has(step)) throw new Refused(`${name}: no step ${step} to feed`);
+        return steps.map((step) => {
+            if (!supply.has(step.name)) return step;
+            const { source, ...rest } = step;
+            return { ...rest, from: supply.get(step.name) };
+        });
+    }
+
     function useModule(doc, name, use) {
         const module = chain(load('modules', use.module));
         addModules(module);
@@ -222,7 +233,8 @@ function boardResolver(catalog) {
                 doc[field][`${name}_${key}`] = renamed(entry, names);
             }
         }
-        doc.power = [...(doc.power || []), ...renamed(module.power || [], names)];
+        const supply = new Map(Object.entries(use.supply || {}).map(([step, line]) => [names.get(step) ?? step, line]));
+        doc.power = [...(doc.power || []), ...supplied(renamed(module.power || [], names), supply, name)];
         if (!doc.power.length) delete doc.power;
         return { module: use.module, title: module.title, ...picked(module, MODULE_FACTS) };
     }

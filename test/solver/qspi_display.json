@@ -1,0 +1,5 @@
+{
+    "title": "A QSPI display on a dev board: a bus on a free host, chip select, reset, backlight",
+    "answers": {"display": "graphics"},
+    "kit": {"name": "esp32s3_devkit", "modules": {"tft153_st77916": 1}, "on": {"tft153_st77916": "qspi"}}
+}

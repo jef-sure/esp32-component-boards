@@ -1,0 +1,19 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "piezo_disc",
+    "title": "Bare piezo disc, 27 mm",
+    "maker": "youmile",
+    "price": {
+        "amazon": {
+            "shop": "Amazon",
+            "currency": "EUR",
+            "range": [0.3395, 0.3395],
+            "qty": 20,
+            "date": "2026-10-14",
+            "source": "An order of Anton: 20 discs with wires for 6.79 euro"
+        }
+    },
+    "devices": {"piezo": {"chip": "piezo", "logic": "none"}}
+}

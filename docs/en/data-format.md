@@ -13,6 +13,7 @@ describes every file. `tools/check_format.py` checks them.
 | `catalog/mcu/<target>/mcu.json` | a chip: its GPIOs, hosts and what it has. Made from ESP-IDF by `tools/make_mcu.py` |
 | `catalog/connectors/<type>/connector.json` | a type of connector: pins, voltage |
 | `catalog/rules.json` | what makes a board wrong and a schema cannot see |
+| `catalog/questions.json` | what the selection asks, and what each answer asks of a board |
 | `catalog/index.json` | the list of these files for the page of the editor, made by `tools/boards_gen.py --all` |
 | `components/local-boards/` of a program | what is the program's own, in the same layout: read before the catalog |
 
@@ -346,6 +347,8 @@ layer and is checked against `min`, `max` and `values`.
 }
 ```
 
+A chip names what it needs beside a bus in `lines` of its connection, as `"on": {"spi": {"required": true, "lines": ["busy", "rst"]}}`: a board wires them in `pins`, and a rule refuses a board that does not.
+
 `output` is what it can report, `specified` is where the maker promises accuracy.
 Other figures depend on the kind, such as `standards`, `targets_max` and `range_mm`
 of an NFC reader. A figure lies with what sets it: a limit of the
@@ -507,6 +510,53 @@ each contact carries from contact 1, and the board gives as many contacts. `imag
 stand in any file of the catalog, the file beside the JSON; `source` is required,
 and a vendor's photos are not copied. `at` places a mark in shares of the picture,
 and `up` shows where the top of the screen points.
+
+## Supply and levels
+
+A module says what it takes and what it puts on its lines. A board or a project says where it takes
+that from.
+
+```json
+"power": [{"name": "VCC", "source": "connector", "volts": [4.5, 5.5], "feeds": ["lcd"]}],
+"devices": {"lcd": {"chip": "hd44780", "logic": "VCC"}}
+```
+
+| field | on | what |
+|---|---|---|
+| `volts` | a step of `power` | what a step with `source: connector` takes, one voltage or a range |
+| `logic` | a device | the step a high level on its lines reaches: where its pull-ups go, or what its outputs drive |
+| `supply` | a module in `modules` | the line of the board each such step takes from, as `"supply": {"VCC": "5V"}` |
+| `gpio.high_mv_max` | a chip in `catalog/mcu/` | the most a pin takes as a high level, from the datasheet |
+
+`logic` is `none` for a device that puts nothing on the lines of the chip, as a display with no line
+back. A level above `high_mv_max` does not refuse a kit: the solver asks for a level shifter. A device with
+no `logic`, or a chip with no `high_mv_max`, is an unknown of the kit.
+
+`provides.emac` of a chip is the MAC alone. `ethernet` is a port: the device with the PHY provides
+it, as a radio provides `wifi`.
+
+## Ways of wiring
+
+A device with no bus lists its `ways`: the lines of each, the LEDC channels it takes and what it gives,
+the fewest lines first.
+
+```json
+"ways": [
+    {"lines": ["a"], "ledc": 1, "gives": {"swing_v": 3.3}, "do": "one leg to its GPIO, the other to ground"},
+    {"lines": ["a", "b"], "ledc": 2, "gives": {"swing_v": 6.6}, "do": "the legs to two GPIOs in antiphase"}
+]
+```
+
+So each piezo disc takes one pin and one channel, or two of each when a question asks for more swing.
+The solver takes the first way that gives what is asked and counts the channels against `hosts.ledc`
+of the chip.
+
+## Mechanics
+
+`mechanics` on a board or a module holds what a case needs: `outline_mm`, `holes` with `x_mm`, `y_mm`
+and `d_mm` from the centre, y up, and `do`, what it takes to mount it, which the page shows in a kit.
+`window_mm` of a panel is the opening that shows it, for a panel whose area of pixels is not measured;
+`mm_w` and `mm_h` are that area.
 
 ## Price
 

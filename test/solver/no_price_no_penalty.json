@@ -1,0 +1,7 @@
+{
+    "title": "Without a budget a missing price is no unknown: a board with no price and no module comes first",
+    "answers": {"display": "graphics"},
+    "modules": {"cheap_tft": {"format": "jef-sure/boards", "format_version": 2, "kind": "module", "name": "cheap_tft", "title": "A cheap panel on QSPI", "description": "A round 360x360 display module on QSPI, marked TFT 1.53 1.0. Not a board of its own: a project wires it to one.", "power": [{"name": "VCC", "source": "connector", "volts": [3, 3.6], "feeds": ["lcd"]}], "devices": {"lcd": {"chip": "st77916", "part": "TFT 1.53 1.0", "on": {"qspi": {"hz": 40000000}}, "logic": "VCC", "config": {"primary": true, "panel": {"width": 360, "height": 360, "mm_w": 27, "mm_h": 27}, "depth_bits": 16}, "controls": {"orientation": {"start": {"x": "left-right", "y": "top-bottom", "swap": false}}}, "notes": "The glass is marked T150XV-C16-04. The size in mm is that of the ST77916 example of esp32-component-dgx-lvgl, not measured."}}, "price": {"shop": {"shop": "test", "currency": "EUR", "range": [1, 1], "date": "2026-11-01", "source": "the case"}}}},
+    "change": {"cyd_s028r": {"price": null}, "jc4827w543c": {"price": null}, "jc1060p470c": {"price": null}, "jc8012p4a1c": {"price": null}},
+    "first": {"name": "cyd_s028r", "modules": {}}
+}

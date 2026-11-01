@@ -260,7 +260,9 @@ def parts_of(resolved):
     displays = []
     for name, device in resolved["devices"].items():
         classes = device["classes"]
-        if "display" in classes:
+        if device.get("used") is False:
+            board["kept"][name] = kept_numbers(device)
+        elif "display" in classes:
             displays.append(display_part(name, device, module))
         elif "touch" in classes:
             board["touches"].append(touch_part(name, device))
@@ -328,6 +330,8 @@ def read_board(path):
     if switched:
         raise ValueError(f"{path}: the glue cannot set the lines of power yet: {', '.join(switched)}")
     for name, device in resolved["devices"].items():
+        if device.get("used") is False:
+            continue
         if STARTED_CLASSES & set(device["classes"]) and not_started(device):
             raise ValueError(f"{path}: {name}: the glue cannot start this yet: {', '.join(not_started(device))}")
         if "touch" in device["classes"] and (device.get("config") or {}).get("over") == "none":
@@ -698,7 +702,7 @@ def gen_c(board):
     displays = [shown for shown in board.get("displays") or [] if is_pixel(shown)]
     groups = board.get("display_groups") or {}
     display_buses = {shown["bus"]["bus"] for shown in displays}
-    beside = [key for part, device in board["devices"].items() if part not in {shown["name"] for shown in displays} for key in device.get("on") or ()]
+    beside = [key for part, device in board["devices"].items() if part not in {shown["name"] for shown in displays} and device.get("used") is not False for key in device.get("on") or ()]
     beside += [name for name in display_buses if sum(shown["bus"]["bus"] == name for shown in displays) > 1]
     shared = {name for name in display_buses if bus_parts(name)[0] == "spi" and name in beside}
     plain_spi = {own: bus for own, bus in (buses.get("spi") or {}).items() if f"spi.{own}" in shared or f"spi.{own}" not in display_buses}
@@ -749,7 +753,8 @@ def gen_c(board):
             out(f"static const struct board_spi_bus board_spi_{own} = {{.host = {own.upper()}_HOST, .mosi = {c_gpio(bus['mosi'])}, .miso = {c_gpio(bus['miso'])}, .sclk = {c_gpio(bus['sclk'])}{hz}}};")
         for own, bus in i2c_buses[:1]:
             out(f"static const struct board_i2c_pins board_i2c_pins_of = {{.port = I2C_NUM_{port_of(own, 'i2c')}, .sda = {c_gpio(bus['sda'])}, .scl = {c_gpio(bus['scl'])}}}; /* i2c.{own} */")
-        for own, bus in sorted((buses.get("i2s") or {}).items()):
+        sounding = {bus_parts(sound["i2s_bus"])[1] for sound in sounds if "i2s_bus" in sound}  # the table of buses keeps the numbers of the rest
+        for own, bus in sorted(item for item in (buses.get("i2s") or {}).items() if item[0] in sounding):
             out(f"static const struct board_i2s_bus board_i2s_{own} = {{.port = I2S_NUM_{port_of(own, 'i2s')}, .mclk = {c_gpio(bus['mclk'])}, .bclk = {c_gpio(bus['bclk'])}, .ws = {c_gpio(bus['ws'])}, .dout = {c_gpio(bus['dout'])}, .din = {c_gpio(bus.get('din'))}}};")
         out("")
 

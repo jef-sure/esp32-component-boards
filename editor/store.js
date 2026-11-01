@@ -311,7 +311,7 @@ const useEditor = Pinia.defineStore('editor', {
                 if (!mode) throw new Error(`${folder.name}: not empty and not a program: nothing is written there`);
                 const files = {};
                 const board = kit.project ? name : kit.name;
-                if (kit.project) files[LOCAL_BOARD(name)] = `${catalogJson({ ...kit.project, name, title: `${kit.title} with ${kit.modules.map((item) => item.title).join(', ')}` })}\n`;
+                if (kit.project) files[LOCAL_BOARD(name)] = `${catalogJson({ ...kit.project, name, title: kit.modules.length ? `${kit.title} with ${kit.modules.map((item) => item.title).join(', ')}` : kit.title })}\n`;
                 if (mode === 'create') Object.assign(files, await skeletonOf(kit, name, board));
                 files[SELECTION] = `${JSON.stringify(library.solver.selectionOf(kit, this.kits, copied(this.answers), this.currency), null, 4)}\n`;
                 const rows = [];

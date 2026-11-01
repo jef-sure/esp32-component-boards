@@ -152,6 +152,7 @@ Any other kind (`sdio`, `sdspi`) is kept as data. The program reads it with
 | `library_version` | the version of the library, when it is not the one the record describes |
 | `needs` | what the program needs of the library, as things of its `supports` |
 | `firmware_version` | the firmware of this device, when it is not the newest described |
+| `used` | `false`: a project leaves this part of its board alone: its pins stay taken, no library comes for it, its `board_*_init` returns false |
 | `maker`, `part`, `marking`, `ref`, `draw` | what it physically is, see [What is on the board](#what-is-on-the-board) |
 | `price`, `tariff`, `count` | for what is bought apart, see [Price](#price) |
 | `class` | a role or a list of roles: `display`, `touch`, `audio`, `storage`, `radio`, `network`, `nfc`, `sensor`, `io_expander`, `pmic`, `battery_adc`, `adc`, `camera`, `imu`, `rtc`, `button`, `encoder`, `keyboard`, `gamepad`, `led`, `usb`, `gps`, `motor`, `i2c_mux`, `fuel_gauge`, `other` |

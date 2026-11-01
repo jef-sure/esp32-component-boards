@@ -1,0 +1,17 @@
+{
+    "title": "A touch asked for keeps the display it lies over, and the sound nobody asked for is left alone",
+    "answers": {
+        "touch": true
+    },
+    "says": "not asked: i2s_amp",
+    "quiet": {
+        "board": "jc4827w543c",
+        "text": "nv3041a"
+    },
+    "unused": {
+        "board": "jc4827w543c",
+        "parts": [
+            "sound"
+        ]
+    }
+}

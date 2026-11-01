@@ -1,5 +1,8 @@
 {
-    "title": "A gap equal to the longest reach is not enough",
-    "answers": {"nfc_readers": 2, "nfc_gap_mm": 60},
-    "without": "pn532_module"
+    "title": "A distance equal to the longest reach is not enough to be sure",
+    "answers": {
+        "nfc_readers": 2,
+        "nfc_gap_mm": 60
+    },
+    "says": "reaches 60 mm and the readers are 60 mm apart"
 }

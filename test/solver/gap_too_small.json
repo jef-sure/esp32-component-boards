@@ -1,6 +1,14 @@
 {
-    "title": "Readers closer than any reader of the catalog can stay",
-    "answers": {"nfc_readers": 2, "nfc_gap_mm": 25},
-    "fit": [],
-    "says": "no reader that stays under 25 mm"
+    "title": "Two PN532 work under one lid: a small distance is an unknown, not a refusal",
+    "answers": {
+        "nfc_readers": 2,
+        "nfc_gap_mm": 50
+    },
+    "kit": {
+        "name": "esp32_devkit",
+        "modules": {
+            "pn532_module": 2
+        }
+    },
+    "says": "reaches 60 mm and the readers are 50 mm apart"
 }

@@ -1,0 +1,28 @@
+{
+    "title": "Two readers and nothing else: a board with a display, touch and sound does not come first for one wire less",
+    "answers": {
+        "nfc_readers": 2
+    },
+    "first": {
+        "name": "esp32_devkit",
+        "modules": {
+            "pn532_module": 2
+        },
+        "on": {
+            "pn532_module": "spi"
+        }
+    },
+    "says": "on the board and not asked: nv3041a, gt911",
+    "quiet": {
+        "board": "jc4827w543c",
+        "text": "the board starts"
+    },
+    "unused": {
+        "board": "jc4827w543c",
+        "parts": [
+            "lcd",
+            "sound",
+            "touch"
+        ]
+    }
+}

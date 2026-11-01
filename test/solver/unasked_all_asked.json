@@ -1,0 +1,5 @@
+{
+    "title": "A display, touch and sound asked for: the board holds nothing more",
+    "answers": {"display": "graphics", "touch": true, "sound": true},
+    "quiet": {"board": "jc4827w543c", "text": "not asked"}
+}

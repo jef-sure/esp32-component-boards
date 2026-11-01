@@ -375,9 +375,13 @@ def main():
                 path.parent.mkdir(parents=True)
                 path.write_text(json.dumps({**project, "name": f"kit{at}"}))
                 try:
-                    boards_gen.read_board(path)
+                    board = boards_gen.read_board(path)
                 except ValueError as error:
                     problems.append(f"the generator refuses a kit over {project['extends']}: {error}")
+                    continue
+                unused = {part for part, device in (project.get("devices") or {}).items() if device.get("used") is False}
+                if unused & {part["name"] for part in (*(board.get("displays") or ()), *board["touches"], *board["sounds"])}:
+                    problems.append(f"the glue of a kit over {project['extends']} starts what the kit leaves alone")
         print(f"the solver: {found['cases']} cases, {len(found['projects'])} kits, {len(problems)} wrong")
     for problem in problems:
         print(problem)

@@ -130,10 +130,13 @@ committed, a program that asks by kind.
   comparison not yet checked against datasheets; `features`, `frame_bytes`, `stack`, `reads`, a range as
   `range_mm`, `identify` for clones. A question asks which cards, and a chip with no library in the catalog
   counts as an unknown of its kit.
-- From two readers on, a question asks the distance between their antennas: the longest `range_mm` of a
-  reader has to stay under it, and left empty it counts as an unknown of the kit. The rule is not measured
-  on two readers. `when` takes `{"at_least": n}`. A kit whose answers each have a module but not together
-  says so.
+- From two readers on, a question asks the distance between their antennas. A longest `range_mm` that reaches
+  it, or no answer, is an unknown of the kit and not a refusal: two PN532 work side by side in one case, and
+  two readers are not measured. `when` takes `{"at_least": n}`.
+- A kit says what its board holds and nobody asked for, and such a part counts after the modules and
+  before the wires, so a display does not come first for one wire less. `"used": false` on a device of a
+  project: its pins stay taken, no library comes for it, its `board_*_init` returns false. A kit sets it on
+  what was not asked for, but not on the display a touch that was asked for lies over.
 - A DSI bus needs its speed only with a panel on it, so `esp32_p4_eth` lists its free connector.
 - A question for the GPIOs already in use, for something added to wiring that exists.
 - Reports from people: issue forms for a price and for a board, `.github/workflows/reports.yml` and

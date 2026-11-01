@@ -152,6 +152,7 @@
 | `library_version` | версия библиотеки, если это не та, что описана в записи |
 | `needs` | что программе нужно от библиотеки, предметами из её `supports` |
 | `firmware_version` | прошивка этого устройства, если она не новейшая из описанных |
+| `used` | `false`: проект не использует эту деталь своей платы: пины остаются занятыми, библиотека для неё не приходит, её `board_*_init` возвращает false |
 | `maker`, `part`, `marking`, `ref`, `draw` | чем устройство является физически, см. [Что стоит на плате](#что-стоит-на-плате) |
 | `price`, `tariff`, `count` | для того, что покупается отдельно, см. [Цена](#цена) |
 | `class` | роль или список ролей: `display`, `touch`, `audio`, `storage`, `radio`, `network`, `nfc`, `sensor`, `io_expander`, `pmic`, `battery_adc`, `adc`, `camera`, `imu`, `rtc`, `button`, `encoder`, `keyboard`, `gamepad`, `led`, `usb`, `gps`, `motor`, `i2c_mux`, `fuel_gauge`, `other` |

@@ -401,6 +401,7 @@
         "part": { "type": "string", "minLength": 1, "description": "The maker's part number, when the chip's entry does not say it or says less." },
         "marking": { "type": "string", "minLength": 1, "description": "What the package shows, when the part is not known." },
         "ref": { "type": "string", "minLength": 1, "description": "Its designator on the schematic, as U6." },
+        "used": { "const": false, "description": "On the board, its pins taken, and no use of it: no library, no glue, its board_*_init returns false. A project says this of a part of its board it leaves alone." },
         "count": { "type": "integer", "minimum": 1, "description": "How many of this one product takes, for what has no wiring of its own: screws, cables. 1 when absent." },
         "price": { "$ref": "#/$defs/price" },
         "tariff": { "$ref": "#/$defs/tariff" },

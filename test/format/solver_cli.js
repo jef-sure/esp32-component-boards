@@ -94,6 +94,11 @@ for (const name of names) {
         const kit = fit.find((item) => item.name === given.avoids.board);
         if (!kit?.wires.length || kit.wires.some((wire) => given.avoids.pins.includes(wire.pin))) say(`${given.avoids.board} uses a pin it was told is in use`);
     }
+    if (given.unused) {
+        const kit = fit.find((item) => item.name === given.unused.board);
+        const left = Object.entries(kit?.project?.devices ?? {}).filter(([, device]) => device.used === false).map(([part]) => part).sort();
+        if (JSON.stringify(left) !== JSON.stringify(given.unused.parts)) say(`${given.unused.board} leaves alone: ${left}`);
+    }
     if (given.without && fit.some((kit) => kit.modules.some((module) => module.name === given.without))) say(`a kit with ${given.without} fits`);
     if (given.fed) {
         const kit = fit.find((item) => item.name === given.fed.board && item.project?.modules[given.fed.use]);

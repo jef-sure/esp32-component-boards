@@ -347,7 +347,7 @@ idf.py reconfigure build flash monitor</pre>
                     </div>
                 </section>
                 <p class="summary"><b>{{ t(fit.length === 1 ? '{0} kit fits' : '{0} kits fit', fit.length) }}</b>
-                    <span class="hint">{{ t(asked ? 'The fewest unknowns first, then the fewest modules and wires; the price counts last, or after the unknowns with a budget.' : 'Nothing is asked yet, so every board fits.') }}</span></p>
+                    <span class="hint">{{ t(asked ? 'The fewest unknowns first, then the fewest modules, the least you did not ask for and the fewest wires; the price counts last, or after the unknowns with a budget.' : 'Nothing is asked yet, so every board fits.') }}</span></p>
                 <p class="project"><label>{{ t('Project name') }} <input type="text" v-model="store.projectName"></label>
                     <span class="hint">{{ t('An empty folder gets a whole project. A folder with a program gets only its board.') }}</span></p>
                 <article v-for="kit in fit" :key="kit.name + kit.modules.map((item) => item.name).join()" class="kit">

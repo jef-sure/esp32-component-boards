@@ -1,7 +1,24 @@
 {
-    "title": "Two readers 100 mm apart: the PN5180 reaches 120 mm and goes, the PN532 stays",
-    "answers": {"nfc_readers": 2, "nfc_gap_mm": 100},
-    "kit": {"name": "esp32_devkit", "modules": {"pn532_module": 2}},
-    "without": "pn5180_module",
-    "quiet": {"board": "esp32_devkit", "text": "distance between the readers"}
+    "title": "Two readers 100 mm apart: the PN5180 reaches 120 mm, so it stays as an unknown, and the PN532 comes first",
+    "answers": {
+        "nfc_readers": 2,
+        "nfc_gap_mm": 100
+    },
+    "first": {
+        "name": "esp32_devkit",
+        "modules": {
+            "pn532_module": 2
+        }
+    },
+    "kit": {
+        "name": "esp32_devkit",
+        "modules": {
+            "pn5180_module": 2
+        }
+    },
+    "says": "PN5180 module reaches 120 mm and the readers are 100 mm apart",
+    "quiet": {
+        "board": "esp32_devkit",
+        "text": "distance between the readers is not given"
+    }
 }

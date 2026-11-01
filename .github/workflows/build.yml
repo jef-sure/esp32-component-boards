@@ -59,6 +59,29 @@ jobs:
           path: examples/hello_lvgl
           command: idf.py build
 
+  parts-left-alone:
+    name: a project that leaves parts alone on ESP-IDF ${{ matrix.idf }}
+    needs: check
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        idf: [release-v5.5, v6.1]
+    steps:
+      - uses: actions/checkout@v4
+      - name: write the project as the page does
+        run: |
+          mkdir -p examples/hello_board/components/local-boards/boards/project_unused
+          cp test/format/good/project_unused_parts.json examples/hello_board/components/local-boards/boards/project_unused/board.json
+          python3 tools/board_select.py project_unused examples/hello_board
+      - name: build it
+        uses: espressif/esp-idf-ci-action@v1
+        with:
+          esp_idf_version: ${{ matrix.idf }}
+          target: esp32s3
+          path: examples/hello_board
+          command: idf.py build
+
   local-boards:
     name: a board of the program on ESP-IDF ${{ matrix.idf }}
     needs: check

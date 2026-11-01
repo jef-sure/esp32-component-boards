@@ -1,0 +1,17 @@
+{
+    "title": "A graphics display asked for: a board that has one beats a module, though it holds touch and sound too",
+    "answers": {
+        "display": "graphics"
+    },
+    "first": {
+        "name": "cyd_s028r",
+        "modules": {}
+    },
+    "unused": {
+        "board": "cyd_s028r",
+        "parts": [
+            "sound",
+            "touch"
+        ]
+    }
+}

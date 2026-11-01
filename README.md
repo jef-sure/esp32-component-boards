@@ -124,6 +124,7 @@ tools/check_boards.py                  the generated is what the data says; pins
 tools/board_pins.py                    the map of a board's pins and its tree
 tools/board_select.py                  choose the board for a project
 tools/board_bom.py                     what to buy for a product, with prices as ranges
+tools/update_rates.py                  the exchange rates of the catalog, from the ECB
 editor/                                the page: what to build, a kit, a project; and the editor. Any static server from the root, then /editor/
 examples/hello_board/                  the smallest program, built for every board in CI
 examples/hello_lvgl/                   LVGL through DGX-LVGL, built in CI for every board with a graphics display

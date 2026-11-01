@@ -1,0 +1,5 @@
+{
+    "title": "Eleven outputs on two pins: LEDC and MCPWM of an S3 hold ten, and RMT has no antiphase",
+    "answers": {"outputs": [{"kind": "tone", "hz": 440, "pins": 2}, {"kind": "tone", "hz": 440, "pins": 2}, {"kind": "tone", "hz": 440, "pins": 2}, {"kind": "tone", "hz": 440, "pins": 2}, {"kind": "tone", "hz": 440, "pins": 2}, {"kind": "tone", "hz": 440, "pins": 2}, {"kind": "tone", "hz": 440, "pins": 2}, {"kind": "tone", "hz": 440, "pins": 2}, {"kind": "tone", "hz": 440, "pins": 2}, {"kind": "tone", "hz": 440, "pins": 2}, {"kind": "tone", "hz": 440, "pins": 2}]},
+    "says": "this chip does not give output 11"
+}

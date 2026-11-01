@@ -36,8 +36,7 @@
     "hosts": {
         "spi": 2,
         "i2c": 1,
-        "uart": 2,
-        "ledc": 6
+        "uart": 2
     },
     "provides": {
         "wifi": {},

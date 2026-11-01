@@ -1,6 +1,0 @@
-{
-    "title": "Five discs on two lines each want ten LEDC channels: no chip here has them",
-    "answers": {"beepers": 5, "beep_swing_v": 6},
-    "fit": [],
-    "says": "it takes 10 LEDC channels"
-}

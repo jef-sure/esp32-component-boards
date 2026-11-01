@@ -551,10 +551,19 @@ So each piezo disc takes one pin and one channel, or two of each when a question
 The solver takes the first way that gives what is asked and counts the channels against `hosts.ledc`
 of the chip.
 
+## Frequency sources
+
+`frequency_sources` of a chip in `catalog/mcu/` lists where it gets a frequency, in the order to try
+them. Each has `kind`, which picks the formula of the solver, `timers` (how many frequencies at once),
+`outputs` (how many pins), `pairs` (two pins in antiphase) and `can`, what can be changed while it runs:
+`frequency`, `duty`, `phase`, `fade`, `pause`, `dead_time`, `sync`, `carrier`, `loop`, `start_stop`,
+`divider`. A crystal of a board is a device that provides `clock` with `freq_mhz`.
+
 ## Mechanics
 
-`mechanics` on a board or a module holds what a case needs: `outline_mm`, `holes` with `x_mm`, `y_mm`
-and `d_mm` from the centre, y up, and `do`, what it takes to mount it, which the page shows in a kit.
+`mechanics` on a board or a module holds what a case needs: `outline_mm` and `holes` with `x_mm`, `y_mm`
+and `d_mm` from the centre, y up. `do` beside it lists what a person does to fit the part, beyond the
+wires, and the page shows it in a kit.
 `window_mm` of a panel is the opening that shows it, for a panel whose area of pixels is not measured;
 `mm_w` and `mm_h` are that area.
 
@@ -574,10 +583,14 @@ one, as a project adds what it really paid.
 |---|---|
 | `shop` | where it is sold |
 | `currency` | the code, as `EUR` |
-| `range` | lowest and highest price of one unit, never one number. "Less than 3" is `[0, 3]` |
+| `range` | lowest and highest price of one unit, never one number. "Less than 3" is `[0, 3]`, and a kit counts it as 3 |
 | `qty` | the least quantity this price holds for, 1 when absent. Several offers of one shop give its prices by batch |
 | `date`, `source` | when the price was seen and who says so: a price gets old |
 | `notes` | anything else |
+
+A price may be in any currency. The page shows them, and takes a budget, in the currency chosen, by `catalog/rates.json`, the reference
+rates of the European Central Bank for one day, written by `tools/update_rates.py`. A currency with no
+rate there counts as no price.
 
 Delivery and duty are not here: they depend on the whole order, not on one board. See
 [board_bom.py](tools.md#board_bompy).

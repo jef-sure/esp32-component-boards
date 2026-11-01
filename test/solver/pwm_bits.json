@@ -1,0 +1,6 @@
+{
+    "title": "PWM of 18 bits: the LEDC counter of an ESP32 has 20, that of an S3 has 14, and whole ticks of MCPWM do not reach it",
+    "answers": {"outputs": [{"kind": "pwm", "hz": 100, "bits": 18, "pins": 1}]},
+    "kit": {"name": "esp32_devkit", "modules": {}},
+    "says": "this chip does not give output 1: 100 Hz"
+}

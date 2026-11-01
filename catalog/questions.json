@@ -21,14 +21,13 @@
         },
         {"id": "touch", "text": "A touch panel", "type": "flag", "needs": {"class": "touch"}},
         {"id": "sound", "text": "Sound", "type": "flag", "needs": {"class": "audio"}},
-        {"id": "beepers", "text": "Piezo discs", "type": "count", "max": 8, "needs": {"class": "buzzer"}},
-        {"id": "beep_swing_v", "text": "Swing across each disc at least, V: 3.3 on one pin, 6.6 on two", "type": "number", "when": {"beepers": true}, "limit": {"measure": "swing_v", "of": "buzzer"}},
+        {"id": "outputs", "text": "Tones and PWM", "type": "outputs"},
         {"id": "nfc_readers", "text": "NFC readers", "type": "count", "max": 4, "needs": {"class": "nfc"}},
         {"id": "nfc_range_mm", "text": "Reading distance at least, mm, with the wall of the case", "type": "number", "when": {"nfc_readers": true}, "limit": {"measure": "range_mm", "of": "nfc"}},
         {"id": "wifi", "text": "Wi-Fi", "type": "flag", "needs": {"provides": "wifi"}},
         {"id": "bluetooth", "text": "Bluetooth", "type": "flag", "needs": {"provides": "bluetooth"}},
         {"id": "ethernet", "text": "Ethernet", "type": "flag", "needs": {"provides": "ethernet"}},
         {"id": "poe", "text": "Power over Ethernet", "type": "flag", "when": {"ethernet": true}, "needs": {"provides": "poe"}},
-        {"id": "budget_eur", "text": "Budget for one, euro", "type": "number", "limit": {"measure": "price_eur"}}
+        {"id": "budget", "text": "Budget for one kit", "type": "number", "top": true, "limit": {"measure": "price"}}
     ]
 }

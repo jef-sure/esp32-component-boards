@@ -266,67 +266,92 @@ const NewDocument = {
 const MARKS = { yes: '✓', no: '✗', unknown: '?', do: '→' };
 
 // Which question a board and its modules answer: the first screen.
+const numberOf = (event) => (event.target.value === '' ? undefined : Number(event.target.value));
+
 const SelectPage = {
     setup() {
         const store = useEditor();
         const fit = computed(() => store.kits.filter((kit) => kit.fits));
         const others = computed(() => store.kits.filter((kit) => !kit.fits));
-        const money = (price) => (!price ? '' : !price.known ? 'price not known' : `${price.low === price.high ? price.low : `${price.low}–${price.high}`} EUR${price.missing.length ? ' + ?' : ''}`);
-        const number = (event) => (event.target.value === '' ? undefined : Number(event.target.value));
-        return { store, host, fit, others, money, number, MARKS };
+        const asked = computed(() => Object.values(store.answers).some((answer) => (Array.isArray(answer) ? answer.length : answer && answer !== 'none')));
+        const addOutput = () => store.answers.outputs.push({ kind: 'tone', hz: undefined, ppm: undefined, jitter: 'any', bits: 8, pins: 1, live: false });
+        // a plan belongs to the answers it was made for
+        Vue.watch(() => store.answers, () => { store.plan = null; }, { deep: true });
+        const money = (price) => (!price ? '' : !price.known ? translate(store.language, 'price not known') : `${price.low === price.high ? price.low : `${price.low}–${price.high}`} ${price.currency}${price.missing.length ? ' + ?' : ''}`);
+        return { store, host, fit, others, asked, addOutput, money, numberOf, MARKS };
     },
     template: `
         <div class="select">
             <form class="questions" @submit.prevent>
-                <h2>Let's build something great!</h2>
+                <h2>{{ t("Let's build something great!") }}</h2>
                 <div v-for="question in store.questions" :key="question.id" class="question">
-                    <label v-if="question.type === 'flag'"><input type="checkbox" v-model="store.answers[question.id]"> {{ question.text }}</label>
+                    <label v-if="question.type === 'flag'"><input type="checkbox" v-model="store.answers[question.id]"> {{ t(question.text) }}</label>
+                    <template v-else-if="question.type === 'outputs'">
+                        <label>{{ t(question.text) }}</label>
+                        <div v-for="(output, i) in store.answers.outputs" :key="i" class="output">
+                            <select v-model="output.kind"><option value="tone">{{ t('tone') }}</option><option value="pwm">PWM</option></select>
+                            <label><input type="number" min="0" step="any" v-model.number="output.hz"> {{ t('Hz') }}</label>
+                            <template v-if="output.kind === 'tone'">
+                                <label>± <input type="number" min="0" step="any" v-model.number="output.ppm" :placeholder="t('any')"> ppm</label>
+                                <select v-model="output.jitter"><option value="any">{{ t('any jitter') }}</option><option value="none">{{ t('no jitter of the divider') }}</option></select>
+                            </template>
+                            <label v-else><input type="number" min="1" step="1" v-model.number="output.bits"> {{ t('bits of duty') }}</label>
+                            <label><input type="checkbox" v-model="output.live"> {{ t('changes while running') }}</label>
+                            <select v-model.number="output.pins"><option :value="1">{{ t('one pin') }}</option><option :value="2">{{ t('two pins in antiphase') }}</option></select>
+                            <button class="drop" @click.prevent="store.answers.outputs.splice(i, 1)">×</button>
+                        </div>
+                        <button @click.prevent="addOutput">{{ t('add an output') }}</button>
+                        <div v-if="store.answers.outputs.length" class="hint">{{ t('Frequencies are calculated, not measured.') }}</div>
+                    </template>
                     <template v-else>
-                        <label>{{ question.text }}</label>
-                        <select v-if="question.type === 'choice'" v-model="store.answers[question.id]">
-                            <option v-for="choice in question.choices" :key="choice.value" :value="choice.value">{{ choice.text }}</option>
+                        <label>{{ t(question.text) }}</label>
+                        <select v-if="question.type === 'choice'" :value="store.answers[question.id] ?? question.choices[0].value" @change="store.answers[question.id] = $event.target.value">
+                            <option v-for="choice in question.choices" :key="choice.value" :value="choice.value">{{ t(choice.text) }}</option>
                         </select>
-                        <input v-else type="number" min="0" :max="question.max" step="any" :value="store.answers[question.id]" @input="store.answers[question.id] = number($event)">
+                        <input v-else type="number" min="0" :max="question.max" step="any" :value="store.answers[question.id]" @input="store.answers[question.id] = numberOf($event)">
                     </template>
                 </div>
             </form>
             <div class="kits">
                 <section v-if="store.plan" class="plan">
-                    <h3>{{ store.plan.mode === 'create' ? 'A new project in' : 'The project' }} {{ store.plan.folderName }}</h3>
+                    <h3>{{ t(store.plan.mode === 'create' ? 'A new project in' : 'The project') }} {{ store.plan.folderName }}</h3>
                     <table>
                         <tr v-for="row in store.plan.rows" :key="row.path" :class="row.state">
                             <td><code>{{ row.path }}</code></td>
-                            <td v-if="row.state === 'new'">new</td>
-                            <td v-else-if="row.state === 'same'">the same, left as it is</td>
-                            <td v-else-if="row.state === 'kept'">it is there, left as it is</td>
-                            <td v-else><label><input type="checkbox" v-model="row.replace"> it differs: replace it</label></td>
+                            <td v-if="row.state === 'new'">{{ t('new') }}</td>
+                            <td v-else-if="row.state === 'same'">{{ t('the same, left as it is') }}</td>
+                            <td v-else-if="row.state === 'kept'">{{ t('it is there, left as it is') }}</td>
+                            <td v-else><label><input type="checkbox" v-model="row.replace"> {{ t('it differs: replace it') }}</label></td>
                         </tr>
                     </table>
-                    <details v-for="row in store.plan.rows.filter((item) => item.state === 'changes')" :key="row.path"><summary>{{ row.path }}: what lies there and what would</summary>
+                    <details v-for="row in store.plan.rows.filter((item) => item.state === 'changes')" :key="row.path"><summary>{{ t('{0}: what lies there and what would', row.path) }}</summary>
                         <div class="both"><pre>{{ row.old }}</pre><pre>{{ row.text }}</pre></div>
                     </details>
-                    <p v-if="store.plan.needsComponent" class="locked">This project does not name jef-sure/boards. Add it to <code>main/idf_component.yml</code> yourself: the file stays as it is.</p>
-                    <p v-if="!store.plan.written"><button @click="store.writeProject()">write</button> <button @click="store.plan = null">cancel</button></p>
+                    <p v-if="store.plan.needsComponent" class="locked">{{ t('This project does not name jef-sure/boards. Add it to main/idf_component.yml yourself: the file stays as it is.') }}</p>
+                    <p v-if="!store.plan.written"><button @click="store.writeProject()">{{ t('write') }}</button> <button @click="store.plan = null">{{ t('cancel') }}</button></p>
                     <div v-else>
-                        <p class="good">{{ store.plan.written.length }} file(s) written, nothing else touched.</p>
+                        <p class="good">{{ t('{0} file(s) written, nothing else touched.', store.plan.written.length) }}</p>
                         <pre>python3 path/to/boards/tools/board_select.py {{ store.plan.board }} .
 idf.py {{ store.plan.mode === 'create' ? 'build' : 'reconfigure build' }} flash monitor</pre>
                     </div>
                 </section>
-                <p class="project"><label>Project name <input type="text" v-model="store.projectName"></label>
-                    <span class="hint">An empty folder gets a whole project. A folder with a program gets only its board.</span></p>
+                <p class="summary"><b>{{ t(fit.length === 1 ? '{0} kit fits' : '{0} kits fit', fit.length) }}</b>
+                    <span class="hint">{{ t(asked ? 'The fewest unknowns first, then the fewest modules and wires; the price counts last, or after the unknowns with a budget.' : 'Nothing is asked yet, so every board fits.') }}</span></p>
+                <p class="project"><label>{{ t('Project name') }} <input type="text" v-model="store.projectName"></label>
+                    <span class="hint">{{ t('An empty folder gets a whole project. A folder with a program gets only its board.') }}</span></p>
                 <article v-for="kit in fit" :key="kit.name + kit.modules.map((item) => item.name).join()" class="kit">
-                    <h3>{{ kit.title }} <span class="note">{{ money(kit.price) }}</span></h3>
+                    <img v-if="kit.picture" class="picture" :src="'../catalog/' + kit.picture" :alt="kit.title">
+                    <h3>{{ kit.headline }} <span class="note">{{ money(kit.price) }}</span></h3>
                     <ul><li v-for="line in kit.says" :key="line.text" :class="line.level"><span class="mark">{{ MARKS[line.level] }}</span> {{ line.text }}</li></ul>
-                    <details v-if="kit.wires.length || kit.supply.length"><summary>the wires ({{ kit.wires.length }}, power apart)</summary>
-                        <table class="pins"><tr v-for="wire in kit.wires" :key="wire.what + wire.line"><td>{{ wire.what }}</td><td>{{ wire.line }}</td><td>GPIO {{ wire.pin }}</td></tr>
-                            <tr v-for="wire in kit.supply" :key="'power' + wire.what + wire.line"><td>{{ wire.what }}</td><td>{{ wire.line }}</td><td>{{ wire.from }}</td></tr></table>
+                    <details v-if="kit.wiring.length"><summary>{{ t('the wires') }}</summary>
+                        <div v-for="module in kit.wiring" :key="module.use" class="wiring"><b>{{ module.title }}</b>
+                            <span v-for="wire in module.lines" :key="wire.line"><code>{{ wire.line }}</code> → {{ wire.to }}</span></div>
                     </details>
-                    <button v-if="host.canOpenFolder" @click="store.planProject(kit)">make a project…</button>
-                    <span v-else class="hint">Writing a project into a folder takes Chromium.</span>
+                    <button v-if="host.canOpenFolder" @click="store.planProject(kit)">{{ t('make a project…') }}</button>
+                    <span v-else class="hint">{{ t('Writing a project into a folder takes Chromium.') }}</span>
                 </article>
-                <p v-if="!fit.length">Nothing fits these answers.</p>
-                <details v-if="others.length" class="others"><summary>What does not fit, and why ({{ others.length }})</summary>
+                <p v-if="!fit.length">{{ t('Nothing fits these answers.') }}</p>
+                <details v-if="others.length" class="others"><summary>{{ t('What does not fit, and why ({0})', others.length) }}</summary>
                     <article v-for="kit in others" :key="kit.name" class="kit">
                         <h3>{{ kit.title }}</h3>
                         <ul><li v-for="line in kit.says" :key="line.text" :class="line.level"><span class="mark">{{ MARKS[line.level] }}</span> {{ line.text }}</li></ul>
@@ -343,18 +368,23 @@ const app = createApp({
         const store = useEditor();
         Vue.onMounted(() => store.start());
         const VIEWS = ['card', 'pins', 'json'];
+        Vue.watch(() => store.language, (language) => {
+            localStorage.setItem(PREFERENCES.language, language);
+            document.documentElement.lang = language;
+        }, { immediate: true });
+        Vue.watch(() => store.currency, (currency) => localStorage.setItem(PREFERENCES.currency, currency));
         const jsonOf = computed(() => (store.jsonResolved ? JSON.stringify(store.checks.resolved, null, 2) : store.saved));
-        return { store, host, VIEWS, jsonOf };
+        return { store, host, VIEWS, jsonOf, numberOf, LANGUAGES };
     },
     template: `
         <header>
             <h1>boards</h1>
             <span class="views">
-                <button :class="{ here: store.page === 'select' }" @click="store.page = 'select'">select</button>
-                <button :class="{ here: store.page === 'edit' }" @click="store.page = 'edit'">edit</button>
+                <button :class="{ here: store.page === 'select' }" @click="store.page = 'select'">{{ t('select') }}</button>
+                <button :class="{ here: store.page === 'edit' }" @click="store.page = 'edit'">{{ t('edit') }}</button>
             </span>
-            <button v-if="host.canOpenFolder" title="a program or its local-boards; the repository, to save into the catalog" @click="store.openFolder()">open a folder</button>
-            <label v-else class="button">open a folder<input type="file" webkitdirectory hidden @change="store.openPicked($event.target.files)"></label>
+            <button v-if="host.canOpenFolder" :title="t('a program or its local-boards; the repository, to save into the catalog')" @click="store.openFolder()">{{ t('open a folder') }}</button>
+            <label v-else class="button">{{ t('open a folder') }}<input type="file" webkitdirectory hidden @change="store.openPicked($event.target.files)"></label>
             <template v-if="store.entry && store.page === 'edit'">
                 <span class="path">{{ store.entry.path }}</span>
                 <span v-if="store.edited(store.entry)" class="tag open">edited</span>
@@ -362,6 +392,15 @@ const app = createApp({
             </template>
             <span class="say">{{ store.note }}</span>
             <span class="say wrong">{{ store.error }}</span>
+            <span class="top">
+                <template v-if="store.page === 'select'">
+                    <label v-for="question in store.topQuestions" :key="question.id">{{ t(question.text) }}
+                        <input type="number" min="0" step="any" :value="store.answers[question.id]" @input="store.answers[question.id] = numberOf($event)"></label>
+                </template>
+                <label>{{ t('Prices in') }}
+                    <select v-model="store.currency"><option v-for="currency in store.currencies" :key="currency">{{ currency }}</option></select></label>
+                <select v-model="store.language" :aria-label="store.language"><option v-for="(language, code) in LANGUAGES" :key="code" :value="code">{{ language.title }}</option></select>
+            </span>
         </header>
         <p v-if="!store.loaded" class="start">The page is not served from the repository, so it has no catalog: open the folder of the repository.
             A program or its <code>local-boards</code> comes after it.</p>
@@ -403,4 +442,5 @@ const app = createApp({
 
 app.config.globalProperties.PLACES_OPEN = PLACES_OPEN;
 app.use(Pinia.createPinia());
+app.config.globalProperties.t = (text, ...values) => translate(useEditor().language, text, ...values);
 app.mount('#app');

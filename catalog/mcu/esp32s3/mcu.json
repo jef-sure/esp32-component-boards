@@ -276,8 +276,7 @@
     "hosts": {
         "spi": 3,
         "i2c": 2,
-        "uart": 3,
-        "ledc": 8
+        "uart": 3
     },
     "provides": {
         "wifi": {},
@@ -293,6 +292,13 @@
             "level": "vendor-docs",
             "source": "ESP-IDF esp-idf, components/soc/esp32s3, soc_caps.h"
         },
+        "frequency_sources": {
+            "level": "vendor-docs",
+            "covers": [
+                "frequency_sources"
+            ],
+            "source": "ESP-IDF esp-idf, soc_caps.h, the low-level headers and drivers; the reference manual of the chip"
+        },
         "levels": {
             "level": "datasheet",
             "covers": [
@@ -307,6 +313,71 @@
                 "gpio.strapping"
             ],
             "source": "ESP-IDF esp-idf, docs/en/api-reference/peripherals/gpio/esp32s3.inc"
+        }
+    },
+    "frequency_sources": {
+        "ledc": {
+            "title": "LEDC",
+            "kind": "ledc",
+            "divider_bits": 18,
+            "fraction_bits": 8,
+            "pairs": true,
+            "can": [
+                "frequency",
+                "duty",
+                "phase",
+                "fade",
+                "pause"
+            ],
+            "clocks_hz": {
+                "XTAL": 40000000,
+                "APB": 80000000
+            },
+            "timers": 4,
+            "outputs": 8,
+            "counter_bits": 14
+        },
+        "mcpwm": {
+            "title": "MCPWM",
+            "kind": "ticks",
+            "timers": 6,
+            "outputs": 12,
+            "clock_hz": 160000000,
+            "ticks_max": 65535,
+            "prescale_max": 65536,
+            "pairs": true,
+            "can": [
+                "frequency",
+                "duty",
+                "phase",
+                "dead_time",
+                "sync"
+            ]
+        },
+        "rmt": {
+            "title": "RMT",
+            "kind": "ticks",
+            "clock_hz": 80000000,
+            "ticks_max": 131070,
+            "prescale_max": 256,
+            "pairs": false,
+            "can": [
+                "carrier",
+                "loop"
+            ],
+            "timers": 4,
+            "outputs": 4
+        },
+        "clk_out": {
+            "title": "CLK_OUT",
+            "kind": "clock_out",
+            "timers": 3,
+            "outputs": 3,
+            "signals": [],
+            "pairs": false,
+            "can": [
+                "start_stop"
+            ]
         }
     },
     "controls": {

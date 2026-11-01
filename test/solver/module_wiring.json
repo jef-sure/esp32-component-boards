@@ -1,0 +1,5 @@
+{
+    "title": "The wires of a module are listed for that module: the lines of its bus, its own, its supply",
+    "answers": {"nfc_readers": 2},
+    "wiring": {"board": "esp32_devkit", "use": "nfc_1", "lines": ["mosi", "miso", "sclk", "cs", "VCC", "GND"]}
+}

@@ -1,0 +1,6 @@
+{
+    "title": "Outputs that change while running take a timer each, on a source that can do it",
+    "answers": {"outputs": [{"kind": "tone", "hz": 440, "pins": 1, "live": true}, {"kind": "tone", "hz": 440, "pins": 1, "live": true}]},
+    "kit": {"name": "esp32s3_devkit", "modules": {}},
+    "says": "LEDC: 2 of 8 outputs, 2 of 4 timers"
+}

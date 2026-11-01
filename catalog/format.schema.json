@@ -62,7 +62,7 @@
         "properties": {
           "shop": { "type": "string", "minLength": 1 },
           "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
-          "range": { "$ref": "#/$defs/range", "description": "Lowest and highest price of one unit. Less than 3 is [0, 3]: a bound, not an invented low." },
+          "range": { "$ref": "#/$defs/range", "description": "Lowest and highest price of one unit. Less than 3 is [0, 3]: a bound, not an invented low, and a kit counts it as 3." },
           "qty": { "type": "integer", "minimum": 1, "description": "The least quantity this price holds for. 1 when absent." },
           "date": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
           "source": { "type": "string", "minLength": 1 },
@@ -529,6 +529,7 @@
           }
         },
         "hosts": { "type": "object", "additionalProperties": { "type": "integer" } },
+        "frequency_sources": { "type": "object", "description": "Where the chip gets a frequency, in the order to try them.", "additionalProperties": { "$ref": "#/$defs/frequencySource" } },
         "provides": { "$ref": "#/$defs/provides" },
         "controls": { "$ref": "#/$defs/controls" },
         "limits": { "type": "object", "description": "The largest speeds of the chip, in MHz.", "additionalProperties": { "type": "number" } },
@@ -591,8 +592,46 @@
             "additionalProperties": false,
             "properties": { "x_mm": { "type": "number" }, "y_mm": { "type": "number" }, "d_mm": { "type": "number", "exclusiveMinimum": 0 } }
           }
-        },
-        "do": { "type": "string", "minLength": 1, "description": "What it takes to mount it." }
+        }
+      }
+    },
+    "rates": {
+      "description": "What one unit of the base currency buys in others, on one day: catalog/rates.json, written by tools/update_rates.py.",
+      "type": "object",
+      "required": ["format", "format_version", "base", "date", "source", "rates"],
+      "additionalProperties": false,
+      "properties": {
+        "format": { "const": "jef-sure/boards" },
+        "format_version": { "type": "integer" },
+        "base": { "type": "string", "pattern": "^[A-Z]{3}$" },
+        "date": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+        "source": { "type": "string", "minLength": 1 },
+        "rates": { "type": "object", "propertyNames": { "pattern": "^[A-Z]{3}$" }, "additionalProperties": { "type": "number", "exclusiveMinimum": 0 } }
+      }
+    },
+    "frequencySource": {
+      "description": "A part of a chip that makes a frequency. A frequency belongs to a timer, so outputs of one setting share it.",
+      "type": "object",
+      "required": ["title", "kind", "timers", "outputs", "pairs", "can"],
+      "additionalProperties": false,
+      "properties": {
+        "title": { "type": "string", "minLength": 1 },
+        "kind": { "enum": ["ledc", "ticks", "apll", "clock_out", "rc"], "description": "How the frequency is made: the solver has a formula for each." },
+        "timers": { "type": "integer", "minimum": 1, "description": "How many frequencies at once." },
+        "outputs": { "type": "integer", "minimum": 1, "description": "How many pins at once." },
+        "pairs": { "type": "boolean", "description": "It can drive two pins in antiphase." },
+        "can": { "type": "array", "uniqueItems": true, "items": { "enum": ["frequency", "duty", "phase", "fade", "pause", "dead_time", "sync", "carrier", "loop", "start_stop", "divider"] }, "description": "What can be changed while it runs." },
+        "counter_bits": { "type": "integer", "minimum": 1 },
+        "divider_bits": { "type": "integer", "minimum": 1 },
+        "fraction_bits": { "type": "integer", "minimum": 0 },
+        "clocks_hz": { "type": "object", "additionalProperties": { "type": "integer", "minimum": 1 } },
+        "clock_hz": { "type": "integer", "minimum": 1 },
+        "ticks_max": { "type": "integer", "minimum": 1 },
+        "prescale_max": { "type": "integer", "minimum": 1 },
+        "xtal_hz": { "type": "integer", "minimum": 1 },
+        "min_hz": { "type": "integer", "minimum": 1 },
+        "max_hz": { "type": "integer", "minimum": 1 },
+        "signals": { "type": "array", "items": { "type": "string", "minLength": 1 }, "description": "Clocks of the board it can bring to a pin." }
       }
     },
     "way": {
@@ -859,7 +898,8 @@
       "properties": {
         "id": { "$ref": "#/$defs/name" },
         "text": { "type": "string", "minLength": 1 },
-        "type": { "enum": ["choice", "flag", "count", "number"] },
+        "type": { "enum": ["choice", "flag", "count", "number", "outputs"], "description": "outputs: a list of tones and PWM signals, each with its frequency and what it needs." },
+        "top": { "type": "boolean", "description": "Shown in the top row of the page, not among the questions about the hardware." },
         "max": { "type": "integer", "minimum": 1, "description": "The most a count takes." },
         "when": { "type": "object", "description": "It is asked only when these answers are given, by the id of the question. true: any answer but none." },
         "needs": { "$ref": "#/$defs/questionNeed" },
@@ -868,7 +908,7 @@
           "type": "object",
           "required": ["measure"],
           "additionalProperties": false,
-          "properties": { "measure": { "enum": ["diagonal_in", "range_mm", "swing_v", "price_eur"] }, "of": { "type": "string", "description": "The class it is measured on." } }
+          "properties": { "measure": { "enum": ["diagonal_in", "range_mm", "price"] }, "of": { "type": "string", "description": "The class it is measured on." } }
         },
         "choices": {
           "type": "array",
@@ -1280,6 +1320,7 @@
         "price": { "$ref": "#/$defs/price" },
         "tariff": { "$ref": "#/$defs/tariff" },
         "mechanics": { "$ref": "#/$defs/mechanics" },
+        "do": { "type": "array", "items": { "type": "string", "minLength": 1 }, "description": "What a person does to fit it, beside the wires. A kit shows these." },
         "mcu": { "$ref": "#/$defs/mcu" },
         "buses": { "$ref": "#/$defs/buses" },
         "devices": { "type": "object", "propertyNames": { "$ref": "#/$defs/name" }, "additionalProperties": { "$ref": "#/$defs/device" } },

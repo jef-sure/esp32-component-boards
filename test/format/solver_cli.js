@@ -15,7 +15,8 @@ const CASES = path.join(__dirname, '../solver');
 const catalog = catalogOf([ROOT]);
 const loader = boardResolver(catalog);
 const checksOf = documentChecks({ schema: read(path.join(ROOT, 'format.schema.json')), rules: read(path.join(ROOT, 'rules.json')), loader, schemaReader, check, pinProblems });
-const solver = kitSolver({ catalog, loader, questions: read(path.join(ROOT, 'questions.json')).questions, checksOf, pinMap });
+const rates = read(path.join(ROOT, 'rates.json')).rates;
+const solver = kitSolver({ catalog, loader, questions: read(path.join(ROOT, 'questions.json')).questions, rates, checksOf, pinMap });
 
 const wrong = [];
 const projects = new Map();
@@ -41,7 +42,7 @@ function holdsForEvery(kits, say) {
         const devices = loader.resolve(kit.project).devices;
         const isDisplay = (use) => Object.keys(devices).some((name) => name.startsWith(`${use}_`) && (devices[name].classes || []).includes('display'));
         for (const [use, { on }] of Object.entries(kit.project.modules)) {
-            for (const bus of Object.keys(on || {})) {
+            for (const bus of Object.keys(on)) {
                 const sharing = Object.entries(kit.project.modules).filter(([other, entry]) => other !== use && bus in (entry.on || {}));
                 if (isDisplay(use) && !bus.startsWith('i2c.') && sharing.length) say(`${kit.name}: ${sharing[0][0]} shares the bus of the display, ${bus}`);
                 const [kind, own] = bus.split('.');
@@ -60,6 +61,8 @@ for (const name of names) {
     const kept = Object.keys(given.change || {}).map((board) => [board, catalog.boards[board]]);
     for (const [board, patch] of Object.entries(given.change || {})) catalog.boards[board] = loader.merge(structuredClone(catalog.boards[board]), patch);
     Object.assign(catalog.modules, given.modules || {});
+    const keptRates = { ...rates };
+    Object.assign(rates, given.rates || {});
     const kits = solver.solve(given.answers);
     const fit = kits.filter((kit) => kit.fits);
     const say = (text) => wrong.push(`${name}: ${text}`);
@@ -78,6 +81,13 @@ for (const name of names) {
         const kit = fit.find((item) => item.name === given.cost.board && (!given.cost.module || item.modules.some((module) => module.name === given.cost.module)));
         if (kit?.price.low !== given.cost.low) say(`${given.cost.board} costs at least ${kit?.price.low}`);
     }
+    if (given.wiring) {
+        const kit = fit.find((item) => item.name === given.wiring.board);
+        const lines = kit?.wiring.find((module) => module.use === given.wiring.use)?.lines.map((wire) => wire.line);
+        if (JSON.stringify(lines) !== JSON.stringify(given.wiring.lines)) say(`the wires of ${given.wiring.use}: ${lines}`);
+    }
+    if (given.picture && kits.find((item) => item.name === given.picture.board)?.picture !== given.picture.file) say('the picture of a kit is not there');
+    if (given.quiet && kits.find((item) => item.name === given.quiet.board)?.says.some((line) => line.text.includes(given.quiet.text))) say(`${given.quiet.board} says "${given.quiet.text}"`);
     if (given.fed) {
         const kit = fit.find((item) => item.name === given.fed.board && item.project?.modules[given.fed.use]);
         if (JSON.stringify(kit?.project.modules[given.fed.use].supply) !== JSON.stringify(given.fed.supply)) say(`fed by ${JSON.stringify(kit?.project.modules[given.fed.use].supply)}`);
@@ -86,6 +96,7 @@ for (const name of names) {
     for (const kit of fit) if (kit.project && checksOf(kit.project).problems.length) say(`${kit.name}: its project does not pass the checks`);
     holdsForEvery(kits, say);
     for (const module of Object.keys(given.modules || {})) delete catalog.modules[module];
+    Object.assign(rates, keptRates);
     for (const [board, price] of prices) catalog.boards[board].price = price;
     for (const [board, doc] of kept) catalog.boards[board] = doc;
     // a module of a case is not in the catalog the generator reads

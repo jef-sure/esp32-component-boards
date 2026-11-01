@@ -1,0 +1,6 @@
+{
+    "title": "A kit shows the front of its board",
+    "answers": {},
+    "change": {"esp32_devkit": {"images": {"back": {"file": "back.webp", "source": "own", "shows": "back"}, "front": {"file": "front.webp", "source": "own", "shows": "front"}}}},
+    "picture": {"board": "esp32_devkit", "file": "boards/esp32_devkit/front.webp"}
+}

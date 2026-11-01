@@ -1,0 +1,6 @@
+{
+    "title": "32000 Hz comes from a whole divider, and the bits of a PWM row left in a tone do not count",
+    "answers": {"outputs": [{"kind": "tone", "hz": 32000, "ppm": 1, "jitter": "none", "bits": 8, "pins": 1}]},
+    "kit": {"name": "esp32s3_devkit", "modules": {}},
+    "says": "LEDC timer 0: 32000 Hz, exact, a whole divider"
+}

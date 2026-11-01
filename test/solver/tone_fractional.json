@@ -1,0 +1,6 @@
+{
+    "title": "32768 Hz held tight with any jitter takes the fractional divider of LEDC: exact on average",
+    "answers": {"outputs": [{"kind": "tone", "hz": 32768, "ppm": 10, "jitter": "any", "pins": 1}]},
+    "kit": {"name": "esp32s3_devkit", "modules": {}},
+    "says": "LEDC timer 0: 32768 Hz, exact, a fractional divider"
+}

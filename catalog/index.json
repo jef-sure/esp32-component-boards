@@ -66,5 +66,6 @@
     "modules/tft153_st77916/module.json",
     "modules/waveshare_poe_b/module.json",
     "questions.json",
+    "rates.json",
     "rules.json"
 ]

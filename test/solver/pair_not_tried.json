@@ -1,0 +1,6 @@
+{
+    "title": "Two pins in antiphase were tried on an ESP32, not on an S3, and the kit says so",
+    "answers": {"outputs": [{"kind": "tone", "hz": 440, "pins": 2}]},
+    "says": "LEDC: two pins in antiphase were not tried on this chip",
+    "quiet": {"board": "esp32_devkit", "text": "were not tried on this chip"}
+}

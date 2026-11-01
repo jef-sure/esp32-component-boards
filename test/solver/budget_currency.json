@@ -1,0 +1,6 @@
+{
+    "title": "A budget in another currency: prices and the reason come in it",
+    "answers": {"wifi": true, "currency": "USD", "budget": 5},
+    "rates": {"USD": 2},
+    "says": "it costs at least 6 USD"
+}

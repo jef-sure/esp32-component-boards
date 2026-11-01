@@ -1,6 +1,0 @@
-{
-    "title": "Four discs cost four times one",
-    "answers": {"beepers": 4},
-    "modules": {"priced_disc": {"format": "jef-sure/boards", "format_version": 2, "kind": "module", "name": "priced_disc", "title": "A disc with a price", "devices": {"piezo": {"chip": "piezo", "logic": "none"}}, "price": {"shop": {"shop": "test", "currency": "EUR", "range": [1, 1], "date": "2026-11-01", "source": "the case"}}}},
-    "cost": {"board": "esp32_devkit", "module": "priced_disc", "low": 4}
-}

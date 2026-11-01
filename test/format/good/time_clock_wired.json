@@ -1,0 +1,26 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "project",
+    "name": "time_clock_wired",
+    "extends": "esp32_p4_poe_eth",
+    "title": "The time clock as it is wired",
+    "description": "The real wiring of tc-eth-p4: a 12864 on SPI2, two PN532 on SPI3, four piezo discs on two pins each, from the code and from Anton",
+    "buses": {
+        "spi": {
+            "spi2": {"mosi": 15, "miso": "nc", "sclk": 16},
+            "spi3": {"mosi": 21, "miso": 22, "sclk": 20}
+        }
+    },
+    "modules": {
+        "display": {"module": "lcd12864_st7920", "on": {"spi.spi2": {"cs": 14}}, "supply": {"VCC": "VCC_5V"}},
+        "nfc_1": {"module": "pn532_module", "on": {"spi.spi3": {"cs": 23}}, "supply": {"VCC": "ESP_3V3"}},
+        "nfc_2": {"module": "pn532_module", "on": {"spi.spi3": {"cs": 26}}, "supply": {"VCC": "ESP_3V3"}}
+    },
+    "devices": {
+        "disc_1": {"class": "other", "pins": {"a": 2, "b": 3}},
+        "disc_2": {"class": "other", "pins": {"a": 4, "b": 5}},
+        "disc_3": {"class": "other", "pins": {"a": 6, "b": 17}},
+        "disc_4": {"class": "other", "pins": {"a": 18, "b": 19}}
+    }
+}

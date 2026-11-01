@@ -28,7 +28,8 @@ const valueAt = (doc, path) => path.reduce((node, key) => (node === undefined ||
 const isCollection = (v) => (isPlain(v) || Array.isArray(v)) && Object.keys(v).length > 0 && Object.values(v).every(isPlain);
 
 // What the page has read, kept out of reactive state: the loader clones entries, which a proxy does not allow.
-const library = { catalog: null, entries: {}, localFiles: null, schema: null, rules: null, reader: null, loader: null, levels: [], checksOf: null, questions: [], solver: null };
+const PREFERENCES = { language: 'boards.language', currency: 'boards.currency' }; // keys of localStorage
+const library = { catalog: null, entries: {}, localFiles: null, schema: null, rules: null, reader: null, loader: null, levels: [], checksOf: null, questions: [], rates: null, solver: null };
 
 // The entries of a tree in the layout of the catalog. What a program has of its own wins over the catalog.
 function readTree(files, local) {
@@ -58,7 +59,8 @@ function readCatalog(files) {
     library.levels = library.schema.$defs.level.enum;
     library.checksOf = documentChecks({ schema: library.schema, rules: library.rules, loader: library.loader, schemaReader, check, pinProblems });
     library.questions = JSON.parse(files['questions.json']).questions;
-    library.solver = kitSolver({ catalog, loader: library.loader, questions: library.questions, checksOf: library.checksOf, pinMap });
+    library.rates = JSON.parse(files['rates.json']);
+    library.solver = kitSolver({ catalog, loader: library.loader, questions: library.questions, rates: library.rates.rates, t: (text, ...values) => translate(useEditor().language, text, ...values), checksOf: library.checksOf, pinMap });
 }
 
 function labelOf(key, value) {
@@ -126,7 +128,9 @@ const useEditor = Pinia.defineStore('editor', {
         hasLocal: false, // a program's local-boards is open: what is new goes there
         stamp: 0, // changes when something outside the reactive state does
         page: 'select',
-        answers: {},
+        answers: { outputs: [] },
+        language: localStorage.getItem(PREFERENCES.language) || (navigator.language.startsWith('ru') ? 'ru' : 'en'),
+        currency: localStorage.getItem(PREFERENCES.currency) || 'EUR',
         projectName: 'my_project',
         plan: null, // what a project is about to get, shown before anything is written
     }),
@@ -172,11 +176,20 @@ const useEditor = Pinia.defineStore('editor', {
         },
         questions(state) {
             state.stamp;
-            return library.questions.filter((question) => library.solver.holds(question, state.answers));
+            return library.questions.filter((question) => !question.top && library.solver.holds(question, state.answers));
+        },
+        topQuestions(state) {
+            state.stamp;
+            return library.questions.filter((question) => question.top);
+        },
+        currencies(state) {
+            state.stamp;
+            return library.rates ? [library.rates.base, ...Object.keys(library.rates.rates)] : [];
         },
         kits(state) {
             state.stamp;
-            return state.loaded ? library.solver.solve(copied(state.answers)) : [];
+            state.language;
+            return state.loaded ? library.solver.solve({ ...copied(state.answers), currency: state.currency }) : [];
         },
         saved() {
             return this.plain ? `${catalogJson(this.plain)}\n` : '';

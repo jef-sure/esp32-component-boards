@@ -1,0 +1,7 @@
+{
+    "title": "A price in another currency compares in euro, by the rate of that day",
+    "answers": {"wifi": true},
+    "rates": {"USD": 2},
+    "change": {"esp32_devkit": {"price": {"amazon": null, "aliexpress": null, "shop": {"shop": "test", "currency": "USD", "range": [20, 20], "date": "2026-11-01", "source": "the case"}}}},
+    "cost": {"board": "esp32_devkit", "low": 10}
+}

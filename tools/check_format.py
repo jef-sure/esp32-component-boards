@@ -37,6 +37,7 @@ jsonschema.Draft202012Validator.check_schema(SCHEMA)
 RAW = jsonschema.Draft202012Validator(SCHEMA)
 RESOLVED = jsonschema.Draft202012Validator({"$ref": "#/$defs/resolved", "$defs": SCHEMA["$defs"]})
 QUESTIONS = jsonschema.Draft202012Validator({"$ref": "#/$defs/questions", "$defs": SCHEMA["$defs"]})
+RATES = jsonschema.Draft202012Validator({"$ref": "#/$defs/rates", "$defs": SCHEMA["$defs"]})
 RULES = json.loads((ROOT / "catalog" / "rules.json").read_text())
 FILE_RULES = {**RULES, "rules": [rule for rule in RULES["rules"] if rule.get("in_files")]}
 LEVELS = SCHEMA["$defs"]["level"]["enum"]
@@ -328,6 +329,10 @@ def main():
     failed += bool(differ)
 
     problems = errors_of(QUESTIONS, json.loads((ROOT / "catalog" / "questions.json").read_text()), "questions")
+    problems += errors_of(RATES, json.loads((ROOT / "catalog" / "rates.json").read_text()), "rates")
+    run = subprocess.run(["node", str(TESTS / "lang_cli.js")], capture_output=True, text=True)
+    print(run.stdout.strip())
+    failed += run.returncode != 0
     run = subprocess.run(["node", str(TESTS / "solver_cli.js")], capture_output=True, text=True)
     if run.returncode:
         problems.append(run.stderr[:800])

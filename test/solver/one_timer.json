@@ -1,0 +1,7 @@
+{
+    "title": "Outputs of one frequency share a timer, and two pins take two channels",
+    "answers": {"outputs": [{"kind": "tone", "hz": 440, "pins": 2}, {"kind": "tone", "hz": 440, "pins": 2}]},
+    "kit": {"name": "esp32s3_devkit", "modules": {}},
+    "says": "LEDC: 4 of 8 outputs, 1 of 4 timers",
+    "lines": {"board": "esp32s3_devkit", "count": 4}
+}

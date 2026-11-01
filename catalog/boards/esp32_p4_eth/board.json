@@ -131,6 +131,7 @@
             "notes": "Fed by LDO channel 4 of the chip, through Q1."
         },
         "usb_serial": {"class": "other", "ref": "U4", "part": "CH343P", "on": {"uart.uart0": {}}},
+        "xtal_32k": {"class": "other", "ref": "Y2", "pins": {"xi": 1, "xo": 0}, "provides": {"clock": {"freq_mhz": [0.032768, 0.032768]}}, "notes": "32.768 kHz on GPIO0 and GPIO1, through R27 and R31."},
         "amplifier": {"class": "other", "ref": "U11", "part": "NS4150B"},
         "mic": {"class": "other", "ref": "MIC1"},
         "flash": {"class": "other", "ref": "U7", "part": "GD25Q256EYIGR"},

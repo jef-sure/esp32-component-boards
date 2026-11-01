@@ -1,0 +1,6 @@
+{
+    "title": "32768 Hz with room to move takes the nearest whole divider of LEDC: no jitter, 576 ppm off",
+    "answers": {"outputs": [{"kind": "tone", "hz": 32768, "ppm": 600, "jitter": "any", "pins": 1}]},
+    "kit": {"name": "esp32s3_devkit", "modules": {}},
+    "says": "LEDC timer 0: 32786.89 Hz, +576"
+}

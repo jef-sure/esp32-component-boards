@@ -3,7 +3,7 @@
     "format_version": 2,
     "kind": "module",
     "name": "pn532_module",
-    "title": "PN532 module with its antenna on the board",
+    "title": "PN532 module",
     "power": [
         {"name": "VCC", "source": "connector", "volts": [3.3, 5.5]},
         {"name": "3V3", "from": "VCC", "regulator": "ldo", "mv": 3300, "feeds": ["nfc"]}

@@ -1,0 +1,6 @@
+{
+    "title": "A fifth frequency on an S3, with four LEDC timers, goes to MCPWM",
+    "answers": {"outputs": [{"kind": "tone", "hz": 1000, "pins": 1}, {"kind": "tone", "hz": 1100, "pins": 1}, {"kind": "tone", "hz": 1200, "pins": 1}, {"kind": "tone", "hz": 1300, "pins": 1}, {"kind": "tone", "hz": 1400, "pins": 1}]},
+    "kit": {"name": "esp32s3_devkit", "modules": {}},
+    "says": "MCPWM: 1 of 12 outputs, 1 of 6 timers"
+}

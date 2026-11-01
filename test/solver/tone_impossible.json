@@ -1,0 +1,5 @@
+{
+    "title": "On an S3 nothing gives 32768 Hz within 1 ppm with no jitter of a divider",
+    "answers": {"outputs": [{"kind": "tone", "hz": 32768, "ppm": 1, "jitter": "none", "pins": 1}]},
+    "says": "this chip does not give output 1: 32768 Hz"
+}

@@ -119,12 +119,27 @@ committed, a program that asks by kind.
   A display on SPI or QSPI gets a bus of its own.
 - The Waveshare ESP32-P4-ETH and ESP32-P4-POE-ETH, from the schematic of Waveshare, and the module
   `waveshare_poe_b`. Built, not flashed.
+- The speed of a display on its connection goes before that of its bus. A display with no line back gets a
+  bus with no MISO from the solver.
 - A kit counts what is sold by the pack at the price of the pack.
+- A character display may stand beside a graphics display: the glue has a slot for each. Built on a
+  JC1060P470C, not flashed.
+- Prices in any currency: `catalog/rates.json`, the rates of the ECB, written by `tools/update_rates.py`.
+  The page shows prices and takes a budget in the currency chosen.
+  A price of "less than 3" counts as 3 in a kit, not as 0.
+- A card of a kit shows the front picture of its board, when the data has one.
+- The page names a kit by its board and modules, lists the wires by module with their power, says how
+  many kits fit and in what order, and drops a plan when the answers change. A board that does not fit
+  gives the reasons of every choice of modules.
 - DGX 0.10.3 at least: under ESP-IDF 6.1 a QSPI display on the IO MUX pins of SPI2 stayed dark.
 - The ST7920 as a chip of the glue, and the module `lcd12864_st7920`. `mechanics` on a board or a
   module: outline, holes, what it takes to mount it; `window_mm` of a panel.
-- Piezo discs: the class `buzzer`, `ways` for a device with no bus. Each disc takes a line and a LEDC
-  channel, or two of each for more swing, counted against `hosts.ledc` of the chip.
+- Tones and PWM on the page: a list of outputs, each with its frequency, and for a tone a tolerance and
+  jitter, for PWM the bits of duty, on one pin or two in antiphase, changing while running or not.
+  `frequency_sources` of a chip holds LEDC, MCPWM, RMT, CLK_OUT and I2S with the APLL, with what can be
+  changed while they run. The solver takes the first that holds and a kit lists timers and channels with
+  the error and the kind of jitter. A crystal of a board counts: the Waveshare P4 boards have 32.768 kHz.
+- Piezo discs in the catalog: the class `buzzer`, `ways` for a device with no bus.
 - `board_select.py` says `idf.py reconfigure build` for a project already built.
 - A board of a program: `components/local-boards/` of the project, a tree in the layout of `catalog/`,
   read before it. `board_select.py` makes its glue there and the board joins the menu.

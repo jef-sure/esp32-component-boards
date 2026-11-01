@@ -91,7 +91,7 @@ endchoice
 # A module is not a board of its own: it is on whichever board the choice above picked, and
 # its glue comes in beside the board's (its sdkconfig.defaults turns it on, read after the board's).
 config BOARD_MODULE_LCD2004_PCF8574
-    bool "2004 character LCD on a PCF8574 backpack: 20x4 HD44780"
+    bool "2004 LCD on a PCF8574: 20x4 HD44780"
     depends on !BOARD_SELECT_NONE
     help
         A 20x4 HD44780 on the common I2C backpack (P0 RS, P1 RW, P2 E, P3

@@ -1,5 +1,7 @@
 {
-    "title": "Discs sold in twenties cost a pack, however few a kit takes",
-    "answers": {"beepers": 4},
-    "cost": {"board": "esp32_devkit", "module": "piezo_disc", "low": 6.79}
+    "title": "What is sold by the pack costs a pack, however few a kit takes: 20 and 3 for the board",
+    "answers": {"nfc_readers": 2},
+    "modules": {"pack_reader": {"format": "jef-sure/boards", "format_version": 2, "kind": "module", "name": "pack_reader", "title": "A reader sold by the pack", "power": [{"name": "VCC", "source": "connector", "volts": [3.3, 5.5]}, {"name": "3V3", "from": "VCC", "regulator": "ldo", "mv": 3300, "feeds": ["nfc"]}], "devices": {"nfc": {"chip": "pn532", "antenna": {"kind": "on_board"}, "logic": "3V3", "provides": {"nfc": {"range_mm": 40}}}}, "price": {"shop": {"shop": "test", "currency": "EUR", "range": [1, 1], "qty": 20, "date": "2026-11-01", "source": "the case"}}}},
+    "cost": {"board": "esp32_devkit", "module": "pack_reader", "low": 23},
+    "says": "sold by 20"
 }

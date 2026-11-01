@@ -14,6 +14,26 @@ IDF = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else os.path.expanduser("~/.
 PROVIDES = {"SOC_WIFI_SUPPORTED": "wifi", "SOC_BT_SUPPORTED": "bluetooth", "SOC_DAC_SUPPORTED": "dac", "SOC_USB_OTG_SUPPORTED": "usb_otg",
             "SOC_MIPI_DSI_SUPPORTED": "mipi_dsi", "SOC_LCD_RGB_SUPPORTED": "lcd_rgb", "SOC_EMAC_SUPPORTED": "emac",
             "SOC_SDMMC_HOST_SUPPORTED": "sdmmc", "SOC_TOUCH_SENSOR_SUPPORTED": "touch_pads", "SOC_TWAI_SUPPORTED": "twai"}
+# Where a chip can get a frequency, in the order to try them, and what can be changed while it runs. From soc_caps.h, the
+# low-level headers and the drivers of ESP-IDF and the reference manuals. RC_FAST is left out of clocks: it is imprecise.
+LEDC = {"title": "LEDC", "kind": "ledc", "divider_bits": 18, "fraction_bits": 8, "pairs": True, "can": ["frequency", "duty", "phase", "fade", "pause"]}
+MCPWM = {"title": "MCPWM", "kind": "ticks", "timers": 6, "outputs": 12, "clock_hz": 160000000, "ticks_max": 65535, "prescale_max": 65536, "pairs": True, "can": ["frequency", "duty", "phase", "dead_time", "sync"]}
+RMT = {"title": "RMT", "kind": "ticks", "clock_hz": 80000000, "ticks_max": 131070, "prescale_max": 256, "pairs": False, "can": ["carrier", "loop"]}
+APLL = {"title": "I2S with APLL", "kind": "apll", "timers": 1, "xtal_hz": 40000000, "min_hz": 5303031, "max_hz": 125000000, "pairs": False, "can": []}
+FREQUENCY_SOURCES = {
+    "esp32": {"ledc": {**LEDC, "clocks_hz": {"APB": 80000000, "REF_TICK": 1000000}}, "mcpwm": MCPWM, "rmt": {**RMT, "timers": 8, "outputs": 8},
+              "clk_out": {"title": "CLK_OUT", "kind": "clock_out", "timers": 3, "outputs": 3, "signals": [], "pairs": False, "can": ["start_stop"]},
+              "i2s_apll": {**APLL, "outputs": 2},
+              "dac_cosine": {"title": "DAC cosine", "kind": "rc", "timers": 2, "outputs": 2, "pairs": False, "can": []}},
+    "esp32s3": {"ledc": {**LEDC, "clocks_hz": {"XTAL": 40000000, "APB": 80000000}}, "mcpwm": MCPWM, "rmt": {**RMT, "timers": 4, "outputs": 4},
+                "clk_out": {"title": "CLK_OUT", "kind": "clock_out", "timers": 3, "outputs": 3, "signals": [], "pairs": False, "can": ["start_stop"]}},
+    "esp32p4": {"ledc": {**LEDC, "clocks_hz": {"XTAL": 40000000, "PLL_F80M": 80000000}}, "mcpwm": MCPWM, "rmt": {**RMT, "timers": 4, "outputs": 4},
+                "clk_out": {"title": "CLK_OUT", "kind": "clock_out", "timers": 2, "outputs": 2, "signals": ["XTAL32K"], "pairs": False, "can": ["start_stop", "divider"]},
+                "i2s_apll": {**APLL, "outputs": 3}},
+}
+# What was tried on a chip, not only read: the pair of pins of a source counts as unknown in a kit until it is here.
+FREQUENCY_TRIED = {"esp32": {"ledc_pairs": {"level": "hardware", "covers": ["frequency_sources.ledc.pairs"], "by": "~/freecad/tc-eth-poe/piezo-test: two channels, one timer, hpoint half a period, antiphase read on the pins, four discs heard", "date": "2026-10-15"}},
+                   "esp32p4": {"ledc_pairs": {"level": "hardware", "covers": ["frequency_sources.ledc.pairs"], "by": "Anton: tried in the project of the time clock on the ESP32-P4", "date": "2026-11-01", "notes": "The date is that of his word. The project went on on another machine, so the copy here does not have this code."}}}
 # the datasheets of these chips, DC characteristics: VIH is at most VDD + 0.3 V, here at a VDD of 3.3 V
 GPIO_HIGH_MV_MAX = {target: 3600 for target in ("esp32", "esp32s2", "esp32s3", "esp32c3", "esp32c5", "esp32c6", "esp32h2", "esp32p4", "esp32s31")}
 # esp_wifi.h: the unit of esp_wifi_set_max_tx_power() is 0.25 dBm, the range 8 to 84, after esp_wifi_start()
@@ -107,9 +127,16 @@ def main():
             continue
         entry = {"format": "jef-sure/boards", "format_version": 2, "kind": "mcu", "name": target, "title": target.upper().replace("ESP32", "ESP32-").rstrip("-"),
                  "gpio": {"count": count, "valid": bits(valid, 64), "input_only": bits(valid & ~out, 64)},
-                 "hosts": {key: value for key, value in (("spi", number(found.get("SOC_SPI_PERIPH_NUM"), found)), ("i2c", number(found.get("SOC_I2C_NUM"), found)), ("uart", number(found.get("SOC_UART_HP_NUM") or found.get("SOC_UART_NUM"), found)), ("ledc", number(found.get("SOC_LEDC_CHANNEL_NUM"), found))) if value is not None},
+                 "hosts": {key: value for key, value in (("spi", number(found.get("SOC_SPI_PERIPH_NUM"), found)), ("i2c", number(found.get("SOC_I2C_NUM"), found)), ("uart", number(found.get("SOC_UART_HP_NUM") or found.get("SOC_UART_NUM"), found))) if value is not None},
                  "provides": {name: {} for symbol, name in PROVIDES.items() if found.get(symbol) == "1"},
                  "checked": {"facts": {"level": "vendor-docs", "source": f"ESP-IDF {IDF.name}, components/soc/{target}, soc_caps.h"}}}
+        if target in FREQUENCY_SOURCES:
+            sources = {name: dict(source) for name, source in FREQUENCY_SOURCES[target].items()}
+            modes = 2 if found.get("SOC_LEDC_SUPPORT_HS_MODE") else 1  # high and low speed, each with its own timers and channels
+            sources["ledc"].update(timers=modes * number(found["SOC_LEDC_TIMER_NUM"], found), outputs=modes * number(found["SOC_LEDC_CHANNEL_NUM"], found), counter_bits=number(found["SOC_LEDC_TIMER_BIT_WIDTH"], found))
+            entry["frequency_sources"] = sources
+            entry["checked"]["frequency_sources"] = {"level": "vendor-docs", "covers": ["frequency_sources"], "source": f"ESP-IDF {IDF.name}, soc_caps.h, the low-level headers and drivers; the reference manual of the chip"}
+            entry["checked"].update(FREQUENCY_TRIED.get(target, {}))
         if target in GPIO_HIGH_MV_MAX:
             entry["gpio"]["high_mv_max"] = GPIO_HIGH_MV_MAX[target]
             entry["checked"]["levels"] = {"level": "datasheet", "covers": ["gpio.high_mv_max"], "source": "Espressif datasheet of the chip, DC characteristics: VIH at most VDD + 0.3 V, at VDD 3.3 V"}

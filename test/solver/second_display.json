@@ -1,0 +1,5 @@
+{
+    "title": "A character display beside the graphics display of a board: the board keeps its primary one",
+    "answers": {"display": "character"},
+    "kit": {"name": "jc1060p470c", "modules": {"lcd2004_pcf8574": 1}}
+}

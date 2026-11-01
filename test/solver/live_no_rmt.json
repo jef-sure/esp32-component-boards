@@ -1,0 +1,5 @@
+{
+    "title": "Eleven tones that change while running: LEDC and MCPWM of an S3 hold ten, and RMT is not asked",
+    "answers": {"outputs": [{"kind": "tone", "hz": 1000, "pins": 1, "live": true}, {"kind": "tone", "hz": 1100, "pins": 1, "live": true}, {"kind": "tone", "hz": 1200, "pins": 1, "live": true}, {"kind": "tone", "hz": 1300, "pins": 1, "live": true}, {"kind": "tone", "hz": 1400, "pins": 1, "live": true}, {"kind": "tone", "hz": 1500, "pins": 1, "live": true}, {"kind": "tone", "hz": 1600, "pins": 1, "live": true}, {"kind": "tone", "hz": 1700, "pins": 1, "live": true}, {"kind": "tone", "hz": 1800, "pins": 1, "live": true}, {"kind": "tone", "hz": 1900, "pins": 1, "live": true}, {"kind": "tone", "hz": 2000, "pins": 1, "live": true}]},
+    "says": "this chip does not give output 11"
+}

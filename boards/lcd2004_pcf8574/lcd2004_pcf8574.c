@@ -14,7 +14,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* 2004 character LCD on a PCF8574 backpack: A 20x4 HD44780 on the common I2C backpack (P0 RS, P1 RW, P2 E, P3 backlight, P4-P7 D4-D7): not a board of its own, a display any board's I2C bus can carry. */
+/* 2004 LCD on a PCF8574: A 20x4 HD44780 on the common I2C backpack (P0 RS, P1 RW, P2 E, P3 backlight, P4-P7 D4-D7): not a board of its own, a display any board's I2C bus can carry. */
 
 /* The character display: a 20x4 hd44780 on i2c.i2c0. */
 static lcd_bus_hd44780_t *character_bus(void)

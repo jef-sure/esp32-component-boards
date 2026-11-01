@@ -1,7 +1,7 @@
 {
-    "title": "The time clock of tc-eth-p4: Ethernet with PoE, a 12864 on its own SPI, two PN532 on another, four piezo discs in the cover at the largest swing",
-    "answers": {"display": "graphics", "nfc_readers": 2, "ethernet": true, "poe": true, "beepers": 4, "beep_swing_v": 6},
-    "first": {"name": "esp32_p4_poe_eth", "modules": {"lcd12864_st7920": 1, "pn532_module": 2, "piezo_disc": 4}, "on": {"lcd12864_st7920": "spi", "pn532_module": "spi"}},
-    "says": "the legs to two GPIOs of its own",
-    "lines": {"board": "esp32_p4_poe_eth", "count": 17}
+    "title": "The time clock of tc-eth-p4: Ethernet with PoE, a 12864 on its own SPI, two PN532 on another, four tones of 440 Hz on two pins each",
+    "answers": {"display": "graphics", "nfc_readers": 2, "ethernet": true, "poe": true, "outputs": [{"kind": "tone", "hz": 440, "pins": 2}, {"kind": "tone", "hz": 440, "pins": 2}, {"kind": "tone", "hz": 440, "pins": 2}, {"kind": "tone", "hz": 440, "pins": 2}]},
+    "first": {"name": "esp32_p4_poe_eth", "modules": {"lcd12864_st7920": 1, "pn532_module": 2}, "on": {"lcd12864_st7920": "spi", "pn532_module": "spi"}},
+    "says": "LEDC: 8 of 8 outputs, 1 of 4 timers",
+    "lines": {"board": "esp32_p4_poe_eth", "count": 16}
 }

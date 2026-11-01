@@ -1,0 +1,6 @@
+{
+    "title": "A currency with no rate is no price, and the page says so",
+    "answers": {"wifi": true},
+    "change": {"esp32_devkit": {"price": {"amazon": null, "aliexpress": null, "shop": {"shop": "test", "currency": "XTS", "range": [20, 20], "date": "2026-11-01", "source": "the case"}}}},
+    "says": "no price for ESP32 DevKit"
+}

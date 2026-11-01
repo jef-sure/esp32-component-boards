@@ -4,6 +4,7 @@
     "kind": "module",
     "name": "lcd12864_st7920",
     "title": "12864 LCD on an ST7920",
+    "part": "12864B-V2.3",
     "description": "A 128x64 monochrome LCD in serial mode: E is the clock, R/W the data, RS the chip select, PSB to ground",
     "price": {
         "anton": {
@@ -21,8 +22,17 @@
             {"x_mm": 44.2, "y_mm": 32.5, "d_mm": 3},
             {"x_mm": -44.2, "y_mm": -32.7, "d_mm": 3},
             {"x_mm": 44.2, "y_mm": -32.7, "d_mm": 3}
-        ],
-        "do": "a board of 93 x 70 mm: it takes a frame of its own, 110 x 80 mm in the time clock, on four M2 screws"
+        ]
+    },
+    "do": [
+        "a board of 93 x 70 mm: it takes a frame of its own, 110 x 80 mm in the time clock, on four M2 screws",
+        "serial mode: PSB and K to GND, A to VCC, so the backlight is always on; RS is the select, R/W the data, E the clock"
+    ],
+    "connectors": {
+        "J1": {
+            "type": "20 contacts in a row, 2.54 mm",
+            "pins": ["GND", "VCC", "V0", "RS", "R/W", "E", "DB0", "DB1", "DB2", "DB3", "DB4", "DB5", "DB6", "DB7", "PSB", "NC", "RST", "VOUT", "A", "K"]
+        }
     },
     "power": [
         {"name": "VCC", "source": "connector", "volts": [4.5, 5.5], "feeds": ["lcd"]}
@@ -43,6 +53,13 @@
             "covers": ["devices.lcd.on", "devices.lcd.config"],
             "by": "the firmware of tc-eth-p4, 1 MHz, 128x64",
             "date": "2026-10-14"
+        },
+        "contacts": {
+            "level": "hardware",
+            "covers": ["connectors", "do"],
+            "by": "a photo of the module in the time clock, 12864B-V2.3: its silkscreen and the jumpers soldered to it",
+            "date": "2026-11-01",
+            "notes": "The names of contacts 2, 15, 19 and 20 are under the solder or hidden; their places are those of the usual module. RST is left open and DB0 to DB7 are not used. The sticker says 5 V."
         },
         "mechanics": {
             "level": "hardware",

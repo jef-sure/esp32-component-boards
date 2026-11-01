@@ -131,6 +131,11 @@ python3 tools/make_mcu.py [ESP-IDF directory]
 
 Writes `catalog/mcu/` from `soc_caps.h` of ESP-IDF.
 
+## update_rates.py
+
+Writes `catalog/rates.json` from the reference rates of the European Central Bank, so that prices in
+any currency compare on the page. It needs the network and nothing else; the page only reads the file.
+
 ## sync_versions.py
 
 ```sh
@@ -167,6 +172,12 @@ a bus of the board only when the lines of that bus come out and no display holds
 those lines too. For each module it picks the lowest line of power that fits and comes out, and it
 asks for a level shifter when the lines of a module go above what the pins of the chip take, see
 [Supply and levels](data-format.md#supply-and-levels). It does not add up currents.
+
+Tones and PWM are outputs of the chip: each has a frequency, a tone a tolerance and jitter, PWM its bits
+of duty, and either may have to change while it runs. The solver tries the sources of the chip in the
+order of `frequency_sources`, works out the frequency it gets from each, and takes the first that holds:
+usually LEDC, then MCPWM and RMT, a crystal of the board through CLK_OUT, I2S with the APLL. A frequency
+belongs to a timer, so outputs of one setting share it. The figures are calculated, not measured.
 
 Kits come in this order: those that fit, the fewest unknowns, the fewest modules, the fewest wires,
 then the price. A budget makes the price a criterion: it then comes right after the unknowns, and a

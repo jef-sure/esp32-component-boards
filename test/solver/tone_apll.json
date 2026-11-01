@@ -1,0 +1,6 @@
+{
+    "title": "32768 Hz within 1 ppm with no jitter of a divider: an S3 cannot, an ESP32 takes I2S with the APLL, the Waveshare board its crystal",
+    "answers": {"outputs": [{"kind": "tone", "hz": 32768, "ppm": 1, "jitter": "none", "pins": 1}]},
+    "fit": ["cyd_s028r", "esp32_devkit", "esp32_p4_eth", "esp32_p4_poe_eth", "jc1060p470c", "jc8012p4a1c"],
+    "says": "the crystal of the board"
+}

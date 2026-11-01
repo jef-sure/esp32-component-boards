@@ -1,0 +1,5 @@
+{
+    "title": "A price of less than 3 is no free board: it counts as 3 against a budget",
+    "answers": {"wifi": true, "budget": 2},
+    "says": "it costs at least 3 EUR"
+}

@@ -275,8 +275,7 @@
     "hosts": {
         "spi": 3,
         "i2c": 2,
-        "uart": 3,
-        "ledc": 8
+        "uart": 3
     },
     "provides": {
         "wifi": {},
@@ -292,6 +291,21 @@
             "level": "vendor-docs",
             "source": "ESP-IDF esp-idf, components/soc/esp32, soc_caps.h"
         },
+        "frequency_sources": {
+            "level": "vendor-docs",
+            "covers": [
+                "frequency_sources"
+            ],
+            "source": "ESP-IDF esp-idf, soc_caps.h, the low-level headers and drivers; the reference manual of the chip"
+        },
+        "ledc_pairs": {
+            "level": "hardware",
+            "covers": [
+                "frequency_sources.ledc.pairs"
+            ],
+            "by": "~/freecad/tc-eth-poe/piezo-test: two channels, one timer, hpoint half a period, antiphase read on the pins, four discs heard",
+            "date": "2026-10-15"
+        },
         "levels": {
             "level": "datasheet",
             "covers": [
@@ -306,6 +320,90 @@
                 "gpio.strapping"
             ],
             "source": "ESP-IDF esp-idf, docs/en/api-reference/peripherals/gpio/esp32.inc"
+        }
+    },
+    "frequency_sources": {
+        "ledc": {
+            "title": "LEDC",
+            "kind": "ledc",
+            "divider_bits": 18,
+            "fraction_bits": 8,
+            "pairs": true,
+            "can": [
+                "frequency",
+                "duty",
+                "phase",
+                "fade",
+                "pause"
+            ],
+            "clocks_hz": {
+                "APB": 80000000,
+                "REF_TICK": 1000000
+            },
+            "timers": 8,
+            "outputs": 16,
+            "counter_bits": 20
+        },
+        "mcpwm": {
+            "title": "MCPWM",
+            "kind": "ticks",
+            "timers": 6,
+            "outputs": 12,
+            "clock_hz": 160000000,
+            "ticks_max": 65535,
+            "prescale_max": 65536,
+            "pairs": true,
+            "can": [
+                "frequency",
+                "duty",
+                "phase",
+                "dead_time",
+                "sync"
+            ]
+        },
+        "rmt": {
+            "title": "RMT",
+            "kind": "ticks",
+            "clock_hz": 80000000,
+            "ticks_max": 131070,
+            "prescale_max": 256,
+            "pairs": false,
+            "can": [
+                "carrier",
+                "loop"
+            ],
+            "timers": 8,
+            "outputs": 8
+        },
+        "clk_out": {
+            "title": "CLK_OUT",
+            "kind": "clock_out",
+            "timers": 3,
+            "outputs": 3,
+            "signals": [],
+            "pairs": false,
+            "can": [
+                "start_stop"
+            ]
+        },
+        "i2s_apll": {
+            "title": "I2S with APLL",
+            "kind": "apll",
+            "timers": 1,
+            "xtal_hz": 40000000,
+            "min_hz": 5303031,
+            "max_hz": 125000000,
+            "pairs": false,
+            "can": [],
+            "outputs": 2
+        },
+        "dac_cosine": {
+            "title": "DAC cosine",
+            "kind": "rc",
+            "timers": 2,
+            "outputs": 2,
+            "pairs": false,
+            "can": []
         }
     },
     "controls": {

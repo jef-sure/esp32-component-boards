@@ -1,0 +1,6 @@
+{
+    "title": "32768 Hz within 50 ppm with no jitter of a divider goes to whole ticks of MCPWM",
+    "answers": {"outputs": [{"kind": "tone", "hz": 32768, "ppm": 50, "jitter": "none", "pins": 1}]},
+    "kit": {"name": "esp32s3_devkit", "modules": {}},
+    "says": "MCPWM timer 0: 32766.74 Hz, -38.4 ppm"
+}

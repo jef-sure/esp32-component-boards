@@ -1,5 +1,5 @@
 {
     "title": "A board with a price comes before the boards without one",
-    "answers": {"budget_eur": 10, "wifi": true},
+    "answers": {"budget": 10, "wifi": true},
     "first": {"name": "esp32_devkit", "modules": {}}
 }

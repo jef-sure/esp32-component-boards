@@ -189,7 +189,7 @@ def display_part(name, device, module):
     key, connection = next(iter(device["on"].items()))
     pins, config = device.get("pins", {}), device["config"]
     part = {"name": name, "driver": device["chip"], "kind": config["kind"], "bus": {"bus": MODULE_BUS if module else key}, "primary": bool(config.get("primary")), **started_by(device)}
-    for field in ("cs", "address"):
+    for field in ("cs", "address", "hz"):
         if field in connection:
             part["bus"][field] = number(connection[field])
     if "dc" in pins:
@@ -332,9 +332,6 @@ def read_board(path):
             raise ValueError(f"{path}: {name}: the glue cannot start this yet: {', '.join(not_started(device))}")
         if "touch" in device["classes"] and (device.get("config") or {}).get("over") == "none":
             raise ValueError(f"{path}: {name}: a touch with no display: DGX-DI has no pointer for it yet")
-    characters = [name for name, device in resolved["devices"].items() if (device.get("config") or {}).get("kind") == "character"]
-    if characters and len([d for d in resolved["devices"].values() if "display" in d["classes"]]) > 1:
-        raise ValueError(f"{path}: a character display beside another display is not set up yet: {', '.join(characters)}")
     data = parts_of(resolved)
     kinds = [sound["kind"] for sound in data["sounds"]]
     if len(set(kinds)) != len(kinds):
@@ -687,8 +684,10 @@ def gen_c(board):
     display = board.get("display")
     touches, sounds, buttons = board["touches"], board["sounds"], board["buttons"]
     is_module = bool(board.get("module"))
-    pixel = is_pixel(display)
-    character = is_character(display)
+    shown_all = board.get("displays") or ([display] if display else [])
+    letters = next((shown for shown in shown_all if is_character(shown)), None)  # a character display may stand beside a pixel one
+    pixel = any(is_pixel(shown) for shown in shown_all)
+    character = letters is not None
     i2c_buses = sorted((buses.get("i2c") or {}).items())
     i2c_port = port_of(i2c_buses[0][0], "i2c") if i2c_buses else 0
     # dgx_spi_init() keeps its host for the display: a device beside the display needs a host
@@ -720,7 +719,7 @@ def gen_c(board):
     headers = ["stdlib.h", "string.h", "esp_log.h"]
     for record, entry, also in started(board):
         headers += [header for used in (record, *also) for header in used["adapter"].get("headers", ())] + entry["adapter"].get("headers", [])
-    if character and bus_parts(display["bus"]["bus"])[0] == "gpio":
+    if character and bus_parts(letters["bus"]["bus"])[0] == "gpio":
         headers.append("driver/gpio.h")
     for shown in displays:
         headers.append(transport_of(shown)["header"])
@@ -835,14 +834,14 @@ def gen_c(board):
 
     # ---- the display ----
     if character:
-        transport = display["bus"]
+        transport = letters["bus"]
         kind, width = bus_parts(transport["bus"])
         gpins = transport.get("pins", {})
-        cols, rows = display["geometry"].split("x")
-        out(f"/* The character display: a {display['geometry']} {display['driver']} on {transport['bus']}. */")
+        cols, rows = letters["geometry"].split("x")
+        out(f"/* The character display: a {letters['geometry']} {letters['driver']} on {transport['bus']}. */")
         out("static lcd_bus_hd44780_t *character_bus(void)")
         out("{")
-        library = resolve.library(display["library"])
+        library = resolve.library(letters["library"])
         if kind == "i2c":
             step = library["transports"]["i2c"]["shared"]
             out("    i2c_master_bus_handle_t bus = board_glue_i2c();")
@@ -858,7 +857,7 @@ def gen_c(board):
         out("    return board_glue_character_init(&character_panel, out);")
         out("}")
         out("")
-    elif pixel:
+    if pixel:
         rows, group_rows = [], []
         for name, group in sorted(groups.items(), key=lambda item: not item[1].get("primary")):
             group_rows.append((name, group))
@@ -881,6 +880,7 @@ def gen_c(board):
             values = {**transport.get("defaults", {}), **{key: value if key in resolve.NOT_LINES else c_gpio(value) for key, value in bus.items()}, "host": f"{(own or '').upper()}_HOST"}
             own_select = "{cs}" in entry["init"][0]["args"]  # the driver of such a chip holds its select itself, so the bus has none
             values.update({"dc": "GPIO_NUM_NC", **{line: c_gpio(db[line]) for line in ("cs", "dc") if line in db and not (own_select and line == "cs")}})
+            values.update({"hz": db["hz"]} if "hz" in db else {})  # the speed of a device goes before that of its bus
             values.setdefault("cs", "GPIO_NUM_NC")
             if bus_name in shared:
                 out(f"    if (!board_glue_spi_host(&board_spi_{own})) return NULL;")

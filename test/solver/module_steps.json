@@ -1,0 +1,6 @@
+{
+    "title": "What a person does to fit a module comes with the kit: the 12864 needs PSB to ground for serial mode",
+    "answers": {"display": "graphics"},
+    "kit": {"name": "esp32_devkit", "modules": {"lcd12864_st7920": 1}},
+    "says": "PSB and K to GND"
+}

@@ -1,0 +1,5 @@
+{
+    "title": "A board with both SPI hosts taken says so, not that something about pins is wrong",
+    "answers": {"nfc_readers": 2},
+    "says": "no free SPI host on this board"
+}

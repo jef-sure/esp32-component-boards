@@ -3,7 +3,7 @@
     "format_version": 2,
     "kind": "module",
     "name": "lcd2004_pcf8574",
-    "title": "2004 character LCD on a PCF8574 backpack",
+    "title": "2004 LCD on a PCF8574",
     "description": "A 20x4 HD44780 on the common I2C backpack (P0 RS, P1 RW, P2 E, P3 backlight, P4-P7 D4-D7): not a board of its own, a display any board's I2C bus can carry",
     "power": [
         {"name": "VCC", "source": "connector", "volts": [4.5, 5.5], "feeds": ["lcd"]}

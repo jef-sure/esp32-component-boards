@@ -540,6 +540,7 @@
       "required": ["class"],
       "properties": {
         "high_min_mv": { "type": "integer", "minimum": 1 },
+        "price": { "$ref": "#/$defs/price", "description": "What one chip costs, by the piece: the worth of such a part on a board that nobody asked for. A board or a module does not inherit it: its own price is that of the whole." },
         "identify": {
           "description": "How a program tells this chip from its clones: a register and what it holds in the original.",
           "type": "object",

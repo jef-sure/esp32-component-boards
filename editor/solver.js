@@ -351,6 +351,9 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
     }
     // a part of a board nobody asked for, in money: its role and variant, its role, its class, or any part
     function worthOf(device) {
+        // a part whose chip has a price by the piece is worth that many of it: a module of its role counts a ring for one LED
+        const own = rangeOf(device.price ?? catalog.devices[device.chip]?.price, KIT_CURRENCY);
+        if (own) return ((own[0] + own[1]) / 2) * (device.config?.count ?? device.count ?? 1);
         typical ??= typicalPrices();
         const roleKeys = Object.entries(device.provides ?? {}).filter(([role]) => roleOf(role)).flatMap(([role, given]) => [...(given?.variant ? [`${role}/${given.variant}`] : []), role]);
         const keys = [...roleKeys, ...(device.classes ?? []).filter((item) => item !== 'other').map((item) => `class:${item}`), ''];
@@ -1060,7 +1063,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             const started = arduino ? [] : libraries.filter((library) => !library.own);
             if (started.length) lines.push({ level: 'yes', text: t('the board starts: {0}', started.map((item) => `${item.name} ${item.version}`).join(', ')) });
             if (unasked.length) lines.push({ level: 'do', text: t('on the board and not asked: {0}. The project leaves them unused and their pins stay taken', unasked.map(([name, device]) => device.chip ?? name).join(', ')) });
-            if (unasked.length) lines.push({ level: 'do', text: t('what nobody asked for is worth about {0} {1}, as the median of parts of its roles', cents(unasked.reduce((sum, [, device]) => sum + worthOf(device), 0)), KIT_CURRENCY) });
+            if (unasked.length) lines.push({ level: 'do', text: t('what nobody asked for is worth about {0} {1}: a part by the price of its chip, or by the median of the modules of its role', cents(unasked.reduce((sum, [, device]) => sum + worthOf(device), 0)), KIT_CURRENCY) });
             for (const title of price.missing) lines.push({ level: 'unknown', text: t('no price for {0}', title) });
             const fits = !none && (wanted.limits.price === undefined || !price.known || price.low <= wanted.limits.price);
             if (!fits) lines.push({ level: 'no', text: t('it costs at least {0} {1}', price.low, price.currency) });

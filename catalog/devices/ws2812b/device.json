@@ -1,0 +1,24 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "ws2812b",
+    "title": "Worldsemi WS2812B",
+    "class": "led",
+    "maker": "worldsemi",
+    "part": "WS2812B",
+    "provides": {"led": {"variant": "addressable"}},
+    "notes": "One RGB LED with its driver in the package, chained on one data line. Its price here is by the piece, for the worth of one on a board that nobody asked for.",
+    "price": {
+        "lcsc": {
+            "shop": "LCSC",
+            "currency": "USD",
+            "range": [0.047, 0.099],
+            "date": "2026-11-02",
+            "source": "C114586, WS2812B-B/W, from 5 to 1000 pieces, as search results of lcsc.com showed the page; the live page gives no table to a fetch"
+        }
+    },
+    "checked": {
+        "price": {"level": "unchecked", "covers": ["price"], "source": "search results of lcsc.com, not the live page", "date": "2026-11-02"}
+    }
+}

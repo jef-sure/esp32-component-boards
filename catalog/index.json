@@ -42,6 +42,7 @@
     "devices/scd4x/device.json",
     "devices/st77916/device.json",
     "devices/st7920/device.json",
+    "devices/ws2812b/device.json",
     "devices/xpt2046/device.json",
     "format.schema.json",
     "libraries/arduino/adafruit/adafruit-busio/audit.json",

@@ -234,7 +234,7 @@ LANGUAGES.ru = {
         'no lines': 'без линий',
         '{0}: your own part, not in the catalog: {1}': '{0}: своя деталь, её нет в каталоге: {1}',
         'Pictures of parts: Fritzing, CC BY-SA 3.0. Hold the pointer on one for its author.': 'Рисунки деталей: Fritzing, CC BY-SA 3.0. Автор виден при наведении на рисунок.',
-        'what nobody asked for is worth about {0} {1}, as the median of parts of its roles': 'непрошеное стоит около {0} {1}, по медиане деталей его ролей',
+        'what nobody asked for is worth about {0} {1}: a part by the price of its chip, or by the median of the modules of its role': 'непрошеное стоит около {0} {1}: деталь по цене своего чипа или по медиане модулей своей роли',
         'its data lists only the parts its pack starts': 'в её данных только те детали, которые запускает пакет',
         'Its shape': 'Его форма',
         'round': 'круглый',

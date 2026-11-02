@@ -1,5 +1,5 @@
 {
     "title": "A chip with no library in the catalog comes after one that has it",
     "answers": {"nfc_readers": 1},
-    "first": {"name": "esp32_devkit", "modules": {"pn532_module": 1}}
+    "first": {"name": "esp32_s3_zero", "modules": {"pn532_module": 1}}
 }

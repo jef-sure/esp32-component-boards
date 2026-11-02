@@ -35,6 +35,7 @@
         "led": {
             "class": "led",
             "ref": "U1",
+            "chip": "ws2812b",
             "part": "WS2812B-0807",
             "provides": {"led": {"variant": "addressable"}},
             "pins": {"data": 21},

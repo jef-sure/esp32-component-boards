@@ -18,7 +18,7 @@
         "led": {
             "class": "led",
             "ref": "WS_L1",
-            "part": "WS2812B",
+            "chip": "ws2812b",
             "provides": {"led": {"variant": "addressable"}},
             "pins": {"data": 10},
             "config": {"kind": "ws2812", "count": 1}

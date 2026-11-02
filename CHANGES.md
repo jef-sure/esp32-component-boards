@@ -209,6 +209,9 @@ committed, a program that asks by kind.
 - Waveshare ESP32-C3-Zero, `esp32_c3_zero`, from the schematic of Waveshare; the generator takes the ESP32-C3 and C6. Pictures of
   the S3-Zero and the C3-Zero from Anton's photos.
 - A page without an agent shows how to get one, as a single line that opens to the command.
+- A chip in catalog/devices can have a price by the piece, and a part of a board nobody asked for weighs that many of it:
+  one WS2812B is cents, where the median of the modules of its role, rings and strips, made it 11 EUR. The median stays
+  for a part whose chip has no price. The WS2812B is in the catalog with a price of LCSC, and the LEDs of both Zero boards name it.
 - The model gets in page_state why the boards that do not fit do not, the most common first, with how many boards each.
 - tools/boards_mcp.py finds the versions of ESP-IDF and of the Arduino core on the computer, and a kit names which of its
   versions are there. A request the page cannot send to its solver is said in the console and counted on the page.

@@ -209,6 +209,9 @@ committed, a program that asks by kind.
 - Waveshare ESP32-C3-Zero, `esp32_c3_zero`, from the schematic of Waveshare; the generator takes the ESP32-C3 and C6. Pictures of
   the S3-Zero and the C3-Zero from Anton's photos.
 - A page without an agent shows how to get one, as a single line that opens to the command.
+- The model gets in page_state why the boards that do not fit do not, the most common first, with how many boards each.
+- tools/boards_mcp.py finds the versions of ESP-IDF and of the Arduino core on the computer, and a kit names which of its
+  versions are there. A request the page cannot send to its solver is said in the console and counted on the page.
 - `tools/boards_mcp.py --install` gives the server to the agent at once: to Claude Code for every folder when its command
   is there, otherwise in `.mcp.json` of the current folder.
 - What the person fixes is theirs: the pin of a block, a part chosen in a block, a board fixed from its card. The solver keeps a

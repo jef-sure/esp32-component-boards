@@ -281,7 +281,7 @@ const SelectPage = {
         const boards = computed(() => [...Map.groupBy(fit.value, (kit) => kit.name).values()].map(([first, ...rest]) => ({ first, rest })));
         const asked = computed(() => Object.values(store.answers).some((answer) => (Array.isArray(answer) ? answer.length : answer && answer !== 'none')));
         const addOutput = () => store.answers.outputs.push({ kind: 'tone', hz: undefined, ppm: undefined, jitter: 'any', bits: 8, pins: 1, live: false });
-        Vue.watch(() => [store.loaded, store.stamp, store.language, store.currency, store.answers], () => store.askKits(), { deep: true, immediate: true });
+        Vue.watch(() => [store.loaded, store.stamp, store.language, store.currency, store.answers, store.installed], () => store.askKits(), { deep: true, immediate: true });
         // a plan belongs to the answers it was made for
         Vue.watch(() => store.answers, (answers) => {
             store.plan = null;

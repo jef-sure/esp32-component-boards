@@ -304,7 +304,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         }
         const outputs = (answers.outputs || []).filter((output) => output.hz > 0).map((output) => ({ ...output, ppm: output.ppm === '' ? undefined : output.ppm, bits: output.kind === 'pwm' ? output.bits : undefined }));
         const unanswered = questions.filter((question) => MEASURES[question.limit?.measure]?.unanswered && holds(question, answers) && limits[question.limit.measure] === undefined);
-        return { needs, limits, unanswered, outputs, currency: answers.currency || KIT_CURRENCY };
+        return { needs, limits, unanswered, outputs, currency: answers.currency || KIT_CURRENCY, installed: answers.installed ?? null };
     }
 
     const rateOf = (currency) => (currency === KIT_CURRENCY ? 1 : rates[currency]);
@@ -1047,7 +1047,12 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             const ranges = (id) => [...new Set(Object.values(resolved.devices).filter((device) => device.library && device.used !== false)
                 .map((device) => catalog.libraries[device.library]?.versions?.[device.library_at]?.platforms?.[id]).filter(Boolean))];
             const builds = Object.entries(takes).map(([id, { full }]) => [id, full.filter((version) => ranges(id).every((range) => within(version, range)))]);
-            for (const [id, versions] of builds) if (versions.length) lines.push({ level: 'yes', text: t('builds with {0} {1}', catalog.platforms[id].title, versions.join(', ')) });
+            for (const [id, versions] of builds) {
+                if (!versions.length) continue;
+                // what of these the computer has, when the server of the model told the page
+                const here = wanted.installed?.[id]?.filter((full) => versions.some((version) => full === version || full.startsWith(`${version}.`)));
+                lines.push({ level: 'yes', text: here ? t('builds with {0} {1}; on this computer: {2}', catalog.platforms[id].title, versions.join(', '), here.join(', ') || t('none of them')) : t('builds with {0} {1}', catalog.platforms[id].title, versions.join(', ')) });
+            }
             const none = builds.find(([id, versions]) => id === platformName && !versions.length && takes[id].full.length);
             if (none) lines.push({ level: 'no', text: t('{0}: no version of the catalog takes what its libraries ask, {1}', platform.title, ranges(platformName).join(', ')) });
             lines.push(...auditLines(resolved, platformName || 'esp_idf', wanted.limits.standard));

@@ -265,6 +265,8 @@ LANGUAGES.ru = {
         Arduino: 'Arduino',
         'by the kit': 'по комплекту',
         'builds with {0} {1}': 'собирается на {0} {1}',
+        'builds with {0} {1}; on this computer: {2}': 'собирается на {0} {1}; на этом компьютере: {2}',
+        'none of them': 'ни одной из них',
         'no version of {0} takes {1}': 'ни одна версия {0} не берёт {1}',
         '{0}: no version of the catalog takes what its libraries ask, {1}': '{0}: ни одна версия каталога не подходит под то, что требуют библиотеки: {1}',
         'the same part: {0}': 'та же деталь: {0}',

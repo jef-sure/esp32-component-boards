@@ -1,0 +1,5 @@
+{
+    "title": "With the versions on the computer told, a kit names those of its versions that are there",
+    "answers": {"platform": "esp_idf", "installed": {"esp_idf": ["6.1.0", "6.0.3", "5.5.5"], "arduino_esp32": []}, "blocks": [{"role": "air", "name": "co2", "variant": "co2"}]},
+    "says": "builds with ESP-IDF 6.1, 5.5; on this computer: 6.1.0, 5.5.5"
+}

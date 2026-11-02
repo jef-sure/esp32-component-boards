@@ -13,6 +13,7 @@ Once, to give it to the agent: python3 tools/boards_mcp.py --install
 import argparse
 import http.server
 import json
+import os
 import pathlib
 import posixpath
 import re
@@ -38,7 +39,8 @@ person starts from, the task of page_state: begin from it and ask only what it l
 it stands. The dialog develops the theme. wait_for_person also returns the theme when the person changed it. Set what the
 device needs with edit_blocks: blocks of roles, their variants and parts, which are the conditions of the solver. What the
 person fixed, a block, a part or the board, is theirs: edit_blocks refuses it, and when it leaves the task with no kit, say
-why instead of working around it. The solver on the page
+why instead of working around it. When few kits fit, refusals of page_state tells what keeps them out: loosen a condition
+that is not fixed and say which, or ask the person. The solver on the page
 chooses the kits: comment on them, do not invent parts or wires, and name what is not checked. The solver ranks by what
 the person asked; what it only shows, as the antenna quality of a board from 0 to 10, you weigh against the task: where the
 device stands and how far it is from what it talks to. When the person is done,
@@ -46,7 +48,7 @@ write the description with write_description: the task, the choice and why, and 
 what was found in the libraries of a chip: use it in advice, and keep it out of the description."""
 TOOLS = [
     {"name": "page_link", "description": "The link of the page, for the person to open.", "inputSchema": {"type": "object", "properties": {}}},
-    {"name": "page_state", "description": "What the person wrote and put on the canvas, with the blocks, parts and board the person fixed, and the best kits of the solver with what each says.", "inputSchema": {"type": "object", "properties": {}}},
+    {"name": "page_state", "description": "What the person wrote and put on the canvas, with the blocks, parts and board the person fixed, the best kits of the solver with what each says, and refusals: why the boards that do not fit do not, the most common first, with how many boards each.", "inputSchema": {"type": "object", "properties": {}}},
     {"name": "wait_for_person", "description": "Waits for what the person writes in the page. Returns the new messages, or none after seconds, and the theme of the field on top when it changed.",
      "inputSchema": {"type": "object", "properties": {"seconds": {"type": "integer", "minimum": 1, "maximum": LONGEST_WAIT_S}}}},
     {"name": "say", "description": "Shows a message to the person in the page.", "inputSchema": {"type": "object", "required": ["text"], "properties": {"text": {"type": "string"}}}},
@@ -130,6 +132,8 @@ def handler_of(desk, token, port):
                     return self.answer(401)
                 seen = int(urllib.parse.parse_qs(address.query).get("seen", ["0"])[0])
                 return self.answer(200, desk.since(seen, LONGEST_POLL_S))
+            if address.path == "/agent/installed":
+                return self.answer(200, installed()) if self.agent_call() else self.answer(401)
             # the path as it will be read, not as it was sent: /editor/../CLAUDE.md is no file of the page
             clean = posixpath.normpath(urllib.parse.unquote(address.path))
             if not f"{clean}/".startswith(SERVED):
@@ -244,6 +248,23 @@ def answer_of(desk, link, request):
     else:
         return {"jsonrpc": "2.0", "id": ident, "error": {"code": -32601, "message": f"no method {method}"}}
     return {"jsonrpc": "2.0", "id": ident, "result": result}
+
+
+def installed():
+    """The versions of the platforms on this computer: ESP-IDF of EIM, of IDF_PATH and in ~/esp, read from version.cmake, and the
+    Arduino core of ESP32 by its folder. The kit names those that take it, so the person builds with what is there."""
+    home = pathlib.Path.home()
+    trees = [*home.glob(".espressif/v*/esp-idf"), *home.glob("esp/esp-idf*"), *([pathlib.Path(os.environ["IDF_PATH"])] if os.environ.get("IDF_PATH") else [])]
+    idf = set()
+    for tree in trees:
+        cmake = tree / "tools" / "cmake" / "version.cmake"
+        if cmake.is_file():
+            parts = dict(re.findall(r"set\(IDF_VERSION_(MAJOR|MINOR|PATCH) (\d+)\)", cmake.read_text()))
+            if len(parts) == 3:
+                idf.add(f"{parts['MAJOR']}.{parts['MINOR']}.{parts['PATCH']}")
+    arduino = {folder.name for folder in home.glob(".arduino15/packages/esp32/hardware/esp32/*") if re.fullmatch(r"\d+\.\d+\.\d+", folder.name)}
+    newest = lambda versions: sorted(versions, key=lambda text: [int(part) for part in text.split(".")], reverse=True)
+    return {"esp_idf": newest(idf), "arduino_esp32": newest(arduino)}
 
 
 def install():

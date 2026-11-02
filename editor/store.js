@@ -5,6 +5,7 @@
 const FILES = { boards: 'board.json', modules: 'module.json', addons: 'addon.json', platforms: 'platform.json', devices: 'device.json', mcu: 'mcu.json', connectors: 'connector.json' };
 const DESCRIPTION = 'DESCRIPTION.md';
 const AGENT_KITS = 12; // what a model reads of a list of hundreds
+const AGENT_REFUSALS = 8; // the reasons the model gets why boards do not fit
 const SHOWN_ANSWERS = ['blocks', 'task', 'outputs', 'board']; // what the canvas holds beside the questions of the top row and of its blocks
 const READ_ONLY_GROUPS = new Set(['mcu']); // written by tools/make_mcu.py
 const LOADED = ['facts', 'classes', 'libraries', 'inputs']; // what the loader adds, not a field to edit
@@ -161,6 +162,7 @@ const useEditor = Pinia.defineStore('editor', {
         agent: null, // the token of tools/boards_mcp.py, when the page came from it
         talk: [], // what was said with the model
         applied: 0, // the last message of the model whose edits are on the canvas
+        installed: null, // the versions of the platforms on the computer, from the server of the model
         description: '', // what the model wrote in the end: a project gets it
     }),
     getters: {
@@ -251,7 +253,9 @@ const useEditor = Pinia.defineStore('editor', {
         // Beside tools/boards_mcp.py the page tells it what it has, and reads what the model says.
         connect() {
             this.agent = new URLSearchParams(location.hash.slice(1)).get('agent');
-            if (this.agent) this.listen(0);
+            if (!this.agent) return;
+            this.listen(0);
+            this.agentCall('installed').then((versions) => (this.installed = versions)).catch(() => {});
         },
         async agentCall(path, options = {}) {
             const answer = await fetch(`/agent/${path}`, { ...options, headers: { Authorization: `Bearer ${this.agent}` } });
@@ -275,7 +279,14 @@ const useEditor = Pinia.defineStore('editor', {
         tellAgent() {
             if (!this.agent) return Promise.resolve();
             const kits = this.kits.filter((kit) => kit.fits).slice(0, AGENT_KITS).map((kit) => ({ headline: kit.headline, price: kit.price, imported: kit.imported, says: kit.says }));
-            return this.agentCall('state', { method: 'POST', body: JSON.stringify({ task: this.answers.task ?? '', blocks: this.answers.blocks, board: this.answers.board ?? null, fits: this.kits.filter((kit) => kit.fits).length, kits }) }).catch(() => {});
+            // why the boards that do not fit do not, the most common first: what keeps a selection empty
+            const why = new Map();
+            for (const kit of this.kits.filter((item) => !item.fits)) {
+                const reason = kit.says.find((line) => line.level === 'no')?.text ?? 'no reason given';
+                why.set(reason, (why.get(reason) ?? new Set()).add(kit.name));
+            }
+            const refusals = [...why].map(([reason, boards]) => ({ reason, boards: boards.size })).sort((a, b) => b.boards - a.boards).slice(0, AGENT_REFUSALS);
+            return this.agentCall('state', { method: 'POST', body: JSON.stringify({ task: this.answers.task ?? '', blocks: this.answers.blocks, board: this.answers.board ?? null, fits: this.kits.filter((kit) => kit.fits).length, kits, refusals }) }).catch(() => {});
         },
         // what it says goes after what the page has, so the model reads the two in order
         async sayToAgent(text) {
@@ -333,7 +344,7 @@ const useEditor = Pinia.defineStore('editor', {
             const classes = new Set(this.answers.blocks.map((block) => library.roles.flatMap((group) => group.roles).find((role) => role.id === block.role)?.needs?.class).filter(Boolean));
             const shown = new Set(library.questions.filter((question) => question.top || classes.has(question.limit?.of)).map((question) => question.id));
             const kept = Object.entries(copied(this.answers)).filter(([key]) => SHOWN_ANSWERS.includes(key) || shown.has(key));
-            const answers = { ...Object.fromEntries(kept), currency: this.currency };
+            const answers = { ...Object.fromEntries(kept), currency: this.currency, ...(this.installed ? { installed: copied(this.installed) } : {}) };
             if (!library.worker) {
                 this.kits = library.solver.solve(answers);
                 return;
@@ -344,7 +355,14 @@ const useEditor = Pinia.defineStore('editor', {
                 library.sent = this.stamp;
             }
             this.solving = true;
-            library.worker.postMessage(message);
+            try {
+                library.worker.postMessage(message);
+            } catch (error) {
+                // what cannot be sent would leave the page counting for ever: it is said, and the page counts by itself
+                console.error('postMessage to the solver:', error);
+                this.solving = false;
+                this.kits = library.solver.solve(answers);
+            }
         },
         async start() {
             this.startWorker();

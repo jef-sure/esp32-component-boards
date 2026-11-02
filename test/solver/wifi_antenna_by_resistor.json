@@ -1,0 +1,6 @@
+{
+    "title": "A board with an antenna on it and a connector beside it, chosen by a resistor: the kit says to move the resistor",
+    "answers": {"blocks": [{"role": "wifi", "name": "net", "variant": "external_antenna"}]},
+    "change": {"esp32_devkit": {"mcu": {"antenna": {"kind": "on_board", "form": "ceramic", "external": {"connector": "IPEX", "by": "resistor", "ref": "R12"}}}}},
+    "says": "Wi-Fi: an antenna goes on its IPEX once R12 is moved to it"
+}

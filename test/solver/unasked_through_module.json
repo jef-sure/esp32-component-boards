@@ -1,0 +1,5 @@
+{
+    "title": "A camera a module of the board brings, not asked: the kit leaves it unused through that module, so no program starts it",
+    "answers": {"blocks": [{"role": "wifi", "name": "net"}]},
+    "quiet": {"board": "jc1060p470c", "text": "the program starts camera_sensor"}
+}

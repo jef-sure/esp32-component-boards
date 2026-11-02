@@ -1,0 +1,5 @@
+{
+    "title": "With no platform asked, a kit names the versions of every platform that take it",
+    "answers": {"blocks": [{"role": "air", "name": "co2", "variant": "co2"}]},
+    "says": "builds with Arduino 3.3"
+}

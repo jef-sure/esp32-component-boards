@@ -42,6 +42,7 @@ async function localOf(picked) {
 
 const host = {
     folder: null,
+    trees: {}, // the tree each folder of an entry came from: a picture lies beside its entry
     localFolder: null,
     localProgram: null, // a program with no local-boards yet: they are made when the first file is saved
 
@@ -60,7 +61,14 @@ const host = {
         if (!answer.ok) return null;
         const paths = await answer.json();
         const texts = await Promise.all(paths.map(async (path) => (await fetch(`../catalog/${path}`)).text()));
-        return { ...(await this.fetchImported('imported')), ...(await this.fetchImported('imported-shops')), ...Object.fromEntries(paths.map((path, i) => [path, texts[i]])) };
+        const imported = { ...(await this.fetchImported('imported')), ...(await this.fetchImported('imported-shops')) };
+        for (const path of paths) this.trees[path.replace(/[^/]*$/, '')] = 'catalog';
+        return { ...imported, ...Object.fromEntries(paths.map((path, i) => [path, texts[i]])) };
+    },
+
+    // Where a picture of an entry lies, by the tree its folder came from.
+    pictureSrc(path) {
+        return `../${this.trees[path.replace(/[^/]*$/, '')] ?? 'catalog'}/${path}`;
     },
 
     // A tree of imported data. imported-shops/ is not published: a page elsewhere has none, and the catalog goes over both.
@@ -69,6 +77,7 @@ const host = {
         if (!answer.ok) return {};
         const paths = await answer.json();
         const texts = await Promise.all(paths.map(async (path) => (await fetch(`../${tree}/${path}`)).text()));
+        for (const path of paths) this.trees[path.replace(/[^/]*$/, '')] = tree;
         return Object.fromEntries(paths.map((path, i) => [path, texts[i]]));
     },
 

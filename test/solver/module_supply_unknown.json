@@ -1,0 +1,16 @@
+{
+    "title": "A module whose data names no supply: the wires list none, and the kit says that it is not known",
+    "answers": {"blocks": [{"role": "air", "name": "co2", "variant": "co2"}]},
+    "modules": {
+        "bare_co2": {
+            "format": "jef-sure/boards",
+            "format_version": 2,
+            "kind": "module",
+            "name": "bare_co2",
+            "title": "Bare CO2 board",
+            "devices": {"co2": {"chip": "scd4x", "variant": "scd41"}},
+            "price": {"shop": {"shop": "test", "currency": "EUR", "range": [1, 1], "date": "2026-11-02", "source": "the case"}}
+        }
+    },
+    "says": "Bare CO2 board: what feeds it is not in the data"
+}

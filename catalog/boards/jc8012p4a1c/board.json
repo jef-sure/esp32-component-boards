@@ -295,7 +295,7 @@
             "on": {"sdio.sdio0": {}},
             "provides": {"wifi": {}, "bluetooth": {}},
             "pins": {"io2": 6},
-            "antenna": {"kind": "connector"},
+            "antenna": {"kind": "connector", "quality": 8},
             "config": {"chip": "esp32-c6"},
             "notes": "An ESP32-C6 module beside the P4: Wi-Fi and BLE, its antenna on a wire from a connector of the module."
         },

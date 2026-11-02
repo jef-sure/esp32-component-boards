@@ -1,0 +1,7 @@
+{
+    "title": "A temperature block that asks up to 300 °C: the SCD4x stops at 60 and leaves, a part with no range in its data stays as an unknown",
+    "imported": true,
+    "answers": {"blocks": [{"role": "temperature", "name": "oven", "asks": {"temperature_up_to": 300}}]},
+    "without": "scd41_module",
+    "says": "Measures up to, °C: not in the data"
+}

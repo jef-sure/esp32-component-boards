@@ -20,7 +20,8 @@
         "flash_mb": 4,
         "psram_mb": 8,
         "psram_mhz": 80,
-        "notes": "the QSPI bus divides 80 MHz by a whole number; 80 MHz garbles the picture on this board, so it runs at 40"
+        "notes": "the QSPI bus divides 80 MHz by a whole number; 80 MHz garbles the picture on this board, so it runs at 40",
+        "antenna": {"kind": "connector", "quality": 8}
     },
     "price": {
         "aliexpress": {
@@ -32,6 +33,21 @@
         }
     },
     "checked": {
+        "antenna": {
+            "level": "hardware",
+            "covers": ["mcu.antenna"],
+            "by": "Anton",
+            "date": "2026-11-02",
+            "notes": "His board has an external antenna. JC4827W543 Specifications-EN.pdf of the vendor archive names an ESP32-S3-WROOM-1, which has a PCB antenna by the datasheet of Espressif; the WROOM-1U has a connector. Which module a board bought now has is not known."
+        },
+        "antenna_rssi": {
+            "level": "hardware",
+            "covers": ["mcu.antenna"],
+            "by": "rssi_probe on Anton's desk, one access point on channel 1, 60 s",
+            "unit": "MAC 44:bd:8d:7a:c7:44",
+            "date": "2026-11-02",
+            "notes": "Median RSSI with the external antenna: -52 dBm at 0 and -49 at 90 degrees. In the same place the boards with an antenna on them gave -59 to -66 at 0 degrees and, over two positions, -60 to -68."
+        },
         "pins": {
             "level": "schematic",
             "source": "JC4827W543 V1.1 and ESP32-4827A043 V0.2, 5-IO pin distribution of the vendor archive",

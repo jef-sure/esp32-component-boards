@@ -12,7 +12,7 @@
         {"via": "registry"},
         {"via": "git", "url": "https://github.com/jef-sure/esp32-component-pn532.git", "ref": "v{version}"}
     ],
-    "described": "0.8.0",
+    "described": "0.8.1",
     "transports": {
         "spi": {
             "init": {
@@ -72,7 +72,7 @@
     "checked": {
         "api": {
             "level": "vendor-code",
-            "source": "README of esp32-component-pn532 0.7.5, Features and scope; include/pn532.h, which in 0.8.0 differs by comments; include/pn532-ndef.h",
+            "source": "README of esp32-component-pn532 0.7.5, Features and scope; include/pn532.h, which in 0.8.1 differs by comments and a field of pn532_t; include/pn532-ndef.h",
             "date": "2026-10-31"
         },
         "history": {
@@ -106,6 +106,7 @@
         {"before": "0.5.0", "transports": {"spi": {"shared": null}, "i2c": {"shared": null}}}
     ],
     "versions": {
+        "0.8.1": {"platforms": {"esp_idf": ">=5.2.0"}},
         "0.8.0": {"platforms": {"esp_idf": ">=5.2.0"}},
         "0.7.7": {"platforms": {"esp_idf": ">=5.2.0"}},
         "0.7.6": {"platforms": {"esp_idf": ">=5.2.0"}},

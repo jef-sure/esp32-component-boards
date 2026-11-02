@@ -1,0 +1,6 @@
+{
+    "title": "A round display asked for: the round ST77916 module, and no rectangular panel of a board",
+    "answers": {"display": "graphics", "display_shape": "round"},
+    "first": {"name": "esp32_devkit", "modules": {"tft153_st77916": 1}},
+    "without": "lcd12864_st7920"
+}

@@ -1,6 +1,6 @@
 {
     "title": "A chip a version takes as a preview stays with a question, and a version that does not know it refuses",
     "imported": true,
-    "answers": {"platform": "esp_idf:5.5"},
+    "answers": {"platform": "esp_idf", "platform_version": "5.5"},
     "says": "ESP-IDF 5.5 does not take esp32s31"
 }

@@ -629,7 +629,7 @@
             "platforms": ["arduino_esp32"],
             "chips": ["bmp280"],
             "requires": ["arduino/adafruit/adafruit-busio", "arduino/adafruit/adafruit-unified-sensor"],
-            "stars": 284,
+            "stars": 283,
             "changed": "2026-01-13",
             "archived": false,
             "license": "MIT"
@@ -1843,7 +1843,7 @@
                 "arduino/fortyseveneffects/midi-library"
             ],
             "stars": 653,
-            "changed": "2026-11-01",
+            "changed": "2026-11-02",
             "archived": false,
             "license": "MIT"
         },
@@ -2576,7 +2576,7 @@
             "repository": "https://github.com/bblanchon/ArduinoJson.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
-            "stars": 7241,
+            "stars": 7242,
             "changed": "2026-10-13",
             "archived": false,
             "license": "MIT"
@@ -3711,7 +3711,7 @@
             "repository": "https://github.com/earlephilhower/ESP8266Audio.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
-            "stars": 2412,
+            "stars": 2413,
             "changed": "2026-10-07",
             "archived": false,
             "license": "GPL-3.0"
@@ -3895,7 +3895,7 @@
             "platforms": ["arduino_esp32"],
             "chips": [],
             "stars": 7522,
-            "changed": "2026-11-01",
+            "changed": "2026-11-02",
             "archived": false,
             "license": "MIT"
         },
@@ -4586,7 +4586,7 @@
             "repository": "https://github.com/lvgl/lvgl.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
-            "stars": 25072,
+            "stars": 25075,
             "changed": "2026-11-02",
             "archived": false,
             "license": "MIT"
@@ -5199,7 +5199,7 @@
             "repository": "https://github.com/miguelbalboa/rfid.git",
             "platforms": ["arduino_esp32"],
             "chips": ["mfrc522"],
-            "stars": 3044,
+            "stars": 3045,
             "changed": "2026-10-01",
             "archived": false,
             "license": "Unlicense"
@@ -7406,7 +7406,7 @@
             "repository": "https://github.com/tamctec/gt911-arduino.git",
             "platforms": ["arduino_esp32"],
             "chips": ["gt911"],
-            "stars": 62,
+            "stars": 63,
             "changed": "2023-09-17",
             "archived": false,
             "license": "Apache-2.0"
@@ -8002,7 +8002,7 @@
             "repository": "https://github.com/z3t0/Arduino-IRremote.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
-            "stars": 5061,
+            "stars": 5062,
             "changed": "2026-10-10",
             "archived": false,
             "license": "NOASSERTION"
@@ -8359,11 +8359,11 @@
         },
         "esp-idf/jef-sure/pn532": {
             "title": "PN532",
-            "version": "0.8.0",
+            "version": "0.8.1",
             "repository": "https://github.com/jef-sure/esp32-component-pn532",
             "platforms": ["esp_idf"],
             "chips": ["pn532"],
-            "audited": ["0.7.6", "0.7.7", "0.8.0"],
+            "audited": ["0.7.6", "0.7.7", "0.8.0", "0.8.1"],
             "stars": 3,
             "changed": "2026-11-02",
             "archived": false,
@@ -8490,8 +8490,8 @@
             "repository": "https://github.com/espressif/esp-matter",
             "platforms": ["esp_idf"],
             "chips": ["esp32_dac"],
-            "stars": 1097,
-            "changed": "2026-10-29",
+            "stars": 1096,
+            "changed": "2026-11-02",
             "archived": false,
             "license": "Apache-2.0"
         },
@@ -8561,7 +8561,7 @@
             "platforms": ["arduino_esp32"],
             "chips": ["pn532"],
             "audited": ["1.1.0", "1.1.0"],
-            "stars": 506,
+            "stars": 505,
             "changed": "2026-10-12",
             "archived": false,
             "license": "BSD-3-Clause"
@@ -8581,7 +8581,7 @@
             "repository": "https://github.com/vroland/epdiy",
             "platforms": ["esp_idf"],
             "chips": ["gt911"],
-            "stars": 1969,
+            "stars": 1970,
             "changed": "2026-08-23",
             "archived": false,
             "license": "LGPL-3.0"

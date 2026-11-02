@@ -1,0 +1,6 @@
+{
+    "title": "On the canvas the settings of a display block hold: a round one asked for gives the round ST77916 module",
+    "answers": {"blocks": [{"role": "display", "name": "screen"}], "display_shape": "round"},
+    "first": {"name": "esp32_devkit", "modules": {"tft153_st77916": 1}},
+    "without": "lcd12864_st7920"
+}

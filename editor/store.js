@@ -5,6 +5,7 @@
 const FILES = { boards: 'board.json', modules: 'module.json', addons: 'addon.json', platforms: 'platform.json', devices: 'device.json', mcu: 'mcu.json', connectors: 'connector.json' };
 const DESCRIPTION = 'DESCRIPTION.md';
 const AGENT_KITS = 12; // what a model reads of a list of hundreds
+const SHOWN_ANSWERS = ['blocks', 'task', 'outputs', 'board']; // what the canvas holds beside the questions of the top row and of its blocks
 const READ_ONLY_GROUPS = new Set(['mcu']); // written by tools/make_mcu.py
 const LOADED = ['facts', 'classes', 'libraries', 'inputs']; // what the loader adds, not a field to edit
 const ROOT_FIELDS = new Set(['format', 'format_version', 'kind', 'name', 'title', 'description', 'extends', 'notes', 'images', 'origin', 'provides']);
@@ -159,7 +160,7 @@ const useEditor = Pinia.defineStore('editor', {
         solving: false,
         agent: null, // the token of tools/boards_mcp.py, when the page came from it
         talk: [], // what was said with the model
-        accepted: [], // the ids of proposals of blocks taken or left
+        applied: 0, // the last message of the model whose edits are on the canvas
         description: '', // what the model wrote in the end: a project gets it
     }),
     getters: {
@@ -175,6 +176,18 @@ const useEditor = Pinia.defineStore('editor', {
             const has = (role, device) => Boolean(device.provides?.[role.id]) || (role.needs?.class && classOf(device).includes(role.needs.class));
             const count = (role) => parts.filter((part) => Object.values(part.devices ?? {}).some((device) => has(role, device))).length;
             return (library.roles ?? []).map((group) => ({ ...group, roles: group.roles.map((role) => ({ ...role, count: count(role) })) }));
+        },
+        // The versions of a platform, the newest first, for the person to fix one.
+        versionsOf() {
+            return (platform) => Object.keys(library.catalog.platforms?.[platform]?.versions ?? {}).sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
+        },
+        // What a block asks of the data of its part: the questions of its role, and of its variant.
+        asksOf() {
+            return (block) => library.questions.filter((question) => question.limit?.field && question.limit.of === block.role && (!question.limit.variant || question.limit.variant === block.variant));
+        },
+        // The parts of the catalog a block can have, for the person to fix one.
+        partsOf() {
+            return (block) => library.solver?.partsOfBlock(block) ?? [];
         },
         // What a block asks besides its variant: the questions that limit parts of its class.
         settings(state) {
@@ -221,7 +234,7 @@ const useEditor = Pinia.defineStore('editor', {
         },
         topQuestions(state) {
             state.stamp;
-            return library.questions.filter((question) => question.top);
+            return library.questions.filter((question) => question.top && library.solver.holds(question, state.answers));
         },
         currencies(state) {
             state.stamp;
@@ -252,6 +265,7 @@ const useEditor = Pinia.defineStore('editor', {
                 this.talk.push(...messages);
                 next = seen + messages.length;
                 for (const item of messages) if (item.description) this.description = item.text;
+                for (const item of messages) if (item.edits) this.applyEdits(item);
             } catch {
                 this.agent = null; // the server is gone: the page works on without it
                 return;
@@ -261,7 +275,7 @@ const useEditor = Pinia.defineStore('editor', {
         tellAgent() {
             if (!this.agent) return Promise.resolve();
             const kits = this.kits.filter((kit) => kit.fits).slice(0, AGENT_KITS).map((kit) => ({ headline: kit.headline, price: kit.price, imported: kit.imported, says: kit.says }));
-            return this.agentCall('state', { method: 'POST', body: JSON.stringify({ task: this.answers.task ?? '', blocks: this.answers.blocks, fits: this.kits.filter((kit) => kit.fits).length, kits }) }).catch(() => {});
+            return this.agentCall('state', { method: 'POST', body: JSON.stringify({ task: this.answers.task ?? '', blocks: this.answers.blocks, board: this.answers.board ?? null, fits: this.kits.filter((kit) => kit.fits).length, kits }) }).catch(() => {});
         },
         // what it says goes after what the page has, so the model reads the two in order
         async sayToAgent(text) {
@@ -269,12 +283,30 @@ const useEditor = Pinia.defineStore('editor', {
             await this.tellAgent();
             await this.agentCall('say', { method: 'POST', body: JSON.stringify({ text }) });
         },
-        acceptBlocks(message) {
-            this.answers.blocks.push(...message.blocks.filter((block) => this.palette.some((group) => group.roles.some((role) => role.id === block.role))).map((block) => ({ role: block.role, variant: block.variant, name: block.name ?? '' })));
-            this.accepted.push(message.id);
+        // What the model changes on the canvas, once per message: a block the person fixed stays as it is.
+        applyEdits(message) {
+            const stored = `boards.applied.${this.agent}`;
+            this.applied = Math.max(this.applied, Number(localStorage.getItem(stored) ?? 0));
+            if (message.id <= this.applied) return;
+            const named = (name) => this.answers.blocks.find((block) => (block.name || block.role) === name && !block.fixed);
+            for (const name of message.edits.remove ?? []) {
+                const block = named(name);
+                if (block) this.answers.blocks.splice(this.answers.blocks.indexOf(block), 1);
+            }
+            for (const change of message.edits.change ?? []) {
+                const block = named(change.name);
+                if (block) Object.assign(block, { variant: change.variant ?? block.variant, part: change.part ?? block.part, asks: change.asks ?? block.asks, by: 'model' });
+            }
+            const known = (role) => this.palette.some((group) => group.roles.some((item) => item.id === role));
+            for (const block of (message.edits.add ?? []).filter((item) => known(item.role))) {
+                if (!this.answers.blocks.some((other) => other.fixed && (other.name || other.role) === (block.name || block.role)))
+                    this.answers.blocks.push({ role: block.role, variant: block.variant, name: block.name ?? '', part: block.part, asks: block.asks, by: 'model' });
+            }
+            this.applied = message.id;
+            localStorage.setItem(stored, String(message.id));
         },
         addBlock(role) {
-            this.answers.blocks.push({ role, variant: undefined, name: '' });
+            this.answers.blocks.push({ role, variant: undefined, name: '', by: 'person' });
         },
         // The worker answers the last question only; a page it cannot start on answers by itself.
         startWorker() {
@@ -297,7 +329,11 @@ const useEditor = Pinia.defineStore('editor', {
         },
         askKits() {
             if (!this.loaded) return;
-            const answers = { ...copied(this.answers), currency: this.currency };
+            // only what the page shows acts: an answer kept from the old questions would add a part nobody sees asked for
+            const classes = new Set(this.answers.blocks.map((block) => library.roles.flatMap((group) => group.roles).find((role) => role.id === block.role)?.needs?.class).filter(Boolean));
+            const shown = new Set(library.questions.filter((question) => question.top || classes.has(question.limit?.of)).map((question) => question.id));
+            const kept = Object.entries(copied(this.answers)).filter(([key]) => SHOWN_ANSWERS.includes(key) || shown.has(key));
+            const answers = { ...Object.fromEntries(kept), currency: this.currency };
             if (!library.worker) {
                 this.kits = library.solver.solve(answers);
                 return;

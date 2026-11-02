@@ -1,0 +1,6 @@
+{
+    "title": "A CO2 block that asks up to 5000 ppm: the SCD40 stops at 2000 by its datasheet and leaves, the SCD41 stays",
+    "answers": {"blocks": [{"role": "air", "name": "co2", "variant": "co2", "asks": {"co2_up_to": 5000}}]},
+    "kit": {"name": "esp32_devkit", "modules": {"scd41_module": 1}},
+    "without": "scd40_module"
+}

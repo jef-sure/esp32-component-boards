@@ -1,15 +1,18 @@
 {
-    "title": "A graphics display asked for: a board that has one beats a module, though it holds touch and sound too",
+    "title": "A graphics display asked for: a module on a plain board beats a board whose touch and sound nobody asked for",
     "answers": {
         "display": "graphics"
     },
     "first": {
-        "name": "cyd_s028r",
-        "modules": {}
+        "name": "esp32_devkit",
+        "modules": {
+            "lcd12864_st7920": 1
+        }
     },
     "unused": {
         "board": "cyd_s028r",
         "parts": [
+            "rgb",
             "sound",
             "touch"
         ]

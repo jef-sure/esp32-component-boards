@@ -4,7 +4,7 @@
     "kind": "module",
     "name": "adafruit_adafruit_as5600_magnetic_angle_sensor",
     "title": "Adafruit AS5600 Magnetic Angle Sensor",
-    "devices": {"other": {"on": {"i2c": {}}, "chip": "as5600"}},
+    "devices": {"imu": {"on": {"i2c": {}}, "chip": "as5600"}},
     "connectors": {"J1": {"type": "contacts of the part", "pins": ["VCC", "3.3V", "PWMOUT", "SCL", "SDA", "GND"]}},
     "maker": "adafruit",
     "part": "6357",
@@ -17,5 +17,12 @@
         "tool": "tools/import_fritzing.py",
         "date": "2026-11-01"
     },
-    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}},
+    "images": {
+        "drawing": {
+            "file": "drawing.webp",
+            "source": "the breadboard drawing of the Fritzing part Adafruit AS5600 Magnetic Angle Sensor.fzpz by liz, CC BY-SA 3.0, drawn at 320 px",
+            "shows": "drawing"
+        }
+    }
 }

@@ -31,6 +31,13 @@ config BOARD_SELECT_CYD_S028R
         to pins no host is left for (spi3 is the touch's): kept as data for the
         program.
 
+config BOARD_SELECT_ESP32_C3_ZERO
+    bool "Waveshare ESP32-C3-Zero"
+    depends on IDF_TARGET_ESP32C3
+    help
+        A small ESP32-C3 board: 4 MB flash in the chip, castellated holes, USB-C
+        to the chip, a WS2812B, BOOT and RESET buttons, a ceramic antenna.
+
 config BOARD_SELECT_ESP32_DEVKIT
     bool "ESP32 DevKit, 4 MB"
     depends on IDF_TARGET_ESP32
@@ -51,6 +58,14 @@ config BOARD_SELECT_ESP32_P4_POE_ETH
     depends on IDF_TARGET_ESP32P4
     help
         The ESP32-P4-ETH sold with a PoE module on its header H7.
+
+config BOARD_SELECT_ESP32_S3_ZERO
+    bool "Waveshare ESP32-S3-Zero"
+    depends on IDF_TARGET_ESP32S3
+    help
+        A small ESP32-S3 board: 4 MB flash and 2 MB PSRAM in the chip,
+        castellated holes, USB-C to the chip, a WS2812B, BOOT and RESET buttons,
+        a ceramic antenna.
 
 config BOARD_SELECT_ESP32S3_DEVKIT
     bool "ESP32-S3 DevKit, 16 MB, 8 MB PSRAM"
@@ -105,6 +120,11 @@ config BOARD_CYD_S028R
     default 1 if BOARD_SELECT_CYD_S028R
     default 0
 
+config BOARD_ESP32_C3_ZERO
+    int
+    default 1 if BOARD_SELECT_ESP32_C3_ZERO
+    default 0
+
 config BOARD_ESP32_DEVKIT
     int
     default 1 if BOARD_SELECT_ESP32_DEVKIT
@@ -118,6 +138,11 @@ config BOARD_ESP32_P4_ETH
 config BOARD_ESP32_P4_POE_ETH
     int
     default 1 if BOARD_SELECT_ESP32_P4_POE_ETH
+    default 0
+
+config BOARD_ESP32_S3_ZERO
+    int
+    default 1 if BOARD_SELECT_ESP32_S3_ZERO
     default 0
 
 config BOARD_ESP32S3_DEVKIT

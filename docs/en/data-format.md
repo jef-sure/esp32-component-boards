@@ -371,7 +371,26 @@ radiated power. A part of a module inherits the figures of its chip and can repl
 An antenna is not the
 chip's: a module or a board names it in `antenna` (`kind`: `on_board`, `connector`,
 `wire`) and keeps its figures, with a `checked` entry saying who measured them. A
-larger antenna on the same chip is another module.
+larger antenna on the same chip is another module. `form` tells an antenna on the board:
+`trace`, `ceramic` or `coil`. `external` is a connector beside it, with what chooses between
+the two: a `resistor` to solder over or a `switch`, a device the program sets, and its `ref`.
+The radio of the chip itself has its antenna in `mcu.antenna`. A Wi-Fi or Bluetooth block of
+the variant `external_antenna` refuses a board whose radio has only the antenna on it, and an
+antenna not in the data is an unknown of the kit.
+
+`quality` judges the design from 0 to 10. It is not a measurement: an RSSI holds for one place and one time, and a
+device a metre from its access point does not care. A kit shows it when a radio is asked for and does not rank by it;
+the model weighs it against the task. The marks between those below are free.
+
+| `quality` | the design |
+|---|---|
+| 0 | no antenna: a connector with nothing on it, or nothing at all |
+| 2 | a known fault of the design, as a chip antenna next to the crystal |
+| 4 | a ceramic chip on a small board |
+| 5 | a trace on a small board, or a ceramic chip with free space around it |
+| 7 | the PCB antenna of a module, as an ESP-WROOM-32, out over the edge of the board |
+| 8 | an external antenna on a connector |
+| 10 | an external antenna of high gain, or on a cable out of the case |
 A family writes what its members share, and each entry of `variants` patches the
 rest. `variant_by` says what sets the variant and how a program can know it.
 
@@ -564,7 +583,9 @@ it, as a radio provides `wifi`.
 
 A role in `catalog/roles.json` can have variants, and a chip says its own in `provides`, as `{"display": {"variant": "tft"}}`.
 A part that does not say stays a candidate, and the kit counts that as an unknown. A variant with a `way` needs no part: the kit
-gives it its `lines`, and those in `shared` are one line for all the blocks of that variant. `adc` asks for a pin of `gpio.adc1`.
+gives it its `lines`, and those in `shared` are one line for all the blocks of that variant. `adc` is how many of the lines, the
+first of the list, take pins of `gpio.adc1`. A variant with `needs.provides`, as a gamepad by Bluetooth, asks the board for it.
+`bluetooth_classic` of a chip comes from `SOC_BT_CLASSIC_SUPPORTED` of ESP-IDF; every chip with `bluetooth` has BLE.
 
 ## Addons
 

@@ -290,6 +290,7 @@
     "provides": {
         "wifi": {},
         "bluetooth": {},
+        "bluetooth_classic": {},
         "dac": {},
         "emac": {},
         "sdmmc": {},

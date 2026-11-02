@@ -1,0 +1,11 @@
+{
+    "title": "Two temperature blocks that ask different ranges are two needs: the room keeps the SCD41, the oven does not take it",
+    "imported": true,
+    "answers": {"blocks": [
+        {"role": "air", "name": "co2", "variant": "co2", "part": "scd41_module", "fixed": true},
+        {"role": "temperature", "name": "room", "asks": {"temperature_up_to": 40}},
+        {"role": "temperature", "name": "oven", "asks": {"temperature_up_to": 300}}
+    ]},
+    "says": "SCD41 module serves: Air quality, Temperature",
+    "kit": {"name": "esp32_devkit", "modules": {"scd41_module": 1, "adafruit_adafruit_max31865_rtd_sensor_breakout": 1}}
+}

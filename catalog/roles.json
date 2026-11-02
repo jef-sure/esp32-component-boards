@@ -154,11 +154,28 @@
                     "needs": {"class": "encoder"}
                 },
                 {
+                    "id": "gamepad",
+                    "text": "Gamepad",
+                    "class": "gamepad",
+                    "words": "gamepad|game ?controller|nunchu\\w*|\\bwii\\b",
+                    "needs": {"class": "gamepad"},
+                    "variants": [
+                        {"id": "nes", "text": "NES or SNES pad", "words": "\\bs?nes\\b", "way": {"lines": ["latch", "clock", "data"], "shared": ["latch", "clock"]}},
+                        {"id": "ps2", "text": "PlayStation 2 pad", "words": "playstation|dualshock", "way": {"lines": ["data", "command", "attention", "clock"]}},
+                        {"id": "on_gpio", "text": "Buttons on GPIOs", "way": {"lines": ["up", "down", "left", "right", "a", "b", "start", "back"]}},
+                        {"id": "classic", "text": "Bluetooth Classic", "needs": {"provides": "bluetooth_classic"}},
+                        {"id": "ble", "text": "Bluetooth LE", "needs": {"provides": "bluetooth"}}
+                    ]
+                },
+                {
                     "id": "joystick",
                     "text": "Joystick",
-                    "class": "gamepad",
-                    "words": "joystick|gamepad|thumbstick",
-                    "needs": {"class": "gamepad"}
+                    "class": "other",
+                    "words": "joystick|thumb ?stick",
+                    "variants": [
+                        {"id": "analog", "text": "Analog stick", "words": "thumb ?stick|analog|ky-?023", "way": {"lines": ["x", "y", "press"], "adc": 2}},
+                        {"id": "arcade", "text": "Arcade stick", "words": "arcade", "way": {"lines": ["up", "down", "left", "right"]}}
+                    ]
                 },
                 {
                     "id": "keypad",
@@ -341,14 +358,16 @@
                     "text": "Wi-Fi",
                     "class": "radio",
                     "words": "wi-?fi|winc\\d+|rn-?1\\d\\d\\w*|airlift|esp-?at",
-                    "needs": {"provides": "wifi"}
+                    "needs": {"provides": "wifi"},
+                    "variants": [{"id": "external_antenna", "text": "External antenna", "needs": {"provides": "wifi", "antenna": "external"}}]
                 },
                 {
                     "id": "bluetooth",
                     "text": "Bluetooth",
                     "class": "radio",
                     "words": "bluetooth|bluefruit|\\bble\\b|rn-?4\\d\\b|hm-?10",
-                    "needs": {"provides": "bluetooth"}
+                    "needs": {"provides": "bluetooth"},
+                    "variants": [{"id": "external_antenna", "text": "External antenna", "needs": {"provides": "bluetooth", "antenna": "external"}}]
                 },
                 {
                     "id": "lora",
@@ -566,6 +585,11 @@
                 },
                 {"id": "usb_pd", "text": "USB power", "class": "other", "words": "husb\\d+|\\bpd\\b|power delivery"}
             ]
+        },
+        {
+            "id": "own",
+            "text": "Your own",
+            "roles": [{"id": "own_part", "text": "Your own part", "class": "other"}]
         }
     ]
 }

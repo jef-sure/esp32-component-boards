@@ -1,0 +1,33 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "scd40_module",
+    "title": "SCD40 module",
+    "description": "A small purple board with the sensor, two resistors and a capacitor, and four holes, as AliExpress sells it",
+    "power": [{"name": "VDD", "source": "connector", "volts": [2.4, 5.5], "feeds": ["co2"]}],
+    "devices": {"co2": {"chip": "scd4x", "variant": "scd40", "logic": "VDD"}},
+    "connectors": {"J1": {"type": "4 pin holes", "pins": ["GND", "VDD", "SCL", "SDA"]}},
+    "notes": "No regulator on the top side: VDD goes to the sensor, which draws up to 205 mA at 3.3 V for a moment (datasheet, Table 4).",
+    "price": {
+        "aliexpress": {
+            "shop": "AliExpress",
+            "currency": "EUR",
+            "range": [12, 12],
+            "date": "2026-11-02",
+            "source": "Anton bought an SCD40 on AliExpress for about 12 EUR"
+        }
+    },
+    "checked": {
+        "listing": {
+            "level": "unchecked",
+            "covers": ["connectors", "power"],
+            "source": "Photos of the board Anton sent: the purple one is the SCD40. Holes GND (the square one), VDD, SCL, SDA; R1 at SDA, R2 at SCL, C1. logic VDD assumes that R1 and R2 pull the lines up to VDD: not measured"
+        },
+        "supply": {
+            "level": "datasheet",
+            "covers": ["power"],
+            "source": "CD_DS_SCD4x_Datasheet_D1.pdf in esp32-component-scd4x, Table 4: VDD 2.4 to 5.5 V; SDA and SCL at most VDD + 0.3 V"
+        }
+    }
+}

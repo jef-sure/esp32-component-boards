@@ -20,7 +20,7 @@ extern "C" {
 struct board_data {
     const char *name;   /* the board's directory name, as the data names it */
     const char *title;  /* what the menu of the configuration shows */
-    const char *target; /* the chip of the board: esp32, esp32s3, esp32p4 */
+    const char *target; /* the chip of the board: esp32, esp32s3, esp32p4, esp32c3, esp32c6 */
 };
 extern const struct board_data board_data;
 

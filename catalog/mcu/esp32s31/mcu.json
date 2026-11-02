@@ -355,6 +355,7 @@
     "provides": {
         "wifi": {},
         "bluetooth": {},
+        "bluetooth_classic": {},
         "usb_otg": {},
         "lcd_rgb": {},
         "emac": {},

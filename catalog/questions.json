@@ -19,6 +19,14 @@
             "when": {"display": "graphics"},
             "limit": {"measure": "diagonal_in", "of": "display"}
         },
+        {
+            "id": "display_shape",
+            "text": "Its shape",
+            "type": "choice",
+            "when": {"display": "graphics"},
+            "limit": {"measure": "shape", "of": "display"},
+            "choices": [{"value": "any", "text": "any"}, {"value": "round", "text": "round"}, {"value": "rectangular", "text": "rectangular"}]
+        },
         {"id": "touch", "text": "A touch panel", "type": "flag", "needs": {"class": "touch"}},
         {"id": "sound", "text": "Sound", "type": "flag", "needs": {"class": "audio"}},
         {"id": "outputs", "text": "Tones and PWM", "type": "outputs"},
@@ -43,9 +51,12 @@
         {"id": "bluetooth", "text": "Bluetooth", "type": "flag", "needs": {"provides": "bluetooth"}},
         {"id": "ethernet", "text": "Ethernet", "type": "flag", "needs": {"provides": "ethernet", "chip": "emac"}},
         {"id": "poe", "text": "Power over Ethernet", "type": "flag", "when": {"ethernet": true}, "needs": {"provides": "poe"}},
-        {"id": "taken", "text": "GPIOs already in use, as 14, 15, 16", "type": "text"},
+        {"id": "co2_up_to", "text": "Measures up to, ppm", "type": "number", "limit": {"of": "air", "variant": "co2", "field": "provides.air.specified", "fits": "up_to"}},
+        {"id": "temperature_down_to", "text": "Measures down to, °C", "type": "number", "limit": {"of": "temperature", "field": "provides.temperature.specified", "fits": "down_to"}},
+        {"id": "temperature_up_to", "text": "Measures up to, °C", "type": "number", "limit": {"of": "temperature", "field": "provides.temperature.specified", "fits": "up_to"}},
         {"id": "platform", "text": "Platform", "type": "choice", "top": true, "limit": {"measure": "platform"}, "choices": [
-            {"value": "any", "text": "any"}, {"value": "esp_idf:6.1", "text": "ESP-IDF 6.1"}, {"value": "esp_idf:5.5", "text": "ESP-IDF 5.5"}, {"value": "arduino_esp32:3.3", "text": "Arduino 3.3"}]},
+            {"value": "any", "text": "any"}, {"value": "esp_idf", "text": "ESP-IDF"}, {"value": "arduino_esp32", "text": "Arduino"}]},
+        {"id": "platform_version", "text": "Version", "type": "version", "top": true, "when": {"platform": true}, "limit": {"measure": "platform_version"}},
         {"id": "budget", "text": "Budget for one kit", "type": "number", "top": true, "limit": {"measure": "price"}}
     ]
 }

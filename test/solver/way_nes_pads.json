@@ -1,0 +1,6 @@
+{
+    "title": "Two NES pads ask for no part: they share latch and clock, and each has a data line of its own",
+    "answers": {"blocks": [{"role": "gamepad", "name": "player1", "variant": "nes"}, {"role": "gamepad", "name": "player2", "variant": "nes"}]},
+    "says": "no part of the catalog, the kit only gives it pins: latch, clock, data",
+    "shared": {"board": "esp32_devkit", "uses": ["player1", "player2"], "lines": ["latch", "clock"], "own": "data"}
+}

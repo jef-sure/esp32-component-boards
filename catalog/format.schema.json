@@ -146,7 +146,7 @@
         "properties": {
           "file": { "type": "string", "pattern": "\\.(webp|png|jpg|svg)$" },
           "source": { "type": "string", "description": "Whose picture: own, or where the right to use it comes from. Vendor photos are not copied." },
-          "shows": { "enum": ["front", "back", "side", "pinout"] },
+          "shows": { "enum": ["front", "back", "side", "pinout", "drawing"], "description": "drawing: a drawing of the part, not a photo of it." },
           "up": {
             "description": "Where the top of the screen points, so as the board shows it needs no words.",
             "type": "object",
@@ -453,9 +453,28 @@
       "additionalProperties": false,
       "properties": {
         "kind": { "enum": ["on_board", "connector", "wire"] },
+        "form": { "enum": ["trace", "ceramic", "coil"], "description": "Of an antenna on the board: a trace of the board, a ceramic chip or a coil." },
+        "quality": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "A judgement of the design from 0, no antenna, to 10, by the marks of data-format.md: not a measurement, which holds for one place and one time."
+        },
         "connector": { "type": "string" },
+        "external": {
+          "description": "A connector for an antenna outside the board beside the one on it, and what chooses between them.",
+          "type": "object",
+          "required": ["connector", "by", "ref"],
+          "additionalProperties": false,
+          "properties": {
+            "connector": { "type": "string", "minLength": 1 },
+            "by": { "enum": ["resistor", "switch"], "description": "resistor: a part soldered to one side or the other; switch: a device of the board that the program sets." },
+            "ref": { "type": "string", "minLength": 1, "description": "The resistor as the schematic names it, or the device of the switch." }
+          }
+        },
         "size_mm": { "$ref": "#/$defs/range" },
-        "gain_dbi": { "type": "number" }
+        "gain_dbi": { "type": "number" },
+        "notes": { "$ref": "#/$defs/notes" }
       }
     },
     "start": {
@@ -758,7 +777,7 @@
       "properties": {
         "high_min_mv": { "type": "integer", "minimum": 1, "description": "The least a line takes as a high level." },
         "lines": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
-        "ledc": { "type": "integer", "minimum": 1, "description": "The LEDC channels one device takes this way." }, "shared": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 }, "description": "Of lines: those that all the devices of one block share, as data and clock of chains of shift registers." }, "adc": { "type": "integer", "minimum": 1, "description": "The lines read by ADC1." },
+        "ledc": { "type": "integer", "minimum": 1, "description": "The LEDC channels one device takes this way." }, "shared": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 }, "description": "Of lines: those that all the devices of one block share, as data and clock of chains of shift registers." }, "adc": { "type": "integer", "minimum": 1, "description": "How many lines, the first of the list, are read by ADC1." },
         "gives": { "type": "object", "additionalProperties": { "type": "number" }, "description": "The figures of this way, as swing_v across a piezo disc." },
         "do": { "type": "string", "minLength": 1, "description": "What a person does to wire it." }
       }
@@ -783,6 +802,7 @@
         "psram_mb": { "type": "integer", "minimum": 0 },
         "notes": { "$ref": "#/$defs/notes" },
         "controls": { "$ref": "#/$defs/controls", "description": "Values for the parameters of the chip, such as wifi_tx_power." },
+        "antenna": { "$ref": "#/$defs/antenna", "description": "The antenna of the radio of the chip, on this board or on the module that holds the chip." },
         "facts": { "type": "object", "description": "Made by the loader: the entry of catalog/mcu/." },
         "psram_mhz": {
           "type": "integer",
@@ -1016,17 +1036,27 @@
       "properties": {
         "id": { "$ref": "#/$defs/name" },
         "text": { "type": "string", "minLength": 1 },
-        "type": { "enum": ["choice", "flag", "count", "number", "text", "outputs"], "description": "outputs: a list of tones and PWM signals, each with its frequency and what it needs." },
+        "type": { "enum": ["choice", "flag", "count", "number", "text", "outputs", "version"], "description": "outputs: a list of tones and PWM signals, each with its frequency and what it needs. version: a version of the platform answered, from catalog/platforms." },
         "top": { "type": "boolean", "description": "Shown in the top row of the page, not among the questions about the hardware." },
         "max": { "type": "integer", "minimum": 1, "description": "The most a count takes." },
         "when": { "type": "object", "description": "It is asked only when these answers are given, by the id of the question. true: any answer but none; {\"at_least\": n}: a count of n or more." },
         "needs": { "$ref": "#/$defs/questionNeed" },
         "limit": {
-          "description": "What a number limits instead of asking for a part.",
+          "description": "What an answer limits instead of asking for a part: a measure of the solver, asked once for the device, or a field of the data of a part, asked in each block of the role, its answer in asks of the block.",
           "type": "object",
-          "required": ["measure"],
+          "oneOf": [{ "required": ["measure"] }, { "required": ["field", "fits", "of"] }],
           "additionalProperties": false,
-          "properties": { "measure": { "enum": ["diagonal_in", "range_mm", "gap_mm", "standard", "price", "platform"] }, "of": { "type": "string", "description": "The class it is measured on." } }
+          "properties": {
+            "measure": { "enum": ["diagonal_in", "range_mm", "gap_mm", "standard", "shape", "price", "platform", "platform_version"] },
+            "of": { "type": "string", "description": "The class it is measured on; with field, the role whose blocks ask it." },
+            "variant": { "type": "string", "description": "With field: only blocks of this variant of the role ask it." },
+            "field": { "type": "string", "description": "The path of the value in the data of a part, its variant applied, as provides.air.specified." },
+            "fits": {
+              "enum": ["up_to", "down_to", "at_least", "at_most", "includes", "is"],
+              "description": "up_to: the top of a range reaches the answer; down_to: its bottom does; at_least, at_most: a number; includes: a list holds value; is: equal to the answer."
+            },
+            "value": { "description": "With includes: what the list must hold, the answer of a flag asking for it." }
+          }
         },
         "choices": {
           "type": "array",
@@ -1061,7 +1091,7 @@
                 "type": "array",
                 "items": {
                   "type": "object",
-                  "required": ["id", "text", "class", "words"],
+                  "required": ["id", "text", "class"],
                   "additionalProperties": false,
                   "properties": {
                     "id": { "$ref": "#/$defs/name" },
@@ -1100,7 +1130,8 @@
         "class": { "$ref": "#/$defs/class" },
         "where": { "type": "object", "additionalProperties": { "type": "string" }, "description": "What the device must have, by the path of the field." },
         "provides": { "type": "string", "minLength": 1 },
-        "chip": { "type": "string", "minLength": 1, "description": "What the chip must provide for it. An imported board that does not say is then an unknown, not a no." }
+        "chip": { "type": "string", "minLength": 1, "description": "What the chip must provide for it. An imported board that does not say is then an unknown, not a no." },
+        "antenna": { "const": "external", "description": "Of a radio the board provides: an antenna outside the board can serve it." }
       }
     },
     "calibration": {

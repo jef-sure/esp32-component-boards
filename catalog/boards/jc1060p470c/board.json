@@ -388,7 +388,7 @@
             "class": "radio",
             "on": {"sdio.sdio0": {}},
             "provides": {"wifi": {}, "bluetooth": {}},
-            "antenna": {"kind": "connector"},
+            "antenna": {"kind": "connector", "quality": 8},
             "config": {"chip": "esp32-c6"},
             "notes": "The ESP32-C6 inside the module: Wi-Fi and BLE of the P4, its antenna on a wire from a connector of the module."
         },

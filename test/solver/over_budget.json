@@ -3,5 +3,5 @@
     "answers": {"budget": 10, "wifi": true},
     "prices": {"esp32_devkit": [20, 25]},
     "says": "it costs at least 20 EUR",
-    "fit": ["esp32s3_devkit"]
+    "fit": ["esp32_c3_zero", "esp32_s3_zero", "esp32s3_devkit"]
 }

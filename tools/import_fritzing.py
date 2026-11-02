@@ -103,7 +103,7 @@ def roles_of(text):
     """The roles the name of a part shows, and of each the first variant it names."""
     found = []
     for role in ROLES:
-        if re.search(role["words"], text, re.I):
+        if "words" in role and re.search(role["words"], text, re.I):
             variant = next((item for item in role.get("variants", []) if "words" in item and re.search(item["words"], text, re.I)), None)
             found.append((role, variant))
     return found
@@ -120,11 +120,14 @@ def config_of(role, title, text):
 
 
 def chip_of(title, known):
-    """The chip of a part: one of the catalog by its name in the title, or what looks like a part number there."""
+    """The chip of a part: one of the catalog by its name in the title, the first there, or what looks like a part number there."""
     plain = title.lower().replace("-", "").replace("_", "")
-    found = next((name for name in known if len(name) > 3 and re.search(rf"(?<![a-z0-9]){re.escape(name.replace('_', ''))}(?![a-z0-9])", plain)), None)
+    # a title can name two chips, as "ENS160 ... CCS811 upgrade": the first named is the chip of the part
+    places = ((match.start(), -len(name), name) for name in known if len(name) > 3
+              for match in [re.search(rf"(?<![a-z0-9]){re.escape(name.replace('_', ''))}(?![a-z0-9])", plain)] if match)
+    found = min(places, default=None)
     if found:
-        return found, True
+        return found[2], True
     token = next((item for item in CHIP_LIKE.findall(title) if item.rstrip("0123456789-") not in NOT_CHIPS), None)
     return (importer.word(token.replace("-", "")), False) if token else (None, False)
 

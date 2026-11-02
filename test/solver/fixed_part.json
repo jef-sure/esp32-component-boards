@@ -1,0 +1,6 @@
+{
+    "title": "A part the person fixed is the only one for its block: the SCD41 stays though the SCD40 costs less",
+    "answers": {"blocks": [{"role": "air", "name": "co2", "variant": "co2", "part": "scd41_module", "fixed": true}]},
+    "kit": {"name": "esp32_devkit", "modules": {"scd41_module": 1}},
+    "without": "scd40_module"
+}

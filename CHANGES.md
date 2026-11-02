@@ -173,6 +173,48 @@ committed, a program that asks by kind.
   gives it the lines, and chains share their data and clock in `shared_pins`. `gpio.adc1` of a chip comes from ESP-IDF.
 - The HLK-LD2410C radar, and PIR and radar as variants of presence.
 - The solver tries every choice of modules for a board while they are few, and past that what one change of the best gives, twice.
+- A part chosen for one block takes the place of another whose role it gives: an SCD4x is CO2, temperature and humidity.
+- What a person can ask for comes from the roles too, and a part a module of the board brings is left unused through that module.
+- Kits rank what a board has and nobody asked for before the count of modules, so a camera nobody needs puts a kit below one
+  without it. The button of a strapping pin is not counted, and an imported board says that its pack lists only some of its parts.
+- Pictures of parts: `tools/import_pictures.py` draws the breadboard drawing of the Fritzing part of each imported module
+  into a WebP of 320 px. They are under CC BY-SA 3.0, each names its author, and a kit shows them with that credit.
+- A part of a board nobody asked for weighs its worth: the median price of the modules of its role and variant.
+- A block of your own part replaces the field of pins in use: its lines, those already soldered as line=GPIO, and its bus with
+  an address. The kit keeps those pins for it and the checks name it when another owner wants one.
+- A card is titled by its board, with the parts bought one by one under it, and the page asks the solver only what it shows:
+  answers left from the old questions no longer add parts. The project name stands above the theme.
+- A display block can ask for a round panel, and the settings of a block hold on the canvas. The SCD4x names CO2 by its role
+  `air`. SCD40 and SCD41 modules at the prices Anton paid, their boards from his photos: four holes, VDD 2.4 to 5.5 V by the
+  datasheet, no regulator on the top side, pull-ups to VDD assumed. The kit feeds them from 3V3.
+- Input has a gamepad: a module, an NES or SNES pad (pads share latch and clock), a PlayStation 2 pad, buttons on GPIOs, or a
+  pad by Bluetooth Classic or BLE. Classic is `bluetooth_classic` of a chip, from ESP-IDF: ESP32 and ESP32-S31 have it. The
+  joystick is an analog stick, its two axes on ADC1, or an arcade stick. A way can take several pins of ADC1.
+- A kit says when the data names no supply of a module, or no voltage of a step, instead of listing no wire for it.
+- The antenna of the radio of the chip is `mcu.antenna`; an antenna on the board has a `form` and can have an `external`
+  connector beside it, chosen by a resistor or a switch. Wi-Fi and Bluetooth blocks have the variant `external_antenna`.
+  The JC4827W543C of Anton has an external antenna, though the vendor's specification names a WROOM-1.
+- The Waveshare ESP32-S3-Zero, `esp32_s3_zero`, from the schematic of Waveshare: the WS2812B on GPIO 21, BOOT, the holes and
+  the pads, 4 MB flash and 2 MB quad PSRAM. Built, not flashed yet.
+- Antennas measured on Anton's desk, the RSSI of one access point: the boards with an antenna on them gave -60 to -68 dBm over
+  two positions, the JC4827W543C with its external antenna -50.5. A turn of 90 degrees moves a board by up to 11 dB.
+  These stay notes of one desk and one evening. The data judges the design instead: `antenna.quality` from 0 to 10, with
+  marks for kinds of design; a kit shows it when a radio is asked for and does not rank by it, the model weighs it.
+- A kit whose price lacks a part is no longer the cheapest by the sum of the rest.
+- A block asks of the data of its part: questions with `limit.field` and `limit.fits`, answers in `asks` of the block. First
+  ones: CO2 up to, ppm (the SCD40 stops at 2000), temperature down to and up to. Blocks with different answers are separate needs.
+- One part serving several blocks no longer chains: a part that serves another block stays, and the kit keeps it.
+- The platform is asked as any, ESP-IDF or Arduino; a kit names the versions that take its chip and its libraries
+  (`builds with ESP-IDF 6.1, 5.5`), and a version is fixed only when chosen.
+- Waveshare ESP32-C3-Zero, `esp32_c3_zero`, from the schematic of Waveshare; the generator takes the ESP32-C3 and C6. Pictures of
+  the S3-Zero and the C3-Zero from Anton's photos.
+- A page without an agent shows how to get one, as a single line that opens to the command.
+- `tools/boards_mcp.py --install` gives the server to the agent at once: to Claude Code for every folder when its command
+  is there, otherwise in `.mcp.json` of the current folder.
+- What the person fixes is theirs: the pin of a block, a part chosen in a block, a board fixed from its card. The solver keeps a
+  fixed part for its block, even where the board has a part of that role, and tries only a fixed board. The model sets the
+  blocks itself with `edit_blocks`, which replaces `propose_blocks`; the server and the page refuse it what the person fixed.
+- `tools/import_fritzing.py` takes the chip named first in a title: a second run took CCS811 for the ENS160 module.
 - `tools/import_addresses.py` writes the I2C addresses of imported chips, from ESPHome and from library headers with a
   permissive license. The solver gives a second part of one chip the next free address and tells the person to set it. A
   clash on an imported list stays an unknown, since the list can be short.

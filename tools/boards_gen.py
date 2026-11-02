@@ -65,12 +65,14 @@ FORMAT_VERSION = 2
 RULES = json.loads((ROOT / "catalog" / "rules.json").read_text())
 
 # the SPI buses a chip has: the name of the data ("spi2", "spi3") is the claim of
-# the host, and a chip that has fewer refuses more names (a C-series joins here
-# when a board with one arrives)
+# the host, and a chip that has fewer refuses more names. A C-series chip has SPI2
+# alone for the program: SOC_SPI_PERIPH_NUM 2 counts SPI1 of the flash.
 SPI_BUSES = {
     "esp32": ("spi2", "spi3"),
     "esp32s3": ("spi2", "spi3"),
     "esp32p4": ("spi2", "spi3"),
+    "esp32c3": ("spi2",),
+    "esp32c6": ("spi2",),
 }
 
 # the GPIOs a chip has, and the ones that are input only (an output on them is an
@@ -79,6 +81,8 @@ GPIOS = {
     "esp32": (range(0, 40), (34, 35, 36, 37, 38, 39)),
     "esp32s3": (range(0, 49), ()),
     "esp32p4": (range(0, 55), ()),
+    "esp32c3": (range(0, 22), ()),  # SOC_GPIO_PIN_COUNT 22
+    "esp32c6": (range(0, 31), ()),  # SOC_GPIO_PIN_COUNT 31
 }
 
 I2C_HZ_DEFAULT = 400000

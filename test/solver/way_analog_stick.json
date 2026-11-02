@@ -1,0 +1,6 @@
+{
+    "title": "An analog stick asks for no part: the kit gives its two axes pins of ADC1 and the press any pin",
+    "answers": {"blocks": [{"role": "joystick", "name": "stick", "variant": "analog"}]},
+    "says": "no part of the catalog, the kit only gives it pins: x, y, press",
+    "adc": {"board": "esp32_devkit", "use": "stick", "lines": ["x", "y"]}
+}

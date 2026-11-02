@@ -1,0 +1,96 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "esp32_s3_zero",
+    "title": "Waveshare ESP32-S3-Zero",
+    "maker": "waveshare",
+    "part": "ESP32-S3-Zero",
+    "description": "A small ESP32-S3 board: 4 MB flash and 2 MB PSRAM in the chip, castellated holes, USB-C to the chip, a WS2812B, BOOT and RESET buttons, a ceramic antenna",
+    "notes": [
+        "USB-C goes to the chip itself, GPIO 19 and 20 through 22 ohm: no USB bridge, the log comes on the USB Serial/JTAG port.",
+        "GPIO 21 drives the WS2812B and is pulled up to 3V3 by R1, 1 kOhm.",
+        "GPIO 43 reaches the TX hole through R6, 499 ohm.",
+        "GPIO 14 to 18, 38 to 42 and 45 come out on pads, not holes: 14, 15 and 16 on the front, the others on the back.",
+        "GPIO 19 and 20 (USB), 33 to 37, 46, 47 and 48 do not come out."
+    ],
+    "mcu": {
+        "target": "esp32s3",
+        "part": "ESP32-S3FH4R2",
+        "flash_mb": 4,
+        "psram_mb": 2,
+        "antenna": {"kind": "on_board", "form": "ceramic", "quality": 4}
+    },
+    "price": {
+        "anton": {
+            "shop": "not named",
+            "currency": "EUR",
+            "range": [5, 5],
+            "date": "2026-11-02",
+            "source": "Anton: about 5 EUR now"
+        }
+    },
+    "devices": {
+        "boot": {"class": "button", "ref": "K2", "pins": {"in": {"gpio": 0, "active": "low"}}},
+        "led": {
+            "class": "led",
+            "ref": "U1",
+            "part": "WS2812B-0807",
+            "provides": {"led": {"variant": "addressable"}},
+            "pins": {"data": 21},
+            "config": {"kind": "ws2812", "count": 1}
+        },
+        "reg_3v3": {"class": "other", "ref": "U3", "part": "ME6217C33M5G"}
+    },
+    "power": [
+        {"name": "5V", "source": "usb", "mv": 5000, "plug": "usb_c", "why": "VBUS of the USB-C, also on the 5V hole."},
+        {"name": "3V3", "from": "5V", "through": "reg_3v3", "regulator": "ldo", "mv": 3300, "feeds": ["mcu", "led"]}
+    ],
+    "connectors": {
+        "P15": {
+            "type": "castellated holes, 2.54 mm, 18 along two edges",
+            "pins": [43, 44, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, "3V3", "GND", "5V"]
+        },
+        "pads_front": {"type": "pads on the front", "pins": [14, 15, 16]},
+        "pads_back": {"type": "pads on the back", "pins": [17, 18, 38, 39, 40, 41, 42, 45]}
+    },
+    "images": {
+        "front": {"file": "front.webp", "source": "a photo by Anton of his board, 2026-11-02", "shows": "front"},
+        "back": {"file": "back.webp", "source": "a photo by Anton of his board, 2026-11-02", "shows": "back"}
+    },
+    "checked": {
+        "pins": {
+            "level": "schematic",
+            "source": "ESP32-S3-Zero-Sch.pdf of Waveshare, files.waveshare.com/wiki/ESP32-S3-Zero",
+            "date": "2026-11-02"
+        },
+        "connectors": {
+            "level": "schematic",
+            "covers": ["connectors"],
+            "source": "P15 and the test points of the schematic; the labels of the holes and the pads on the photos of both sides of Anton's board",
+            "date": "2026-11-02"
+        },
+        "chip": {
+            "level": "hardware",
+            "covers": ["mcu.target"],
+            "by": "esptool",
+            "unit": "MAC ac:27:6e:ce:c8:88",
+            "date": "2026-11-02",
+            "notes": "ESP32-S3 (QFN56) revision 0.2. The marking FH4R2 is on the photo of the chip."
+        },
+        "antenna": {
+            "level": "schematic",
+            "covers": ["mcu.antenna"],
+            "source": "J1 of the schematic with its matching network, no connector; a ceramic chip on the photo",
+            "date": "2026-11-02"
+        },
+        "antenna_rssi": {
+            "level": "hardware",
+            "covers": ["mcu.antenna"],
+            "by": "rssi_probe on Anton's desk, one access point on channel 1, 60 s each",
+            "unit": "MAC ac:27:6e:ce:c8:88",
+            "date": "2026-11-02",
+            "notes": "Median RSSI on foam, 0 degrees: -64 dBm; lying on the desk: -66 at 0 and -70 at 90 degrees. In the same place an ESP32 DevKit with an ESP-WROOM-32 on its pins gave -63 at 0 degrees, an ESP32-C6 Super Mini on foam -59 and -70."
+        }
+    }
+}

@@ -703,6 +703,7 @@
     "modules/adafruit_adafruit_vl6180x_time_of_flight_distance_sensor/module.json",
     "modules/adafruit_adafruit_vs1053_codec___microsd_breakout___mp3_wav_midi_ogg/module.json",
     "modules/adafruit_adafruit_vs1053_headphone_featherwing/module.json",
+    "modules/adafruit_adafruit_wii_nunchuck_breakout_adapter/module.json",
     "modules/adafruit_adafruit_winc1500__pcb_antenna__breakout/module.json",
     "modules/adafruit_adafruit_winc1500__ufl_antenna__breakout/module.json",
     "modules/adafruit_adafruit_wiz5500_ethernet_co_processor_breakout_board/module.json",

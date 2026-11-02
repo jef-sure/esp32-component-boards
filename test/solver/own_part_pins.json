@@ -1,0 +1,28 @@
+{
+    "title": "A part of the person's own soldered to GPIO 4 and 18: the kit keeps those pins for it and names it",
+    "answers": {
+        "outputs": [
+            {
+                "kind": "tone",
+                "hz": 440,
+                "pins": 2
+            }
+        ],
+        "blocks": [
+            {
+                "role": "own_part",
+                "name": "relay",
+                "lines": "coil=4, led=18"
+            }
+        ]
+    },
+    "avoids": {
+        "board": "esp32_devkit",
+        "pins": [
+            4,
+            18
+        ],
+        "owner": "relay"
+    },
+    "says": "relay: your own part, not in the catalog: coil GPIO 4, led GPIO 18"
+}

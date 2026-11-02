@@ -167,6 +167,19 @@ python3 tools/import_fritzing.py adafruit=PATH fritzing=PATH --ref adafruit=COMM
 Only facts are taken: the contacts, the supply they name, the part number. A module needs a bus its contacts show.
 Its roles come from the words of `catalog/roles.json`, and from the sections of a shop when `--shop` names a copy of its list, which also gives the price and leaves out what is no longer sold.
 
+## import_pictures.py
+
+Gives the imported modules a picture: the breadboard drawing of their Fritzing part, drawn by Chrome into a square of 320 px
+and kept as `drawing.webp` beside the module. Run it after `import_fritzing.py`, with the same sources. Needs Chrome and ImageMagick.
+
+```sh
+python3 tools/import_pictures.py adafruit=PATH fritzing=PATH
+```
+
+The drawings are under CC BY-SA 3.0, and so are the pictures. The `source` of each names the part, its author and the
+license, and the page shows the credit under the pictures of a kit. A drawing is read from the `.fzpz` in place and drawn as
+an image, in which no script runs.
+
 ## import_libraries.py
 
 Lists the known libraries in `catalog/libraries/libraries.json`, the leading list: Arduino from `library_index.json`, ESP-IDF
@@ -218,15 +231,23 @@ moved, a reading of what changed replaces the rest, and it refuses when somethin
 ## boards_mcp.py
 
 Puts the agent of a person beside the page. It runs as an MCP server of a client, serves the page on 127.0.0.1 and takes no
-key: the model is the agent that started it.
+key: the model is the agent that started it. Once, to give it to the agent:
 
-```json
-{"mcpServers": {"boards": {"command": "python3", "args": ["tools/boards_mcp.py"]}}}
+```sh
+python3 tools/boards_mcp.py --install
 ```
 
+With the command `claude` on the machine this gives it to Claude Code for every folder (`claude mcp add -s user`). Without
+it, it writes `.mcp.json` in the current folder, beside the servers that file names, and prints the same entry for a client
+that keeps it elsewhere. The paths are full, so the folder of the agent does not matter. Then start the agent again and ask
+it to help choose the hardware of a device.
+
 The agent gives the person a link with a token. On that page a dialog appears, and once it starts it takes the column of the roles, whose search stays: the model reads the description, the blocks
-and the best kits, proposes blocks for the person to accept, and writes a description that a project keeps as `DESCRIPTION.md`.
-The solver stays in the page. A page opened any other way has no dialog and works as before.
+and the best kits, sets the blocks with their variants and parts, the conditions of the solver, and writes a description that a
+project keeps as `DESCRIPTION.md`. What the person fixes is theirs: the pin of a block, a part chosen in it, or the button
+`fix this board` of a card. The server refuses the model a change of it, the page refuses it again, and the solver keeps a
+fixed part for its block and tries only a fixed board.
+The field on top is the theme the model starts from, and the dialog develops it: a changed theme reaches the model with the next answer of `wait_for_person`. The solver stays in the page. A page opened any other way has no dialog and works as before.
 
 ## sync_versions.py
 
@@ -256,6 +277,14 @@ marked `?`. Boards that do not fit are listed with the reason. The solver only p
 is a project, and the checks of the tools decide about it. So two PN532 go on SPI by themselves,
 because the rules refuse one I2C address twice.
 
+A block asks of the data of its part through the questions of its role: a question with `limit.field`, the path of a value
+in the data of a part with its variant applied, and `limit.fits`, how the value meets the answer (`up_to`, `down_to`,
+`at_least`, `at_most`, `includes`, `is`), as `co2_up_to` on `provides.air.specified`. The answer lies in `asks` of the block,
+so two temperature blocks, a room and an oven, ask different ranges and are two needs. A part whose data has no such value
+stays, and the kit names it as an unknown. The page shows these fields in the block; the model sets them with `edit_blocks`,
+and `roles` lists them. The platform is asked without a version: a kit names the versions that take its chip and its
+libraries, and a version is fixed only when the person chooses one.
+
 The solver wires I2C, SPI, QSPI and UART and the lines a chip needs beside its bus, such as BUSY and
 RST of the PN5180. A DSI module takes a free DSI bus of the board on a ribbon, and its timings stay an
 unknown of the kit, because they are measured on a board. The solver takes free pins that come out to
@@ -271,8 +300,10 @@ order of `frequency_sources`, works out the frequency it gets from each, and tak
 usually LEDC, then MCPWM and RMT, a crystal of the board through CLK_OUT, I2S with the APLL. A frequency
 belongs to a timer, so outputs of one setting share it. The figures are calculated, not measured.
 
-Kits come in this order: those that fit, the fewest unknowns, the fewest modules, the fewest wires,
-then the price. A budget makes the price a criterion: it then comes right after the unknowns, and a
+Kits come in this order: those that fit, the fewest unknowns, the least worth of what the board has and nobody asked for
+(a camera, touch, Ethernet; not the button of a strapping pin), the fewest modules, the fewest wires, then the price. A part of a
+board has no price of its own, so it is worth the median price of the modules of its role and variant, else of its class, else of
+all parts: a camera weighs, an LED hardly. A budget makes the price a criterion: it then comes right after the unknowns, and a
 missing price counts as an unknown. `tools/check_format.py` gives the kits of `test/solver/` to the
 generator as well.
 

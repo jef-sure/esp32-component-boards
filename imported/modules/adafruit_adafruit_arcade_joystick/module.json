@@ -4,7 +4,13 @@
     "kind": "module",
     "name": "adafruit_adafruit_arcade_joystick",
     "title": "Adafruit Arcade Joystick",
-    "devices": {"joystick": {"ways": [{"lines": ["s"]}], "provides": {"joystick": {}}, "class": "gamepad"}},
+    "devices": {
+        "joystick": {
+            "ways": [{"lines": ["up", "down", "left", "right"]}],
+            "provides": {"joystick": {"variant": "arcade"}},
+            "class": "other"
+        }
+    },
     "connectors": {"J1": {"type": "contacts of the part", "pins": ["S", "W", "E", "COM", "N"]}},
     "maker": "adafruit",
     "origin": {
@@ -15,5 +21,12 @@
         "tool": "tools/import_fritzing.py",
         "date": "2026-11-01"
     },
-    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}},
+    "images": {
+        "drawing": {
+            "file": "drawing.webp",
+            "source": "the breadboard drawing of the Fritzing part Adafruit Arcade Joystick.fzpz by John De Cristofaro, CC BY-SA 3.0, drawn at 320 px",
+            "shows": "drawing"
+        }
+    }
 }

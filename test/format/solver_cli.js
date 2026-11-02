@@ -8,7 +8,7 @@ const { schemaReader } = require('../../editor/schema.js');
 const { check } = require('../../editor/rules.js');
 const { pinMap, pinProblems } = require('../../editor/pins.js');
 const { documentChecks } = require('../../editor/checks.js');
-const { kitSolver, auditSummary, auditedOrder } = require('../../editor/solver.js');
+const { kitSolver, auditSummary, auditedOrder, within } = require('../../editor/solver.js');
 
 const ROOT = path.join(__dirname, '../../catalog');
 const CASES = path.join(__dirname, '../solver');
@@ -105,7 +105,10 @@ for (const name of names) {
     if (given.quiet && kits.find((item) => item.name === given.quiet.board)?.says.some((line) => line.text.includes(given.quiet.text))) say(`${given.quiet.board} says "${given.quiet.text}"`);
     if (given.avoids) {
         const kit = fit.find((item) => item.name === given.avoids.board);
-        if (!kit?.wires.length || kit.wires.some((wire) => given.avoids.pins.includes(wire.pin))) say(`${given.avoids.board} uses a pin it was told is in use`);
+        // every pin of the project but those of the part the pins belong to
+        const others = (doc) => Object.entries(doc ?? {}).filter(([use]) => use !== given.avoids.owner).flatMap(([, item]) => [...Object.values(item.pins ?? {}), ...Object.values(item.on ?? {}).flatMap((wires) => Object.values(wires))]);
+        const used = [...others(kit?.project.devices), ...others(kit?.project.modules), ...Object.values(kit?.project.buses ?? {}).flatMap((hosts) => Object.values(hosts).flatMap((lines) => Object.values(lines)))];
+        if (!kit?.project || used.some((pin) => given.avoids.pins.includes(pin))) say(`${given.avoids.board} uses a pin it was told is in use`);
     }
     if (given.unused) {
         const kit = fit.find((item) => item.name === given.unused.board);
@@ -116,12 +119,15 @@ for (const name of names) {
         const kit = fit.find((item) => item.name === given.shared.board);
         const [first, second] = given.shared.uses.map((use) => kit?.project.devices[use]?.pins ?? {});
         for (const line of given.shared.lines) if (first[line] === undefined || first[line] !== second[line]) say(`${line} is not one line of ${given.shared.uses}`);
-        if (first.latch === second.latch) say(`${given.shared.uses} share what is their own`);
+        const own = given.shared.own ?? 'latch';
+        if (first[own] === second[own]) say(`${given.shared.uses} share ${own}, which is their own`);
     }
     if (given.adc) {
         const kit = fit.find((item) => item.name === given.adc.board);
-        const pin = kit?.project.devices[given.adc.use]?.pins.in;
-        if (!catalog.mcu[catalog.boards[given.adc.board].mcu?.target ?? 'esp32'].gpio.adc1.includes(pin)) say(`${given.adc.use} is on GPIO ${pin}, not on ADC1`);
+        for (const line of given.adc.lines ?? ['in']) {
+            const pin = kit?.project.devices[given.adc.use]?.pins[line];
+            if (!catalog.mcu[catalog.boards[given.adc.board].mcu?.target ?? 'esp32'].gpio.adc1.includes(pin)) say(`${given.adc.use}.${line} is on GPIO ${pin}, not on ADC1`);
+        }
     }
     if (given.without && fit.some((kit) => kit.modules.some((module) => module.name === given.without))) say(`a kit with ${given.without} fits`);
     if (given.fed) {
@@ -151,4 +157,8 @@ const orderOf = (asked) => auditedOrder(table, { chip: 'chip', platform: 'p', bu
 const expected = [[{}, 'b f a c g'], [{ several: true }, 'b f a c'], [{ standard: 'x' }, 'g'], [{ bus: 'uart' }, '']];
 for (const [asked, order] of expected) if (orderOf(asked) !== order) wrong.push(`audited order for ${JSON.stringify(asked)}: ${orderOf(asked)}`);
 if (JSON.stringify(auditedOrder(table, { chip: 'chip', platform: 'p', bus: 'spi' }).find((item) => item.id === 'c')) !== JSON.stringify({ id: 'c', health: 0, high: 1, medium: 2, unread: ['unread'] })) wrong.push('a library does not answer for what it requires');
+// Ranges of manifests against the versions of a platform: a line meets a range when some release of it does.
+for (const [version, range, meets] of [['5.5', '>=5.2.0', true], ['5.5', '>=5.5.2', true], ['5.5', '>=6.0', false], ['6.1', '^5.3', false], ['5.5', '^5.3', true],
+    ['5.5', '~5.4', false], ['6.1', '>=5.3,<6.0', false], ['5.5', '>=5.3 <6.0', true], ['5.5', '*', true], ['5.5', 'git+https://x', true]])
+    if (within(version, range) !== meets) wrong.push(`${version} against ${range}: ${!meets}`);
 console.log(JSON.stringify({ cases: names.length, wrong, projects: [...projects.values()] }));

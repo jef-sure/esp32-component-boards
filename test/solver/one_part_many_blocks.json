@@ -1,0 +1,29 @@
+{
+    "title": "A CO2 station asks for CO2, temperature and humidity: an SCD4x gives all three, so the kit takes one part, the cheaper of the catalog",
+    "imported": true,
+    "answers": {
+        "task": "A CO2 station for a room: it shows CO2, temperature and humidity on a small screen and sends them over Wi-Fi.",
+        "blocks": [
+            {
+                "role": "air",
+                "name": "co2",
+                "variant": "co2"
+            },
+            {
+                "role": "temperature",
+                "name": "temp"
+            },
+            {
+                "role": "humidity",
+                "name": "hum"
+            }
+        ]
+    },
+    "kit": {
+        "name": "esp32_devkit",
+        "modules": {
+            "scd40_module": 1
+        }
+    },
+    "says": "SCD40 module serves: Air quality, Temperature, Humidity"
+}

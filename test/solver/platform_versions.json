@@ -1,0 +1,5 @@
+{
+    "title": "With a platform asked and no version, a kit names the versions that take its chip and its libraries",
+    "answers": {"platform": "esp_idf", "blocks": [{"role": "air", "name": "co2", "variant": "co2"}]},
+    "says": "builds with ESP-IDF 6.1, 5.5"
+}

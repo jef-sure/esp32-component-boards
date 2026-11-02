@@ -29,5 +29,12 @@
         "tool": "tools/import_fritzing.py",
         "date": "2026-11-01"
     },
-    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}}
+    "checked": {"part": {"level": "extracted", "source": "adafruit c7bbe2d"}},
+    "images": {
+        "drawing": {
+            "file": "drawing.webp",
+            "source": "the breadboard drawing of the Fritzing part Adafruit MAX98357A.fzpz by ladyada, CC BY-SA 3.0, drawn at 320 px",
+            "shows": "drawing"
+        }
+    }
 }

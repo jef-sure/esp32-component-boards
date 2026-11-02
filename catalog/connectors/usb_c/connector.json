@@ -1,0 +1,37 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "connector",
+    "name": "usb_c",
+    "title": "USB Type-C",
+    "pins": [
+        "GND",
+        "TX1+",
+        "TX1-",
+        "VBUS",
+        "CC1",
+        "D+",
+        "D-",
+        "SBU1",
+        "VBUS",
+        "RX2-",
+        "RX2+",
+        "GND",
+        "GND",
+        "TX2+",
+        "TX2-",
+        "VBUS",
+        "CC2",
+        "D+",
+        "D-",
+        "SBU2",
+        "VBUS",
+        "RX1-",
+        "RX1+",
+        "GND"
+    ],
+    "volts": 5,
+    "checked": {
+        "standard": {"level": "vendor-docs", "source": "USB Type-C specification, contacts A1 to A12, B1 to B12"}
+    }
+}

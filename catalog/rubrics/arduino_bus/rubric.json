@@ -1,0 +1,55 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "rubric",
+    "name": "arduino_bus",
+    "title": "A library that carries I2C and SPI for drivers on Arduino",
+    "version": 1,
+    "source": "The Wire and SPI classes of arduino-esp32, in framework-arduinoespressif32 of PlatformIO",
+    "severity": {
+        "high": "with a working device and ordinary use of a public function, the program corrupts memory, hangs, returns wrong data or a false success, or the function cannot work at all. Data from a device counts as ordinary input whatever its length.",
+        "medium": "the same, but only after a fault (a dead device, a bus error), at a limit of a legal input from the application, or in a configuration the library offers and does not use by default.",
+        "low": "a leak on an error path, an unchecked call with no harm in ordinary use, a text that disagrees with the code."
+    },
+    "sections": {
+        "transports": {
+            "i2c": {"text": "carries I2C through a TwoWire object."},
+            "spi": {"text": "carries SPI through an SPIClass object or by bit-banging."}
+        },
+        "builds_on": {
+            "arduino": {"text": "compiles as an Arduino library."},
+            "esp_idf": {"text": "compiles under ESP-IDF, on its own or with Arduino as a component. Note which."}
+        },
+        "i2c": {
+            "nack_reported": {"text": "a NACK or other failure of endTransmission() reaches the caller as a failure."},
+            "short_read_reported": {"text": "a read compares what requestFrom() gave with what was asked."},
+            "large_transfers": {
+                "text": "a transfer longer than the buffer of the bus object is split or refused, and loses no byte in silence."
+            },
+            "repeated_start": {"text": "a write then read can keep the bus with no STOP between them."},
+            "speed": {"text": "the clock speed asked for is applied, and a bus that cannot set it is reported."},
+            "probe": {"text": "the presence check tells a device from an empty address."}
+        },
+        "spi": {
+            "transactions": {"text": "beginTransaction() and endTransaction() are paired on every path."},
+            "chip_select": {"text": "chip select is released on every path, errors included."},
+            "mode_and_order": {"text": "mode, bit order and speed apply to hardware and bit-banged transfers alike."},
+            "bit_bang_timing": {"text": "bit-banging keeps the clock at or under the speed asked for."}
+        },
+        "waiting": {"bounded_waits": {"text": "every wait has an end, so a dead device cannot hang the program."}},
+        "several": {
+            "several_devices": {"text": "two devices work in one program: no state of one lives in a global or static."},
+            "shared_bus": {"text": "two devices share one bus, each with its own settings."},
+            "thread_safety": {"text": "a lock or a stated rule for use from several tasks."}
+        },
+        "code_health": {
+            "errors_returned": {"text": "a failure reaches the caller as a value it can tell apart."},
+            "buffers_bounded": {"text": "lengths are checked before they are copied into a buffer."},
+            "allocation_checked": {"text": "where memory is allocated, a failed allocation is handled."},
+            "tests": {"text": "tests that run without or with hardware."},
+            "examples": {"text": "examples that show its use."},
+            "docs": {"text": "a README or API text that says how to use it."},
+            "license": {"text": "its license file."}
+        }
+    }
+}

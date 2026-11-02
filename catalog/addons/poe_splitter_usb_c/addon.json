@@ -1,0 +1,17 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "addon",
+    "name": "poe_splitter_usb_c",
+    "title": "PoE splitter, USB-C, 5 V 2 A",
+    "description": "Takes data and power from one cable, and gives RJ45 and USB-C for the board. The port moves, it does not go away.",
+    "stands": "port",
+    "needs": ["ethernet"],
+    "gives": {"provides": ["poe"], "plug": "usb_c", "mv": 5000, "ma": 2000},
+    "checked": {
+        "facts": {
+            "level": "vendor-docs",
+            "source": "Adafruit 4552, PoE Splitter with USB Type C, 5V 2A, 100 MB Ethernet"
+        }
+    }
+}

@@ -166,6 +166,9 @@ Any other kind (`sdio`, `sdspi`) is kept as data. The program reads it with
 An entry of the catalog writes `on` by kind, `"i2c": { "address": "0x18" }`, and
 may mark a kind `required`. A channel of a multiplexer is `i2c.mux.ch0`.
 
+`address_try` lists the addresses a chip can have, the first as it comes. A wiring that sets `address` chooses one of them.
+An empty list in a project says that none the data lists is free: the data of an imported chip can be short.
+
 ### Display
 
 `config.kind` comes from the chip: `graphics` or `character`.
@@ -394,8 +397,8 @@ libraries, and a board names a library by that path: `esp-idf/jef-sure/pn5180`.
         }
     },
     "versions": {
-        "0.0.2": { "frameworks": { "esp-idf": ">=5.3.0" }, "requires": { "esp-idf/jef-sure/dgx": "^0.10.2" } },
-        "0.0.1": { "frameworks": { "esp-idf": ">=5.3.0" }, "requires": { "esp-idf/jef-sure/dgx": "^0.10.1" } }
+        "0.0.2": { "platforms": { "esp_idf": ">=5.3.0" }, "requires": { "esp-idf/jef-sure/dgx": "^0.10.2" } },
+        "0.0.1": { "platforms": { "esp_idf": ">=5.3.0" }, "requires": { "esp-idf/jef-sure/dgx": "^0.10.1" } }
     },
     "history": [
         { "before": "0.9.3", "chips": { "st77916": null } },
@@ -427,7 +430,7 @@ a step of `history` says when it was another. For the `esp-idf` ecosystem
 `tools/sync_versions.py` fills it from the registry, which writes `Custom` for a text of its own.
 
 `ecosystem` says where a library is published: its registry and its name depend on that. What
-its code is built against is in `frameworks` of each version: `{ "esp-idf": ">=5.2.0" }`. These
+its code is built against is in `platforms` of each version: `{ "esp_idf": ">=5.2.0" }`. These
 are different things: a library of the Arduino registry may build with both `arduino-esp32` and
 `esp-idf`, and then it has two keys. Both fields are open: a new ecosystem is a new directory in
 `catalog/libraries/` and the schema stays as it is. `targets` lists the chips when a library
@@ -435,7 +438,7 @@ limits them; no list only says it declared none.
 
 `install` lists the ways to get a library, from the one to prefer: `registry` (of its ecosystem),
 `git` (`url`, `path` inside the repository and `ref`: a tag with `{version}` or a branch), `archive`
-(`url`) and `platform` (it comes with the framework). The manifest of the component takes the
+(`url`) and `platform` (it comes with the platform). The manifest of the component takes the
 first way. A version that not all ways have names its own in `via`: that marks a version found
 only in the tags of git.
 
@@ -443,7 +446,7 @@ A step with `call` must say how to tell it worked: `ok` follows the conventions 
 itself. `{ "not": "NULL" }` for a pointer, `{ "equals": "ESP_OK" }` for ESP-IDF,
 `{ "equals": "ESP_CODEC_DEV_OK" }` for the codec, `"none"` for a call with no result.
 
-`versions` holds each version apart: `frameworks`, `targets` and the other libraries it needs
+`versions` holds each version apart: `platforms`, `targets` and the other libraries it needs
 (`requires`). For the `esp-idf` ecosystem `tools/sync_versions.py` fills it from the registry.
 
 A record describes one version, named in `described`, and all it says is true of that one.
@@ -465,6 +468,26 @@ describes: a chip with such a library stays data and the component does not star
 PN532 of the terminal.
 
 What a library requires is a field of the library, so DGX-LVGL has no chips and has versions.
+
+### Audits
+
+`catalog/libraries/` holds all that is known of libraries. `libraries.json` is the leading list, `chip_libraries.json` an
+index into it, and each folder `<ecosystem>/<owner>/<name>/` a record and, when the library was read, `audit.json`.
+
+An audit is about a library and not about a chip: a library can do an algorithm and drive nothing. `catalog/rubrics/<name>/rubric.json`
+says what is asked: `sections` of items, `severity`, and `chips` when it is for chips. An item keeps its name, and one added
+later has `since`. An entry of `audits` is one commit read against one version of a rubric: `commit`, `version` and `tag`
+as far as they exist, `rubric`, `rubric_version`, `date`, `by`, `items` and `defects`. `blind` says the copy was read with the
+names of its owners removed. `over` says the entry carries an older one: only what the changes touched was read again. A place is `file:line` at that commit. In a defect `judged` is the reason of a second reader, `read_as` what
+the first said when they differ, `measured` where it was tried beyond reading. A newer version adds an entry and leaves the old ones.
+
+The solver reads the last entry of each library. A library fits by its statuses, `yes` or `partly`, for the platform, the bus,
+a second reader on it and the kind of card. Among those that fit: fewer `high`, then fewer `medium`, each counted with
+all the library requires, then more of `frames`, `waiting` and `code_health` at `yes`, a `partly` as half, then the name. A
+required library nobody read is an unknown. More readings find more defects, so only readings of one kind compare: one
+blind reading of each library, against one version of a rubric. An entry of `checked` at level `hardware` that covers
+`transports.spi` names the buses tried: the solver wires the chip on those first and says so of any other. Stars and downloads play no part. A kit shows the order
+without counts, and what was found goes to the model through the tool `library_audits` of `boards_mcp.py`.
 
 ## Firmware
 

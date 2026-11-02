@@ -60,7 +60,7 @@
         "sdmmc": {"sdmmc0": {"clk": 43, "cmd": 44, "d0": 39, "d1": 40, "d2": 41, "d3": 42}}
     },
     "power": [
-        {"name": "USB", "source": "usb", "mv": 5000, "why": "The net USB0_5V, the Type-C connector H2."},
+        {"name": "USB", "source": "usb", "mv": 5000, "plug": "usb_c", "why": "The net USB0_5V, the Type-C connector H2."},
         {"name": "PoE", "source": "vin", "mv": 5000, "why": "Contact 5 of H7: a PoE module gives 5 V on the net VCC1_5V."},
         {"name": "VCC1_5V", "from": [{"name": "USB", "through": "q_usb"}, "PoE"], "why": "Contact 40 of P1."},
         {"name": "VCC_5V", "from": "VCC1_5V", "through": "d_5v", "feeds": ["amplifier"], "why": "Contact 39 of P1."},

@@ -29,13 +29,13 @@
     "devices": {
         "gpio_expander": {
             "class": "io_expander",
-            "on": {"i2c.i2c1": {"address": "0x40"}},
+            "on": {"i2c.i2c1": {"address": "0x20"}},
             "config": {"pins": 8},
             "chip": "tca9554"
         },
         "audio_dac": {
             "class": "audio",
-            "on": {"i2s.i2s1": {"format": "tdm"}, "i2c.i2c1": {"address": "0x30"}},
+            "on": {"i2s.i2s1": {"format": "tdm"}, "i2c.i2c1": {"address": "0x18"}},
             "config": {"direction": "out", "sample_rate": 22050},
             "chip": "es8311"
         },
@@ -77,7 +77,7 @@
         },
         "lcd_touch": {
             "class": "touch",
-            "on": {"i2c.i2c1": {"address": "0x70"}},
+            "on": {"i2c.i2c1": {"address": "0x38"}},
             "pins": {},
             "controls": {
                 "orientation": {"how": "driver", "start": {"x": "left-right", "y": "top-bottom", "swap": false}}

@@ -316,7 +316,7 @@
         "cpu_mhz": 240
     },
     "platforms": {
-        "esp-idf": {
+        "esp_idf": {
             "revisions": {
                 "0.0": {
                     "since": "4.2"

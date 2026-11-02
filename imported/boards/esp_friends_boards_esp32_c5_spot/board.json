@@ -10,7 +10,7 @@
         "power_control": {"class": "other", "pins": {"out": 2}},
         "audio_adc": {
             "class": "audio",
-            "on": {"i2s.i2s0": {}, "i2c.i2c0": {"address": "0x30"}},
+            "on": {"i2s.i2s0": {}, "i2c.i2c0": {"address": "0x18"}},
             "config": {"direction": "both", "sample_rate": 48000, "clock": "bclk"},
             "chip": "es8311"
         }

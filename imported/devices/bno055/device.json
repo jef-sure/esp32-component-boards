@@ -5,6 +5,9 @@
     "name": "bno055",
     "title": "bno055",
     "class": ["imu"],
-    "checked": {"facts": {"level": "extracted", "source": "the boards that use it"}},
-    "on": {"i2c": {}, "spi": {}, "uart": {}}
+    "checked": {
+        "facts": {"level": "extracted", "source": "the boards that use it"},
+        "address": {"level": "extracted", "source": "imported/report_addresses.json"}
+    },
+    "on": {"i2c": {"address_try": ["0x28", "0x29"]}, "spi": {}, "uart": {}}
 }

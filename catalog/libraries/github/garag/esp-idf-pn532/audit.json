@@ -1,0 +1,1110 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "audit",
+    "name": "esp-idf-pn532",
+    "title": "esp-idf-pn532",
+    "audits": [
+        {
+            "version": "0.2.1",
+            "blind": true,
+            "commit": "0f6b16ff3d89d42f43a2bd4413f2a48520655ec1",
+            "rubric": "pn532",
+            "rubric_version": 1,
+            "date": "2026-11-01",
+            "by": "claude-opus-5-5",
+            "items": {
+                "transports.i2c": {
+                    "status": "yes",
+                    "note": "7-bit address 0x24 at 100 kHz. The read skips the status byte before the frame.",
+                    "evidence": ["src/pn532_driver_i2c.c:8", "src/pn532_driver_i2c.c:194", "src/pn532_driver_i2c.c:231"]
+                },
+                "transports.spi": {
+                    "status": "yes",
+                    "note": "Half duplex, LSB first, mode 0, status/write/read op codes 02/01/03. CS is driven by hand in the pre and post callbacks.",
+                    "evidence": [
+                        "src/pn532_driver_spi.c:14",
+                        "src/pn532_driver_spi.c:181",
+                        "src/pn532_driver_spi.c:300"
+                    ]
+                },
+                "transports.uart": {
+                    "status": "yes",
+                    "note": "HSU with the 0x55 wakeup sequence and SetSerialBaudRate from 115200 to a chosen rate.",
+                    "evidence": [
+                        "src/pn532_driver_hsu.c:287",
+                        "src/pn532_driver_hsu.c:369",
+                        "src/pn532_driver_hsu.c:253"
+                    ]
+                },
+                "builds_on.esp_idf": {
+                    "status": "yes",
+                    "note": "Calls driver/i2c_master.h (the new I2C driver, not driver/i2c.h), driver/spi_master.h, driver/uart.h and driver/gpio.h. Not built, by the rules of this audit: the status comes from reading the includes and calls. See the version defect: it needs more than the 5.2 it declares.",
+                    "evidence": [
+                        "include/pn532_driver_i2c.h:4",
+                        "src/pn532_driver_spi.c:8",
+                        "include/pn532_driver_hsu.h:4",
+                        "CMakeLists.txt:11"
+                    ]
+                },
+                "builds_on.arduino": {
+                    "status": "no",
+                    "searched": "'arduino' in any case, Arduino.h, Wire.h, library.properties, library.json, *.ino: no match in any file.",
+                    "note": "All sources include ESP-IDF headers (esp_log.h, driver/*, freertos/*) and the public headers live in include/, not src/."
+                },
+                "builds_on.esp_idf_component": {
+                    "status": "yes",
+                    "evidence": ["idf_component.yml:1", "CMakeLists.txt:1"]
+                },
+                "frames.ack_checked": {
+                    "status": "yes",
+                    "note": "All public commands go through pn532_send_command_wait_ack, and the HSU setup frames check the ACK on their own. A missing ACK or a NACK returns an error to the caller, and a NACK gets the same ESP_FAIL as any other wrong frame. There is no resend.",
+                    "evidence": [
+                        "src/pn532_driver.c:404",
+                        "src/pn532_driver.c:421",
+                        "src/pn532_driver.c:425",
+                        "src/pn532_driver.c:426"
+                    ]
+                },
+                "frames.checksums_checked": {
+                    "status": "partly",
+                    "note": "HSU: LCS always, DCS only when the whole frame fits read_size, so it is skipped for GetFirmwareVersion (12 of 13 bytes) and for long replies. I2C and SPI: LCS only in pn532_in_data_exchange and pn532_in_list_passive_target, DCS never.",
+                    "evidence": [
+                        "src/pn532_driver_hsu.c:304",
+                        "src/pn532_driver_hsu.c:325",
+                        "src/pn532_driver_hsu.c:332",
+                        "src/pn532.c:202",
+                        "src/pn532.c:267"
+                    ]
+                },
+                "frames.extended_frames": {
+                    "status": "no",
+                    "searched": "LENM, LENL, 'extended', the FF FF length marker. The only '0xFF, 0xFF' match is NACK_FRAME in pn532_driver.h line 30.",
+                    "note": "pn532_write_command writes one LEN byte and every response parser reads one LEN byte. pn532_write on I2C and SPI refuses more than 254 bytes.",
+                    "evidence": ["src/pn532_driver.c:184", "src/pn532_driver_hsu.c:302"]
+                },
+                "frames.error_frame": {
+                    "status": "no",
+                    "searched": "0x7F, 0x81, 'syntax', 'error frame': no match in any file.",
+                    "note": "pn532_in_data_exchange and pn532_in_list_passive_target reject the frame only because TFI is not D5, with the generic ESP_FAIL. ntag2xx_read_page accepts it as a success, see the defects."
+                },
+                "frames.response_code_checked": {
+                    "status": "partly",
+                    "note": "Both TFI and code are checked in pn532_in_data_exchange, pn532_in_list_passive_target and pn532_get_firmware_version. pn532_SAM_config checks the code only. pn532_read_passive_target_id, ntag2xx_read_page and ntag2xx_write_page check neither.",
+                    "evidence": [
+                        "src/pn532.c:209",
+                        "src/pn532.c:274",
+                        "src/pn532.c:56",
+                        "src/pn532_driver.c:369",
+                        "src/pn532.c:133",
+                        "src/pn532.c:414"
+                    ]
+                },
+                "waiting.irq": {
+                    "status": "yes",
+                    "note": "With CONFIG_ENABLE_IRQ_ISR (default on) a falling edge posts to a queue. Without it the IRQ pin level is polled every 10 ms.",
+                    "evidence": [
+                        "src/pn532_driver.c:27",
+                        "src/pn532_driver.c:58",
+                        "src/pn532_driver.c:310",
+                        "src/pn532_driver.c:263",
+                        "Kconfig.projbuild:2"
+                    ]
+                },
+                "waiting.ready_polling": {
+                    "status": "yes",
+                    "note": "Used when the IRQ pin is not connected. pn532_read on I2C and SPI also polls the status before each read. HSU has no status byte, pn532_is_ready is NULL there.",
+                    "evidence": [
+                        "src/pn532_driver_i2c.c:166",
+                        "src/pn532_driver_i2c.c:171",
+                        "src/pn532_driver_spi.c:228",
+                        "src/pn532_driver_spi.c:237",
+                        "src/pn532_driver.c:296"
+                    ]
+                },
+                "waiting.bounded_waits": {
+                    "status": "partly",
+                    "note": "Fixed commands use finite timeouts (100, 1000, 10000 ms). pn532_read_passive_target_id passes the caller's timeout on, and 0 means wait forever in pn532_wait_ready and in all transport reads. The example passes 0, so a dead chip hangs it. In the IRQ polling branch a timeout above 65530 ms never ends, see the defects.",
+                    "evidence": [
+                        "src/pn532_driver.c:306",
+                        "src/pn532_driver.c:273",
+                        "src/pn532_driver_i2c.c:180",
+                        "src/pn532_driver_spi.c:245",
+                        "src/pn532.c:42",
+                        "examples/ntag_read/main/ntag_read.c:143"
+                    ]
+                },
+                "waiting.nonblocking_detect": {
+                    "status": "no",
+                    "searched": "A start and collect pair for InListPassiveTarget. 'async', 'callback', xTaskCreate: no match. In include/, 'start' matches only PN532_STARTCODE* and 'poll' only PN532_COMMAND_INAUTOPOLL, which src/ does not use.",
+                    "note": "pn532_read_passive_target_id and pn532_in_list_passive_target send, wait and read in one call. pn532_send_command_wait_ack, pn532_wait_ready and pn532_read_data are public, so a caller could write this alone, including the frame parsing, but the library has no such path."
+                },
+                "cards.iso14443a_uid": {
+                    "status": "yes",
+                    "note": "The UID copy has no bound, see the defects.",
+                    "evidence": ["src/pn532.c:92", "src/pn532.c:93", "src/pn532.c:144", "src/pn532.c:149"]
+                },
+                "cards.two_targets": {
+                    "status": "no",
+                    "searched": "MaxTg, a value of 2 written to pn532_packetbuffer[1], any handling of a second Tg: none.",
+                    "note": "MaxTg is hard-coded to 1 in both detect functions and any NbTg other than 1 returns ESP_FAIL.",
+                    "evidence": ["src/pn532.c:93", "src/pn532.c:241", "src/pn532.c:133", "src/pn532.c:276"]
+                },
+                "cards.mifare_classic": {
+                    "status": "partly",
+                    "note": "Key A only, under an NTAG name. The authentication result is never read, so the caller does not know if it passed. The 0x30 read in ntag2xx_read_page works for blocks below 231, so the upper sectors of a Classic 4K are out of reach. No block write: MIFARE_CMD_WRITE and MIFARE_CMD_AUTH_B are defined and not used, and ntag2xx_write_page sends the 4-byte 0xA2 write. No value block functions.",
+                    "evidence": [
+                        "src/pn532.c:338",
+                        "src/pn532.c:341",
+                        "src/pn532.c:350",
+                        "src/pn532.c:381",
+                        "src/pn532.c:364"
+                    ]
+                },
+                "cards.ultralight_ntag": {
+                    "status": "yes",
+                    "note": "Reads 16 bytes from a page, writes 4 bytes to pages 4..225. ntag2xx_get_model takes the size from the capability container byte, not from GET_VERSION as its header comment states. The write does not check the card status, see the defects.",
+                    "evidence": [
+                        "src/pn532.c:381",
+                        "src/pn532.c:417",
+                        "src/pn532.c:460",
+                        "src/pn532.c:462",
+                        "src/pn532.c:315"
+                    ]
+                },
+                "cards.iso14443_4_apdu": {
+                    "status": "partly",
+                    "note": "InDataExchange works for short exchanges: at most 62 bytes out and 56 bytes back, because the receive buffer is 64 bytes. No chaining: the MI bit is masked off. The Tg comes only from pn532_in_list_passive_target.",
+                    "evidence": [
+                        "src/pn532.c:161",
+                        "src/pn532.c:166",
+                        "src/pn532.c:175",
+                        "src/pn532.c:196",
+                        "src/pn532.c:210"
+                    ]
+                },
+                "cards.ndef": {
+                    "status": "no",
+                    "searched": "'ndef' in any case apart from #ifndef, TLV, an NDEF message or record parser or builder: only the NDEF_URIPREFIX_* defines in pn532.h lines 102-138, and src/ does not use them."
+                },
+                "cards.iso14443b": {
+                    "status": "no",
+                    "searched": "'14443B', 'BRTY_ISO14443B', AFI, ATQB: only the define in pn532.h line 88.",
+                    "note": "pn532_read_passive_target_id passes any BrTy but sends no InitiatorData (the AFI that type B needs) and parses the response as type A."
+                },
+                "cards.felica": {
+                    "status": "no",
+                    "searched": "'felica' in any case, 'BRTY_FELICA', a polling payload, NFCID2: only the defines in pn532.h lines 86-87.",
+                    "note": "pn532_read_passive_target_id sends no InitiatorData (the 5-byte polling payload that FeliCa needs) and parses the response as type A."
+                },
+                "cards.card_emulation": {
+                    "status": "no",
+                    "searched": "PN532_COMMAND_TGINITASTARGET and the other PN532_COMMAND_TG* names, TgInit, TgGet, TgSet: only defined in pn532.h lines 60-67, never used in src/."
+                },
+                "cards.peer_to_peer": {
+                    "status": "no",
+                    "searched": "PN532_COMMAND_INJUMPFORDEP, INJUMPFORPSL, INATR, INPSL, TGINITASTARGET, NFCIP: only defined in pn532.h, never used in src/."
+                },
+                "chip_control.firmware_version": {
+                    "status": "yes",
+                    "evidence": ["src/pn532.c:24", "src/pn532.c:32", "src/pn532.c:56", "src/pn532.c:64"]
+                },
+                "chip_control.sam_configuration": {
+                    "status": "yes",
+                    "note": "Normal mode, timeout 0, IRQ used. Called from pn532_init.",
+                    "evidence": ["src/pn532_driver.c:347", "src/pn532_driver.c:365", "src/pn532_driver.c:101"]
+                },
+                "chip_control.rf_field_control": {
+                    "status": "no",
+                    "searched": "PN532_COMMAND_RFCONFIGURATION is used once, at pn532.c line 73, with item 5. No frame with item 1 and no function named for the field or for RF on and off."
+                },
+                "chip_control.retries_control": {
+                    "status": "yes",
+                    "note": "MxRtyPassiveActivation only; ATR and PSL retries are fixed at 0xFF and 0x01. The response is not read, see the defects.",
+                    "evidence": ["src/pn532.c:72", "src/pn532.c:74", "src/pn532.c:77"]
+                },
+                "chip_control.power_down": {
+                    "status": "no",
+                    "searched": "PN532_COMMAND_POWERDOWN (defined in pn532.h line 46, never used), 'powerdown', 'power_down'. 'wakeup' matches only the HSU start sequence.",
+                    "note": "pn532_wakeup sends the 0x55 sequence on HSU before SAMConfiguration is done. No function puts the chip into power down."
+                },
+                "chip_control.reset_recovery": {
+                    "status": "yes",
+                    "note": "A reset line through pn532_reset, or pn532_release followed by pn532_init, which rebuilds the bus and resends SAMConfiguration. pn532_reset alone does not restore the setup, see the defects.",
+                    "evidence": [
+                        "src/pn532_driver.c:162",
+                        "src/pn532_driver.c:167",
+                        "src/pn532_driver.c:169",
+                        "examples/ntag_read/main/ntag_read.c:111",
+                        "examples/ntag_read/main/ntag_read.c:114"
+                    ]
+                },
+                "several.several_readers": {
+                    "status": "partly",
+                    "note": "Pins, bus handles and transport config are per handle, so two readers can be created and used in turn from one task. But the Tg number and all frame buffers are globals or statics shared by every reader, and pn532_release removes the GPIO ISR service for all of them.",
+                    "evidence": [
+                        "include/pn532_driver.h:49",
+                        "src/pn532.c:19",
+                        "src/pn532.c:22",
+                        "src/pn532_driver.c:177",
+                        "src/pn532_driver.c:231",
+                        "src/pn532_driver_i2c.c:176",
+                        "src/pn532_driver_spi.c:242"
+                    ]
+                },
+                "several.shared_spi_bus": {
+                    "status": "yes",
+                    "note": "Each reader has its own device handle and its own CS, set in the per-transaction callbacks. A bus that is already initialized is accepted, and passing a pin as NC skips the bus setup. The static rx_buffer in pn532_read makes this safe only from one task.",
+                    "evidence": [
+                        "src/pn532_driver_spi.c:147",
+                        "src/pn532_driver_spi.c:180",
+                        "src/pn532_driver_spi.c:186",
+                        "src/pn532_driver_spi.c:106",
+                        "src/pn532_driver_spi.c:231"
+                    ]
+                },
+                "several.thread_safety": {
+                    "status": "no",
+                    "searched": "semaphore, xSemaphore, mutex, portENTER_CRITICAL, 'lock', 'thread', 'task-safe' in src/, include/ and README.md: the only match is dependencies.lock in .gitignore.",
+                    "note": "No lock and no stated rule."
+                },
+                "code_health.errors_returned": {
+                    "status": "partly",
+                    "note": "Functions return esp_err_t. Bad argument, no memory and most timeouts can be told apart. All chip-level failures are one ESP_FAIL: no card found, a card error status, a bad checksum, a NACK. An ISR-mode timeout is ESP_FAIL too. Some failures return ESP_OK: an out-of-range page write, a rejected page write, a failed authentication.",
+                    "evidence": [
+                        "src/pn532_driver_i2c.c:207",
+                        "src/pn532.c:29",
+                        "src/pn532_driver_i2c.c:44",
+                        "src/pn532.c:134",
+                        "src/pn532.c:214",
+                        "src/pn532.c:450",
+                        "src/pn532_driver.c:316"
+                    ]
+                },
+                "code_health.buffers_bounded": {
+                    "status": "partly",
+                    "note": "The HSU read clamps to read_size and pn532_in_data_exchange clamps to the caller's size. The UID copy has no bound at all, and pn532_in_data_exchange does not bound the read of its own 64-byte source buffer.",
+                    "evidence": [
+                        "src/pn532_driver_hsu.c:314",
+                        "src/pn532_driver_hsu.c:315",
+                        "src/pn532.c:219",
+                        "src/pn532.c:148",
+                        "src/pn532.c:149",
+                        "src/pn532.c:224"
+                    ]
+                },
+                "code_health.allocation_checked": {
+                    "status": "partly",
+                    "note": "The three heap_caps_calloc calls are checked. The xQueueCreate result is not.",
+                    "evidence": [
+                        "src/pn532_driver_i2c.c:42",
+                        "src/pn532_driver_i2c.c:43",
+                        "src/pn532_driver_spi.c:57",
+                        "src/pn532_driver_hsu.c:48",
+                        "src/pn532_driver.c:54"
+                    ]
+                },
+                "code_health.tests": {
+                    "status": "no",
+                    "searched": "Files and directories named *test*, TEST_CASE, Unity, pytest: none. The word 'test' occurs only inside 'latest'.",
+                    "note": "The example is a demonstration and asserts nothing."
+                },
+                "code_health.examples": {
+                    "status": "yes",
+                    "note": "One example, ntag_read, covering all three transports through #defines.",
+                    "evidence": [
+                        "examples/ntag_read/main/ntag_read.c:111",
+                        "examples/ntag_read/main/ntag_read.c:143",
+                        "examples/ntag_read/main/ntag_read.c:188"
+                    ]
+                },
+                "code_health.docs": {
+                    "status": "partly",
+                    "note": "The README covers installation and license only. The public headers have per-function comments. The pn532_new_driver_* functions have no comment and no text gives the call order: only the example shows it. Some comments do not match the code: ntag2xx_get_model and the '4 byte' read.",
+                    "evidence": [
+                        "README.md:2",
+                        "README.md:9",
+                        "include/pn532.h:170",
+                        "include/pn532.h:175",
+                        "include/pn532_driver.h:113"
+                    ]
+                },
+                "code_health.license": {"status": "yes", "evidence": ["LICENSE:1", "idf_component.yml:5"]}
+            },
+            "defects": [
+                {
+                    "what": "pn532_read_passive_target_id copies the NFCID length from the frame into uid with no bound and takes no buffer size, so a 10-byte UID overflows the 7-byte array of the example and a corrupt length up to 255 overruns the caller's buffer and reads past the 64-byte pn532_packetbuffer; the function does not check the frame first on I2C or SPI.",
+                    "severity": "medium",
+                    "read_as": "high",
+                    "judged": "The function takes no buffer size and copies pn532_packetbuffer[12] bytes after testing only the tag count, so a 10-byte UID overflows the example's uid[7]; on I2C and SPI nothing verifies the frame, and only the UART read checks LCS and DCS. 4 and 7-byte UIDs fit, so this is the limit of a legal input or a corrupt frame.",
+                    "evidence": [
+                        "src/pn532.c:88",
+                        "src/pn532.c:144",
+                        "src/pn532.c:148",
+                        "src/pn532.c:149",
+                        "examples/ntag_read/main/ntag_read.c:137"
+                    ]
+                },
+                {
+                    "what": "pn532_in_data_exchange receives at most 64 bytes but copies LEN-3 bytes from pn532_packetbuffer limited only by *response_length, so a card reply over 56 bytes with a large caller buffer reads past the end of the global and returns that memory as card data with ESP_OK; LEN below 3 also wraps the uint8_t length to about 253.",
+                    "severity": "high",
+                    "judged": "The function reads 64 bytes and copies up to *response_length bytes from offset 8, so with a large caller buffer a reply over 56 bytes returns memory past the global with ESP_OK; such a reply is legal and not a limit case. The LEN below 3 part needs a corrupt frame, because a valid LEN 2 frame has DCS 0xEA at index 7 and fails the status test at line 210.",
+                    "evidence": [
+                        "src/pn532.c:22",
+                        "src/pn532.c:196",
+                        "src/pn532.c:217",
+                        "src/pn532.c:219",
+                        "src/pn532.c:224"
+                    ]
+                },
+                {
+                    "what": "ntag2xx_authenticate returns after the ACK and never reads the InDataExchange response, so a wrong key or a card error returns ESP_OK, and the unread response stays pending for the next command, which expects an ACK.",
+                    "severity": "high",
+                    "judged": "The function returns the ACK result and nothing reads the InDataExchange reply, so a wrong key or card error returns ESP_OK; the key result is the only thing this call exists to report, so this needs no fault. The pending-reply part is not confirmed: pn532_write on UART flushes input first, UM0701-02 6.2.2.2 says a new command replaces an unanswered one, and what the chip does with an unread reply on I2C or SPI cannot be checked here.",
+                    "evidence": ["src/pn532.c:350", "src/pn532.c:352"]
+                },
+                {
+                    "what": "ntag2xx_write_page reads the response but does not check the status byte, TFI or command code, so a write that the card rejected or that timed out returns ESP_OK.",
+                    "severity": "medium",
+                    "read_as": "high",
+                    "judged": "ntag2xx_write_page returns the result of pn532_read_data and never looks at the frame, unlike ntag2xx_read_page, which tests the status byte, so a status reporting an RF timeout or a card refusal returns ESP_OK. The false success needs a write that fails on the card, such as a lost card or a locked page.",
+                    "evidence": ["src/pn532.c:485", "src/pn532.c:486"]
+                },
+                {
+                    "what": "ntag2xx_write_page returns 0, which is ESP_OK, for a page outside 4..225, although the comment above it states a failure, so a rejected write looks successful.",
+                    "severity": "medium",
+                    "evidence": ["src/pn532.c:445", "src/pn532.c:449", "src/pn532.c:450"]
+                },
+                {
+                    "what": "pn532_set_passive_activation_retries returns after the ACK and never reads the RFConfiguration response (D5 33): the setting is not confirmed and the pending response stays for the next command, and in ISR mode it leaves a stale event in the IRQ queue, which is reset only in pn532_init.",
+                    "severity": "medium",
+                    "evidence": ["src/pn532.c:83", "src/pn532_driver.c:97"]
+                },
+                {
+                    "what": "The SPI pn532_read does not check the ready flag after its loop: when the timeout ends with a successful status read showing not ready, result is ESP_OK, the data is read anyway and the function returns ESP_OK with garbage. The I2C read has this check and returns ESP_ERR_TIMEOUT.",
+                    "severity": "medium",
+                    "evidence": [
+                        "src/pn532_driver_spi.c:256",
+                        "src/pn532_driver_spi.c:270",
+                        "src/pn532_driver_spi.c:273",
+                        "src/pn532_driver_i2c.c:205"
+                    ]
+                },
+                {
+                    "what": "On I2C and SPI no response has its DCS verified, and only two functions check LCS, so corrupted UID bytes or page data are returned as valid; only the HSU read checks them.",
+                    "severity": "medium",
+                    "evidence": [
+                        "src/pn532.c:114",
+                        "src/pn532.c:405",
+                        "src/pn532_driver_i2c.c:211",
+                        "src/pn532_driver_spi.c:277"
+                    ]
+                },
+                {
+                    "what": "ntag2xx_read_page takes byte 7 as the status with no check of the start code, TFI or command code, so a syntax error frame (00 00 FF 01 FF 7F 81 00), which has 00 at byte 7, counts as a successful read and the bytes after it are copied out as page data with ESP_OK.",
+                    "severity": "medium",
+                    "evidence": ["src/pn532.c:414", "src/pn532.c:416", "src/pn532.c:417"]
+                },
+                {
+                    "what": "pn532_in_data_exchange sends the Tg from pn532_inListedTag, which only pn532_in_list_passive_target sets; after detection through pn532_read_passive_target_id it is still 0 or a stale value, so InDataExchange goes out with a wrong target number.",
+                    "severity": "medium",
+                    "evidence": ["src/pn532.c:19", "src/pn532.c:92", "src/pn532.c:175", "src/pn532.c:284"]
+                },
+                {
+                    "what": "All frame buffers and the Tg are globals or function statics with no lock, so two readers used from two tasks overwrite each other's commands and responses, and one reader's Tg is used for the other.",
+                    "severity": "medium",
+                    "evidence": [
+                        "src/pn532.c:19",
+                        "src/pn532.c:22",
+                        "src/pn532_driver.c:177",
+                        "src/pn532_driver.c:231",
+                        "src/pn532_driver_i2c.c:176",
+                        "src/pn532_driver_spi.c:242"
+                    ]
+                },
+                {
+                    "what": "pn532_release calls gpio_uninstall_isr_service, which frees the whole GPIO ISR service, so releasing one reader removes the IRQ handler of a second reader and of any other component using gpio_isr_handler_add.",
+                    "severity": "medium",
+                    "evidence": ["src/pn532_driver.c:131", "src/pn532_driver.c:132"]
+                },
+                {
+                    "what": "After a timeout in pn532_read_passive_target_id no ACK frame is sent to abort the command (UM0701 6.2), so InListPassiveTarget keeps running on the chip and a late response is left for the next command; the only ACK the host ever writes is in the HSU baud rate change.",
+                    "severity": "medium",
+                    "evidence": ["src/pn532.c:107", "src/pn532.c:112", "src/pn532_driver_hsu.c:234"]
+                },
+                {
+                    "what": "On HSU without an IRQ pin pn532_wait_ready returns ESP_OK at once and the next read uses PN532_READ_TIMEOUT, so the 10000 ms wait of pn532_in_list_passive_target and the 1000 ms wait of pn532_in_data_exchange become 100 ms and slower cards fail with a timeout.",
+                    "severity": "medium",
+                    "evidence": [
+                        "src/pn532_driver_hsu.c:77",
+                        "src/pn532_driver.c:295",
+                        "src/pn532.c:188",
+                        "src/pn532.c:196",
+                        "src/pn532.c:256",
+                        "src/pn532.c:260"
+                    ]
+                },
+                {
+                    "what": "pn532_in_data_exchange cuts a response to *response_length and returns ESP_OK, and it masks off the MI bit of the status, so the caller cannot tell that the data is incomplete.",
+                    "severity": "low",
+                    "evidence": ["src/pn532.c:210", "src/pn532.c:220"]
+                },
+                {
+                    "what": "In the IRQ polling branch of pn532_wait_ready the elapsed time is a uint16_t compared with an int32_t timeout, so with a timeout above 65530 ms the counter wraps and the wait never ends.",
+                    "severity": "low",
+                    "evidence": ["src/pn532_driver.c:318", "src/pn532_driver.c:323", "src/pn532_driver.c:324"]
+                },
+                {
+                    "what": "The HSU pn532_write passes a timeout in milliseconds to uart_wait_tx_done, whose argument is in ticks, so at a tick rate of 100 Hz the wait is ten times longer than asked.",
+                    "severity": "low",
+                    "evidence": ["src/pn532_driver_hsu.c:375"]
+                },
+                {
+                    "what": "In ISR mode pn532_wait_ready returns ESP_FAIL on a timeout, while its header promises ESP_ERR_TIMEOUT and the polling branches return it, so a caller cannot tell a timeout from other failures.",
+                    "severity": "low",
+                    "evidence": ["src/pn532_driver.c:316", "include/pn532_driver.h:101", "src/pn532_driver.c:329"]
+                },
+                {
+                    "what": "pn532_init does not check the xQueueCreate result, so a failed allocation leaves IRQQueue NULL, which the ISR, xQueueReset and xQueueReceive then use.",
+                    "severity": "low",
+                    "evidence": ["src/pn532_driver.c:54", "src/pn532_driver.c:97"]
+                },
+                {
+                    "what": "pn532_init ignores the results of gpio_install_isr_service and gpio_isr_handler_add, so with a failed handler registration no IRQ event arrives and every wait ends in an unexplained timeout.",
+                    "severity": "low",
+                    "evidence": ["src/pn532_driver.c:57", "src/pn532_driver.c:58"]
+                },
+                {
+                    "what": "pn532_write_command does not check cmdlen: a frame takes cmdlen + 6 bytes, so the public function writes past the static command[256] for cmdlen above 250, and at 255 the LEN byte wraps to 0. The check of 254 in pn532_write comes after the overflow. No caller inside the library reaches this.",
+                    "severity": "low",
+                    "evidence": [
+                        "src/pn532_driver.c:175",
+                        "src/pn532_driver.c:177",
+                        "src/pn532_driver.c:184",
+                        "src/pn532_driver.c:190"
+                    ]
+                },
+                {
+                    "what": "dev_cfg is an uninitialized stack struct and flags.disable_ack_check is never set, so the I2C device takes a random ACK check setting; gpio_config_t io_conf has the same fault for hys_ctrl_mode on chips that have that field.",
+                    "severity": "low",
+                    "evidence": ["src/pn532_driver_i2c.c:120", "src/pn532_driver_i2c.c:124", "src/pn532_driver.c:33"]
+                },
+                {
+                    "what": "pn532_read_passive_target_id takes any PN532_BRTY_xxx value but sends no InitiatorData, which FeliCa and type B require, and parses the response in the type A layout; for a Jewel tag byte 12 is an ID byte, which is then used as the copy length.",
+                    "severity": "low",
+                    "evidence": ["include/pn532.h:172", "src/pn532.c:94", "src/pn532.c:96", "src/pn532.c:144"]
+                },
+                {
+                    "what": "idf_component.yml declares idf >=5.2, but the code calls i2c_master_get_bus_handle, which is absent from the v5.3.1 header, and CMakeLists.txt requires the esp_driver_* components, so the build fails on versions the manifest accepts.",
+                    "severity": "low",
+                    "evidence": ["idf_component.yml:12", "src/pn532_driver_i2c.c:114", "CMakeLists.txt:11"]
+                },
+                {
+                    "what": "The HSU pn532_init_io has no release at its start and leaves the UART driver installed on a failure, so a second pn532_init without pn532_release fails in uart_driver_install with ESP_FAIL even if the chip has recovered; the I2C and SPI versions release first.",
+                    "severity": "low",
+                    "evidence": [
+                        "src/pn532_driver_hsu.c:119",
+                        "src/pn532_driver_hsu.c:147",
+                        "src/pn532_driver_spi.c:125"
+                    ]
+                },
+                {
+                    "what": "pn532_reset does not resend SAMConfiguration and on HSU leaves the UART at the changed baud rate while the chip returns to 115200, and the example retries with it alone, so recovery by pn532_reset without pn532_init can not complete.",
+                    "severity": "low",
+                    "evidence": ["src/pn532_driver.c:172", "examples/ntag_read/main/ntag_read.c:125"]
+                }
+            ]
+        },
+        {
+            "version": "0.2.1",
+            "blind": true,
+            "commit": "0f6b16ff3d89d42f43a2bd4413f2a48520655ec1",
+            "rubric": "pn532",
+            "rubric_version": 2,
+            "date": "2026-11-02",
+            "by": "claude-opus-5-5",
+            "items": {
+                "transports.i2c": {
+                    "status": "partly",
+                    "note": "Address 0x24, 100 kHz, a status byte first in each read and a retry after STOP are right: i2c_master_receive ends in STOP (esp_driver_i2c/i2c_master.c:1340-1351, v5.5.5). The whole-frame rule of 6.2.4 is broken in two places: pn532_is_ready reads the status alone and sends STOP when no IRQ pin is given, and the fixed read sizes (64 bytes for InDataExchange, 32 for InListPassiveTarget) are shorter than a long frame. A NOT READY read also takes read_size+1 bytes before STOP; 6.2.4 says those bytes are not relevant, so this has no effect. Status is compared with == 0x01 although bits 7..1 are rfu in 6.2.4.",
+                    "evidence": [
+                        "src/pn532_driver_i2c.c:8",
+                        "src/pn532_driver_i2c.c:122",
+                        "src/pn532_driver_i2c.c:123",
+                        "src/pn532_driver_i2c.c:194",
+                        "src/pn532_driver_i2c.c:195",
+                        "src/pn532_driver_i2c.c:166"
+                    ]
+                },
+                "transports.spi": {
+                    "status": "yes",
+                    "note": "Mode 0, LSB first, 4 MHz default, op codes 0x02, 0x01, 0x03. The LSB-first flag also applies to the command phase: spi_ll_set_command is called with tx_lsbfirst (hal/spi_hal_iram.c:197, hal/esp32s3/include/hal/spi_ll.h:1044, v5.5.5). A clock passed by the caller is not limited to 5 MHz.",
+                    "evidence": [
+                        "src/pn532_driver_spi.c:14",
+                        "src/pn532_driver_spi.c:15",
+                        "src/pn532_driver_spi.c:16",
+                        "src/pn532_driver_spi.c:175",
+                        "src/pn532_driver_spi.c:177",
+                        "src/pn532_driver_spi.c:181",
+                        "src/pn532_driver_spi.c:67"
+                    ]
+                },
+                "transports.uart": {
+                    "status": "yes",
+                    "note": "Adds preamble and postamble, sends the wake-up bytes until SAM is configured. It does not resend a command after 15 ms with no ACK as 6.2.3 advises; it returns an error instead.",
+                    "evidence": [
+                        "src/pn532_driver_hsu.c:119",
+                        "src/pn532_driver_hsu.c:253",
+                        "src/pn532_driver_hsu.c:366",
+                        "src/pn532_driver_hsu.c:369",
+                        "src/pn532_driver_hsu.c:372"
+                    ]
+                },
+                "builds_on.esp_idf": {
+                    "status": "yes",
+                    "note": "Uses driver/i2c_master.h (the new I2C API), spi_master and uart. No Arduino layer. Judged by reading; not built, as the task forbids it. The option CONFIG_PN532DEBUG does not build on IDF 6, see defects.",
+                    "evidence": [
+                        "include/pn532_driver_i2c.h:4",
+                        "src/pn532_driver_spi.c:8",
+                        "include/pn532_driver_hsu.h:4"
+                    ]
+                },
+                "builds_on.arduino": {
+                    "status": "no",
+                    "searched": "Arduino.h, Wire., .ino, library.properties, library.json: no match in the folder."
+                },
+                "builds_on.esp_idf_component": {
+                    "status": "yes",
+                    "evidence": ["idf_component.yml:1", "idf_component.yml:12", "CMakeLists.txt:1"]
+                },
+                "frames.ack_checked": {
+                    "status": "yes",
+                    "note": "A missing or wrong ACK returns an error to the caller. The ACK wait is also bounded. The command is not resent.",
+                    "evidence": ["src/pn532_driver.c:404", "src/pn532_driver.c:425", "src/pn532_driver.c:426"]
+                },
+                "frames.nack_resend": {
+                    "status": "no",
+                    "searched": "NACK_FRAME: defined at include/pn532_driver.h:30, compared at src/pn532_driver_hsu.c:298, never written. All pn532_write calls checked: the only frames sent are commands and the ACK at src/pn532_driver_hsu.c:234."
+                },
+                "frames.checksums_checked": {
+                    "status": "partly",
+                    "note": "On I2C and SPI LCS is checked only in pn532_in_data_exchange and pn532_in_list_passive_target, and DCS is never checked. pn532_read_passive_target_id and ntag2xx_read_page check neither. On HSU pn532_read checks LCS always and DCS only when read_size covers the whole frame.",
+                    "evidence": [
+                        "src/pn532.c:202",
+                        "src/pn532.c:267",
+                        "src/pn532_driver_hsu.c:304",
+                        "src/pn532_driver_hsu.c:332"
+                    ]
+                },
+                "frames.extended_frames": {
+                    "status": "no",
+                    "searched": "LENM, LENL, extended: no match. LEN is uint8_t and a frame with LEN FF, LCS FF fails the check at src/pn532.c:202 and src/pn532_driver_hsu.c:304. Receive buffer is 64 bytes."
+                },
+                "frames.error_frame": {
+                    "status": "no",
+                    "searched": "0x7F, 0x81, syntax, error frame: no match in the folder.",
+                    "note": "The frame only fails the generic checks. In ntag2xx_read_page it passes as Status 0, see defects."
+                },
+                "frames.response_code_checked": {
+                    "status": "partly",
+                    "note": "Checked for GetFirmwareVersion, InDataExchange in pn532_in_data_exchange and InListPassiveTarget in pn532_in_list_passive_target. pn532_SAM_config checks the command code only, not TFI. pn532_read_passive_target_id, ntag2xx_read_page and ntag2xx_write_page check neither.",
+                    "evidence": ["src/pn532.c:56", "src/pn532.c:209", "src/pn532.c:274", "src/pn532_driver.c:369"]
+                },
+                "frames.status_decoded": {
+                    "status": "partly",
+                    "note": "The mask 0x3F is right in pn532_in_data_exchange and ntag2xx_read_page. ntag2xx_write_page never looks at Status. The code itself is lost in ESP_FAIL, and MI and NAD are not reported.",
+                    "evidence": ["src/pn532.c:210", "src/pn532.c:416"]
+                },
+                "waiting.irq": {
+                    "status": "yes",
+                    "note": "Interrupt on the falling edge with a queue (default), or polling the pin level when CONFIG_ENABLE_IRQ_ISR is off.",
+                    "evidence": [
+                        "Kconfig.projbuild:2",
+                        "Kconfig.projbuild:4",
+                        "src/pn532_driver.c:27",
+                        "src/pn532_driver.c:68",
+                        "src/pn532_driver.c:310",
+                        "src/pn532_driver.c:263"
+                    ]
+                },
+                "waiting.ready_polling": {
+                    "status": "yes",
+                    "note": "Used when no IRQ pin is given. HSU has no status byte: pn532_is_ready is NULL there and pn532_wait_ready returns at once.",
+                    "evidence": [
+                        "src/pn532_driver.c:293",
+                        "src/pn532_driver.c:281",
+                        "src/pn532_driver_i2c.c:171",
+                        "src/pn532_driver_spi.c:237"
+                    ]
+                },
+                "waiting.bounded_waits": {
+                    "status": "partly",
+                    "note": "Every wait inside the library has a finite timeout. Timeout 0 in pn532_wait_ready, pn532_read_data and pn532_read_passive_target_id means forever, and the example uses it. In polling mode of the IRQ pin a uint16_t counter makes the wait endless from 65534 ms up, see defects.",
+                    "evidence": [
+                        "src/pn532_driver.c:273",
+                        "src/pn532_driver.c:306",
+                        "src/pn532_driver_i2c.c:180",
+                        "src/pn532_driver_hsu.c:282",
+                        "include/pn532.h:175",
+                        "examples/ntag_read/main/ntag_read.c:143"
+                    ]
+                },
+                "waiting.abort_on_timeout": {
+                    "status": "no",
+                    "searched": "ACK sent by the host: the only one is src/pn532_driver_hsu.c:234, the mandatory ACK of SetSerialBaudRate. The paths after a timeout at src/pn532.c:107-112, 188-193, 256-258, 396-401, 476-481 return without writing anything. pn532_init does not lower MxRtyPassiveActivation."
+                },
+                "waiting.nonblocking_detect": {
+                    "status": "no",
+                    "searched": "Start and collect pair for detection: none. pn532_read_passive_target_id and pn532_in_list_passive_target are single blocking calls.",
+                    "note": "A caller could assemble it from the public pn532_send_command_wait_ack, pn532_wait_ready and pn532_read_data with its own frame and parser; the library does not offer it."
+                },
+                "cards.iso14443a_uid": {
+                    "status": "yes",
+                    "note": "Frame offsets match 7.3.5. The copy is not bounded, see defects.",
+                    "evidence": ["src/pn532.c:92", "src/pn532.c:94", "src/pn532.c:144", "src/pn532.c:149"]
+                },
+                "cards.two_targets": {
+                    "status": "no",
+                    "searched": "MaxTg: both callers send 1 (src/pn532.c:93, 241), and NbTg other than 1 returns ESP_FAIL (src/pn532.c:133, 276)."
+                },
+                "cards.mifare_classic": {
+                    "status": "partly",
+                    "note": "ntag2xx_authenticate sends Authentication A but never reads the result. Key B is not offered. 16-byte reads go through ntag2xx_read_page. MIFARE_CMD_WRITE is defined and not used, so there is no 16-byte block write.",
+                    "evidence": [
+                        "src/pn532.c:341",
+                        "src/pn532.c:350",
+                        "src/pn532.c:352",
+                        "src/pn532.c:381",
+                        "include/pn532.h:95"
+                    ]
+                },
+                "cards.ultralight_ntag": {
+                    "status": "yes",
+                    "note": "Reads 16 bytes with 0x30, writes a 4-byte page with 0xA2, identifies NTAG213/215/216 from the capability container. Defects of the write are listed separately.",
+                    "evidence": [
+                        "src/pn532.c:381",
+                        "src/pn532.c:405",
+                        "src/pn532.c:417",
+                        "src/pn532.c:460",
+                        "src/pn532.c:462",
+                        "src/pn532.c:465"
+                    ]
+                },
+                "cards.iso14443_4_apdu": {
+                    "status": "partly",
+                    "note": "InDataExchange is implemented for short APDUs after pn532_in_list_passive_target: at most 62 bytes out and 56 in, where 7.3.8 allows 261 and 258. A longer response is not rejected, see defects.",
+                    "evidence": ["src/pn532.c:174", "src/pn532.c:175", "src/pn532.c:166", "src/pn532.c:196"]
+                },
+                "cards.chaining": {
+                    "status": "no",
+                    "searched": "0x40, MI, chain: only PN532_COMMAND_INDATAEXCHANGE at include/pn532.h:54. Status is masked at src/pn532.c:210 and bit 6 is dropped; the Tg byte at src/pn532.c:175 never carries MI."
+                },
+                "cards.raw_exchange": {
+                    "status": "no",
+                    "searched": "PN532_COMMAND_INCOMMUNICATETHRU: only the define at include/pn532.h:55."
+                },
+                "cards.auto_poll": {
+                    "status": "no",
+                    "searched": "PN532_COMMAND_INAUTOPOLL: only the define at include/pn532.h:59."
+                },
+                "cards.ndef": {
+                    "status": "no",
+                    "searched": "NDEF_URIPREFIX_*: only defines at include/pn532.h:103-138. No TLV, record or message code in src/."
+                },
+                "cards.iso14443b": {
+                    "status": "no",
+                    "searched": "PN532_BRTY_ISO14443B_106KBPS: only the define at include/pn532.h:88. It can be passed to pn532_read_passive_target_id, but the mandatory AFI is not sent and the parser is for type A."
+                },
+                "cards.felica": {
+                    "status": "no",
+                    "searched": "PN532_BRTY_FELICA_212KBPS and _424KBPS: only the defines at include/pn532.h:86-87. They can be passed to pn532_read_passive_target_id, but the mandatory 5-byte payload is not sent and the parser is for type A."
+                },
+                "cards.jewel": {
+                    "status": "no",
+                    "searched": "PN532_BRTY_JEWEL_TAG_106KBPS: only the define at include/pn532.h:89. The command is valid but the response is parsed as type A, see defects."
+                },
+                "cards.card_emulation": {
+                    "status": "no",
+                    "searched": "TgInitAsTarget and the Tg commands: only the defines at include/pn532.h:60-67."
+                },
+                "cards.peer_to_peer": {
+                    "status": "no",
+                    "searched": "PN532_COMMAND_INJUMPFORDEP, TGINITASTARGET, INATR, INPSL: only defines at include/pn532.h:49-53 and 60."
+                },
+                "chip_control.firmware_version": {
+                    "status": "yes",
+                    "evidence": ["src/pn532.c:32", "src/pn532.c:34", "src/pn532.c:56", "src/pn532.c:64"]
+                },
+                "chip_control.general_status": {
+                    "status": "no",
+                    "searched": "PN532_COMMAND_GETGENERALSTATUS: only the define at include/pn532.h:38."
+                },
+                "chip_control.sam_configuration": {
+                    "status": "yes",
+                    "note": "Normal mode only, called from pn532_init.",
+                    "evidence": ["src/pn532_driver.c:347", "src/pn532_driver.c:349", "src/pn532_driver.c:369"]
+                },
+                "chip_control.rf_field_control": {
+                    "status": "no",
+                    "searched": "RFCONFIGURATION: used once, at src/pn532.c:73, with CfgItem 5. CfgItem 1 is not sent anywhere."
+                },
+                "chip_control.retries_control": {
+                    "status": "yes",
+                    "note": "Sets MxRtyPassiveActivation. The response is not read, see defects.",
+                    "evidence": ["src/pn532.c:73", "src/pn532.c:74", "src/pn532.c:77", "src/pn532.c:83"]
+                },
+                "chip_control.power_down": {
+                    "status": "no",
+                    "searched": "PN532_COMMAND_POWERDOWN: only the define at include/pn532.h:46. pn532_wakeup at src/pn532_driver_hsu.c:251 runs only before SAM is configured and is not a return from PowerDown."
+                },
+                "chip_control.registers": {
+                    "status": "no",
+                    "searched": "PN532_COMMAND_READREGISTER, WRITEREGISTER: only the defines at include/pn532.h:39-40."
+                },
+                "chip_control.gpio": {
+                    "status": "no",
+                    "searched": "PN532_COMMAND_READGPIO, WRITEGPIO: only the defines at include/pn532.h:41-42."
+                },
+                "chip_control.parameters": {
+                    "status": "no",
+                    "searched": "PN532_COMMAND_SETPARAMETERS: only the define at include/pn532.h:44."
+                },
+                "chip_control.serial_baud": {
+                    "status": "yes",
+                    "note": "Sent inside pn532_init on HSU, not a public function. Follows 7.2.8: response, then the mandatory ACK, then the host changes its own rate.",
+                    "evidence": [
+                        "src/pn532_driver_hsu.c:201",
+                        "src/pn532_driver_hsu.c:202",
+                        "src/pn532_driver_hsu.c:230",
+                        "src/pn532_driver_hsu.c:234",
+                        "src/pn532_driver_hsu.c:243"
+                    ]
+                },
+                "chip_control.reset_recovery": {
+                    "status": "yes",
+                    "note": "pn532_reset needs a reset pin and returns void. Without a pin pn532_release and pn532_init start over, as the example does. pn532_reset does not repeat SAMConfiguration; pn532_init does.",
+                    "evidence": [
+                        "src/pn532_driver.c:162",
+                        "src/pn532_driver.c:167",
+                        "src/pn532_driver.c:169",
+                        "examples/ntag_read/main/ntag_read.c:114",
+                        "examples/ntag_read/main/ntag_read.c:125"
+                    ]
+                },
+                "several.several_readers": {
+                    "status": "partly",
+                    "note": "Each reader has its own handle and driver data, and the code allows sequential use from one task. But pn532_inListedTag, a state of one reader, is a static shared by all readers, and pn532_packetbuffer and the buffers in the transports are shared too. Two I2C readers need two ports because the address is fixed.",
+                    "evidence": [
+                        "src/pn532_driver_i2c.c:42",
+                        "src/pn532_driver_spi.c:56",
+                        "src/pn532_driver_hsu.c:47",
+                        "src/pn532.c:19",
+                        "src/pn532.c:22"
+                    ]
+                },
+                "several.shared_spi_bus": {
+                    "status": "yes",
+                    "note": "Each device has its own chip select, driven in pre_cb and post_cb (spi_new_trans and spi_post_trans in esp_driver_spi/src/gpspi/spi_master.c:843 and 868, v5.5.5, reached from the polling path at lines 1466 and 1491). ESP_ERR_INVALID_STATE from a second spi_bus_initialize is tolerated.",
+                    "evidence": [
+                        "src/pn532_driver_spi.c:180",
+                        "src/pn532_driver_spi.c:106",
+                        "src/pn532_driver_spi.c:112",
+                        "src/pn532_driver_spi.c:147"
+                    ]
+                },
+                "several.thread_safety": {
+                    "status": "no",
+                    "searched": "xSemaphore, mutex, portENTER_CRITICAL, spinlock, spi_device_acquire_bus: no match in the folder. No rule about tasks in the README or the headers."
+                },
+                "code_health.errors_returned": {
+                    "status": "partly",
+                    "note": "Public functions return esp_err_t with a few distinct codes. But a chip Status, no target found and a bad frame all become ESP_FAIL, and the failures of ntag2xx_authenticate and ntag2xx_write_page do not reach the caller.",
+                    "evidence": [
+                        "src/pn532_driver.c:36",
+                        "src/pn532_driver.c:329",
+                        "src/pn532.c:134",
+                        "src/pn532.c:214",
+                        "src/pn532.c:352",
+                        "src/pn532.c:486"
+                    ]
+                },
+                "code_health.buffers_bounded": {
+                    "status": "partly",
+                    "note": "The destination is bounded in pn532_in_data_exchange and in the HSU read. The UID copy has no bound at all, and the source of the copy in pn532_in_data_exchange is not bounded.",
+                    "evidence": ["src/pn532.c:219", "src/pn532.c:148", "src/pn532_driver_hsu.c:314"]
+                },
+                "code_health.allocation_checked": {
+                    "status": "partly",
+                    "note": "heap_caps_calloc is checked in all three transports. xQueueCreate in pn532_init is not.",
+                    "evidence": [
+                        "src/pn532_driver_i2c.c:43",
+                        "src/pn532_driver_spi.c:57",
+                        "src/pn532_driver_hsu.c:48",
+                        "src/pn532_driver.c:54"
+                    ]
+                },
+                "code_health.tests": {
+                    "status": "no",
+                    "searched": "Files named *test*, unity, TEST_CASE: no match in the folder."
+                },
+                "code_health.examples": {
+                    "status": "yes",
+                    "note": "One example, ntag_read, for I2C, HSU and SPI.",
+                    "evidence": [
+                        "examples/ntag_read/main/ntag_read.c:111",
+                        "examples/ntag_read/main/ntag_read.c:143",
+                        "examples/ntag_read/main/ntag_read.c:153",
+                        "examples/ntag_read/main/ntag_read.c:188"
+                    ]
+                },
+                "code_health.docs": {
+                    "status": "partly",
+                    "note": "The README covers only installation. The headers describe most functions, but not pn532_new_driver_* and not the order of calls; only the example shows that.",
+                    "evidence": ["README.md:2", "README.md:9", "include/pn532.h:170", "include/pn532_driver.h:113"]
+                },
+                "code_health.license": {"status": "yes", "evidence": ["LICENSE:1"]}
+            },
+            "defects": [
+                {
+                    "what": "ntag2xx_authenticate returns after the ACK and never reads the InDataExchange response, so a wrong key returns ESP_OK and the response stays unread for the next command.",
+                    "severity": "high",
+                    "judged": "The function returns the result of pn532_send_command_wait_ack and never reads the InDataExchange response, so ESP_OK means only that the chip acknowledged the frame, whatever the card did with the key.",
+                    "evidence": ["src/pn532.c:350", "src/pn532.c:352"]
+                },
+                {
+                    "what": "ntag2xx_write_page returns only the result of pn532_read_data and never looks at Status, so a write that the card refuses, for example on a locked page, returns ESP_OK.",
+                    "severity": "high",
+                    "judged": "After the ACK the function reads 26 bytes and returns the read result with no test of Status, so a write refused by the card returns ESP_OK.",
+                    "evidence": ["src/pn532.c:485", "src/pn532.c:486"]
+                },
+                {
+                    "what": "pn532_in_data_exchange reads 64 bytes but copies LEN-3 bytes from offset 8, bounded only by the caller's buffer, so a response of more than 56 data bytes reads past the end of pn532_packetbuffer and returns ESP_OK with bytes that did not come from the card.",
+                    "severity": "high",
+                    "judged": "Only 64 bytes are read and data starts at index 8, but the copy runs to LEN - 3 limited only by *response_length, so with a large enough caller buffer a response over 56 bytes comes from memory after pn532_packetbuffer and returns ESP_OK.",
+                    "evidence": ["src/pn532.c:21", "src/pn532.c:196", "src/pn532.c:217", "src/pn532.c:224"]
+                },
+                {
+                    "what": "pn532_read_passive_target_id copies NFCID length bytes into uid with no capacity argument and no check, so a 10-byte UID, which the header allows, overflows the 7-byte stack buffer of the example.",
+                    "severity": "high",
+                    "read_as": "medium",
+                    "judged": "The length comes from the card and the caller gives no capacity. The header allows 10 bytes while the example declares 7, so a 10-byte UID overruns that stack buffer.",
+                    "evidence": [
+                        "src/pn532.c:144",
+                        "src/pn532.c:148",
+                        "src/pn532.c:149",
+                        "include/pn532.h:173",
+                        "examples/ntag_read/main/ntag_read.c:137"
+                    ]
+                },
+                {
+                    "what": "With PN532_BRTY_JEWEL_TAG_106KBPS pn532_read_passive_target_id takes byte 12 of the response, which is the second byte of JEWELID (0x2E in the example of 7.3.5), as NFCID length and writes that many bytes into uid.",
+                    "severity": "medium",
+                    "evidence": ["src/pn532.c:94", "src/pn532.c:148", "src/pn532.c:149", "include/pn532.h:89"]
+                },
+                {
+                    "what": "pn532_read_passive_target_id accepts the FeliCa and type B values of PN532_BRTY but sends no InitiatorData, which 7.3.5 makes mandatory, so the command is a syntax error and the function cannot work with these values.",
+                    "severity": "medium",
+                    "evidence": [
+                        "src/pn532.c:94",
+                        "src/pn532.c:96",
+                        "include/pn532.h:86",
+                        "include/pn532.h:87",
+                        "include/pn532.h:88"
+                    ]
+                },
+                {
+                    "what": "ntag2xx_write_page returns 0, which is ESP_OK, for a page outside 4..225, so a write that was never sent reports success.",
+                    "severity": "medium",
+                    "evidence": ["src/pn532.c:445", "src/pn532.c:449", "src/pn532.c:450"]
+                },
+                {
+                    "what": "ntag2xx_authenticate sends the whole UID, but 7.3.8 allows exactly 4 serial bytes (Data 6..9) and lists any other length as a syntax error, so passing a 7-byte UID, as the header describes, is rejected by the chip and the function still returns ESP_OK.",
+                    "severity": "medium",
+                    "evidence": ["src/pn532.c:345", "src/pn532.c:348", "src/pn532.c:350"]
+                },
+                {
+                    "what": "pn532_read_passive_target_id and pn532_in_list_passive_target return on timeout without sending an ACK, and MxRtyPassiveActivation stays 0xFF because pn532_init does not change it, so InListPassiveTarget and the RF field stay on after the call until another command arrives (7.3.1, 6.2.2.2 b), and a card arriving later leaves an unrequested frame.",
+                    "severity": "medium",
+                    "evidence": [
+                        "src/pn532.c:107",
+                        "src/pn532.c:108",
+                        "src/pn532.c:112",
+                        "src/pn532.c:256",
+                        "src/pn532.c:257",
+                        "src/pn532.c:258"
+                    ]
+                },
+                {
+                    "what": "pn532_read on SPI does not test the ready flag after its loop ends, so on a timeout with status NOT READY it reads data from the chip anyway and returns ESP_OK; the I2C version returns ESP_ERR_TIMEOUT here.",
+                    "severity": "medium",
+                    "evidence": [
+                        "src/pn532_driver_spi.c:256",
+                        "src/pn532_driver_spi.c:270",
+                        "src/pn532_driver_spi.c:273"
+                    ]
+                },
+                {
+                    "what": "pn532_write_command writes into static command[256] from index 5 with no length check, so cmdlen 251 to 254, which a normal frame allows, and 255, which also wraps LEN to 0, write past the end before the size checks in the transports run.",
+                    "severity": "medium",
+                    "judged": "command is 256 bytes, the data starts at index 5 and the checksum follows, so cmdlen 251 to 254 writes 1 to 4 bytes past it, and 255 also wraps LEN. The size test in the I2C transport comes after this, and the library callers stay within 64 bytes, so it is a limit of a legal input to a public function.",
+                    "evidence": [
+                        "src/pn532_driver.c:177",
+                        "src/pn532_driver.c:184",
+                        "src/pn532_driver.c:190",
+                        "src/pn532_driver.c:193",
+                        "src/pn532_driver_i2c.c:221"
+                    ]
+                },
+                {
+                    "what": "On I2C with no IRQ pin pn532_is_ready reads the status byte alone and sends STOP even when the chip is ready, against 6.2.4 (the rest of the frame shall be read before STOP or it is lost); Fig 31 draws status and frame as two reads, so the effect on a real chip needs a bench check.",
+                    "severity": "medium",
+                    "evidence": [
+                        "src/pn532_driver_i2c.c:166",
+                        "src/pn532_driver_i2c.c:171",
+                        "src/pn532_driver.c:293",
+                        "src/pn532_driver.c:281"
+                    ]
+                },
+                {
+                    "what": "i2c_device_config_t dev_cfg is an uninitialized stack variable and flags.disable_ack_check is never set, so i2c_master_bus_add_device (esp_driver_i2c/i2c_master.c:1194 in v5.5.5, :1193 in v6.1) takes ACK checking from stack contents, and with the bit set a NACK from the chip, which 6.2.4 says can follow an exchange, is not reported.",
+                    "severity": "medium",
+                    "judged": "dev_cfg is an uninitialised stack struct and flags is never set, and i2c_master.c copies the bit (line 1194 in v5.5.5, 1193 in v6.1) into the ack_en choice used for transmit, so the ACK check depends on stack contents. A NACK then returns ESP_OK from pn532_write; the ACK wait catches a lost command in the normal path, so the effect is limited to a bus fault or the NACK that 6.2.4 allows.",
+                    "evidence": [
+                        "src/pn532_driver_i2c.c:120",
+                        "src/pn532_driver_i2c.c:122",
+                        "src/pn532_driver_i2c.c:123",
+                        "src/pn532_driver_i2c.c:124",
+                        "src/pn532_driver_i2c.c:126"
+                    ]
+                },
+                {
+                    "what": "pn532_set_passive_activation_retries reads the ACK but not the RFConfiguration response, against the dialog of 6.2.2, so the frame stays pending and in IRQ mode its edge stays queued for the next command.",
+                    "severity": "medium",
+                    "evidence": ["src/pn532.c:83"]
+                },
+                {
+                    "what": "The IRQ queue is cleared only in pn532_init, so an edge from an unread or abandoned response makes the next pn532_wait_ready return ESP_OK before the chip has answered; pn532_in_list_passive_target then gives up after the 100 ms read timeout instead of its 10 s wait.",
+                    "severity": "medium",
+                    "evidence": [
+                        "src/pn532_driver.c:97",
+                        "src/pn532_driver.c:310",
+                        "src/pn532.c:256",
+                        "src/pn532.c:260"
+                    ]
+                },
+                {
+                    "what": "pn532_read_passive_target_id does not set pn532_inListedTag, so a pn532_in_data_exchange after it sends Tg 0, the chip returns Status 0x27 (7.3.8) and the call fails until pn532_in_list_passive_target has run.",
+                    "severity": "medium",
+                    "evidence": ["src/pn532.c:19", "src/pn532.c:175", "src/pn532.c:284"]
+                },
+                {
+                    "what": "pn532_in_data_exchange cuts a response to the caller's buffer and returns ESP_OK, so the caller cannot see that data was lost.",
+                    "severity": "medium",
+                    "evidence": ["src/pn532.c:219", "src/pn532.c:220", "src/pn532.c:226", "src/pn532.c:228"]
+                },
+                {
+                    "what": "pn532_in_data_exchange masks MI out of Status and returns ESP_OK, so a response that 7.3.8 marks as not complete reaches the caller as complete.",
+                    "severity": "medium",
+                    "evidence": ["src/pn532.c:210", "src/pn532.c:228"]
+                },
+                {
+                    "what": "ntag2xx_read_page takes byte 7 as Status with no check of the frame, so the Syntax Error frame, which has 0x00 at that offset, returns ESP_OK with bytes that are not card data; on I2C and SPI a corrupted frame passes too because DCS is not checked.",
+                    "severity": "medium",
+                    "evidence": ["src/pn532.c:405", "src/pn532.c:414", "src/pn532.c:416", "src/pn532.c:417"]
+                },
+                {
+                    "what": "On HSU with no IRQ pin, the setting of the example, pn532_is_ready is NULL and pn532_wait_ready returns ESP_OK at once, so the waits of 1000 ms in pn532_in_data_exchange and 10000 ms in pn532_in_list_passive_target become the 100 ms read timeout and a slower response returns ESP_ERR_TIMEOUT.",
+                    "severity": "medium",
+                    "evidence": [
+                        "src/pn532_driver_hsu.c:77",
+                        "src/pn532_driver.c:293",
+                        "src/pn532_driver.c:295",
+                        "src/pn532_driver.c:298",
+                        "src/pn532.c:188",
+                        "src/pn532.c:196",
+                        "src/pn532.c:256",
+                        "src/pn532.c:260",
+                        "examples/ntag_read/main/ntag_read.c:33"
+                    ]
+                },
+                {
+                    "what": "With CONFIG_ENABLE_IRQ_ISR off the IRQ polling loop counts milliseconds in a uint16_t that never exceeds 65534, so a timeout of 65534 ms or more never expires.",
+                    "severity": "medium",
+                    "evidence": ["src/pn532_driver.c:318", "src/pn532_driver.c:323", "src/pn532_driver.c:324"]
+                },
+                {
+                    "what": "pn532_release calls gpio_uninstall_isr_service, which frees the handler table of all pins (esp_driver_gpio/src/gpio.c:588-606, v5.5.5), so in the default IRQ mode releasing one reader stops the IRQ of a second reader and every other GPIO ISR in the program.",
+                    "severity": "medium",
+                    "evidence": ["src/pn532_driver.c:132"]
+                },
+                {
+                    "what": "pn532_packetbuffer and the static buffers in pn532_write_command, pn532_read_data and the I2C and SPI pn532_read are shared by all handles with no lock, so two readers used from two tasks overwrite each other's frames.",
+                    "severity": "medium",
+                    "judged": "The buffers are file-level or function-level statics shared by all handles, and src has no mutex or semaphore around them. The API takes a handle per reader, but two readers in two tasks is a configuration the examples do not use.",
+                    "evidence": [
+                        "src/pn532.c:22",
+                        "src/pn532_driver.c:177",
+                        "src/pn532_driver.c:231",
+                        "src/pn532_driver_i2c.c:176",
+                        "src/pn532_driver_spi.c:242"
+                    ]
+                },
+                {
+                    "what": "With CONFIG_PN532DEBUG, an option of Kconfig.projbuild, pn532_driver.c calls esp_log_buffer_hex, which exists in components/log of v5.5.5 (esp_log_buffer.h:157, deprecated) and not in v6.0.3 or v6.1, while idf_component.yml allows any IDF from 5.2 up, so that option does not build on IDF 6 (found by reading the sources, not by a build).",
+                    "severity": "medium",
+                    "evidence": [
+                        "src/pn532_driver.c:197",
+                        "src/pn532_driver.c:246",
+                        "idf_component.yml:12",
+                        "Kconfig.projbuild:5"
+                    ]
+                },
+                {
+                    "what": "The result of xQueueCreate is not checked, and a NULL queue is then used by the ISR and pn532_wait_ready.",
+                    "severity": "low",
+                    "evidence": ["src/pn532_driver.c:54"]
+                },
+                {
+                    "what": "The results of gpio_install_isr_service and gpio_isr_handler_add are ignored, so a failure there shows up only as a later timeout.",
+                    "severity": "low",
+                    "evidence": ["src/pn532_driver.c:57", "src/pn532_driver.c:58"]
+                },
+                {
+                    "what": "pn532_wait_ready returns ESP_FAIL on a timeout in IRQ mode, while its header text says ESP_ERR_TIMEOUT.",
+                    "severity": "low",
+                    "evidence": ["src/pn532_driver.c:316", "include/pn532_driver.h:101"]
+                },
+                {
+                    "what": "The HSU pn532_write passes xfer_timeout_ms to uart_wait_tx_done, whose argument is in ticks (esp_driver_uart/src/uart.c:1485, v5.5.5), so at the default 100 Hz the wait is ten times longer than stated.",
+                    "severity": "low",
+                    "evidence": ["src/pn532_driver_hsu.c:375"]
+                },
+                {
+                    "what": "The header says ntag2xx_get_model uses the GET_VERSION response, but the code reads page 0 and uses byte 14 of the capability container.",
+                    "severity": "low",
+                    "evidence": ["include/pn532.h:208", "src/pn532.c:311", "src/pn532.c:318"]
+                },
+                {
+                    "what": "The header says ntag2xx_read_page reads a 4-byte page, but it reads 16 bytes and read_len is not described.",
+                    "severity": "low",
+                    "evidence": ["include/pn532.h:227", "include/pn532.h:233", "src/pn532.c:371"]
+                },
+                {
+                    "what": "gpio_config_t io_conf is not zeroed and hys_ctrl_mode is not set, so on chips with SOC_GPIO_SUPPORT_PIN_HYS_FILTER (ESP32-P4, C5, C61, H2) gpio_config reads an undefined value (esp_driver_gpio/src/gpio.c:423, v5.5.5).",
+                    "severity": "low",
+                    "evidence": ["src/pn532_driver.c:33", "src/pn532_driver_spi.c:162"]
+                },
+                {
+                    "what": "A failed pn532_init on HSU leaves the UART driver installed, so a second pn532_init without pn532_release fails in uart_driver_install (esp_driver_uart/src/uart.c:1987, v5.5.5).",
+                    "severity": "low",
+                    "evidence": ["src/pn532_driver_hsu.c:119", "src/pn532_driver_hsu.c:147"]
+                },
+                {
+                    "what": "On an I2C bus the library did not create, a second pn532_init without pn532_release adds the device again and loses the old device handle.",
+                    "severity": "low",
+                    "evidence": ["src/pn532_driver_i2c.c:90", "src/pn532_driver_i2c.c:126"]
+                }
+            ]
+        }
+    ]
+}

@@ -29,17 +29,17 @@
         }
     },
     "versions": {
-        "1.2.1": {"frameworks": {"esp-idf": ">=4.4.2"}},
-        "1.2.0": {"frameworks": {"esp-idf": ">=4.4.2"}},
-        "1.1.2": {"frameworks": {"esp-idf": ">=4.4.2"}},
-        "1.1.1": {"frameworks": {"esp-idf": ">=4.4.2"}},
-        "1.1.0": {"frameworks": {"esp-idf": ">=4.4.2"}},
-        "1.0.4": {"frameworks": {"esp-idf": ">=4.4.2"}},
-        "1.0.3": {"frameworks": {"esp-idf": ">=4.4.2"}},
-        "1.0.2": {"frameworks": {"esp-idf": ">=4.4.2"}},
-        "1.0.1": {"frameworks": {"esp-idf": ">=4.4.2"}},
-        "1.0.0": {"frameworks": {"esp-idf": ">=5.0"}},
-        "0.9.1": {"frameworks": {"esp-idf": ">=4.4"}},
-        "0.9.0": {"frameworks": {"esp-idf": ">=4.4"}}
+        "1.2.1": {"platforms": {"esp_idf": ">=4.4.2"}},
+        "1.2.0": {"platforms": {"esp_idf": ">=4.4.2"}},
+        "1.1.2": {"platforms": {"esp_idf": ">=4.4.2"}},
+        "1.1.1": {"platforms": {"esp_idf": ">=4.4.2"}},
+        "1.1.0": {"platforms": {"esp_idf": ">=4.4.2"}},
+        "1.0.4": {"platforms": {"esp_idf": ">=4.4.2"}},
+        "1.0.3": {"platforms": {"esp_idf": ">=4.4.2"}},
+        "1.0.2": {"platforms": {"esp_idf": ">=4.4.2"}},
+        "1.0.1": {"platforms": {"esp_idf": ">=4.4.2"}},
+        "1.0.0": {"platforms": {"esp_idf": ">=5.0"}},
+        "0.9.1": {"platforms": {"esp_idf": ">=4.4"}},
+        "0.9.0": {"platforms": {"esp_idf": ">=4.4"}}
     }
 }

@@ -72,7 +72,7 @@
         "cpu_mhz": 64
     },
     "platforms": {
-        "esp-idf": {
+        "esp_idf": {
             "revisions": {
                 "0.1": {
                     "since": "5.1"

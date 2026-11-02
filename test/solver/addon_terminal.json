@@ -1,0 +1,6 @@
+{
+    "title": "The time clock on the canvas: what the photo of its open case shows comes out of the roles",
+    "answers": {"blocks": [{"role": "ethernet"}, {"role": "poe"}, {"role": "panel_ethernet"}, {"role": "nfc", "name": "nfc_in"}, {"role": "nfc", "name": "nfc_out"}, {"role": "display", "name": "screen"}], "outputs": [{"kind": "tone", "hz": 440, "pins": 2}, {"kind": "tone", "hz": 220, "pins": 2}]},
+    "first": {"name": "esp32_p4_poe_eth", "modules": {"lcd12864_st7920": 1, "pn532_module": 2}},
+    "says": "RJ45 panel extension: on the port of the board"
+}

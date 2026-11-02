@@ -5,6 +5,9 @@
     "name": "lps28",
     "title": "lps28",
     "class": ["sensor"],
-    "checked": {"facts": {"level": "extracted", "source": "the boards that use it"}},
-    "on": {"i2c": {}}
+    "checked": {
+        "facts": {"level": "extracted", "source": "the boards that use it"},
+        "address": {"level": "extracted", "source": "imported/report_addresses.json"}
+    },
+    "on": {"i2c": {"address_try": ["0x5d"]}}
 }

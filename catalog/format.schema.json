@@ -8,7 +8,7 @@
   "properties": {
     "format": { "const": "jef-sure/boards" },
     "format_version": { "const": 2 },
-    "kind": { "enum": ["board", "module", "addon", "device", "library", "mcu", "connector", "project"] },
+    "kind": { "enum": ["board", "module", "addon", "device", "library", "mcu", "connector", "project", "platform", "audit", "rubric"] },
     "name": { "type": "string", "minLength": 1 },
     "title": { "type": "string", "minLength": 1 },
     "description": { "type": "string" },
@@ -24,12 +24,16 @@
     { "if": { "properties": { "kind": { "const": "project" } } }, "then": { "$ref": "#/$defs/boardFile", "required": ["extends"] } },
     { "if": { "properties": { "kind": { "const": "module" } } }, "then": { "$ref": "#/$defs/moduleFile" } },
     { "if": { "properties": { "kind": { "const": "addon" } } }, "then": { "$ref": "#/$defs/addonFile" } },
+    { "if": { "properties": { "kind": { "const": "platform" } } }, "then": { "$ref": "#/$defs/platformFile" } },
     { "if": { "properties": { "kind": { "const": "device" } } }, "then": { "$ref": "#/$defs/deviceFile" } },
     { "if": { "properties": { "kind": { "const": "mcu" } } }, "then": { "$ref": "#/$defs/mcuFile" } },
     { "if": { "properties": { "kind": { "const": "connector" } } }, "then": { "$ref": "#/$defs/connectorFile" } },
+    { "if": { "properties": { "kind": { "const": "rubric" } } }, "then": { "$ref": "#/$defs/rubricFile" } },
+    { "if": { "properties": { "kind": { "const": "audit" } } }, "then": { "$ref": "#/$defs/auditFile" } },
+    { "if": { "properties": { "kind": { "const": "library" } } }, "then": { "$ref": "#/$defs/libraryFile" } },
     {
-      "if": { "properties": { "kind": { "const": "library" } } },
-      "then": { "$ref": "#/$defs/libraryFile" },
+      "if": { "properties": { "kind": { "enum": ["library", "audit"] } } },
+      "then": { "properties": { "name": { "pattern": "^[a-z0-9][a-z0-9_.-]*$" } } },
       "else": { "properties": { "name": { "$ref": "#/$defs/name" } } }
     }
   ],
@@ -95,26 +99,27 @@
       "description": "Where a fact comes from, most trusted first: this order is the scale. hardware: tried on a board. schematic and datasheet: the maker's drawings and the chip's. vendor-docs: the maker's specifications and pin tables. vendor-code: the maker's examples, a hint. community: other people's descriptions. extracted: taken by a tool, read by nobody. unchecked: from memory.",
       "enum": ["hardware", "schematic", "datasheet", "vendor-docs", "vendor-code", "community", "extracted", "unchecked"]
     },
+    "checkedEntry": {
+      "type": "object",
+      "required": ["level"],
+      "additionalProperties": false,
+      "properties": {
+        "level": { "$ref": "#/$defs/level" },
+        "covers": { "type": "array", "minItems": 1, "items": { "type": "string" }, "description": "Paths in this file, as devices.touch or connectors.CN1." },
+        "source": { "type": "string", "description": "The document, its version and where it was found." },
+        "by": { "type": "string", "description": "Who tried or read it." },
+        "unit": { "type": "string", "description": "Which board was tried: on_board names a model, this names one piece of it." },
+        "date": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+        "result": { "enum": ["confirmed", "pending", "refuted"], "description": "confirmed when absent. refuted keeps a disagreement in sight; pending says what is still to be tried." },
+        "notes": { "$ref": "#/$defs/notes" },
+        "on_board": { "type": "string", "description": "Made by the loader: this entry was earned by the board named, a variant only inherits it." }
+      }
+    },
     "checked": {
       "description": "What the facts of this file stand on, entry by entry. Named entries, so a layer can add one: the person who tries an imported board adds what was confirmed. Without covers an entry is about the whole file.",
       "type": "object",
       "propertyNames": { "$ref": "#/$defs/name" },
-      "additionalProperties": {
-        "type": "object",
-        "required": ["level"],
-        "additionalProperties": false,
-        "properties": {
-          "level": { "$ref": "#/$defs/level" },
-          "covers": { "type": "array", "minItems": 1, "items": { "type": "string" }, "description": "Paths in this file, as devices.touch or connectors.CN1." },
-          "source": { "type": "string", "description": "The document, its version and where it was found." },
-          "by": { "type": "string", "description": "Who tried or read it." },
-          "unit": { "type": "string", "description": "Which board was tried: on_board names a model, this names one piece of it." },
-          "date": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
-          "result": { "enum": ["confirmed", "pending", "refuted"], "description": "confirmed when absent. refuted keeps a disagreement in sight; pending says what is still to be tried." },
-          "notes": { "$ref": "#/$defs/notes" },
-          "on_board": { "type": "string", "description": "Made by the loader: this entry was earned by the board named, a variant only inherits it." }
-        }
-      }
+      "additionalProperties": { "$ref": "#/$defs/checkedEntry" }
     },
     "origin": {
       "description": "Where this file came from when it was imported. It says nothing of how true it is: that is checked.",
@@ -296,7 +301,7 @@
       "properties": {
         "lines": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 }, "description": "In a type: the lines the chip needs beside this bus, which a board wires in pins." },
         "address": { "$ref": "#/$defs/address" },
-        "address_try": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/address" } },
+        "address_try": { "type": "array", "items": { "$ref": "#/$defs/address" }, "description": "The addresses a chip can have, the first as it comes. Empty in a project: none of those the data lists is free, and the list can be short." },
         "cs": { "$ref": "#/$defs/line" },
         "hz": { "$ref": "#/$defs/hz" },
         "mode": { "enum": [0, 1, 2, 3] },
@@ -463,6 +468,30 @@
     },
     "boardFile": { "$ref": "#/$defs/assembly" },
     "moduleFile": { "$ref": "#/$defs/assembly", "required": ["devices"] },
+    "platformFile": {
+      "description": "What a program is built on: which chips each version takes, where its libraries are published, what a project of it is.",
+      "required": ["ecosystem", "versions"],
+      "properties": {
+        "url": { "type": "string" },
+        "ecosystem": { "$ref": "#/$defs/word" },
+        "registry": { "type": "string", "description": "Where its libraries are published." },
+        "project": { "type": "string", "description": "What a project of it consists of." },
+        "writes_projects": { "type": "boolean", "description": "The page writes a project for it." },
+        "versions": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["targets"],
+            "additionalProperties": false,
+            "properties": {
+              "targets": { "type": "array", "items": { "type": "string" } },
+              "preview": { "type": "array", "items": { "type": "string" } },
+              "on": { "type": "string", "description": "What this version is built on." }
+            }
+          }
+        }
+      }
+    },
     "addonFile": {
       "description": "A part that stands in the way of something instead of on a bus: lines, a supply or a port come in and go out, and it adds something on the way. It takes no pins of the chip.",
       "required": ["stands"],
@@ -473,7 +502,19 @@
         "price": { "$ref": "#/$defs/price" },
         "do": { "type": "array", "items": { "type": "string", "minLength": 1 } },
         "channels": { "type": "integer", "minimum": 1, "description": "How many lines one of them takes." },
-        "both_ways": { "type": "boolean", "description": "Of lines: a line works in both directions, as I2C needs." }
+        "both_ways": { "type": "boolean", "description": "Of lines: a line works in both directions, as I2C needs." },
+        "needs": { "type": "array", "items": { "type": "string" }, "description": "What a board must provide for it to stand there." },
+        "gives": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Of a port: what a board has with it, and the plug and the power it hands over.",
+          "properties": {
+            "provides": { "type": "array", "items": { "type": "string" } },
+            "plug": { "$ref": "#/$defs/name", "description": "A directory of catalog/connectors/." },
+            "mv": { "type": "integer", "minimum": 1 },
+            "ma": { "type": "integer", "minimum": 1 }
+          }
+        }
       }
     },
     "deviceFile": {
@@ -535,7 +576,7 @@
         "platforms": {
           "type": "object",
           "description": "Which versions of a platform take this chip, by the name of the platform. A revision the source does not name is not here.",
-          "propertyNames": { "$ref": "#/$defs/word" },
+          "propertyNames": { "$ref": "#/$defs/name" },
           "additionalProperties": {
             "type": "object",
             "additionalProperties": false,
@@ -775,6 +816,7 @@
         "level": { "enum": [0, 1] },
         "mv": { "type": "integer", "minimum": 0 },
         "volts": { "$ref": "#/$defs/volts", "description": "What a step with source connector takes from the board." },
+        "plug": { "$ref": "#/$defs/name", "description": "Of a step that comes in from outside: the connector it comes in by, a directory of catalog/connectors/." },
         "ma_max": { "type": "integer", "minimum": 0 },
         "dropout_mv": { "$ref": "#/$defs/dropout" },
         "delay_ms": { "type": "integer", "minimum": 0 },
@@ -983,7 +1025,7 @@
           "type": "object",
           "required": ["measure"],
           "additionalProperties": false,
-          "properties": { "measure": { "enum": ["diagonal_in", "range_mm", "gap_mm", "standard", "price"] }, "of": { "type": "string", "description": "The class it is measured on." } }
+          "properties": { "measure": { "enum": ["diagonal_in", "range_mm", "gap_mm", "standard", "price", "platform"] }, "of": { "type": "string", "description": "The class it is measured on." } }
         },
         "choices": {
           "type": "array",
@@ -1289,10 +1331,10 @@
           "uniqueItems": true,
           "items": { "enum": ["registry", "git", "archive", "platform"] }
         },
-        "frameworks": {
-          "description": "What its code is built against, with the versions: esp-idf, arduino-esp32 and the like. A library for several has several.",
+        "platforms": {
+          "description": "What its code is built against, with the versions, by the names of catalog/platforms/. A library for several has several.",
           "type": "object",
-          "propertyNames": { "$ref": "#/$defs/word" },
+          "propertyNames": { "$ref": "#/$defs/name" },
           "additionalProperties": { "type": "string" }
         },
         "targets": {
@@ -1319,10 +1361,101 @@
         "notes": { "$ref": "#/$defs/notes" }
       }
     },
+    "rubricItem": {
+      "type": "object",
+      "required": ["text"],
+      "additionalProperties": false,
+      "properties": {
+        "text": { "type": "string", "minLength": 1 },
+        "since": { "type": "integer", "minimum": 2, "description": "The version of the rubric that added it. Absent: the first." }
+      }
+    },
+    "rubricFile": {
+      "description": "What an audit asks of a kind of library. An item keeps its name: an audit names the version it was read against.",
+      "required": ["version", "source", "severity", "sections"],
+      "properties": {
+        "version": { "type": "integer", "minimum": 1 },
+        "source": { "type": "string", "minLength": 1, "description": "The document the items were checked against." },
+        "chips": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/name" }, "description": "The chips it is for, when it is for chips: a library can do an algorithm and drive nothing." },
+        "severity": {
+          "type": "object",
+          "required": ["high", "medium", "low"],
+          "additionalProperties": false,
+          "properties": { "high": { "type": "string" }, "medium": { "type": "string" }, "low": { "type": "string" } }
+        },
+        "sections": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": { "$ref": "#/$defs/name" },
+          "additionalProperties": { "type": "object", "minProperties": 1, "propertyNames": { "$ref": "#/$defs/name" }, "additionalProperties": { "$ref": "#/$defs/rubricItem" } }
+        }
+      }
+    },
+    "auditPlaces": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "pattern": "^.+:[1-9][0-9]*$" },
+      "description": "Files from the root of the repository with a line, at the commit of the audit."
+    },
+    "auditItem": {
+      "type": "object",
+      "required": ["status"],
+      "additionalProperties": false,
+      "properties": {
+        "status": { "enum": ["yes", "partly", "no", "not_applicable"] },
+        "evidence": { "$ref": "#/$defs/auditPlaces" },
+        "searched": { "type": "string", "minLength": 1, "description": "What was looked for, for a no." },
+        "note": { "type": "string" }
+      },
+      "allOf": [
+        { "if": { "properties": { "status": { "enum": ["yes", "partly"] } } }, "then": { "required": ["evidence"] } },
+        { "if": { "properties": { "status": { "const": "no" } } }, "then": { "required": ["searched"] } }
+      ]
+    },
+    "auditDefect": {
+      "type": "object",
+      "required": ["what", "severity", "evidence"],
+      "additionalProperties": false,
+      "properties": {
+        "what": { "type": "string", "minLength": 1 },
+        "severity": { "enum": ["high", "medium", "low"] },
+        "evidence": { "$ref": "#/$defs/auditPlaces" },
+        "read_as": { "enum": ["high", "medium", "low"], "description": "What the reader said, when a judge changed it." },
+        "judged": { "type": "string", "minLength": 1, "description": "The reason of the judge that checked it. Absent: nobody but the reader saw it." },
+        "measured": { "$ref": "#/$defs/checkedEntry", "description": "Where it was tried beyond reading." }
+      }
+    },
+    "audit": {
+      "description": "One reading of one commit against one rubric. A newer version adds an entry and leaves this one, and tools/audit.py shows what it changed.",
+      "type": "object",
+      "required": ["commit", "rubric", "rubric_version", "date", "by", "items", "defects"],
+      "additionalProperties": false,
+      "properties": {
+        "version": { "type": "string", "minLength": 1, "description": "As the manifest says at that commit. Absent: it has none." },
+        "tag": { "type": "string", "minLength": 1, "description": "The tag that names exactly this commit." },
+        "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "rubric": { "$ref": "#/$defs/name" },
+        "rubric_version": { "type": "integer", "minimum": 1 },
+        "date": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+        "by": { "type": "string", "minLength": 1, "description": "Who read it." },
+        "blind": { "const": true, "description": "The copy was read with the names of its owners removed." },
+        "over": { "type": "string", "pattern": "^[0-9a-f]{40}$", "description": "The commit of the entry this one carries: only what the changes touched was read again." },
+        "items": { "type": "object", "minProperties": 1, "propertyNames": { "pattern": "^[a-z][a-z0-9_]*\\.[a-z][a-z0-9_]*$" }, "additionalProperties": { "$ref": "#/$defs/auditItem" } },
+        "defects": { "type": "array", "items": { "$ref": "#/$defs/auditDefect" } }
+      }
+    },
+    "auditFile": {
+      "description": "What audits found in a library, beside its record. The library is the folder: its ecosystem, owner and name.",
+      "required": ["audits"],
+      "properties": {
+        "audits": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/audit" } }
+      }
+    },
     "libraryFile": {
       "required": ["ecosystem", "owner", "install"],
       "properties": {
         "name": { "pattern": "^[a-z0-9][a-z0-9_.-]*$" },
+        "provides": { "$ref": "#/$defs/provides", "description": "What it gives that is no chip of chips: an algorithm, a format, a protocol." },
         "ecosystem": {
           "$ref": "#/$defs/word",
           "description": "Where it is published: the registry its name belongs to, not what it builds with. A new one is a new directory."
@@ -1429,7 +1562,7 @@
       "additionalProperties": false,
       "patternProperties": { "^x_": true },
       "properties": {
-        "via": { "enum": ["registry", "git", "archive", "platform"], "description": "platform: it comes with the framework, nothing to download." },
+        "via": { "enum": ["registry", "git", "archive", "platform"], "description": "platform: it comes with the platform, nothing to download." },
         "url": { "type": "string", "description": "The repository or the archive." },
         "path": { "type": "string", "description": "Where it lies inside the repository." },
         "ref": { "type": "string", "description": "The tag of a version, with {version} in it, or a branch. None: the default branch." },

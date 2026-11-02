@@ -30,7 +30,7 @@
         "adc_button_group_volume_up": {"class": "button", "pins": {"in": {"gpio": 42, "analog": [1605, 1935]}}},
         "audio_dac": {
             "class": "audio",
-            "on": {"i2s.i2s0": {"format": "tdm"}, "i2c.i2c0": {"address": "0x20"}},
+            "on": {"i2s.i2s0": {"format": "tdm"}, "i2c.i2c0": {"address": "0x10"}},
             "config": {"direction": "both", "sample_rate": 48000, "clock": "bclk"},
             "chip": "es8389"
         },
@@ -64,7 +64,7 @@
         },
         "lcd_touch": {
             "class": "touch",
-            "on": {"i2c.i2c0": {"address": "0x28"}},
+            "on": {"i2c.i2c0": {"address": "0x14"}},
             "pins": {},
             "controls": {
                 "orientation": {"how": "driver", "start": {"x": "left-right", "y": "top-bottom", "swap": false}}

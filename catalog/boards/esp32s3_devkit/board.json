@@ -17,7 +17,7 @@
         "usb_serial": {"class": "other", "part": "CH343", "on": {"uart.uart0": {}}}
     },
     "power": [
-        {"name": "5V", "source": "usb", "mv": 5000, "why": "From USB, on contact 21 of J1."},
+        {"name": "5V", "source": "usb", "mv": 5000, "plug": "usb_c", "why": "From USB, on contact 21 of J1."},
         {"name": "3V3", "from": "5V", "regulator": "ldo", "mv": 3300, "feeds": ["mcu"]}
     ],
     "connectors": {

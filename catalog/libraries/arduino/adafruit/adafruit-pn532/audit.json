@@ -1,0 +1,1349 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "audit",
+    "name": "adafruit-pn532",
+    "title": "Adafruit PN532",
+    "audits": [
+        {
+            "version": "1.3.4",
+            "tag": "1.3.4",
+            "commit": "bf9f3f31961474fdbca23cb57d604c7f27269baf",
+            "rubric": "pn532",
+            "rubric_version": 1,
+            "date": "2026-11-01",
+            "by": "claude-opus-5-5",
+            "items": {
+                "transports.i2c": {
+                    "status": "yes",
+                    "note": "Goes through Adafruit_I2CDevice at address 0x24.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:108",
+                        "Adafruit_PN532.cpp:112",
+                        "Adafruit_PN532.cpp:1610",
+                        "Adafruit_PN532.cpp:1815"
+                    ]
+                },
+                "transports.spi": {
+                    "status": "yes",
+                    "note": "Software and hardware SPI constructors, LSB first, mode 0, 1 MHz.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:92",
+                        "Adafruit_PN532.cpp:123",
+                        "Adafruit_PN532.cpp:1606",
+                        "Adafruit_PN532.cpp:1784"
+                    ]
+                },
+                "transports.uart": {
+                    "status": "yes",
+                    "note": "HardwareSerial only, fixed at 115200. README and library.properties name only SPI and I2C, the code has the HSU path. The path has defects: fixed-length reads and no flush before a command, see defects.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:137",
+                        "Adafruit_PN532.cpp:204",
+                        "Adafruit_PN532.cpp:1616",
+                        "Adafruit_PN532.cpp:1817"
+                    ]
+                },
+                "builds_on.esp_idf": {
+                    "status": "no",
+                    "searched": "Case-insensitive grep of the .cpp and .h for esp_, ESP32, freertos, driver/, idf, i2c_master, spi_master, spi_device, uart_: no match. The code calls Arduino.h, pinMode, digitalWrite, delay, TwoWire, SPIClass and HardwareSerial through Adafruit BusIO.",
+                    "note": "No ESP-IDF driver API is called, neither driver/i2c_master.h nor driver/i2c.h, spi_master or uart.",
+                    "evidence": ["Adafruit_PN532.h:16", "Adafruit_PN532.h:18", "Adafruit_PN532.h:19"]
+                },
+                "builds_on.arduino": {
+                    "status": "yes",
+                    "note": "Judged by the layout and includes. It was not compiled, as the audit rules forbid building it. Needs the Adafruit BusIO library, which is not in the folder.",
+                    "evidence": [
+                        "library.properties:1",
+                        "library.properties:10",
+                        "Adafruit_PN532.h:16",
+                        ".github/workflows/githubci.yml:23"
+                    ]
+                },
+                "builds_on.esp_idf_component": {
+                    "status": "no",
+                    "searched": "find over the whole folder for CMakeLists*, idf_component*, Kconfig*, component.mk: no file. Recursive grep of the folder for idf_component, idf_component_register, CMakeLists: no match."
+                },
+                "frames.ack_checked": {
+                    "status": "yes",
+                    "note": "Every command goes through sendCommandCheckAck. A missing ACK or a NACK both return false. They are not told apart and there is no retry.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:339",
+                        "Adafruit_PN532.cpp:350",
+                        "Adafruit_PN532.cpp:354",
+                        "Adafruit_PN532.cpp:1540"
+                    ]
+                },
+                "frames.checksums_checked": {
+                    "status": "partly",
+                    "searched": "grep for DCS, datachecksum, data checksum: only the comments at lines 411 and 447. No code sums the data bytes of a response.",
+                    "note": "LCS is checked only in inDataExchange and inListPassiveTarget. DCS is checked nowhere. All other responses have neither check.",
+                    "evidence": ["Adafruit_PN532.cpp:703", "Adafruit_PN532.cpp:775"]
+                },
+                "frames.extended_frames": {
+                    "status": "no",
+                    "searched": "grep for extended, LENM, LENL and a 00 FF FF start sequence: no frame code matches. Frame lengths are uint8_t, the write path always sends one LEN byte and the receive buffer is 64 bytes."
+                },
+                "frames.error_frame": {
+                    "status": "no",
+                    "searched": "grep of the .cpp and .h for syntax, error frame, 0x7F, 0x81: only 0x7F inside a sector trailer at line 1113, which is access bits data, not frame handling.",
+                    "note": "The Mifare status checks take this frame for success, see defects."
+                },
+                "frames.response_code_checked": {
+                    "status": "partly",
+                    "note": "TFI and code are both checked only in inDataExchange and inListPassiveTarget. getFirmwareVersion compares the header through D5 but not the code. writeGPIO and SAMConfig check the code but not TFI. readDetectedPassiveTargetID and the Mifare, Ultralight and NTAG functions check neither.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:711",
+                        "Adafruit_PN532.cpp:712",
+                        "Adafruit_PN532.cpp:783",
+                        "Adafruit_PN532.cpp:784",
+                        "Adafruit_PN532.cpp:291",
+                        "Adafruit_PN532.cpp:422",
+                        "Adafruit_PN532.cpp:508",
+                        "Adafruit_PN532.cpp:624",
+                        "Adafruit_PN532.cpp:912"
+                    ]
+                },
+                "waiting.irq": {
+                    "status": "partly",
+                    "note": "The driver itself never waits on the pin: the IRQ branch of isready comes after the spi_dev, i2c_dev and ser_dev branches and is not reached. A sketch can watch the pin itself, as the IRQ example does, then call readDetectedPassiveTargetID. Only the I2C constructor takes an IRQ pin.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:110",
+                        "Adafruit_PN532.cpp:499",
+                        "Adafruit_PN532.cpp:1563",
+                        "Adafruit_PN532.cpp:1564",
+                        "examples/readMifareClassicIrq/readMifareClassicIrq.ino:95",
+                        "examples/readMifareClassicIrq/readMifareClassicIrq.ino:112"
+                    ]
+                },
+                "waiting.ready_polling": {
+                    "status": "yes",
+                    "note": "Status byte on SPI, RDY byte on I2C, 10 ms poll. On HSU isready tests available() on the serial port instead.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:1553",
+                        "Adafruit_PN532.cpp:1554",
+                        "Adafruit_PN532.cpp:1558",
+                        "Adafruit_PN532.cpp:1559",
+                        "Adafruit_PN532.cpp:1579"
+                    ]
+                },
+                "waiting.bounded_waits": {
+                    "status": "partly",
+                    "note": "Most calls use a 100 or 1000 ms timeout. readPassiveTargetID defaults to timeout 0, which passes to waitready as no limit, also for the ACK, so a dead chip hangs the program with the default argument. Timeouts of 65534 and 65535 also never expire.",
+                    "evidence": [
+                        "Adafruit_PN532.h:166",
+                        "Adafruit_PN532.cpp:339",
+                        "Adafruit_PN532.cpp:563",
+                        "Adafruit_PN532.cpp:1580",
+                        "Adafruit_PN532.cpp:1582"
+                    ]
+                },
+                "waiting.nonblocking_detect": {
+                    "status": "partly",
+                    "note": "The split into start and collect exists, but start is not free of blocking: it runs sendCommandCheckAck, which waits for readiness after the ACK, about 100 ms with no card, and then returns false. No public call tells when the result is ready, since isready is private, so the caller has to watch the IRQ pin.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:581",
+                        "Adafruit_PN532.cpp:586",
+                        "Adafruit_PN532.cpp:601",
+                        "Adafruit_PN532.cpp:361",
+                        "examples/readMifareClassicIrq/readMifareClassicIrq.ino:112",
+                        "examples/readMifareClassicIrq/readMifareClassicIrq.ino:126"
+                    ]
+                },
+                "cards.iso14443a_uid": {
+                    "status": "yes",
+                    "note": "Works for UIDs up to 7 bytes. Longer lengths are not bounded, see defects.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:557",
+                        "Adafruit_PN532.cpp:559",
+                        "Adafruit_PN532.cpp:601",
+                        "Adafruit_PN532.cpp:642",
+                        "Adafruit_PN532.cpp:643"
+                    ]
+                },
+                "cards.two_targets": {
+                    "status": "no",
+                    "searched": "grep for MaxTg and every InListPassiveTarget build: all three send 1, and both response parsers reject any target count other than 1.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:560",
+                        "Adafruit_PN532.cpp:583",
+                        "Adafruit_PN532.cpp:624",
+                        "Adafruit_PN532.cpp:752",
+                        "Adafruit_PN532.cpp:785"
+                    ]
+                },
+                "cards.mifare_classic": {
+                    "status": "yes",
+                    "note": "Authenticate, read and write with key A or B. The write does not check the status byte, see defects. Value block commands are only defined, not implemented.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:868",
+                        "Adafruit_PN532.cpp:894",
+                        "Adafruit_PN532.cpp:936",
+                        "Adafruit_PN532.cpp:946",
+                        "Adafruit_PN532.cpp:996",
+                        "Adafruit_PN532.cpp:1006"
+                    ]
+                },
+                "cards.ultralight_ntag": {
+                    "status": "yes",
+                    "note": "Page read and write for Ultralight (pages under 64) and NTAG2xx. The writes do not check the status byte, see defects.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:1167",
+                        "Adafruit_PN532.cpp:1184",
+                        "Adafruit_PN532.cpp:1242",
+                        "Adafruit_PN532.cpp:1262",
+                        "Adafruit_PN532.cpp:1296",
+                        "Adafruit_PN532.cpp:1377"
+                    ]
+                },
+                "cards.iso14443_4_apdu": {
+                    "status": "partly",
+                    "note": "inDataExchange carries an APDU after inListPassiveTarget. It sends at most 62 bytes and has 56 usable response bytes, with no chaining. A longer response is read past the buffer, see defects, which limits DESFire use. _inListedTag is not set by readPassiveTargetID.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:667",
+                        "Adafruit_PN532.cpp:670",
+                        "Adafruit_PN532.cpp:678",
+                        "Adafruit_PN532.cpp:679",
+                        "Adafruit_PN532.cpp:698",
+                        "Adafruit_PN532.cpp:794",
+                        "examples/apduToBlackBerry/apduToBlackBerry.ino:108"
+                    ]
+                },
+                "cards.ndef": {
+                    "status": "partly",
+                    "searched": "grep for NDEF in the .cpp and .h: only FormatNDEF and the two WriteNDEFURI functions, no function reads or parses a message. The ntag2xx_read and mifareclassic_memdump examples print raw pages and blocks.",
+                    "note": "Writes one short URI record on Mifare Classic and NTAG2xx, and formats a Classic card. There is no NDEF read and no other record type. The Classic URI writer has an off-by-one, see defects.",
+                    "evidence": ["Adafruit_PN532.cpp:1033", "Adafruit_PN532.cpp:1075", "Adafruit_PN532.cpp:1439"]
+                },
+                "cards.iso14443b": {
+                    "status": "no",
+                    "searched": "grep for 14443B, type b, ATQB, REQB, AFI: no match. The only modulation constant is PN532_MIFARE_ISO14443A. cardbaudrate is passed through, but no code sends the AFI byte or parses a type B response.",
+                    "evidence": ["Adafruit_PN532.h:79"]
+                },
+                "cards.felica": {
+                    "status": "no",
+                    "searched": "grep of the .cpp and .h for felica, 212, 424, POL_RES, polling: the only FeliCa hit is the parameter block in the AsTarget command; the polling hit at line 326 is the I2C RDY byte. No reader-side polling, no response parser, no FeliCa command.",
+                    "evidence": ["Adafruit_PN532.cpp:1646"]
+                },
+                "cards.card_emulation": {
+                    "status": "partly",
+                    "note": "TgInitAsTarget, TgGetData and TgSetData are sent, with fixed target parameters. TgGetInitiatorCommand, TgResponseToInitiator, TgSetGeneralBytes and TgGetTargetStatus are only defined. AsTarget and setDataTarget return false on success, and AsTarget waits only 100 ms for an initiator, see defects.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:1638",
+                        "Adafruit_PN532.cpp:1641",
+                        "Adafruit_PN532.cpp:1673",
+                        "Adafruit_PN532.cpp:1675",
+                        "Adafruit_PN532.cpp:1706",
+                        "Adafruit_PN532.cpp:1662",
+                        "Adafruit_PN532.cpp:1723",
+                        "examples/iso14443as_target/iso14443as_target.ino:89"
+                    ]
+                },
+                "cards.peer_to_peer": {
+                    "status": "partly",
+                    "searched": "grep for INJUMPFORDEP, JUMPFOR, INATR, NFCIP, DEP: only #define lines in the header. No initiator-side code.",
+                    "note": "Target side only: AsTarget sends TgInitAsTarget with mode 0x00 and an NFCID3t, so the mode is not limited to PICC, and TgGetData and TgSetData follow. The activation mode in the response is not read. Initiator side, InJumpForDEP, is absent.",
+                    "evidence": ["Adafruit_PN532.cpp:1642", "Adafruit_PN532.cpp:1651", "Adafruit_PN532.h:43"]
+                },
+                "chip_control.firmware_version": {
+                    "status": "yes",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:277",
+                        "Adafruit_PN532.cpp:280",
+                        "Adafruit_PN532.cpp:287",
+                        "Adafruit_PN532.cpp:299"
+                    ]
+                },
+                "chip_control.sam_configuration": {
+                    "status": "yes",
+                    "note": "Normal mode with fixed parameters. begin discards its result, see defects.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:495",
+                        "Adafruit_PN532.cpp:496",
+                        "Adafruit_PN532.cpp:497",
+                        "Adafruit_PN532.cpp:499",
+                        "Adafruit_PN532.cpp:508"
+                    ]
+                },
+                "chip_control.rf_field_control": {
+                    "status": "no",
+                    "searched": "grep for RFCONFIGURATION: the only use is line 522, which sends item 5. grep for field: no code sends item 1.",
+                    "evidence": ["Adafruit_PN532.cpp:523"]
+                },
+                "chip_control.retries_control": {
+                    "status": "yes",
+                    "note": "Sets MxRtyPassiveActivation only; MxRtyATR and MxRtyPSL are fixed. The response is not read, see defects.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:521",
+                        "Adafruit_PN532.cpp:522",
+                        "Adafruit_PN532.cpp:523",
+                        "Adafruit_PN532.cpp:526"
+                    ]
+                },
+                "chip_control.power_down": {
+                    "status": "partly",
+                    "searched": "grep for POWERDOWN and 0x16: only the #define at header line 40. No function sends the command.",
+                    "note": "Only the wake half exists: wakeup does the CS or 0x55 step and SAMConfiguration. PowerDown is never sent and the wake-up enable bits are not set.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:197",
+                        "Adafruit_PN532.cpp:201",
+                        "Adafruit_PN532.cpp:204",
+                        "Adafruit_PN532.cpp:212",
+                        "Adafruit_PN532.h:40"
+                    ]
+                },
+                "chip_control.reset_recovery": {
+                    "status": "yes",
+                    "note": "reset is public and begin can be called again. Neither constructor for SPI takes a reset pin, so on SPI only the start-over path through wakeup and SAMConfiguration exists. The driver does not start recovery by itself.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:171",
+                        "Adafruit_PN532.cpp:173",
+                        "Adafruit_PN532.cpp:182",
+                        "Adafruit_PN532.cpp:185",
+                        "Adafruit_PN532.cpp:187",
+                        "Adafruit_PN532.h:151"
+                    ]
+                },
+                "several.several_readers": {
+                    "status": "partly",
+                    "note": "Pins, keys and device objects are per instance, but the packet buffer is one global shared by all instances. It holds nothing between calls, so two readers work when used one call at a time from one task. The rubric's condition of no global state is not met.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:78",
+                        "Adafruit_PN532.cpp:79",
+                        "Adafruit_PN532.h:203",
+                        "Adafruit_PN532.h:207",
+                        "Adafruit_PN532.h:216"
+                    ]
+                },
+                "several.shared_spi_bus": {
+                    "status": "yes",
+                    "note": "Each instance owns an Adafruit_SPIDevice with its own chip select on a given SPIClass. The select handling is in BusIO, which is not in the folder, and this was not run on hardware. Use is limited to one task by the global packet buffer.",
+                    "evidence": [
+                        "Adafruit_PN532.h:145",
+                        "Adafruit_PN532.cpp:123",
+                        "Adafruit_PN532.cpp:125",
+                        "Adafruit_PN532.cpp:126"
+                    ]
+                },
+                "several.thread_safety": {
+                    "status": "no",
+                    "searched": "grep of the .cpp and .h for mutex, semaphore, xSemaphore, portENTER, critical, thread, task, noInterrupts, lock(, std::: no match. grep of the README, library.properties and examples for mutex, semaphore, thread, multitask, freertos: no match, so no rule is stated. The global pn532_packetbuffer is used without protection."
+                },
+                "code_health.errors_returned": {
+                    "status": "partly",
+                    "note": "Results are only true/false or 0/1, so a dead chip, no card and a card error all look the same. Some failures do not reach the caller at all: begin returns true after a failed SAMConfig, the write functions return 1 with any status.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:567",
+                        "Adafruit_PN532.cpp:340",
+                        "Adafruit_PN532.cpp:169",
+                        "Adafruit_PN532.cpp:174",
+                        "Adafruit_PN532.cpp:1023",
+                        "Adafruit_PN532.h:167"
+                    ]
+                },
+                "code_health.buffers_bounded": {
+                    "status": "partly",
+                    "note": "Only inDataExchange limits a length, and only to the caller's buffer, not to the 64 bytes received. readDetectedPassiveTargetID, getDataTarget and setDataTarget copy with no bound. getDataTarget has the check commented out.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:670",
+                        "Adafruit_PN532.cpp:722",
+                        "Adafruit_PN532.cpp:642",
+                        "Adafruit_PN532.cpp:1683",
+                        "Adafruit_PN532.cpp:1685",
+                        "Adafruit_PN532.cpp:1715"
+                    ]
+                },
+                "code_health.allocation_checked": {
+                    "status": "partly",
+                    "note": "The result of new is not tested at the call. If new returns NULL, begin finds no device and returns false. The buffers in readdata and writecommand are stack arrays with no check, bounded by uint8_t lengths.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:95",
+                        "Adafruit_PN532.cpp:112",
+                        "Adafruit_PN532.cpp:125",
+                        "Adafruit_PN532.cpp:168",
+                        "Adafruit_PN532.cpp:169"
+                    ]
+                },
+                "code_health.tests": {
+                    "status": "no",
+                    "searched": "find for *test*, *spec*, *mock* files and test or host directories: only examples/apduToBlackBerry/.esp32.test.skip, a CI marker. .github/workflows/githubci.yml builds examples, runs clang-format and doxygen; it runs no test."
+                },
+                "code_health.examples": {
+                    "status": "yes",
+                    "note": "13 Arduino sketches cover UID read, Mifare Classic, NTAG, NDEF, APDU, IRQ and target mode.",
+                    "evidence": [
+                        "examples/iso14443a_uid/iso14443a_uid.ino:91",
+                        "examples/apduToBlackBerry/apduToBlackBerry.ino:108",
+                        "examples/readMifareClassicIrq/readMifareClassicIrq.ino:112",
+                        "examples/iso14443as_target/iso14443as_target.ino:89"
+                    ]
+                },
+                "code_health.docs": {
+                    "status": "yes",
+                    "note": "The README gives dependencies, installation and links only. Usage is in the doxygen comments on each function and in the examples. The comment at line 322 says one second where the default in the header is 100 ms.",
+                    "evidence": [
+                        "README.md:12",
+                        "README.md:13",
+                        "Adafruit_PN532.cpp:544",
+                        "Adafruit_PN532.cpp:547",
+                        "Adafruit_PN532.cpp:554"
+                    ]
+                },
+                "code_health.license": {
+                    "status": "yes",
+                    "note": "BSD, in license.txt.",
+                    "evidence": ["license.txt:1", "license.txt:3"]
+                }
+            },
+            "defects": [
+                {
+                    "what": "mifareclassic_WriteNDEFURI, for URLs of 24 to 38 characters, copies len - 24 bytes instead of len - 23 and puts 0xFE at index len - 22, so the last URL character is lost and at len = 38 the terminator is written one byte past the 16-byte stack array sectorbuffer3.",
+                    "severity": "high",
+                    "judged": "Blocks 1 and 2 take 23 characters, so url + 23 has len - 23 left, but only len - 24 are copied and 0xFE goes to index len - 22; the last character is replaced by 0x00 in every URL of 24 to 38 characters and the function returns success. A URL of that length is ordinary use, and len 38 also writes one byte past sectorbuffer3.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:1086",
+                        "Adafruit_PN532.cpp:1111",
+                        "Adafruit_PN532.cpp:1137",
+                        "Adafruit_PN532.cpp:1138"
+                    ]
+                },
+                {
+                    "what": "readDetectedPassiveTargetID copies the NFCID length byte of the response into uid with no bound and reads only 20 bytes, so a 10-byte UID overruns the 7-byte buffer that the API text and examples use, with stale bytes at the end, and a corrupt length also reads past the 64-byte packet buffer.",
+                    "severity": "medium",
+                    "read_as": "high",
+                    "judged": "The function reads 20 bytes, of which 7 can be UID, and copies pn532_packetbuffer[12] bytes with no bound and no frame check, so a 10-byte UID writes 3 bytes past uid[7] and those 3 bytes are stale. 4 and 7-byte UIDs fit, so this is the limit of a legal input or a corrupt frame.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:549",
+                        "Adafruit_PN532.cpp:604",
+                        "Adafruit_PN532.cpp:638",
+                        "Adafruit_PN532.cpp:642",
+                        "Adafruit_PN532.cpp:643",
+                        "examples/iso14443a_uid/iso14443a_uid.ino:85"
+                    ]
+                },
+                {
+                    "what": "getDataTarget computes length as LEN - 3 with no check and copies that many bytes to a caller buffer whose size it is never told, so LEN above 59 reads past the 64-byte packet buffer, LEN below 3 wraps to about 254, and the response code and status byte are not checked.",
+                    "severity": "high",
+                    "judged": "getDataTarget has no capacity argument and checks neither LEN, the response code nor the status byte, and it reads only 64 bytes, so a reader command over 56 bytes returns memory past the packet buffer and overruns any smaller caller buffer; LEN below 3 also wraps. A reader command over 56 bytes is legal and not a limit case, and a released target returns true with length 0.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:1673",
+                        "Adafruit_PN532.cpp:1682",
+                        "Adafruit_PN532.cpp:1683",
+                        "Adafruit_PN532.cpp:1685",
+                        "Adafruit_PN532.cpp:1690",
+                        "Adafruit_PN532.cpp:1691"
+                    ]
+                },
+                {
+                    "what": "setDataTarget reads 8 bytes and then copies LEN - 3 bytes over the caller's command buffer with no bound, so a frame with LEN below 3, such as the syntax error frame with LEN 1, wraps to 254 and overruns the buffer with bytes taken past the packet buffer.",
+                    "severity": "medium",
+                    "read_as": "high",
+                    "judged": "setDataTarget computes LEN - 3 in a uint8_t with no check, so a syntax error frame (LEN 1, UM0701-02 6.2.1.5) gives 254 and the loop writes over and past cmd from bytes past the 64-byte packet buffer. A normal TgSetData reply has LEN 3 and copies nothing, so this needs an error frame or a corrupt frame.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:1714",
+                        "Adafruit_PN532.cpp:1715",
+                        "Adafruit_PN532.cpp:1716",
+                        "Adafruit_PN532.cpp:1717",
+                        "examples/iso14443as_target/iso14443as_target.ino:97"
+                    ]
+                },
+                {
+                    "what": "inDataExchange limits the copy to the caller's responseLength but not to the 64 bytes it read, so a card response over 56 bytes makes the loop read past pn532_packetbuffer and return unrelated memory as data.",
+                    "severity": "high",
+                    "judged": "inDataExchange reads 64 bytes and bounds the copy only by the caller's length, so with a large caller buffer a reply over 56 bytes reads past pn532_packetbuffer and returns true with that memory as data. A reply of that size is legal for an ISO-DEP card and not a limit case, and the examples avoid it only by passing small buffers.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:78",
+                        "Adafruit_PN532.cpp:698",
+                        "Adafruit_PN532.cpp:722",
+                        "Adafruit_PN532.cpp:727"
+                    ]
+                },
+                {
+                    "what": "mifareclassic_WriteDataBlock, mifareultralight_WritePage and ntag2xx_WritePage read the response and return 1 without testing its status byte, so a failed write is reported as success, also through FormatNDEF and both WriteNDEFURI functions.",
+                    "severity": "medium",
+                    "read_as": "high",
+                    "judged": "All three functions call readdata and return 1 without testing pn532_packetbuffer[7], while the read functions next to them do test it, and FormatNDEF and both WriteNDEFURI functions rely on that return value. The false success needs a write that fails on the card, such as a lost card or a protected block.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:1021",
+                        "Adafruit_PN532.cpp:1023",
+                        "Adafruit_PN532.cpp:1278",
+                        "Adafruit_PN532.cpp:1281",
+                        "Adafruit_PN532.cpp:1418",
+                        "Adafruit_PN532.cpp:1421"
+                    ]
+                },
+                {
+                    "what": "mifareclassic_AuthenticateBlock copies uidLen bytes into the 7-byte member _uid with no bound, so a 10-byte UID overwrites the start of _key after the key was stored, and a larger uidLen also overruns the packet buffer in the loop.",
+                    "severity": "medium",
+                    "evidence": [
+                        "Adafruit_PN532.h:204",
+                        "Adafruit_PN532.h:206",
+                        "Adafruit_PN532.cpp:877",
+                        "Adafruit_PN532.cpp:878",
+                        "Adafruit_PN532.cpp:899"
+                    ]
+                },
+                {
+                    "what": "AsTarget and setDataTarget test response byte 6 against 0x15, the SAMConfiguration response code, while the responses to TgInitAsTarget 0x8C and TgSetData 0x8E carry 0x8D and 0x8F, so both return false on success.",
+                    "severity": "medium",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:1639",
+                        "Adafruit_PN532.cpp:1662",
+                        "Adafruit_PN532.cpp:1708",
+                        "Adafruit_PN532.cpp:1723"
+                    ]
+                },
+                {
+                    "what": "AsTarget has no timeout parameter and uses the 100 ms default of sendCommandCheckAck, so unless an initiator activates the chip within 100 ms of the ACK it returns false and the TgInitAsTarget response is never read.",
+                    "severity": "medium",
+                    "evidence": [
+                        "Adafruit_PN532.h:158",
+                        "Adafruit_PN532.h:172",
+                        "Adafruit_PN532.cpp:361",
+                        "Adafruit_PN532.cpp:1655",
+                        "Adafruit_PN532.cpp:1656"
+                    ]
+                },
+                {
+                    "what": "setPassiveActivationRetries returns without reading the RFConfiguration response, so on HSU the frame stays in the receive buffer, isready is true at once for the next command and readack compares that frame with the ACK and fails.",
+                    "severity": "medium",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:534",
+                        "Adafruit_PN532.cpp:537",
+                        "Adafruit_PN532.cpp:1562",
+                        "Adafruit_PN532.cpp:1616"
+                    ]
+                },
+                {
+                    "what": "Responses are read with fixed lengths and HSU input is drained only in begin, so on HSU a 7-byte UID response (22 bytes, 20 read), WriteGPIO (9, 8 read) and ReadGPIO (12, 11 read) leave bytes that fail the next ACK check, and a read longer than the frame, such as 64 bytes in inDataExchange, blocks until the serial read timeout.",
+                    "severity": "medium",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:166",
+                        "Adafruit_PN532.cpp:413",
+                        "Adafruit_PN532.cpp:448",
+                        "Adafruit_PN532.cpp:604",
+                        "Adafruit_PN532.cpp:698",
+                        "Adafruit_PN532.cpp:1562",
+                        "Adafruit_PN532.cpp:1616"
+                    ]
+                },
+                {
+                    "what": "Mifare and page reads test only byte 7 == 0x00 with no check of TFI or code, so the syntax error frame 00 00 FF 01 FF 7F 81 00, whose byte 7 is 0x00, passes as success in AuthenticateBlock, ReadDataBlock and both ReadPage functions.",
+                    "severity": "medium",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:912",
+                        "Adafruit_PN532.cpp:962",
+                        "Adafruit_PN532.cpp:972",
+                        "Adafruit_PN532.cpp:1203",
+                        "Adafruit_PN532.cpp:1338"
+                    ]
+                },
+                {
+                    "what": "isready ignores the result of the bus read and tests a local variable with no initial value, so a failed I2C or SPI status read can report the chip as ready.",
+                    "severity": "medium",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:1552",
+                        "Adafruit_PN532.cpp:1553",
+                        "Adafruit_PN532.cpp:1554",
+                        "Adafruit_PN532.cpp:1557",
+                        "Adafruit_PN532.cpp:1558",
+                        "Adafruit_PN532.cpp:1559"
+                    ]
+                },
+                {
+                    "what": "readdata and writecommand return void and drop the result of every bus transfer, so after a failed or short read the callers parse old buffer content as a response.",
+                    "severity": "medium",
+                    "evidence": [
+                        "Adafruit_PN532.h:210",
+                        "Adafruit_PN532.h:211",
+                        "Adafruit_PN532.cpp:1606",
+                        "Adafruit_PN532.cpp:1610",
+                        "Adafruit_PN532.cpp:1616",
+                        "Adafruit_PN532.cpp:1815"
+                    ]
+                },
+                {
+                    "what": "begin returns true even when SAMConfiguration fails, because wakeup is void and drops the return value of SAMConfig.",
+                    "severity": "medium",
+                    "evidence": [
+                        "Adafruit_PN532.h:152",
+                        "Adafruit_PN532.cpp:173",
+                        "Adafruit_PN532.cpp:174",
+                        "Adafruit_PN532.cpp:212"
+                    ]
+                },
+                {
+                    "what": "readPassiveTargetID defaults to timeout 0, which makes waitready loop with no limit, also while waiting for the ACK, so with the default argument a dead chip hangs the program.",
+                    "severity": "medium",
+                    "evidence": [
+                        "Adafruit_PN532.h:166",
+                        "Adafruit_PN532.cpp:339",
+                        "Adafruit_PN532.cpp:563",
+                        "Adafruit_PN532.cpp:1580",
+                        "examples/iso14443a_uid/iso14443a_uid.ino:91"
+                    ]
+                },
+                {
+                    "what": "When a wait times out, sendCommandCheckAck returns without sending the ACK frame that aborts a command, so the chip keeps running the command and on HSU a late response stays in the receive buffer and fails the next ACK check; pn532ack is used only for comparison.",
+                    "severity": "medium",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:62",
+                        "Adafruit_PN532.cpp:340",
+                        "Adafruit_PN532.cpp:362",
+                        "Adafruit_PN532.cpp:1540"
+                    ]
+                },
+                {
+                    "what": "inDataExchange sends _inListedTag, which has no initial value and is set only by inListPassiveTarget, so an exchange after readPassiveTargetID sends an undefined target number.",
+                    "severity": "medium",
+                    "evidence": ["Adafruit_PN532.h:207", "Adafruit_PN532.cpp:679", "Adafruit_PN532.cpp:794"]
+                },
+                {
+                    "what": "startPassiveTargetIDDetection returns the result of the ready wait after the ACK, so with no card it returns false after about 100 ms, the same value as a missing ACK from a dead chip, and the caller cannot tell a started detection from a failed command.",
+                    "severity": "medium",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:361",
+                        "Adafruit_PN532.cpp:586",
+                        "examples/readMifareClassicIrq/readMifareClassicIrq.ino:112",
+                        "examples/readMifareClassicIrq/readMifareClassicIrq.ino:113"
+                    ]
+                },
+                {
+                    "what": "waitready counts in a uint16_t by steps of 10, so timer > timeout is never true for timeout 65534 or 65535 and those waits have no end.",
+                    "severity": "low",
+                    "evidence": ["Adafruit_PN532.cpp:1578", "Adafruit_PN532.cpp:1581", "Adafruit_PN532.cpp:1582"]
+                },
+                {
+                    "what": "The IRQ branch of isready follows the spi_dev, i2c_dev and ser_dev branches and every constructor sets one of those, so the irq pin given to the I2C constructor is never used for waiting.",
+                    "severity": "low",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:1549",
+                        "Adafruit_PN532.cpp:1555",
+                        "Adafruit_PN532.cpp:1560",
+                        "Adafruit_PN532.cpp:1563"
+                    ]
+                },
+                {
+                    "what": "inListPassiveTarget calls waitready(30000) only after sendCommandCheckAck has returned true from its own 1000 ms ready wait, so the 30 second wait has no effect and the call gives up after about 1 second with no card.",
+                    "severity": "low",
+                    "evidence": ["Adafruit_PN532.cpp:361", "Adafruit_PN532.cpp:759", "Adafruit_PN532.cpp:766"]
+                },
+                {
+                    "what": "readGPIO returns 0 for a failed command, which is also a valid pin state.",
+                    "severity": "low",
+                    "evidence": ["Adafruit_PN532.h:160", "Adafruit_PN532.cpp:443", "Adafruit_PN532.cpp:444"]
+                },
+                {
+                    "what": "mifareclassic_WriteNDEFURI and ntag2xx_WriteNDEFURI store strlen in a uint8_t, so a URL of 256 characters or more wraps, can pass the length check and is written truncated.",
+                    "severity": "low",
+                    "evidence": ["Adafruit_PN532.cpp:1079", "Adafruit_PN532.cpp:1447"]
+                },
+                {
+                    "what": "Several diagnostics are outside the debug #ifdef and print to Serial, so when the PN532 is on HSU through Serial that text goes out on the PN532 link.",
+                    "severity": "low",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:75",
+                        "Adafruit_PN532.cpp:140",
+                        "Adafruit_PN532.cpp:733",
+                        "Adafruit_PN532.cpp:795",
+                        "Adafruit_PN532.cpp:1677"
+                    ]
+                }
+            ]
+        },
+        {
+            "version": "1.3.4",
+            "tag": "1.3.4",
+            "blind": true,
+            "commit": "bf9f3f31961474fdbca23cb57d604c7f27269baf",
+            "rubric": "pn532",
+            "rubric_version": 2,
+            "date": "2026-11-02",
+            "by": "claude-opus-5-5",
+            "items": {
+                "transports.i2c": {
+                    "status": "partly",
+                    "note": "Address 0x24 in 7 bits is correct, the first byte of each read is taken as the status byte, and a NOT READY status ends the read and is retried. The last point of the rubric is not met: isready reads the status byte alone and ends the transfer even when RDY = 1, and readdata then starts a new read. Fig 31 (6.2.4.1) draws the status read and the frame read as separate SLV+R transfers, but the text of 6.2.4 says the rest of the frame shall be read before STOP. Reads have fixed lengths, so a longer frame is cut by STOP: writeGPIO reads 8 of 9 bytes, readDetectedPassiveTargetID reads 20 bytes of a response that also holds an ATS. readdata skips the RDY byte of the frame read without testing it. The clock speed is left to the TwoWire object; the library does not set it. isready compares the whole byte with 0x01 although only bit 0 is defined (6.2.4).",
+                    "evidence": [
+                        "Adafruit_PN532.h:73",
+                        "Adafruit_PN532.cpp:112",
+                        "Adafruit_PN532.cpp:1558",
+                        "Adafruit_PN532.cpp:1559",
+                        "Adafruit_PN532.cpp:1609",
+                        "Adafruit_PN532.cpp:1610",
+                        "Adafruit_PN532.cpp:1612",
+                        "Adafruit_PN532.cpp:413"
+                    ]
+                },
+                "transports.spi": {
+                    "status": "yes",
+                    "note": "Mode 0, LSB first and 1 MHz are fixed in both the software and the hardware SPI constructor. Each transfer starts with 0x02, 0x01 or 0x03. isready compares the whole byte with 0x01 although the manual defines only bit 0 (6.2.5); Fig 34 shows the values 0x00 and 0x01.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:95",
+                        "Adafruit_PN532.cpp:96",
+                        "Adafruit_PN532.cpp:125",
+                        "Adafruit_PN532.cpp:126",
+                        "Adafruit_PN532.cpp:1551",
+                        "Adafruit_PN532.cpp:1605",
+                        "Adafruit_PN532.cpp:1743",
+                        "Adafruit_PN532.h:68",
+                        "Adafruit_PN532.h:69",
+                        "Adafruit_PN532.h:70"
+                    ]
+                },
+                "transports.uart": {
+                    "status": "partly",
+                    "note": "HardwareSerial only, at 115200, with the frames of 6.2.1 and the 0x55 wake byte of Fig 65. The fixed read length equals the frame only for GetFirmwareVersion (13), SAMConfiguration (9) and a successful Mifare read (26). A read shorter than the frame leaves bytes that the next readack takes for the ACK (see defects). A read longer than the frame waits for the Stream timeout: authentication reads 12 of 10 bytes, writes 26 of 10, detection of a 4-byte UID 20 of 19. The command is not resent when the ACK is missing after 15 ms, as 6.2.3 asks.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:137",
+                        "Adafruit_PN532.cpp:163",
+                        "Adafruit_PN532.cpp:204",
+                        "Adafruit_PN532.cpp:1562",
+                        "Adafruit_PN532.cpp:1616",
+                        "Adafruit_PN532.cpp:1817"
+                    ]
+                },
+                "builds_on.esp_idf": {
+                    "status": "no",
+                    "searched": "Adafruit_PN532.cpp and Adafruit_PN532.h for driver/, i2c_master, spi_master, uart_driver, esp_err, freertos, esp_timer: no match. The whole tree for i2c_master_, spi_device_, uart_driver_install: no match.",
+                    "note": "The header includes Arduino.h and the code uses TwoWire, SPIClass, HardwareSerial, delay, pinMode, digitalWrite and Serial. No ESP-IDF driver API is called, old or new."
+                },
+                "builds_on.arduino": {
+                    "status": "yes",
+                    "note": "Not built, as the task forbids it: judged from the source and library.properties. It needs the BusIO dependency, which is not in the folder. In this copy the file names and the names in the text differ: Adafruit_PN532.cpp line 60 includes Owner_PN532.h and the examples include <Owner_PN532.h>, while the header file is Adafruit_PN532.h. As the files stand that include does not resolve. This looks like a text rename of the copy and not a property of the library, so it is not counted as a defect.",
+                    "evidence": [
+                        "Adafruit_PN532.h:16",
+                        "Adafruit_PN532.h:18",
+                        "Adafruit_PN532.h:19",
+                        "library.properties:9",
+                        "library.properties:10"
+                    ]
+                },
+                "builds_on.esp_idf_component": {
+                    "status": "no",
+                    "searched": "The whole tree by name for idf_component.yml, CMakeLists.txt, component.mk and Kconfig, and by content for idf_component_register: no match."
+                },
+                "frames.ack_checked": {
+                    "status": "yes",
+                    "note": "sendCommandCheckAck waits for ready, reads 6 bytes and compares them with the ACK frame. On a timeout or a mismatch it returns false, and each caller returns failure. The command is not resent. With timeout 0, the default of readPassiveTargetID, a missing ACK is never detected, because waitready does not end (see waiting.bounded_waits).",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:339",
+                        "Adafruit_PN532.cpp:350",
+                        "Adafruit_PN532.cpp:354",
+                        "Adafruit_PN532.cpp:1537",
+                        "Adafruit_PN532.cpp:1540"
+                    ]
+                },
+                "frames.nack_resend": {
+                    "status": "no",
+                    "searched": "Adafruit_PN532.cpp and .h for nack, NACK and the bytes 00 00 FF FF 00 00. writecommand is the only frame writer and it always builds an information frame. No NACK is built or sent."
+                },
+                "frames.checksums_checked": {
+                    "status": "partly",
+                    "note": "LCS is tested in inDataExchange and inListPassiveTarget. getFirmwareVersion compares fixed LEN and LCS bytes. DCS of a response is not computed anywhere. All other parsers test neither.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:703",
+                        "Adafruit_PN532.cpp:775",
+                        "Adafruit_PN532.cpp:290",
+                        "Adafruit_PN532.cpp:291"
+                    ]
+                },
+                "frames.extended_frames": {
+                    "status": "no",
+                    "searched": "Adafruit_PN532.cpp and .h for LENM, LENL, extended, a test for 00 00 FF FF FF, and any 16-bit frame length. Lengths are uint8_t at lines 702 and 774, readdata takes uint8_t n, and the packet buffer has 64 bytes.",
+                    "note": "Line 703 rejects LEN = 0xFF with LCS = 0xFF, because it expects LCS 0x01 for that LEN."
+                },
+                "frames.error_frame": {
+                    "status": "no",
+                    "searched": "Adafruit_PN532.cpp and .h for 0x7F, 0x81 and the bytes 00 00 FF 01 FF 7F 81 00. The only 0x7F is sector trailer data at line 1113. Nothing tests for this frame.",
+                    "note": "inDataExchange and inListPassiveTarget return false for it only because byte 5 is not D5. The Mifare parsers read its postamble as Status 0x00 (see defects)."
+                },
+                "frames.response_code_checked": {
+                    "status": "partly",
+                    "note": "Both TFI and code are tested only in inDataExchange and inListPassiveTarget. writeGPIO and SAMConfig test the code only, getFirmwareVersion tests TFI only. readGPIO, readDetectedPassiveTargetID, all Mifare, Ultralight and NTAG functions and getDataTarget test neither. AsTarget and setDataTarget test for the wrong code (see defects).",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:711",
+                        "Adafruit_PN532.cpp:712",
+                        "Adafruit_PN532.cpp:783",
+                        "Adafruit_PN532.cpp:784",
+                        "Adafruit_PN532.cpp:422",
+                        "Adafruit_PN532.cpp:508"
+                    ]
+                },
+                "frames.status_decoded": {
+                    "status": "partly",
+                    "note": "Only inDataExchange masks bits 5..0, and it reduces the code to a bool. The Mifare functions compare the whole byte. The write functions, getDataTarget and setDataTarget do not read Status at all. No error code reaches the caller, and MI is dropped.",
+                    "evidence": ["Adafruit_PN532.cpp:713", "Adafruit_PN532.cpp:912", "Adafruit_PN532.cpp:962"]
+                },
+                "waiting.irq": {
+                    "status": "partly",
+                    "note": "No wait inside the library reads the line: the branch at line 1563 cannot be reached, because every constructor sets spi_dev, i2c_dev or ser_dev and those branches come first. The constructor only sets the pin mode, and only the I2C constructor takes the pin. An IRQ wait is possible only in the program, as the example does, with its own digitalRead and then readDetectedPassiveTargetID. The ACK and any other response are still polled.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:110",
+                        "Adafruit_PN532.cpp:499",
+                        "Adafruit_PN532.cpp:1563",
+                        "Adafruit_PN532.cpp:1564",
+                        "examples/readMifareClassicIrq/readMifareClassicIrq.ino:95",
+                        "examples/readMifareClassicIrq/readMifareClassicIrq.ino:126"
+                    ]
+                },
+                "waiting.ready_polling": {
+                    "status": "yes",
+                    "note": "waitready polls isready every 10 ms. On UART isready tests for received bytes.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:1553",
+                        "Adafruit_PN532.cpp:1554",
+                        "Adafruit_PN532.cpp:1558",
+                        "Adafruit_PN532.cpp:1559",
+                        "Adafruit_PN532.cpp:1579",
+                        "Adafruit_PN532.cpp:1589"
+                    ]
+                },
+                "waiting.bounded_waits": {
+                    "status": "partly",
+                    "note": "waitready has a timeout and sendCommandCheckAck defaults to 100 ms, but timeout 0 means no limit and it is the default of readPassiveTargetID, the call the examples use. A timeout of 65534 or 65535 also never ends, because the counter wraps (see defects). In inListPassiveTarget the 30 s wait at line 766 does not apply when no card is present, because the 1000 ms response wait in sendCommandCheckAck fails first.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:1580",
+                        "Adafruit_PN532.cpp:1582",
+                        "Adafruit_PN532.h:158",
+                        "Adafruit_PN532.h:166"
+                    ]
+                },
+                "waiting.abort_on_timeout": {
+                    "status": "no",
+                    "searched": "Adafruit_PN532.cpp for writers of the ACK frame and for abort. pn532ack is used only as the compare value in readack at line 1540. The bus writes are at lines 1784, 1815 and 1817 in writecommand, which always builds an information frame, and at line 205, the wake bytes. Each timeout path returns false with nothing sent.",
+                    "note": "Only a later command stops the running one (6.2.2.2 b, method 2). Until then InListPassiveTarget stays active, with MxRtyPassiveActivation 0xFF by default."
+                },
+                "waiting.nonblocking_detect": {
+                    "status": "partly",
+                    "note": "Start and collect are separate functions, but the start blocks: sendCommandCheckAck also waits up to 100 ms for the response. It then returns false both for no card yet and for a failed command. isready is private, so the caller can learn that a result is ready only from its own IRQ wiring. readDetectedPassiveTargetID does not test for ready.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:581",
+                        "Adafruit_PN532.cpp:586",
+                        "Adafruit_PN532.cpp:361",
+                        "Adafruit_PN532.cpp:601",
+                        "Adafruit_PN532.h:212"
+                    ]
+                },
+                "cards.iso14443a_uid": {
+                    "status": "yes",
+                    "note": "Correct for 4-byte and 7-byte UIDs. A 10-byte UID is not handled safely (see defects).",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:559",
+                        "Adafruit_PN532.cpp:561",
+                        "Adafruit_PN532.h:79",
+                        "Adafruit_PN532.cpp:638",
+                        "Adafruit_PN532.cpp:643"
+                    ]
+                },
+                "cards.two_targets": {
+                    "status": "no",
+                    "searched": "Adafruit_PN532.cpp for MaxTg values and NbTg handling. Lines 560, 583 and 752 send MaxTg = 1, with no parameter. Lines 624 and 785 return failure when NbTg is not 1. No code parses a second TargetData block."
+                },
+                "cards.mifare_classic": {
+                    "status": "yes",
+                    "note": "Command formats match 7.3.8. Value block commands (increment, decrement, transfer, restore) are only defined. The result of a write is not checked (see defects).",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:868",
+                        "Adafruit_PN532.cpp:894",
+                        "Adafruit_PN532.cpp:936",
+                        "Adafruit_PN532.cpp:946",
+                        "Adafruit_PN532.cpp:996",
+                        "Adafruit_PN532.cpp:1006"
+                    ]
+                },
+                "cards.ultralight_ntag": {
+                    "status": "yes",
+                    "note": "The result of a write is not checked (see defects).",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:1167",
+                        "Adafruit_PN532.cpp:1242",
+                        "Adafruit_PN532.cpp:1262",
+                        "Adafruit_PN532.cpp:1296",
+                        "Adafruit_PN532.cpp:1377"
+                    ]
+                },
+                "cards.iso14443_4_apdu": {
+                    "status": "partly",
+                    "note": "inListPassiveTarget followed by inDataExchange exchanges short APDUs. The 64-byte packet buffer limits a command to 62 bytes and a correct response to 56 data bytes, where 7.3.8 allows 261 and 258. It works only after inListPassiveTarget, not after readPassiveTargetID (see defects).",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:667",
+                        "Adafruit_PN532.cpp:670",
+                        "Adafruit_PN532.cpp:678",
+                        "Adafruit_PN532.cpp:698",
+                        "Adafruit_PN532.cpp:750"
+                    ]
+                },
+                "cards.chaining": {
+                    "status": "no",
+                    "searched": "Adafruit_PN532.cpp for MI, More Information, chaining, and tests or sets of bit 6 (0x40) on Status or Tg. The only 0x40 uses are the InDataExchange code at line 678 and sector trailer data at line 1114. Line 713 masks bit 6 away. Tg is sent unchanged at line 679."
+                },
+                "cards.raw_exchange": {
+                    "status": "no",
+                    "searched": "PN532_COMMAND_INCOMMUNICATETHRU and the byte 0x42 in Adafruit_PN532.cpp and examples: the name is only defined at Adafruit_PN532.h line 49 and never used."
+                },
+                "cards.auto_poll": {
+                    "status": "no",
+                    "searched": "PN532_COMMAND_INAUTOPOLL and the byte 0x60 as a command in Adafruit_PN532.cpp and examples: the name is only defined at Adafruit_PN532.h line 53 and never used. The 0x60 at line 1645 is SEL_RES."
+                },
+                "cards.ndef": {
+                    "status": "partly",
+                    "note": "Writes a single URI record only, on Mifare Classic and NTAG2xx. There is no NDEF parser and no other record type. On Classic, URLs of 24 to 38 characters are written wrongly (see defects).",
+                    "evidence": ["Adafruit_PN532.cpp:1033", "Adafruit_PN532.cpp:1075", "Adafruit_PN532.cpp:1439"]
+                },
+                "cards.iso14443b": {
+                    "status": "no",
+                    "searched": "Adafruit_PN532.cpp and .h for type B, ATQB, ATTRIB, AFI and BrTy 0x03: no match. cardbaudrate is passed through at line 561, but the command has no InitiatorData and the AFI is mandatory (7.3.5), so 0x03 is a syntax error."
+                },
+                "cards.felica": {
+                    "status": "no",
+                    "searched": "Adafruit_PN532.cpp and .h for FeliCa, POL_RES and BrTy 0x01 or 0x02. The only hits are the FeliCa target parameters of AsTarget at line 1646. cardbaudrate is passed through, but the mandatory 5-byte polling payload is not sent (7.3.5), and no parser reads NFCID2t."
+                },
+                "cards.jewel": {
+                    "status": "no",
+                    "searched": "Adafruit_PN532.cpp and .h for Jewel, Innovision and BrTy 0x04: no match. The value 0x04 can be passed through cardbaudrate, but the parser assumes type A and takes byte 12, a JEWELID byte, as the UID length."
+                },
+                "cards.card_emulation": {
+                    "status": "partly",
+                    "note": "TgInitAsTarget has correct fields for 7.3.14, with fixed values the caller cannot set, and TgGetData and TgSetData are sent. The caller must put 0x8E in cmd[0] of setDataTarget. The response code tests are wrong, Status is not read, the wait is fixed at 100 ms, and InitiatorCommand is dropped. TgGetInitiatorCommand and TgResponseToInitiator are not implemented.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:1638",
+                        "Adafruit_PN532.cpp:1641",
+                        "Adafruit_PN532.cpp:1655",
+                        "Adafruit_PN532.cpp:1675",
+                        "Adafruit_PN532.cpp:1710",
+                        "examples/iso14443as_target/iso14443as_target.ino:89"
+                    ]
+                },
+                "cards.peer_to_peer": {
+                    "status": "partly",
+                    "searched": "PN532_COMMAND_INJUMPFORDEP, InATR and InPSL in Adafruit_PN532.cpp and examples: only defined in the header, never used. No LLCP or SNEP code.",
+                    "note": "Target side only, and only as a side effect of AsTarget: Mode 0 does not exclude DEP, SEL_RES 0x60 announces DEP, NFCID3t and general bytes are present, and getDataTarget and setDataTarget are the DEP data commands. No example or function is written for it, and the defects of those functions apply. There is no initiator side.",
+                    "evidence": ["Adafruit_PN532.cpp:1642", "Adafruit_PN532.cpp:1645", "Adafruit_PN532.cpp:1651"]
+                },
+                "chip_control.firmware_version": {
+                    "status": "yes",
+                    "evidence": ["Adafruit_PN532.cpp:277", "Adafruit_PN532.cpp:280", "Adafruit_PN532.cpp:299"]
+                },
+                "chip_control.general_status": {
+                    "status": "no",
+                    "searched": "PN532_COMMAND_GETGENERALSTATUS and the byte 0x04 as a command in Adafruit_PN532.cpp and examples: the name is only defined at Adafruit_PN532.h line 32 and never used."
+                },
+                "chip_control.sam_configuration": {
+                    "status": "yes",
+                    "note": "Normal mode only, with fixed parameters.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:495",
+                        "Adafruit_PN532.cpp:496",
+                        "Adafruit_PN532.cpp:497",
+                        "Adafruit_PN532.cpp:508"
+                    ]
+                },
+                "chip_control.rf_field_control": {
+                    "status": "no",
+                    "searched": "PN532_COMMAND_RFCONFIGURATION in Adafruit_PN532.cpp: the one use is at line 522, with CfgItem 5 at line 523. No CfgItem 0x01 is sent anywhere."
+                },
+                "chip_control.retries_control": {
+                    "status": "yes",
+                    "note": "MxRtyPassiveActivation only; MxRtyATR and MxRtyPSL are fixed at their defaults. The response frame is not read (see defects).",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:521",
+                        "Adafruit_PN532.cpp:522",
+                        "Adafruit_PN532.cpp:523",
+                        "Adafruit_PN532.cpp:526"
+                    ]
+                },
+                "chip_control.power_down": {
+                    "status": "partly",
+                    "searched": "PN532_COMMAND_POWERDOWN and the byte 0x16 as a command in Adafruit_PN532.cpp and examples: the name is only defined at Adafruit_PN532.h line 40 and never used.",
+                    "note": "The waking up part exists as the public wakeup(). The PowerDown command is not sent, so the library cannot enter the mode.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:197",
+                        "Adafruit_PN532.cpp:201",
+                        "Adafruit_PN532.cpp:204",
+                        "Adafruit_PN532.cpp:212"
+                    ]
+                },
+                "chip_control.registers": {
+                    "status": "no",
+                    "searched": "PN532_COMMAND_READREGISTER and PN532_COMMAND_WRITEREGISTER and the bytes 0x06 and 0x08 as commands in Adafruit_PN532.cpp and examples: the names are only defined at Adafruit_PN532.h lines 33 and 34 and never used."
+                },
+                "chip_control.gpio": {
+                    "status": "yes",
+                    "note": "P3 only: readGPIO returns P3 and drops P7 and I0I1, writeGPIO leaves P7 alone.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:391",
+                        "Adafruit_PN532.cpp:398",
+                        "Adafruit_PN532.cpp:439",
+                        "Adafruit_PN532.cpp:440"
+                    ]
+                },
+                "chip_control.parameters": {
+                    "status": "no",
+                    "searched": "PN532_COMMAND_SETPARAMETERS and the byte 0x12 as a command in Adafruit_PN532.cpp and examples: the name is only defined at Adafruit_PN532.h line 38 and never used."
+                },
+                "chip_control.serial_baud": {
+                    "status": "no",
+                    "searched": "PN532_COMMAND_SETSERIALBAUDRATE and the byte 0x10 as a command in Adafruit_PN532.cpp and examples: the name is only defined at Adafruit_PN532.h line 37 and never used. The UART speed is fixed at 115200 at line 163."
+                },
+                "chip_control.reset_recovery": {
+                    "status": "partly",
+                    "note": "reset() and begin() are public, and begin() can be called again. The I2C and UART constructors take a reset pin. The SPI constructors do not, so _reset stays -1 and reset() does nothing there; only wakeup with SAMConfig remains. Recovery is left to the caller, and no timeout path starts it.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:182",
+                        "Adafruit_PN532.cpp:184",
+                        "Adafruit_PN532.cpp:185",
+                        "Adafruit_PN532.cpp:187",
+                        "Adafruit_PN532.cpp:171",
+                        "Adafruit_PN532.h:151"
+                    ]
+                },
+                "several.several_readers": {
+                    "status": "partly",
+                    "note": "Pins, device objects and card state are members, so several objects can exist. The packet buffer that holds every frame in flight is one global shared by all objects. It keeps nothing between calls, so readers used in turn from one task work, but the rubric condition of no state in a global is not met, and calls from two tasks overwrite each other's frames.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:79",
+                        "Adafruit_PN532.h:203",
+                        "Adafruit_PN532.h:207",
+                        "Adafruit_PN532.h:216"
+                    ]
+                },
+                "several.shared_spi_bus": {
+                    "status": "yes",
+                    "note": "Each object holds its own SPI device with its own chip select on a given SPIClass. Not tried on hardware.",
+                    "evidence": [
+                        "Adafruit_PN532.h:145",
+                        "Adafruit_PN532.cpp:123",
+                        "Adafruit_PN532.cpp:124",
+                        "Adafruit_PN532.cpp:125"
+                    ]
+                },
+                "several.thread_safety": {
+                    "status": "no",
+                    "searched": "Adafruit_PN532.cpp, .h and README.md for mutex, semaphore, critical, noInterrupts, lock (as a guard), task, thread and reentrant: no lock and no stated rule. The global packet buffer has no guard."
+                },
+                "code_health.errors_returned": {
+                    "status": "partly",
+                    "note": "Most functions return a bool or 0/1, so a caller sees pass or fail but not the cause: timeout, missing ACK, card error and bad frame look the same. Failures that do not reach the caller: readGPIO returns 0, the same as all pins low; writes return 1 regardless; begin returns true without a chip; bus errors are dropped in readdata and writecommand.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:350",
+                        "Adafruit_PN532.cpp:283",
+                        "Adafruit_PN532.cpp:444",
+                        "Adafruit_PN532.cpp:1023",
+                        "Adafruit_PN532.h:210",
+                        "Adafruit_PN532.h:211"
+                    ]
+                },
+                "code_health.buffers_bounded": {
+                    "status": "partly",
+                    "note": "inDataExchange bounds the send length and clamps the copy to the caller's size, but not to the 64-byte packet buffer it copies from. readDetectedPassiveTargetID, getDataTarget and setDataTarget copy by a length from the chip with no bound. The caller gives no buffer size to the first two.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:670",
+                        "Adafruit_PN532.cpp:722",
+                        "Adafruit_PN532.cpp:642",
+                        "Adafruit_PN532.cpp:1683",
+                        "Adafruit_PN532.cpp:1715"
+                    ]
+                },
+                "code_health.allocation_checked": {
+                    "status": "partly",
+                    "note": "No test follows new. Where new returns NULL the result is handled indirectly: each use is guarded by if (spi_dev) or if (i2c_dev), and begin() falls through to return false. Where new throws or aborts, nothing handles it.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:95",
+                        "Adafruit_PN532.cpp:112",
+                        "Adafruit_PN532.cpp:125",
+                        "Adafruit_PN532.cpp:151",
+                        "Adafruit_PN532.cpp:169"
+                    ]
+                },
+                "code_health.tests": {
+                    "status": "no",
+                    "searched": "The whole tree by name for test and by content for unity, gtest, aunit, TEST_CASE and assertEqual. There are no test files. The only name match is the empty CI marker examples/apduToBlackBerry/.esp32.test.skip. The content matches are ordinary words in the two .github templates. .github/workflows/githubci.yml only builds for platforms, checks clang-format and generates doxygen."
+                },
+                "code_health.examples": {
+                    "status": "yes",
+                    "note": "13 example sketches for UID reading, Classic, NTAG, NDEF, target mode and APDU exchange. No example uses UART, apart from one commented-out constructor line.",
+                    "evidence": [
+                        "examples/readMifareClassic/readMifareClassic.ino:94",
+                        "examples/readMifareClassicIrq/readMifareClassicIrq.ino:112",
+                        "examples/iso14443as_target/iso14443as_target.ino:90"
+                    ]
+                },
+                "code_health.docs": {
+                    "status": "yes",
+                    "note": "The README gives the dependency and the installation, the rest is contributor text. The usage text is the doxygen block above each function.",
+                    "evidence": ["README.md:53", "Adafruit_PN532.cpp:547", "Adafruit_PN532.cpp:552"]
+                },
+                "code_health.license": {
+                    "status": "yes",
+                    "note": "BSD 3-clause text.",
+                    "evidence": ["license.txt:1", "license.txt:3"]
+                }
+            },
+            "defects": [
+                {
+                    "what": "mifareclassic_WriteNDEFURI, for a URL of 24 to 38 characters, copies len - 24 bytes into the third block where len - 23 remain and puts the 0xFE terminator at index len - 22 instead of len - 23, so the last character is left as 0x00 on the card with a return of 1, and at len = 38, the documented maximum, the terminator is written one byte past the 16-byte stack array.",
+                    "severity": "high",
+                    "judged": "For len 24 to 38, block 3 needs url[23] to url[len - 1], which is len - 23 bytes, but len - 24 are copied and 0xFE goes to index len - 22, so the last character is written as 0x00 and the function returns 1. At len 38, the documented maximum, the index is 16 in a 16-byte stack array.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:1086",
+                        "Adafruit_PN532.cpp:1111",
+                        "Adafruit_PN532.cpp:1137",
+                        "Adafruit_PN532.cpp:1138"
+                    ]
+                },
+                {
+                    "what": "mifareclassic_WriteDataBlock, mifareultralight_WritePage and ntag2xx_WritePage read the response and return 1 without looking at Status, so a write that the card refused is reported as success, and mifareclassic_FormatNDEF and both WriteNDEFURI functions inherit this.",
+                    "severity": "high",
+                    "judged": "Each of the three functions reads 26 bytes into the packet buffer and returns 1 with no test of Status at byte 7, so a refused write is success for them and for FormatNDEF and both WriteNDEFURI functions.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:1021",
+                        "Adafruit_PN532.cpp:1023",
+                        "Adafruit_PN532.cpp:1278",
+                        "Adafruit_PN532.cpp:1281",
+                        "Adafruit_PN532.cpp:1418",
+                        "Adafruit_PN532.cpp:1421"
+                    ]
+                },
+                {
+                    "what": "inDataExchange reads 64 bytes of the frame but copies LEN - 3 bytes limited only by the caller's *responseLength, so a response of more than 56 data bytes (legal up to 262, 7.3.8) is filled from memory past the end of the global buffer and returned with true.",
+                    "severity": "high",
+                    "judged": "Only 64 bytes are read, data starts at index 8, and the copy runs to LEN - 3 limited only by *responseLength, so with a large enough caller buffer a response over 56 bytes is filled from memory after the global buffer and returns true.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:78",
+                        "Adafruit_PN532.cpp:698",
+                        "Adafruit_PN532.cpp:720",
+                        "Adafruit_PN532.cpp:722",
+                        "Adafruit_PN532.cpp:726",
+                        "Adafruit_PN532.cpp:727"
+                    ]
+                },
+                {
+                    "what": "AsTarget compares the response code with 0x15, the SAMConfiguration response, while TgInitAsTarget returns D5 8D (7.3.14), so it returns false on a successful activation.",
+                    "severity": "high",
+                    "judged": "TgInitAsTarget returns D5 8D (7.3.14), so byte 6 is 0x8D and the comparison with 0x15 fails, and AsTarget() returns false on a successful activation. The example ignores the value.",
+                    "evidence": ["Adafruit_PN532.cpp:1659", "Adafruit_PN532.cpp:1661", "Adafruit_PN532.cpp:1662"]
+                },
+                {
+                    "what": "setDataTarget compares the response code with 0x15 while TgSetData returns D5 8F (7.3.17), so it returns false on a successful send, and the Status byte is not examined.",
+                    "severity": "high",
+                    "judged": "Byte 6 of the frame is the response code, which is 0x8F for TgSetData (7.3.17), and the function compares it with 0x15, so it returns false on every successful send and never looks at Status at byte 7.",
+                    "evidence": ["Adafruit_PN532.cpp:1714", "Adafruit_PN532.cpp:1722", "Adafruit_PN532.cpp:1723"]
+                },
+                {
+                    "what": "getDataTarget reads 64 bytes and copies LEN - 3 bytes into cmd with no limit and no size from the caller, so data of more than 56 bytes from an initiator is taken from memory past the global buffer, and any caller buffer smaller than the data is overrun.",
+                    "severity": "high",
+                    "judged": "Only 64 bytes are read but LEN - 3 bytes are copied, and the caller gives no size. Data of more than 56 bytes from an initiator (up to 262 in 7.3.16) comes from memory after the global buffer and overruns any smaller caller buffer.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:1682",
+                        "Adafruit_PN532.cpp:1683",
+                        "Adafruit_PN532.cpp:1690",
+                        "Adafruit_PN532.cpp:1691"
+                    ]
+                },
+                {
+                    "what": "readDetectedPassiveTargetID copies NFCIDLength bytes into uid with no limit and no size from the caller, so a card with a 10-byte UID (cascade level 3, 7.3.5) writes 3 bytes past the 7-byte array that the API documents and the examples declare, those 3 bytes are not part of the 20 bytes read, and a Jewel response or a damaged frame gives a length of up to 255.",
+                    "severity": "high",
+                    "read_as": "medium",
+                    "judged": "The copy bound is NFCIDLength from the frame with no size from the caller, and the API text and examples give 7 bytes, so a 10-byte UID overruns by 3. Only 20 bytes are read, so those 3 come from an older frame.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:549",
+                        "Adafruit_PN532.cpp:604",
+                        "Adafruit_PN532.cpp:638",
+                        "Adafruit_PN532.cpp:642",
+                        "Adafruit_PN532.cpp:643",
+                        "examples/readMifareClassic/readMifareClassic.ino:88"
+                    ]
+                },
+                {
+                    "what": "mifareclassic_AuthenticateBlock copies uidLen bytes into the 7-byte member _uid with no check, so the length 10 that readPassiveTargetID can return overwrites _uidLen and the start of _key, and the corrupted key is then sent.",
+                    "severity": "medium",
+                    "judged": "memcpy has no check and the key is stored first, so uidLen 10 overwrites _uidLen and _key[0..1], and the corrupted key is sent. The length comes from the card through the caller, but the examples test uidLength == 4 before this call, so it is reached only outside the shown use.",
+                    "evidence": [
+                        "Adafruit_PN532.h:204",
+                        "Adafruit_PN532.h:206",
+                        "Adafruit_PN532.cpp:877",
+                        "Adafruit_PN532.cpp:878",
+                        "Adafruit_PN532.cpp:897"
+                    ]
+                },
+                {
+                    "what": "The Mifare parsers test byte 7 without checking the frame, and byte 7 of the syntax error frame is its postamble 0x00, so mifareclassic_AuthenticateBlock returns 1 when the chip rejects the command, for example the 13 data bytes sent for a 7-byte UID, which 7.3.8 lists as a syntax error, and the block and page read functions return 1 with bytes that are not card data.",
+                    "severity": "medium",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:902",
+                        "Adafruit_PN532.cpp:906",
+                        "Adafruit_PN532.cpp:912",
+                        "Adafruit_PN532.cpp:962",
+                        "Adafruit_PN532.cpp:972",
+                        "Adafruit_PN532.cpp:1203"
+                    ]
+                },
+                {
+                    "what": "readdata and writecommand return void and drop the results of i2c_dev->read, i2c_dev->write and ser_dev->readBytes, so after a bus error isready tests an uninitialized byte, which can pass as ready, and the parsers take uninitialized or old bytes for a response.",
+                    "severity": "medium",
+                    "judged": "Adafruit_I2CDevice.cpp in ~/Arduino/libraries returns false from _read without writing the buffer when the byte count differs, and readdata and isready ignore that, so rdy and rbuff stay uninitialised. It needs a NACK or bus error, which 6.2.4 says can also occur right after an exchange.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:1557",
+                        "Adafruit_PN532.cpp:1558",
+                        "Adafruit_PN532.cpp:1559",
+                        "Adafruit_PN532.cpp:1609",
+                        "Adafruit_PN532.cpp:1610",
+                        "Adafruit_PN532.cpp:1616",
+                        "Adafruit_PN532.cpp:1815"
+                    ]
+                },
+                {
+                    "what": "When the host gives up a wait, no ACK frame is sent (6.2.2.1 d), so after readPassiveTargetID with a timeout and no card the chip keeps polling with the RF field on (MxRtyPassiveActivation 0xFF by default, 7.3.1), and on UART the response to a card that arrives later is read by the next readack in place of the ACK.",
+                    "severity": "medium",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:361",
+                        "Adafruit_PN532.cpp:362",
+                        "Adafruit_PN532.cpp:563",
+                        "Adafruit_PN532.cpp:567"
+                    ]
+                },
+                {
+                    "what": "readPassiveTargetID has the default timeout 0, which makes waitready loop without end, so a chip that stops working or a missing ACK hangs the program.",
+                    "severity": "medium",
+                    "evidence": [
+                        "Adafruit_PN532.h:166",
+                        "Adafruit_PN532.cpp:1579",
+                        "Adafruit_PN532.cpp:1580",
+                        "examples/readMifareClassic/readMifareClassic.ino:94"
+                    ]
+                },
+                {
+                    "what": "waitready adds 10 to a uint16_t counter and tests timer > timeout, so the counter wraps and never exceeds a timeout of 65534 or 65535, values that readPassiveTargetID accepts, and the wait has no end.",
+                    "severity": "medium",
+                    "judged": "timer is uint16_t and steps by 10, so it takes only even values with a maximum of 65534 and never exceeds a timeout of 65534 or 65535, which are legal uint16_t values for readPassiveTargetID. Only those two values wait with no end.",
+                    "evidence": ["Adafruit_PN532.cpp:1578", "Adafruit_PN532.cpp:1581", "Adafruit_PN532.cpp:1582"]
+                },
+                {
+                    "what": "begin returns true without testing the chip, because wakeup is void and drops the result of SAMConfig, so with no chip or a dead chip it reports success, against its documented return value.",
+                    "severity": "medium",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:147",
+                        "Adafruit_PN532.cpp:173",
+                        "Adafruit_PN532.cpp:174",
+                        "Adafruit_PN532.cpp:212"
+                    ]
+                },
+                {
+                    "what": "On UART the fixed read lengths are shorter than some frames (writeGPIO 8 of 9 bytes, readGPIO 11 of 12, readDetectedPassiveTargetID 20 of 22 for a 7-byte UID), and the bytes left in the receive buffer are read by the next readack in place of the ACK, so the next commands return failure.",
+                    "severity": "medium",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:413",
+                        "Adafruit_PN532.cpp:448",
+                        "Adafruit_PN532.cpp:604",
+                        "Adafruit_PN532.cpp:1537",
+                        "Adafruit_PN532.cpp:1616"
+                    ]
+                },
+                {
+                    "what": "setPassiveActivationRetries returns after sendCommandCheckAck without reading the response frame, so the result of the command is not checked, and on UART the 9 unread bytes are read by the next readack in place of the ACK.",
+                    "severity": "medium",
+                    "evidence": ["Adafruit_PN532.cpp:534", "Adafruit_PN532.cpp:537"]
+                },
+                {
+                    "what": "inDataExchange sends _inListedTag, which only inListPassiveTarget sets and no constructor initializes, so after detection with readPassiveTargetID the target number is 0, or indeterminate for an object that is not static, where the chip assigned 1 (7.3.5), and the chip returns Status 0x27 for an unknown target (7.3.8).",
+                    "severity": "medium",
+                    "evidence": ["Adafruit_PN532.h:207", "Adafruit_PN532.cpp:679", "Adafruit_PN532.cpp:794"]
+                },
+                {
+                    "what": "getDataTarget does not read the Status byte, so an error such as 0x29, released by the initiator, gives LEN 3, length 0 and a return of true.",
+                    "severity": "medium",
+                    "evidence": ["Adafruit_PN532.cpp:1683", "Adafruit_PN532.cpp:1693", "Adafruit_PN532.cpp:1694"]
+                },
+                {
+                    "what": "setDataTarget computes length = LEN - 3 in a uint8_t with no check and copies that many bytes into the caller's cmd, so a syntax error frame, LEN = 1, gives 254 bytes, which overruns cmd and reads past the global buffer.",
+                    "severity": "medium",
+                    "judged": "length is LEN - 3 in a uint8_t with no check, so the error frame of 6.2.1.5 with LEN 1 gives 254 and overruns cmd and the global buffer. A normal TgSetData response has LEN 3 and copies nothing, so this needs a rejected command.",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:1707",
+                        "Adafruit_PN532.cpp:1715",
+                        "Adafruit_PN532.cpp:1716",
+                        "Adafruit_PN532.cpp:1717"
+                    ]
+                },
+                {
+                    "what": "inDataExchange masks the MI bit out of Status and does not act on it, so a response marked as incomplete (7.3.8, 7.4.5) is returned with true as if it were complete.",
+                    "severity": "medium",
+                    "evidence": ["Adafruit_PN532.cpp:713", "Adafruit_PN532.cpp:731"]
+                },
+                {
+                    "what": "readGPIO returns 0 on failure, the same value as all pins low, and does not check the response, so a failed read cannot be told from a pin state.",
+                    "severity": "medium",
+                    "evidence": ["Adafruit_PN532.cpp:443", "Adafruit_PN532.cpp:444", "Adafruit_PN532.cpp:486"]
+                },
+                {
+                    "what": "AsTarget waits with the default 100 ms for a command that ends only when a frame from an initiator has arrived (7.3.14) and the caller cannot change this, so without an initiator in that window it returns false with the command still running, and the next command aborts it (6.2.2.2 b), as the TgGetData of the example does.",
+                    "severity": "medium",
+                    "evidence": [
+                        "Adafruit_PN532.h:158",
+                        "Adafruit_PN532.cpp:1655",
+                        "examples/iso14443as_target/iso14443as_target.ino:89",
+                        "examples/iso14443as_target/iso14443as_target.ino:90"
+                    ]
+                },
+                {
+                    "what": "The comment above sendCommandCheckAck says the default timeout is one second, and the declaration gives 100 ms.",
+                    "severity": "low",
+                    "evidence": ["Adafruit_PN532.cpp:322", "Adafruit_PN532.h:158"]
+                },
+                {
+                    "what": "Two examples say that setPassiveActivationRetries(0xFF) prevents waiting forever, while 0xFF is the value that retries without end (7.3.1).",
+                    "severity": "low",
+                    "evidence": [
+                        "examples/iso14443a_uid/iso14443a_uid.ino:76",
+                        "examples/iso14443a_uid/iso14443a_uid.ino:78",
+                        "examples/iso14443as_target/iso14443as_target.ino:78",
+                        "examples/iso14443as_target/iso14443as_target.ino:80",
+                        "Adafruit_PN532.cpp:515"
+                    ]
+                },
+                {
+                    "what": "The _irq branch of isready cannot be reached, because every constructor sets spi_dev, i2c_dev or ser_dev and those branches come first, so the irq constructor argument only sets a pin mode.",
+                    "severity": "low",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:110",
+                        "Adafruit_PN532.cpp:1549",
+                        "Adafruit_PN532.cpp:1555",
+                        "Adafruit_PN532.cpp:1560",
+                        "Adafruit_PN532.cpp:1563"
+                    ]
+                },
+                {
+                    "what": "startPassiveTargetIDDetection is documented as non blocking with 0 for an error, but it waits for the ACK and then up to 100 ms for the response, and it returns 0 when no card arrived in that time as well as when the command failed.",
+                    "severity": "low",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:575",
+                        "Adafruit_PN532.cpp:578",
+                        "Adafruit_PN532.cpp:586",
+                        "Adafruit_PN532.cpp:361"
+                    ]
+                },
+                {
+                    "what": "mifareclassic_WriteNDEFURI and ntag2xx_WriteNDEFURI store strlen in a uint8_t, so a URL of 256 or more characters wraps to a short length, can pass the length check and is written cut short with a return of 1.",
+                    "severity": "low",
+                    "evidence": ["Adafruit_PN532.cpp:1079", "Adafruit_PN532.cpp:1447"]
+                },
+                {
+                    "what": "With MIFAREDEBUG defined, PrintHex is called with int8_t arrays although it takes const byte *, an invalid conversion that C++ rejects unless -fpermissive is on.",
+                    "severity": "low",
+                    "evidence": [
+                        "Adafruit_PN532.cpp:883",
+                        "Adafruit_PN532.cpp:887",
+                        "Adafruit_PN532.h:199",
+                        "Adafruit_PN532.h:204"
+                    ]
+                },
+                {
+                    "what": "The constructors allocate the device object with new and the class has no destructor, so a destroyed reader leaks it.",
+                    "severity": "low",
+                    "evidence": ["Adafruit_PN532.cpp:95", "Adafruit_PN532.cpp:112", "Adafruit_PN532.cpp:125"]
+                }
+            ]
+        }
+    ]
+}

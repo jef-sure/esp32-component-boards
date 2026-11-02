@@ -41,9 +41,9 @@
         }
     },
     "versions": {
-        "0.2.0": {"frameworks": {"esp-idf": ">=5.2.0"}},
-        "0.1.0": {"frameworks": {"esp-idf": ">=5.2.0"}},
-        "0.0.3": {"frameworks": {"esp-idf": ">=5.2.0"}},
-        "0.0.1": {"frameworks": {"esp-idf": ">=5.2.0"}}
+        "0.2.0": {"platforms": {"esp_idf": ">=5.2.0"}},
+        "0.1.0": {"platforms": {"esp_idf": ">=5.2.0"}},
+        "0.0.3": {"platforms": {"esp_idf": ">=5.2.0"}},
+        "0.0.1": {"platforms": {"esp_idf": ">=5.2.0"}}
     }
 }

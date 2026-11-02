@@ -15,7 +15,7 @@
         }
     },
     "versions": {
-        "1.1.0": {"frameworks": {"esp-idf": ">=5.2"}, "requires": {"esp-idf/owner_b/base": "^2.1"}},
+        "1.1.0": {"platforms": {"esp_idf": ">=5.2"}, "requires": {"esp-idf/owner_b/base": "^2.1"}},
         "1.0.0": {"requires": {"esp-idf/owner_b/base": "^2.0"}}
     },
     "history": [

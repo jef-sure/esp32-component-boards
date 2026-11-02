@@ -1,0 +1,809 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "audit",
+    "name": "cie-pn532",
+    "title": "CIE-PN532",
+    "audits": [
+        {
+            "version": "1.0.0",
+            "tag": "1.0.0",
+            "commit": "d2f67c67d5ef5f10ceaca996a4d1f640bbaf32fc",
+            "rubric": "pn532",
+            "rubric_version": 1,
+            "date": "2026-11-01",
+            "by": "claude-opus-5-5",
+            "items": {
+                "transports.i2c": {
+                    "status": "no",
+                    "searched": "I2C, i2c, TwoWire, Wire in all .cpp, .h, .ino, .md, .rst and .properties files. Hits are only #include <Wire.h> in the sketches and comments (cie_PN532.h:13, cie_PN532.h:36, 'I2C is not supported' in the sketches).",
+                    "note": "No constructor takes I2C arguments. The only construction of Adafruit_PN532 is the four-pin one at cie_Nfc_Adafruit.cpp:38."
+                },
+                "transports.spi": {
+                    "status": "yes",
+                    "note": "By delegation only: the library builds Adafruit_PN532 with four pins named clk, miso, mosi, ss. The folder holds no SPI transfer code, and no SPI peripheral or bus object can be passed in.",
+                    "evidence": ["cie_Nfc_Adafruit.cpp:38", "cie_PN532.cpp:43", "cie_PN532.cpp:45"]
+                },
+                "transports.uart": {
+                    "status": "no",
+                    "searched": "uart, UART, HSU, HardwareSerial in all .cpp, .h, .ino, .md, .rst and .properties files: no hits.",
+                    "note": "The only use of Serial is debug printing through PN532DEBUGPRINT."
+                },
+                "builds_on.esp_idf": {
+                    "status": "no",
+                    "searched": "esp_, esp32, driver/, freertos, ESP_LOG in all .cpp, .h, .ino, .md, .rst and .properties files: no hits. spi_master, i2c_master, uart: no hits.",
+                    "note": "No ESP-IDF driver API is called. The headers include Arduino.h and Adafruit_PN532.h, and the code uses Serial, F(), byte, word, random and analogRead.",
+                    "evidence": ["cie_Nfc.h:18", "cie_Nfc_Adafruit.h:14"]
+                },
+                "builds_on.arduino": {
+                    "status": "yes",
+                    "note": "Arduino layout and API. Not built, as instructed. It needs Adafruit_PN532, which is not in the folder and is not declared in library.properties (no depends line). cie_Nfc_Adafruit.cpp:86 passes a word* response length, so the dependency must accept that signature. The test sketch does not share this status, see tests.",
+                    "evidence": [
+                        "library.properties:5",
+                        "cie_Nfc.h:18",
+                        "cie_Nfc_Adafruit.h:14",
+                        "cie_Nfc_Adafruit.cpp:86"
+                    ]
+                },
+                "builds_on.esp_idf_component": {
+                    "status": "no",
+                    "searched": "find for CMakeLists.txt, idf_component.yml, component.mk, Kconfig, library.json, platformio.ini: no files. idf_component_register: no hits.",
+                    "note": "Only library.properties describes the package."
+                },
+                "frames.ack_checked": {
+                    "status": "no",
+                    "searched": "ACK, NACK, PN532_ACK, waitready in all .cpp, .h, .ino, .md, .rst and .properties files: no hits.",
+                    "note": "This folder never sees a PN532 frame: it passes APDU bytes to inDataExchange and gets bytes back. All chip traffic goes through Adafruit_PN532, an external library that is not in this folder. cie_Nfc_Adafruit.cpp makes five calls to it: begin, getFirmwareVersion, SAMConfig, inListPassiveTarget, inDataExchange. What that library does cannot be read here, so it earns no credit."
+                },
+                "frames.checksums_checked": {
+                    "status": "no",
+                    "searched": "LCS, DCS, checksum, TFI as a word in all .cpp, .h, .ino, .md, .rst and .properties files: no hits. 'preamble' hits are the READ BINARY response octets at cie_PN532.cpp:750-769, not a PN532 frame.",
+                    "note": "This folder never sees a PN532 frame: it passes APDU bytes to inDataExchange and gets bytes back. All chip traffic goes through Adafruit_PN532, an external library that is not in this folder. cie_Nfc_Adafruit.cpp makes five calls to it: begin, getFirmwareVersion, SAMConfig, inListPassiveTarget, inDataExchange. What that library does cannot be read here, so it earns no credit."
+                },
+                "frames.extended_frames": {
+                    "status": "no",
+                    "searched": "extended, 0xFF 0xFF, LEN M, LEN L in all .cpp, .h, .ino, .md, .rst and .properties files: no hits in code.",
+                    "note": "This folder never sees a PN532 frame: it passes APDU bytes to inDataExchange and gets bytes back. All chip traffic goes through Adafruit_PN532, an external library that is not in this folder. cie_Nfc_Adafruit.cpp makes five calls to it: begin, getFirmwareVersion, SAMConfig, inListPassiveTarget, inDataExchange. What that library does cannot be read here, so it earns no credit. The folder reads files in pages of at most PAGE_LENGTH (0xE4) bytes."
+                },
+                "frames.error_frame": {
+                    "status": "no",
+                    "searched": "0x7F, syntax error, error frame in all .cpp, .h, .ino, .md, .rst and .properties files: no hits in code.",
+                    "note": "This folder never sees a PN532 frame: it passes APDU bytes to inDataExchange and gets bytes back. All chip traffic goes through Adafruit_PN532, an external library that is not in this folder. cie_Nfc_Adafruit.cpp makes five calls to it: begin, getFirmwareVersion, SAMConfig, inListPassiveTarget, inDataExchange. What that library does cannot be read here, so it earns no credit."
+                },
+                "frames.response_code_checked": {
+                    "status": "no",
+                    "searched": "0xD5, 0xD4, PN532_COMMAND in all .cpp, .h, .ino, .md, .rst and .properties files: no hits.",
+                    "note": "This folder never sees a PN532 frame: it passes APDU bytes to inDataExchange and gets bytes back. All chip traffic goes through Adafruit_PN532, an external library that is not in this folder. cie_Nfc_Adafruit.cpp makes five calls to it: begin, getFirmwareVersion, SAMConfig, inListPassiveTarget, inDataExchange. What that library does cannot be read here, so it earns no credit. hasSuccessStatusWord checks the ISO 7816 status word of the card, not the PN532 response code."
+                },
+                "waiting.irq": {
+                    "status": "no",
+                    "searched": "IRQ, irq, attachInterrupt, digitalRead in all .cpp, .h, .ino, .md, .rst and .properties files. Hits: the macro PN532_IRQ at cie_PN532.h:38, which nothing references, and commented-out copies in the sketches.",
+                    "note": "No constructor takes an IRQ pin. All chip traffic goes through Adafruit_PN532, an external library that is not in this folder. cie_Nfc_Adafruit.cpp makes five calls to it: begin, getFirmwareVersion, SAMConfig, inListPassiveTarget, inDataExchange. What that library does cannot be read here, so it earns no credit."
+                },
+                "waiting.ready_polling": {
+                    "status": "no",
+                    "searched": "waitready, isready, readstatus, status byte in all .cpp, .h, .ino, .md, .rst and .properties files: no hits.",
+                    "note": "All chip traffic goes through Adafruit_PN532, an external library that is not in this folder. cie_Nfc_Adafruit.cpp makes five calls to it: begin, getFirmwareVersion, SAMConfig, inListPassiveTarget, inDataExchange. What that library does cannot be read here, so it earns no credit."
+                },
+                "waiting.bounded_waits": {
+                    "status": "no",
+                    "searched": "timeout, millis, waitready in the library sources: no hits (millis appears only in sketches). while loops were read one by one.",
+                    "note": "No chip call in the folder takes a timeout. begin() has an explicit endless loop when no firmware version comes back, so a dead chip hangs the program. Timing of the other calls is inside the external library.",
+                    "evidence": ["cie_Nfc_Adafruit.cpp:51", "cie_Nfc_Adafruit.cpp:69"]
+                },
+                "waiting.nonblocking_detect": {
+                    "status": "no",
+                    "searched": "startPassiveTargetIDDetection, readDetectedPassiveTargetID, InAutoPoll in all .cpp, .h, .ino, .md, .rst and .properties files: no hits.",
+                    "note": "detectCard() is one call that returns a bool. There is no start and collect pair.",
+                    "evidence": ["cie_Nfc_Adafruit.cpp:69"]
+                },
+                "cards.iso14443a_uid": {
+                    "status": "partly",
+                    "note": "It runs InListPassiveTarget through the external library, but only a bool comes back. No UID, ATQA or SAK reaches the caller, and no API in the folder returns one.",
+                    "evidence": ["cie_Nfc_Adafruit.cpp:69", "cie_Nfc.h:22", "cie_PN532.cpp:90"]
+                },
+                "cards.two_targets": {
+                    "status": "no",
+                    "searched": "MaxTg, maxTg, second target, Tg in all .cpp, .h, .ino, .md, .rst and .properties files: no hits.",
+                    "note": "inListPassiveTarget() is called with no arguments and the wrapper holds no target number.",
+                    "evidence": ["cie_Nfc_Adafruit.cpp:69"]
+                },
+                "cards.mifare_classic": {
+                    "status": "no",
+                    "searched": "mifare, Mifare, AuthenticateBlock, ReadDataBlock in all .cpp, .h, .ino, .md, .rst and .properties files: no hits.",
+                    "note": "cie_Nfc exposes no such call."
+                },
+                "cards.ultralight_ntag": {
+                    "status": "no",
+                    "searched": "ultralight, ntag, ReadPage, WritePage in all .cpp, .h, .ino, .md, .rst and .properties files: no hits.",
+                    "note": "cie_Nfc exposes no such call."
+                },
+                "cards.iso14443_4_apdu": {
+                    "status": "yes",
+                    "note": "SELECT, READ BINARY, MSE and INTERNAL AUTHENTICATE APDUs go through inDataExchange. Command length is a byte. cie_PN532::sendCommand is private, so a general APDU needs the public cie_Nfc::sendCommand. The higher layer is fixed to the Italian identity card (AIDs at cie_PN532.cpp:842 and 866).",
+                    "evidence": ["cie_Nfc_Adafruit.cpp:86", "cie_Nfc.h:23", "cie_PN532.cpp:355", "cie_PN532.cpp:763"]
+                },
+                "cards.ndef": {
+                    "status": "no",
+                    "searched": "ndef, NDEF, NdefMessage, Tag Type in all .cpp, .h, .ino, .md, .rst and .properties files: no hits except the letters inside #ifndef and Indefinite."
+                },
+                "cards.iso14443b": {
+                    "status": "no",
+                    "searched": "type B, ISO14443B, BaudModType in all .cpp, .h, .ino, .md, .rst and .properties files: no hits.",
+                    "note": "inListPassiveTarget() takes no modulation argument here."
+                },
+                "cards.felica": {
+                    "status": "no",
+                    "searched": "felica, FeliCa, 212, 424 kbps in all .cpp, .h, .ino, .md, .rst and .properties files: no hits."
+                },
+                "cards.card_emulation": {
+                    "status": "no",
+                    "searched": "TgInitAsTarget, TgGetData, TgSetData, emulat in all .cpp, .h, .ino, .md, .rst and .properties files: no hits."
+                },
+                "cards.peer_to_peer": {
+                    "status": "no",
+                    "searched": "InJumpForDEP, InJumpForPSL, NFCIP, p2p, peer in all .cpp, .h, .ino, .md, .rst and .properties files: no hits."
+                },
+                "chip_control.firmware_version": {
+                    "status": "yes",
+                    "note": "Called once, in begin(), through the external library. The value is printed to Serial and is not returned to the caller.",
+                    "evidence": ["cie_Nfc_Adafruit.cpp:48"]
+                },
+                "chip_control.sam_configuration": {
+                    "status": "yes",
+                    "note": "Called once, in begin(), through the external library, with no arguments. Nothing is done with a result, see defects.",
+                    "evidence": ["cie_Nfc_Adafruit.cpp:57"]
+                },
+                "chip_control.rf_field_control": {
+                    "status": "no",
+                    "searched": "RFConfiguration, setRFField, RFField, 0x32 in all .cpp, .h, .ino, .md, .rst and .properties files: no hits."
+                },
+                "chip_control.retries_control": {
+                    "status": "no",
+                    "searched": "MaxRetries, setPassiveActivationRetries, retries, 0x32 in all .cpp, .h, .ino, .md, .rst and .properties files: no hits.",
+                    "note": "The library never sets MaxRetries, so the time a detection takes is whatever the external library and the chip default give."
+                },
+                "chip_control.power_down": {
+                    "status": "no",
+                    "searched": "PowerDown, powerdown, wakeup, sleep, 0x16 in all .cpp, .h, .ino, .md, .rst and .properties files: no hits except a BER tag case at examples/cie-EF_SOD/cie-EF_SOD.ino:183."
+                },
+                "chip_control.reset_recovery": {
+                    "status": "no",
+                    "searched": "reset, PN532_RESET, RSTPD, wakeup, and a second call of begin() in all .cpp, .h, .ino, .md, .rst and .properties files. The macro PN532_RESET at cie_PN532.h:39 is defined and nothing references it; resetCursor at cie_BerReader.cpp:389 is unrelated.",
+                    "note": "No reset pin is taken. Calling begin() again is the only way to start over, and it enters the endless loop when the chip does not return a firmware version, so a chip that stopped responding halts the program.",
+                    "evidence": ["cie_PN532.h:39", "cie_Nfc_Adafruit.cpp:51"]
+                },
+                "several.several_readers": {
+                    "status": "partly",
+                    "note": "In this folder all state is in instance members; a search for static and for file-scope variables finds none, and each instance takes its own pins. The transport state is in the external library, which cannot be read here, so the requirement is only shown for this folder's part.",
+                    "evidence": [
+                        "cie_PN532.h:119",
+                        "cie_PN532.h:122",
+                        "cie_PN532.h:123",
+                        "cie_BerReader.h:40",
+                        "cie_Nfc_Adafruit.h:32",
+                        "cie_PN532.cpp:43"
+                    ]
+                },
+                "several.shared_spi_bus": {
+                    "status": "partly",
+                    "note": "Each instance takes its own ss, so two instances can name the same clk, miso, mosi and different ss. Nothing in the folder manages a shared bus, and whether it works depends on the external library. Not run.",
+                    "evidence": ["cie_PN532.cpp:43", "cie_Nfc_Adafruit.cpp:38"]
+                },
+                "several.thread_safety": {
+                    "status": "no",
+                    "searched": "mutex, Mutex, Semaphore, noInterrupts, portENTER, lock, thread, task, reentr in all .cpp, .h, .ino, .md, .rst and .properties files: no hits.",
+                    "note": "No lock and no stated rule."
+                },
+                "code_health.errors_returned": {
+                    "status": "partly",
+                    "note": "Failures reach the caller only as bool false, so the caller cannot tell a dead chip, a missing card and a card status word apart; the reason goes to Serial only. begin() returns void and halts on failure.",
+                    "evidence": [
+                        "cie_PN532.cpp:90",
+                        "cie_PN532.cpp:353",
+                        "cie_PN532.cpp:79",
+                        "cie_Nfc.h:21",
+                        "cie_PN532.cpp:903",
+                        "cie_PN532.cpp:919"
+                    ]
+                },
+                "code_health.buffers_bounded": {
+                    "status": "partly",
+                    "note": "Bounded: fixed-length reads are clamped, pages are limited to PAGE_LENGTH, and the capacity of the response buffer is handed to the exchange through responseLength. Not bounded: lengths read from the card replace the caller's length with no compare to the destination buffer, the BER limit is a fixed 2048 and runs after a stack array is sized from the same length, and the ATR path has no limit. See the first two defects. Scope: the BER and ATR readers are audited because they take lengths from the card and issue exchanges; CIE file logic and the unfinished crypto code are left out because they do not drive the PN532.",
+                    "evidence": ["cie_PN532.cpp:170", "cie_PN532.cpp:749", "cie_PN532.cpp:761", "cie_BerReader.cpp:101"]
+                },
+                "code_health.allocation_checked": {
+                    "status": "no",
+                    "searched": "nothrow, == NULL, == nullptr, == 0, !buffer after each new, malloc, calloc in the library sources: no check at any of the new sites in cie_PN532.cpp, cie_BerReader.cpp, cie_Nfc_Adafruit.cpp.",
+                    "note": "Every new is followed by direct use of the pointer.",
+                    "evidence": ["cie_PN532.cpp:334", "cie_PN532.cpp:762", "cie_BerReader.cpp:47"]
+                },
+                "code_health.tests": {
+                    "status": "partly",
+                    "note": "One ArduinoUnit sketch with a mock of cie_Nfc: three tests with content and one empty, none at PN532 level. As written it does not compile, because the mock's definition and declaration differ, and the mock has a memory bug. See defects. Not built, as instructed; this comes from reading the code.",
+                    "evidence": [
+                        "tests/cie-UnitTest/cie-UnitTest.ino:27",
+                        "tests/cie-UnitTest/cie-UnitTest.ino:42",
+                        "tests/cie-UnitTest/cie-UnitTest.ino:58",
+                        "tests/cie-UnitTest/cie-UnitTest.ino:94",
+                        "tests/cie-UnitTest/cie_Nfc_Mock.h:16",
+                        "tests/cie-UnitTest/cie_Nfc_Mock.cpp:115"
+                    ]
+                },
+                "code_health.examples": {
+                    "status": "yes",
+                    "note": "Five sketches under examples/, all reading the Italian identity card over SPI.",
+                    "evidence": [
+                        "examples/cie-ReadSerialNumber/cie-ReadSerialNumber.ino:32",
+                        "examples/cie-ReadSerialNumber/cie-ReadSerialNumber.ino:47",
+                        "examples/cie-ReadSerialNumber/cie-ReadSerialNumber.ino:57",
+                        "examples/cie-ReadAll/cie-ReadAll.ino:33",
+                        "examples/cie-EF_SOD/cie-EF_SOD.ino:60"
+                    ]
+                },
+                "code_health.docs": {
+                    "status": "yes",
+                    "note": "README in English, Sphinx pages in Italian, Doxygen comments in the sources. The getting-started code has an error, see defects.",
+                    "evidence": ["README.md:2", "README.md:17", "README.md:32", "docs/overview.rst:31"]
+                },
+                "code_health.license": {
+                    "status": "yes",
+                    "note": "BSD 3-Clause, copyright Developers Italia 2017.",
+                    "evidence": ["LICENSE:1"]
+                }
+            },
+            "defects": [
+                {
+                    "what": "readElementaryFile() replaces the caller's *contentLength with a length read from the card and then writes that many bytes into contentBuffer with no compare to the buffer size, so a long file overflows the caller's buffer (the BER path is limited only to about 2048 bytes, the ATR path not at all, and the ReadAll example passes 600).",
+                    "severity": "medium",
+                    "read_as": "high",
+                    "judged": "determineLength overwrites *contentLength with the card's length, nothing compares it to the buffer, and readBinaryContent writes that many bytes; the BER path fails only above 2048 and the ATR path has no limit, while ReadAll allocates 600. It needs a file longer than the caller's buffer, which is not the case the example sizes are written for.",
+                    "evidence": [
+                        "cie_PN532.cpp:538",
+                        "cie_PN532.cpp:539",
+                        "cie_BerReader.cpp:64",
+                        "cie_AtrReader.cpp:60",
+                        "cie_PN532.cpp:769",
+                        "examples/cie-ReadAll/cie-ReadAll.ino:81"
+                    ]
+                },
+                {
+                    "what": "readTriples() declares a stack array sized by a length read from the card (up to 65535) and fills it before the BER_READER_MAX_LENGTH check runs, so a card can overflow the stack.",
+                    "severity": "medium",
+                    "read_as": "high",
+                    "judged": "The VLA is sized by a card-supplied 16-bit contentLength and is filled at line 75, while the BER_READER_MAX_LENGTH test comes at line 101. Genuine OIDs are short, so this needs a crafted OID triple.",
+                    "evidence": ["cie_BerReader.cpp:74", "cie_BerReader.cpp:75", "cie_BerReader.cpp:101"]
+                },
+                {
+                    "what": "cie_Nfc_Adafruit::begin() enters an endless loop when getFirmwareVersion() returns 0 and returns void, so a missing or dead chip stops the whole program and the caller gets no error.",
+                    "severity": "medium",
+                    "read_as": "high",
+                    "judged": "begin() returns void and spins in while (1) when getFirmwareVersion() returns 0, and cie_PN532::begin() calls it directly, so a dead chip stops the program with no error to the caller. A working chip passes, so this happens only after a fault.",
+                    "evidence": ["cie_Nfc_Adafruit.cpp:46", "cie_Nfc_Adafruit.cpp:49", "cie_Nfc_Adafruit.cpp:51"]
+                },
+                {
+                    "what": "readBinaryContent() copies the requested number of bytes out of responseBuffer without comparing them to the returned response length and without checking the preamble octets, so a short response with status 9000 puts uninitialized heap bytes into the caller's buffer.",
+                    "severity": "medium",
+                    "evidence": ["cie_PN532.cpp:762", "cie_PN532.cpp:763", "cie_PN532.cpp:768", "cie_PN532.cpp:769"]
+                },
+                {
+                    "what": "cie_BerReader::detectLength() ignores the result of readOctets(), so after a failed exchange it builds contentLength from an uninitialized buffer and returns true.",
+                    "severity": "medium",
+                    "evidence": [
+                        "cie_BerReader.cpp:239",
+                        "cie_BerReader.cpp:240",
+                        "cie_BerReader.cpp:245",
+                        "cie_BerReader.cpp:256"
+                    ]
+                },
+                {
+                    "what": "readBinaryContent() ends its page loop on offset < contentLength although offset starts at startingOffset, so a read longer than one page from a nonzero offset can stop early and return true with part of the buffer unfilled (offset 1000, length 300 stops after 228 bytes).",
+                    "severity": "medium",
+                    "evidence": ["cie_PN532.cpp:747", "cie_PN532.cpp:749", "cie_PN532.cpp:775"]
+                },
+                {
+                    "what": "No result of new is checked, so where new returns a null pointer instead of throwing, a failed allocation is used directly, for example as the response buffer of an exchange.",
+                    "severity": "medium",
+                    "evidence": [
+                        "cie_PN532.cpp:334",
+                        "cie_PN532.cpp:762",
+                        "cie_PN532.cpp:763",
+                        "cie_PN532.cpp:799",
+                        "cie_BerReader.cpp:47"
+                    ]
+                },
+                {
+                    "what": "readTriples() ignores the result of readBinaryContent() for an object identifier and then compares the uninitialized array with the known OIDs.",
+                    "severity": "low",
+                    "evidence": ["cie_BerReader.cpp:75", "cie_BerReader.cpp:77"]
+                },
+                {
+                    "what": "hasSuccessStatusWord() reads response[responseLength-2] with no check that the length is at least 2, so a response of 0 or 1 bytes is read out of bounds.",
+                    "severity": "low",
+                    "evidence": ["cie_PN532.cpp:356", "cie_PN532.cpp:887", "cie_PN532.cpp:888"]
+                },
+                {
+                    "what": "begin() does not check SAMConfig() and cannot report a failure because it returns void, so a failed SAM configuration looks the same as no card being present.",
+                    "severity": "low",
+                    "evidence": ["cie_Nfc_Adafruit.cpp:57", "cie_PN532.cpp:79"]
+                },
+                {
+                    "what": "detectCard() assigns NULL_EF to _currentDedicatedFile instead of _currentElementaryFile, so the cached EF is not cleared there; the effect is masked because ensureDedicatedFileIsSelected() clears it on the next selection.",
+                    "severity": "low",
+                    "evidence": ["cie_PN532.cpp:93", "cie_PN532.cpp:94", "cie_PN532.cpp:648"]
+                },
+                {
+                    "what": "cie_Nfc has no virtual destructor, so delete _nfc through the base pointer in ~cie_PN532() is undefined behaviour and ~cie_Nfc_Adafruit(), which frees the Adafruit_PN532 object, is not guaranteed to run.",
+                    "severity": "low",
+                    "evidence": ["cie_Nfc.h:19", "cie_PN532.cpp:991", "cie_Nfc_Adafruit.cpp:116"]
+                },
+                {
+                    "what": "isCardValid() never deletes the cie_Key it allocates, on either return path, so each call leaks the object and its 260 bytes of key data.",
+                    "severity": "low",
+                    "evidence": ["cie_PN532.cpp:229", "cie_PN532.cpp:231", "cie_PN532.cpp:256"]
+                },
+                {
+                    "what": "readBinaryContent() uses 2 preamble octets for a page of exactly 0x80 bytes, but the BER short form ends at 0x7F (this library's own parser treats 0x80 as indefinite length), so such a page is parsed one octet off.",
+                    "severity": "low",
+                    "evidence": ["cie_PN532.cpp:750", "cie_BerReader.cpp:223"]
+                },
+                {
+                    "what": "Two loops that run one exchange per pass have no iteration limit and end only on a read failure or a match, and their word offset wraps, so a card that keeps returning status 9000 keeps them running.",
+                    "severity": "low",
+                    "evidence": [
+                        "cie_AtrReader.cpp:43",
+                        "cie_AtrReader.cpp:44",
+                        "cie_BerReader.cpp:277",
+                        "cie_BerReader.h:40"
+                    ]
+                },
+                {
+                    "what": "The definition of cie_Nfc_Mock::expectCommand takes byte *response while its declaration takes word *response, so the test sketch does not compile as written.",
+                    "severity": "low",
+                    "evidence": ["tests/cie-UnitTest/cie_Nfc_Mock.h:16", "tests/cie-UnitTest/cie_Nfc_Mock.cpp:115"]
+                },
+                {
+                    "what": "cie_Nfc_Mock::expectCommands() ignores count and allocates a zero-length array that expectCommand() then writes past, and clear() calls delete [] on arrays that the test holds on its stack.",
+                    "severity": "low",
+                    "evidence": [
+                        "tests/cie-UnitTest/cie_Nfc_Mock.cpp:98",
+                        "tests/cie-UnitTest/cie_Nfc_Mock.cpp:99",
+                        "tests/cie-UnitTest/cie_Nfc_Mock.cpp:116",
+                        "tests/cie-UnitTest/cie_Nfc_Mock.cpp:175",
+                        "tests/cie-UnitTest/cie-UnitTest.ino:63"
+                    ]
+                },
+                {
+                    "what": "The getting-started code writes cie_PN532 cie(); which C++ parses as a function declaration, so the cie.begin() that follows does not compile.",
+                    "severity": "low",
+                    "evidence": ["README.md:42", "README.md:50", "docs/overview.rst:41"]
+                }
+            ]
+        },
+        {
+            "version": "1.0.0",
+            "tag": "1.0.0",
+            "blind": true,
+            "commit": "d2f67c67d5ef5f10ceaca996a4d1f640bbaf32fc",
+            "rubric": "pn532",
+            "rubric_version": 2,
+            "date": "2026-11-02",
+            "by": "claude-opus-5-5",
+            "items": {
+                "transports.i2c": {
+                    "status": "no",
+                    "searched": "I2C, Wire, TwoWire, 0x48, 0x24 in cie_*.cpp, cie_*.h, examples, tests, README.md and docs/*.rst. Hits: unused #include <Wire.h> in sketches and the README, comments, commented-out defines in the examples, and the unused macros PN532_IRQ and PN532_RESET in cie_PN532.h.",
+                    "note": "The constructors take only clk, miso, mosi and ss. The cie_Nfc interface could be implemented over I2C by a user, but no such implementation exists here."
+                },
+                "transports.spi": {
+                    "status": "partly",
+                    "note": "The only transport in the code is the four-pin constructor of the external class Owner_PN532. No SPI code is in the folder (no SPISettings, LSBFIRST, SPI_MODE, no SPI. calls), so mode 0, LSB first, the clock limit and the first bytes 0x02, 0x01, 0x03 cannot be confirmed.",
+                    "evidence": ["cie_Nfc_Adafruit.cpp:38", "cie_Nfc_Adafruit.cpp:37", "cie_PN532.cpp:43"]
+                },
+                "transports.uart": {
+                    "status": "no",
+                    "searched": "HSU, HardwareSerial, Serial1, Serial2, uart in cie_*.cpp, cie_*.h, examples, tests, README.md and docs/*.rst: no hits. Serial is used only for debug prints."
+                },
+                "builds_on.esp_idf": {
+                    "status": "no",
+                    "searched": "ESP_PLATFORM, esp_err, driver/, freertos, idf_component_register in cie_*.cpp, cie_*.h, examples, tests, README.md and docs/*.rst: no hits.",
+                    "note": "Every source depends on Arduino.h and uses Serial, F(), random() or analogRead(). No ESP-IDF driver API is called: neither driver/i2c_master.h, driver/i2c.h, spi_master nor uart.",
+                    "evidence": ["cie_Nfc.h:18"]
+                },
+                "builds_on.arduino": {
+                    "status": "partly",
+                    "note": "The code is written to the Arduino API and carries library.properties and .ino sketches, but in this folder it cannot compile as it stands: cie_PN532.h and cie_Nfc_Adafruit.cpp include \"cie_Nfc_Owner.h\" while the file on disk is cie_Nfc_Adafruit.h, and <Owner_PN532.h> is an external library that is not in the folder. The word Owner stands in for another name throughout the text of this copy but not in file names, so the include mismatch may come from how the copy was prepared; for that reason it is not listed as a defect. Reading the sources found no other compile error in the library proper. Not built, as the task forbids it.",
+                    "evidence": [
+                        "library.properties:1",
+                        "library.properties:9",
+                        "cie_Nfc.h:18",
+                        "cie_PN532.h:34",
+                        "cie_Nfc_Adafruit.h:14"
+                    ]
+                },
+                "builds_on.esp_idf_component": {
+                    "status": "no",
+                    "searched": "find over the whole folder for CMakeLists.txt, idf_component.yml, component.mk; grep for idf_component_register: none."
+                },
+                "frames.ack_checked": {
+                    "status": "no",
+                    "searched": "ACK, sendAck, readack, isready, waitready and the bytes 00 00 FF 00 FF 00 in cie_*.cpp, cie_*.h, examples, tests, README.md and docs/*.rst: no hits.",
+                    "note": "This folder has no PN532 frame code: every chip exchange goes through the external class Owner_PN532 (<Owner_PN532.h>), which is not in the folder and could not be read. cie_Nfc::sendCommand returns only a bool."
+                },
+                "frames.nack_resend": {
+                    "status": "no",
+                    "searched": "NACK, sendNack, resend, retry, retries and the bytes 00 00 FF FF 00 00 in cie_*.cpp, cie_*.h, examples, tests, README.md and docs/*.rst: no hits.",
+                    "note": "This folder has no PN532 frame code: every chip exchange goes through the external class Owner_PN532 (<Owner_PN532.h>), which is not in the folder and could not be read. Neither sendCommand nor readBinaryContent repeats a failed exchange."
+                },
+                "frames.checksums_checked": {
+                    "status": "no",
+                    "searched": "checksum, LCS, DCS, postamble in cie_*.cpp, cie_*.h, examples, tests, README.md and docs/*.rst: no hits. preamble occurs only for the IAS READ BINARY preamble octets.",
+                    "note": "This folder has no PN532 frame code: every chip exchange goes through the external class Owner_PN532 (<Owner_PN532.h>), which is not in the folder and could not be read."
+                },
+                "frames.extended_frames": {
+                    "status": "no",
+                    "searched": "extended, LENM, LENL, 0xFF, 0xFF in cie_*.cpp, cie_*.h, examples, tests, README.md and docs/*.rst: no frame code.",
+                    "note": "This folder has no PN532 frame code: every chip exchange goes through the external class Owner_PN532 (<Owner_PN532.h>), which is not in the folder and could not be read. PAGE_LENGTH 0xE4 keeps a READ BINARY response to 233 bytes, which fits a normal frame. isCardValid prepares for 259 bytes, more than a normal frame carries (LEN 255 includes TFI, code and Status); whether Owner_PN532 handles that could not be read."
+                },
+                "frames.error_frame": {
+                    "status": "no",
+                    "searched": "syntax, 0x7F, the bytes 01 FF 7F 81 in cie_*.cpp, cie_*.h, examples, tests, README.md and docs/*.rst: no hits. 0x81 occurs only in an AID and in OIDs.",
+                    "note": "This folder has no PN532 frame code: every chip exchange goes through the external class Owner_PN532 (<Owner_PN532.h>), which is not in the folder and could not be read."
+                },
+                "frames.response_code_checked": {
+                    "status": "no",
+                    "searched": "0xD5, 0xD4, TFI, PN532_PN532TOHOST in cie_*.cpp, cie_*.h, examples, tests, README.md and docs/*.rst: no hits.",
+                    "note": "This folder has no PN532 frame code: every chip exchange goes through the external class Owner_PN532 (<Owner_PN532.h>), which is not in the folder and could not be read."
+                },
+                "frames.status_decoded": {
+                    "status": "no",
+                    "searched": "NAD, Status byte, 0x3F as a mask in cie_*.cpp, cie_*.h, examples, tests, README.md and docs/*.rst: no hits. 0x3F occurs only in the root file id and in a display value.",
+                    "note": "This folder has no PN532 frame code: every chip exchange goes through the external class Owner_PN532 (<Owner_PN532.h>), which is not in the folder and could not be read. hasSuccessStatusWord examines the ISO 7816 SW1 SW2 of the APDU, not the PN532 Status byte."
+                },
+                "waiting.irq": {
+                    "status": "no",
+                    "searched": "attachInterrupt, digitalRead, IRQ, P70 in cie_*.cpp, cie_*.h, examples, tests, README.md and docs/*.rst. Hits: the macro PN532_IRQ in cie_PN532.h, used nowhere, and commented-out defines in the examples.",
+                    "note": "No constructor takes an IRQ pin."
+                },
+                "waiting.ready_polling": {
+                    "status": "no",
+                    "searched": "isready, waitready, status byte, 0x02 as an SPI first byte, poll in cie_*.cpp, cie_*.h, examples, tests, README.md and docs/*.rst: no hits.",
+                    "note": "This folder has no PN532 frame code: every chip exchange goes through the external class Owner_PN532 (<Owner_PN532.h>), which is not in the folder and could not be read."
+                },
+                "waiting.bounded_waits": {
+                    "status": "no",
+                    "searched": "timeout, millis( and micros( in cie_*.cpp and cie_*.h: no timeout exists; the only hit is micros() in the random seed. No timeout argument is passed to any Owner_PN532 call.",
+                    "note": "The folder's own response to a dead chip is an endless loop in begin(). Waits inside Owner_PN532 could not be read.",
+                    "evidence": ["cie_Nfc_Adafruit.cpp:51"]
+                },
+                "waiting.abort_on_timeout": {
+                    "status": "no",
+                    "searched": "sendAck, ACK, abort, cancel, setPassiveActivationRetries, RFConfiguration, MxRty in cie_*.cpp, cie_*.h, examples, tests, README.md and docs/*.rst: no hits.",
+                    "note": "The folder never sets MxRtyPassiveActivation and never sends an ACK frame. The default of 0xFF (7.3.1) stands unless Owner_PN532 changes it, and that class could not be read."
+                },
+                "waiting.nonblocking_detect": {
+                    "status": "no",
+                    "searched": "startPassiveTargetIDDetection, readDetectedPassiveTargetID, async, nonblock, attachInterrupt in cie_*.cpp, cie_*.h, examples, tests, README.md and docs/*.rst: no hits.",
+                    "note": "detectCard is one blocking call that returns a bool."
+                },
+                "cards.iso14443a_uid": {
+                    "status": "partly",
+                    "note": "detectCard activates a target through Owner_PN532::inListPassiveTarget and returns only a bool. The UID is not read or returned, and BrTy is not visible in this folder.",
+                    "evidence": ["cie_Nfc_Adafruit.cpp:69", "cie_PN532.cpp:91", "cie_Nfc.h:22"]
+                },
+                "cards.two_targets": {
+                    "status": "no",
+                    "searched": "MaxTg, a target count, Tg in cie_*.cpp, cie_*.h, examples, tests, README.md and docs/*.rst: no hits. inListPassiveTarget is called with no arguments.",
+                    "note": "Everything assumes one card."
+                },
+                "cards.mifare_classic": {
+                    "status": "no",
+                    "searched": "mifare, authenticateBlock, readDataBlock, writeDataBlock, classic in cie_*.cpp, cie_*.h, examples, tests, README.md and docs/*.rst: no hits."
+                },
+                "cards.ultralight_ntag": {
+                    "status": "no",
+                    "searched": "ultralight, ntag, ReadPage, WritePage in cie_*.cpp, cie_*.h, examples, tests, README.md and docs/*.rst: no hits."
+                },
+                "cards.iso14443_4_apdu": {
+                    "status": "yes",
+                    "note": "The library builds ISO 7816 APDUs, exchanges them through inDataExchange and checks SW1 SW2. The general entry is cie_Nfc::sendCommand; cie_PN532::sendCommand is private. The command length is a byte. The PN532 frames are in Owner_PN532, not in this folder.",
+                    "evidence": [
+                        "cie_Nfc_Adafruit.cpp:86",
+                        "cie_PN532.cpp:355",
+                        "cie_PN532.cpp:753",
+                        "cie_PN532.cpp:763",
+                        "cie_Nfc.h:23"
+                    ]
+                },
+                "cards.chaining": {
+                    "status": "no",
+                    "searched": "MI, More Information, chaining, 0x40, 0x61, GET RESPONSE in cie_*.cpp, cie_*.h, examples, tests, README.md and docs/*.rst: no hits.",
+                    "note": "READ BINARY is split into 228-byte pages at the APDU level (PAGE_LENGTH), which avoids chaining for that command but does not handle the MI bit."
+                },
+                "cards.raw_exchange": {
+                    "status": "no",
+                    "searched": "CommunicateThru in cie_*.cpp, cie_*.h, examples, tests, README.md and docs/*.rst: no hits."
+                },
+                "cards.auto_poll": {
+                    "status": "no",
+                    "searched": "AutoPoll in cie_*.cpp, cie_*.h, examples, tests, README.md and docs/*.rst: no hits."
+                },
+                "cards.ndef": {
+                    "status": "no",
+                    "searched": "ndef, case-insensitive, in cie_*.cpp, cie_*.h, examples, tests, README.md and docs/*.rst: only as part of #ifndef and Indefinite."
+                },
+                "cards.iso14443b": {
+                    "status": "no",
+                    "searched": "type b, iso14443b, BrTy in cie_*.cpp, cie_*.h, examples, tests, README.md and docs/*.rst: no hits."
+                },
+                "cards.felica": {
+                    "status": "no",
+                    "searched": "felica, BrTy in cie_*.cpp, cie_*.h, examples, tests, README.md and docs/*.rst: no hits."
+                },
+                "cards.jewel": {
+                    "status": "no",
+                    "searched": "jewel, topaz, BrTy in cie_*.cpp, cie_*.h, examples, tests, README.md and docs/*.rst: no hits."
+                },
+                "cards.card_emulation": {
+                    "status": "no",
+                    "searched": "TgInitAsTarget, tgGetData, tgSetData, emulat in cie_*.cpp, cie_*.h, examples, tests, README.md and docs/*.rst: no hits."
+                },
+                "cards.peer_to_peer": {
+                    "status": "no",
+                    "searched": "InJumpForDEP, InJumpForPSL, peer, P2P, NFCIP, LLCP, SNEP in cie_*.cpp, cie_*.h, examples, tests, README.md and docs/*.rst: no hits."
+                },
+                "chip_control.firmware_version": {
+                    "status": "partly",
+                    "note": "Called once inside begin() through Owner_PN532 and printed to Serial. The value is not returned, and cie_PN532 has no function that gives it to the caller.",
+                    "evidence": ["cie_Nfc_Adafruit.cpp:48", "cie_Nfc_Adafruit.cpp:54"]
+                },
+                "chip_control.general_status": {
+                    "status": "no",
+                    "searched": "GetGeneralStatus in cie_*.cpp, cie_*.h, examples, tests, README.md and docs/*.rst: no hits.",
+                    "note": "No call or wrapper for this exists in the folder, and cie_PN532 exposes only begin, detectCard and the CIE file readers."
+                },
+                "chip_control.sam_configuration": {
+                    "status": "partly",
+                    "note": "Called once inside begin() through Owner_PN532, with no choice of mode, and nothing looks at a result. The command bytes are not in this folder.",
+                    "evidence": ["cie_Nfc_Adafruit.cpp:57"]
+                },
+                "chip_control.rf_field_control": {
+                    "status": "no",
+                    "searched": "RFConfiguration, setRFField, field in cie_*.cpp, cie_*.h, examples, tests, README.md and docs/*.rst: no chip call.",
+                    "note": "No call or wrapper for this exists in the folder, and cie_PN532 exposes only begin, detectCard and the CIE file readers."
+                },
+                "chip_control.retries_control": {
+                    "status": "no",
+                    "searched": "RFConfiguration, MaxRetries, MxRty, setPassiveActivationRetries, retries in cie_*.cpp, cie_*.h, examples, tests, README.md and docs/*.rst: no hits.",
+                    "note": "No call or wrapper for this exists in the folder, and cie_PN532 exposes only begin, detectCard and the CIE file readers."
+                },
+                "chip_control.power_down": {
+                    "status": "no",
+                    "searched": "PowerDown, wakeup in cie_*.cpp, cie_*.h, examples, tests, README.md and docs/*.rst: no hits.",
+                    "note": "No call or wrapper for this exists in the folder, and cie_PN532 exposes only begin, detectCard and the CIE file readers."
+                },
+                "chip_control.registers": {
+                    "status": "no",
+                    "searched": "ReadRegister, WriteRegister, case-insensitive, in cie_*.cpp, cie_*.h, examples, tests, README.md and docs/*.rst: no hits.",
+                    "note": "No call or wrapper for this exists in the folder, and cie_PN532 exposes only begin, detectCard and the CIE file readers."
+                },
+                "chip_control.gpio": {
+                    "status": "no",
+                    "searched": "ReadGPIO, WriteGPIO, case-insensitive, in cie_*.cpp, cie_*.h, examples, tests, README.md and docs/*.rst: no hits.",
+                    "note": "No call or wrapper for this exists in the folder, and cie_PN532 exposes only begin, detectCard and the CIE file readers."
+                },
+                "chip_control.parameters": {
+                    "status": "no",
+                    "searched": "SetParameters in cie_*.cpp, cie_*.h, examples, tests, README.md and docs/*.rst: no hits.",
+                    "note": "No call or wrapper for this exists in the folder, and cie_PN532 exposes only begin, detectCard and the CIE file readers."
+                },
+                "chip_control.serial_baud": {
+                    "status": "no",
+                    "searched": "SetSerialBaudRate in cie_*.cpp, cie_*.h, examples, tests, README.md and docs/*.rst: no hits.",
+                    "note": "No call or wrapper for this exists in the folder, and cie_PN532 exposes only begin, detectCard and the CIE file readers."
+                },
+                "chip_control.reset_recovery": {
+                    "status": "no",
+                    "searched": "reset and PN532_RESET in cie_*.cpp and cie_*.h: only the unused macro and its comment in cie_PN532.h. Every call of begin() traced by reading.",
+                    "note": "No reset pin is taken or driven. Calling begin() again on a chip that stopped answering ends in the endless loop.",
+                    "evidence": ["cie_PN532.h:39", "cie_Nfc_Adafruit.cpp:51"]
+                },
+                "several.several_readers": {
+                    "status": "partly",
+                    "note": "All state in this folder is in instance fields: there is no static and no file-scope variable in cie_*.cpp or cie_*.h. Each reader gets its own Owner_PN532 object, but the state of that class could not be read.",
+                    "evidence": ["cie_PN532.h:119", "cie_PN532.h:122", "cie_BerReader.h:40", "cie_Nfc_Adafruit.cpp:38"]
+                },
+                "several.shared_spi_bus": {
+                    "status": "partly",
+                    "note": "Each object takes its own clk, miso, mosi and ss, so two objects can be given the same three bus pins and two chip selects. Nothing in the folder prevents or supports this; the pin handling is in Owner_PN532 and could not be read.",
+                    "evidence": ["cie_PN532.cpp:43", "cie_Nfc_Adafruit.cpp:37"]
+                },
+                "several.thread_safety": {
+                    "status": "no",
+                    "searched": "mutex, semaphore, portMUX, noInterrupts, critical, thread, task in cie_*.cpp, cie_*.h, examples, tests, README.md and docs/*.rst: no hits.",
+                    "note": "No lock and no stated rule. sendCommand and the file readers change _currentDedicatedFile, _currentElementaryFile and _currentOffset with no guard."
+                },
+                "code_health.errors_returned": {
+                    "status": "partly",
+                    "note": "Most functions return bool, so failure can be told from success, but not one failure from another: no card, a chip failure and a card status word all give false, and the reason goes only to Serial. begin() returns void and halts.",
+                    "evidence": [
+                        "cie_PN532.cpp:90",
+                        "cie_PN532.cpp:135",
+                        "cie_PN532.cpp:79",
+                        "cie_Nfc_Adafruit.cpp:51",
+                        "cie_PN532.cpp:905"
+                    ]
+                },
+                "code_health.buffers_bounded": {
+                    "status": "partly",
+                    "note": "Bounded: the fixed-length files through clamp, each page through PAGE_LENGTH, and the BER content length through BER_READER_MAX_LENGTH. Not bounded: read_EF_DH and read_EF_ATR ignore the caller's capacity, the OID array is sized from the card before any check, and the copy in readBinaryContent ignores the returned length. See defects.",
+                    "evidence": [
+                        "cie_PN532.cpp:170",
+                        "cie_PN532.cpp:187",
+                        "cie_PN532.cpp:749",
+                        "cie_PN532.cpp:761",
+                        "cie_BerReader.cpp:101"
+                    ]
+                },
+                "code_health.allocation_checked": {
+                    "status": "no",
+                    "searched": "All new expressions in cie_*.cpp, and nothrow, == NULL, == nullptr, != NULL, != nullptr: no result of new is compared. The only NULL test in the code is on the callback at cie_BerReader.cpp line 92.",
+                    "note": "See defects.",
+                    "evidence": ["cie_PN532.cpp:762", "cie_BerReader.cpp:47"]
+                },
+                "code_health.tests": {
+                    "status": "partly",
+                    "note": "A mock of cie_Nfc and four ArduinoUnit tests that run on a board with no reader: status word, clamp, DF selection, and one with an empty body. None covers a PN532 exchange, and the mock cannot compile as written (see defects).",
+                    "evidence": [
+                        "tests/cie-UnitTest/cie-UnitTest.ino:27",
+                        "tests/cie-UnitTest/cie-UnitTest.ino:42",
+                        "tests/cie-UnitTest/cie-UnitTest.ino:58",
+                        "tests/cie-UnitTest/cie_Nfc_Mock.cpp:15"
+                    ]
+                },
+                "code_health.examples": {
+                    "status": "yes",
+                    "note": "Five sketches. Three of them (ReadID, ReadAll, EF_SOD) use __heap_start and __brkval, which come from the AVR C library, while library.properties says architectures=*. No file under cores/ of the ESP32 Arduino framework on this machine defines __brkval; this was not linked.",
+                    "evidence": [
+                        "examples/cie-ReadID/cie-ReadID.ino:48",
+                        "examples/cie-ReadID/cie-ReadID.ino:59",
+                        "examples/cie-ReadAll/cie-ReadAll.ino:60",
+                        "examples/cie-EF_SOD/cie-EF_SOD.ino:60",
+                        "examples/cie-Turnstile/cie-Turnstile.ino:82"
+                    ]
+                },
+                "code_health.docs": {
+                    "status": "yes",
+                    "note": "The README gives prerequisites, wiring and a getting-started sketch. docs/ repeats it in Italian. Doxygen comments cover the functions. The sketch has an error: see defects.",
+                    "evidence": ["README.md:12", "README.md:23", "README.md:32", "docs/overview.rst:41"]
+                },
+                "code_health.license": {"status": "yes", "note": "BSD 3-Clause.", "evidence": ["LICENSE:1"]}
+            },
+            "defects": [
+                {
+                    "what": "read_EF_DH and read_EF_ATR replace *contentLength with the length found on the card and write that many bytes to contentBuffer, so the capacity passed by the caller is ignored and a card file longer than the buffer overruns it (up to about 2 KB for EF_DH, no limit for EF_ATR; cie-ReadAll passes a 600-byte buffer).",
+                    "severity": "high",
+                    "judged": "readTriples and detectLength replace *contentLength with a value from the card and readElementaryFile reads that many bytes into contentBuffer, so the capacity from the caller is lost. cie-ReadAll passes 600 bytes for both files, and a card file can be longer.",
+                    "evidence": [
+                        "cie_PN532.cpp:138",
+                        "cie_PN532.cpp:154",
+                        "cie_PN532.cpp:695",
+                        "cie_BerReader.cpp:64",
+                        "cie_AtrReader.cpp:60",
+                        "cie_PN532.cpp:539",
+                        "examples/cie-ReadAll/cie-ReadAll.ino:81"
+                    ]
+                },
+                {
+                    "what": "readBinaryContent ends its loop on offset < contentLength, which compares an absolute offset with a relative length: with a nonzero starting offset and more than one page the loop stops early and the function returns true with part of the buffer unwritten (offset 100, length 300 reads 228 bytes).",
+                    "severity": "high",
+                    "judged": "The page size uses contentLength + startingOffset - offset, but the loop ends on offset < contentLength, so start 100 and length 300 read one page of 228 bytes and return true. readKey with start 8 and length 257 happens to pass, yet readBinaryContent is public and many such pairs give a false success.",
+                    "evidence": ["cie_PN532.cpp:775", "cie_PN532.cpp:749", "cie_PN532.cpp:773", "cie_PN532.h:109"]
+                },
+                {
+                    "what": "Card layer, above the chip protocol: isCardValid can never return true, because verifyInternalAuthenticateResponse is a stub that returns false, so a genuine card is reported as invalid after the exchanges are made.",
+                    "severity": "high",
+                    "judged": "verifyInternalAuthenticateResponse is a stub that returns false, so isCardValid() cannot return true and cie-ReadID prints a genuine card as probably a clone. The README warning that clones are not yet detected does not change the behaviour of the public function.",
+                    "evidence": [
+                        "cie_PN532.h:105",
+                        "cie_PN532.cpp:248",
+                        "cie_PN532.cpp:416",
+                        "cie_PN532.cpp:417",
+                        "cie_PN532.cpp:418"
+                    ]
+                },
+                {
+                    "what": "With a dead chip, begin() stops the program in an endless loop, and it returns void, so the caller cannot detect the failure or try again.",
+                    "severity": "medium",
+                    "evidence": ["cie_Nfc_Adafruit.cpp:49", "cie_Nfc_Adafruit.cpp:51", "cie_PN532.h:94"]
+                },
+                {
+                    "what": "hasSuccessStatusWord reads response[responseLength-2] with no check of the length, so a successful exchange that returns 0 or 1 bytes reads before the start of the heap buffer and decides on those bytes.",
+                    "severity": "medium",
+                    "evidence": ["cie_PN532.cpp:887", "cie_PN532.cpp:888", "cie_PN532.cpp:356"]
+                },
+                {
+                    "what": "readBinaryContent always copies contentPageLength bytes and ignores the length returned in responseLength, so a shorter response that ends in 90 00 fills the caller's buffer with uninitialized heap bytes and returns true.",
+                    "severity": "high",
+                    "read_as": "medium",
+                    "judged": "The copy loop runs to contentPageLength regardless of the responseLength that sendCommand updates, and hasSuccessStatusWord looks only at the last two returned bytes. A short response ending in 90 00 returns true with the status word and uninitialised heap bytes in the content.",
+                    "evidence": [
+                        "cie_PN532.cpp:761",
+                        "cie_PN532.cpp:762",
+                        "cie_PN532.cpp:763",
+                        "cie_PN532.cpp:768",
+                        "cie_PN532.cpp:769"
+                    ]
+                },
+                {
+                    "what": "readTriples allocates a variable-length stack array with a length taken from the card, before the check against BER_READER_MAX_LENGTH, so a malformed OBJECT IDENTIFIER length can overflow the stack.",
+                    "severity": "high",
+                    "read_as": "medium",
+                    "judged": "The VLA for an OBJECT IDENTIFIER is sized by contentLength from the card at line 74 and the BER_READER_MAX_LENGTH test is at line 101, so the length can reach 65535 before any check.",
+                    "evidence": ["cie_BerReader.cpp:74", "cie_BerReader.cpp:101"]
+                },
+                {
+                    "what": "Two card reads in the BER reader ignore the returned bool: after a failed read, detectLength builds the content length from an uninitialized heap buffer and returns true, and readTriples compares an uninitialized OID.",
+                    "severity": "medium",
+                    "judged": "Both calls return bool and the result is dropped, so after a failed read detectLength builds a length from an uninitialised heap buffer and returns true, and readTriples compares an uninitialised stack array. It needs a failed read, such as a lost card.",
+                    "evidence": ["cie_BerReader.cpp:240", "cie_BerReader.cpp:245", "cie_BerReader.cpp:75"]
+                },
+                {
+                    "what": "No result of new is checked, and on the AVR core operator new[] returns the NULL from malloc (~/.arduinocdt/packages/arduino/hardware/avr/1.8.2/cores/arduino/new.cpp), so with the heap exhausted the null pointer goes to the exchange and to the copy loops.",
+                    "severity": "medium",
+                    "judged": "No new is checked, and AVR 1.8.2 new.cpp returns malloc directly, so a NULL reaches the exchange and the copy loops. These sizes are about 260 bytes at most, so it needs an exhausted heap rather than a length from a card.",
+                    "evidence": [
+                        "cie_PN532.cpp:277",
+                        "cie_PN532.cpp:762",
+                        "cie_BerReader.cpp:47",
+                        "cie_BerReader.cpp:239",
+                        "cie_BerReader.cpp:59"
+                    ]
+                },
+                {
+                    "what": "cie_AtrReader::detectLength and cie_BerReader::detectTag have no limit of their own: they end only on a match or a read error, so a card that keeps returning 90 00 keeps the program in the loop, and on AVR the 16-bit offset wraps.",
+                    "severity": "medium",
+                    "judged": "Both loops have no count limit and end only on a match or a failed read, and word is 16 bits on AVR, so the offset wraps. A card that ends the file with an error status stops them, and removing the card gives the read error that ends the loop, so the program stays there only while such a card is held in the field.",
+                    "evidence": ["cie_AtrReader.cpp:44", "cie_AtrReader.cpp:64", "cie_BerReader.cpp:277"]
+                },
+                {
+                    "what": "detectCard assigns NULL_EF to _currentDedicatedFile instead of _currentElementaryFile; the old value is cleared later only because ensureDedicatedFileIsSelected clears it when the DF differs.",
+                    "severity": "low",
+                    "evidence": ["cie_PN532.cpp:93", "cie_PN532.cpp:94", "cie_PN532.cpp:648"]
+                },
+                {
+                    "what": "isCardValid allocates a cie_Key and never deletes it, on the early return and at the end, so each call loses the object and its 260 bytes of key data.",
+                    "severity": "low",
+                    "evidence": ["cie_PN532.cpp:229", "cie_PN532.cpp:231", "cie_PN532.cpp:256"]
+                },
+                {
+                    "what": "cie_PN532 deletes _nfc through cie_Nfc, which has no virtual destructor, so ~cie_Nfc_Owner does not run and the Owner_PN532 object is not freed; deleting a derived object this way is undefined behaviour.",
+                    "severity": "low",
+                    "evidence": ["cie_PN532.cpp:991", "cie_Nfc.h:19", "cie_Nfc_Adafruit.cpp:116"]
+                },
+                {
+                    "what": "The getting-started sketch writes cie_PN532 cie(); which declares a function, so the cie.begin() that follows does not compile.",
+                    "severity": "low",
+                    "evidence": ["README.md:42", "README.md:50", "docs/overview.rst:41"]
+                },
+                {
+                    "what": "A comment in cie_PN532.h tells I2C users to define the IRQ and reset pins, but PN532_IRQ and PN532_RESET are used nowhere and the library has no I2C path.",
+                    "severity": "low",
+                    "evidence": ["cie_PN532.h:36", "cie_PN532.h:38", "cie_PN532.h:39"]
+                },
+                {
+                    "what": "The test mock cannot compile and is wrong if it did: expectCommand is declared with word *response and defined with byte *response, printHex receives a byte where it needs a pointer, and expectCommands sets the count to 0 and allocates an empty array that expectCommand then writes to.",
+                    "severity": "low",
+                    "evidence": [
+                        "tests/cie-UnitTest/cie_Nfc_Mock.h:16",
+                        "tests/cie-UnitTest/cie_Nfc_Mock.cpp:115",
+                        "tests/cie-UnitTest/cie_Nfc_Mock.cpp:157",
+                        "tests/cie-UnitTest/cie_Nfc_Mock.cpp:98",
+                        "tests/cie-UnitTest/cie_Nfc_Mock.cpp:99",
+                        "tests/cie-UnitTest/cie_Nfc_Mock.cpp:116"
+                    ]
+                }
+            ]
+        }
+    ]
+}

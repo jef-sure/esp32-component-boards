@@ -1,0 +1,5 @@
+{
+    "title": "Seven PN532 go on two SPI hosts: a host takes six, the seventh gave ESP_ERR_NO_MEM",
+    "answers": {"blocks": [{"role": "nfc", "name": "a"}, {"role": "nfc", "name": "b"}, {"role": "nfc", "name": "c"}, {"role": "nfc", "name": "d"}, {"role": "nfc", "name": "e"}, {"role": "nfc", "name": "f"}, {"role": "nfc", "name": "g"}]},
+    "kit": {"name": "esp32s3_devkit", "modules": {"pn532_module": 7}}
+}

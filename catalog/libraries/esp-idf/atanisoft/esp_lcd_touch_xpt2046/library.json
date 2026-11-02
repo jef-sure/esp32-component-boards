@@ -40,11 +40,11 @@
         "api": {"level": "vendor-code", "source": "include/esp_lcd_touch_xpt2046.h of 1.0.6", "date": "2026-10-31"}
     },
     "versions": {
-        "1.0.6": {"requires": {"esp-idf/espressif/esp_lcd_touch": ">=1.0.4"}, "frameworks": {"esp-idf": ">=4.4"}},
-        "1.0.5": {"requires": {"esp-idf/espressif/esp_lcd_touch": ">=1.0.4"}, "frameworks": {"esp-idf": ">=4.4"}},
-        "1.0.4": {"requires": {"esp-idf/espressif/esp_lcd_touch": ">=1.0.4"}, "frameworks": {"esp-idf": ">=4.4"}},
-        "1.0.3": {"requires": {"esp-idf/espressif/esp_lcd_touch": ">=1.0.4"}, "frameworks": {"esp-idf": ">=4.4"}},
-        "1.0.2": {"requires": {"esp-idf/espressif/esp_lcd_touch": ">=1.0.4"}, "frameworks": {"esp-idf": ">=4.4"}},
-        "1.0.1": {"requires": {"esp-idf/espressif/esp_lcd_touch": ">=1.0.2"}, "frameworks": {"esp-idf": ">=4.4"}}
+        "1.0.6": {"requires": {"esp-idf/espressif/esp_lcd_touch": ">=1.0.4"}, "platforms": {"esp_idf": ">=4.4"}},
+        "1.0.5": {"requires": {"esp-idf/espressif/esp_lcd_touch": ">=1.0.4"}, "platforms": {"esp_idf": ">=4.4"}},
+        "1.0.4": {"requires": {"esp-idf/espressif/esp_lcd_touch": ">=1.0.4"}, "platforms": {"esp_idf": ">=4.4"}},
+        "1.0.3": {"requires": {"esp-idf/espressif/esp_lcd_touch": ">=1.0.4"}, "platforms": {"esp_idf": ">=4.4"}},
+        "1.0.2": {"requires": {"esp-idf/espressif/esp_lcd_touch": ">=1.0.4"}, "platforms": {"esp_idf": ">=4.4"}},
+        "1.0.1": {"requires": {"esp-idf/espressif/esp_lcd_touch": ">=1.0.2"}, "platforms": {"esp_idf": ">=4.4"}}
     }
 }

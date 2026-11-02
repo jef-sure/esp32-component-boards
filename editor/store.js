@@ -2,7 +2,9 @@
 // the data comes from schema.js, resolve.js, rules.js and pins.js, the same as the tools in Python check.
 'use strict';
 
-const FILES = { boards: 'board.json', modules: 'module.json', addons: 'addon.json', devices: 'device.json', mcu: 'mcu.json', connectors: 'connector.json' };
+const FILES = { boards: 'board.json', modules: 'module.json', addons: 'addon.json', platforms: 'platform.json', devices: 'device.json', mcu: 'mcu.json', connectors: 'connector.json' };
+const DESCRIPTION = 'DESCRIPTION.md';
+const AGENT_KITS = 12; // what a model reads of a list of hundreds
 const READ_ONLY_GROUPS = new Set(['mcu']); // written by tools/make_mcu.py
 const LOADED = ['facts', 'classes', 'libraries', 'inputs']; // what the loader adds, not a field to edit
 const ROOT_FIELDS = new Set(['format', 'format_version', 'kind', 'name', 'title', 'description', 'extends', 'notes', 'images', 'origin', 'provides']);
@@ -46,7 +48,7 @@ function readTree(files, local) {
     };
     for (const path of Object.keys(files).sort()) {
         const parts = path.split('/');
-        if (parts[0] === 'libraries' && parts.length === 5) {
+        if (parts[0] === 'libraries' && parts[4] === 'library.json') {
             const doc = JSON.parse(files[path]);
             add('libraries', `${doc.ecosystem}/${doc.owner}/${doc.name}`, path);
         } else if (parts.length === 3 && FILES[parts[0]] === parts[2]) add(parts[0], parts[1], path);
@@ -54,7 +56,7 @@ function readTree(files, local) {
 }
 
 function readCatalog(files) {
-    library.catalog = { boards: {}, modules: {}, addons: {}, devices: {}, mcu: {}, connectors: {}, libraries: {} };
+    library.catalog = { boards: {}, modules: {}, addons: {}, platforms: {}, devices: {}, mcu: {}, connectors: {}, libraries: {} };
     library.entries = {};
     readTree(files, false);
     const catalog = library.catalog;
@@ -67,7 +69,9 @@ function readCatalog(files) {
     library.questions = JSON.parse(files['questions.json']).questions;
     library.rates = JSON.parse(files['rates.json']);
     library.roles = JSON.parse(files['roles.json']).groups;
-    library.solver = kitSolver({ catalog, loader: library.loader, questions: library.questions, roles: library.roles, rates: library.rates.rates, levels: library.levels, t: (text, ...values) => translate(useEditor().language, text, ...values), checksOf: library.checksOf, pinMap });
+    const audits = Object.keys(files).filter((path) => /^libraries\/.*\/audit\.json$/.test(path)).map((path) => [path.split('/').slice(1, 4).join('/'), auditSummary(JSON.parse(files[path]))]);
+    library.candidates = { all: JSON.parse(files['libraries/libraries.json'] ?? '{"libraries": {}}').libraries, byChip: JSON.parse(files['libraries/chip_libraries.json'] ?? '{"chips": {}}').chips, audits: Object.fromEntries(audits) };
+    library.solver = kitSolver({ catalog, loader: library.loader, questions: library.questions, roles: library.roles, libraries: library.candidates, rates: library.rates.rates, levels: library.levels, t: (text, ...values) => translate(useEditor().language, text, ...values), checksOf: library.checksOf, pinMap });
 }
 
 function labelOf(key, value) {
@@ -153,6 +157,10 @@ const useEditor = Pinia.defineStore('editor', {
         plan: null, // what a project is about to get, shown before anything is written
         kits: [],
         solving: false,
+        agent: null, // the token of tools/boards_mcp.py, when the page came from it
+        talk: [], // what was said with the model
+        accepted: [], // the ids of proposals of blocks taken or left
+        description: '', // what the model wrote in the end: a project gets it
     }),
     getters: {
         entry(state) {
@@ -227,6 +235,44 @@ const useEditor = Pinia.defineStore('editor', {
         },
     },
     actions: {
+        // Beside tools/boards_mcp.py the page tells it what it has, and reads what the model says.
+        connect() {
+            this.agent = new URLSearchParams(location.hash.slice(1)).get('agent');
+            if (this.agent) this.listen(0);
+        },
+        async agentCall(path, options = {}) {
+            const answer = await fetch(`/agent/${path}`, { ...options, headers: { Authorization: `Bearer ${this.agent}` } });
+            if (!answer.ok) throw new Error(`the server of the model: ${answer.status}`);
+            return answer.json();
+        },
+        async listen(seen) {
+            let next = seen;
+            try {
+                const messages = await this.agentCall(`messages?seen=${seen}`);
+                this.talk.push(...messages);
+                next = seen + messages.length;
+                for (const item of messages) if (item.description) this.description = item.text;
+            } catch {
+                this.agent = null; // the server is gone: the page works on without it
+                return;
+            }
+            this.listen(next);
+        },
+        tellAgent() {
+            if (!this.agent) return Promise.resolve();
+            const kits = this.kits.filter((kit) => kit.fits).slice(0, AGENT_KITS).map((kit) => ({ headline: kit.headline, price: kit.price, imported: kit.imported, says: kit.says }));
+            return this.agentCall('state', { method: 'POST', body: JSON.stringify({ task: this.answers.task ?? '', blocks: this.answers.blocks, fits: this.kits.filter((kit) => kit.fits).length, kits }) }).catch(() => {});
+        },
+        // what it says goes after what the page has, so the model reads the two in order
+        async sayToAgent(text) {
+            if (!text.trim()) return;
+            await this.tellAgent();
+            await this.agentCall('say', { method: 'POST', body: JSON.stringify({ text }) });
+        },
+        acceptBlocks(message) {
+            this.answers.blocks.push(...message.blocks.filter((block) => this.palette.some((group) => group.roles.some((role) => role.id === block.role))).map((block) => ({ role: block.role, variant: block.variant, name: block.name ?? '' })));
+            this.accepted.push(message.id);
+        },
         addBlock(role) {
             this.answers.blocks.push({ role, variant: undefined, name: '' });
         },
@@ -241,6 +287,7 @@ const useEditor = Pinia.defineStore('editor', {
                 if (data.id !== library.asked) return;
                 this.kits = data.kits;
                 this.solving = false;
+                this.tellAgent();
             };
             library.worker.onerror = () => {
                 library.worker = null;
@@ -257,7 +304,7 @@ const useEditor = Pinia.defineStore('editor', {
             }
             const message = { id: ++library.asked, answers, language: this.language };
             if (library.sent !== this.stamp) {
-                message.documents = { catalog: library.catalog, schema: library.schema, rules: library.rules, questions: library.questions, roles: library.roles, rates: library.rates.rates };
+                message.documents = { catalog: library.catalog, schema: library.schema, rules: library.rules, questions: library.questions, roles: library.roles, libraries: library.candidates, rates: library.rates.rates };
                 library.sent = this.stamp;
             }
             this.solving = true;
@@ -265,6 +312,7 @@ const useEditor = Pinia.defineStore('editor', {
         },
         async start() {
             this.startWorker();
+            this.connect();
             await this.run(async () => {
                 const files = await host.fetchCatalog();
                 if (files) this.load(files);
@@ -361,11 +409,12 @@ const useEditor = Pinia.defineStore('editor', {
                 const board = kit.project ? name : kit.name;
                 if (kit.project) files[LOCAL_BOARD(name)] = `${catalogJson({ ...kit.project, name, title: kit.modules.length ? `${kit.title} with ${kit.modules.map((item) => item.title).join(', ')}` : kit.title })}\n`;
                 if (mode === 'create') Object.assign(files, await skeletonOf(kit, name, board));
+                if (this.description) files[DESCRIPTION] = `${this.description.trim()}\n`;
                 files[SELECTION] = `${JSON.stringify(library.solver.selectionOf(kit, this.kits, copied(this.answers), this.currency), null, 4)}\n`;
                 const rows = [];
                 for (const [path, text] of Object.entries(files)) {
                     const old = await host.readIn(folder, path);
-                    const state = old === null ? 'new' : old === text ? 'same' : path === LOCAL_BOARD(name) || path === SELECTION ? 'changes' : 'kept';
+                    const state = old === null ? 'new' : old === text ? 'same' : path === LOCAL_BOARD(name) || path === SELECTION || path === DESCRIPTION ? 'changes' : 'kept';
                     rows.push({ path, text, old, state, replace: false });
                 }
                 const manifest = mode === 'update' ? await host.readIn(folder, 'main/idf_component.yml') : null;

@@ -15,7 +15,7 @@
         "boot_button": {"class": "button", "pins": {"in": {"gpio": 0, "active": "low"}}},
         "audio_dac": {
             "class": "audio",
-            "on": {"i2s.i2s0": {"format": "tdm"}, "i2c.i2c0": {"address": "0x30"}},
+            "on": {"i2s.i2s0": {"format": "tdm"}, "i2c.i2c0": {"address": "0x18"}},
             "config": {"direction": "out", "sample_rate": 48000},
             "chip": "es8311"
         },

@@ -1,0 +1,21 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "library",
+    "name": "cie-pn532",
+    "title": "CIE-PN532",
+    "ecosystem": "arduino",
+    "owner": "italia",
+    "url": "https://github.com/italia/cie-PN532",
+    "license": "BSD-3-Clause",
+    "described": "1.0.0",
+    "versions": {"1.0.0": {"platforms": {"arduino_esp32": "*"}, "requires": {"arduino/adafruit/adafruit-pn532": "*"}}},
+    "install": [{"via": "git", "url": "https://github.com/italia/cie-PN532.git"}],
+    "checked": {
+        "requires": {
+            "level": "vendor-code",
+            "covers": ["versions"],
+            "source": "its code at d2f67c67d5ef, which includes Adafruit_PN532.h; library.properties does not name it"
+        }
+    }
+}

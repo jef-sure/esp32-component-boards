@@ -1,0 +1,12 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "library",
+    "name": "esp32-pn532",
+    "title": "ESP32-PN532",
+    "ecosystem": "github",
+    "owner": "ytvw",
+    "url": "https://github.com/YTvW/ESP32-PN532",
+    "license": "GPL-3.0",
+    "install": [{"via": "git", "url": "https://github.com/YTvW/ESP32-PN532.git"}]
+}

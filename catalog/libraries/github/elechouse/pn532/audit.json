@@ -1,0 +1,1844 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "audit",
+    "name": "pn532",
+    "title": "elechouse/PN532",
+    "audits": [
+        {
+            "commit": "8b05896a6616396392f0eac5af88a97c9733ebce",
+            "rubric": "pn532",
+            "rubric_version": 1,
+            "date": "2026-11-01",
+            "by": "claude-opus-5-5",
+            "items": {
+                "transports.i2c": {
+                    "status": "yes",
+                    "note": "Uses the Arduino TwoWire class. The I2C address is fixed at 0x24.",
+                    "evidence": [
+                        "PN532_I2C/PN532_I2C.cpp:9",
+                        "PN532_I2C/PN532_I2C.cpp:28",
+                        "PN532_I2C/PN532_I2C.cpp:117"
+                    ]
+                },
+                "transports.spi": {
+                    "status": "yes",
+                    "note": "Uses the Arduino SPIClass in LSB-first mode 0.",
+                    "evidence": [
+                        "PN532_SPI/PN532_SPI.cpp:42",
+                        "PN532_SPI/PN532_SPI.cpp:63",
+                        "PN532_SPI/PN532_SPI.cpp:157"
+                    ]
+                },
+                "transports.uart": {
+                    "status": "yes",
+                    "note": "HardwareSerial in PN532_HSU, SoftwareSerial in PN532_SWHSU. The two files have the same logic. web/pn532-tester is a separate browser page that also uses HSU; it is not part of the driver.",
+                    "evidence": [
+                        "PN532_HSU/PN532_HSU.cpp:14",
+                        "PN532_HSU/PN532_HSU.cpp:36",
+                        "PN532_HSU/PN532_HSU.cpp:84",
+                        "PN532_SWHSU/PN532_SWHSU.cpp:6"
+                    ]
+                },
+                "builds_on.esp_idf": {
+                    "status": "no",
+                    "searched": "idf_component_register, driver/i2c, i2c_master, spi_master, driver/uart, ESP_PLATFORM, esp_err, freertos, ESP32: no match over every source outside web/",
+                    "note": "Calls no ESP-IDF driver API, neither driver/i2c_master.h nor the old driver/i2c.h, spi_master or uart. Arduino.h is included unconditionally, and the transports depend on TwoWire, SPIClass and HardwareSerial.",
+                    "evidence": ["PN532/PN532.cpp:9", "PN532_I2C/PN532_I2C.h:8", "PN532_SPI/PN532_SPI.h:5"]
+                },
+                "builds_on.arduino": {
+                    "status": "yes",
+                    "note": "Judged by reading; compiling was outside the rules of this audit. There is no library.properties or library.json. The root is not one library: README.md tells the user to copy the PN532, PN532_I2C, PN532_SPI, PN532_HSU folders into Arduino libraries.",
+                    "evidence": [
+                        "PN532/PN532.cpp:9",
+                        "PN532_I2C/PN532_I2C.h:8",
+                        "PN532_SPI/PN532_SPI.h:5",
+                        "PN532/examples/iso14443a_uid/iso14443a_uid.pde:35"
+                    ]
+                },
+                "builds_on.esp_idf_component": {
+                    "status": "no",
+                    "searched": "find for idf_component.yml, CMakeLists.txt, component.mk, Kconfig*: no file; idf_component_register: no match over every source outside web/"
+                },
+                "frames.ack_checked": {
+                    "status": "yes",
+                    "note": "All transports compare six bytes to the ACK frame and return an error on a timeout or on any other frame, a NACK included. Every caller in PN532.cpp checks the result. There is no retransmission.",
+                    "evidence": [
+                        "PN532_I2C/PN532_I2C.cpp:219",
+                        "PN532_I2C/PN532_I2C.cpp:221",
+                        "PN532_SPI/PN532_SPI.cpp:56",
+                        "PN532_SPI/PN532_SPI.cpp:58",
+                        "PN532_HSU/PN532_HSU.cpp:155",
+                        "PN532_HSU/PN532_HSU.cpp:157",
+                        "PN532/PN532.cpp:122"
+                    ]
+                },
+                "frames.checksums_checked": {
+                    "status": "yes",
+                    "note": "All transports verify both checksums. Several callers in PN532.cpp discard the result of readResponse, so a DCS failure can still go unnoticed: see the defects.",
+                    "evidence": [
+                        "PN532_I2C/PN532_I2C.cpp:149",
+                        "PN532_I2C/PN532_I2C.cpp:176",
+                        "PN532_SPI/PN532_SPI.cpp:91",
+                        "PN532_SPI/PN532_SPI.cpp:127",
+                        "PN532_HSU/PN532_HSU.cpp:104",
+                        "PN532_HSU/PN532_HSU.cpp:135"
+                    ]
+                },
+                "frames.extended_frames": {
+                    "status": "no",
+                    "searched": "LENM, LENL, extended, a 0xFF 0xFF length marker in the read paths, 16-bit frame lengths: none in PN532/ or the transport folders",
+                    "note": "All frame lengths are uint8_t. An extended frame has LEN=FF, LCS=FF and fails the LCS check. The two 0xFF bytes in PN532_I2C.cpp:80 are the NACK frame.",
+                    "evidence": [
+                        "PN532_I2C/PN532_I2C.cpp:120",
+                        "PN532_SPI/PN532_SPI.cpp:90",
+                        "PN532_HSU/PN532_HSU.cpp:100"
+                    ]
+                },
+                "frames.error_frame": {
+                    "status": "no",
+                    "searched": "0x7F, 0x81, syntax, error frame, ERROR_FRAME in PN532.cpp, PN532.h, PN532Interface.h and the transports: only unrelated matches (PrintHexChar, a Mifare access byte)",
+                    "note": "There is no code for this frame. I2C and SPI return the generic PN532_INVALID_FRAME because TFI 0x7F is not 0xD5. HSU and SWHSU return PN532_NO_SPACE because LEN=1 underflows before TFI is read.",
+                    "evidence": ["PN532_HSU/PN532_HSU.cpp:108", "PN532_I2C/PN532_I2C.cpp:154"]
+                },
+                "frames.response_code_checked": {
+                    "status": "yes",
+                    "evidence": [
+                        "PN532_I2C/PN532_I2C.cpp:154",
+                        "PN532_SPI/PN532_SPI.cpp:97",
+                        "PN532_HSU/PN532_HSU.cpp:118"
+                    ]
+                },
+                "waiting.irq": {
+                    "status": "no",
+                    "searched": "attachInterrupt, digitalRead, IRQ, irq: only the two lines quoted over every source outside web/",
+                    "note": "The IRQ macro is never used. SAMConfig enables the chip's IRQ output, but no code reads that line.",
+                    "evidence": ["NDEF/NfcAdapter.h:20", "PN532/PN532.cpp:303"]
+                },
+                "waiting.ready_polling": {
+                    "status": "yes",
+                    "note": "SPI sends the status read command. I2C reads the status byte at the start of each read. HSU has no status byte.",
+                    "evidence": [
+                        "PN532_SPI/PN532_SPI.cpp:66",
+                        "PN532_SPI/PN532_SPI.cpp:146",
+                        "PN532_SPI/PN532_SPI.cpp:147",
+                        "PN532_I2C/PN532_I2C.cpp:85"
+                    ]
+                },
+                "waiting.bounded_waits": {
+                    "status": "partly",
+                    "note": "ACK waits and the default 1000 ms response wait are bounded. A timeout of 0 means no limit in every transport, and it is the default of tgInitAsTarget, EmulateTag::emulate and SNEP. NfcAdapter::begin stops forever when the chip does not return a firmware version.",
+                    "evidence": [
+                        "PN532_I2C/PN532_I2C.cpp:92",
+                        "PN532_SPI/PN532_SPI.cpp:69",
+                        "PN532_HSU/PN532_HSU.cpp:182",
+                        "PN532/PN532Interface.h:48",
+                        "PN532/PN532.h:151",
+                        "PN532/emulatetag.h:26",
+                        "PN532/snep.h:41",
+                        "NDEF/NfcAdapter.cpp:22"
+                    ]
+                },
+                "waiting.nonblocking_detect": {
+                    "status": "no",
+                    "searched": "start*Passive, read*Detected, startDetect, readDetected, public isReady or available in PN532/ and the transports: only the private PN532_SPI::isReady",
+                    "note": "readPassiveTargetID and inListPassiveTarget send the command and wait for the response in one call.",
+                    "evidence": ["PN532/PN532.cpp:388", "PN532/PN532.cpp:393"]
+                },
+                "cards.iso14443a_uid": {
+                    "status": "yes",
+                    "note": "ATQA and SAK are parsed but not returned. The UID copy has no length check: see the defects.",
+                    "evidence": ["PN532/PN532.cpp:382", "PN532/PN532.cpp:384", "PN532/PN532.cpp:425"]
+                },
+                "cards.two_targets": {
+                    "status": "no",
+                    "searched": "MaxTg, two cards, 2 cards, max cards: only the quoted comment over every source outside web/",
+                    "note": "MaxTg is hard-coded to 1 and any other NbTg is rejected.",
+                    "evidence": ["PN532/PN532.cpp:385", "PN532/PN532.cpp:410"]
+                },
+                "cards.mifare_classic": {
+                    "status": "yes",
+                    "evidence": ["PN532/PN532.cpp:482", "PN532/PN532.cpp:531", "PN532/PN532.cpp:574"]
+                },
+                "cards.ultralight_ntag": {
+                    "status": "partly",
+                    "note": "Pages are read and written, but the read refuses page 64 and above. NTAG215 and NTAG216 have more pages than that, so they cannot be read in full. There is no NTAG-specific command such as GET_VERSION or FAST_READ.",
+                    "evidence": ["PN532/PN532.cpp:711", "PN532/PN532.cpp:713", "PN532/PN532.cpp:759"]
+                },
+                "cards.iso14443_4_apdu": {
+                    "status": "yes",
+                    "note": "inListPassiveTarget followed by inDataExchange exchanges raw bytes, with RATS left to the chip. Lengths are uint8_t and the response timeout is fixed at 1000 ms. The MI bit is masked out and chaining is not handled.",
+                    "evidence": [
+                        "PN532/PN532.cpp:787",
+                        "PN532/PN532.cpp:794",
+                        "PN532/PN532.cpp:829",
+                        "PN532/examples/android_hce/android_hce.ino:72"
+                    ]
+                },
+                "cards.ndef": {
+                    "status": "yes",
+                    "note": "MIFARE Classic and Type 2 tags, plus SNEP for P2P. There is no Type 3 or Type 4 tag driver in reader mode.",
+                    "evidence": [
+                        "NDEF/NfcAdapter.cpp:104",
+                        "NDEF/NfcAdapter.cpp:138",
+                        "NDEF/MifareUltralight.cpp:165",
+                        "NDEF/MifareClassic.cpp:18",
+                        "PN532/snep.cpp:51"
+                    ]
+                },
+                "cards.iso14443b": {
+                    "status": "no",
+                    "searched": "14443B, 14443-B, type B, AFI, BrTy, BaudModulation: no match over every source outside web/",
+                    "note": "cardbaudrate is passed through, but no AFI byte is sent and the response is parsed as type A.",
+                    "evidence": ["PN532/PN532.h:53", "PN532/PN532.cpp:386"]
+                },
+                "cards.felica": {
+                    "status": "yes",
+                    "evidence": [
+                        "PN532/PN532.cpp:990",
+                        "PN532/PN532.cpp:1062",
+                        "PN532/PN532.cpp:1203",
+                        "PN532/PN532.cpp:1278",
+                        "PN532/PN532.cpp:1383"
+                    ]
+                },
+                "cards.card_emulation": {
+                    "status": "yes",
+                    "note": "EmulateTag emulates an NDEF Type 4 tag with TgGetData and TgSetData, although README.md lists card emulation under To do. TgGetInitiatorCommand and TgResponseToInitiator are only defined, not used.",
+                    "evidence": [
+                        "PN532/PN532.cpp:855",
+                        "PN532/PN532.cpp:895",
+                        "PN532/PN532.cpp:923",
+                        "PN532/emulatetag.cpp:95",
+                        "PN532/emulatetag.cpp:127",
+                        "PN532/emulatetag.cpp:216"
+                    ]
+                },
+                "cards.peer_to_peer": {
+                    "status": "yes",
+                    "note": "Target role only, with LLCP and SNEP on top. InJumpForDEP is only a #define, so the initiator role is absent.",
+                    "evidence": [
+                        "PN532/PN532.cpp:875",
+                        "PN532/mac_link.cpp:9",
+                        "PN532/llcp.cpp:115",
+                        "PN532/snep.cpp:5"
+                    ]
+                },
+                "chip_control.firmware_version": {
+                    "status": "yes",
+                    "evidence": ["PN532/PN532.cpp:116", "PN532/PN532.cpp:120"]
+                },
+                "chip_control.sam_configuration": {
+                    "status": "yes",
+                    "note": "Normal mode only. The command is sent correctly, but the function returns false on success: see the defects.",
+                    "evidence": ["PN532/PN532.cpp:298", "PN532/PN532.cpp:300"]
+                },
+                "chip_control.rf_field_control": {
+                    "status": "yes",
+                    "note": "Sends config item 1. The function returns false on success: see the defects.",
+                    "evidence": ["PN532/PN532.cpp:354", "PN532/PN532.cpp:356", "PN532/PN532.cpp:357"]
+                },
+                "chip_control.retries_control": {
+                    "status": "yes",
+                    "note": "MxRtyATR and MxRtyPSL are fixed. The function returns false on success: see the defects.",
+                    "evidence": ["PN532/PN532.cpp:323", "PN532/PN532.cpp:326", "PN532/PN532.cpp:329"]
+                },
+                "chip_control.power_down": {
+                    "status": "no",
+                    "searched": "COMMAND_POWERDOWN, powerDown, PowerDown, sleep over every source outside web/: only the #define quoted",
+                    "note": "The PowerDown command is never sent. wakeup() runs only inside begin().",
+                    "evidence": ["PN532/PN532.h:26"]
+                },
+                "chip_control.reset_recovery": {
+                    "status": "partly",
+                    "note": "begin() and SAMConfig() can be called again to start over, and MACLink does that on every activation. There is no reset pin (the RESET macro is unused), no ACK abort, and no code that detects a dead chip and acts.",
+                    "evidence": [
+                        "PN532/PN532.cpp:26",
+                        "PN532/PN532.cpp:29",
+                        "PN532/mac_link.cpp:7",
+                        "NDEF/NfcAdapter.h:21"
+                    ]
+                },
+                "several.several_readers": {
+                    "status": "yes",
+                    "note": "All reader state is in object members. The only static is LLCP::SYMM_PDU, which is two zero bytes and never written. The I2C address is fixed, so two I2C readers need two TwoWire buses.",
+                    "evidence": [
+                        "PN532/PN532.h:204",
+                        "PN532/PN532.h:206",
+                        "PN532_SPI/PN532_SPI.h:19",
+                        "PN532_SPI/PN532_SPI.h:20",
+                        "PN532_SPI/PN532_SPI.h:21",
+                        "PN532_I2C/PN532_I2C.h:21",
+                        "PN532/llcp.cpp:15"
+                    ]
+                },
+                "several.shared_spi_bus": {
+                    "status": "yes",
+                    "note": "Each object takes the bus and its own chip select, and each exchange is framed by that pin. beginTransaction and SPISettings are not used: LSB-first and the clock are set once on the shared SPIClass. Two PN532 readers use the same settings; another kind of device on the bus may need different ones.",
+                    "evidence": [
+                        "PN532_SPI/PN532_SPI.h:10",
+                        "PN532_SPI/PN532_SPI.cpp:144",
+                        "PN532_SPI/PN532_SPI.cpp:148",
+                        "PN532_SPI/PN532_SPI.cpp:154",
+                        "PN532_SPI/PN532_SPI.cpp:188",
+                        "PN532_SPI/PN532_SPI.cpp:23"
+                    ]
+                },
+                "several.thread_safety": {
+                    "status": "no",
+                    "searched": "mutex, semaphore, critical, portENTER, noInterrupts, thread, task in sources outside web/ and examples: no match; no rule in the READMEs",
+                    "note": "The Web Serial reader lock in web/pn532-tester is a stream lock in a browser page, unrelated to tasks using the driver."
+                },
+                "code_health.errors_returned": {
+                    "status": "partly",
+                    "note": "The transports and the felica_ functions return distinct negative codes, and tgInitAsTarget separates timeout from failure. Most PN532 methods reduce failures to 0 or false, and some discard the result. The failure results of readRegister and readGPIO look like register or pin values.",
+                    "evidence": [
+                        "PN532/PN532Interface.h:18",
+                        "PN532/PN532Interface.h:19",
+                        "PN532/PN532Interface.h:20",
+                        "PN532/PN532Interface.h:21",
+                        "PN532/PN532.cpp:1003",
+                        "PN532/PN532.cpp:162",
+                        "PN532/PN532.cpp:273",
+                        "PN532/PN532.cpp:505"
+                    ]
+                },
+                "code_health.buffers_bounded": {
+                    "status": "partly",
+                    "note": "Every transport checks the frame length against the buffer it was given. Above that layer several copies use unchecked lengths from the chip, the card or the peer: see the defects.",
+                    "evidence": [
+                        "PN532_I2C/PN532_I2C.cpp:159",
+                        "PN532_SPI/PN532_SPI.cpp:106",
+                        "PN532_HSU/PN532_HSU.cpp:109",
+                        "PN532/PN532.cpp:425",
+                        "PN532/PN532.cpp:1100",
+                        "PN532/emulatetag.cpp:177",
+                        "PN532/emulatetag.cpp:199",
+                        "PN532/llcp.cpp:291"
+                    ]
+                },
+                "code_health.allocation_checked": {
+                    "status": "no",
+                    "searched": "malloc, calloc, realloc, new in PN532/ and NDEF/, then a NULL check after each: none. All nine malloc calls in NdefRecord.cpp go straight to memcpy",
+                    "note": "PN532.cpp and the transports allocate nothing. The allocations are in the NDEF layer and none is checked.",
+                    "evidence": [
+                        "NDEF/NdefRecord.cpp:29",
+                        "NDEF/NdefRecord.cpp:30",
+                        "NDEF/NdefRecord.cpp:275",
+                        "NDEF/NdefRecord.cpp:276",
+                        "NDEF/NfcAdapter.cpp:5",
+                        "NDEF/NfcTag.cpp:41"
+                    ]
+                },
+                "code_health.tests": {
+                    "status": "partly",
+                    "note": "ArduinoUnit tests cover NDEF records and messages in memory and run without a reader. The Node test covers the browser page's own JavaScript. No test exercises PN532.cpp, the transports, frames or a chip.",
+                    "evidence": [
+                        "NDEF/tests/NdefUnitTest/NdefUnitTest.ino:16",
+                        "NDEF/tests/NfcTagTest/NfcTagTest.ino:11",
+                        "web/pn532-tester/test-pn532-page.cjs:72"
+                    ]
+                },
+                "code_health.examples": {
+                    "status": "yes",
+                    "note": "12 examples in PN532/examples and 10 in NDEF/examples.",
+                    "evidence": [
+                        "PN532/examples/iso14443a_uid/iso14443a_uid.pde:80",
+                        "PN532/examples/android_hce/android_hce.ino:72",
+                        "PN532/examples/emulate_tag_ndef/emulate_tag_ndef.ino:61",
+                        "PN532/examples/p2p_raw/p2p_raw.ino:28",
+                        "NDEF/examples/P2P_Receive/P2P_Receive.ino:20"
+                    ]
+                },
+                "code_health.docs": {
+                    "status": "yes",
+                    "note": "Usage text exists, but it does not match the code in two places: README.md claims mbed support and the tree has no mbed code, and it lists card emulation as To do although EmulateTag exists.",
+                    "evidence": ["README.md:21", "README.md:39", "NDEF/README.md:44"]
+                },
+                "code_health.license": {
+                    "status": "yes",
+                    "note": "BSD for PN532/ and NDEF/. There is no license file at the root or in the transport folders or web/.",
+                    "evidence": ["PN532/license.txt:1", "NDEF/LICENSE.txt:1"]
+                }
+            },
+            "defects": [
+                {
+                    "what": "EmulateTag::emulate copies lc bytes, a value up to 255 set by the NFC reader, into the 128-byte stack buffer rwbuf on READ BINARY, and bounds the offset by NDEF_MAX_LENGTH even for the 15-byte compatibility container, so a reader can overflow the stack and read past the container.",
+                    "severity": "medium",
+                    "read_as": "high",
+                    "judged": "lc reaches memcpy into rwbuf[128] with only the offset checked, and the CC branch uses NDEF_MAX_LENGTH as the bound for a 15-byte stack array, so a reader can overflow the stack and read past the container. The container declares MLe 0x54, so a compliant reader stays inside and this needs a reader that sends a larger Le or offset.",
+                    "evidence": [
+                        "PN532/emulatetag.cpp:119",
+                        "PN532/emulatetag.cpp:136",
+                        "PN532/emulatetag.cpp:174",
+                        "PN532/emulatetag.cpp:177",
+                        "PN532/emulatetag.cpp:185"
+                    ]
+                },
+                {
+                    "what": "On UPDATE BINARY EmulateTag::emulate copies lc reader-supplied bytes to ndef_file + p1p2_length and checks only that the offset is at most 128, so a reader can write up to 255 bytes past the end of the 128-byte ndef_file.",
+                    "severity": "medium",
+                    "read_as": "high",
+                    "judged": "The offset test allows 128 and lc can be 255, so the copy reaches 255 bytes past ndef_file, over uidPtr, the flags and updateNdefCallback, and tagWriteable defaults to true. The container declares a 128-byte file, so a compliant writer stays inside and this needs a reader that ignores it.",
+                    "evidence": ["PN532/emulatetag.cpp:195", "PN532/emulatetag.cpp:199", "PN532/emulatetag.h:62"]
+                },
+                {
+                    "what": "readPassiveTargetID copies NFCIDLength bytes into the caller's uid with no limit, while NfcAdapter and the example give it uid[7], so a card with a 10-byte UID overflows the buffer by 3 bytes.",
+                    "severity": "medium",
+                    "read_as": "high",
+                    "judged": "The loop has no limit and the callers pass uid[7], so a 10-byte UID, which the chip reports for cascade level 3 (UM0701-02 7.3.5), writes 3 bytes past the array, in NfcAdapter over the uidLength member that follows it. 4 and 7-byte UIDs fit, so this is the limit of a legal input.",
+                    "evidence": [
+                        "PN532/PN532.cpp:424",
+                        "PN532/PN532.cpp:425",
+                        "NDEF/NfcAdapter.h:40",
+                        "PN532/examples/iso14443a_uid/iso14443a_uid.pde:74"
+                    ]
+                },
+                {
+                    "what": "felica_SendCommand copies the card's response into the caller's buffer with no size limit and the callers check the length only afterwards, so a card that returns more bytes overflows the 10, 11 or 42-byte stack arrays of felica_RequestResponse, felica_WriteWithoutEncryption and felica_RequestSystemCode.",
+                    "severity": "medium",
+                    "read_as": "high",
+                    "judged": "felica_SendCommand takes no capacity and its memcpy runs before the callers' length tests, so a reply of up to 62 bytes overflows the 10, 11 or 42-byte stack arrays. A card that follows the FeliCa command format returns the expected length, so this needs a non-conforming card.",
+                    "evidence": [
+                        "PN532/PN532.cpp:1094",
+                        "PN532/PN532.cpp:1100",
+                        "PN532/PN532.cpp:1173",
+                        "PN532/PN532.cpp:1181",
+                        "PN532/PN532.cpp:1312",
+                        "PN532/PN532.cpp:1353"
+                    ]
+                },
+                {
+                    "what": "LLCP::read accepts a 2-byte I PDU, then computes len = status - 3 as 255 and moves 255 bytes inside the caller's buffer, so a peer can overflow a buffer such as the 128-byte one in the P2P examples.",
+                    "severity": "medium",
+                    "read_as": "high",
+                    "judged": "status 2 passes the test at line 274, len becomes 255, and the loop writes 255 bytes from buf, which overruns the 128-byte global reached through SNEP::read in p2p_raw and the 16-byte rbuf in SNEP::write. An I PDU has at least 3 header bytes, so this needs a malformed PDU from the peer.",
+                    "evidence": ["PN532/llcp.cpp:274", "PN532/llcp.cpp:279", "PN532/llcp.cpp:291", "PN532/llcp.cpp:303"]
+                },
+                {
+                    "what": "MifareUltralight::read writes one page, 4 bytes, past its stack buffer whenever messageLength + ndefStartIndex is not a multiple of 4, because the loop stops at the first index at or above that sum and bufferSize equals that index in those cases.",
+                    "severity": "high",
+                    "judged": "With L = messageLength + ndefStartIndex, the last ReadPage runs at the first multiple of 4 at or above L, and calculateBufferSize gives that same value when L mod 4 is 1, 2 or 3, so 4 bytes land past the end of the stack buffer (L mod 4 = 0 stays inside). This happens on an ordinary NfcAdapter::read of an NDEF Ultralight or NTAG tag with a working chip.",
+                    "evidence": [
+                        "NDEF/MifareUltralight.cpp:45",
+                        "NDEF/MifareUltralight.cpp:49",
+                        "NDEF/MifareUltralight.cpp:65",
+                        "NDEF/MifareUltralight.cpp:156",
+                        "NDEF/MifareUltralight.cpp:161"
+                    ]
+                },
+                {
+                    "what": "MifareClassic::read sizes a stack array from the 16-bit TLV length on the card with no upper limit, so a tag that declares a large message can exhaust the stack.",
+                    "severity": "medium",
+                    "read_as": "high",
+                    "judged": "decodeTlv takes a 16-bit length from the tag and read() declares a VLA of that size with no limit, up to about 64 KB. A normal 1K tag message fits the stack, so this needs a tag that declares a message near the format limit.",
+                    "evidence": ["NDEF/MifareClassic.cpp:176", "NDEF/MifareClassic.cpp:52", "NDEF/MifareClassic.cpp:53"]
+                },
+                {
+                    "what": "The NdefMessage decoder takes type, id and payload lengths from the tag without comparing them to numBytes, and allows a 32-bit payload length, so a crafted tag causes reads past the buffer or a memcpy to NULL after a failed malloc.",
+                    "severity": "medium",
+                    "read_as": "high",
+                    "judged": "The decoder never compares the type, id or payload lengths to numBytes, payloadLength can come from 4 tag bytes, and setPayload calls memcpy on the unchecked result of malloc, so a crafted tag reads past the buffer or copies to NULL. A valid message passes, so this needs a crafted tag.",
+                    "evidence": [
+                        "NDEF/NdefMessage.cpp:20",
+                        "NDEF/NdefMessage.cpp:43",
+                        "NDEF/NdefMessage.cpp:62",
+                        "NDEF/NdefMessage.cpp:71",
+                        "NDEF/NdefRecord.cpp:275",
+                        "NDEF/NdefRecord.cpp:276"
+                    ]
+                },
+                {
+                    "what": "mifareclassic_WriteDataBlock and mifareultralight_WritePage treat any response with one or more bytes as success and never read the InDataExchange status byte, so a failed write to the card returns success.",
+                    "severity": "medium",
+                    "read_as": "high",
+                    "judged": "readResponse returns the payload length, which is at least 1 for the status byte, so the expression is true whatever the status says, and neither function looks at pn532_packetbuffer[0]. The false success needs a write that fails on the card, such as a lost card or a protected block.",
+                    "evidence": ["PN532/PN532.cpp:589", "PN532/PN532.cpp:774"]
+                },
+                {
+                    "what": "mifareclassic_ReadDataBlock, mifareultralight_ReadPage and mifareclassic_AuthenticateBlock discard the result of readResponse and test only byte 0 of the buffer, and the transports fill the buffer before they verify DCS, so a frame with a bad checksum or a short frame can pass as valid data.",
+                    "severity": "medium",
+                    "evidence": [
+                        "PN532/PN532.cpp:505",
+                        "PN532/PN532.cpp:548",
+                        "PN532/PN532.cpp:551",
+                        "PN532/PN532.cpp:730",
+                        "PN532_SPI/PN532_SPI.cpp:119",
+                        "PN532_SPI/PN532_SPI.cpp:127"
+                    ]
+                },
+                {
+                    "what": "SAMConfig, setPassiveActivationRetries, setRFField and writeGPIO return 0 < readResponse, but these responses carry no data bytes, so readResponse returns 0 and the functions return false on success, EmulateTag::init included.",
+                    "severity": "medium",
+                    "evidence": [
+                        "PN532/PN532.cpp:310",
+                        "PN532/PN532.cpp:334",
+                        "PN532/PN532.cpp:364",
+                        "PN532/PN532.cpp:248",
+                        "PN532/emulatetag.cpp:53",
+                        "web/pn532-tester/test-pn532-page.cjs:95",
+                        "web/pn532-tester/test-pn532-page.cjs:96"
+                    ]
+                },
+                {
+                    "what": "PN532_I2C::readResponse stores the int16_t result of getResponseLength in a uint8_t without checking it, so an error turns into length 255 and the function starts a second wait, and a timeout takes twice the requested time.",
+                    "severity": "medium",
+                    "evidence": [
+                        "PN532_I2C/PN532_I2C.cpp:120",
+                        "PN532_I2C/PN532_I2C.cpp:122",
+                        "PN532_I2C/PN532_I2C.cpp:93",
+                        "PN532_I2C/PN532_I2C.cpp:126"
+                    ]
+                },
+                {
+                    "what": "The I2C transport returns -1, the value of PN532_INVALID_ACK, on a response timeout instead of PN532_TIMEOUT, so tgInitAsTarget returns -2 (failed) rather than the documented 0 (timeout) over I2C.",
+                    "severity": "medium",
+                    "evidence": [
+                        "PN532_I2C/PN532_I2C.cpp:135",
+                        "PN532/PN532Interface.h:18",
+                        "PN532/PN532Interface.h:19",
+                        "PN532/PN532.cpp:865"
+                    ]
+                },
+                {
+                    "what": "tgInitAsTarget, EmulateTag::emulate and SNEP read and write default to timeout 0, for which every transport waits for the chip without limit.",
+                    "severity": "medium",
+                    "evidence": [
+                        "PN532/PN532.h:151",
+                        "PN532/emulatetag.h:26",
+                        "PN532/snep.h:31",
+                        "PN532/snep.h:41",
+                        "PN532_I2C/PN532_I2C.cpp:92",
+                        "PN532_SPI/PN532_SPI.cpp:69",
+                        "PN532_HSU/PN532_HSU.cpp:182"
+                    ]
+                },
+                {
+                    "what": "NfcAdapter::begin enters an endless loop when getFirmwareVersion fails, so a missing or dead chip hangs the program instead of returning an error.",
+                    "severity": "medium",
+                    "evidence": ["NDEF/NfcAdapter.cpp:19", "NDEF/NfcAdapter.cpp:22"]
+                },
+                {
+                    "what": "After a response timeout the driver returns without sending the ACK abort frame of UM0701, so the chip can still be running InListPassiveTarget (MaxRetries defaults to 0xFF) when the next command is sent; the only frame the host ever sends besides commands is the I2C NACK.",
+                    "severity": "medium",
+                    "evidence": ["PN532/PN532.cpp:393", "PN532/PN532.cpp:394", "PN532_I2C/PN532_I2C.cpp:80"]
+                },
+                {
+                    "what": "readPassiveTargetID never sets inListedTag and the constructor does not initialize it, so inDataExchange after readPassiveTargetID sends an unset target number.",
+                    "severity": "medium",
+                    "evidence": [
+                        "PN532/PN532.cpp:18",
+                        "PN532/PN532.h:200",
+                        "PN532/PN532.cpp:792",
+                        "PN532/PN532.cpp:850",
+                        "PN532/PN532.cpp:1023"
+                    ]
+                },
+                {
+                    "what": "PN532_HSU::receive returns its byte count as int8_t, so a read of 128 or more bytes returns a negative number, fails the comparison with length[0] and is reported as PN532_TIMEOUT; PN532_SWHSU has the same code.",
+                    "severity": "medium",
+                    "evidence": [
+                        "PN532_HSU/PN532_HSU.cpp:169",
+                        "PN532_HSU/PN532_HSU.cpp:195",
+                        "PN532_HSU/PN532_HSU.cpp:123",
+                        "PN532_SWHSU/PN532_SWHSU.cpp:169"
+                    ]
+                },
+                {
+                    "what": "The switch on P1 of SELECT in EmulateTag::emulate has no default, so a SELECT with another P1 sets no response and tgSetData sends rwbuf with an uninitialized or stale sendlen.",
+                    "severity": "medium",
+                    "evidence": ["PN532/emulatetag.cpp:120", "PN532/emulatetag.cpp:141", "PN532/emulatetag.cpp:216"]
+                },
+                {
+                    "what": "LLCP::read and SNEP::read keep a signed result in uint16_t, so the negative errors of the layer below pass the 2 > status and 6 > status checks as large values.",
+                    "severity": "medium",
+                    "evidence": ["PN532/llcp.cpp:269", "PN532/llcp.cpp:274", "PN532/snep.cpp:63", "PN532/snep.cpp:64"]
+                },
+                {
+                    "what": "EmulateTag::emulate passes the length field written by the reader to the update callback, and getContent returns it, with no check against the 126 bytes that ndef_file holds, so consumers read past the buffer.",
+                    "severity": "medium",
+                    "evidence": ["PN532/emulatetag.cpp:203", "PN532/emulatetag.cpp:205", "PN532/emulatetag.h:37"]
+                },
+                {
+                    "what": "felica_ReadWithoutEncryption accepts 12 blocks and felica_RequestService 32 nodes, but the responses need 206 and 76 bytes in the 64-byte packet buffer, so reads of more than 3 blocks and requests of more than 26 nodes always fail with PN532_NO_SPACE.",
+                    "severity": "medium",
+                    "evidence": ["PN532/PN532.h:122", "PN532/PN532.h:125", "PN532/PN532.h:204", "PN532/PN532.cpp:1079"]
+                },
+                {
+                    "what": "MifareUltralight::findNdefMessage treats a first length byte of 0xFF as the length 255 and ignores the 3-byte TLV length that MifareUltralight::write produces for messages of 255 bytes or more.",
+                    "severity": "medium",
+                    "evidence": [
+                        "NDEF/MifareUltralight.cpp:134",
+                        "NDEF/MifareUltralight.cpp:135",
+                        "NDEF/MifareUltralight.cpp:175",
+                        "NDEF/MifareUltralight.cpp:199"
+                    ]
+                },
+                {
+                    "what": "MifareUltralight::read stops at page 62 and mifareultralight_ReadPage refuses page 64 and above, so an NDEF message that ends beyond that on a larger tag is decoded with uninitialized buffer bytes.",
+                    "severity": "medium",
+                    "evidence": [
+                        "NDEF/MifareUltralight.cpp:9",
+                        "NDEF/MifareUltralight.cpp:46",
+                        "PN532/PN532.cpp:713",
+                        "NDEF/MifareUltralight.cpp:73"
+                    ]
+                },
+                {
+                    "what": "MifareClassic::read sizes its buffer as if the TLV started at byte 0 and then decodes from messageStartIndex, so with leading null TLVs the decoder can read past the buffer and miss the last block of the message.",
+                    "severity": "medium",
+                    "evidence": [
+                        "NDEF/MifareClassic.cpp:113",
+                        "NDEF/MifareClassic.cpp:182",
+                        "NDEF/MifareClassic.cpp:102"
+                    ]
+                },
+                {
+                    "what": "MifareClassic::read goes on after a failed authentication or block read and decodes the uninitialized buffer as a message, so the caller cannot tell a failed read from a tag with content.",
+                    "severity": "medium",
+                    "evidence": [
+                        "NDEF/MifareClassic.cpp:69",
+                        "NDEF/MifareClassic.cpp:70",
+                        "NDEF/MifareClassic.cpp:85",
+                        "NDEF/MifareClassic.cpp:86",
+                        "NDEF/MifareClassic.cpp:102"
+                    ]
+                },
+                {
+                    "what": "MifareClassic::formatNDEF only prints failed block writes and returns the result of the last authentication, and formatMifare always returns true after its loop, so a partly formatted card is reported as a success.",
+                    "severity": "medium",
+                    "evidence": [
+                        "NDEF/MifareClassic.cpp:219",
+                        "NDEF/MifareClassic.cpp:248",
+                        "NDEF/MifareClassic.cpp:289",
+                        "NDEF/MifareClassic.cpp:325"
+                    ]
+                },
+                {
+                    "what": "NdefRecord::encode writes the payload before the id, while the NDEF format and the decoder in NdefMessage use type, id, payload, so a record with an id is encoded wrongly.",
+                    "severity": "medium",
+                    "evidence": [
+                        "NDEF/NdefRecord.cpp:170",
+                        "NDEF/NdefRecord.cpp:173",
+                        "NDEF/NdefRecord.cpp:178",
+                        "NDEF/NdefMessage.cpp:67",
+                        "NDEF/NdefMessage.cpp:71"
+                    ]
+                },
+                {
+                    "what": "NfcTag deletes _ndefMessage in its destructor, but operator= copies the pointer and there is no copy constructor, so an assigned or copied tag leads to use after free and a double delete.",
+                    "severity": "medium",
+                    "evidence": ["NDEF/NfcTag.cpp:46", "NDEF/NfcTag.cpp:58", "NDEF/NfcTag.h:17"]
+                },
+                {
+                    "what": "mifareclassic_AuthenticateBlock copies uidLen bytes into the 7-byte member _uid with no limit, so the 10-byte UID that readPassiveTargetID can return overflows the member.",
+                    "severity": "medium",
+                    "evidence": ["PN532/PN532.cpp:488", "PN532/PN532.h:197"]
+                },
+                {
+                    "what": "readGPIO discards the result of readResponse, so after a failed read it returns the stale byte 0x0C, the command code, as the pin state.",
+                    "severity": "low",
+                    "evidence": ["PN532/PN532.cpp:267", "PN532/PN532.cpp:273", "PN532/PN532.cpp:290"]
+                },
+                {
+                    "what": "readRegister returns 0 on failure, the same value as a register that holds 0.",
+                    "severity": "low",
+                    "evidence": ["PN532/PN532.cpp:162", "PN532/PN532.cpp:168", "PN532/PN532.cpp:173"]
+                },
+                {
+                    "what": "EmulateTag::emulate assigns the bool from tgSetData to status and tests status < 0, which is never true, so a failed tgSetData is ignored.",
+                    "severity": "low",
+                    "evidence": ["PN532/emulatetag.cpp:216", "PN532/emulatetag.cpp:217", "PN532/PN532.h:155"]
+                },
+                {
+                    "what": "EmulateTag::setNdefFile returns void and only prints a debug message when the file is too large, so the caller gets no error and the old content stays.",
+                    "severity": "low",
+                    "evidence": ["PN532/emulatetag.cpp:57", "PN532/emulatetag.cpp:59"]
+                },
+                {
+                    "what": "The EmulateTag constructor leaves ndef_file uninitialized, so without setNdefFile, which the example calls optional, the emulated tag returns uninitialized bytes unless the object is global.",
+                    "severity": "low",
+                    "evidence": [
+                        "PN532/emulatetag.h:22",
+                        "PN532/emulatetag.h:62",
+                        "PN532/examples/emulate_tag_ndef/emulate_tag_ndef.ino:47"
+                    ]
+                },
+                {
+                    "what": "All transports compute the LEN byte as a uint8_t sum with no check, so a payload that takes hlen + blen + 1 above 255 wraps and produces a wrong frame instead of an error.",
+                    "severity": "low",
+                    "evidence": [
+                        "PN532_I2C/PN532_I2C.cpp:37",
+                        "PN532_SPI/PN532_SPI.cpp:162",
+                        "PN532_HSU/PN532_HSU.cpp:54"
+                    ]
+                },
+                {
+                    "what": "PN532_I2C::writeCommand returns from its too-long path without endTransmission, leaving the transmission opened at the start of the function unfinished.",
+                    "severity": "low",
+                    "evidence": [
+                        "PN532_I2C/PN532_I2C.cpp:31",
+                        "PN532_I2C/PN532_I2C.cpp:53",
+                        "PN532_I2C/PN532_I2C.cpp:64"
+                    ]
+                },
+                {
+                    "what": "The HSU transports subtract 2 from LEN before reading TFI, so the syntax error frame with LEN=1 underflows and is reported as PN532_NO_SPACE, and its remaining bytes stay in the serial buffer until the next command.",
+                    "severity": "low",
+                    "evidence": [
+                        "PN532_HSU/PN532_HSU.cpp:108",
+                        "PN532_HSU/PN532_HSU.cpp:109",
+                        "PN532_HSU/PN532_HSU.cpp:110",
+                        "PN532_SWHSU/PN532_SWHSU.cpp:108"
+                    ]
+                },
+                {
+                    "what": "LLCP::disconnect has the checks of connect: it ends on a CC PDU, continues on the DM PDU that should end it, and returns -3 on a SYMM PDU.",
+                    "severity": "low",
+                    "evidence": ["PN532/llcp.cpp:188", "PN532/llcp.cpp:195", "PN532/llcp.cpp:197"]
+                },
+                {
+                    "what": "LLCP::waitForConnection, waitForDisconnection, connect and disconnect ignore their timeout argument, so the documented timeout has no effect and the loops run as long as the peer sends SYMM PDUs.",
+                    "severity": "low",
+                    "evidence": ["PN532/llcp.cpp:37", "PN532/llcp.cpp:47", "PN532/llcp.cpp:63", "PN532/llcp.h:28"]
+                },
+                {
+                    "what": "LLCP::getHeaderBuffer subtracts 3 from the pointer len instead of the value it points to, so the reported length stays 3 bytes too large.",
+                    "severity": "low",
+                    "evidence": ["PN532/llcp.h:58"]
+                },
+                {
+                    "what": "LLCP sequence numbers are not reduced modulo 16: nr carries into the N(S) bits after 16 received PDUs, and an RR after peer N(S) 15 sets a reserved bit.",
+                    "severity": "low",
+                    "evidence": ["PN532/llcp.cpp:232", "PN532/llcp.cpp:297", "PN532/llcp.cpp:306"]
+                },
+                {
+                    "what": "The long-record branch of the NdefMessage decoder modifies index four times in one expression with no sequencing, which is undefined behaviour in C++.",
+                    "severity": "low",
+                    "evidence": [
+                        "NDEF/NdefMessage.cpp:48",
+                        "NDEF/NdefMessage.cpp:49",
+                        "NDEF/NdefMessage.cpp:50",
+                        "NDEF/NdefMessage.cpp:51"
+                    ]
+                },
+                {
+                    "what": "MifareUltralight leaves tagCapacity unset when reading page 3 fails, and write and clean still use it as the capacity and the page count.",
+                    "severity": "low",
+                    "evidence": [
+                        "NDEF/MifareUltralight.cpp:98",
+                        "NDEF/MifareUltralight.cpp:102",
+                        "NDEF/MifareUltralight.cpp:178",
+                        "NDEF/MifareUltralight.cpp:236"
+                    ]
+                },
+                {
+                    "what": "MifareUltralight::isUnformatted returns false on a read failure and findNdefMessage leaves messageLength at 0 on one, so a failed read of a tag is returned as a tag with one empty record.",
+                    "severity": "low",
+                    "evidence": [
+                        "NDEF/MifareUltralight.cpp:90",
+                        "NDEF/MifareUltralight.cpp:130",
+                        "NDEF/MifareUltralight.cpp:36"
+                    ]
+                },
+                {
+                    "what": "NfcAdapter::guessTagType uses only the UID length, so every card with a 4-byte UID counts as MIFARE Classic and every other card as Type 2, including the 7-byte Classic and Type 4 cards listed in its own comment.",
+                    "severity": "low",
+                    "evidence": [
+                        "NDEF/NfcAdapter.cpp:182",
+                        "NDEF/NfcAdapter.cpp:184",
+                        "NDEF/NfcAdapter.cpp:186",
+                        "NDEF/NfcAdapter.cpp:192"
+                    ]
+                },
+                {
+                    "what": "NfcAdapter::tagPresent passes an unsigned long timeout to a uint16_t parameter, so values above 65535 ms are cut.",
+                    "severity": "low",
+                    "evidence": ["NDEF/NfcAdapter.h:29", "NDEF/NfcAdapter.cpp:46", "PN532/PN532.h:161"]
+                },
+                {
+                    "what": "mifareclassic_WriteNDEFURI stores strlen in a uint8_t before its range check, so a URL of 256 or more characters can pass the check with a wrapped length and is silently truncated.",
+                    "severity": "low",
+                    "evidence": ["PN532/PN532.cpp:642", "PN532/PN532.cpp:649"]
+                },
+                {
+                    "what": "PrintHex and PrintHexChar count with a uint8_t against a uint32_t length, so a length of 256 or more loops forever.",
+                    "severity": "low",
+                    "evidence": ["PN532/PN532.cpp:40", "PN532/PN532.cpp:43"]
+                },
+                {
+                    "what": "NfcTag::getUidString tests _uid[i] < 0xF, so the byte 0x0F is printed as one digit.",
+                    "severity": "low",
+                    "evidence": ["NDEF/NfcTag.cpp:83"]
+                }
+            ]
+        },
+        {
+            "blind": true,
+            "commit": "8b05896a6616396392f0eac5af88a97c9733ebce",
+            "rubric": "pn532",
+            "rubric_version": 2,
+            "date": "2026-11-02",
+            "by": "claude-opus-5-5",
+            "items": {
+                "transports.i2c": {
+                    "status": "yes",
+                    "note": "Address is 0x48 >> 1 = 0x24. Each poll reads the status byte first, requestFrom ends with STOP, and the loop retries after NOT READY. The first read of a response stops after 6 bytes, so the rest of that frame is lost (6.2.4); the code then sends a NACK and reads the retransmitted frame whole (6.2.2.1 c). The bus speed is left at the Wire default. The error path of this sequence has a high defect, see defects. Sources read for the Wire claims: ~/.platformio/packages/framework-arduinoespressif32@3.20016.0/libraries/Wire/src/Wire.cpp, ~/.arduino15/packages/esp8266/hardware/esp8266/3.1.2/libraries/Wire/Wire.cpp, and for the read path ~/.espressif/v5.5.5/esp-idf/components/driver/i2c/i2c.c (the legacy driver; the arduino-esp32 package ships prebuilt IDF libraries, so this is the nearest source on this machine). Nothing was run.",
+                    "evidence": [
+                        "PN532_I2C/PN532_I2C.cpp:9",
+                        "PN532_I2C/PN532_I2C.cpp:31",
+                        "PN532_I2C/PN532_I2C.cpp:84",
+                        "PN532_I2C/PN532_I2C.cpp:85",
+                        "PN532_I2C/PN532_I2C.cpp:90",
+                        "PN532_I2C/PN532_I2C.cpp:108",
+                        "PN532_I2C/PN532_I2C.cpp:110",
+                        "PN532_I2C/PN532_I2C.cpp:126",
+                        "PN532_I2C/PN532_I2C.cpp:127"
+                    ]
+                },
+                "transports.spi": {
+                    "status": "yes",
+                    "note": "First bytes 2, 1, 3 match 6.2.5. Mode 0 and LSB first are set in begin(). SPI_CLOCK_DIV8 is 2 MHz in esp32-hal-spi.h and in the esp8266 SPI.h on this machine. The code uses setDataMode, setBitOrder and setClockDivider once in begin() and no beginTransaction.",
+                    "evidence": [
+                        "PN532_SPI/PN532_SPI.cpp:6",
+                        "PN532_SPI/PN532_SPI.cpp:7",
+                        "PN532_SPI/PN532_SPI.cpp:8",
+                        "PN532_SPI/PN532_SPI.cpp:22",
+                        "PN532_SPI/PN532_SPI.cpp:23",
+                        "PN532_SPI/PN532_SPI.cpp:25",
+                        "PN532_SPI/PN532_SPI.cpp:146",
+                        "PN532_SPI/PN532_SPI.cpp:157",
+                        "PN532_SPI/PN532_SPI.cpp:79"
+                    ]
+                },
+                "transports.uart": {
+                    "status": "yes",
+                    "note": "PN532_HSU runs on HardwareSerial and PN532_SWHSU on SoftwareSerial, both fixed at 115200. The web page drives the same link from a browser.",
+                    "evidence": [
+                        "PN532_HSU/PN532_HSU.cpp:14",
+                        "PN532_HSU/PN532_HSU.cpp:50",
+                        "PN532_HSU/PN532_HSU.cpp:51",
+                        "PN532_HSU/PN532_HSU.cpp:52",
+                        "PN532_SWHSU/PN532_SWHSU.cpp:14",
+                        "web/pn532-tester/index.html:408"
+                    ]
+                },
+                "builds_on.esp_idf": {
+                    "status": "no",
+                    "searched": "Searched all sources for driver/i2c.h, driver/i2c_master.h, driver/spi_master.h, driver/uart.h, esp_err, ESP_PLATFORM, freertos: none found. PN532.cpp:9, PN532_debug.h:6 and every transport include Arduino.h and call Wire, SPIClass, HardwareSerial or SoftwareSerial.",
+                    "note": "No ESP-IDF driver API is called."
+                },
+                "builds_on.arduino": {
+                    "status": "yes",
+                    "note": "Judged from the source; nothing was built, by rule. There is no library.properties: each folder is a legacy Arduino library that is copied into libraries/ on its own.",
+                    "evidence": [
+                        "PN532/PN532.cpp:9",
+                        "PN532_I2C/PN532_I2C.h:8",
+                        "PN532_SPI/PN532_SPI.h:5",
+                        "PN532_HSU/PN532_HSU.h:6",
+                        "PN532_SWHSU/PN532_SWHSU.h:5"
+                    ]
+                },
+                "builds_on.esp_idf_component": {
+                    "status": "no",
+                    "searched": "find for idf_component.yml, CMakeLists.txt, component.mk, library.json, library.properties, platformio.ini in the whole tree: none. grep for idf_component_register: none."
+                },
+                "frames.ack_checked": {
+                    "status": "yes",
+                    "note": "Every command waits for the ACK frame and compares it; a missing or wrong ACK reaches the caller as a failure. The command is not resent, and the 10 ms limit is shorter than the 15 ms of 6.2.3, see defects. No code expects a NACK from the chip.",
+                    "evidence": [
+                        "PN532_I2C/PN532_I2C.cpp:76",
+                        "PN532_I2C/PN532_I2C.cpp:206",
+                        "PN532_I2C/PN532_I2C.cpp:219",
+                        "PN532_SPI/PN532_SPI.cpp:48",
+                        "PN532_SPI/PN532_SPI.cpp:56",
+                        "PN532_HSU/PN532_HSU.cpp:81",
+                        "PN532_HSU/PN532_HSU.cpp:150",
+                        "PN532_HSU/PN532_HSU.cpp:155",
+                        "PN532/PN532.cpp:122"
+                    ]
+                },
+                "frames.nack_resend": {
+                    "status": "partly",
+                    "note": "A NACK frame is sent only on I2C and on every response, as the second step of reading it: the first read gets LEN, the NACK gets the frame again. It is not a recovery: no transport sends a NACK after a bad checksum, a bad frame or a missing response.",
+                    "evidence": [
+                        "PN532_I2C/PN532_I2C.cpp:80",
+                        "PN532_I2C/PN532_I2C.cpp:108",
+                        "PN532_I2C/PN532_I2C.cpp:110",
+                        "PN532_I2C/PN532_I2C.cpp:122"
+                    ]
+                },
+                "frames.checksums_checked": {
+                    "status": "yes",
+                    "note": "Each transport checks both LCS and DCS. Several PN532.cpp functions ignore the failure that results, see defects.",
+                    "evidence": [
+                        "PN532_I2C/PN532_I2C.cpp:149",
+                        "PN532_I2C/PN532_I2C.cpp:176",
+                        "PN532_SPI/PN532_SPI.cpp:91",
+                        "PN532_SPI/PN532_SPI.cpp:127",
+                        "PN532_HSU/PN532_HSU.cpp:104",
+                        "PN532_HSU/PN532_HSU.cpp:135",
+                        "PN532_SWHSU/PN532_SWHSU.cpp:104",
+                        "PN532_SWHSU/PN532_SWHSU.cpp:135"
+                    ]
+                },
+                "frames.extended_frames": {
+                    "status": "no",
+                    "searched": "grep for LENM, LENL, extended, a 16-bit frame length in the transports: none. LEN is uint8_t in all of them, and LEN FF, LCS FF fails the LCS check (PN532_I2C.cpp:149, PN532_SPI.cpp:91, PN532_HSU.cpp:104). In the web page extractFrame treats it the same way."
+                },
+                "frames.error_frame": {
+                    "status": "no",
+                    "searched": "grep for 0x7F and 0x81 in the transports and PN532.cpp: only a printable-character test and an access-bits table. The frame fails the TFI test and returns the generic PN532_INVALID_FRAME (PN532_I2C.cpp:154, PN532_SPI.cpp:97, PN532_HSU.cpp:118), which is the same value as a corrupt frame. The web page throws \"Unexpected frame direction\"."
+                },
+                "frames.response_code_checked": {
+                    "status": "yes",
+                    "evidence": [
+                        "PN532_I2C/PN532_I2C.cpp:153",
+                        "PN532_I2C/PN532_I2C.cpp:154",
+                        "PN532_SPI/PN532_SPI.cpp:96",
+                        "PN532_SPI/PN532_SPI.cpp:97",
+                        "PN532_HSU/PN532_HSU.cpp:114",
+                        "PN532_HSU/PN532_HSU.cpp:118",
+                        "PN532_SWHSU/PN532_SWHSU.cpp:118",
+                        "web/pn532-tester/index.html:723",
+                        "web/pn532-tester/index.html:724"
+                    ]
+                },
+                "frames.status_decoded": {
+                    "status": "partly",
+                    "note": "inDataExchange and the FeliCa functions mask with 0x3F. The Mifare functions, tgGetData and tgSetData compare the whole byte, so a set MI or NAD bit reads as an error in tgGetData. The error code never reaches the caller: it is reduced to false or to a fixed negative number. mifareclassic_WriteDataBlock and mifareultralight_WritePage do not read Status at all.",
+                    "evidence": [
+                        "PN532/PN532.cpp:803",
+                        "PN532/PN532.cpp:1086",
+                        "PN532/PN532.cpp:1403",
+                        "PN532/PN532.cpp:510",
+                        "PN532/PN532.cpp:551",
+                        "PN532/PN532.cpp:733",
+                        "PN532/PN532.cpp:911",
+                        "PN532/PN532.cpp:950"
+                    ]
+                },
+                "waiting.irq": {
+                    "status": "no",
+                    "searched": "grep for irq, attachInterrupt, digitalRead, P70 in all sources: only the 0x01 parameter of SAMConfiguration (PN532.cpp:303) and an unused #define IRQ (NfcAdapter.h:20). No code reads the line."
+                },
+                "waiting.ready_polling": {
+                    "status": "yes",
+                    "note": "Not applicable to HSU, which has no status byte: there the code waits for bytes with a timeout.",
+                    "evidence": [
+                        "PN532_I2C/PN532_I2C.cpp:85",
+                        "PN532_I2C/PN532_I2C.cpp:127",
+                        "PN532_I2C/PN532_I2C.cpp:197",
+                        "PN532_SPI/PN532_SPI.cpp:48",
+                        "PN532_SPI/PN532_SPI.cpp:66",
+                        "PN532_SPI/PN532_SPI.cpp:146",
+                        "PN532_SPI/PN532_SPI.cpp:147"
+                    ]
+                },
+                "waiting.bounded_waits": {
+                    "status": "partly",
+                    "note": "ACK waits have a limit and readResponse defaults to 1000 ms. Timeout 0 means no limit in all transports, and tgInitAsTarget, EmulateTag::emulate and SNEP::read/write default to 0. NfcAdapter::begin ends in while (1) when no chip answers. On I2C the limit counts polls, not ms, and a timeout runs the loop twice.",
+                    "evidence": [
+                        "PN532_I2C/PN532_I2C.cpp:92",
+                        "PN532_I2C/PN532_I2C.cpp:134",
+                        "PN532_I2C/PN532_I2C.cpp:204",
+                        "PN532_SPI/PN532_SPI.cpp:51",
+                        "PN532_SPI/PN532_SPI.cpp:69",
+                        "PN532_HSU/PN532_HSU.cpp:182",
+                        "PN532/PN532.h:151",
+                        "PN532/emulatetag.h:26",
+                        "PN532/snep.h:31",
+                        "NDEF/NfcAdapter.cpp:22"
+                    ]
+                },
+                "waiting.abort_on_timeout": {
+                    "status": "no",
+                    "searched": "Searched all transports, PN532.cpp and the web page for a host write of 00 00 FF 00 FF 00: PN532_ACK and ACK_FRAME are only compared with received data, and PN532_NACK is the only frame written by the host. readPassiveTargetID, inListPassiveTarget, felica_Polling and tgInitAsTarget return at once on a timeout (PN532.cpp:393, 841, 1006, 862).",
+                    "note": "A next command does stop the old one (6.2.2.2 b, method 2), but nothing is sent when the wait ends. The web page limits MxRtyPassiveActivation to 1 instead, so its command ends by itself."
+                },
+                "waiting.nonblocking_detect": {
+                    "status": "no",
+                    "searched": "Searched PN532.h and the transports for a start function, an available or ready call, or a detection that returns before the response: none. isReady is private to PN532_SPI. readPassiveTargetID, inListPassiveTarget and felica_Polling all write the command and wait in one call."
+                },
+                "cards.iso14443a_uid": {
+                    "status": "yes",
+                    "note": "The copy has no bound on the output buffer, see defects.",
+                    "evidence": [
+                        "PN532/PN532.cpp:382",
+                        "PN532/PN532.cpp:384",
+                        "PN532/PN532.cpp:386",
+                        "PN532/PN532.cpp:422",
+                        "PN532/PN532.cpp:425",
+                        "PN532/PN532.h:53"
+                    ]
+                },
+                "cards.two_targets": {
+                    "status": "no",
+                    "searched": "InListPassiveTarget MaxTg: 1 at PN532.cpp:385 and PN532.cpp:832. Response parsing takes one target and readPassiveTargetID fails unless NbTg is 1 (PN532.cpp:410). No API takes MaxTg."
+                },
+                "cards.mifare_classic": {
+                    "status": "yes",
+                    "note": "Reads and authentication work on the frame level. Writes report success without reading Status, see defects. A 7-byte UID is sent whole, which 7.3.8 does not allow.",
+                    "evidence": [
+                        "PN532/PN532.cpp:482",
+                        "PN532/PN532.cpp:494",
+                        "PN532/PN532.cpp:531",
+                        "PN532/PN532.cpp:539",
+                        "PN532/PN532.cpp:574",
+                        "PN532/PN532.cpp:579"
+                    ]
+                },
+                "cards.ultralight_ntag": {
+                    "status": "partly",
+                    "note": "ReadPage refuses page 64 and up, so the upper pages of NTAG215 (135 pages) and NTAG216 (231 pages) cannot be read. WritePage has no such limit but reports success without reading Status. There is no 16-byte read for the caller: three of the four pages returned by the card are discarded.",
+                    "evidence": [
+                        "PN532/PN532.cpp:711",
+                        "PN532/PN532.cpp:713",
+                        "PN532/PN532.cpp:721",
+                        "PN532/PN532.cpp:759",
+                        "PN532/PN532.cpp:764"
+                    ]
+                },
+                "cards.iso14443_4_apdu": {
+                    "status": "yes",
+                    "note": "Works after inListPassiveTarget, which has a fixed 30 s wait and gives no UID. After readPassiveTargetID the Tg byte is unset, see defects. Without extended frames an R-APDU that needs more than a normal frame cannot be received.",
+                    "evidence": [
+                        "PN532/PN532.cpp:787",
+                        "PN532/PN532.cpp:792",
+                        "PN532/PN532.cpp:794",
+                        "PN532/PN532.cpp:803",
+                        "PN532/PN532.cpp:829",
+                        "PN532/examples/android_hce/android_hce.ino:72"
+                    ]
+                },
+                "cards.chaining": {
+                    "status": "no",
+                    "searched": "Searched for MI handling: nothing sets bit 6 of Tg (PN532.cpp:792) and nothing loops on bit 6 of Status. inDataExchange masks it off with 0x3f (PN532.cpp:803); tgGetData treats it as an error (PN532.cpp:911)."
+                },
+                "cards.raw_exchange": {
+                    "status": "no",
+                    "searched": "PN532_COMMAND_INCOMMUNICATETHRU appears only as a #define at PN532.h:35. No raw 0x42 opcode in PN532.cpp. felica_SendCommand uses InDataExchange (PN532.cpp:1069)."
+                },
+                "cards.auto_poll": {
+                    "status": "no",
+                    "searched": "PN532_COMMAND_INAUTOPOLL appears only as a #define at PN532.h:39. No raw 0x60 command byte in PN532.cpp."
+                },
+                "cards.ndef": {
+                    "status": "yes",
+                    "note": "Reads and writes NDEF on MIFARE Classic and Type 2 tags through NfcAdapter. There is no Type 4 path. Several defects in this layer are listed below.",
+                    "evidence": [
+                        "NDEF/NfcAdapter.cpp:104",
+                        "NDEF/NfcAdapter.cpp:138",
+                        "NDEF/MifareClassic.cpp:18",
+                        "NDEF/MifareClassic.cpp:328",
+                        "NDEF/MifareUltralight.cpp:24",
+                        "NDEF/MifareUltralight.cpp:165",
+                        "PN532/PN532.cpp:639"
+                    ]
+                },
+                "cards.iso14443b": {
+                    "status": "no",
+                    "searched": "grep for ISO14443B, TYPE_B, BrTy, 0x03 as baud rate, AFI: none. readPassiveTargetID passes cardbaudrate through (PN532.cpp:386) but sends no AFI, which 7.3.5 makes mandatory, and parses only the type A layout."
+                },
+                "cards.felica": {
+                    "status": "partly",
+                    "note": "Polling, Request Service, Request Response, Read and Write Without Encryption and Request System Code are present. BrTy is fixed to 0x01, so 424 kbps (BrTy 0x02) cannot be selected.",
+                    "evidence": [
+                        "PN532/PN532.cpp:990",
+                        "PN532/PN532.cpp:994",
+                        "PN532/PN532.cpp:995",
+                        "PN532/PN532.cpp:1062",
+                        "PN532/PN532.cpp:1203",
+                        "PN532/PN532.cpp:1278",
+                        "PN532/PN532.cpp:1347"
+                    ]
+                },
+                "cards.jewel": {
+                    "status": "no",
+                    "searched": "grep for Jewel, Innovision, BrTy 0x04: none. readPassiveTargetID passes cardbaudrate through (PN532.cpp:386) but parses only the type A layout, so a Jewel response is misread."
+                },
+                "cards.card_emulation": {
+                    "status": "yes",
+                    "note": "TgInitAsTarget, TgGetData and TgSetData are used to emulate a Type 4 NDEF tag. TgGetInitiatorCommand, TgResponseToInitiator, TgSetMetaData and TgSetGeneralBytes are defined and unused. Several defects are listed below.",
+                    "evidence": [
+                        "PN532/emulatetag.cpp:75",
+                        "PN532/emulatetag.cpp:95",
+                        "PN532/emulatetag.cpp:127",
+                        "PN532/emulatetag.cpp:216",
+                        "PN532/PN532.cpp:855",
+                        "PN532/PN532.cpp:895",
+                        "PN532/PN532.cpp:923"
+                    ]
+                },
+                "cards.peer_to_peer": {
+                    "status": "yes",
+                    "note": "Target side only, with LLCP and SNEP above it. PN532_COMMAND_INJUMPFORDEP is defined and unused, so the chip cannot act as initiator.",
+                    "evidence": [
+                        "PN532/PN532.cpp:875",
+                        "PN532/PN532.cpp:878",
+                        "PN532/PN532.cpp:890",
+                        "PN532/mac_link.cpp:9",
+                        "PN532/llcp.cpp:115",
+                        "PN532/snep.cpp:5",
+                        "PN532/snep.cpp:51"
+                    ]
+                },
+                "chip_control.firmware_version": {
+                    "status": "yes",
+                    "evidence": [
+                        "PN532/PN532.cpp:116",
+                        "PN532/PN532.cpp:120",
+                        "PN532/PN532.cpp:127",
+                        "PN532/PN532.cpp:132"
+                    ]
+                },
+                "chip_control.general_status": {
+                    "status": "no",
+                    "searched": "PN532_COMMAND_GETGENERALSTATUS appears only as a #define at PN532.h:18. No raw 0x04 command byte in PN532.cpp."
+                },
+                "chip_control.sam_configuration": {
+                    "status": "yes",
+                    "note": "The command is sent correctly, but the function returns false on success, see defects.",
+                    "evidence": [
+                        "PN532/PN532.cpp:298",
+                        "PN532/PN532.cpp:300",
+                        "PN532/PN532.cpp:301",
+                        "PN532/PN532.cpp:310"
+                    ]
+                },
+                "chip_control.rf_field_control": {
+                    "status": "yes",
+                    "note": "The command is sent correctly, but the function returns false on success, see defects.",
+                    "evidence": [
+                        "PN532/PN532.cpp:354",
+                        "PN532/PN532.cpp:356",
+                        "PN532/PN532.cpp:357",
+                        "PN532/PN532.cpp:358",
+                        "PN532/PN532.cpp:364"
+                    ]
+                },
+                "chip_control.retries_control": {
+                    "status": "yes",
+                    "note": "The command is sent correctly, but the function returns false on success, see defects.",
+                    "evidence": [
+                        "PN532/PN532.cpp:323",
+                        "PN532/PN532.cpp:326",
+                        "PN532/PN532.cpp:329",
+                        "PN532/PN532.cpp:334"
+                    ]
+                },
+                "chip_control.power_down": {
+                    "status": "no",
+                    "searched": "PN532_COMMAND_POWERDOWN appears only as a #define at PN532.h:26. No raw 0x16 command byte in PN532.cpp.",
+                    "note": "wakeup() exists on each transport and runs in begin(), but no code can put the chip to sleep."
+                },
+                "chip_control.registers": {
+                    "status": "yes",
+                    "note": "readRegister returns 0 on failure, which is also a valid register value.",
+                    "evidence": [
+                        "PN532/PN532.cpp:153",
+                        "PN532/PN532.cpp:157",
+                        "PN532/PN532.cpp:186",
+                        "PN532/PN532.cpp:190"
+                    ]
+                },
+                "chip_control.gpio": {
+                    "status": "yes",
+                    "note": "Both commands are sent. Only P3 is exposed: P7 and I0I1 are dropped, and writeGPIO forces P32 and P34 high.",
+                    "evidence": [
+                        "PN532/PN532.cpp:230",
+                        "PN532/PN532.cpp:236",
+                        "PN532/PN532.cpp:265",
+                        "PN532/PN532.cpp:267",
+                        "PN532/PN532.cpp:290"
+                    ]
+                },
+                "chip_control.parameters": {
+                    "status": "no",
+                    "searched": "PN532_COMMAND_SETPARAMETERS appears only as a #define at PN532.h:24. No raw 0x12 command byte in PN532.cpp."
+                },
+                "chip_control.serial_baud": {
+                    "status": "no",
+                    "searched": "PN532_COMMAND_SETSERIALBAUDRATE appears only as a #define at PN532.h:23. No raw 0x10 command byte in PN532.cpp. HSU is fixed at 115200 (PN532_HSU.cpp:14)."
+                },
+                "chip_control.reset_recovery": {
+                    "status": "no",
+                    "searched": "grep for RSTPD, reset, RESET in the core, the transports and NfcAdapter: no pin is driven. NfcAdapter.h:21 has an unused #define RESET. No code detects a stopped chip and starts over.",
+                    "note": "A caller can run begin() and SAMConfig() again, but begin() only opens the bus and repeats wakeup(), which on I2C is delay(500), so it does not reset the chip."
+                },
+                "several.several_readers": {
+                    "status": "yes",
+                    "note": "All state is in object members. The one static, LLCP::SYMM_PDU, is a two-byte constant that is only read. The I2C address is fixed, so two readers on I2C need two TwoWire buses.",
+                    "evidence": [
+                        "PN532/PN532.h:204",
+                        "PN532/PN532.h:206",
+                        "PN532_I2C/PN532_I2C.h:21",
+                        "PN532_I2C/PN532_I2C.h:22",
+                        "PN532_SPI/PN532_SPI.h:19",
+                        "PN532_SPI/PN532_SPI.h:20",
+                        "PN532_SPI/PN532_SPI.h:21",
+                        "PN532_HSU/PN532_HSU.h:22",
+                        "PN532_HSU/PN532_HSU.h:23",
+                        "PN532/llcp.cpp:15"
+                    ]
+                },
+                "several.shared_spi_bus": {
+                    "status": "yes",
+                    "note": "Each PN532_SPI object holds its own chip select and can use the same SPIClass. Mode, bit order and clock are set once in begin() with no transaction, so a device with other settings on the same bus needs its own handling.",
+                    "evidence": [
+                        "PN532_SPI/PN532_SPI.cpp:10",
+                        "PN532_SPI/PN532_SPI.cpp:13",
+                        "PN532_SPI/PN532_SPI.cpp:14",
+                        "PN532_SPI/PN532_SPI.cpp:144",
+                        "PN532_SPI/PN532_SPI.cpp:148",
+                        "PN532_SPI/PN532_SPI.h:10"
+                    ]
+                },
+                "several.thread_safety": {
+                    "status": "no",
+                    "searched": "grep for mutex, semaphore, noInterrupts, critical, beginTransaction, taskENTER: none. No rule for tasks in README.md, PN532/README.md or NDEF/README.md. The packet buffer of each object is used without a lock."
+                },
+                "code_health.errors_returned": {
+                    "status": "partly",
+                    "note": "The transports return distinct negative codes, and tgInitAsTarget and the FeliCa functions keep a difference. Most of PN532.cpp reduces them to 0 or false; readRegister, readGPIO and getFirmwareVersion return 0, which readRegister and readGPIO can also return as a value. SAMConfig, setPassiveActivationRetries, setRFField and writeGPIO return false on success. PN532::begin returns nothing.",
+                    "evidence": [
+                        "PN532/PN532Interface.h:18",
+                        "PN532/PN532Interface.h:19",
+                        "PN532/PN532Interface.h:20",
+                        "PN532/PN532Interface.h:21",
+                        "PN532/PN532.cpp:865",
+                        "PN532/PN532.cpp:868",
+                        "PN532/PN532.cpp:1003",
+                        "PN532/PN532.cpp:123",
+                        "PN532/PN532.cpp:168",
+                        "PN532/PN532.cpp:271"
+                    ]
+                },
+                "code_health.buffers_bounded": {
+                    "status": "partly",
+                    "note": "The transports compare the response length with the buffer. Above them, the UID copy, felica_SendCommand, EmulateTag and the NDEF decoder take lengths from the chip, the card or the reader with no bound; see defects.",
+                    "evidence": [
+                        "PN532_I2C/PN532_I2C.cpp:159",
+                        "PN532_SPI/PN532_SPI.cpp:106",
+                        "PN532_HSU/PN532_HSU.cpp:109",
+                        "PN532/PN532.cpp:425",
+                        "PN532/PN532.cpp:1100",
+                        "PN532/emulatetag.cpp:177",
+                        "PN532/emulatetag.cpp:199"
+                    ]
+                },
+                "code_health.allocation_checked": {
+                    "status": "no",
+                    "searched": "All malloc results in NdefRecord.cpp (lines 29, 35, 41, 97, 103, 109, 257, 275, 300) go straight to memcpy with no NULL test. new at NfcAdapter.cpp:5, NdefMessage.cpp:217 and 240, NfcTag.cpp:32 and 41 is used with no test either."
+                },
+                "code_health.tests": {
+                    "status": "partly",
+                    "note": "ArduinoUnit sketches test the NDEF data classes on a board, and a Node script tests the web page framing with stubs. Nothing tests the C++ transports or PN532.cpp. No test was run, by rule.",
+                    "evidence": [
+                        "NDEF/tests/NdefUnitTest/NdefUnitTest.ino:4",
+                        "NDEF/tests/NdefMessageTest/NdefMessageTest.ino:27",
+                        "NDEF/tests/NfcTagTest/NfcTagTest.ino:11",
+                        "web/pn532-tester/test-pn532-page.cjs:72"
+                    ]
+                },
+                "code_health.examples": {
+                    "status": "yes",
+                    "note": "12 sketches under PN532/examples and 10 under NDEF/examples.",
+                    "evidence": [
+                        "PN532/examples/iso14443a_uid/iso14443a_uid.pde:80",
+                        "PN532/examples/android_hce/android_hce.ino:72",
+                        "PN532/examples/emulate_tag_ndef/emulate_tag_ndef.ino:61",
+                        "NDEF/examples/ReadTag/ReadTag.ino:31"
+                    ]
+                },
+                "code_health.docs": {
+                    "status": "yes",
+                    "note": "The READMEs cover installation and first use; there is no API reference beyond the comments in the code.",
+                    "evidence": ["README.md:34", "README.md:44", "NDEF/README.md:22", "NDEF/README.md:51"]
+                },
+                "code_health.license": {
+                    "status": "yes",
+                    "note": "BSD license in PN532/ and NDEF/. There is no license file at the root.",
+                    "evidence": ["PN532/license.txt:1", "NDEF/LICENSE.txt:1"]
+                }
+            },
+            "defects": [
+                {
+                    "what": "SAMConfig, setPassiveActivationRetries, setRFField and writeGPIO return 0 < readResponse(), but the responses D5 15, D5 33 and D5 0F (7.2.10, 7.3.1, 7.2.7) carry no data after the command code, so readResponse returns 0 and each function returns false on success, and EmulateTag::init passes that false on.",
+                    "severity": "high",
+                    "judged": "All transports strip D5 and the response code and return the count of the rest, and the manual gives D5 15, D5 33 and D5 0F with nothing after them, so readResponse returns 0 and these four public functions return false on success. Callers ignore it except EmulateTag::init, which returns it.",
+                    "evidence": [
+                        "PN532/PN532.cpp:248",
+                        "PN532/PN532.cpp:310",
+                        "PN532/PN532.cpp:334",
+                        "PN532/PN532.cpp:364",
+                        "PN532/emulatetag.cpp:53",
+                        "PN532_I2C/PN532_I2C.cpp:182"
+                    ]
+                },
+                {
+                    "what": "mifareclassic_WriteDataBlock returns readResponse() > 0 and never reads the Status byte, so a write the card refused or never received, which comes back as one Status byte (7.1), is reported as success, and mifareclassic_WriteNDEFURI, mifareclassic_FormatNDEF and MifareClassic::write inherit this.",
+                    "severity": "high",
+                    "judged": "The same 0 < readResponse test as WritePage: one Status byte gives 1, so the function returns true for any completed exchange with an error Status, and mifareclassic_WriteNDEFURI, FormatNDEF and MifareClassic::write rely on it.",
+                    "evidence": ["PN532/PN532.cpp:589", "PN532/PN532.cpp:687", "NDEF/MifareClassic.cpp:377"]
+                },
+                {
+                    "what": "mifareultralight_WritePage returns readResponse() > 0 and never reads the Status byte, so a write to a locked page is reported as success, and MifareUltralight::write and clean inherit this.",
+                    "severity": "high",
+                    "judged": "A refused write still gives one Status byte, so readResponse returns 1 and the function returns true without looking at it. write() and clean() use that value as their success test.",
+                    "evidence": [
+                        "PN532/PN532.cpp:774",
+                        "NDEF/MifareUltralight.cpp:217",
+                        "NDEF/MifareUltralight.cpp:246"
+                    ]
+                },
+                {
+                    "what": "MifareUltralight::read stores a page before it tests index >= messageLength + ndefStartIndex while the stack buffer holds only that sum + 1 rounded up to 4, so for every sum that is not a multiple of 4 (three lengths of four) 4 bytes are written past the end of the buffer.",
+                    "severity": "high",
+                    "judged": "bufferSize is the sum S + 1 rounded up to 4, the last stored page starts at the first multiple of 4 at or above S, and it needs 4 more bytes. Worked through: S mod 4 of 1, 2 and 3 each write 4 bytes past the stack array on a normal read, S mod 4 of 0 fits.",
+                    "evidence": [
+                        "NDEF/MifareUltralight.cpp:45",
+                        "NDEF/MifareUltralight.cpp:49",
+                        "NDEF/MifareUltralight.cpp:65",
+                        "NDEF/MifareUltralight.cpp:70",
+                        "NDEF/MifareUltralight.cpp:156",
+                        "NDEF/MifareUltralight.cpp:161"
+                    ]
+                },
+                {
+                    "what": "PN532_I2C::readResponse keeps the int16_t result of getResponseLength in a uint8_t, so a timeout (-1) becomes length 255 and an invalid frame (-3) becomes 253, the error is ignored and the function polls for a second timeout period with requestFrom(0x24, 263); readPassiveTargetID with no card reaches this at every timeout, and on arduino-esp32 2.0.x the request writes 263 bytes into the 128-byte rxBuffer, because ~/.platformio/packages/framework-arduinoespressif32@3.20016.0/libraries/Wire/src/Wire.cpp does not clamp the size, i2cRead passes it to i2c_master_read_from_device, and ~/.espressif/v5.5.5/esp-idf/components/driver/i2c/i2c.c:1429 stores each byte at cmd->data + bytes_used.",
+                    "severity": "high",
+                    "judged": "length is uint8_t, so -1 becomes 255 and the error is lost, and readPassiveTargetID with its default 1000 ms timeout and no card takes this path. Then requestFrom(int, int) asks for 263 bytes: arduino-esp32 2.0.16 Wire.cpp and esp32-hal-i2c.c do not clamp, so 263 bytes go into the 128-byte rxBuffer (IDF store loop read in v5.5.5 i2c.c:1429), while esp8266 3.1.2 and arduino-esp32 3.3.12 clamp and only the second timeout remains.",
+                    "evidence": [
+                        "PN532_I2C/PN532_I2C.cpp:93",
+                        "PN532_I2C/PN532_I2C.cpp:102",
+                        "PN532_I2C/PN532_I2C.cpp:120",
+                        "PN532_I2C/PN532_I2C.cpp:122",
+                        "PN532_I2C/PN532_I2C.cpp:126"
+                    ]
+                },
+                {
+                    "what": "readPassiveTargetID never stores the Tg byte and the constructor does not initialise inListedTag, so inDataExchange after readPassiveTargetID sends an unset target number and the chip returns Status 0x27 (7.3.8) unless the byte happens to be 1.",
+                    "severity": "medium",
+                    "read_as": "high",
+                    "judged": "The constructor sets only _interface and readPassiveTargetID has no store of Tg, so inDataExchange after it sends 0 for a global object or an indeterminate byte for a heap one, and 7.3.8 gives Status 0x27 for an unknown target. The failure is a clean false, and the sequence the library shows, inListPassiveTarget in android_hce, works.",
+                    "evidence": [
+                        "PN532/PN532.cpp:18",
+                        "PN532/PN532.cpp:422",
+                        "PN532/PN532.cpp:792",
+                        "PN532/PN532.cpp:850",
+                        "PN532/PN532.h:200"
+                    ]
+                },
+                {
+                    "what": "NfcTag::operator= copies the _ndefMessage pointer and the class has no copy constructor, so tag = nfc.read() leaves tag with a pointer the destructor of the temporary has already deleted, which gives a use after free and a double delete.",
+                    "severity": "high",
+                    "judged": "operator= copies the pointer and the destructor deletes it, so assigning the temporary from nfc.read() leaves a dangling pointer and a second delete when tag is destroyed. The documented form NfcTag tag = nfc.read() is safe only through copy elision, and plain assignment through the public operator corrupts the heap.",
+                    "evidence": ["NDEF/NfcTag.cpp:46", "NDEF/NfcTag.cpp:58", "NDEF/NfcTag.h:17"]
+                },
+                {
+                    "what": "LLCP::disconnect waits for a DM PDU but breaks only on PDU_CC and answers PDU_DM with a SYMM PDU, so with a peer that replies to DISC with DM, as waitForDisconnection in the same file does, the function cannot return success.",
+                    "severity": "high",
+                    "judged": "The loop leaves only on PDU_CC and treats PDU_DM as a reason to send SYMM and read again, so the DM that waitForDisconnection sends never ends it and the next read returns -1 or -3. The function cannot return success on a correct exchange; SNEP::write ignores the result, but a direct caller gets a false failure.",
+                    "evidence": [
+                        "PN532/llcp.cpp:106",
+                        "PN532/llcp.cpp:188",
+                        "PN532/llcp.cpp:195",
+                        "PN532/llcp.cpp:197",
+                        "PN532/llcp.cpp:198"
+                    ]
+                },
+                {
+                    "what": "readPassiveTargetID, inListPassiveTarget and felica_Polling return on a timeout without sending an ACK frame, so with the default MxRtyPassiveActivation 0xFF (7.3.1) the chip keeps the RF field on and keeps searching after the function has returned failure, and a card that arrives later leaves a response no call expects (6.2.2.1 d).",
+                    "severity": "medium",
+                    "evidence": [
+                        "PN532/PN532.cpp:393",
+                        "PN532/PN532.cpp:394",
+                        "PN532/PN532.cpp:841",
+                        "PN532/PN532.cpp:1006"
+                    ]
+                },
+                {
+                    "what": "PN532_ACK_WAIT_TIME is 10 ms and the command is not resent, while 6.2.3 gives the chip 15 ms to send the ACK and tells the host to resend after that, so on HSU an ACK that arrives between 10 and 15 ms is reported as a failure.",
+                    "severity": "medium",
+                    "evidence": [
+                        "PN532/PN532Interface.h:16",
+                        "PN532_HSU/PN532_HSU.cpp:150",
+                        "PN532_SWHSU/PN532_SWHSU.cpp:150"
+                    ]
+                },
+                {
+                    "what": "readPassiveTargetID copies NFCIDLength bytes into the caller's buffer with no size argument, so a 10-byte UID (cascade level 3, 7.3.5) overflows the 7-byte buffers of NfcAdapter and the examples, and mifareclassic_AuthenticateBlock then overflows _uid[7] in the same way and corrupts _key.",
+                    "severity": "high",
+                    "read_as": "medium",
+                    "judged": "The length is taken from the card with no size argument, and NfcAdapter and the examples hold 7 bytes as documented, so a 10-byte UID (Cascade Level 3 in 7.3.5) overruns them, in NfcAdapter into uidLength. mifareclassic_AuthenticateBlock then writes past _uid[7] into _uidLen and _key.",
+                    "evidence": [
+                        "PN532/PN532.cpp:422",
+                        "PN532/PN532.cpp:424",
+                        "PN532/PN532.cpp:425",
+                        "PN532/PN532.cpp:488",
+                        "NDEF/NfcAdapter.h:40",
+                        "PN532/PN532.h:197"
+                    ]
+                },
+                {
+                    "what": "mifareclassic_AuthenticateBlock sends the whole UID, so with a 7-byte UID DataOut carries 13 data bytes where 7.3.8 allows Data 0..9 (6 key bytes and 4 serial bytes) and lists any other count as a syntax error, so by the manual a 7-byte MIFARE Classic card cannot authenticate; this was not tried on a card.",
+                    "severity": "medium",
+                    "evidence": ["PN532/PN532.cpp:497", "PN532/PN532.cpp:498", "PN532/PN532.cpp:501"]
+                },
+                {
+                    "what": "mifareclassic_AuthenticateBlock, mifareclassic_ReadDataBlock and mifareultralight_ReadPage ignore the result of readResponse, and every transport fills the buffer before it checks DCS, so a frame with a bad checksum whose first byte is 0 is returned as success with corrupt data.",
+                    "severity": "medium",
+                    "evidence": [
+                        "PN532/PN532.cpp:505",
+                        "PN532/PN532.cpp:548",
+                        "PN532/PN532.cpp:551",
+                        "PN532/PN532.cpp:557",
+                        "PN532/PN532.cpp:730",
+                        "PN532/PN532.cpp:733",
+                        "PN532/PN532.cpp:739",
+                        "PN532_I2C/PN532_I2C.cpp:168",
+                        "PN532_I2C/PN532_I2C.cpp:176"
+                    ]
+                },
+                {
+                    "what": "readGPIO ignores the result of readResponse, so after a failed read it returns the command byte 0x0C left in the buffer as if it were the state of P3.",
+                    "severity": "medium",
+                    "evidence": ["PN532/PN532.cpp:267", "PN532/PN532.cpp:273", "PN532/PN532.cpp:290"]
+                },
+                {
+                    "what": "PN532_HSU::receive and PN532_SWHSU::receive return the byte count as int8_t, so a response of 128 or more data bytes gives a negative count, fails the compare with length[0] and is reported as PN532_TIMEOUT although all bytes arrived.",
+                    "severity": "medium",
+                    "evidence": [
+                        "PN532_HSU/PN532_HSU.h:27",
+                        "PN532_HSU/PN532_HSU.cpp:123",
+                        "PN532_HSU/PN532_HSU.cpp:195",
+                        "PN532_SWHSU/PN532_SWHSU.h:29",
+                        "PN532_SWHSU/PN532_SWHSU.cpp:123",
+                        "PN532_SWHSU/PN532_SWHSU.cpp:195"
+                    ]
+                },
+                {
+                    "what": "tgInitAsTarget, EmulateTag::emulate and SNEP::read and write default to timeout 0, which every transport treats as no limit, so a chip that stops after its ACK hangs the program.",
+                    "severity": "medium",
+                    "evidence": [
+                        "PN532/PN532.h:151",
+                        "PN532/PN532.h:152",
+                        "PN532/emulatetag.h:26",
+                        "PN532/snep.h:31",
+                        "PN532/snep.h:41",
+                        "PN532_I2C/PN532_I2C.cpp:92",
+                        "PN532_SPI/PN532_SPI.cpp:69",
+                        "PN532_HSU/PN532_HSU.cpp:182"
+                    ]
+                },
+                {
+                    "what": "NfcAdapter::begin ends in an endless loop with no return value when getFirmwareVersion fails, so a dead chip hangs the program.",
+                    "severity": "medium",
+                    "evidence": ["NDEF/NfcAdapter.cpp:19", "NDEF/NfcAdapter.cpp:22"]
+                },
+                {
+                    "what": "PrintHex and PrintHexChar take numBytes as uint32_t but count with uint8_t, so numBytes of 256 or more loops forever and reads past the data.",
+                    "severity": "medium",
+                    "judged": "The loop counter is uint8_t against a uint32_t bound, so numBytes of 256 or more never ends and repeats the first 256 bytes. The library calls these with short data unless its debug defines are on, so this is a limit of a legal input.",
+                    "evidence": ["PN532/PN532.cpp:40", "PN532/PN532.cpp:43", "PN532/PN532.cpp:71", "PN532/PN532.cpp:74"]
+                },
+                {
+                    "what": "PN532_I2C::readResponse returns -1 on a timeout instead of PN532_TIMEOUT (-2), so over I2C tgInitAsTarget with a timeout reports -2 (failed) and never the 0 that PN532.h documents for a timeout.",
+                    "severity": "medium",
+                    "evidence": [
+                        "PN532_I2C/PN532_I2C.cpp:135",
+                        "PN532/PN532Interface.h:19",
+                        "PN532/PN532.cpp:865",
+                        "PN532/PN532.cpp:868",
+                        "PN532/PN532.h:148"
+                    ]
+                },
+                {
+                    "what": "PN532_I2C::readResponse requests 6 + LEN + 2 bytes whatever the size of the Wire buffer and checks them against len only afterwards, so a frame longer than 128 bytes overflows rxBuffer on arduino-esp32 2.0.x and fails the DCS check on esp8266 3.1.2, where ~/.arduino15/packages/esp8266/hardware/esp8266/3.1.2/libraries/Wire/Wire.cpp clamps the size to 128.",
+                    "severity": "high",
+                    "read_as": "medium",
+                    "judged": "requestFrom(6 + length + 2) runs before the test against len. arduino-esp32 2.0.16 Wire.cpp has no clamp and passes the size to i2cRead with the 128-byte malloc buffer, so a frame over 128 bytes overruns the heap; esp8266 3.1.2 Wire.cpp clamps to 128, read() then gives 0xFF and the checksum fails, and arduino-esp32 3.3.12 also clamps.",
+                    "evidence": [
+                        "PN532_I2C/PN532_I2C.cpp:126",
+                        "PN532_I2C/PN532_I2C.cpp:159",
+                        "PN532_I2C/PN532_I2C.cpp:168"
+                    ]
+                },
+                {
+                    "what": "PN532_I2C::writeCommand returns PN532_INVALID_FRAME after beginTransmission without calling endTransmission, so on arduino-esp32 2.0.x, where beginTransmission takes a mutex with portMAX_DELAY and only endTransmission gives it back (~/.platformio/packages/framework-arduinoespressif32@3.20016.0/libraries/Wire/src/Wire.cpp), the next I2C call after a frame too long for the Wire buffer blocks forever.",
+                    "severity": "medium",
+                    "evidence": [
+                        "PN532_I2C/PN532_I2C.cpp:31",
+                        "PN532_I2C/PN532_I2C.cpp:53",
+                        "PN532_I2C/PN532_I2C.cpp:64"
+                    ]
+                },
+                {
+                    "what": "EmulateTag::emulate copies lc bytes for READ BINARY into rwbuf[128] with no limit on lc and tests the offset against NDEF_MAX_LENGTH even for the 15-byte compatibility container, so a reader that asks for more overflows the stack buffer and reads past both source arrays; cc_size is declared and never used.",
+                    "severity": "high",
+                    "read_as": "medium",
+                    "judged": "lc comes from the reader, is up to 255, and the compatibility container advertises MLe 0x00FF, while rwbuf is 128 bytes, so memcpy and setResponse write past the stack buffer. The CC branch tests against 128 for a 15-byte array, and cc_size has no use after its declaration.",
+                    "evidence": [
+                        "PN532/emulatetag.cpp:119",
+                        "PN532/emulatetag.cpp:123",
+                        "PN532/emulatetag.cpp:136",
+                        "PN532/emulatetag.cpp:174",
+                        "PN532/emulatetag.cpp:177",
+                        "PN532/emulatetag.cpp:178",
+                        "PN532/emulatetag.cpp:185"
+                    ]
+                },
+                {
+                    "what": "EmulateTag::emulate tests only the offset for UPDATE BINARY, so offset + lc can pass the end of ndef_file[128], and data from the reader overwrites uidPtr and updateNdefCallback, the pointer that is called a few lines later.",
+                    "severity": "high",
+                    "read_as": "medium",
+                    "judged": "Only the offset is tested, so offset + lc from the reader can pass ndef_file[128] and the members declared after it, uidPtr and updateNdefCallback, are overwritten before the callback is called. tagWriteable is true by default.",
+                    "evidence": [
+                        "PN532/emulatetag.cpp:195",
+                        "PN532/emulatetag.cpp:199",
+                        "PN532/emulatetag.cpp:205",
+                        "PN532/emulatetag.h:62",
+                        "PN532/emulatetag.h:63",
+                        "PN532/emulatetag.h:66"
+                    ]
+                },
+                {
+                    "what": "EmulateTag::emulate has no case for a SELECT with P1 other than 0x00 or 0x04, so sendlen is not set for that APDU and tgSetData sends an uninitialised or stale number of bytes from rwbuf.",
+                    "severity": "high",
+                    "read_as": "medium",
+                    "judged": "The inner switch has no default, so for SELECT with another P1 sendlen stays uninitialised or stale and tgSetData sends that many bytes from the 128-byte rwbuf, up to 255. The APDU comes from the reader, which counts as ordinary input, and the reply is wrong.",
+                    "evidence": [
+                        "PN532/emulatetag.cpp:120",
+                        "PN532/emulatetag.cpp:141",
+                        "PN532/emulatetag.cpp:142",
+                        "PN532/emulatetag.cpp:157",
+                        "PN532/emulatetag.cpp:216"
+                    ]
+                },
+                {
+                    "what": "The compatibility container in EmulateTag::emulate declares MLc 255, but tgGetData receives into rwbuf[128], so an UPDATE BINARY with Lc above 122, which the container allows and the 128-byte file can hold, returns PN532_NO_SPACE and ends the session.",
+                    "severity": "medium",
+                    "evidence": ["PN532/emulatetag.cpp:104", "PN532/emulatetag.cpp:119", "PN532/emulatetag.cpp:127"]
+                },
+                {
+                    "what": "felica_SendCommand copies the card's response into the caller's array with no capacity argument, and felica_RequestResponse and felica_WriteWithoutEncryption test responseLength only after the copy, so a card that returns more bytes than expected overflows these stack arrays.",
+                    "severity": "high",
+                    "read_as": "medium",
+                    "judged": "responseLength comes from the card and memcpy runs before any test against the size of the array, so a longer response, up to about 60 bytes through the 64-byte packet buffer, overruns response[10] and response[11] on the stack.",
+                    "evidence": [
+                        "PN532/PN532.cpp:1100",
+                        "PN532/PN532.cpp:1173",
+                        "PN532/PN532.cpp:1175",
+                        "PN532/PN532.cpp:1181",
+                        "PN532/PN532.cpp:1312",
+                        "PN532/PN532.cpp:1314",
+                        "PN532/PN532.cpp:1320"
+                    ]
+                },
+                {
+                    "what": "felica_RequestSystemCode takes the number of codes from the card and compares it only with responseLength, so up to 62 bytes go into the 42-byte response array and up to 26 codes into a list the comment describes as 16 long.",
+                    "severity": "medium",
+                    "evidence": [
+                        "PN532/PN532.cpp:1342",
+                        "PN532/PN532.cpp:1353",
+                        "PN532/PN532.cpp:1359",
+                        "PN532/PN532.cpp:1362",
+                        "PN532/PN532.cpp:1369"
+                    ]
+                },
+                {
+                    "what": "felica_ReadWithoutEncryption accepts numBlock up to 12 and felica_RequestService accepts numNode up to 32, but felica_SendCommand receives into the 64-byte packet buffer, so numBlock of 4 or more and numNode of 27 or more always fail, because readResponse returns PN532_NO_SPACE.",
+                    "severity": "medium",
+                    "evidence": [
+                        "PN532/PN532.h:122",
+                        "PN532/PN532.h:125",
+                        "PN532/PN532.h:204",
+                        "PN532/PN532.cpp:1079",
+                        "PN532/PN532.cpp:1119",
+                        "PN532/PN532.cpp:1209"
+                    ]
+                },
+                {
+                    "what": "The transports compute LEN as uint8_t hlen + blen + 1, so inDataExchange with sendLength of 253 or more wraps LEN, although 7.3.8 allows 262 bytes of DataOut, and sends a frame the chip cannot accept with no error before the send.",
+                    "severity": "medium",
+                    "judged": "length is a uint8_t, so hlen 2 plus sendLength 253 to 255 wraps LEN and the SPI and HSU transports send the frame with no check. This happens only at the top of the sendLength range.",
+                    "evidence": [
+                        "PN532_SPI/PN532_SPI.cpp:162",
+                        "PN532_HSU/PN532_HSU.cpp:54",
+                        "PN532/PN532.cpp:787",
+                        "PN532/PN532.cpp:794"
+                    ]
+                },
+                {
+                    "what": "LLCP::read and SNEP::read keep the int16_t result in a uint16_t, so the tests 2 > status and 6 > status never see a negative error; the code goes on with stale bytes in buf, and if those read as an I PDU it computes a len of about 250 and shifts that many bytes in the caller's buffer.",
+                    "severity": "medium",
+                    "evidence": [
+                        "PN532/llcp.cpp:269",
+                        "PN532/llcp.cpp:273",
+                        "PN532/llcp.cpp:274",
+                        "PN532/llcp.cpp:291",
+                        "PN532/llcp.cpp:302",
+                        "PN532/snep.cpp:63",
+                        "PN532/snep.cpp:64"
+                    ]
+                },
+                {
+                    "what": "LLCP::read computes len as status - 3 in a uint8_t, so a 2-byte I PDU from the peer gives len 255 and the shift loop runs past the caller's buffer.",
+                    "severity": "high",
+                    "read_as": "medium",
+                    "judged": "The test passes status 2 and uint8_t len = status - 3 gives 255, so the loop writes up to buf[254] and reads to buf[257]. SNEP::write passes rbuf[16] and the example a 128-byte buffer, and the PDU length comes from the peer.",
+                    "evidence": ["PN532/llcp.cpp:274", "PN532/llcp.cpp:291", "PN532/llcp.cpp:302", "PN532/llcp.cpp:303"]
+                },
+                {
+                    "what": "MifareClassic::read sizes a stack array from the 16-bit TLV length on the tag with no check against the size of the card, so a length such as 0xFFFF puts about 64 KB on the stack.",
+                    "severity": "high",
+                    "read_as": "medium",
+                    "judged": "decodeTlv takes a 16-bit length from the tag and read() declares a stack array of that size with no check against the card, so a tag with a large length overruns the stack in the path NfcAdapter::read uses.",
+                    "evidence": ["NDEF/MifareClassic.cpp:176", "NDEF/MifareClassic.cpp:52", "NDEF/MifareClassic.cpp:53"]
+                },
+                {
+                    "what": "MifareClassic::read only prints a message after a failed authentication or block read and goes on, so the unread part of the uninitialised buffer is decoded as an NDEF message.",
+                    "severity": "medium",
+                    "judged": "Both failure branches only print, index still advances, and the VLA buffer is passed to NfcTag at the end, so the unread blocks are decoded. It needs a failed authentication or read after the first block succeeded, such as a lost card.",
+                    "evidence": [
+                        "NDEF/MifareClassic.cpp:67",
+                        "NDEF/MifareClassic.cpp:69",
+                        "NDEF/MifareClassic.cpp:85",
+                        "NDEF/MifareClassic.cpp:86",
+                        "NDEF/MifareClassic.cpp:102"
+                    ]
+                },
+                {
+                    "what": "MifareClassic::read sizes the buffer for a TLV at byte 0 and ignores messageStartIndex, so with leading NULL TLVs, as mifareclassic_WriteNDEFURI writes them, a message of 13, 29, 45 ... bytes ends past the buffer and its last byte is read from the stack.",
+                    "severity": "high",
+                    "read_as": "medium",
+                    "judged": "getBufferSize counts only the TLV header and terminator, while the data starts at messageStartIndex. With the two NULL bytes that mifareclassic_WriteNDEFURI writes, the start is 4, so for length 13 the buffer is 16 and the last byte, index 16, is read from outside it, and read() returns wrong data.",
+                    "evidence": [
+                        "NDEF/MifareClassic.cpp:52",
+                        "NDEF/MifareClassic.cpp:102",
+                        "NDEF/MifareClassic.cpp:108",
+                        "NDEF/MifareClassic.cpp:113",
+                        "PN532/PN532.cpp:656"
+                    ]
+                },
+                {
+                    "what": "The NdefMessage decoder never compares typeLength, payloadLength or idLength with numBytes, so a tag with a bad record makes setType and setPayload read past the buffer and call malloc with a length taken from the tag.",
+                    "severity": "high",
+                    "read_as": "medium",
+                    "judged": "The decoder advances index by lengths from the tag and calls setType, setId and setPayload with no comparison against numBytes, so a bad record over-reads the buffer and sizes malloc from the tag. It runs on every tag read through NfcTag.",
+                    "evidence": [
+                        "NDEF/NdefMessage.cpp:20",
+                        "NDEF/NdefMessage.cpp:37",
+                        "NDEF/NdefMessage.cpp:43",
+                        "NDEF/NdefMessage.cpp:62",
+                        "NDEF/NdefMessage.cpp:71"
+                    ]
+                },
+                {
+                    "what": "After a failed page read MifareUltralight::read sets messageLength to 0 and still builds an NdefMessage, whose while (index <= numBytes) runs once with numBytes 0 and decodes a record from uninitialised stack bytes.",
+                    "severity": "medium",
+                    "judged": "On a failed page read messageLength becomes 0, the loop breaks, and the NdefMessage constructor still runs its body once because the test is index <= numBytes, decoding bytes that may be uninitialised. The normal empty message returns earlier at line 36, so this needs a failed read.",
+                    "evidence": [
+                        "NDEF/MifareUltralight.cpp:59",
+                        "NDEF/MifareUltralight.cpp:61",
+                        "NDEF/MifareUltralight.cpp:73",
+                        "NDEF/NdefMessage.cpp:20",
+                        "NDEF/NdefMessage.cpp:25"
+                    ]
+                },
+                {
+                    "what": "MifareUltralight::read stops at page 62 and reads the TLV length as one byte, so a message past byte 236 on NTAG215 or NTAG216 comes back with an uninitialised tail, and a long-form TLV, which MifareUltralight::write produces, is read as length 255.",
+                    "severity": "high",
+                    "read_as": "medium",
+                    "judged": "The loop ends at page 62, which is 236 bytes, and findNdefMessage reads the length from data[1] only, so a longer message on NTAG215/216 keeps an unread tail and the 03 FF hi lo form produced by write() is decoded as length 255 at offset 2. A tag with such a message is ordinary input and read() returns wrong data.",
+                    "evidence": [
+                        "NDEF/MifareUltralight.cpp:9",
+                        "NDEF/MifareUltralight.cpp:46",
+                        "NDEF/MifareUltralight.cpp:134",
+                        "NDEF/MifareUltralight.cpp:175",
+                        "NDEF/MifareUltralight.cpp:199"
+                    ]
+                },
+                {
+                    "what": "NdefRecord::encode writes the id after the payload while the decoder in NdefMessage reads it before the payload, so a record with an id does not survive a write and read through this library.",
+                    "severity": "medium",
+                    "evidence": [
+                        "NDEF/NdefRecord.cpp:170",
+                        "NDEF/NdefRecord.cpp:173",
+                        "NDEF/NdefRecord.cpp:178",
+                        "NDEF/NdefMessage.cpp:67",
+                        "NDEF/NdefMessage.cpp:71"
+                    ]
+                },
+                {
+                    "what": "NfcTag::getUidString tests _uid[i] < 0xF, so the byte 0x0F is printed as F with no leading zero.",
+                    "severity": "medium",
+                    "evidence": ["NDEF/NfcTag.cpp:83"]
+                },
+                {
+                    "what": "NfcAdapter::guessTagType decides by UID length alone and readPassiveTargetID drops SENS_RES and SEL_RES, so a 7-byte MIFARE Classic or DESFire card is driven as Type 2 and a target with a 4-byte UID that is not Classic is driven as MIFARE Classic.",
+                    "severity": "medium",
+                    "evidence": ["NDEF/NfcAdapter.cpp:186", "NDEF/NfcAdapter.cpp:188", "NDEF/NfcAdapter.cpp:192"]
+                },
+                {
+                    "what": "mifareclassic_WriteNDEFURI stores strlen(url) in a uint8_t before the 38-character test, so a URL of 257 to 294 characters passes the test and a truncated URL is written.",
+                    "severity": "medium",
+                    "evidence": ["PN532/PN532.cpp:642", "PN532/PN532.cpp:649"]
+                },
+                {
+                    "what": "NdefRecord::setType and setPayload and the copy paths call memcpy on the malloc result with no NULL test, so an allocation failure, for example with a payload length taken from a tag, writes through a null pointer.",
+                    "severity": "high",
+                    "read_as": "medium",
+                    "judged": "malloc results go to memcpy unchecked in setType, setPayload and the copy constructor. The payload length is a 32-bit field from the tag in the NdefMessage decoder, so plain card data can make malloc fail and write through NULL, without a fault on the chip or bus.",
+                    "evidence": [
+                        "NDEF/NdefRecord.cpp:257",
+                        "NDEF/NdefRecord.cpp:258",
+                        "NDEF/NdefRecord.cpp:275",
+                        "NDEF/NdefRecord.cpp:276"
+                    ]
+                },
+                {
+                    "what": "MifareClassic::formatNDEF returns only the last authentication result and formatMifare returns true unless an authentication fails, because failed block writes are only printed, so a partly formatted card is reported as formatted.",
+                    "severity": "medium",
+                    "evidence": [
+                        "NDEF/MifareClassic.cpp:212",
+                        "NDEF/MifareClassic.cpp:219",
+                        "NDEF/MifareClassic.cpp:248",
+                        "NDEF/MifareClassic.cpp:310",
+                        "NDEF/MifareClassic.cpp:325"
+                    ]
+                },
+                {
+                    "what": "MifareUltralight leaves tagCapacity uninitialised when the read of page 3 fails, and write and clean go on to use it, so clean writes zeros to an arbitrary number of pages.",
+                    "severity": "medium",
+                    "judged": "tagCapacity is set only inside the success branch and the constructor does not set it, and clean() and write() use it regardless. It needs a failed read of page 3, and because WritePage reports true on a refused write the clean loop then runs over an arbitrary page count.",
+                    "evidence": [
+                        "NDEF/MifareUltralight.h:18",
+                        "NDEF/MifareUltralight.cpp:98",
+                        "NDEF/MifareUltralight.cpp:102",
+                        "NDEF/MifareUltralight.cpp:178",
+                        "NDEF/MifareUltralight.cpp:236"
+                    ]
+                },
+                {
+                    "what": "The loop that drains an oversized frame in PN532_SPI::readResponse has its only read() inside DMSG_HEX, which expands to nothing without DEBUG, so the frame is not drained.",
+                    "severity": "low",
+                    "evidence": ["PN532_SPI/PN532_SPI.cpp:107", "PN532_SPI/PN532_SPI.cpp:108", "PN532/PN532_debug.h:16"]
+                },
+                {
+                    "what": "PN532_HSU::readResponse and PN532_SWHSU::readResponse return PN532_NO_SPACE without reading the rest of the frame, so bytes that arrive after the dump loop of the next writeCommand can be taken for its ACK.",
+                    "severity": "low",
+                    "evidence": [
+                        "PN532_HSU/PN532_HSU.cpp:109",
+                        "PN532_HSU/PN532_HSU.cpp:110",
+                        "PN532_SWHSU/PN532_SWHSU.cpp:109",
+                        "PN532_SWHSU/PN532_SWHSU.cpp:110"
+                    ]
+                },
+                {
+                    "what": "PN532_HSU::wakeup sends five bytes and returns with no delay, about 0.43 ms at 115200, while Fig 65 and 6.3.2.1 ask for a long preamble or a wait for the wake-up delay, and footnote 9 of 7.2.11 allows up to 2 ms, so the first command after begin can be lost on a chip that needs longer.",
+                    "severity": "low",
+                    "evidence": [
+                        "PN532_HSU/PN532_HSU.cpp:19",
+                        "PN532_HSU/PN532_HSU.cpp:23",
+                        "PN532_SWHSU/PN532_SWHSU.cpp:19",
+                        "PN532/PN532.cpp:29"
+                    ]
+                },
+                {
+                    "what": "PN532_I2C::writeCommand ignores the result of endTransmission and of writing the checksum and postamble, so a NACK on the bus or a frame that just fills the Wire buffer appears only as an ACK timeout.",
+                    "severity": "low",
+                    "evidence": [
+                        "PN532_I2C/PN532_I2C.cpp:69",
+                        "PN532_I2C/PN532_I2C.cpp:70",
+                        "PN532_I2C/PN532_I2C.cpp:72",
+                        "PN532_I2C/PN532_I2C.cpp:112"
+                    ]
+                },
+                {
+                    "what": "EmulateTag::emulate assigns the bool from tgSetData to int16_t status and tests status < 0, which is never true, so a failed TgSetData is ignored until the next tgGetData fails.",
+                    "severity": "low",
+                    "evidence": [
+                        "PN532/emulatetag.cpp:121",
+                        "PN532/emulatetag.cpp:216",
+                        "PN532/emulatetag.cpp:217",
+                        "PN532/PN532.h:155"
+                    ]
+                },
+                {
+                    "what": "LLCP::getHeaderBuffer subtracts 3 from the uint8_t *len pointer and not from the value, so the caller gets a length 3 bytes too large.",
+                    "severity": "low",
+                    "evidence": ["PN532/llcp.h:56", "PN532/llcp.h:58"]
+                },
+                {
+                    "what": "LLCP::waitForConnection, waitForDisconnection, connect and disconnect ignore their timeout parameter, so their loops end only when the peer stops sending SYMM PDUs or a read fails.",
+                    "severity": "low",
+                    "evidence": ["PN532/llcp.cpp:37", "PN532/llcp.cpp:78", "PN532/llcp.cpp:115", "PN532/llcp.cpp:167"]
+                },
+                {
+                    "what": "SNEP::write ignores the result of llcp.disconnect and SNEP::read ignores the result of the llcp.write that sends the success response.",
+                    "severity": "low",
+                    "evidence": ["PN532/snep.cpp:46", "PN532/snep.cpp:103"]
+                },
+                {
+                    "what": "MACLink::activateAsTarget ignores the result of SAMConfig.",
+                    "severity": "low",
+                    "evidence": ["PN532/mac_link.cpp:8"]
+                },
+                {
+                    "what": "snep.h documents =0 for a timeout, but SNEP::write returns -1 when activate returns 0 for a timeout.",
+                    "severity": "low",
+                    "evidence": ["PN532/snep.h:28", "PN532/snep.cpp:7", "PN532/snep.cpp:9"]
+                },
+                {
+                    "what": "EmulateTag::setNdefFile returns void and only prints a debug message for a file that is too large, so the caller cannot see that the file was not set.",
+                    "severity": "low",
+                    "evidence": ["PN532/emulatetag.cpp:56", "PN532/emulatetag.cpp:57", "PN532/emulatetag.cpp:58"]
+                },
+                {
+                    "what": "NdefRecord::setType and setPayload call malloc(0) for a zero length and the destructor frees only when the length is nonzero, so an empty record leaks that block where malloc(0) returns one.",
+                    "severity": "low",
+                    "evidence": [
+                        "NDEF/NdefRecord.cpp:52",
+                        "NDEF/NdefRecord.cpp:54",
+                        "NDEF/NdefRecord.cpp:257",
+                        "NDEF/NdefRecord.cpp:259",
+                        "NDEF/NdefMessage.cpp:62",
+                        "NDEF/NdefMessage.cpp:71"
+                    ]
+                },
+                {
+                    "what": "NfcAdapter::tagPresent takes an unsigned long timeout and passes it to a uint16_t parameter, so a timeout above 65535 ms is truncated.",
+                    "severity": "low",
+                    "evidence": ["NDEF/NfcAdapter.h:29", "NDEF/NfcAdapter.cpp:46", "PN532/PN532.h:161"]
+                },
+                {
+                    "what": "formatMifare and formatNDEF stop at 16 sectors with a fixed count, so on a 4K card NfcAdapter::clean and format leave the upper sectors untouched and return true.",
+                    "severity": "low",
+                    "evidence": ["NDEF/MifareClassic.cpp:211", "NDEF/MifareClassic.cpp:270", "NDEF/NfcAdapter.h:36"]
+                },
+                {
+                    "what": "The comment on writeGPIO calls P32 and P34 reserved and the code forces them high, while 7.2.6 and 7.2.7 say both can be used as standard GPIO.",
+                    "severity": "low",
+                    "evidence": ["PN532/PN532.cpp:222", "PN532/PN532.cpp:224", "PN532/PN532.cpp:233"]
+                },
+                {
+                    "what": "The debug output of readGPIO reads bytes 7 to 9 of the buffer while the response is at bytes 0 to 2, an offset left from an older frame layout.",
+                    "severity": "low",
+                    "evidence": ["PN532/PN532.cpp:285", "PN532/PN532.cpp:286", "PN532/PN532.cpp:287"]
+                },
+                {
+                    "what": "README.md and PN532/README.md list card emulation as to do although emulatetag.cpp implements it, and they claim mbed support although no mbed code exists in the tree.",
+                    "severity": "low",
+                    "evidence": ["README.md:19", "README.md:28", "PN532/README.md:15", "PN532/README.md:24"]
+                },
+                {
+                    "what": "pollOnce in the web page returns without arming the timer when isBusy is set, so pressing Get firmware version between two polls stops polling while the status still says Running.",
+                    "severity": "low",
+                    "evidence": ["web/pn532-tester/index.html:883", "web/pn532-tester/index.html:902"]
+                }
+            ]
+        }
+    ]
+}

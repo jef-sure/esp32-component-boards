@@ -1,0 +1,6 @@
+{
+    "title": "ESP-IDF 6.1 takes the ESP32-S31 as a preview",
+    "imported": true,
+    "answers": {"platform": "esp_idf:6.1"},
+    "says": "ESP-IDF 6.1 takes esp32s31 as a preview"
+}

@@ -120,16 +120,28 @@ li.unknown .mark, li.do .mark { color: var(--accent); }
 /* The first screen: the palette of roles, the canvas, the kits. */
 .select { display: grid; grid-template-columns: 230px minmax(340px, 1fr) minmax(380px, 1.2fr); height: calc(100vh - 44px); }
 .select > * { overflow: auto; padding: 10px 12px; }
-.palette { border-right: 1px solid var(--line); }
+.select.talking { grid-template-columns: 320px minmax(340px, 1fr) minmax(380px, 1.2fr); }
+.palette { display: flex; flex-direction: column; gap: 6px; border-right: 1px solid var(--line); }
+.palette > h2 { margin: 0; }
+.roles { flex: 1 1 auto; min-height: 0; overflow: auto; }
 .palette input[type=search] { width: 100%; box-sizing: border-box; }
 .palette h3 { margin: 12px 0 4px; font-size: 12px; color: var(--muted); }
 .role { display: flex; justify-content: space-between; width: 100%; margin: 1px 0; border-color: transparent; background: none; text-align: left; cursor: grab; }
 .role:hover { background: var(--soft); }
+.talk { display: flex; flex-direction: column; gap: 6px; min-height: 0; }
+.talking .talk { flex: 1 1 auto; }
+.stream { display: grid; align-content: start; gap: 6px; min-height: 0; overflow: auto; }
+.talking .stream { flex: 1 1 auto; }
+.talk input { width: 100%; box-sizing: border-box; }
+.said { padding: 6px 8px; border-radius: 6px; background: light-dark(#fff, #1b1d22); white-space: pre-wrap; }
+.said.person { justify-self: end; background: var(--mark); }
+.said pre { margin: 0; white-space: pre-wrap; font: inherit; }
+.offer { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin-top: 4px; }
 .more p { margin: 4px 0; font-size: 13px; }
 .role.empty { color: var(--muted); }
 .canvas { background: var(--soft); border-right: 1px solid var(--line); }
 .task { width: 100%; box-sizing: border-box; margin-bottom: 10px; padding: 6px; border: 1px solid var(--line); border-radius: 6px; font: inherit; color: inherit; background: light-dark(#fff, #1b1d22); resize: vertical; }
-.blocks { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; margin-bottom: 14px; }
+.blocks { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; align-items: start; margin-bottom: 14px; }
 .block { display: grid; gap: 4px; padding: 8px; border: 1px solid var(--line); border-radius: 6px; background: light-dark(#fff, #1b1d22); }
 .block header { display: flex; justify-content: space-between; height: auto; padding: 0; border: 0; }
 .block label { display: grid; gap: 1px; font-size: 12px; color: var(--muted); }

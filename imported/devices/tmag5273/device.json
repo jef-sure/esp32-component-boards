@@ -5,6 +5,9 @@
     "name": "tmag5273",
     "title": "tmag5273",
     "class": ["imu"],
-    "checked": {"facts": {"level": "extracted", "source": "the boards that use it"}},
-    "on": {"i2c": {}}
+    "checked": {
+        "facts": {"level": "extracted", "source": "the boards that use it"},
+        "address": {"level": "extracted", "source": "imported/report_addresses.json"}
+    },
+    "on": {"i2c": {"address_try": ["0x35", "0x0c", "0x22"]}}
 }

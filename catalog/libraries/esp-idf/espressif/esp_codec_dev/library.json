@@ -70,7 +70,7 @@
                     "if": ["target in [esp32s2, esp32s3, esp32s31, esp32p4, esp32h4]"]
                 }
             },
-            "frameworks": {"esp-idf": ">=5.4.4,!=5.5.0,!=5.5.1,!=5.5.2"}
+            "platforms": {"esp_idf": ">=5.4.4,!=5.5.0,!=5.5.1,!=5.5.2"}
         },
         "2.0.0-beta4": {
             "requires": {
@@ -79,7 +79,7 @@
                     "if": ["target in [esp32s2, esp32s3, esp32s31, esp32p4, esp32h4]"]
                 }
             },
-            "frameworks": {"esp-idf": ">=5.4.4,!=5.5.0,!=5.5.1,!=5.5.2"}
+            "platforms": {"esp_idf": ">=5.4.4,!=5.5.0,!=5.5.1,!=5.5.2"}
         },
         "2.0.0-beta3": {
             "requires": {
@@ -88,7 +88,7 @@
                     "if": ["target in [esp32s2, esp32s3, esp32s31, esp32p4, esp32h4]"]
                 }
             },
-            "frameworks": {"esp-idf": ">=5.4.4,!=5.5.0,!=5.5.1,!=5.5.2"}
+            "platforms": {"esp_idf": ">=5.4.4,!=5.5.0,!=5.5.1,!=5.5.2"}
         },
         "2.0.0-beta2": {
             "requires": {
@@ -97,7 +97,7 @@
                     "if": ["target in [esp32s2, esp32s3, esp32s31, esp32p4, esp32h4]"]
                 }
             },
-            "frameworks": {"esp-idf": ">=5.4.4,!=5.5.0,!=5.5.1,!=5.5.2"}
+            "platforms": {"esp_idf": ">=5.4.4,!=5.5.0,!=5.5.1,!=5.5.2"}
         },
         "2.0.0-beta1": {
             "requires": {
@@ -108,35 +108,35 @@
                     ]
                 }
             },
-            "frameworks": {"esp-idf": ">=5.4.4,!=5.5.0,!=5.5.1,!=5.5.2"}
+            "platforms": {"esp_idf": ">=5.4.4,!=5.5.0,!=5.5.1,!=5.5.2"}
         },
-        "1.6.2": {"frameworks": {"esp-idf": ">=4.0"}},
-        "1.6.1": {"frameworks": {"esp-idf": ">=4.0"}},
-        "1.5.11": {"frameworks": {"esp-idf": ">=4.0"}},
-        "1.5.10": {"frameworks": {"esp-idf": ">=4.0"}},
-        "1.5.9": {"frameworks": {"esp-idf": ">=4.0"}},
-        "1.5.8": {"frameworks": {"esp-idf": ">=4.0"}},
-        "1.5.7": {"frameworks": {"esp-idf": ">=4.0"}},
-        "1.5.6": {"frameworks": {"esp-idf": ">=4.0"}},
-        "1.5.5": {"frameworks": {"esp-idf": ">=4.0"}},
-        "1.5.4": {"frameworks": {"esp-idf": ">=4.0"}},
-        "1.5.3": {"frameworks": {"esp-idf": ">=4.0"}},
-        "1.5.2": {"frameworks": {"esp-idf": ">=4.0"}},
-        "1.5.1": {"frameworks": {"esp-idf": ">=4.0"}},
-        "1.5.0": {"frameworks": {"esp-idf": ">=4.0"}},
-        "1.4.0": {"frameworks": {"esp-idf": ">=4.0"}},
-        "1.3.6": {"frameworks": {"esp-idf": ">=4.0"}},
-        "1.3.5": {"frameworks": {"esp-idf": ">=4.0"}},
-        "1.3.4": {"frameworks": {"esp-idf": ">=4.0"}},
-        "1.3.3": {"frameworks": {"esp-idf": ">=4.0"}},
-        "1.3.2": {"frameworks": {"esp-idf": ">=4.0"}},
-        "1.3.1": {"frameworks": {"esp-idf": ">=4.0"}},
-        "1.3.0": {"frameworks": {"esp-idf": ">=4.0"}},
-        "1.2.0": {"frameworks": {"esp-idf": ">=4.0"}},
-        "1.1.0": {"frameworks": {"esp-idf": ">=4.0"}},
-        "1.0.3": {"frameworks": {"esp-idf": ">=4.0"}},
-        "1.0.2": {"frameworks": {"esp-idf": ">=4.0"}},
-        "1.0.1": {"frameworks": {"esp-idf": ">=4.0"}},
-        "1.0.0": {"frameworks": {"esp-idf": ">=4.0"}}
+        "1.6.2": {"platforms": {"esp_idf": ">=4.0"}},
+        "1.6.1": {"platforms": {"esp_idf": ">=4.0"}},
+        "1.5.11": {"platforms": {"esp_idf": ">=4.0"}},
+        "1.5.10": {"platforms": {"esp_idf": ">=4.0"}},
+        "1.5.9": {"platforms": {"esp_idf": ">=4.0"}},
+        "1.5.8": {"platforms": {"esp_idf": ">=4.0"}},
+        "1.5.7": {"platforms": {"esp_idf": ">=4.0"}},
+        "1.5.6": {"platforms": {"esp_idf": ">=4.0"}},
+        "1.5.5": {"platforms": {"esp_idf": ">=4.0"}},
+        "1.5.4": {"platforms": {"esp_idf": ">=4.0"}},
+        "1.5.3": {"platforms": {"esp_idf": ">=4.0"}},
+        "1.5.2": {"platforms": {"esp_idf": ">=4.0"}},
+        "1.5.1": {"platforms": {"esp_idf": ">=4.0"}},
+        "1.5.0": {"platforms": {"esp_idf": ">=4.0"}},
+        "1.4.0": {"platforms": {"esp_idf": ">=4.0"}},
+        "1.3.6": {"platforms": {"esp_idf": ">=4.0"}},
+        "1.3.5": {"platforms": {"esp_idf": ">=4.0"}},
+        "1.3.4": {"platforms": {"esp_idf": ">=4.0"}},
+        "1.3.3": {"platforms": {"esp_idf": ">=4.0"}},
+        "1.3.2": {"platforms": {"esp_idf": ">=4.0"}},
+        "1.3.1": {"platforms": {"esp_idf": ">=4.0"}},
+        "1.3.0": {"platforms": {"esp_idf": ">=4.0"}},
+        "1.2.0": {"platforms": {"esp_idf": ">=4.0"}},
+        "1.1.0": {"platforms": {"esp_idf": ">=4.0"}},
+        "1.0.3": {"platforms": {"esp_idf": ">=4.0"}},
+        "1.0.2": {"platforms": {"esp_idf": ">=4.0"}},
+        "1.0.1": {"platforms": {"esp_idf": ">=4.0"}},
+        "1.0.0": {"platforms": {"esp_idf": ">=4.0"}}
     }
 }

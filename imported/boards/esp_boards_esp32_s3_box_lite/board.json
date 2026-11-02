@@ -14,13 +14,13 @@
         "boot_button": {"class": "button", "pins": {"in": {"gpio": 0, "active": "low"}}},
         "audio_dac": {
             "class": "audio",
-            "on": {"i2s.i2s0": {}, "i2c.i2c0": {"address": "0x10"}},
+            "on": {"i2s.i2s0": {}, "i2c.i2c0": {"address": "0x08"}},
             "config": {"direction": "out", "sample_rate": 16000},
             "chip": "es8156"
         },
         "audio_adc": {
             "class": "audio",
-            "on": {"i2s.i2s0": {}, "i2c.i2c0": {"address": "0x20"}},
+            "on": {"i2s.i2s0": {}, "i2c.i2c0": {"address": "0x10"}},
             "config": {"direction": "in", "sample_rate": 16000},
             "chip": "es7243e"
         },

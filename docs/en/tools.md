@@ -167,6 +167,67 @@ python3 tools/import_fritzing.py adafruit=PATH fritzing=PATH --ref adafruit=COMM
 Only facts are taken: the contacts, the supply they name, the part number. A module needs a bus its contacts show.
 Its roles come from the words of `catalog/roles.json`, and from the sections of a shop when `--shop` names a copy of its list, which also gives the price and leaves out what is no longer sold.
 
+## import_libraries.py
+
+Lists the known libraries in `catalog/libraries/libraries.json`, the leading list: Arduino from `library_index.json`, ESP-IDF
+from the catalog, the dependencies of the packs and a search of GitHub. Each has one entry, with the chips it names, and a
+library with no chip stays a library: it may do an algorithm and drive nothing. `chip_libraries.json` beside it is an index
+from a chip to that list and need not cover it. Needs `gh`, logged in.
+
+```sh
+python3 tools/import_libraries.py library_index.json.gz --date 2026-11-01
+```
+
+It lists by name and ranks nothing. Stars and dates are shown and decide nothing, and a name is all that ties most of these
+libraries to a chip, so nobody read them. The registry of Espressif closes its API to robots and is not crawled.
+
+## import_addresses.py
+
+Writes the I2C addresses of the chips into `imported/devices/`, as `address_try` with the first as a chip comes. Run it after
+`import_fritzing.py`, which rewrites that folder, and after `import_libraries.py`, whose list says which clones it reads.
+
+```sh
+python3 tools/import_addresses.py --list
+python3 tools/import_addresses.py --esphome esphome/components --libraries CLONES --date 2026-11-01
+```
+
+The sources are the Python of ESPHome and the headers of libraries with a permissive license, in folders named `owner__repo`.
+Only text is read. The board packs are no source: they give addresses in the 8-bit form, and `import_board_manager.py`
+shifts those of its boards. What a filter refused goes to `imported/report_addresses.json`. `--compare` prints where a table
+of Tasmota differs: it is under GPL, so it stays a check and goes nowhere.
+
+The list can be short, so the solver takes a clash on these addresses as an unknown and no refusal.
+
+## audit.py
+
+Keeps what audits found in a library in `audit.json` beside its record, one entry for each commit read.
+
+```sh
+python3 tools/audit.py take esp-idf/jef-sure/pn532 RESULT --src COPY --rubric pn532 --rubric-version 1 --commit SHA --by WHO --version 0.7.6 --tag v0.7.6 --blind
+python3 tools/audit.py changes esp-idf/jef-sure/pn532 --clone CLONE --to v0.7.7
+python3 tools/audit.py carry esp-idf/jef-sure/pn532 READING --src COPY --clone CLONE --to v0.8.0 --commit SHA --by WHO --version 0.8.0 --tag v0.8.0 --blind
+```
+
+`take` checks that every quote of a result stands in the copy that was read, then keeps the file and the line: with the
+commit they say the same, and the code of others stays out of this repository. `changes` compares the last entry with a newer
+commit, or with the working tree of a clone when `--to` is absent, and lists what to read again: entries whose lines changed,
+entries whose file changed elsewhere, new files. A `no` has no line to compare, so new code can change any of them. The clone
+is only read. `carry` makes the entry of a newer commit from the last one: what stands on unchanged lines stays with its lines
+moved, a reading of what changed replaces the rest, and it refuses when something on changed lines was not read again.
+
+## boards_mcp.py
+
+Puts the agent of a person beside the page. It runs as an MCP server of a client, serves the page on 127.0.0.1 and takes no
+key: the model is the agent that started it.
+
+```json
+{"mcpServers": {"boards": {"command": "python3", "args": ["tools/boards_mcp.py"]}}}
+```
+
+The agent gives the person a link with a token. On that page a dialog appears, and once it starts it takes the column of the roles, whose search stays: the model reads the description, the blocks
+and the best kits, proposes blocks for the person to accept, and writes a description that a project keeps as `DESCRIPTION.md`.
+The solver stays in the page. A page opened any other way has no dialog and works as before.
+
 ## sync_versions.py
 
 ```sh

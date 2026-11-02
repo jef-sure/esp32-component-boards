@@ -440,7 +440,7 @@
         ]
     },
     "platforms": {
-        "esp-idf": {
+        "esp_idf": {
             "revisions": {
                 "1.0": {
                     "since": "5.3"

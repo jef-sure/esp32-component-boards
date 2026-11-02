@@ -21,7 +21,7 @@ def version_of(entry):
     out = {"targets": entry.get("targets"), "requires": {}}
     for dep in entry.get("dependencies") or []:
         if dep["source"] == "idf":
-            out["frameworks"] = {"esp-idf": dep["spec"]}
+            out["platforms"] = {"esp_idf": dep["spec"]}
         elif dep["source"] == "service":
             conditions = [rule["if"] for rule in (dep.get("rules") or []) + (dep.get("matches") or [])]
             name = f"esp-idf/{dep['namespace']}/{dep['name']}"

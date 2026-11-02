@@ -1,0 +1,116 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "rubric",
+    "name": "pn532",
+    "title": "Driver of the NXP PN532",
+    "version": 2,
+    "source": "UM0701-02 Rev. 02, PN532 user manual for firmware V1.6, NXP document 141520",
+    "chips": ["pn532"],
+    "severity": {
+        "high": "with a working chip and ordinary use of a public function, the program corrupts memory, hangs, returns wrong data or a false success, or the function cannot work at all. Data from a card or a chip counts as ordinary input whatever its length: a card can hold anything.",
+        "medium": "the same, but only after a fault (a dead chip, a lost card, a bus error), at a limit of a legal input from the application, or in a configuration the library offers and does not use by default.",
+        "low": "a leak on an error path, an unchecked call with no harm in ordinary use, a text that disagrees with the code."
+    },
+    "sections": {
+        "transports": {
+            "i2c": {
+                "text": "talks to the chip over I2C (6.2.4): address 0x48 on the wire, 0x24 in 7 bits, up to 400 kHz. A status byte comes first in each read. After NOT READY the host sends STOP and tries again. A ready frame is read whole before STOP, or its remaining bytes are lost."
+            },
+            "spi": {
+                "text": "talks over SPI (6.1.1.1, 6.2.5): mode 0, LSB first, up to 5 MHz. The first byte says what follows: 0x02 status read, 0x01 data write, 0x03 data read."
+            },
+            "uart": {"text": "talks over HSU, the serial link (6.2.3)."}
+        },
+        "builds_on": {
+            "esp_idf": {
+                "text": "compiles under ESP-IDF with no Arduino layer. Note which driver API it calls (driver/i2c_master.h or the old driver/i2c.h, spi_master, uart)."
+            },
+            "arduino": {"text": "compiles as an Arduino library."},
+            "esp_idf_component": {"text": "has an idf_component.yml or a CMakeLists.txt with idf_component_register."}
+        },
+        "frames": {
+            "ack_checked": {
+                "text": "reads the ACK frame after a command and acts when it is missing: on an LCS or DCS error the chip sends nothing (6.2.2.1 b). The chip never sends a NACK (6.2.1.4)."
+            },
+            "nack_resend": {
+                "text": "on a bad or missing response, sends a NACK frame to get the last response again (6.2.2.1 c).",
+                "since": 2
+            },
+            "checksums_checked": {"text": "verifies LCS and DCS of a response."},
+            "extended_frames": {
+                "text": "handles the extended frame, which the chip uses above 255 bytes, up to 265 with TFI (6.2.1.2)."
+            },
+            "error_frame": {"text": "recognizes the syntax error frame 00 00 FF 01 FF 7F 81 00 (6.2.1.5)."},
+            "response_code_checked": {"text": "checks that a response carries TFI D5 and the command code + 1."},
+            "status_decoded": {
+                "text": "takes the error code from bits 5..0 of the Status byte, apart from MI in bit 6 and NAD in bit 7 (7.1).",
+                "since": 2
+            }
+        },
+        "waiting": {
+            "irq": {"text": "can wait on the P70_IRQ line (6.1.2, 6.2.4.2, 6.2.5.2)."},
+            "ready_polling": {"text": "polls the ready status (the status byte on SPI and I2C)."},
+            "bounded_waits": {"text": "every wait for the chip has a timeout, so a dead chip cannot hang the program."},
+            "abort_on_timeout": {
+                "text": "a wait the host gives up ends with an ACK frame, which aborts the command (6.2.2.1 d, 6.2.2.2 b). MxRtyPassiveActivation is 0xFF by default, so without a card InListPassiveTarget does not end by itself (7.3.1).",
+                "since": 2
+            },
+            "nonblocking_detect": {
+                "text": "can start a passive detection and collect the result later, without blocking."
+            }
+        },
+        "cards": {
+            "iso14443a_uid": {"text": "reads the UID of a type A card (InListPassiveTarget, BrTy 0x00, 7.3.5)."},
+            "two_targets": {"text": "asks for and handles MaxTg = 2, the limit for type A."},
+            "mifare_classic": {"text": "authenticates and reads or writes blocks."},
+            "ultralight_ntag": {"text": "reads and writes pages."},
+            "iso14443_4_apdu": {"text": "exchanges APDUs with a card (InDataExchange on ISO-DEP), as DESFire needs."},
+            "chaining": {
+                "text": "handles the MI bit, for data that does not fit one exchange (7.3.8, 7.4.5).",
+                "since": 2
+            },
+            "raw_exchange": {"text": "InCommunicateThru (7.3.9).", "since": 2},
+            "auto_poll": {"text": "InAutoPoll (7.3.13).", "since": 2},
+            "ndef": {"text": "reads or writes NDEF messages."},
+            "iso14443b": {"text": "type B (BrTy 0x03)."},
+            "felica": {"text": "FeliCa (BrTy 0x01, 0x02)."},
+            "jewel": {"text": "Innovision Jewel (BrTy 0x04).", "since": 2},
+            "card_emulation": {"text": "TgInitAsTarget and the commands after it (7.3.14)."},
+            "peer_to_peer": {"text": "InJumpForDEP or TgInitAsTarget for NFCIP-1 (7.3.3)."}
+        },
+        "chip_control": {
+            "firmware_version": {"text": "GetFirmwareVersion (7.2.2)."},
+            "general_status": {"text": "GetGeneralStatus (7.2.3).", "since": 2},
+            "sam_configuration": {"text": "SAMConfiguration (7.2.10)."},
+            "rf_field_control": {"text": "RFConfiguration CfgItem 0x01, the field on and off (7.3.1)."},
+            "retries_control": {"text": "RFConfiguration CfgItem 0x05, MaxRetries (7.3.1)."},
+            "power_down": {"text": "PowerDown and waking up (7.2.11)."},
+            "registers": {"text": "ReadRegister, WriteRegister (7.2.4, 7.2.5).", "since": 2},
+            "gpio": {"text": "ReadGPIO, WriteGPIO (7.2.6, 7.2.7).", "since": 2},
+            "parameters": {"text": "SetParameters (7.2.9).", "since": 2},
+            "serial_baud": {"text": "SetSerialBaudRate (7.2.8).", "since": 2},
+            "reset_recovery": {
+                "text": "can recover a chip that stopped answering, by a reset line or by starting over."
+            }
+        },
+        "several": {
+            "several_readers": {
+                "text": "two readers can work in one program: no state of one reader lives in a global or static."
+            },
+            "shared_spi_bus": {"text": "two readers can share one SPI bus with a chip select each."},
+            "thread_safety": {"text": "a lock or a stated rule for use from several tasks."}
+        },
+        "code_health": {
+            "errors_returned": {"text": "a failure reaches the caller as a value it can tell apart."},
+            "buffers_bounded": {
+                "text": "lengths from the chip or the card are checked before they are copied into a buffer."
+            },
+            "allocation_checked": {"text": "where memory is allocated, a failed allocation is handled."},
+            "tests": {"text": "tests that run without or with hardware."},
+            "examples": {"text": "examples that show its use."},
+            "docs": {"text": "a README or API text that says how to use it."},
+            "license": {"text": "its license file."}
+        }
+    }
+}

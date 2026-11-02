@@ -9,7 +9,7 @@
     "devices": {
         "lcd_touch": {
             "class": "touch",
-            "on": {"i2c.i2c0": {"address": "0x28"}},
+            "on": {"i2c.i2c0": {"address": "0x14"}},
             "pins": {"int": 48},
             "config": {"over": "none", "x_max": 540, "y_max": 960},
             "chip": "gt911"

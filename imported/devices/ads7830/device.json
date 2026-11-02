@@ -5,6 +5,9 @@
     "name": "ads7830",
     "title": "ads7830",
     "class": ["adc"],
-    "checked": {"facts": {"level": "extracted", "source": "the boards that use it"}},
-    "on": {"i2c": {}}
+    "checked": {
+        "facts": {"level": "extracted", "source": "the boards that use it"},
+        "address": {"level": "extracted", "source": "imported/report_addresses.json"}
+    },
+    "on": {"i2c": {"address_try": ["0x48", "0x49", "0x4a", "0x4b"]}}
 }

@@ -1,0 +1,14 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "connector",
+    "name": "rj45",
+    "title": "RJ45",
+    "pins": ["TX+", "TX-", "RX+", "4", "5", "RX-", "7", "8"],
+    "checked": {
+        "standard": {
+            "level": "vendor-docs",
+            "source": "TIA-568 on 100BASE-TX: the contacts 4, 5, 7, 8 carry the spare pairs of PoE"
+        }
+    }
+}

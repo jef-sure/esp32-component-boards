@@ -1,0 +1,1163 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "audit",
+    "name": "dfrobot_pn532",
+    "title": "DFRobot_PN532",
+    "audits": [
+        {
+            "version": "1.0.1",
+            "tag": "V1.0.1",
+            "commit": "f6dc6f0bfec866804e674387dece54e716773a58",
+            "rubric": "pn532",
+            "rubric_version": 1,
+            "date": "2026-11-01",
+            "by": "claude-opus-5-5",
+            "items": {
+                "transports.i2c": {
+                    "status": "yes",
+                    "note": "Class DFRobot_PN532_IIC. It always uses the global Wire object at the fixed address 0x24.",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:441",
+                        "src/DFRobot_PN532.cpp:446",
+                        "src/DFRobot_PN532.cpp:476",
+                        "src/DFRobot_PN532.h:37"
+                    ]
+                },
+                "transports.spi": {
+                    "status": "no",
+                    "searched": "Case-insensitive 'spi', 'chip select', word 'cs' and 'ss', SPI.h, SPI.transfer in all text files: no hits. The only transport classes are DFRobot_PN532_IIC and DFRobot_PN532_UART."
+                },
+                "transports.uart": {
+                    "status": "yes",
+                    "note": "Class DFRobot_PN532_UART on a HardwareSerial at a fixed 115200 baud, with the HSU wake sequence in begin(). The ESP_PLATFORM branch of begin() passes its pin arguments in the wrong position, see defects.",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:573",
+                        "src/DFRobot_PN532.cpp:615",
+                        "src/DFRobot_PN532.cpp:646",
+                        "src/DFRobot_PN532.cpp:585"
+                    ]
+                },
+                "builds_on.esp_idf": {
+                    "status": "no",
+                    "searched": "driver/i2c_master.h, driver/i2c.h, driver/spi_master.h, driver/uart.h, i2c_master_, uart_driver, esp_err, freertos: no hits. ESP_PLATFORM appears only to pick the arduino-esp32 begin() overload and skip flush().",
+                    "note": "No ESP-IDF driver API is called. The code depends on Wire, Arduino.h, String and HardwareSerial.",
+                    "evidence": ["src/DFRobot_PN532.h:16", "src/DFRobot_PN532.h:17"]
+                },
+                "builds_on.arduino": {
+                    "status": "yes",
+                    "note": "Arduino library layout with src/, examples/ and library.properties. Judged by reading, not compiled. examples/readS50Uart cannot compile, see defects.",
+                    "evidence": [
+                        "library.properties:1",
+                        "library.properties:9",
+                        "src/DFRobot_PN532.h:16",
+                        "src/DFRobot_PN532.h:17"
+                    ]
+                },
+                "builds_on.esp_idf_component": {
+                    "status": "no",
+                    "searched": "File search for idf_component.yml, CMakeLists.txt, Kconfig and library.json; grep for idf_component: none found."
+                },
+                "frames.ack_checked": {
+                    "status": "partly",
+                    "note": "Both transports read six bytes and return false on a mismatch, but strncmp stops at the first zero byte and the expected frame starts with 0x00, so only the first byte is compared. A NACK (00 00 FF FF 00 00) passes. A missing ACK is noticed on I2C (IRQ timeout, or Wire.read() returns -1 and stores 0xFF), not on UART when no byte arrived (stale buffer). writeNTAG, writeUltralight, writeData(block, data) and getInformation ignore the result.",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:466",
+                        "src/DFRobot_PN532.cpp:476",
+                        "src/DFRobot_PN532.cpp:480",
+                        "src/DFRobot_PN532.cpp:509",
+                        "src/DFRobot_PN532.cpp:510",
+                        "src/DFRobot_PN532.cpp:612",
+                        "src/DFRobot_PN532.cpp:622",
+                        "src/DFRobot_PN532.cpp:623"
+                    ]
+                },
+                "frames.checksums_checked": {
+                    "status": "partly",
+                    "note": "checkDCS is arithmetically correct: its sum starts at the preamble, so the 0xFF start code compensates for the one's complement. It is called only for the MIFARE auth reply and the MIFARE Classic block read. LCS is not compared on its own, although a wrong LEN+LCS sum also fails this check, since both bytes are in the sum. scan, getInformation, readNTAG, readUltralight, begin and the write replies have no checksum check.",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:148",
+                        "src/DFRobot_PN532.cpp:277",
+                        "src/DFRobot_PN532.cpp:281",
+                        "src/DFRobot_PN532.cpp:282",
+                        "src/DFRobot_PN532.cpp:423"
+                    ]
+                },
+                "frames.extended_frames": {
+                    "status": "no",
+                    "searched": "'extended', LENM, LENL, the FF FF packet length marker, any branch on LEN: no hits. Lengths are uint8_t in writeCommand and receiveACK has 35 bytes.",
+                    "evidence": ["src/DFRobot_PN532.h:181", "src/DFRobot_PN532.h:193"]
+                },
+                "frames.error_frame": {
+                    "status": "no",
+                    "searched": "0x7F, 0x81, 'error frame', 'syntax' in src: no hits. receiveACK[9] (LEN) is never read, so a frame with TFI 7F is not recognized."
+                },
+                "frames.response_code_checked": {
+                    "status": "partly",
+                    "note": "The command code + 1 is checked at a fixed offset for InDataExchange reads (0x41) and SAMConfiguration (0x15). TFI 0xD5 is never checked: PN532TOHOST is defined and has no use. scan and getInformation do not check 0x4B. Write replies are not checked at all.",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:28",
+                        "src/DFRobot_PN532.cpp:51",
+                        "src/DFRobot_PN532.cpp:148",
+                        "src/DFRobot_PN532.cpp:423",
+                        "src/DFRobot_PN532.cpp:561",
+                        "src/DFRobot_PN532.cpp:600",
+                        "src/DFRobot_PN532.h:32"
+                    ]
+                },
+                "waiting.irq": {
+                    "status": "yes",
+                    "note": "I2C class only, mode 1. waitRemind polls the pin level with digitalRead; there is no interrupt handler. The UART class has no IRQ use.",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:473",
+                        "src/DFRobot_PN532.cpp:474",
+                        "src/DFRobot_PN532.cpp:527",
+                        "src/DFRobot_PN532.cpp:551"
+                    ]
+                },
+                "waiting.ready_polling": {
+                    "status": "no",
+                    "searched": "All reads of the I2C status byte: Wire.read() at lines 477, 485, 495, 503 discards it with no comparison to 0x01. 'ready' and 'RDY' have no hits; 'status' occurs only in two header comments. There is no SPI status read.",
+                    "note": "Mode 0 is called polling, but it is a fixed delay(30) before each read, with no loop on the ready bit.",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:493",
+                        "src/DFRobot_PN532.cpp:495",
+                        "src/DFRobot_PN532.cpp:501",
+                        "src/DFRobot_PN532.cpp:503"
+                    ]
+                },
+                "waiting.bounded_waits": {
+                    "status": "yes",
+                    "note": "The only loops on the chip are waitRemind (about 1 s) and the UART drain loop (uartTimeout, 1000 ms). All other waits are fixed delays. Own code only: the Wire library calls are not bounded by this library (no setWireTimeout). The timeout argument of readAck has no effect: it is overwritten with 0 and never read (cpp lines 472, 610).",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:521",
+                        "src/DFRobot_PN532.cpp:527",
+                        "src/DFRobot_PN532.cpp:531",
+                        "src/DFRobot_PN532.cpp:532",
+                        "src/DFRobot_PN532.cpp:611",
+                        "src/DFRobot_PN532.cpp:638"
+                    ]
+                },
+                "waiting.nonblocking_detect": {
+                    "status": "no",
+                    "searched": "'autopoll', attachInterrupt, a start and collect pair of public functions: no hits (0x60 occurs only as the MIFARE key A command). writeCommand and readAck are private, and scan() runs both in one call.",
+                    "evidence": ["src/DFRobot_PN532.h:193", "src/DFRobot_PN532.h:194"]
+                },
+                "cards.iso14443a_uid": {
+                    "status": "yes",
+                    "note": "scan() and readUid() keep only the first 4 UID bytes. getInformation() copies the whole UID into card.uid, without a length check. See defects.",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:357",
+                        "src/DFRobot_PN532.cpp:359",
+                        "src/DFRobot_PN532.cpp:363",
+                        "src/DFRobot_PN532.cpp:364",
+                        "src/DFRobot_PN532.cpp:172"
+                    ]
+                },
+                "cards.two_targets": {
+                    "status": "no",
+                    "searched": "MaxTg byte of every InListPassiveTarget, Tg 2 in InDataExchange, NbTg handling: MaxTg is always 1 and Tg always 1; receiveACK[13] is only compared with 1.",
+                    "evidence": ["src/DFRobot_PN532.cpp:157", "src/DFRobot_PN532.cpp:358"]
+                },
+                "cards.mifare_classic": {
+                    "status": "yes",
+                    "note": "Key A only (0x60 is hard-coded, CARD_CMD_AUTHENTICATION_B has no use). The key is the public member nfcPassword, default FF FF FF FF FF FF. Writes do not check the result, see defects.",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:133",
+                        "src/DFRobot_PN532.cpp:135",
+                        "src/DFRobot_PN532.cpp:136",
+                        "src/DFRobot_PN532.cpp:298",
+                        "src/DFRobot_PN532.cpp:303",
+                        "src/DFRobot_PN532.cpp:305",
+                        "src/DFRobot_PN532.cpp:411",
+                        "src/DFRobot_PN532.cpp:416"
+                    ]
+                },
+                "cards.ultralight_ntag": {
+                    "status": "yes",
+                    "note": "Read (0x30) and write (0xA2) of one page through InDataExchange. Writes do not check the result, see defects.",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:34",
+                        "src/DFRobot_PN532.cpp:44",
+                        "src/DFRobot_PN532.cpp:62",
+                        "src/DFRobot_PN532.cpp:72",
+                        "src/DFRobot_PN532.cpp:82",
+                        "src/DFRobot_PN532.cpp:109",
+                        "src/DFRobot_PN532.cpp:119"
+                    ]
+                },
+                "cards.iso14443_4_apdu": {
+                    "status": "no",
+                    "searched": "'apdu', 'desfire', 'iso-dep', 'rats', transceive: no hits. COMMAND_INDATAEXCHANGE is sent only with the fixed MIFARE commands 0x30, 0xA0, 0xA2 and 0x60. No public function takes a raw payload, and writeCommand is private.",
+                    "evidence": ["src/DFRobot_PN532.h:193"]
+                },
+                "cards.ndef": {
+                    "status": "no",
+                    "searched": "'ndef' (only #ifndef matches), 'TLV', 0xD1 record header, capability container parsing in src: no hits. Page data is returned raw."
+                },
+                "cards.iso14443b": {
+                    "status": "no",
+                    "searched": "BrTy byte of InListPassiveTarget: always MIFARE_ISO14443A (0x00); 'type b', 'ATTRIB' in src: no hits.",
+                    "evidence": ["src/DFRobot_PN532.cpp:158", "src/DFRobot_PN532.cpp:359", "src/DFRobot_PN532.h:38"]
+                },
+                "cards.felica": {
+                    "status": "no",
+                    "searched": "'felica', '212', '424', 'kbps', a BrTy value other than 0x00 in src: no hits."
+                },
+                "cards.card_emulation": {
+                    "status": "no",
+                    "searched": "TgInitAsTarget (0x8C), TgGetData (0x86), TgSetData (0x8E), 'emulat', 'tginit' in src: no hits. h lines 34-36 define the only PN532 commands used: 0x14, 0x4A, 0x40."
+                },
+                "cards.peer_to_peer": {
+                    "status": "no",
+                    "searched": "InJumpForDEP (0x56), InJumpForPSL (0x46), TgInitAsTarget (0x8C), 'nfcip', 'p2p', 'peer' in src: no hits."
+                },
+                "chip_control.firmware_version": {
+                    "status": "no",
+                    "searched": "'firmware' and GetFirmwareVersion in src: no hits; 0x02 occurs only in an ATQA compare. begin() sends only SAMConfiguration."
+                },
+                "chip_control.sam_configuration": {
+                    "status": "yes",
+                    "note": "I2C begin() sends mode 1 with IRQ on. UART begin() sends the same command as a prebuilt frame with mode 1.",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:548",
+                        "src/DFRobot_PN532.cpp:549",
+                        "src/DFRobot_PN532.cpp:551",
+                        "src/DFRobot_PN532.cpp:554",
+                        "src/DFRobot_PN532.cpp:585"
+                    ]
+                },
+                "chip_control.rf_field_control": {
+                    "status": "no",
+                    "searched": "RFConfiguration, command 0x32, CfgItem, 'field' in src: no hits."
+                },
+                "chip_control.retries_control": {
+                    "status": "no",
+                    "searched": "RFConfiguration, command 0x32, CfgItem 5, MxRty, 'retries' in src: no hits.",
+                    "note": "MxRtyPassiveActivation stays at its default 0xFF, so InListPassiveTarget with no card does not end on the chip. The library stops waiting and sends no abort frame."
+                },
+                "chip_control.power_down": {
+                    "status": "no",
+                    "searched": "PowerDown, command 0x16, 'power', RSTPDN in src: no hits.",
+                    "note": "A HSU wake sequence exists in begin() and a delay(2) comment mentions wake-up, but PowerDown is never sent.",
+                    "evidence": ["src/DFRobot_PN532.cpp:584"]
+                },
+                "chip_control.reset_recovery": {
+                    "status": "partly",
+                    "note": "No reset pin: 'reset', RSTPDN and RSTO have no hits and the constructor takes only irq and mode. No automatic recovery. The caller can start over by calling begin() again, which sends SAMConfiguration again (and the wake sequence on UART).",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:552",
+                        "src/DFRobot_PN532.cpp:554",
+                        "src/DFRobot_PN532.cpp:557",
+                        "src/DFRobot_PN532.cpp:595",
+                        "examples/nfcCardInfo/nfcCardInfo.ino:34",
+                        "src/DFRobot_PN532.h:210"
+                    ]
+                },
+                "several.several_readers": {
+                    "status": "partly",
+                    "note": "All driver state is in instance members and 'static' has no hits, so two UART readers, or one I2C and one UART reader, share no state. Two I2C readers cannot work: the class always uses the global Wire at a fixed address and has no TwoWire argument.",
+                    "evidence": [
+                        "src/DFRobot_PN532.h:181",
+                        "src/DFRobot_PN532.h:183",
+                        "src/DFRobot_PN532.h:184",
+                        "src/DFRobot_PN532.h:210",
+                        "src/DFRobot_PN532.h:255",
+                        "src/DFRobot_PN532.cpp:446"
+                    ]
+                },
+                "several.shared_spi_bus": {
+                    "status": "no",
+                    "searched": "'spi', 'chip select', a cs argument in src: no hits.",
+                    "note": "There is no SPI transport at all."
+                },
+                "several.thread_safety": {
+                    "status": "no",
+                    "searched": "mutex, semaphore, xSemaphore, noInterrupts, critical, portENTER, 'thread', 'task' in src and README.md: no hits.",
+                    "note": "Every operation uses the shared member buffer receiveACK with no lock and no stated rule."
+                },
+                "code_health.errors_returned": {
+                    "status": "partly",
+                    "note": "Most failures reach the caller as false, -1 or an error string, and begin() as false. Not all: the three block and page writes return true without looking at the result, a failed DCS or status check in a MIFARE read is reported as success, -1 in a uint8_t is 255 and in readData(block, offset) equals a stored 0xFF. scan() returns the same false for no card and for a transport failure.",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:16",
+                        "src/DFRobot_PN532.cpp:64",
+                        "src/DFRobot_PN532.cpp:78",
+                        "src/DFRobot_PN532.cpp:142",
+                        "src/DFRobot_PN532.cpp:378",
+                        "src/DFRobot_PN532.cpp:401",
+                        "src/DFRobot_PN532.cpp:436",
+                        "src/DFRobot_PN532.cpp:559",
+                        "src/DFRobot_PN532.h:77"
+                    ]
+                },
+                "code_health.buffers_bounded": {
+                    "status": "no",
+                    "searched": "All uses of a length from the chip. The only one is NFCIDLength at receiveACK[18], with no bounds check before lines 161-162 and 172. LEN at receiveACK[9] is never read.",
+                    "note": "Reads into receiveACK use fixed caller sizes of at most 32 and stay in the 35-byte array, but they are not lengths from the chip.",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:161",
+                        "src/DFRobot_PN532.cpp:162",
+                        "src/DFRobot_PN532.cpp:172",
+                        "src/DFRobot_PN532.h:64",
+                        "src/DFRobot_PN532.h:183"
+                    ]
+                },
+                "code_health.allocation_checked": {
+                    "status": "no",
+                    "searched": "malloc, calloc, realloc, free(, new, delete in src: no hits. The heap is used only through Arduino String, and the result of its concat and += is not checked anywhere.",
+                    "note": "On a failed allocation String::concat returns 0 and the string stays shorter; readUid() then returns a partial UID string.",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:337",
+                        "src/DFRobot_PN532.cpp:379",
+                        "src/DFRobot_PN532.cpp:383",
+                        "src/DFRobot_PN532.cpp:384",
+                        "src/DFRobot_PN532.cpp:422",
+                        "src/DFRobot_PN532.cpp:428"
+                    ]
+                },
+                "code_health.tests": {
+                    "status": "no",
+                    "searched": "File search for test*, tests/, a test runner or CI configuration in the library: none found. The examples are demonstration sketches, not tests."
+                },
+                "code_health.examples": {
+                    "status": "yes",
+                    "note": "Twelve sketches for card info, MIFARE Classic, NTAG, Ultralight, IRQ mode and UART. The single UART sketch cannot compile, see defects.",
+                    "evidence": [
+                        "examples/nfcCardInfo/nfcCardInfo.ino:27",
+                        "examples/readS50Interrupt/readS50Interrupt.ino:22",
+                        "examples/readS50Uart/readS50Uart.ino:18",
+                        "examples/MifareClassicReadWrite/MifareClassicReadWrite.ino:22",
+                        "examples/NTAG21xReadWrite/NTAG21xReadWrite.ino:22",
+                        "examples/UltralightReadWrite/UltralightReadWrite.ino:21"
+                    ]
+                },
+                "code_health.docs": {
+                    "status": "yes",
+                    "note": "README.md gives installation and the card API. It omits the constructors and begin(); those are described in the header comments.",
+                    "evidence": [
+                        "README.md:28",
+                        "README.md:30",
+                        "README.md:32",
+                        "README.md:72",
+                        "src/DFRobot_PN532.h:205",
+                        "src/DFRobot_PN532.h:213"
+                    ]
+                },
+                "code_health.license": {
+                    "status": "yes",
+                    "note": "MIT, in the LICENSE file.",
+                    "evidence": ["LICENSE:1", "LICENSE:3"]
+                }
+            },
+            "defects": [
+                {
+                    "what": "The ACK check uses strncmp on a frame that starts with 0x00, so it stops after the first byte: a NACK, an error frame or any data that starts with 0x00 is accepted as an ACK, on both transports.",
+                    "severity": "medium",
+                    "read_as": "high",
+                    "judged": "pn532ack[0] is 0x00, and strncmp stops at a NUL, so it returns 0 whenever receiveACK[0] is 0x00, which covers a NACK, an error frame and all-zero reads on both transports. In a normal exchange the frame is an ACK anyway, so the harm comes only after a fault, when a bad frame is accepted.",
+                    "evidence": ["src/DFRobot_PN532.cpp:466", "src/DFRobot_PN532.cpp:509", "src/DFRobot_PN532.cpp:622"]
+                },
+                {
+                    "what": "UART readAck reads nothing when no byte is available and still runs the compare on the old receiveACK, so it returns true with stale data: if the last reply was a successful scan and the chip then sends nothing, scan() keeps returning true with the previous UID, and begin() with no chip sets nfcEnable to true.",
+                    "severity": "medium",
+                    "read_as": "high",
+                    "judged": "The read is skipped when available() is 0 and strncmp still passes while receiveACK[0] is 0x00, so a silent chip after a good scan repeats the old UID, and begin() with no chip sets nfcEnable to true while it returns false. A working chip sends the ACK inside the 100 ms delay, so this needs a dead or disconnected chip.",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:581",
+                        "src/DFRobot_PN532.cpp:599",
+                        "src/DFRobot_PN532.cpp:612",
+                        "src/DFRobot_PN532.cpp:614",
+                        "src/DFRobot_PN532.cpp:615",
+                        "src/DFRobot_PN532.cpp:622",
+                        "src/DFRobot_PN532.cpp:369"
+                    ]
+                },
+                {
+                    "what": "getInformation ignores the readAck result and uses receiveACK[18] as a length with no check, so nfcUid[4] and the stack variable card.uid[7] are overflowed: a 7-byte UID overflows nfcUid on every NTAG or Ultralight, and on UART with no card the missing bytes are stored as 0xFF (read() returns -1), which gives a 255-byte copy.",
+                    "severity": "high",
+                    "judged": "readAck is ignored and receiveACK[18] bounds both copies, so a 7-byte UID writes 3 bytes past nfcUid[4] into blockData on every NTAG or Ultralight, which is ordinary use. On UART with no card only the ACK is available, read() stores 0xFF at index 18, and 255 bytes run past the object and over the stack variable card.",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:160",
+                        "src/DFRobot_PN532.cpp:161",
+                        "src/DFRobot_PN532.cpp:162",
+                        "src/DFRobot_PN532.cpp:172",
+                        "src/DFRobot_PN532.cpp:615",
+                        "src/DFRobot_PN532.h:64",
+                        "src/DFRobot_PN532.h:183"
+                    ]
+                },
+                {
+                    "what": "writeNTAG, writeUltralight and writeData(block, data) ignore readAck and the reply status and always return true, so a failed write is reported as success.",
+                    "severity": "medium",
+                    "read_as": "high",
+                    "judged": "After sending the write, all three functions discard readAck and the status at receiveACK[13] and return true; the earlier checks catch only a bad block number, a missing card or a failed key. The false success needs a write that fails on the card, such as a card lost in the field or a locked page.",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:77",
+                        "src/DFRobot_PN532.cpp:78",
+                        "src/DFRobot_PN532.cpp:123",
+                        "src/DFRobot_PN532.cpp:124",
+                        "src/DFRobot_PN532.cpp:307",
+                        "src/DFRobot_PN532.cpp:308"
+                    ]
+                },
+                {
+                    "what": "When the DCS or the status byte of a MIFARE read is wrong, readData(page) returns an empty string, which no caller treats as an error, so readData(buffer, block) copies the old blockData and returns 1, and readData(block, offset) returns an old byte.",
+                    "severity": "medium",
+                    "read_as": "high",
+                    "judged": "When the test at line 423 fails, dataSrt stays empty and no caller lists the empty string as an error, so readData(buffer, block) copies the old blockData and returns 1, and readData(block, offset) returns an old byte. It needs a read that fails after a valid scan and authentication, such as a lost card or a bad checksum.",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:324",
+                        "src/DFRobot_PN532.cpp:325",
+                        "src/DFRobot_PN532.cpp:397",
+                        "src/DFRobot_PN532.cpp:398",
+                        "src/DFRobot_PN532.cpp:400",
+                        "src/DFRobot_PN532.cpp:401",
+                        "src/DFRobot_PN532.cpp:423",
+                        "src/DFRobot_PN532.cpp:436"
+                    ]
+                },
+                {
+                    "what": "The ESP_PLATFORM begin() calls begin(115200, rx, tx), while arduino-esp32 declares begin(baud, config, rxPin, txPin), so rx is taken as the serial config, tx as the RX pin, and the TX pin stays at -1.",
+                    "severity": "high",
+                    "judged": "HardwareSerial::begin is declared as (baud, config, rxPin, txPin, ...) in every copy read (HardwareSerial.h and HardwareSerial.cpp of arduino-esp32 3.3.12 under ~/.cache/Espressif/ComponentManager and 2.0.17 under ~/.platformio/packages, because ~/.espressif and ~/.arduino15 hold no copy), so rx becomes the serial config, tx the RX pin and txPin stays -1. ESP_PLATFORM is defined by those builds, so this is the only UART begin on ESP32: with GPIO 16 as rx the UART is set to 5 data bits and has no TX pin, and the function cannot work; read only, not run.",
+                    "evidence": ["src/DFRobot_PN532.cpp:564", "src/DFRobot_PN532.cpp:567"]
+                },
+                {
+                    "what": "writeData(block, index, data) ignores the result of its readData call, so after a failed read it writes the old blockData, with one byte changed, over the block.",
+                    "severity": "medium",
+                    "evidence": ["src/DFRobot_PN532.cpp:316", "src/DFRobot_PN532.cpp:317", "src/DFRobot_PN532.cpp:318"]
+                },
+                {
+                    "what": "readData(block, offset), readData(buffer, block), readNTAG and readUltralight are declared uint8_t and return -1, which becomes 255: a compare with -1 as documented can never be true, and in readData(block, offset) a failure equals a stored byte 0xFF.",
+                    "severity": "medium",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:320",
+                        "src/DFRobot_PN532.cpp:323",
+                        "src/DFRobot_PN532.cpp:328",
+                        "src/DFRobot_PN532.h:75",
+                        "src/DFRobot_PN532.h:77",
+                        "src/DFRobot_PN532.h:86"
+                    ]
+                },
+                {
+                    "what": "In I2C mode 0 the status byte is read and discarded after a fixed delay(30), so a reply that is not ready is parsed as data; ten of the twelve examples use this mode.",
+                    "severity": "medium",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:493",
+                        "src/DFRobot_PN532.cpp:495",
+                        "src/DFRobot_PN532.cpp:501",
+                        "src/DFRobot_PN532.cpp:503"
+                    ]
+                },
+                {
+                    "what": "scan(), readUid() and scan(String) use only the first 4 UID bytes, so a 7-byte UID is truncated and two tags with the same first 4 bytes match in scan(String).",
+                    "severity": "medium",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:338",
+                        "src/DFRobot_PN532.cpp:363",
+                        "src/DFRobot_PN532.cpp:364",
+                        "src/DFRobot_PN532.cpp:380",
+                        "src/DFRobot_PN532.h:183"
+                    ]
+                },
+                {
+                    "what": "scan, readNTAG and readUltralight use reply bytes without any DCS check, so a corrupted frame reaches the caller as valid data.",
+                    "severity": "medium",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:51",
+                        "src/DFRobot_PN532.cpp:53",
+                        "src/DFRobot_PN532.cpp:98",
+                        "src/DFRobot_PN532.cpp:100",
+                        "src/DFRobot_PN532.cpp:363",
+                        "src/DFRobot_PN532.cpp:369"
+                    ]
+                },
+                {
+                    "what": "sCard_t card in getInformation leaves uidlenght, size, usersize, blockSize, blockNumber and sectorSize uninitialized when no ATQA branch matches, and the nfcCardInfo example uses uidlenght as a loop limit over uid[7].",
+                    "severity": "medium",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:154",
+                        "src/DFRobot_PN532.h:54",
+                        "src/DFRobot_PN532.h:55",
+                        "examples/nfcCardInfo/nfcCardInfo.ino:51"
+                    ]
+                },
+                {
+                    "what": "The MIFARE Classic 4k branch sets uidlenght to 7 for ATQA 00 02, a single-size (4-byte) UID value; the length reported in receiveACK[18] is never used for uidlenght.",
+                    "severity": "low",
+                    "evidence": ["src/DFRobot_PN532.cpp:254", "src/DFRobot_PN532.cpp:258"]
+                },
+                {
+                    "what": "getInformation selects the type by ATQA alone and never uses the SAK it stores, so a MIFARE Mini (ATQA 00 04, SAK 09) is reported as MIFARE Classic 1k with 1024 bytes.",
+                    "severity": "low",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:171",
+                        "src/DFRobot_PN532.cpp:173",
+                        "src/DFRobot_PN532.cpp:175",
+                        "src/DFRobot_PN532.cpp:178"
+                    ]
+                },
+                {
+                    "what": "memcpy copies 25 bytes from the 21-byte literal \"ISO/IEC1443-3,Type A\", a read past the end of the literal, in six branches.",
+                    "severity": "low",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:185",
+                        "src/DFRobot_PN532.cpp:196",
+                        "src/DFRobot_PN532.cpp:207",
+                        "src/DFRobot_PN532.cpp:218",
+                        "src/DFRobot_PN532.cpp:229",
+                        "src/DFRobot_PN532.cpp:241"
+                    ]
+                },
+                {
+                    "what": "The Ultralight branch reached when page 19 is unreadable and page 14 is readable reports size 448 and blockNumber 41, which do not match each other (41 * 4 = 164) or a tag with under 20 pages.",
+                    "severity": "low",
+                    "evidence": ["src/DFRobot_PN532.cpp:240", "src/DFRobot_PN532.cpp:245", "src/DFRobot_PN532.cpp:248"]
+                },
+                {
+                    "what": "readData(block, offset) does not range-check offset: 0 reads blockData[-1] and a value above 16 reads past the array.",
+                    "severity": "low",
+                    "evidence": ["src/DFRobot_PN532.cpp:328", "src/DFRobot_PN532.h:184"]
+                },
+                {
+                    "what": "readData(block, offset) does not list the error string \"flase\" returned for page > 255, unlike readData(buffer, block), so it returns an old byte instead of -1.",
+                    "severity": "low",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:325",
+                        "src/DFRobot_PN532.cpp:326",
+                        "src/DFRobot_PN532.cpp:398",
+                        "src/DFRobot_PN532.cpp:406"
+                    ]
+                },
+                {
+                    "what": "writeUltralight has no upper limit on block, and the int is cut to one byte, so block 260 writes page 4.",
+                    "severity": "low",
+                    "evidence": ["src/DFRobot_PN532.cpp:110", "src/DFRobot_PN532.cpp:120"]
+                },
+                {
+                    "what": "The I2C writeCommand ignores the return value of Wire.endTransmission, so a failed bus write is not seen where it occurs.",
+                    "severity": "low",
+                    "evidence": ["src/DFRobot_PN532.cpp:461", "src/DFRobot_PN532.h:193"]
+                },
+                {
+                    "what": "The UART writeCommand returns without sending the command when the drain loop reaches uartTimeout, and nothing tells the caller.",
+                    "severity": "low",
+                    "evidence": ["src/DFRobot_PN532.cpp:636", "src/DFRobot_PN532.cpp:638", "src/DFRobot_PN532.cpp:639"]
+                },
+                {
+                    "what": "I2C begin() sets nfcEnable to true before the first command and leaves it true on failure, unlike the UART begin(), so the other functions do not stop at their nfcEnable check after a failed begin().",
+                    "severity": "low",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:553",
+                        "src/DFRobot_PN532.cpp:557",
+                        "src/DFRobot_PN532.cpp:559",
+                        "src/DFRobot_PN532.cpp:596"
+                    ]
+                },
+                {
+                    "what": "getInformation is the only public card function with no nfcEnable check, so on a UART object before begin() readAck dereferences a null _serial, which it does not test.",
+                    "severity": "low",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:153",
+                        "src/DFRobot_PN532.cpp:159",
+                        "src/DFRobot_PN532.cpp:160",
+                        "src/DFRobot_PN532.cpp:612",
+                        "src/DFRobot_PN532.cpp:633"
+                    ]
+                },
+                {
+                    "what": "The only UART example declares struct card NFCcard, a type the library does not define (the type is sCard_t), so the sketch cannot compile.",
+                    "severity": "low",
+                    "evidence": ["examples/readS50Uart/readS50Uart.ino:19", "src/DFRobot_PN532.h:66"]
+                }
+            ]
+        },
+        {
+            "version": "1.0.1",
+            "tag": "V1.0.1",
+            "blind": true,
+            "commit": "f6dc6f0bfec866804e674387dece54e716773a58",
+            "rubric": "pn532",
+            "rubric_version": 2,
+            "date": "2026-11-02",
+            "by": "claude-opus-5-5",
+            "items": {
+                "transports.i2c": {
+                    "status": "partly",
+                    "note": "Address 0x24 in 7 bits is correct and the clock stays at the Wire default (100 kHz, AVR core twi.h:28). The status byte is read and discarded at lines 477, 483, 495 and 503: RDY is never tested, and there is no STOP and retry after NOT READY as 6.2.4 requires. The read length is a constant from the caller, not from LEN, so a longer frame is cut by STOP: scan() calls readAck(25), which requests 21 bytes, while a response with a 7-byte UID needs 23 with the status byte.",
+                    "evidence": [
+                        "src/DFRobot_PN532.h:37",
+                        "src/DFRobot_PN532.cpp:446",
+                        "src/DFRobot_PN532.cpp:476",
+                        "src/DFRobot_PN532.cpp:477",
+                        "src/DFRobot_PN532.cpp:493",
+                        "src/DFRobot_PN532.cpp:502"
+                    ]
+                },
+                "transports.spi": {
+                    "status": "no",
+                    "searched": "Case-insensitive SPI, SPIClass, transfer, MOSI, MISO, chip select in src/, keywords.txt and library.properties: no match. The only transport classes are Owner_PN532_IIC and Owner_PN532_UART."
+                },
+                "transports.uart": {
+                    "status": "partly",
+                    "note": "Frames are correct, and begin() sends the 0x55 wake-up preamble with SAMConfiguration at 115200. The non-ESP path has no such error. Under ESP_PLATFORM the arguments of HardwareSerial::begin are wrong, so the only begin() of that build cannot work (see defects). Reception is one available() test after a fixed delay(100). The resend after a missing ACK within 15 ms (6.2.3) is not done.",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:567",
+                        "src/DFRobot_PN532.cpp:573",
+                        "src/DFRobot_PN532.cpp:584",
+                        "src/DFRobot_PN532.cpp:612",
+                        "src/DFRobot_PN532.cpp:646"
+                    ]
+                },
+                "builds_on.esp_idf": {
+                    "status": "no",
+                    "searched": "driver/i2c.h, driver/i2c_master.h, driver/spi_master.h, driver/uart.h, esp_err, freertos/ in src/: no match. DFRobot_PN532.h includes Wire.h and Arduino.h, and the code uses String, HardwareSerial, Wire, delay, millis and digitalRead.",
+                    "note": "No ESP-IDF driver API is called. The ESP_PLATFORM branch at DFRobot_PN532.cpp line 563 only changes the HardwareSerial::begin call and needs arduino-esp32."
+                },
+                "builds_on.arduino": {
+                    "status": "yes",
+                    "note": "Not built, by the rules of this audit; this is read from the code. Arduino library layout with library.properties and src/. As the folder stands, the .cpp and all examples include Owner_PN532.h, but the files on disk are src/DFRobot_PN532.h and .cpp, so that include does not resolve. library.properties and the @file comments also say Owner_PN532, so this looks like a rename applied to file contents and not to file names when the folder was prepared. It is judged here as if the name resolved, and it is not in the defect list. Taken literally, the status would be no.",
+                    "evidence": [
+                        "src/DFRobot_PN532.h:16",
+                        "src/DFRobot_PN532.h:17",
+                        "src/DFRobot_PN532.cpp:11",
+                        "library.properties:1",
+                        "library.properties:9"
+                    ]
+                },
+                "builds_on.esp_idf_component": {
+                    "status": "no",
+                    "searched": "find for idf_component.yml, CMakeLists.txt, component.mk, Kconfig: none. idf_component_register: no match."
+                },
+                "frames.ack_checked": {
+                    "status": "partly",
+                    "note": "The ACK bytes are read and compared, and readAck() returns false on a mismatch. strncmp stops at the first NUL and pn532ack[0] is 0x00, so the comparison tests only receiveACK[0] == 0. A dead I2C chip gives 0xFF from Wire.read() and is caught. Other cases pass as an ACK. getInformation() and the write functions ignore the result, and a command is never resent.",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:361",
+                        "src/DFRobot_PN532.cpp:509",
+                        "src/DFRobot_PN532.cpp:622",
+                        "src/DFRobot_PN532.cpp:160",
+                        "src/DFRobot_PN532.cpp:77"
+                    ]
+                },
+                "frames.nack_resend": {
+                    "status": "no",
+                    "searched": "NACK, the byte sequence 00 00 FF FF 00 00, any host-side frame other than writeCommand(): no match. writeCommand() is the only sender and it builds information frames only."
+                },
+                "frames.checksums_checked": {
+                    "status": "partly",
+                    "note": "checkDCS() sums from the start code through the data and derives DCS from that. This is valid because the start byte is 0xFF and LEN + LCS is 0 modulo 256, so LCS has no test of its own and an LCS error shows only as a DCS mismatch. It is called only for authentication and the 16-byte block read. The responses used by begin(), scan(), getInformation(), readNTAG(), readUltralight() and the writes are not verified.",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:148",
+                        "src/DFRobot_PN532.cpp:277",
+                        "src/DFRobot_PN532.cpp:282",
+                        "src/DFRobot_PN532.cpp:423"
+                    ]
+                },
+                "frames.extended_frames": {
+                    "status": "no",
+                    "searched": "LEN = 0xFF marker, LENM, LENL, a 16-bit frame length: no match. writeCommand() takes a uint8_t length and receiveACK is 35 bytes."
+                },
+                "frames.error_frame": {
+                    "status": "no",
+                    "searched": "0x7F, 0x81, the words syntax and error frame in src/: no match."
+                },
+                "frames.response_code_checked": {
+                    "status": "partly",
+                    "note": "The command code + 1 is compared for SAMConfiguration (0x15) and InDataExchange (0x41). The TFI byte receiveACK[11] is never compared: PN532TOHOST is defined and not used. scan() and getInformation() do not compare 0x4B; scan() tests only NbTg.",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:561",
+                        "src/DFRobot_PN532.cpp:28",
+                        "src/DFRobot_PN532.cpp:369",
+                        "src/DFRobot_PN532.h:32"
+                    ]
+                },
+                "frames.status_decoded": {
+                    "status": "no",
+                    "searched": "A mask on the Status byte: 0x3F, 0x40, 0x80, or & applied to receiveACK[13]: no match.",
+                    "note": "Status is tested only as a whole byte against 0x00. The value is not kept or returned, so no error code reaches the caller. MI and NAD are not separated.",
+                    "evidence": ["src/DFRobot_PN532.cpp:28", "src/DFRobot_PN532.cpp:51", "src/DFRobot_PN532.cpp:98"]
+                },
+                "waiting.irq": {
+                    "status": "yes",
+                    "note": "I2C class only, mode 1. The line is sampled with digitalRead every 10 ms inside waitRemind(), with no pin interrupt. The status byte is still discarded after the line goes low.",
+                    "evidence": [
+                        "src/DFRobot_PN532.h:210",
+                        "src/DFRobot_PN532.cpp:473",
+                        "src/DFRobot_PN532.cpp:474",
+                        "src/DFRobot_PN532.cpp:482",
+                        "src/DFRobot_PN532.cpp:527"
+                    ]
+                },
+                "waiting.ready_polling": {
+                    "status": "no",
+                    "searched": "A test of the value returned by the first Wire.read() (RDY, bit 0), a retry loop around it, any variable that keeps it: no match. The result is discarded at each of the four reads.",
+                    "note": "Mode 0, called POLLING in the examples, is a fixed delay(30) before each read, not a poll.",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:493",
+                        "src/DFRobot_PN532.cpp:495",
+                        "src/DFRobot_PN532.cpp:501",
+                        "src/DFRobot_PN532.cpp:503"
+                    ]
+                },
+                "waiting.bounded_waits": {
+                    "status": "yes",
+                    "note": "The only loops are waitRemind(), about 1 s, and the RX drain in UART writeCommand(), limited by uartTimeout of 1000 ms. All other waits are fixed delays. Transfers inside Wire are outside this library, which sets no Wire timeout.",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:521",
+                        "src/DFRobot_PN532.cpp:531",
+                        "src/DFRobot_PN532.cpp:493",
+                        "src/DFRobot_PN532.cpp:611",
+                        "src/DFRobot_PN532.cpp:638"
+                    ]
+                },
+                "waiting.abort_on_timeout": {
+                    "status": "no",
+                    "searched": "A host write of the ACK frame 00 00 FF 00 FF 00: pn532ack[] (lines 465, 603) is used only as an operand of strncmp. RFConfiguration 0x32, MxRtyPassiveActivation, CfgItem 5: no match.",
+                    "note": "After a timeout scan() returns with InListPassiveTarget still running, and MxRtyPassiveActivation stays at 0xFF. The command stops only when the next command arrives (6.2.2.2 b 2)."
+                },
+                "waiting.nonblocking_detect": {
+                    "status": "no",
+                    "searched": "Separate start and collect functions, public access to writeCommand() or readAck(): both are private (DFRobot_PN532.h lines 193-194). scan() sends the command and reads the result in one blocking call."
+                },
+                "cards.iso14443a_uid": {
+                    "status": "yes",
+                    "note": "BrTy is 0x00. getInformation() gets 4-byte and 7-byte UIDs into card.uid. readUid() and scan(String) use only the first 4 bytes (see defects).",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:156",
+                        "src/DFRobot_PN532.cpp:158",
+                        "src/DFRobot_PN532.cpp:159",
+                        "src/DFRobot_PN532.cpp:172"
+                    ]
+                },
+                "cards.two_targets": {
+                    "status": "no",
+                    "searched": "The MaxTg byte: it is the constant 1 in scan() and getInformation() (lines 157, 358). No parser for a second TargetData; Tg in InDataExchange is the constant 1."
+                },
+                "cards.mifare_classic": {
+                    "status": "yes",
+                    "note": "Key A only: 0x60 is fixed and CARD_CMD_AUTHENTICATION_B is unused. The key is the public member nfcPassword, which begin() sets to FF. The result of a write is ignored (see defects).",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:135",
+                        "src/DFRobot_PN532.cpp:137",
+                        "src/DFRobot_PN532.cpp:138",
+                        "src/DFRobot_PN532.cpp:298",
+                        "src/DFRobot_PN532.cpp:306",
+                        "src/DFRobot_PN532.cpp:416"
+                    ]
+                },
+                "cards.ultralight_ntag": {
+                    "status": "yes",
+                    "note": "Reads with 0x30 and writes with 0xA2. The result of a write is ignored (see defects).",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:34",
+                        "src/DFRobot_PN532.cpp:62",
+                        "src/DFRobot_PN532.cpp:72",
+                        "src/DFRobot_PN532.cpp:82",
+                        "src/DFRobot_PN532.cpp:109"
+                    ]
+                },
+                "cards.iso14443_4_apdu": {
+                    "status": "no",
+                    "searched": "A public function that sends a caller's buffer through InDataExchange, RATS, ATS, APDU, ISO-DEP: no match. writeCommand() is private and every InDataExchange payload in src/ is a fixed Mifare command."
+                },
+                "cards.chaining": {
+                    "status": "no",
+                    "searched": "MI in the Tg byte or in Status (0x40 as a bit), a loop over exchanges: no match. Responses are read at fixed lengths up to 32 bytes."
+                },
+                "cards.raw_exchange": {"status": "no", "searched": "InCommunicateThru, 0x42: no match in src/."},
+                "cards.auto_poll": {
+                    "status": "no",
+                    "searched": "InAutoPoll, 0x60 as a PN532 command: no match. 0x60 appears only as the MIFARE Authentication A byte."
+                },
+                "cards.ndef": {
+                    "status": "no",
+                    "searched": "NDEF, TLV, NFCForum, 0xD1, a capability container parser: no match in src/ (only the preprocessor word ifndef)."
+                },
+                "cards.iso14443b": {
+                    "status": "no",
+                    "searched": "BrTy 0x03, type B: the BrTy byte is always MIFARE_ISO14443A, 0x00 (lines 158, 359)."
+                },
+                "cards.felica": {
+                    "status": "no",
+                    "searched": "BrTy 0x01 or 0x02, FeliCa: no match. The BrTy byte is always MIFARE_ISO14443A, 0x00 (lines 158, 359)."
+                },
+                "cards.jewel": {
+                    "status": "no",
+                    "searched": "BrTy 0x04, Jewel: no match. The BrTy byte is always MIFARE_ISO14443A, 0x00 (lines 158, 359)."
+                },
+                "cards.card_emulation": {
+                    "status": "no",
+                    "searched": "TgInitAsTarget, 0x8C, any Tg command: no match in src/."
+                },
+                "cards.peer_to_peer": {
+                    "status": "no",
+                    "searched": "InJumpForDEP, 0x56, TgInitAsTarget, 0x8C, DEP: no match in src/."
+                },
+                "chip_control.firmware_version": {
+                    "status": "no",
+                    "searched": "GetFirmwareVersion, 0x02 as a command byte: no match. The only command codes in src/ are SAMConfiguration, InListPassiveTarget and InDataExchange (DFRobot_PN532.h lines 34-36)."
+                },
+                "chip_control.general_status": {
+                    "status": "no",
+                    "searched": "GetGeneralStatus, 0x04 as a command byte: no match. The only command codes in src/ are SAMConfiguration, InListPassiveTarget and InDataExchange (DFRobot_PN532.h lines 34-36)."
+                },
+                "chip_control.sam_configuration": {
+                    "status": "yes",
+                    "note": "I2C: Mode 0x01, Timeout 0x14, IRQ 0x01. UART: Mode 0x01 inside the wake-up frame of begin().",
+                    "evidence": [
+                        "src/DFRobot_PN532.h:34",
+                        "src/DFRobot_PN532.cpp:548",
+                        "src/DFRobot_PN532.cpp:549",
+                        "src/DFRobot_PN532.cpp:551",
+                        "src/DFRobot_PN532.cpp:561",
+                        "src/DFRobot_PN532.cpp:584"
+                    ]
+                },
+                "chip_control.rf_field_control": {
+                    "status": "no",
+                    "searched": "RFConfiguration, 0x32, CfgItem 0x01: no match. The only command codes in src/ are SAMConfiguration, InListPassiveTarget and InDataExchange (DFRobot_PN532.h lines 34-36)."
+                },
+                "chip_control.retries_control": {
+                    "status": "no",
+                    "searched": "RFConfiguration, 0x32, CfgItem 0x05, MaxRetries, MxRty: no match. The only command codes in src/ are SAMConfiguration, InListPassiveTarget and InDataExchange (DFRobot_PN532.h lines 34-36)."
+                },
+                "chip_control.power_down": {
+                    "status": "no",
+                    "searched": "PowerDown, 0x16: no match. The only command codes in src/ are SAMConfiguration, InListPassiveTarget and InDataExchange (DFRobot_PN532.h lines 34-36).",
+                    "note": "The only wake-up is the 0x55 preamble in UART begin(), which is not paired with a PowerDown command."
+                },
+                "chip_control.registers": {
+                    "status": "no",
+                    "searched": "ReadRegister, WriteRegister, 0x06, 0x08: no match. The only command codes in src/ are SAMConfiguration, InListPassiveTarget and InDataExchange (DFRobot_PN532.h lines 34-36)."
+                },
+                "chip_control.gpio": {
+                    "status": "no",
+                    "searched": "ReadGPIO, WriteGPIO, 0x0C, 0x0E: no match. The only command codes in src/ are SAMConfiguration, InListPassiveTarget and InDataExchange (DFRobot_PN532.h lines 34-36)."
+                },
+                "chip_control.parameters": {
+                    "status": "no",
+                    "searched": "SetParameters, 0x12: no match. The only command codes in src/ are SAMConfiguration, InListPassiveTarget and InDataExchange (DFRobot_PN532.h lines 34-36)."
+                },
+                "chip_control.serial_baud": {
+                    "status": "no",
+                    "searched": "SetSerialBaudRate, 0x10: no match. The only command codes in src/ are SAMConfiguration, InListPassiveTarget and InDataExchange (DFRobot_PN532.h lines 34-36)."
+                },
+                "chip_control.reset_recovery": {
+                    "status": "partly",
+                    "note": "No reset line and no RSTPD_N handling: reset, rstpd, rsto have no match. Nothing recovers by itself. The caller can start over by calling begin() again, which sends SAMConfiguration and so stops a running command (6.2.2.2 b 2). begin() also sets nfcPassword back to FF.",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:540",
+                        "src/DFRobot_PN532.cpp:548",
+                        "examples/nfcCardInfo/nfcCardInfo.ino:34"
+                    ]
+                },
+                "several.several_readers": {
+                    "status": "partly",
+                    "note": "All state is in the object and src/ has no static or global variable, so two UART readers on two serial ports do not share state. The I2C class is fixed to the global Wire and to one address, with no parameter for another bus, so a program cannot have two I2C readers.",
+                    "evidence": [
+                        "src/DFRobot_PN532.h:181",
+                        "src/DFRobot_PN532.h:255",
+                        "src/DFRobot_PN532.h:37",
+                        "src/DFRobot_PN532.cpp:446"
+                    ]
+                },
+                "several.shared_spi_bus": {
+                    "status": "no",
+                    "searched": "SPI, chip select: no match in src/. The library has no SPI transport."
+                },
+                "several.thread_safety": {
+                    "status": "no",
+                    "searched": "mutex, semaphore, the word lock, noInterrupts, portENTER_CRITICAL in src/, a rule about tasks in README.md: no match.",
+                    "note": "Every call uses the shared members receiveACK and blockData with no protection."
+                },
+                "code_health.errors_returned": {
+                    "status": "partly",
+                    "note": "begin() and scan() return bool, and readUid() returns distinct error strings. The write functions return true whatever the card did, writeData(block, index, data) returns void, getInformation() has no failure value, and readData(block, offset) returns 255 on failure, which equals a data byte of 0xFF. No PN532 error code reaches the caller.",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:361",
+                        "src/DFRobot_PN532.cpp:378",
+                        "src/DFRobot_PN532.cpp:421",
+                        "src/DFRobot_PN532.cpp:78",
+                        "src/DFRobot_PN532.cpp:311",
+                        "src/DFRobot_PN532.cpp:323",
+                        "src/DFRobot_PN532.h:178"
+                    ]
+                },
+                "code_health.buffers_bounded": {
+                    "status": "no",
+                    "searched": "A comparison of receiveACK[18] with the size of nfcUid or card.uid, a min() on it: no match.",
+                    "note": "receiveACK[18] is the only length taken from the chip and it is used unchecked in a loop and in a memcpy. Other copies have fixed lengths inside receiveACK[35].",
+                    "evidence": ["src/DFRobot_PN532.cpp:161", "src/DFRobot_PN532.cpp:162", "src/DFRobot_PN532.cpp:172"]
+                },
+                "code_health.allocation_checked": {
+                    "status": "no",
+                    "searched": "malloc, calloc, realloc, new, String::reserve, a test of a String or of a concat() result: no match.",
+                    "note": "The only allocation is implicit in Arduino String. On AVR core 1.8.2, WString.cpp copy() invalidates the String when reserve() fails, and equals() then returns false for a non-empty literal, so the error test at line 325 does not see a failed allocation.",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:324",
+                        "src/DFRobot_PN532.cpp:325",
+                        "src/DFRobot_PN532.cpp:379",
+                        "src/DFRobot_PN532.cpp:422"
+                    ]
+                },
+                "code_health.tests": {
+                    "status": "no",
+                    "searched": "find for names with test, .github, .travis.yml: none. There is no test runner; examples/ holds sketches only."
+                },
+                "code_health.examples": {
+                    "status": "yes",
+                    "note": "12 sketches. 11 use I2C, and the one UART sketch does not compile (see defects).",
+                    "evidence": [
+                        "examples/nfcCardInfo/nfcCardInfo.ino:47",
+                        "examples/MifareClassicReadWrite/MifareClassicReadWrite.ino:51",
+                        "examples/readS50Interrupt/readS50Interrupt.ino:22",
+                        "examples/UltralightReadWrite/UltralightReadWrite.ino:68"
+                    ]
+                },
+                "code_health.docs": {
+                    "status": "yes",
+                    "note": "README.md and the header list the public functions with parameters. Wiring, timing and the need for a card before getInformation() are not described.",
+                    "evidence": [
+                        "README.md:32",
+                        "README.md:45",
+                        "README.md:146",
+                        "src/DFRobot_PN532.h:68",
+                        "src/DFRobot_PN532.h:75"
+                    ]
+                },
+                "code_health.license": {"status": "yes", "note": "MIT.", "evidence": ["LICENSE:1", "LICENSE:5"]}
+            },
+            "defects": [
+                {
+                    "what": "writeNTAG(), writeUltralight() and writeData(block, data) discard the result of readAck(16) and never read the InDataExchange Status, so they return true when the card rejects the write, for example on a locked page or a block whose access bits forbid writing.",
+                    "severity": "high",
+                    "judged": "All three functions call readAck(16), drop its result and return true, and none reads the Status at receiveACK[13], so a write refused by the card is reported as success.",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:77",
+                        "src/DFRobot_PN532.cpp:78",
+                        "src/DFRobot_PN532.cpp:123",
+                        "src/DFRobot_PN532.cpp:124",
+                        "src/DFRobot_PN532.cpp:307",
+                        "src/DFRobot_PN532.cpp:308"
+                    ]
+                },
+                {
+                    "what": "getInformation() copies receiveACK[18] bytes into nfcUid[4] with no length check, so every card with a 7-byte UID (NTAG, Ultralight) writes 3 bytes past nfcUid into blockData, and a 10-byte UID also writes 3 bytes past card.uid[7].",
+                    "severity": "high",
+                    "judged": "The loop bound is NFCIDLength from the card and nfcUid has 4 bytes followed by blockData, so an ordinary 7-byte UID card corrupts 3 bytes of blockData in the nfcCardInfo flow. memcpy into card.uid[7] overruns by 3 more for a 10-byte UID.",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:161",
+                        "src/DFRobot_PN532.cpp:162",
+                        "src/DFRobot_PN532.cpp:172",
+                        "src/DFRobot_PN532.h:183",
+                        "src/DFRobot_PN532.h:64"
+                    ]
+                },
+                {
+                    "what": "getInformation() ignores the result of readAck(28), does not test NbTg and has no failure value: with no card on a working chip over UART, receiveACK[18] holds 0xFF from read() returning -1 (HardwareSerial.cpp in the AVR core and in arduino-esp32), so it copies 255 bytes into nfcUid and through card.uid over the stack, the same happens on I2C polling with a dead chip (Wire.read() returns -1), and an I2C interrupt-mode timeout returns the previous card from the stale buffer.",
+                    "severity": "high",
+                    "judged": "readAck(28) is unchecked and NbTg is not tested. Over UART with no card only the ACK is available, read() returns -1 (HardwareSerial.cpp in AVR 1.8.2 and arduino-esp32 2.0.16), so receiveACK[18] is 0xFF and 255 bytes go through nfcUid and over the stack through card.uid; the examples call scan() first, but the public function has no failure value and a direct call or a card removed after scan() reaches this.",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:160",
+                        "src/DFRobot_PN532.cpp:161",
+                        "src/DFRobot_PN532.cpp:162",
+                        "src/DFRobot_PN532.cpp:172",
+                        "src/DFRobot_PN532.cpp:615",
+                        "src/DFRobot_PN532.cpp:480"
+                    ]
+                },
+                {
+                    "what": "getInformation() leaves uidlenght, size, usersize, blockSize, blockNumber and sectorSize uninitialised for a card whose SENS_RES is not in its table and returns the struct with no error, so the caller reads indeterminate values, and the nfcCardInfo example uses uidlenght as a loop bound.",
+                    "severity": "high",
+                    "judged": "sCard_t has default initialisers only for the char arrays, so for a card outside the table, for example a DESFire with SENS_RES 03 44, the numeric fields are indeterminate and the function has no error value. nfcCardInfo then uses uidlenght as a loop bound.",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:154",
+                        "src/DFRobot_PN532.cpp:267",
+                        "src/DFRobot_PN532.h:54",
+                        "examples/nfcCardInfo/nfcCardInfo.ino:51"
+                    ]
+                },
+                {
+                    "what": "getInformation() sets uidlenght to the constant 7 for SENS_RES 00 02 and ignores NFCIDLength in receiveACK[18], so a MIFARE Classic 4K with a 4-byte UID reports length 7 while only 4 bytes of card.uid are filled.",
+                    "severity": "high",
+                    "judged": "The branch sets uidlenght to 7 as a constant and NFCIDLength is used only for the copy, so a Classic 4K with SENS_RES 00 02 and a 4-byte UID reports 7 and 3 bytes of card.uid are indeterminate.",
+                    "evidence": ["src/DFRobot_PN532.cpp:254", "src/DFRobot_PN532.cpp:258", "src/DFRobot_PN532.cpp:172"]
+                },
+                {
+                    "what": "For a SENS_RES 00 44 card that fails page 19 and passes page 14 (condition at line 240), getInformation() reports 41 blocks, 448 bytes in total and 320 user bytes, which contradicts the failed read of page 19 and the block size of 4.",
+                    "severity": "high",
+                    "judged": "A card that reads page 14 and fails page 19 has 16 pages, but this branch reports 448 bytes in total, 320 user bytes and 41 blocks of 4 bytes, values that match neither the read result nor each other. getInformation() returns wrong data for an ordinary 00 44 card.",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:245",
+                        "src/DFRobot_PN532.cpp:246",
+                        "src/DFRobot_PN532.cpp:247",
+                        "src/DFRobot_PN532.cpp:248"
+                    ]
+                },
+                {
+                    "what": "scan() keeps only the first 4 bytes of the UID, so readUid() returns a truncated UID for a 7-byte card, and scan(String) compares 4 bytes only, so it treats two cards with the same first 4 bytes as equal.",
+                    "severity": "high",
+                    "judged": "nfcUid has 4 bytes and scan() copies 4 whatever NFCIDLength is, so readUid() returns a truncated UID for a 7-byte card and scan(String) matches on 4 bytes, a false match between different cards. 7-byte NTAG and Ultralight cards are ordinary input for this library.",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:363",
+                        "src/DFRobot_PN532.cpp:364",
+                        "src/DFRobot_PN532.cpp:380",
+                        "src/DFRobot_PN532.cpp:338",
+                        "src/DFRobot_PN532.h:183"
+                    ]
+                },
+                {
+                    "what": "Under ESP_PLATFORM begin() calls HardwareSerial::begin(115200, rx, tx), but the second and third parameters of that function are config and rxPin (framework-arduinoespressif32/cores/esp32/HardwareSerial.h:230 in ~/.platformio/packages, the same in all four installed versions), so the RX pin number becomes the line format (esp32-hal-uart.c, uartBegin), the TX pin number becomes the RX pin, TX stays -1, and UART cannot work in that build.",
+                    "severity": "high",
+                    "judged": "Read arduino-esp32 2.0.16 HardwareSerial.h:230, HardwareSerial.cpp and esp32-hal-uart.c, and 3.3.12 HardwareSerial: begin(115200, rx, tx) binds rx to config and tx to rxPin, and TX stays -1 because default pins apply only when both are negative. This is the only UART begin under ESP_PLATFORM, so UART cannot work there.",
+                    "evidence": ["src/DFRobot_PN532.cpp:564", "src/DFRobot_PN532.cpp:567", "src/DFRobot_PN532.h:242"]
+                },
+                {
+                    "what": "readAck() compares the ACK with strncmp, which stops at the first NUL, and pn532ack[0] is 0x00, so only receiveACK[0] == 0 is tested and any bytes that start with 0x00 pass as an ACK, including a response frame or the bytes after a NOT READY status.",
+                    "severity": "medium",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:466",
+                        "src/DFRobot_PN532.cpp:509",
+                        "src/DFRobot_PN532.cpp:604",
+                        "src/DFRobot_PN532.cpp:622"
+                    ]
+                },
+                {
+                    "what": "In I2C polling mode, which 10 of the 12 examples use, readAck() waits a fixed delay(30), discards the status byte and parses the next bytes as a frame, although 6.2.4 says that bytes after NOT READY are not relevant, so a response that takes longer than the delay is parsed from those bytes and is not collected.",
+                    "severity": "medium",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:493",
+                        "src/DFRobot_PN532.cpp:495",
+                        "src/DFRobot_PN532.cpp:498",
+                        "src/DFRobot_PN532.cpp:501",
+                        "src/DFRobot_PN532.cpp:503",
+                        "src/DFRobot_PN532.cpp:506"
+                    ]
+                },
+                {
+                    "what": "scan() gives up with no ACK frame to the chip and the library never sets MxRtyPassiveActivation, so with no card InListPassiveTarget keeps running with the RF field on until the next command (6.2.2.1 d, 7.3.1), and on I2C, unlike UART (line 636), a response produced in that time is not drained before the next command.",
+                    "severity": "medium",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:357",
+                        "src/DFRobot_PN532.cpp:359",
+                        "src/DFRobot_PN532.cpp:360",
+                        "src/DFRobot_PN532.cpp:361",
+                        "src/DFRobot_PN532.cpp:362"
+                    ]
+                },
+                {
+                    "what": "UART readAck() leaves receiveACK unchanged when no byte has arrived after delay(100) and then returns true, because the old buffer starts with 0x00, so with a dead chip after a successful detection scan() returns true and readUid() returns the previous UID.",
+                    "severity": "medium",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:611",
+                        "src/DFRobot_PN532.cpp:612",
+                        "src/DFRobot_PN532.cpp:622",
+                        "src/DFRobot_PN532.cpp:369"
+                    ]
+                },
+                {
+                    "what": "readData(int page) returns an empty String when the DCS or Status test at line 423 fails, that String is not in the error lists of readData(buffer, block) and readData(block, offset), so they report success with the stale blockData.",
+                    "severity": "medium",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:423",
+                        "src/DFRobot_PN532.cpp:436",
+                        "src/DFRobot_PN532.cpp:397",
+                        "src/DFRobot_PN532.cpp:400",
+                        "src/DFRobot_PN532.cpp:401",
+                        "src/DFRobot_PN532.cpp:328"
+                    ]
+                },
+                {
+                    "what": "writeData(block, index, data) ignores a failed readData(block) and then writes blockData left by an earlier read to the card, and it returns void, so the caller cannot see the failure.",
+                    "severity": "medium",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:311",
+                        "src/DFRobot_PN532.cpp:316",
+                        "src/DFRobot_PN532.cpp:317",
+                        "src/DFRobot_PN532.cpp:318"
+                    ]
+                },
+                {
+                    "what": "readData(block, offset) indexes blockData[offset - 1] with no range check, so offset 0 reads nfcUid[3], the byte before the array, and an offset above 16 reads past blockData.",
+                    "severity": "medium",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:328",
+                        "src/DFRobot_PN532.h:83",
+                        "src/DFRobot_PN532.h:183",
+                        "src/DFRobot_PN532.h:184"
+                    ]
+                },
+                {
+                    "what": "readData(block, offset) returns uint8_t -1 on failure, which is 255 and equals a valid data byte 0xFF, so the caller cannot tell a failure from data.",
+                    "severity": "medium",
+                    "evidence": ["src/DFRobot_PN532.cpp:320", "src/DFRobot_PN532.cpp:323", "src/DFRobot_PN532.cpp:327"]
+                },
+                {
+                    "what": "I2C writeCommand() ignores the result of Wire.endTransmission(), so a command that the chip did not acknowledge, which 6.2.4 allows right after an exchange, is lost with no retry and the following read is handled as if the command had been accepted.",
+                    "severity": "medium",
+                    "evidence": ["src/DFRobot_PN532.cpp:446", "src/DFRobot_PN532.cpp:461"]
+                },
+                {
+                    "what": "writeUltralight() has no upper bound on its int block and stores it in one byte, so block 258 passes the block < 4 guard and writes page 2, which holds the lock bytes according to the library's own example.",
+                    "severity": "medium",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:110",
+                        "src/DFRobot_PN532.cpp:120",
+                        "examples/UltralightReadWrite/UltralightReadWrite.ino:47"
+                    ]
+                },
+                {
+                    "what": "Six memcpy calls copy 25 bytes from the 21-byte literal \"ISO/IEC1443-3,Type A\", which reads 4 bytes past its end, and the same string returned in RFTechnology misprints the standard number 14443.",
+                    "severity": "low",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:185",
+                        "src/DFRobot_PN532.cpp:196",
+                        "src/DFRobot_PN532.cpp:207",
+                        "src/DFRobot_PN532.cpp:218",
+                        "src/DFRobot_PN532.cpp:229",
+                        "src/DFRobot_PN532.cpp:241"
+                    ]
+                },
+                {
+                    "what": "The header documents @retval -1 for functions that return uint8_t, so a caller that compares the result with -1 as documented never sees a failure, because the value is 255.",
+                    "severity": "low",
+                    "evidence": [
+                        "src/DFRobot_PN532.h:75",
+                        "src/DFRobot_PN532.h:77",
+                        "src/DFRobot_PN532.h:158",
+                        "src/DFRobot_PN532.h:160",
+                        "src/DFRobot_PN532.cpp:395"
+                    ]
+                },
+                {
+                    "what": "Owner_PN532_IIC::begin() sets nfcEnable to true before the first exchange and does not clear it on failure, and UART begin() leaves it true when the response code is wrong, so after a failed begin() the public functions still run and do not return the \"wake up error!\" path.",
+                    "severity": "low",
+                    "evidence": [
+                        "src/DFRobot_PN532.cpp:553",
+                        "src/DFRobot_PN532.cpp:557",
+                        "src/DFRobot_PN532.cpp:559",
+                        "src/DFRobot_PN532.cpp:599",
+                        "src/DFRobot_PN532.cpp:600"
+                    ]
+                },
+                {
+                    "what": "getInformation() has no nfcEnable test, unlike the other public functions, and UART readAck() uses _serial without the NULL test that writeCommand() has, so a call before begin() dereferences an unset pointer.",
+                    "severity": "low",
+                    "evidence": ["src/DFRobot_PN532.cpp:153", "src/DFRobot_PN532.cpp:612", "src/DFRobot_PN532.cpp:633"]
+                },
+                {
+                    "what": "UART writeCommand() returns without sending the command when the RX drain exceeds uartTimeout, with no error, and the caller then parses the old buffer.",
+                    "severity": "low",
+                    "evidence": ["src/DFRobot_PN532.cpp:636", "src/DFRobot_PN532.cpp:638", "src/DFRobot_PN532.cpp:639"]
+                },
+                {
+                    "what": "examples/readS50Uart declares struct card NFCcard, a type the library does not define (the type is Owner_PN532::sCard_t), so the only UART example does not compile.",
+                    "severity": "low",
+                    "evidence": ["examples/readS50Uart/readS50Uart.ino:19", "src/DFRobot_PN532.h:66"]
+                }
+            ]
+        }
+    ]
+}

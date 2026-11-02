@@ -28,13 +28,13 @@
     "devices": {
         "gpio_expander": {
             "class": "io_expander",
-            "on": {"i2c.i2c0": {"address": "0x40"}},
+            "on": {"i2c.i2c0": {"address": "0x20"}},
             "config": {"pins": 16},
             "chip": "tca9554"
         },
         "audio_dac": {
             "class": "audio",
-            "on": {"i2s.i2s0": {}, "i2c.i2c0": {"address": "0x20"}},
+            "on": {"i2s.i2s0": {}, "i2c.i2c0": {"address": "0x10"}},
             "config": {"direction": "both", "sample_rate": 16000},
             "chip": "es8389"
         },

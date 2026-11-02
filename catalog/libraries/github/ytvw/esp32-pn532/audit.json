@@ -1,0 +1,918 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "audit",
+    "name": "esp32-pn532",
+    "title": "ESP32-PN532",
+    "audits": [
+        {
+            "commit": "3e4d6e059ab056b7cb3673e45d0002cd002eb9c5",
+            "rubric": "pn532",
+            "rubric_version": 1,
+            "date": "2026-11-01",
+            "by": "claude-opus-5-5",
+            "items": {
+                "transports.i2c": {
+                    "status": "no",
+                    "searched": "i2c, Wire.h, i2c_master in pn532.c, include/pn532.h, README.md, CMakeLists.txt, component.mk (case-insensitive)",
+                    "note": "The only bus code is UART."
+                },
+                "transports.spi": {
+                    "status": "no",
+                    "searched": "spi, spi_master, spi_device in pn532.c, include/pn532.h, README.md, CMakeLists.txt, component.mk (case-insensitive)",
+                    "note": "The only bus code is UART."
+                },
+                "transports.uart": {
+                    "status": "yes",
+                    "note": "115200 8N1 with the ESP-IDF UART driver. Each frame starts with 0x55 0x55 0x55 for wake-up.",
+                    "evidence": ["pn532.c:70", "pn532.c:85", "pn532.c:156", "pn532.c:167"]
+                },
+                "builds_on.esp_idf": {
+                    "status": "partly",
+                    "note": "No Arduino layer. API: driver/uart.h (uart_driver_install, uart_read_bytes, uart_write_bytes) and driver/gpio.h. It does not compile as it stands on current ESP-IDF. The library was not built; a probe written for this audit, with the same includes and a CMakeLists.txt of the same shape, gave on v5.5.5 and v6.1: fatal error driver/uart.h: No such file or directory, because idf_component_register has no REQUIRES and driver stopped being an implicit requirement in v5.0 (migration guide). With REQUIRES added to the probe, SemaphoreHandle_t resolves on both, UART_FIFO_LEN is a deprecation warning on v5.5.5 and an error on v6.1 (undeclared; the macro is absent from driver/uart.h in v6.0.3 and v6.1). Versions before v5.0 were not tested.",
+                    "evidence": [
+                        "pn532.c:7",
+                        "pn532.c:8",
+                        "pn532.c:13",
+                        "pn532.c:70",
+                        "pn532.c:167",
+                        "CMakeLists.txt:1"
+                    ]
+                },
+                "builds_on.arduino": {
+                    "status": "no",
+                    "searched": "Arduino.h, arduino, library.properties, library.json, *.ino, Wire, Serial in pn532.c, include/pn532.h, README.md, CMakeLists.txt, component.mk (case-insensitive)",
+                    "note": "No Arduino file or API. It calls ESP-IDF drivers directly."
+                },
+                "builds_on.esp_idf_component": {
+                    "status": "yes",
+                    "note": "CMakeLists.txt with idf_component_register. No idf_component.yml. component.mk for the old make build.",
+                    "evidence": ["CMakeLists.txt:1"]
+                },
+                "frames.ack_checked": {
+                    "status": "yes",
+                    "note": "pn532_tx_mutex reads the 6-byte ACK. Missing ACK returns TIMEOUTACK, NACK returns NACK, other bytes return BADACK. The command is then not marked pending.",
+                    "evidence": [
+                        "pn532.c:336",
+                        "pn532.c:338",
+                        "pn532.c:342",
+                        "pn532.c:344",
+                        "pn532.c:345",
+                        "pn532.c:346",
+                        "pn532.c:347"
+                    ]
+                },
+                "frames.checksums_checked": {
+                    "status": "yes",
+                    "note": "LCS of normal and extended frames, and DCS.",
+                    "evidence": ["pn532.c:382", "pn532.c:391", "pn532.c:437", "pn532.c:438"]
+                },
+                "frames.extended_frames": {
+                    "status": "yes",
+                    "note": "Extended frames are built on send when LEN >= 0x100 and parsed on receive, with the LCS check.",
+                    "evidence": [
+                        "pn532.c:305",
+                        "pn532.c:307",
+                        "pn532.c:309",
+                        "pn532.c:311",
+                        "pn532.c:377",
+                        "pn532.c:379",
+                        "pn532.c:382",
+                        "pn532.c:384"
+                    ]
+                },
+                "frames.error_frame": {
+                    "status": "no",
+                    "searched": "0x7F, 0x81, syntax, error frame in pn532.c, include/pn532.h, README.md, CMakeLists.txt, component.mk (case-insensitive)",
+                    "note": "The frame 00 00 FF 01 FF 7F 81 00 fails the TFI test at pn532.c:394 and returns the generic PN532_ERR_HEADER, the same as any bad frame."
+                },
+                "frames.response_code_checked": {
+                    "status": "yes",
+                    "note": "TFI 0xD5 and the stored cmd + 1 are compared for normal and extended frames.",
+                    "evidence": ["pn532.c:385", "pn532.c:387", "pn532.c:394", "pn532.c:396"]
+                },
+                "waiting.irq": {
+                    "status": "no",
+                    "searched": "gpio_isr, gpio_install_isr_service, gpio_intr, gpio_get_level, irq in pn532.c, include/pn532.h, README.md, CMakeLists.txt, component.mk (case-insensitive)",
+                    "note": "pn532_init has no IRQ pin argument. The only hits are the SAMConfiguration parameter at pn532.c:184 and pn532.c:192, which set the chip side only."
+                },
+                "waiting.ready_polling": {
+                    "status": "partly",
+                    "note": "The library is HSU only and HSU has no status byte. pn532_ready is the HSU equivalent: it returns the number of bytes in the UART RX buffer. Any byte counts, so a partial frame also reads as ready. The caller writes the poll loop.",
+                    "evidence": ["pn532.c:464", "pn532.c:466", "include/pn532.h:80"]
+                },
+                "waiting.bounded_waits": {
+                    "status": "partly",
+                    "note": "A chip that sends nothing is handled: every UART read and uart_wait_tx_done has a timeout. Two waits have no end: the while (1) in uart_preamble has only a per-byte timeout, and pn532_tx takes the mutex with portMAX_DELAY while an earlier command is pending. See defects.",
+                    "evidence": [
+                        "pn532.c:70",
+                        "pn532.c:334",
+                        "pn532.c:369",
+                        "pn532.c:101",
+                        "pn532.c:104",
+                        "pn532.c:357"
+                    ]
+                },
+                "waiting.nonblocking_detect": {
+                    "status": "yes",
+                    "note": "pn532_ILPT_Send starts InListPassiveTarget and returns after the ACK, pn532_ready polls, pn532_Cards collects. The send itself blocks for the ACK.",
+                    "evidence": [
+                        "pn532.c:501",
+                        "pn532.c:509",
+                        "pn532.c:457",
+                        "pn532.c:464",
+                        "pn532.c:578",
+                        "pn532.c:580",
+                        "include/pn532.h:91"
+                    ]
+                },
+                "cards.iso14443a_uid": {
+                    "status": "yes",
+                    "note": "pn532_Cards parses Tg, SENS_RES, SEL_RES and NFCID. pn532_nfcid returns the UID. SENS_RES and SEL_RES have no accessor.",
+                    "evidence": [
+                        "pn532.c:508",
+                        "pn532.c:509",
+                        "pn532.c:596",
+                        "pn532.c:598",
+                        "pn532.c:602",
+                        "include/pn532.h:82"
+                    ]
+                },
+                "cards.two_targets": {
+                    "status": "partly",
+                    "note": "MaxTg = 2 is sent and the count is returned. Only the first target is parsed, and the data of the second can be misread as an ATS (see defects). pn532_dx addresses only the first target.",
+                    "evidence": ["pn532.c:507", "pn532.c:590", "pn532.c:615"]
+                },
+                "cards.mifare_classic": {
+                    "status": "no",
+                    "searched": "mifare, auth, 0x60, 0x61, 0x30, 0xA0 in pn532.c, include/pn532.h, README.md, CMakeLists.txt, component.mk (case-insensitive)",
+                    "note": "No authenticate or block functions. The only hits are the status name MIFAREAUTH, a comment at pn532.c:536 and the DESFire note in the README. pn532_dx is a raw exchange; the caller would have to build these commands."
+                },
+                "cards.ultralight_ntag": {
+                    "status": "no",
+                    "searched": "ultralight, ntag, 0x30, 0xA2 in pn532.c, include/pn532.h, README.md, CMakeLists.txt, component.mk (case-insensitive)",
+                    "note": "No page read or write functions."
+                },
+                "cards.iso14443_4_apdu": {
+                    "status": "yes",
+                    "note": "pn532_dx sends InDataExchange with the first target's Tg and returns the reply in the same buffer. The MI and NAD bits of the status byte are not masked (see defects).",
+                    "evidence": [
+                        "pn532.c:470",
+                        "pn532.c:471",
+                        "pn532.c:480",
+                        "pn532.c:484",
+                        "pn532.c:488",
+                        "include/pn532.h:86"
+                    ]
+                },
+                "cards.ndef": {
+                    "status": "no",
+                    "searched": "ndef, 0xD1, 0xE1, TLV in pn532.c, include/pn532.h, README.md, CMakeLists.txt, component.mk (case-insensitive)",
+                    "note": "No NDEF code; the ndef hits are #undef and #ifndef. The README mentions an external DESFire library only."
+                },
+                "cards.iso14443b": {
+                    "status": "no",
+                    "searched": "iso14443b, type b, BrTy 3, 0x03 as the second InListPassiveTarget byte in pn532.c, include/pn532.h, README.md, CMakeLists.txt, component.mk (case-insensitive)",
+                    "note": "pn532.c:508 sets the only baud/modulation value used, 0 (106 kbps type A). pn532_tx is called with commands 0x00, 0x02, 0x08, 0x0C, 0x0E, 0x14, 0x32, 0x40, 0x4A only."
+                },
+                "cards.felica": {
+                    "status": "no",
+                    "searched": "felica, BrTy 1, BrTy 2, 0xB2, 212, 424 in pn532.c, include/pn532.h, README.md, CMakeLists.txt, component.mk (case-insensitive)",
+                    "note": "pn532.c:508 sets the only baud/modulation value used, 0 (106 kbps type A)."
+                },
+                "cards.card_emulation": {
+                    "status": "no",
+                    "searched": "TgInitAsTarget, 0x8C, 0x86, 0x8E, 0x90, 0x92 in pn532.c, include/pn532.h, README.md, CMakeLists.txt, component.mk (case-insensitive)",
+                    "note": "No target-mode command is sent."
+                },
+                "cards.peer_to_peer": {
+                    "status": "no",
+                    "searched": "InJumpForDEP, InJumpForPSL, 0x56, 0x46, 0x8C in pn532.c, include/pn532.h, README.md, CMakeLists.txt, component.mk (case-insensitive)",
+                    "note": "No such command is sent. The DEP names in pn532.h are only names of status codes."
+                },
+                "chip_control.firmware_version": {
+                    "status": "partly",
+                    "note": "GetFirmwareVersion is sent once in pn532_init and only the arrival of a reply is checked. The value is discarded (the decoding line is commented out), the IC byte is not checked, and no function returns it.",
+                    "evidence": ["pn532.c:200", "pn532.c:205"]
+                },
+                "chip_control.sam_configuration": {
+                    "status": "yes",
+                    "note": "Normal mode, timeout 20, IRQ on, sent in pn532_init with one retry. Fixed values.",
+                    "evidence": ["pn532.c:182", "pn532.c:183", "pn532.c:184", "pn532.c:185"]
+                },
+                "chip_control.rf_field_control": {
+                    "status": "no",
+                    "searched": "RFConfiguration item 1, CfgItem 0x01, field, rf_on in pn532.c, include/pn532.h, README.md, CMakeLists.txt, component.mk (case-insensitive)",
+                    "note": "RFConfiguration (0x32) is sent only with items 5, 4 and 2, at pn532.c:208, pn532.c:244 and pn532.c:253."
+                },
+                "chip_control.retries_control": {
+                    "status": "partly",
+                    "note": "Item 5 is sent once in pn532_init with fixed values (0xFF, 0x01, 0x01). No function changes it; a caller can only send a raw frame with pn532_tx.",
+                    "evidence": ["pn532.c:208", "pn532.c:209", "pn532.c:210", "pn532.c:211", "pn532.c:212"]
+                },
+                "chip_control.power_down": {
+                    "status": "no",
+                    "searched": "PowerDown, 0x16, wakeup, WakeUpEnable in pn532.c, include/pn532.h, README.md, CMakeLists.txt, component.mk (case-insensitive)",
+                    "note": "No PowerDown command. The 0x55 bytes in front of each frame are the only wake-up related code."
+                },
+                "chip_control.reset_recovery": {
+                    "status": "partly",
+                    "note": "No reset pin. pn532_init has one retry of SAMConfiguration. To start over the caller must detect the failure and call pn532_destroy or pn532_end, then pn532_init, which leaks one semaphore per cycle (see defects).",
+                    "evidence": ["pn532.c:114", "pn532.c:118", "pn532.c:140", "pn532.c:185", "pn532.c:187"]
+                },
+                "several.several_readers": {
+                    "status": "yes",
+                    "note": "All reader state is in a heap pn532_s with its own UART number. The only file-scope data are TAG and the const table pn532_err_str.",
+                    "evidence": ["pn532.c:15", "pn532.c:17", "pn532.c:18", "pn532.c:146", "pn532.c:30"]
+                },
+                "several.shared_spi_bus": {
+                    "status": "no",
+                    "searched": "spi, chip select, cs_pin, spi_device in pn532.c, include/pn532.h, README.md, CMakeLists.txt, component.mk (case-insensitive)",
+                    "note": "The library has no SPI transport. Readers need one UART each."
+                },
+                "several.thread_safety": {
+                    "status": "partly",
+                    "note": "A binary semaphore is held from pn532_tx to pn532_rx, so paired calls are serialized. pn532_rx neither takes it nor checks who holds it, and p->pending, p->cards, p->ats and p->nfcid are read outside it. See defects. No rule for tasks is stated.",
+                    "evidence": [
+                        "pn532.c:26",
+                        "pn532.c:151",
+                        "pn532.c:357",
+                        "pn532.c:359",
+                        "pn532.c:449",
+                        "pn532.c:451",
+                        "pn532.c:452",
+                        "pn532.c:578"
+                    ]
+                },
+                "code_health.errors_returned": {
+                    "status": "partly",
+                    "note": "pn532_tx, pn532_rx, pn532_dx, pn532_Cards and the GPIO functions return distinct negative codes, also kept for pn532_lasterr. pn532_init returns only NULL, and the object holding lasterr is freed, so bad pins, a UART failure and a chip that sends nothing give the same result. pn532_Cards replaces a send failure with CMDMISMATCH, and pn532_dx returns 0 with \"No error\" when no card is present. See defects.",
+                    "evidence": [
+                        "pn532.c:295",
+                        "pn532.c:338",
+                        "pn532.c:345",
+                        "pn532.c:438",
+                        "pn532.c:171",
+                        "pn532.c:196",
+                        "include/pn532.h:75"
+                    ]
+                },
+                "code_health.buffers_bounded": {
+                    "status": "yes",
+                    "note": "pn532_rx_mutex rejects a frame longer than the two buffers. NFCID and ATS are checked against their fields. The overflow in pn532_init comes from the outputs argument, not from the chip (see defects).",
+                    "evidence": [
+                        "pn532.c:404",
+                        "pn532.c:405",
+                        "pn532.c:409",
+                        "pn532.c:423",
+                        "pn532.c:279",
+                        "pn532.c:601",
+                        "pn532.c:610"
+                    ]
+                },
+                "code_health.allocation_checked": {
+                    "status": "partly",
+                    "note": "malloc is checked. The result of xSemaphoreCreateBinary is not.",
+                    "evidence": ["pn532.c:146", "pn532.c:147", "pn532.c:151", "pn532.c:152"]
+                },
+                "code_health.tests": {
+                    "status": "no",
+                    "searched": "test, unity, TEST_CASE, ceedling in pn532.c, include/pn532.h, README.md, CMakeLists.txt, component.mk (case-insensitive)",
+                    "note": "No test file or folder. The library has 7 files."
+                },
+                "code_health.examples": {
+                    "status": "no",
+                    "searched": "example, app_main, *.ino in pn532.c, include/pn532.h, README.md, CMakeLists.txt, component.mk (case-insensitive)",
+                    "note": "No example file or folder. The library has 7 files."
+                },
+                "code_health.docs": {
+                    "status": "partly",
+                    "note": "An 8-line README that points to the header, and one-line comments on each function. No wiring, no call sequence, no use of the mutex or of the outputs argument. Two header comments do not match the code: pn532_end is called close only but uninstalls the driver, and the outputs argument is called P3 but its top bits select P7.",
+                    "evidence": ["README.md:3", "README.md:6", "include/pn532.h:79", "include/pn532.h:91"]
+                },
+                "code_health.license": {
+                    "status": "yes",
+                    "note": "GPL version 3, full text.",
+                    "evidence": ["LICENSE:1", "LICENSE:2"]
+                }
+            },
+            "defects": [
+                {
+                    "what": "pn532_init overflows its 8-byte stack buffer: when outputs has bits set in both 0x3F and 0xC0, the two WriteRegister blocks write 12 bytes into buf[8], and n = 12 is then sent.",
+                    "severity": "medium",
+                    "read_as": "high",
+                    "judged": "Each block appends 6 bytes, so outputs with bits in both 0x3F and 0xC0 writes buf[8] to buf[11] past the stack array and sends n = 12. The header documents this argument as port 3 bits, so P7 outputs are an offered configuration and not the documented default.",
+                    "evidence": [
+                        "pn532.c:177",
+                        "pn532.c:219",
+                        "pn532.c:221",
+                        "pn532.c:228",
+                        "pn532.c:230",
+                        "pn532.c:235",
+                        "pn532.c:237"
+                    ]
+                },
+                {
+                    "what": "pn532_tx takes the mutex with portMAX_DELAY and the mutex stays held while a command is pending, so any second command before pn532_rx (for example pn532_write_GPIO or pn532_dx after pn532_ILPT_Send, in the same task) blocks forever; the CMDPENDING test after the take is not reached.",
+                    "severity": "high",
+                    "judged": "pn532_tx keeps the binary semaphore while pending is set and only pn532_rx gives it, so a second pn532_tx in the same task waits forever, and pending is always 0 after a successful take, so PN532_ERR_CMDPENDING is never returned. pn532_ILPT_Send is the documented async call and nothing forbids a GPIO write or pn532_dx during the poll, so this hangs with a working chip.",
+                    "evidence": [
+                        "pn532.c:357",
+                        "pn532.c:359",
+                        "pn532.c:294",
+                        "pn532.c:295",
+                        "pn532.c:547",
+                        "pn532.c:480"
+                    ]
+                },
+                {
+                    "what": "The P7CFGB address in pn532_init is wrong: the code writes 0xFFFF, the PN532_C1 data sheet (Table 59, Table 5) gives P7CFGB at SFR F5h and no register at FFh, so P7CFGB is not written and P71 and P72 do not get the push-pull mode the code intends (with the reset values in Tables 60 and 62 they are quasi-bidirectional).",
+                    "severity": "medium",
+                    "evidence": ["pn532.c:230", "pn532.c:231", "pn532.c:232"]
+                },
+                {
+                    "what": "uart_preamble loops with while (1) and has only a per-byte timeout, so a continuous byte stream without 00 FF (noise, wrong baud rate) keeps it in the loop with no end; it is called for every ACK and every response.",
+                    "severity": "medium",
+                    "evidence": ["pn532.c:101", "pn532.c:104", "pn532.c:107", "pn532.c:336", "pn532.c:369"]
+                },
+                {
+                    "what": "pn532_rx does not take the mutex or check its owner: two tasks in pn532_Cards can both pass the pending tests for one outstanding InListPassiveTarget, read the same UART at once and both give the semaphore, which can release it while a third task holds it.",
+                    "severity": "medium",
+                    "evidence": ["pn532.c:449", "pn532.c:451", "pn532.c:452", "pn532.c:578", "pn532.c:580"]
+                },
+                {
+                    "what": "pn532_Cards ignores the return value of pn532_ILPT_Send, so TIMEOUTACK, NACK or another send failure is overwritten and returned as CMDMISMATCH.",
+                    "severity": "medium",
+                    "evidence": ["pn532.c:577", "pn532.c:578", "pn532.c:579"]
+                },
+                {
+                    "what": "pn532_Cards misreads the second target as an ATS: with MaxTg = 2 and a first card that has no ATS, the byte after the NFCID is the second target's Tg (2), so two bytes of target data are stored and pn532_ats returns a false ATS.",
+                    "severity": "medium",
+                    "evidence": ["pn532.c:507", "pn532.c:606", "pn532.c:608", "pn532.c:610", "pn532.c:612"]
+                },
+                {
+                    "what": "The component does not compile as it stands on current ESP-IDF: CMakeLists.txt has no REQUIRES for the UART and GPIO drivers (driver/uart.h not found on v5.5.5 and v6.1 in a probe of the same shape), and UART_FIFO_LEN is no longer defined in driver/uart.h of v6.0.3 and v6.1 (the probe fails on it on v6.1).",
+                    "severity": "medium",
+                    "evidence": ["CMakeLists.txt:1", "pn532.c:7", "pn532.c:13", "pn532.c:167"]
+                },
+                {
+                    "what": "pn532_dx treats any nonzero status byte as an error, but bits 7 and 6 are NAD and MI and only bits 5..0 are the error code (NXP phTalTama.c: NAD_MASK 0x80, MI_MASK 0x40, ERROR_MASK 0x3F), so a chained reply with MI set is dropped and is reported as PN532_ERR_UNKNOWN.",
+                    "severity": "low",
+                    "evidence": ["pn532.c:487", "pn532.c:488"]
+                },
+                {
+                    "what": "The result of xSemaphoreCreateBinary is not checked; on failure NULL is stored as the mutex and passed to xSemaphoreGive.",
+                    "severity": "low",
+                    "evidence": ["pn532.c:151", "pn532.c:152"]
+                },
+                {
+                    "what": "pn532_end and pn532_destroy free the object without vSemaphoreDelete, so every failed init and every close leaks the semaphore.",
+                    "severity": "low",
+                    "evidence": ["pn532.c:118", "pn532.c:119", "pn532.c:133", "pn532.c:135", "pn532.c:171"]
+                },
+                {
+                    "what": "pn532_ready stores the literal 2 for a UART driver error, and 2 is PN532_ERR_NOTPENDING, so the caller receives the wrong error.",
+                    "severity": "low",
+                    "evidence": [
+                        "pn532.c:464",
+                        "pn532.c:465",
+                        "include/pn532.h:15",
+                        "include/pn532.h:16",
+                        "include/pn532.h:17"
+                    ]
+                },
+                {
+                    "what": "pn532_err_to_name cannot handle negative codes: pn532_err_t has no negative enumerator, so GCC makes it unsigned (checked with riscv32-esp-elf-gcc), e < 0 is false and a negative return value or pn532_lasterr(NULL) maps to PN532_ERR_UNKNOWN.",
+                    "severity": "low",
+                    "evidence": ["pn532.c:42", "pn532.c:55", "pn532.c:56", "pn532.c:57", "pn532.c:58"]
+                },
+                {
+                    "what": "pn532_err_to_name returns NULL for values inside the table range that have no name, such as status 0x08, and pn532_dx passes that NULL to the caller through strerr; the chip's listed status codes all have names, so this needs an unlisted code.",
+                    "severity": "low",
+                    "evidence": ["pn532.c:30", "pn532.c:59", "pn532.c:493"]
+                },
+                {
+                    "what": "pn532_dx sets p->lasterr only inside if (strerr), so with strerr = NULL a status error from the card does not update pn532_lasterr.",
+                    "severity": "low",
+                    "evidence": ["pn532.c:492", "pn532.c:493"]
+                },
+                {
+                    "what": "pn532_dx returns 0 with \"No error\" when no card is present, the same value as a successful exchange with an empty reply.",
+                    "severity": "low",
+                    "evidence": ["pn532.c:474", "pn532.c:478", "pn532.c:479", "pn532.c:495"]
+                },
+                {
+                    "what": "pn532_end is declared as close without uninstall but runs uart_driver_delete, also on a driver that pn532_init found already installed and did not create.",
+                    "severity": "low",
+                    "evidence": ["pn532.c:125", "pn532.c:133", "pn532.c:166", "include/pn532.h:72"]
+                },
+                {
+                    "what": "pn532_ats and pn532_nfcid dereference p without a NULL test, unlike the other public functions, while pn532_init returns NULL on failure.",
+                    "severity": "low",
+                    "evidence": ["pn532.c:269", "pn532.c:278"]
+                }
+            ]
+        },
+        {
+            "blind": true,
+            "commit": "3e4d6e059ab056b7cb3673e45d0002cd002eb9c5",
+            "rubric": "pn532",
+            "rubric_version": 2,
+            "date": "2026-11-02",
+            "by": "claude-opus-5-5",
+            "items": {
+                "transports.i2c": {
+                    "status": "no",
+                    "searched": "i2c, sda, scl, 0x48, 0x24, driver/i2c in pn532.c, include/pn532.h, README.md, CMakeLists.txt, component.mk: no match. The only driver includes are driver/uart.h and driver/gpio.h."
+                },
+                "transports.spi": {
+                    "status": "no",
+                    "searched": "spi, miso, mosi, spi_master, status bytes 0x01/0x02/0x03 as a link prefix in pn532.c, include/pn532.h, README.md, CMakeLists.txt, component.mk: no match."
+                },
+                "transports.uart": {
+                    "status": "yes",
+                    "note": "HSU only, 115200 8N1 as in 6.1.1.2. The baud rate is fixed. Each frame starts with three 0x55 dummy bytes, which 6.2.3 allows.",
+                    "evidence": ["pn532.c:7", "pn532.c:156", "pn532.c:165", "pn532.c:167", "pn532.c:298", "pn532.c:326"]
+                },
+                "builds_on.esp_idf": {
+                    "status": "partly",
+                    "note": "Written for ESP-IDF with no Arduino layer. It calls driver/uart.h (uart_driver_install, uart_read_bytes, uart_write_bytes, uart_wait_tx_done) and driver/gpio.h, and FreeRTOS semaphores. As shipped it does not compile on the versions on this machine: CMakeLists.txt has no REQUIRES, and a probe component of my own with the same register call failed with 'driver/uart.h: No such file or directory' on v5.5.5 and v6.1. UART_FIFO_LEN is deprecated in v5.5.5 (esp_driver_uart/include/driver/uart.h line 25) and removed from 6.0 on (docs/en/migration-guides/release-6.x/6.0/peripherals.rst line 189; preprocessing IDF headers on v6.0.1 shows it undefined). freertos/semphr.h is reached through other IDF headers on v5.5.4 and v6.0.1, so that is not a problem. The library itself was not built, as the task forbids it; older ESP-IDF versions are not on this machine.",
+                    "evidence": [
+                        "pn532.c:7",
+                        "pn532.c:8",
+                        "pn532.c:13",
+                        "pn532.c:167",
+                        "CMakeLists.txt:1",
+                        "CMakeLists.txt:2",
+                        "CMakeLists.txt:3",
+                        "CMakeLists.txt:4"
+                    ]
+                },
+                "builds_on.arduino": {
+                    "status": "no",
+                    "searched": "arduino, Arduino.h, Wire.h, library.properties, keywords.txt, a src/ folder: no match.",
+                    "note": "The header is in include/, which the Arduino library layout does not put on the include path; there is no library metadata."
+                },
+                "builds_on.esp_idf_component": {
+                    "status": "yes",
+                    "note": "Has idf_component_register and an old component.mk. No idf_component.yml. See the defect on missing REQUIRES.",
+                    "evidence": ["CMakeLists.txt:1", "CMakeLists.txt:3"]
+                },
+                "frames.ack_checked": {
+                    "status": "yes",
+                    "note": "Every pn532_tx reads the ACK and returns PN532_ERR_TIMEOUTACK or PN532_ERR_BADACK when it is missing or wrong. There is no resend of the command as 6.2.3 advises, apart from SAMConfiguration in pn532_init (lines 187-193). The NACK branch at line 344 cannot be reached with a real chip (6.2.1.4), with no harm. The ACK wait is shorter than 15 ms: see defects.",
+                    "evidence": [
+                        "pn532.c:336",
+                        "pn532.c:338",
+                        "pn532.c:339",
+                        "pn532.c:342",
+                        "pn532.c:343",
+                        "pn532.c:346",
+                        "pn532.c:347"
+                    ]
+                },
+                "frames.nack_resend": {
+                    "status": "no",
+                    "searched": "NACK in pn532.c: only the receive check at lines 344-345. No transmit of 00 00 FF FF 00 00. pn532_rx_mutex has no uart_tx or uart_write_bytes call.",
+                    "note": "A bad or missing response returns an error; the response is not requested again."
+                },
+                "frames.checksums_checked": {
+                    "status": "yes",
+                    "note": "LCS of both frame types and DCS are verified; the postamble too (line 439).",
+                    "evidence": ["pn532.c:382", "pn532.c:391", "pn532.c:437"]
+                },
+                "frames.extended_frames": {
+                    "status": "yes",
+                    "note": "Sent and received, in the layout of 6.2.1.2. The RX ring buffer is 280 bytes (line 12).",
+                    "evidence": [
+                        "pn532.c:305",
+                        "pn532.c:307",
+                        "pn532.c:311",
+                        "pn532.c:377",
+                        "pn532.c:382",
+                        "pn532.c:384"
+                    ]
+                },
+                "frames.error_frame": {
+                    "status": "no",
+                    "searched": "0x7F, 0x81, 'syntax' in pn532.c and include/pn532.h: no match.",
+                    "note": "The frame has a valid LCS, so it reaches the TFI check and returns PN532_ERR_HEADER, the same code as any wrong TFI. No branch recognizes it.",
+                    "evidence": ["pn532.c:394", "pn532.c:395"]
+                },
+                "frames.response_code_checked": {
+                    "status": "yes",
+                    "note": "pending holds cmd + 1. A mismatch returns PN532_ERR_CMDMISMATCH.",
+                    "evidence": ["pn532.c:348", "pn532.c:385", "pn532.c:387", "pn532.c:394", "pn532.c:396"]
+                },
+                "frames.status_decoded": {
+                    "status": "no",
+                    "searched": "A mask of the Status byte: 0x3F occurs only in lines 219, 223, 545, 566 (GPIO). 0x40 occurs only as the command at line 480. 0x80 only in lines 545-546 (WriteGPIO).",
+                    "note": "pn532_dx tests the whole byte, so a set MI or NAD bit counts as an error and the error code is not separated. The code table in include/pn532.h matches Table 13.",
+                    "evidence": ["pn532.c:487", "pn532.c:488"]
+                },
+                "waiting.irq": {
+                    "status": "no",
+                    "searched": "irq, P70, gpio_isr, gpio_get_level, gpio_install, xQueue in pn532.c and include/pn532.h: only the SAMConfiguration parameter at lines 184 and 192. pn532_init has no IRQ pin argument.",
+                    "note": "The chip is told to drive P70_IRQ; the host does not read it."
+                },
+                "waiting.ready_polling": {
+                    "status": "yes",
+                    "note": "HSU has no status byte. The equivalent is the count of bytes in the UART RX buffer, returned by pn532_ready; any byte counts as ready, and pn532_rx then reads the frame with timeouts.",
+                    "evidence": ["pn532.c:457", "pn532.c:464", "pn532.c:466", "include/pn532.h:80"]
+                },
+                "waiting.bounded_waits": {
+                    "status": "partly",
+                    "note": "All UART reads have a timeout and a silent chip ends every wait; the response wait is 500 ms. Two waits have no end: the loop in uart_preamble restarts its timeout on every byte, so a line that keeps delivering bytes without 00 FF never returns, and pn532_tx waits on the mutex with portMAX_DELAY while a response is uncollected. uart_write_bytes has no timeout (esp_driver_uart/src/uart.c, uart_tx_all) but does not depend on the chip, as flow control is off.",
+                    "evidence": [
+                        "pn532.c:70",
+                        "pn532.c:101",
+                        "pn532.c:104",
+                        "pn532.c:334",
+                        "pn532.c:357",
+                        "pn532.c:369"
+                    ]
+                },
+                "waiting.abort_on_timeout": {
+                    "status": "no",
+                    "searched": "A transmit of 00 00 FF 00 FF 00: uart_tx is called only in pn532_tx_mutex (lines 326-333) and at line 178, uart_write_bytes only in uart_tx and pn532_end (0x55 bytes). No timeout return (lines 338, 341, 371, 375, 381) sends anything.",
+                    "note": "Line 211 sets MxRtyPassiveActivation to 1, so InListPassiveTarget ends by itself without a card; that is not an abort. The chip is stopped only if the caller later sends another command (6.2.2.2 b 2).",
+                    "evidence": ["pn532.c:211", "pn532.c:369", "pn532.c:371"]
+                },
+                "waiting.nonblocking_detect": {
+                    "status": "yes",
+                    "note": "pn532_ILPT_Send starts the detection, pn532_ready polls, pn532_Cards collects. The ACK wait inside pn532_ILPT_Send is short but blocking.",
+                    "evidence": [
+                        "pn532.c:501",
+                        "pn532.c:509",
+                        "pn532.c:512",
+                        "pn532.c:457",
+                        "pn532.c:576",
+                        "pn532.c:578",
+                        "pn532.c:580",
+                        "include/pn532.h:91"
+                    ]
+                },
+                "cards.iso14443a_uid": {
+                    "status": "yes",
+                    "note": "The UID is kept with its length and returned by pn532_nfcid as bytes or hex text, up to 10 bytes.",
+                    "evidence": [
+                        "pn532.c:508",
+                        "pn532.c:509",
+                        "pn532.c:601",
+                        "pn532.c:602",
+                        "pn532.c:273",
+                        "pn532.c:283"
+                    ]
+                },
+                "cards.two_targets": {
+                    "status": "partly",
+                    "note": "MaxTg = 2 is always requested and the count is returned, but only the first target is parsed; the second target's UID, type and Tg are not kept and pn532_dx can address only the first. See the defect on the ATS.",
+                    "evidence": ["pn532.c:507", "pn532.c:590", "pn532.c:591", "pn532.c:615"]
+                },
+                "cards.mifare_classic": {
+                    "status": "no",
+                    "searched": "mifare, authenticate, 0x60, 0x61, 0x30, 0xA0 in pn532.c and include/pn532.h: only the error name MIFAREAUTH and a comment at line 536.",
+                    "note": "pn532_dx passes raw bytes in InDataExchange, so a caller could build these commands; the library has no block read, write or authentication."
+                },
+                "cards.ultralight_ntag": {
+                    "status": "no",
+                    "searched": "ultralight, ntag, page, 0xA2, 0x30: no match.",
+                    "note": "No page read or write; pn532_dx only carries bytes a caller builds."
+                },
+                "cards.iso14443_4_apdu": {
+                    "status": "yes",
+                    "note": "pn532_dx sends InDataExchange to the first target and returns the reply, up to the limit of one exchange. See frames.status_decoded and cards.chaining.",
+                    "evidence": ["pn532.c:471", "pn532.c:480", "pn532.c:484", "pn532.c:495"]
+                },
+                "cards.chaining": {
+                    "status": "no",
+                    "searched": "The MI bit 0x40 in Tg or Status: 0x40 occurs only as the command code at line 480, and Tg is sent unchanged from p->tg.",
+                    "note": "A reply with MI set is returned as an error, and no further exchange is made.",
+                    "evidence": ["pn532.c:480", "pn532.c:487", "pn532.c:488"]
+                },
+                "cards.raw_exchange": {
+                    "status": "no",
+                    "searched": "Command 0x42: not present; the command bytes of all pn532_tx calls are 0x14, 0x02, 0x32, 0x08, 0x40, 0x4A, 0x00, 0x0E, 0x0C.",
+                    "note": "pn532_tx and pn532_rx are public and take any command byte, so a caller could build this by hand; the library holds no code for it."
+                },
+                "cards.auto_poll": {
+                    "status": "no",
+                    "searched": "Command 0x60: not present; the command bytes of all pn532_tx calls are 0x14, 0x02, 0x32, 0x08, 0x40, 0x4A, 0x00, 0x0E, 0x0C.",
+                    "note": "pn532_tx and pn532_rx are public and take any command byte, so a caller could build this by hand; the library holds no code for it."
+                },
+                "cards.ndef": {
+                    "status": "no",
+                    "searched": "ndef, 0x03 TLV, 0xD1, capability container, 0xE103: no match in the code. README.md names none."
+                },
+                "cards.iso14443b": {
+                    "status": "no",
+                    "searched": "BrTy values: the only InListPassiveTarget call sets 0 at line 508. 'type b' and BrTy 0x03: no match.",
+                    "evidence": ["pn532.c:508"]
+                },
+                "cards.felica": {
+                    "status": "no",
+                    "searched": "BrTy values: the only InListPassiveTarget call sets 0 at line 508. 'felica', BrTy 0x01, 0x02: no match.",
+                    "evidence": ["pn532.c:508"]
+                },
+                "cards.jewel": {
+                    "status": "no",
+                    "searched": "BrTy values: the only InListPassiveTarget call sets 0 at line 508. 'jewel', BrTy 0x04: no match.",
+                    "evidence": ["pn532.c:508"]
+                },
+                "cards.card_emulation": {
+                    "status": "no",
+                    "searched": "Commands 0x8C, 0x86, 0x8E, 0x92: not present; 'emulat': no match; the command bytes of all pn532_tx calls are 0x14, 0x02, 0x32, 0x08, 0x40, 0x4A, 0x00, 0x0E, 0x0C."
+                },
+                "cards.peer_to_peer": {
+                    "status": "no",
+                    "searched": "Commands 0x56, 0x46, 0x8C: not present; the command bytes of all pn532_tx calls are 0x14, 0x02, 0x32, 0x08, 0x40, 0x4A, 0x00, 0x0E, 0x0C. The DEP names in include/pn532.h are error names only."
+                },
+                "chip_control.firmware_version": {
+                    "status": "partly",
+                    "note": "Sent once in pn532_init as a check that the chip answers. The reply is discarded: the line that would use it is commented out, IC and Support are not checked, and no function returns the version.",
+                    "evidence": ["pn532.c:199", "pn532.c:200", "pn532.c:205"]
+                },
+                "chip_control.general_status": {
+                    "status": "no",
+                    "searched": "Command 0x04: not present; the command bytes of all pn532_tx calls are 0x14, 0x02, 0x32, 0x08, 0x40, 0x4A, 0x00, 0x0E, 0x0C. 0x04 occurs at line 244 only as a CfgItem."
+                },
+                "chip_control.sam_configuration": {
+                    "status": "yes",
+                    "note": "Sent first in pn532_init and retried once, as the chip starts in LowVbat mode (3.1.3.8). Normal mode only; no public function changes it.",
+                    "evidence": ["pn532.c:180", "pn532.c:182", "pn532.c:183", "pn532.c:184", "pn532.c:185"]
+                },
+                "chip_control.rf_field_control": {
+                    "status": "no",
+                    "searched": "RFConfiguration CfgItem 0x01: the three 0x32 commands use items 5, 4 and 2 (lines 208, 244, 253)."
+                },
+                "chip_control.retries_control": {
+                    "status": "yes",
+                    "note": "Set once in pn532_init to fixed values, with MxRtyPassiveActivation = 1. No public function changes it. CfgItem 0x04 and 0x02 are also set (lines 244, 253).",
+                    "evidence": ["pn532.c:208", "pn532.c:209", "pn532.c:210", "pn532.c:211", "pn532.c:212"]
+                },
+                "chip_control.power_down": {
+                    "status": "no",
+                    "searched": "Command 0x16, 'powerdown', 'sleep': not present; the command bytes of all pn532_tx calls are 0x14, 0x02, 0x32, 0x08, 0x40, 0x4A, 0x00, 0x0E, 0x0C.",
+                    "note": "Line 178 sends one dummy byte before the first frame in pn532_init; there is no way to put the chip in Power Down."
+                },
+                "chip_control.registers": {
+                    "status": "partly",
+                    "searched": "Command 0x06 (ReadRegister): not present.",
+                    "note": "WriteRegister is used only inside pn532_init to set GPIO outputs. There is no ReadRegister and no public register function.",
+                    "evidence": ["pn532.c:221", "pn532.c:224", "pn532.c:237"]
+                },
+                "chip_control.gpio": {
+                    "status": "yes",
+                    "note": "Bit layout and the Val bit match 7.2.6 and 7.2.7. I0I1 is read and dropped.",
+                    "evidence": [
+                        "pn532.c:540",
+                        "pn532.c:545",
+                        "pn532.c:546",
+                        "pn532.c:547",
+                        "pn532.c:554",
+                        "pn532.c:559",
+                        "pn532.c:566"
+                    ]
+                },
+                "chip_control.parameters": {
+                    "status": "no",
+                    "searched": "Command 0x12: not present; the command bytes of all pn532_tx calls are 0x14, 0x02, 0x32, 0x08, 0x40, 0x4A, 0x00, 0x0E, 0x0C. 0x12 occurs only as the error value in include/pn532.h."
+                },
+                "chip_control.serial_baud": {
+                    "status": "no",
+                    "searched": "Command 0x10: not present; the command bytes of all pn532_tx calls are 0x14, 0x02, 0x32, 0x08, 0x40, 0x4A, 0x00, 0x0E, 0x0C. The baud rate is fixed at line 156."
+                },
+                "chip_control.reset_recovery": {
+                    "status": "partly",
+                    "note": "No reset line: pn532_init has no pin argument for it. A caller can start over with pn532_end and pn532_init, which repeats all the setup, and SAMConfiguration is retried once. Nothing recovers by itself, and the mutex leaks on each cycle.",
+                    "evidence": ["pn532.c:124", "pn532.c:140", "pn532.c:187", "pn532.c:193"]
+                },
+                "several.several_readers": {
+                    "status": "yes",
+                    "note": "All reader state is in the allocated pn532_t. The only statics are the constant TAG and the constant error name table. Each reader needs its own UART.",
+                    "evidence": ["pn532.c:15", "pn532.c:17", "pn532.c:146", "pn532.c:30"]
+                },
+                "several.shared_spi_bus": {
+                    "status": "not_applicable",
+                    "searched": "spi: no match.",
+                    "note": "The library has no SPI transport."
+                },
+                "several.thread_safety": {
+                    "status": "partly",
+                    "note": "A binary semaphore is held from pn532_tx to pn532_rx, so a command and its response stay together. p->pending is read outside it (lines 449, 461, 521, 576), and pn532_Cards writes cards, tg, nfcid and ats after giving it back, while pn532_dx reads them. No rule for tasks is stated.",
+                    "evidence": [
+                        "pn532.c:26",
+                        "pn532.c:151",
+                        "pn532.c:357",
+                        "pn532.c:359",
+                        "pn532.c:452",
+                        "pn532.c:449",
+                        "pn532.c:576",
+                        "pn532.c:583"
+                    ]
+                },
+                "code_health.errors_returned": {
+                    "status": "partly",
+                    "note": "Failures return distinct negative codes, and pn532_lasterr keeps the last one. Not all can be told apart: pn532_dx returns 0 with 'No error' when no card is known, pn532_init returns NULL with the reason only in the log, pn532_Cards replaces a send failure with PN532_ERR_CMDMISMATCH, and pn532_ready reports a driver failure as PN532_ERR_NOTPENDING.",
+                    "evidence": [
+                        "pn532.c:338",
+                        "pn532.c:343",
+                        "pn532.c:371",
+                        "pn532.c:383",
+                        "pn532.c:438",
+                        "pn532.c:488",
+                        "pn532.c:479",
+                        "pn532.c:465",
+                        "pn532.c:577",
+                        "include/pn532.h:75"
+                    ]
+                },
+                "code_health.buffers_bounded": {
+                    "status": "yes",
+                    "note": "Lengths from the chip and the card are checked before each copy. The overflow in pn532_init comes from a caller argument, not from the chip: see defects.",
+                    "evidence": [
+                        "pn532.c:404",
+                        "pn532.c:409",
+                        "pn532.c:423",
+                        "pn532.c:599",
+                        "pn532.c:601",
+                        "pn532.c:608",
+                        "pn532.c:610",
+                        "pn532.c:279"
+                    ]
+                },
+                "code_health.allocation_checked": {
+                    "status": "partly",
+                    "note": "malloc is checked. xSemaphoreCreateBinary is not, and its result goes straight to xSemaphoreGive.",
+                    "evidence": ["pn532.c:146", "pn532.c:147", "pn532.c:151", "pn532.c:152"]
+                },
+                "code_health.tests": {
+                    "status": "no",
+                    "searched": "test, TEST_CASE, Unity, a test folder: the only folder is include/ and no file but LICENSE and pn532.c holds the word."
+                },
+                "code_health.examples": {
+                    "status": "no",
+                    "searched": "example, an examples folder, app_main: the only folder is include/."
+                },
+                "code_health.docs": {
+                    "status": "partly",
+                    "note": "An 8-line README that points to the header, and one-line comments there. No usage sequence, and pn532_dx and the mutex rule are not explained.",
+                    "evidence": [
+                        "README.md:3",
+                        "README.md:6",
+                        "include/pn532.h:79",
+                        "include/pn532.h:91",
+                        "include/pn532.h:92"
+                    ]
+                },
+                "code_health.license": {
+                    "status": "yes",
+                    "note": "GPL 3.0 full text. The source comment calls the file LICENCE; the file is LICENSE.",
+                    "evidence": ["LICENSE:1", "LICENSE:2", "pn532.c:2"]
+                }
+            },
+            "defects": [
+                {
+                    "what": "pn532_init writes 12 bytes into the 8-byte stack array buf when outputs has bits in both 0x3F and 0xC0, a legal value of the argument, and pn532_tx then reads those 12 bytes.",
+                    "severity": "medium",
+                    "read_as": "high",
+                    "judged": "Each block adds 6 bytes, so with bits in both 0x3F and 0xC0 n reaches 12 in the 8-byte stack array and pn532_tx reads all 12. It needs the P7 outputs together with P3 outputs, a configuration offered by the code that the header does not describe.",
+                    "evidence": [
+                        "pn532.c:177",
+                        "pn532.c:219",
+                        "pn532.c:228",
+                        "pn532.c:232",
+                        "pn532.c:233",
+                        "pn532.c:234",
+                        "pn532.c:235",
+                        "pn532.c:237"
+                    ]
+                },
+                {
+                    "what": "pn532_init writes P7CFGB at SFR 0xFF instead of 0xF5 (Table 14), an unknown SFR address and so a syntax error by 7.2.5, so any outputs value with bit 6 or 7 leaves P71 and P72 unconfigured and makes pn532_init return NULL with a working chip.",
+                    "severity": "medium",
+                    "read_as": "high",
+                    "judged": "The address bytes are FF FF, while Table 14 gives P7CFGB at 0xF5 and has no 0xFF, and 7.2.5 lists an unknown SFR address as a syntax error; the error frame fails the 0xD5 test in pn532_rx and pn532_init returns NULL. This follows the manual and was not measured, and it needs bit 6 or 7 of outputs, while the header describes the argument as port 3 bits.",
+                    "evidence": ["pn532.c:230", "pn532.c:231", "pn532.c:237", "pn532.c:239", "pn532.c:240"]
+                },
+                {
+                    "what": "CMakeLists.txt has no REQUIRES for esp_driver_uart and esp_driver_gpio, so the component does not compile on ESP-IDF v5.5.5 or v6.1: a probe component with the same register call failed with 'driver/uart.h: No such file or directory'.",
+                    "severity": "high",
+                    "judged": "With no REQUIRES the component sees only requires_common (tools/cmake/build.cmake:282 in v5.5.5, :329 in v6.1), and the CMakeLists of those components give no public path to esp_driver_uart or esp_driver_gpio; esp_stdio links it PRIVATE and vfs lists it in PRIV_REQUIRES. So the includes fail; I checked this by reading, I did not repeat the probe build.",
+                    "evidence": [
+                        "CMakeLists.txt:1",
+                        "CMakeLists.txt:2",
+                        "CMakeLists.txt:3",
+                        "CMakeLists.txt:4",
+                        "pn532.c:7",
+                        "pn532.c:8"
+                    ]
+                },
+                {
+                    "what": "TX_BUF is defined from UART_FIFO_LEN, which ESP-IDF removed in 6.0 (docs/en/migration-guides/release-6.x/6.0/peripherals.rst line 189), so pn532.c does not compile on ESP-IDF 6.x even with REQUIRES added.",
+                    "severity": "high",
+                    "judged": "The v6.1 migration guide says the macro was removed, an exact search finds no UART_FIFO_LEN in v6.1 components, and v5.5.5 driver/uart.h still defines it as deprecated. pn532.c then cannot compile on 6.x; this is from reading the sources, not from a build.",
+                    "evidence": ["pn532.c:13", "pn532.c:167"]
+                },
+                {
+                    "what": "pn532_tx waits on the mutex with portMAX_DELAY while the same task's command is still pending, so a second command after pn532_ILPT_Send (pn532_ILPT_Send again, pn532_dx, pn532_read_GPIO, pn532_write_GPIO) hangs forever and the PN532_ERR_CMDPENDING check can never fire.",
+                    "severity": "medium",
+                    "evidence": ["pn532.c:294", "pn532.c:295", "pn532.c:357", "pn532.c:359", "pn532.c:360"]
+                },
+                {
+                    "what": "pn532_Cards takes whatever follows the first NFCID as an ATS without looking at SEL_RES bit 5 or NbTg, so with two cards where the first has no ATS, the second target's Tg byte (2) is read as an ATS length and pn532_ats returns false data.",
+                    "severity": "medium",
+                    "evidence": ["pn532.c:598", "pn532.c:606", "pn532.c:608", "pn532.c:612", "pn532.c:613"]
+                },
+                {
+                    "what": "pn532_dx tests the whole Status byte, so a reply with MI or NAD set and error code 0 (7.1, 7.3.8) is returned as an error with the name PN532_ERR_UNKNOWN and its data is dropped.",
+                    "severity": "medium",
+                    "evidence": ["pn532.c:487", "pn532.c:488"]
+                },
+                {
+                    "what": "The ACK wait is 5 ticks, 5 ms at 1 kHz and 10 to 20 ms at the default 100 Hz (minimum of 2 ticks at lines 68-69), but 6.2.3 gives the chip 15 ms, so a chip within its limit can get PN532_ERR_TIMEOUTACK while it goes on to run the command.",
+                    "severity": "medium",
+                    "evidence": ["pn532.c:67", "pn532.c:68", "pn532.c:69", "pn532.c:336", "pn532.c:338"]
+                },
+                {
+                    "what": "A response wait given up after 500 ms returns without an ACK frame, so the chip keeps running the command (6.2.2.1 d) and a late response can arrive during the ACK wait of the next command, where it gives PN532_ERR_BADACK.",
+                    "severity": "medium",
+                    "evidence": ["pn532.c:368", "pn532.c:369", "pn532.c:371"]
+                },
+                {
+                    "what": "pn532_dx returns 0 with the text 'No error' when no card is known, the same result as a successful exchange with an empty reply, so a lost card can look like success.",
+                    "severity": "medium",
+                    "evidence": ["pn532.c:474", "pn532.c:478", "pn532.c:479", "pn532.c:495"]
+                },
+                {
+                    "what": "The data reads use a 10-tick wait per ring buffer chunk (uart_read_bytes in components/esp_driver_uart/src/uart.c), but the driver fills the buffer every 120 bytes (UART_FULL_THRESH_DEFAULT there), 10.4 ms at 115200, so at CONFIG_FREERTOS_HZ=1000 a legal response above about 230 bytes ends in PN532_ERR_TIMEOUT; this follows from the source and was not measured.",
+                    "severity": "medium",
+                    "evidence": ["pn532.c:413", "pn532.c:427"]
+                },
+                {
+                    "what": "uart_preamble has no overall time limit: each byte restarts the timeout, so a noisy or floating RX line that keeps delivering bytes without 00 FF keeps the function, and the mutex, forever.",
+                    "severity": "medium",
+                    "evidence": [
+                        "pn532.c:101",
+                        "pn532.c:104",
+                        "pn532.c:105",
+                        "pn532.c:107",
+                        "pn532.c:109",
+                        "pn532.c:110"
+                    ]
+                },
+                {
+                    "what": "pn532_end and pn532_destroy free the structure without deleting the semaphore, so each close and each failed pn532_init leaks it.",
+                    "severity": "low",
+                    "evidence": ["pn532.c:118", "pn532.c:119", "pn532.c:133", "pn532.c:135", "pn532.c:151"]
+                },
+                {
+                    "what": "The result of xSemaphoreCreateBinary is not checked; on allocation failure xSemaphoreGive gets NULL and stops at configASSERT in xQueueGenericSend (components/freertos/FreeRTOS-Kernel/queue.c).",
+                    "severity": "low",
+                    "evidence": ["pn532.c:151", "pn532.c:152"]
+                },
+                {
+                    "what": "pn532_end is described as closing without uninstalling, but it calls uart_driver_delete.",
+                    "severity": "low",
+                    "evidence": ["pn532.c:125", "pn532.c:133", "include/pn532.h:72"]
+                },
+                {
+                    "what": "The header says pn532_tx returns 0 or a negative error, but it returns the data length.",
+                    "severity": "low",
+                    "evidence": ["include/pn532.h:79", "pn532.c:349"]
+                },
+                {
+                    "what": "pn532_ready reports a uart_get_buffered_data_len failure with the literal 2, which is PN532_ERR_NOTPENDING.",
+                    "severity": "low",
+                    "evidence": [
+                        "pn532.c:464",
+                        "pn532.c:465",
+                        "include/pn532.h:15",
+                        "include/pn532.h:16",
+                        "include/pn532.h:17"
+                    ]
+                },
+                {
+                    "what": "pn532_Cards ignores the result of pn532_ILPT_Send, so a dead chip gives PN532_ERR_CMDMISMATCH instead of PN532_ERR_TIMEOUTACK.",
+                    "severity": "low",
+                    "evidence": ["pn532.c:577", "pn532.c:578", "pn532.c:579"]
+                },
+                {
+                    "what": "pn532_err_to_name tests e < 0, but pn532_err_t has no negative member and is unsigned under the ESP toolchains, so the negative values the library returns give PN532_ERR_UNKNOWN and not their name.",
+                    "severity": "low",
+                    "evidence": ["pn532.c:55", "pn532.c:56", "pn532.c:57", "pn532.c:58"]
+                },
+                {
+                    "what": "The results of uart_tx and uart_wait_tx_done are ignored; a failed send shows only as an ACK timeout.",
+                    "severity": "low",
+                    "evidence": ["pn532.c:326", "pn532.c:328", "pn532.c:330", "pn532.c:333", "pn532.c:334"]
+                },
+                {
+                    "what": "pn532_ats and pn532_nfcid dereference p with no NULL check, unlike the other public functions, and pn532_init can return NULL.",
+                    "severity": "low",
+                    "evidence": ["pn532.c:269", "pn532.c:278"]
+                }
+            ]
+        }
+    ]
+}

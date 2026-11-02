@@ -212,7 +212,7 @@ def main():
             entry["revisions"] = {"described": "3.99", "options": [int(n) for n in re.findall(rf"config {prefix}_REV_MIN_(\d+)\b", kconfig)],
                                   "history": [{"before": "3.0", "limits": older, "sdkconfig": {"lines": [f"CONFIG_{prefix}_SELECTS_REV_LESS_V3=y"]}}]}
         if target in supported:
-            entry["platforms"] = {"esp-idf": supported[target]}
+            entry["platforms"] = {"esp_idf": supported[target]}
             entry["checked"]["platforms"] = {"level": "vendor-docs", "covers": ["platforms"], "source": "COMPATIBILITY.md of ESP-IDF"}
         path = ROOT / "catalog/mcu" / target / "mcu.json"
         path.parent.mkdir(parents=True, exist_ok=True)

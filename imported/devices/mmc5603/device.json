@@ -5,6 +5,9 @@
     "name": "mmc5603",
     "title": "mmc5603",
     "class": ["imu"],
-    "checked": {"facts": {"level": "extracted", "source": "the boards that use it"}},
-    "on": {"i2c": {}}
+    "checked": {
+        "facts": {"level": "extracted", "source": "the boards that use it"},
+        "address": {"level": "extracted", "source": "imported/report_addresses.json"}
+    },
+    "on": {"i2c": {"address_try": ["0x1e"]}}
 }

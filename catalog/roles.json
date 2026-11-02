@@ -373,6 +373,13 @@
                     "needs": {"provides": "ethernet", "chip": "emac"}
                 },
                 {
+                    "id": "panel_ethernet",
+                    "text": "Ethernet socket on the case",
+                    "class": "other",
+                    "words": "panel mount ethernet",
+                    "needs": {"provides": "panel_ethernet"}
+                },
+                {
                     "id": "can",
                     "text": "CAN",
                     "class": "network",
@@ -522,6 +529,13 @@
             "id": "power",
             "text": "Power",
             "roles": [
+                {
+                    "id": "poe",
+                    "text": "Power over Ethernet",
+                    "class": "other",
+                    "words": "\\bpoe\\b|power over ethernet",
+                    "needs": {"provides": "poe"}
+                },
                 {
                     "id": "power_monitor",
                     "text": "Current monitor",

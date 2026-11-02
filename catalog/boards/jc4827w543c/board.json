@@ -81,7 +81,7 @@
         "i2c": {"i2c0": {"sda": 8, "scl": 4}}
     },
     "power": [
-        {"name": "USB", "source": "usb", "mv": 5000, "why": "USB1, type C."},
+        {"name": "USB", "source": "usb", "mv": 5000, "plug": "usb_c", "why": "USB1, type C."},
         {"name": "VIN", "source": "vin", "why": "Contact 1 of P1."},
         {"name": "5V", "from": [{"name": "USB", "through": "d_usb"}, {"name": "VIN", "through": "q_vin"}]},
         {"name": "BAT+", "source": "battery", "why": "P6."},

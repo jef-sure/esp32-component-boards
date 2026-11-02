@@ -1,0 +1,5 @@
+{
+    "title": "Seven PN532 on the ESP32 DevKit: two hosts take more pins than it has free, so that module does not fit",
+    "answers": {"blocks": [{"role": "nfc", "name": "a"}, {"role": "nfc", "name": "b"}, {"role": "nfc", "name": "c"}, {"role": "nfc", "name": "d"}, {"role": "nfc", "name": "e"}, {"role": "nfc", "name": "f"}, {"role": "nfc", "name": "g"}]},
+    "says": "more pins"
+}

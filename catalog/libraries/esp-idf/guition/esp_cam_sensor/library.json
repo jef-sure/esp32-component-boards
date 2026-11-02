@@ -45,7 +45,7 @@
         "2.1.0": {
             "via": ["archive"],
             "requires": {"esp-idf/espressif/cmake_utilities": "0.*", "esp-idf/espressif/esp_sccb_intf": ">=0.0.5"},
-            "frameworks": {"esp-idf": ">=5.3"},
+            "platforms": {"esp_idf": ">=5.3"},
             "targets": ["esp32p4", "esp32s3", "esp32c3", "esp32c5", "esp32c6", "esp32c61", "esp32s31"]
         }
     }

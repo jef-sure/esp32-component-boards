@@ -1,0 +1,6 @@
+{
+    "title": "Three BME280 on one bus: the list of imported data has two addresses and can be short, so the third is an unknown and no refusal",
+    "imported": true,
+    "answers": {"blocks": [{"role": "pressure", "name": "a"}, {"role": "pressure", "name": "b"}, {"role": "pressure", "name": "c"}]},
+    "says": "c: the data lists no free I2C address for it"
+}

@@ -201,7 +201,7 @@
         "psram_mhz": 64
     },
     "platforms": {
-        "esp-idf": {
+        "esp_idf": {
             "preview": "6.0"
         }
     }

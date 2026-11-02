@@ -104,18 +104,18 @@
         }
     ],
     "versions": {
-        "0.6.0": {"frameworks": {"esp-idf": ">=5.0.0"}},
-        "0.5.2": {"frameworks": {"esp-idf": ">=5.0.0"}},
-        "0.5.1": {"frameworks": {"esp-idf": ">=5.0.0"}},
+        "0.6.0": {"platforms": {"esp_idf": ">=5.0.0"}},
+        "0.5.2": {"platforms": {"esp_idf": ">=5.0.0"}},
+        "0.5.1": {"platforms": {"esp_idf": ">=5.0.0"}},
         "0.5.0": {"via": ["git"]},
-        "0.4.3": {"frameworks": {"esp-idf": ">=5.0.0"}},
-        "0.4.2": {"frameworks": {"esp-idf": ">=5.0.0"}},
+        "0.4.3": {"platforms": {"esp_idf": ">=5.0.0"}},
+        "0.4.2": {"platforms": {"esp_idf": ">=5.0.0"}},
         "0.4.1": {"via": ["git"]},
         "0.4.0": {"via": ["git"]},
         "0.3.0": {"via": ["git"]},
         "0.2.0": {"via": ["git"]},
-        "0.1.1": {"frameworks": {"esp-idf": ">=5.0.0"}},
-        "0.1.0": {"frameworks": {"esp-idf": ">=5.0.0"}},
-        "0.0.9": {"frameworks": {"esp-idf": ">=5.0.0"}}
+        "0.1.1": {"platforms": {"esp_idf": ">=5.0.0"}},
+        "0.1.0": {"platforms": {"esp_idf": ">=5.0.0"}},
+        "0.0.9": {"platforms": {"esp_idf": ">=5.0.0"}}
     }
 }

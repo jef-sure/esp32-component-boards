@@ -1,0 +1,946 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "audit",
+    "name": "pn532toolkit",
+    "title": "PN532Toolkit",
+    "audits": [
+        {
+            "version": "1.0.1",
+            "commit": "9bbb522a07a42d2a7b2e3cc9a70e1492a020881d",
+            "rubric": "pn532",
+            "rubric_version": 1,
+            "date": "2026-11-01",
+            "by": "claude-opus-5-5",
+            "items": {
+                "transports.i2c": {
+                    "status": "yes",
+                    "note": "A complete path over Arduino Wire, but off by default. The switch is an unconditional #define in src/Utils.h, so selecting I2C means editing the library file. It uses only the default Wire object and its default pins. No example calls InitI2C.",
+                    "evidence": ["src/Utils.h:26", "src/Utils.h:122", "src/PN532.cpp:772", "src/PN532.cpp:960"]
+                },
+                "transports.spi": {
+                    "status": "yes",
+                    "note": "Hardware SPI is the default build; software SPI is a compile-time option. All ten example sketches use hardware SPI.",
+                    "evidence": ["src/Utils.h:25", "src/Utils.h:93", "src/PN532.cpp:81", "src/PN532.cpp:762"]
+                },
+                "transports.uart": {
+                    "status": "no",
+                    "searched": "HSU, uart, UART, HardwareSerial, Serial1, Serial2, InitHSU, USE_HARDWARE_UART in src/ and all examples, and any transport switch besides USE_SOFTWARE_SPI, USE_HARDWARE_SPI and USE_HARDWARE_I2C. The only hits are the two README lines; Serial is used only for the debug console through SerialClass.",
+                    "note": "The README claims High Speed UART. The code has no such path.",
+                    "evidence": ["README.md:3", "README.md:10"]
+                },
+                "builds_on.esp_idf": {
+                    "status": "no",
+                    "searched": "driver/i2c.h, driver/i2c_master.h, driver/spi_master.h, driver/uart.h, i2c_master, spi_master, esp_err_t, ESP_LOG, ESP_PLATFORM across the whole tree: no hits.",
+                    "note": "No ESP-IDF driver API is called. All hardware access goes through Arduino SPI, Wire, digitalWrite and delay, so it needs arduino-esp32 even inside an ESP-IDF project.",
+                    "evidence": ["src/Utils.h:11", "src/Utils.h:31"]
+                },
+                "builds_on.arduino": {
+                    "status": "yes",
+                    "note": "Judged by reading; nothing was built, as the task requires. library.properties limits it to esp32, while the README also lists Uno and Mega.",
+                    "evidence": ["library.properties:1", "library.properties:9", "src/Utils.h:11"]
+                },
+                "builds_on.esp_idf_component": {
+                    "status": "no",
+                    "searched": "idf_component.yml, CMakeLists.txt, Kconfig by file name (case-insensitive) in the whole tree, and idf_component_register in its contents: none."
+                },
+                "frames.ack_checked": {
+                    "status": "yes",
+                    "note": "Any 6 bytes other than the exact ACK frame, a NACK included, give false, and every command returns false in turn. A NACK is not told apart from a garbled frame, and the command is not resent.",
+                    "evidence": ["src/PN532.cpp:703", "src/PN532.cpp:787", "src/PN532.cpp:801", "src/PN532.cpp:804"]
+                },
+                "frames.checksums_checked": {
+                    "status": "yes",
+                    "note": "LCS is checked before the copy and DCS after it; both failures return 0. The DCS test sums 00 FF LEN LCS as well, which adds 0xFF mod 256, and compares with ~DCS. That is equivalent to the manual's rule.",
+                    "evidence": ["src/PN532.cpp:871", "src/PN532.cpp:903", "src/PN532.cpp:905"]
+                },
+                "frames.extended_frames": {
+                    "status": "no",
+                    "searched": "The FF FF length marker, LENM and LENL, a 16-bit frame length in WriteCommand and ReadData, in src/PN532.cpp and in the local copy PassportPN532.cpp: none.",
+                    "note": "Both directions use one length byte. An extended response has LEN FF and LCS FF, which fails the length checksum test. The packet buffer is 80 bytes in src and 255 bytes in the example copy PassportPN532.",
+                    "evidence": ["src/PN532.cpp:720", "src/PN532.cpp:869", "src/PN532.cpp:871"]
+                },
+                "frames.error_frame": {
+                    "status": "no",
+                    "searched": "TFI 0x7F, the frame 00 00 FF 01 FF 7F 81 00, 'syntax error', 'error frame' in src/ and the driver code of the examples. Every 0x7F hit is crypto or DER code.",
+                    "note": "The frame is not recognized as such. It passes the length checksum and is then rejected like any other frame whose TFI is not D5, so the caller gets the same 0 as for any bad frame.",
+                    "evidence": ["src/PN532.cpp:891", "src/PN532.cpp:893"]
+                },
+                "frames.response_code_checked": {
+                    "status": "yes",
+                    "note": "ReadData checks TFI D5 for every response, and each command in src compares byte 1 with its own code + 1.",
+                    "evidence": [
+                        "src/PN532.cpp:891",
+                        "src/PN532.cpp:185",
+                        "src/PN532.cpp:384",
+                        "src/PN532.cpp:1121",
+                        "src/PN532.cpp:1098"
+                    ]
+                },
+                "waiting.irq": {
+                    "status": "no",
+                    "searched": "IRQ, irq, attachInterrupt, PN532_IRQ, an IRQ pin parameter in the Init functions, ReadPin on anything but MISO, in src/ and all examples.",
+                    "note": "SAMConfiguration turns on the chip's IRQ output with 0x01, but no Init function takes an IRQ pin and the host never reads one. Waiting is by polling only.",
+                    "evidence": ["src/PN532.cpp:224"]
+                },
+                "waiting.ready_polling": {
+                    "status": "yes",
+                    "note": "ReadPacket polls the status byte before every read, on SPI and on I2C, in steps of 10 ms.",
+                    "evidence": [
+                        "src/PN532.cpp:641",
+                        "src/PN532.cpp:653",
+                        "src/PN532.cpp:668",
+                        "src/PN532.cpp:679",
+                        "src/PN532.cpp:934"
+                    ]
+                },
+                "waiting.bounded_waits": {
+                    "status": "yes",
+                    "note": "WaitReady is the only wait for the chip, and it ends after PN532_TIMEOUT (1000 ms in src, 15000 ms in PassportPN532). The counter adds only the 10 ms sleeps, so the real limit is somewhat longer. The endless block in a repeated begin() is a mutex, not a wait for the chip; it is listed under defects and also reaches the recovery path after a dead chip.",
+                    "evidence": ["src/PN532.h:24", "src/PN532.cpp:679", "src/PN532.cpp:681", "src/PN532.cpp:684"]
+                },
+                "waiting.nonblocking_detect": {
+                    "status": "no",
+                    "searched": "Use of PN532_COMMAND_INAUTOPOLL (defined, never used), a public pair that starts InListPassiveTarget and collects it later, and calls of IsReady, WaitReady or ReadData from outside the classes, in src/ and all examples.",
+                    "note": "ReadPassiveTargetID, readIso14443A and readFelica all block in WaitReady for up to PN532_TIMEOUT. IsReady, SendCommandCheckAck and ReadData are protected, so a subclass could split the steps, but neither the library nor an example does.",
+                    "evidence": ["src/PN532.cpp:383", "src/PN532.h:219"]
+                },
+                "cards.iso14443a_uid": {
+                    "status": "yes",
+                    "note": "ReadPassiveTargetID accepts UIDs of 4 or 7 bytes. readIso14443A also returns SENS_RES, SEL_RES, the ATS and UIDs up to 10 bytes.",
+                    "evidence": [
+                        "src/PN532.cpp:353",
+                        "src/PN532.cpp:361",
+                        "src/PN532.cpp:363",
+                        "src/PN532.cpp:407",
+                        "src/PN532.cpp:1133"
+                    ]
+                },
+                "cards.two_targets": {
+                    "status": "no",
+                    "searched": "A MaxTg other than 1 in every InListPassiveTarget call (src, PassportPN532, ClassicPN532 in the Classic Explorer sketch), parsing of a second target record, and a target number other than 1 in InDataExchange and InSelect.",
+                    "note": "MaxTg is fixed at 1 and the target number is fixed at 1 in all exchanges.",
+                    "evidence": ["src/PN532.cpp:362", "src/PN532.cpp:396"]
+                },
+                "cards.mifare_classic": {
+                    "status": "yes",
+                    "note": "Key A and key B authentication, block read and block write in src. classicAuthKeyA and classicAuthKeyB refuse a UID that is not 4 bytes. The example class Classic adds value blocks and a dump.",
+                    "evidence": [
+                        "src/PN532.cpp:1222",
+                        "src/PN532.cpp:1231",
+                        "src/PN532.cpp:1250",
+                        "src/PN532.cpp:1262",
+                        "src/PN532.cpp:1276",
+                        "src/PN532.cpp:1224"
+                    ]
+                },
+                "cards.ultralight_ntag": {
+                    "status": "partly",
+                    "note": "The library has a read function only. Page write (0xA2) exists as a local helper in two sketches, built on the public dataExchange. No library function writes a page.",
+                    "evidence": [
+                        "src/PN532.cpp:198",
+                        "src/PN532.cpp:200",
+                        "examples/PN532_ESP32_NTAG215_NDEF_WebWriter_Dumper_V010/PN532_ESP32_NTAG215_NDEF_WebWriter_Dumper_V010.ino:262",
+                        "examples/PN532_ESP32_UltralightC_Explorer_V014/PN532_ESP32_UltralightC_Explorer_V014.ino:383",
+                        "examples/PN532_ESP32_NTAG215_NDEF_WebWriter_Dumper_V010/PN532_ESP32_NTAG215_NDEF_WebWriter_Dumper_V010.ino:274"
+                    ]
+                },
+                "cards.iso14443_4_apdu": {
+                    "status": "yes",
+                    "note": "dataExchange in src is a plain InDataExchange with target 1, which carries ISO-DEP APDUs; the PN532 runs the T=CL protocol. In src the limit is 78 bytes out and 71 bytes back, with no MI handling. DESFire commands live in the example class Desfire, not in src. Longer APDUs use the sketch-local PassportPN532 copy with a 255-byte buffer.",
+                    "evidence": [
+                        "src/PN532.cpp:1110",
+                        "src/PN532.cpp:1114",
+                        "examples/PN532_ESP32_DESFire_DoorOpener_V005/Desfire.cpp:1128",
+                        "examples/PN532_ESP32_Card_Analyzer_V007/PN532_ESP32_Card_Analyzer_V007.ino:598",
+                        "examples/PN532_ESP32_ICAO_eID_Inspector_V013/PN532_ESP32_ICAO_eID_Inspector_V013/PassportSecureMessaging.cpp:483"
+                    ]
+                },
+                "cards.ndef": {
+                    "status": "partly",
+                    "note": "src holds only URI prefix defines, marked not used. NDEF encoding and decoding exist only inside three sketches, all on NTAG215: URI write and decode in the web writer, URI read in the Spotify player, text read in the Avatar sketch. There is no library API, and no NDEF on DESFire or Classic.",
+                    "evidence": [
+                        "src/PN532.h:97",
+                        "examples/PN532_ESP32_NTAG215_NDEF_WebWriter_Dumper_V010/PN532_ESP32_NTAG215_NDEF_WebWriter_Dumper_V010.ino:354",
+                        "examples/PN532_ESP32_NTAG215_NDEF_WebWriter_Dumper_V010/PN532_ESP32_NTAG215_NDEF_WebWriter_Dumper_V010.ino:364",
+                        "examples/PN532_ESP32_NTAG215_NDEF_WebWriter_Dumper_V010/PN532_ESP32_NTAG215_NDEF_WebWriter_Dumper_V010.ino:445",
+                        "examples/PN532_ESP32_Avatar_V034/PN532_ESP32_Avatar_V034.ino:519"
+                    ]
+                },
+                "cards.iso14443b": {
+                    "status": "no",
+                    "searched": "Use of CARD_TYPE_106KB_ISO14443B, BrTy 0x03 in any InListPassiveTarget call, ATTRIB, in src/ and all examples. The constant is defined only; other ISO14443B hits print the firmware flag.",
+                    "evidence": ["src/PN532.h:94"]
+                },
+                "cards.felica": {
+                    "status": "partly",
+                    "note": "Polling only: it returns IDm, PMm and the system code at 212 or 424 kbps. No function or example reads or writes FeliCa blocks.",
+                    "evidence": [
+                        "src/PN532.cpp:1174",
+                        "src/PN532.cpp:1184",
+                        "src/PN532.cpp:1211",
+                        "examples/PN532_ESP32_Card_Analyzer_V007/PN532_ESP32_Card_Analyzer_V007.ino:1494"
+                    ]
+                },
+                "cards.card_emulation": {
+                    "status": "no",
+                    "searched": "Use of PN532_COMMAND_TGINITASTARGET, TGGETDATA, TGSETDATA, TGGETINITIATORCOMMAND, TGRESPONSETOINITIATOR, TGSETMETADATA in src/ and all examples: only #define lines in PN532.h and PassportPN532.h.",
+                    "evidence": ["src/PN532.h:64"]
+                },
+                "cards.peer_to_peer": {
+                    "status": "no",
+                    "searched": "Use of PN532_COMMAND_INJUMPFORDEP, INJUMPFORPSL, INATR, INPSL, TGINITASTARGET in src/ and all examples: only #define lines.",
+                    "evidence": ["src/PN532.h:53", "src/PN532.h:64"]
+                },
+                "chip_control.firmware_version": {
+                    "status": "yes",
+                    "evidence": ["src/PN532.cpp:176", "src/PN532.cpp:180", "src/PN532.cpp:185"]
+                },
+                "chip_control.sam_configuration": {
+                    "status": "yes",
+                    "note": "Normal mode with fixed timeout and IRQ values; the caller cannot change them.",
+                    "evidence": ["src/PN532.cpp:217", "src/PN532.cpp:221", "src/PN532.cpp:222", "src/PN532.cpp:230"]
+                },
+                "chip_control.rf_field_control": {
+                    "status": "yes",
+                    "note": "Separate functions SwitchOffRfField and switchOnRfField.",
+                    "evidence": ["src/PN532.cpp:274", "src/PN532.cpp:275", "src/PN532.cpp:1058", "src/PN532.cpp:1059"]
+                },
+                "chip_control.retries_control": {
+                    "status": "partly",
+                    "note": "RFConfiguration item 5 is sent, but with fixed values (FF 01 03) and no parameter, so a caller cannot choose the retry count.",
+                    "evidence": ["src/PN532.cpp:241", "src/PN532.cpp:246", "src/PN532.cpp:247", "src/PN532.cpp:249"]
+                },
+                "chip_control.power_down": {
+                    "status": "no",
+                    "searched": "Use of PN532_COMMAND_POWERDOWN, PowerDown, powerDown, WakeUpEnable in src/ and all examples: only #define lines. begin() sends wake-up bytes on SPI, but nothing puts the chip to sleep.",
+                    "evidence": ["src/PN532.h:50"]
+                },
+                "chip_control.reset_recovery": {
+                    "status": "partly",
+                    "note": "begin() pulses RSTPD_N when a reset pin is given, and the DoorOpener sketch calls it again after an error. With no reset pin (0xFF, as in the README) it only resends the wake-up bytes. In the default hardware SPI build on ESP32 the second begin() blocks in SPI.beginTransaction (see defects), so recovery works only with software SPI or I2C. Found by reading the library and arduino-esp32 sources, not run on a board.",
+                    "evidence": [
+                        "src/PN532.cpp:120",
+                        "src/PN532.cpp:124",
+                        "src/PN532.cpp:126",
+                        "src/PN532.cpp:137",
+                        "src/Utils.h:93",
+                        "examples/PN532_ESP32_DESFire_DoorOpener_V005/PN532_ESP32_DESFire_DoorOpener_V005.ino:366",
+                        "examples/PN532_ESP32_DESFire_DoorOpener_V005/PN532_ESP32_DESFire_DoorOpener_V005.ino:452"
+                    ]
+                },
+                "several.several_readers": {
+                    "status": "partly",
+                    "note": "The state test passes: PN532.cpp and PN532.h hold no static or global, and all reader state is in the object. Two readers work only with software SPI, though. On hardware SPI the second begin() blocks in SPI.beginTransaction on ESP32 (see defects). On I2C the address is fixed and only the default Wire object is used. No example has two readers.",
+                    "evidence": [
+                        "src/PN532.h:226",
+                        "src/PN532.h:232",
+                        "src/Utils.h:93",
+                        "src/PN532.h:80",
+                        "src/Utils.h:114"
+                    ]
+                },
+                "several.shared_spi_bus": {
+                    "status": "partly",
+                    "note": "Each object has its own chip select around every transfer, so software SPI can share the lines. On hardware SPI the transaction opened in begin() is never closed, so the second reader's begin() blocks on ESP32, and another SPI library on the bus would block too. The chip select is also not driven high at init. No example shares a bus.",
+                    "evidence": [
+                        "src/PN532.cpp:105",
+                        "src/PN532.cpp:754",
+                        "src/PN532.cpp:765",
+                        "src/Utils.h:93",
+                        "src/PN532.cpp:109"
+                    ]
+                },
+                "several.thread_safety": {
+                    "status": "no",
+                    "searched": "mutex, Mutex, Semaphore, xSemaphore, portENTER_CRITICAL, lock_guard, taskENTER, xTaskCreate, and a stated rule on tasks or threads, in src/, the README and all examples: no hits.",
+                    "note": "All commands use one packet buffer in the object with no lock and no stated rule.",
+                    "evidence": ["src/PN532.h:226"]
+                },
+                "code_health.errors_returned": {
+                    "status": "partly",
+                    "note": "Failures reach the caller as false, and ReadPassiveTargetID separates no card from failure. All failures in src give the same false, though: the PN532 status code is printed to Serial and dropped, so a timeout, a NACK and an authentication failure look the same. begin() returns void. Only the example class Desfire keeps the code.",
+                    "evidence": [
+                        "src/PN532.cpp:349",
+                        "src/PN532.cpp:350",
+                        "src/PN532.cpp:526",
+                        "src/PN532.cpp:535",
+                        "src/PN532.h:179",
+                        "examples/PN532_ESP32_DESFire_DoorOpener_V005/Desfire.cpp:1154"
+                    ]
+                },
+                "code_health.buffers_bounded": {
+                    "status": "yes",
+                    "note": "ReadData checks LEN against the requested size before it copies, and the UID, ATS and rx copies are limited. ReadPassiveTargetID and readIso14443A do not compare the UID length with the frame length, so a short frame could read stale bytes from the packet buffer, but no copy goes out of bounds.",
+                    "evidence": [
+                        "src/PN532.cpp:820",
+                        "src/PN532.cpp:877",
+                        "src/PN532.cpp:400",
+                        "src/PN532.cpp:1103",
+                        "src/PN532.cpp:1157",
+                        "src/PN532.cpp:1164",
+                        "examples/PN532_ESP32_DESFire_DoorOpener_V005/Desfire.cpp:1227"
+                    ]
+                },
+                "code_health.allocation_checked": {
+                    "status": "not_applicable",
+                    "searched": "malloc, calloc, realloc, new, ps_malloc, heap_caps_malloc, std::vector in src/ and in all examples' driver code (PassportPN532, Desfire, Classic, Buffer.h): none. The only heap_caps call is a free-block query in the Spotify sketch.",
+                    "note": "The code that drives the chip uses stack and class-member buffers only."
+                },
+                "code_health.tests": {
+                    "status": "partly",
+                    "searched": "Test directories and files, unit test frameworks, tests of frame building or parsing: none.",
+                    "note": "The only test that exercises the chip is Desfire::Selftest in an example. It needs a real empty DESFire card and is compiled out by default. The crypto self-tests in the ICAO examples do not touch the PN532, and nothing tests the frame layer.",
+                    "evidence": [
+                        "examples/PN532_ESP32_DESFire_DoorOpener_V005/Desfire.cpp:1341",
+                        "examples/PN532_ESP32_DESFire_DoorOpener_V005/PN532_ESP32_DESFire_DoorOpener_V005.ino:113"
+                    ]
+                },
+                "code_health.examples": {
+                    "status": "yes",
+                    "note": "Ten sketches, all on hardware SPI. They also hold code that src lacks: page write, NDEF, DESFire and the larger PassportPN532 copy.",
+                    "evidence": [
+                        "examples/PN532_ESP32_Card_Analyzer_V007/PN532_ESP32_Card_Analyzer_V007.ino:1601",
+                        "examples/PN532_ESP32_MIFARE_Classic_Explorer_V004/PN532_ESP32_MIFARE_Classic_Explorer_V004.ino:1553",
+                        "examples/PN532_ESP32_NTAG215_NDEF_WebWriter_Dumper_V010/PN532_ESP32_NTAG215_NDEF_WebWriter_Dumper_V010.ino:711",
+                        "examples/PN532_ESP32_DESFire_DoorOpener_V005/PN532_ESP32_DESFire_DoorOpener_V005.ino:313"
+                    ]
+                },
+                "code_health.docs": {
+                    "status": "yes",
+                    "note": "The README covers installation, a minimal sketch and one wiring table; function comments in PN532.cpp add API text. It claims UART support the code lacks, and lists Uno and Mega although library.properties says esp32 only.",
+                    "evidence": ["README.md:50", "README.md:60", "README.md:85", "README.md:9"]
+                },
+                "code_health.license": {
+                    "status": "yes",
+                    "note": "LICENSE.txt is MIT, but the header of src/PN532.cpp says BSD and the DESFire example code says LGPL, so one file does not cover all the code alike.",
+                    "evidence": [
+                        "LICENSE.txt:1",
+                        "src/PN532.cpp:4",
+                        "examples/PN532_ESP32_DESFire_DoorOpener_V005/Desfire.cpp:21"
+                    ]
+                }
+            },
+            "defects": [
+                {
+                    "what": "PN532::begin() on hardware SPI calls SPI.beginTransaction() every time and the library never calls SPI.endTransaction(), so on arduino-esp32 (sources of 2.0.17 and 3.3.12 read, not run on a board), where beginTransaction takes a non-recursive mutex with portMAX_DELAY that only endTransaction releases, a second begin() blocks forever, which hangs the reset path of the DoorOpener sketch, a second reader, and any other SPI library on the bus.",
+                    "severity": "high",
+                    "judged": "Hardware SPI is the library default and begin() calls SPI.beginTransaction every time with no endTransaction anywhere in src/. In arduino-esp32 2.0.17 and 3.3.12 (libraries/SPI/src/SPI.cpp, read under ~/.platformio/packages/framework-arduinoespressif32 and ~/.cache/Espressif/ComponentManager because ~/.espressif and ~/.arduino15 hold no copy) that call takes a plain mutex with portMAX_DELAY which only endTransaction gives, and HAL locks are on by default, so the sketch's RESET command, a second reader or another SPI library blocks forever with a working chip; read only, not run.",
+                    "evidence": [
+                        "src/Utils.h:92",
+                        "src/Utils.h:93",
+                        "src/PN532.cpp:137",
+                        "examples/PN532_ESP32_DESFire_DoorOpener_V005/PN532_ESP32_DESFire_DoorOpener_V005.ino:366",
+                        "examples/PN532_ESP32_DESFire_DoorOpener_V005/PN532_ESP32_DESFire_DoorOpener_V005.ino:452"
+                    ]
+                },
+                {
+                    "what": "ReadPassiveTargetID reads only 28 bytes, so with the preamble present a response above 22 data bytes fails, and a card with an ATS over 7 bytes (7-byte UID) or over 10 bytes (4-byte UID) is reported as a communication failure, which the DoorOpener sketch answers with a chip reset.",
+                    "severity": "medium",
+                    "evidence": [
+                        "src/PN532.cpp:383",
+                        "src/PN532.cpp:877",
+                        "src/PN532.cpp:879",
+                        "examples/PN532_ESP32_DESFire_DoorOpener_V005/PN532_ESP32_DESFire_DoorOpener_V005.ino:1042"
+                    ]
+                },
+                {
+                    "what": "dataExchange and communicateThru read rxMax + 8 bytes, one short of the n + 9 bytes a frame with preamble needs (1 + 2 + 2 + 3 + n + 1), so a response that fills the caller's buffer exactly is rejected as too long; the example rx sizes checked leave spare room, so they do not show it.",
+                    "severity": "medium",
+                    "evidence": [
+                        "src/PN532.cpp:1097",
+                        "src/PN532.cpp:1120",
+                        "src/PN532.cpp:877",
+                        "examples/PN532_ESP32_MIFARE_Classic_Explorer_V004/PN532_ESP32_MIFARE_Classic_Explorer_V004.ino:210"
+                    ]
+                },
+                {
+                    "what": "dataExchange and communicateThru send the command first and then pass rxMax + 8 to ReadData, which returns 0 for anything over PN532_PACKBUFFSIZE, so in src a caller with an rx size above 72 always gets false, after the card has received the command and without the response being collected.",
+                    "severity": "medium",
+                    "evidence": ["src/PN532.cpp:1118", "src/PN532.cpp:1120", "src/PN532.cpp:820", "src/PN532.h:27"]
+                },
+                {
+                    "what": "After WaitReady times out the driver returns false without sending the ACK abort frame (no code sends one), so a command still running in the chip is left running when the next command is written.",
+                    "severity": "low",
+                    "evidence": ["src/PN532.cpp:683", "src/PN532.cpp:684", "src/PN532.cpp:702"]
+                },
+                {
+                    "what": "ReadPassiveTargetID tests uid[0] == 0x80 for a random-ID DESFire, but ISO/IEC 14443-3 (cited from memory, not among the audit sources) marks a random single-size UID with uid0 = 0x08, so CARD_DesRandom is not set for such a card and the sketch's random-ID branch is not reached.",
+                    "severity": "low",
+                    "evidence": [
+                        "src/PN532.cpp:415",
+                        "examples/PN532_ESP32_DESFire_DoorOpener_V005/PN532_ESP32_DESFire_DoorOpener_V005.ino:1046"
+                    ]
+                },
+                {
+                    "what": "ReadPassiveTargetID returns true with length 0 for a card with a 10-byte UID, which is the same result as no card, so a present card is reported as absent.",
+                    "severity": "low",
+                    "evidence": ["src/PN532.cpp:400", "src/PN532.cpp:404", "src/PN532.cpp:350"]
+                },
+                {
+                    "what": "The PN532 constructor sets the pin members but not mu8_DebugLevel, which begin() and every command read, so a reader object that is not in static storage starts with an indeterminate debug level.",
+                    "severity": "low",
+                    "evidence": ["src/PN532.cpp:51", "src/PN532.cpp:57", "src/PN532.cpp:118", "src/PN532.h:225"]
+                },
+                {
+                    "what": "InitI2C and InitSoftwareSPI call SetPinMode on the reset pin without the 0xFF test that InitHardwareSPI and begin() apply, so 'no reset pin' reaches pinMode as pin 255.",
+                    "severity": "low",
+                    "evidence": ["src/PN532.cpp:68", "src/PN532.cpp:89", "src/PN532.cpp:108", "src/PN532.cpp:120"]
+                },
+                {
+                    "what": "InitHardwareSPI and InitSoftwareSPI set the chip select pin to output but do not drive it high, so until its first transfer the level is whatever the pin holds, and a second reader on a bus is not deselected during the first reader's first transfers.",
+                    "severity": "low",
+                    "evidence": ["src/PN532.cpp:90", "src/PN532.cpp:109", "src/PN532.cpp:765"]
+                },
+                {
+                    "what": "On I2C the result of Wire.endTransmission() is dropped and WriteCommand returns void, so a write the chip did not acknowledge is seen only as a ready timeout about a second later.",
+                    "severity": "low",
+                    "evidence": ["src/Utils.h:141", "src/Utils.h:143", "src/PN532.cpp:777", "src/PN532.cpp:713"]
+                },
+                {
+                    "what": "readFelica ignores the result of SwitchOffRfField() and goes on to poll.",
+                    "severity": "low",
+                    "evidence": ["src/PN532.cpp:1178"]
+                },
+                {
+                    "what": "In the example copy PassportPN532, with the packet buffer raised to 255, the byte counter in WriteCommand's checksum loop cannot reach P when P is 256 or more, so a txLen of 248 to 253, which dataExchange accepts, loops forever; the inspectors send no command that long.",
+                    "severity": "low",
+                    "evidence": [
+                        "examples/PN532_ESP32_ICAO_eID_Inspector_V013/PN532_ESP32_ICAO_eID_Inspector_V013/PassportPN532.h:39",
+                        "examples/PN532_ESP32_ICAO_eID_Inspector_V013/PN532_ESP32_ICAO_eID_Inspector_V013/PassportPN532.cpp:734",
+                        "examples/PN532_ESP32_ICAO_eID_Inspector_V013/PN532_ESP32_ICAO_eID_Inspector_V013/PassportPN532.cpp:1135"
+                    ]
+                }
+            ]
+        },
+        {
+            "version": "1.0.1",
+            "blind": true,
+            "commit": "9bbb522a07a42d2a7b2e3cc9a70e1492a020881d",
+            "rubric": "pn532",
+            "rubric_version": 2,
+            "date": "2026-11-02",
+            "by": "claude-opus-5-5",
+            "items": {
+                "transports.i2c": {
+                    "status": "partly",
+                    "note": "The I2C path exists but is compiled out: USE_HARDWARE_I2C is FALSE in src/Utils.h with no #ifndef, so a sketch cannot select it without editing the library header. Met: 7-bit address 0x24, status byte first in each read, STOP after each NOT READY poll (Wire.requestFrom ends with STOP). Not met: IsReady() also sends STOP after a READY status and ReadPacket() starts a new read, and a frame longer than the fixed read length is cut by STOP; 6.2.4 says the frame shall be read before STOP. Clock is whatever Wire.begin() sets; the code sets none. Judged by reading; not built or run.",
+                    "evidence": [
+                        "src/PN532.h:80",
+                        "src/PN532.cpp:658",
+                        "src/PN532.cpp:661",
+                        "src/PN532.cpp:960",
+                        "src/PN532.cpp:964",
+                        "src/Utils.h:26"
+                    ]
+                },
+                "transports.spi": {
+                    "status": "yes",
+                    "note": "Default transport. Hardware SPI at 1 MHz, LSB first, mode 0, on the global Arduino SPI object with its default pins. A software SPI variant is a compile-time option in src/Utils.h.",
+                    "evidence": [
+                        "src/Utils.h:93",
+                        "src/PN532.h:20",
+                        "src/PN532.h:75",
+                        "src/PN532.h:76",
+                        "src/PN532.h:77",
+                        "src/PN532.cpp:641",
+                        "src/PN532.cpp:758",
+                        "src/PN532.cpp:943"
+                    ]
+                },
+                "transports.uart": {
+                    "status": "no",
+                    "searched": "HardwareSerial, Serial1, Serial2, HSU, UART in src/ and examples/ (*.ino, *.cpp, *.h): no hit. The only PN532 transports in src/Utils.h are USE_SOFTWARE_SPI, USE_HARDWARE_SPI and USE_HARDWARE_I2C.",
+                    "note": "README.md lines 3 and 10 claim High Speed UART; the code has none."
+                },
+                "builds_on.esp_idf": {
+                    "status": "no",
+                    "searched": "#include of driver/*, esp_err, esp_log, freertos/ in src/ and examples/: no hit. src/Utils.h includes Arduino.h and calls Serial, SPI, Wire, millis, delay, pinMode, digitalWrite directly.",
+                    "note": "Driver API called: no ESP-IDF driver at all, neither driver/i2c_master.h, driver/i2c.h, spi_master nor uart. Only the Arduino SPI and Wire classes."
+                },
+                "builds_on.arduino": {
+                    "status": "yes",
+                    "note": "Arduino library layout with src/ and library.properties, architectures=esp32 only. Judged by reading; the task forbids building it.",
+                    "evidence": ["library.properties:1", "library.properties:9", "src/Utils.h:11", "src/Utils.h:31"]
+                },
+                "builds_on.esp_idf_component": {
+                    "status": "no",
+                    "searched": "find for idf_component.yml, CMakeLists.txt, component.mk, Kconfig in the whole tree: no hit."
+                },
+                "frames.ack_checked": {
+                    "status": "yes",
+                    "note": "A missing ACK (WaitReady timeout) and a wrong ACK both make the command fail with false. There is no resend.",
+                    "evidence": [
+                        "src/PN532.cpp:703",
+                        "src/PN532.cpp:787",
+                        "src/PN532.cpp:792",
+                        "src/PN532.cpp:801",
+                        "src/PN532.cpp:804"
+                    ]
+                },
+                "frames.nack_resend": {
+                    "status": "no",
+                    "searched": "NACK, 0xFF 0x00 0x00 byte sequence, any SendPacket of a fixed frame in src/ and examples/: no hit. A bad response returns 0 from ReadData() and the command fails."
+                },
+                "frames.checksums_checked": {
+                    "status": "yes",
+                    "note": "LCS and DCS are both verified in ReadData(). The DCS sum starts at the start code, and 0x00 + 0xFF + LEN + LCS gives 0xFF, which is why the compare is against ~DCS; the arithmetic holds.",
+                    "evidence": ["src/PN532.cpp:871", "src/PN532.cpp:873", "src/PN532.cpp:903", "src/PN532.cpp:905"]
+                },
+                "frames.extended_frames": {
+                    "status": "no",
+                    "searched": "LENM, LENL, a test for LEN = LCS = 0xFF in ReadData() and WriteCommand(): no hit. LEN 0xFF with LCS 0xFF sums to 0x1FE and is rejected at src/PN532.cpp line 871. WriteCommand() writes only the one-byte LEN.",
+                    "note": "src/ uses an 80-byte buffer, so frames above 255 bytes cannot occur there. The passport copy has 255 bytes and the same parser."
+                },
+                "frames.error_frame": {
+                    "status": "no",
+                    "searched": "0x7F and 0x81 as frame bytes in src/PN532.cpp, ReadData(), ReadAck(): no hit.",
+                    "note": "The error frame passes the LCS test, then fails the TFI test at src/PN532.cpp line 891, so it ends as the generic 'Invalid data (no PN532TOHOST)' and return 0. The caller cannot tell a syntax error from a bad frame."
+                },
+                "frames.response_code_checked": {
+                    "status": "yes",
+                    "note": "TFI D5 is tested for every response in ReadData(); each command tests its code + 1.",
+                    "evidence": [
+                        "src/PN532.cpp:891",
+                        "src/PN532.cpp:185",
+                        "src/PN532.cpp:384",
+                        "src/PN532.cpp:1121",
+                        "src/PN532.cpp:1098"
+                    ]
+                },
+                "frames.status_decoded": {
+                    "status": "yes",
+                    "note": "Bits 7 and 6 are masked off. The MI and NAD bits are dropped and not reported to the caller.",
+                    "evidence": ["src/PN532.cpp:528", "src/PN532.cpp:529"]
+                },
+                "waiting.irq": {
+                    "status": "no",
+                    "searched": "attachInterrupt, PN532_IRQ, P70, irqPin, IRQ_PIN in src/ and examples/: no hit. No Init function takes an IRQ pin.",
+                    "note": "SamConfig() sets the chip's IRQ parameter to 1 at src/PN532.cpp line 224, but the host never reads the line."
+                },
+                "waiting.ready_polling": {
+                    "status": "yes",
+                    "evidence": ["src/PN532.cpp:632", "src/PN532.cpp:653", "src/PN532.cpp:668", "src/PN532.cpp:679"]
+                },
+                "waiting.bounded_waits": {
+                    "status": "yes",
+                    "note": "WaitReady() is the only loop on the chip in src/ and every read goes through it. It adds 10 per poll and each poll also spends 2 ms with CS low, so the real limit on SPI is about 1.2 s; the passport copy uses 15000. The hang in the defects list is on a mutex in begin(), not a wait for the chip.",
+                    "evidence": [
+                        "src/PN532.cpp:679",
+                        "src/PN532.cpp:681",
+                        "src/PN532.cpp:684",
+                        "src/PN532.h:24",
+                        "src/PN532.cpp:934"
+                    ]
+                },
+                "waiting.abort_on_timeout": {
+                    "status": "no",
+                    "searched": "Any send of the ACK frame: the constant Ack[] at src/PN532.cpp line 787 is used only by memcmp in ReadAck(); no SendPacket of it, no abort function in src/ and examples/.",
+                    "note": "WaitReady() returns false and the caller leaves. The chip continues until the host sends another command, which 6.2.2.2 b also treats as an abort, but the rubric asks for an ACK and the library sends none. With MxRtyPassiveActivation at its default 0xFF the command does not end by itself; the example sketches avoid this by calling SetPassiveActivationRetries() first. Long card operations in dataExchange() are given up the same way."
+                },
+                "waiting.nonblocking_detect": {
+                    "status": "no",
+                    "searched": "Public members of class PN532 in src/PN532.h; ReadPassiveTargetID, readIso14443A, readFelica; a sketch or subclass that splits send and collect: none. Each sends InListPassiveTarget and blocks in ReadData().",
+                    "note": "SendCommandCheckAck(), IsReady() and ReadData() are protected, so a subclass could build it, but no code does."
+                },
+                "cards.iso14443a_uid": {
+                    "status": "yes",
+                    "note": "ReadPassiveTargetID() takes UID lengths 4 and 7. readIso14443A() also takes 10 and returns the ATS. Not counted as a defect because it cannot be shown from the manual: line 415 tests a random UID against first byte 0x80, where ISO/IEC 14443-3, from memory, uses 0x08; that standard is not on this machine.",
+                    "evidence": [
+                        "src/PN532.cpp:353",
+                        "src/PN532.cpp:361",
+                        "src/PN532.cpp:363",
+                        "src/PN532.cpp:407",
+                        "src/PN532.cpp:1133",
+                        "src/PN532.cpp:1158"
+                    ]
+                },
+                "cards.two_targets": {
+                    "status": "no",
+                    "searched": "InListPassiveTarget senders at src/PN532.cpp lines 362, 1138, 1182 and in the examples: MaxTg is always 1. All exchanges use Tg 1. No code parses a second TargetData."
+                },
+                "cards.mifare_classic": {
+                    "status": "yes",
+                    "note": "Key A and key B, block read and write. Refuses UIDs that are not 4 bytes. Value operations exist only as constants in the example Classic.h and were not required here.",
+                    "evidence": [
+                        "src/PN532.cpp:1222",
+                        "src/PN532.cpp:1231",
+                        "src/PN532.cpp:1250",
+                        "src/PN532.cpp:1260",
+                        "src/PN532.cpp:1262",
+                        "src/PN532.cpp:1273",
+                        "src/PN532.cpp:1276"
+                    ]
+                },
+                "cards.ultralight_ntag": {
+                    "status": "partly",
+                    "note": "src/ has only ntagRead16(). The 4-byte page write 0xA2 is not in the library API; two sketches build it by hand on the public dataExchange().",
+                    "evidence": [
+                        "src/PN532.cpp:198",
+                        "src/PN532.cpp:200",
+                        "examples/PN532_ESP32_UltralightC_Explorer_V014/PN532_ESP32_UltralightC_Explorer_V014.ino:383",
+                        "examples/PN532_ESP32_NTAG215_NDEF_WebWriter_Dumper_V010/PN532_ESP32_NTAG215_NDEF_WebWriter_Dumper_V010.ino:262"
+                    ]
+                },
+                "cards.iso14443_4_apdu": {
+                    "status": "yes",
+                    "note": "dataExchange() sends InDataExchange to Tg 1. Limit in src/: at most 78 bytes out and fewer than 72 bytes in, against 261 and 258 in 7.3.8. DESFire fits because the example uses 60-byte frames. The passport sketches need more, so they carry their own driver copy with a 255-byte buffer.",
+                    "evidence": [
+                        "src/PN532.cpp:1110",
+                        "src/PN532.cpp:1114",
+                        "examples/PN532_ESP32_DESFire_DoorOpener_V005/Desfire.cpp:1128",
+                        "examples/PN532_ESP32_ICAO_eID_Inspector_V013/PN532_ESP32_ICAO_eID_Inspector_V013/PassportPaceApdu.cpp:525"
+                    ]
+                },
+                "cards.chaining": {
+                    "status": "no",
+                    "searched": "Bit 6 of Tg: every Tg byte is the constant 1 at src/PN532.cpp line 1115, examples Desfire.cpp line 1129 and Classic.cpp line 277. Bit 6 of Status: masked at line 529 with no other test. 0x40 in src/ and the driver copies: only the InDataExchange command code and test key bytes.",
+                    "note": "The DESFire example chains at card level with status 0xAF; that is not the PN532 MI bit."
+                },
+                "cards.raw_exchange": {
+                    "status": "yes",
+                    "note": "Used by the Ultralight-C and Card Analyzer sketches.",
+                    "evidence": ["src/PN532.cpp:1088", "src/PN532.cpp:1092", "src/PN532.cpp:1100"]
+                },
+                "cards.auto_poll": {
+                    "status": "no",
+                    "searched": "PN532_COMMAND_INAUTOPOLL: defined at src/PN532.h line 63, never used in src/ or examples/. Raw 0x60 as a PN532 command: no hit (0x60 in the code is MIFARE auth A)."
+                },
+                "cards.ndef": {
+                    "status": "partly",
+                    "note": "No NDEF code in src/; PN532.h has only unused prefix constants. Two NTAG215 sketches build and parse one URI record with its TLV by hand, for that tag type only.",
+                    "evidence": [
+                        "src/PN532.h:97",
+                        "examples/PN532_ESP32_NTAG215_NDEF_WebWriter_Dumper_V010/PN532_ESP32_NTAG215_NDEF_WebWriter_Dumper_V010.ino:354",
+                        "examples/PN532_ESP32_NTAG215_NDEF_WebWriter_Dumper_V010/PN532_ESP32_NTAG215_NDEF_WebWriter_Dumper_V010.ino:364",
+                        "examples/PN532_ESP32_NTAG215_NDEF_WebWriter_Dumper_V010/PN532_ESP32_NTAG215_NDEF_WebWriter_Dumper_V010.ino:379",
+                        "examples/PN532_ESP32_NTAG215_Spotify_Player_V033/PN532_ESP32_NTAG215_Spotify_Player_V033.ino:262",
+                        "examples/PN532_ESP32_NTAG215_Spotify_Player_V033/PN532_ESP32_NTAG215_Spotify_Player_V033.ino:409"
+                    ]
+                },
+                "cards.iso14443b": {
+                    "status": "no",
+                    "searched": "CARD_TYPE_106KB_ISO14443B: defined at src/PN532.h line 94, never used. 'Type B', ATQB, BrTy 0x03 in src/ and examples/: only the printing of the firmware flag bit."
+                },
+                "cards.felica": {
+                    "status": "yes",
+                    "note": "Polling at either rate gives IDm, PMm and system code; offsets match 7.3.5. No FeliCa read or write helper; dataExchange() can carry such frames.",
+                    "evidence": [
+                        "src/PN532.cpp:1174",
+                        "src/PN532.cpp:1183",
+                        "src/PN532.cpp:1184",
+                        "src/PN532.cpp:1211",
+                        "src/PN532.cpp:1212",
+                        "examples/PN532_ESP32_Card_Analyzer_V007/PN532_ESP32_Card_Analyzer_V007.ino:1494",
+                        "examples/PN532_ESP32_Card_Analyzer_V007/PN532_ESP32_Card_Analyzer_V007.ino:1503"
+                    ]
+                },
+                "cards.jewel": {
+                    "status": "no",
+                    "searched": "CARD_TYPE_106KB_JEWEL: defined at src/PN532.h line 95, never used. Jewel, Topaz, BrTy 0x04 in src/ and examples/: no other hit."
+                },
+                "cards.card_emulation": {
+                    "status": "no",
+                    "searched": "PN532_COMMAND_TGINITASTARGET and the other TG constants: defined at src/PN532.h lines 64-71, never used in src/ or examples/."
+                },
+                "cards.peer_to_peer": {
+                    "status": "no",
+                    "searched": "PN532_COMMAND_INJUMPFORDEP, INJUMPFORPSL, TGINITASTARGET, INATR, INPSL: defined in src/PN532.h, never used in src/ or examples/."
+                },
+                "chip_control.firmware_version": {
+                    "status": "yes",
+                    "evidence": ["src/PN532.cpp:176", "src/PN532.cpp:180", "src/PN532.cpp:185"]
+                },
+                "chip_control.general_status": {
+                    "status": "no",
+                    "searched": "PN532_COMMAND_GETGENERALSTATUS: defined at src/PN532.h line 42, never used in src/ or examples/."
+                },
+                "chip_control.sam_configuration": {
+                    "status": "yes",
+                    "note": "Normal mode only; the arguments are fixed.",
+                    "evidence": ["src/PN532.cpp:217", "src/PN532.cpp:221", "src/PN532.cpp:222", "src/PN532.cpp:230"]
+                },
+                "chip_control.rf_field_control": {
+                    "status": "yes",
+                    "evidence": [
+                        "src/PN532.cpp:269",
+                        "src/PN532.cpp:274",
+                        "src/PN532.cpp:275",
+                        "src/PN532.cpp:1055",
+                        "src/PN532.cpp:1059"
+                    ]
+                },
+                "chip_control.retries_control": {
+                    "status": "partly",
+                    "note": "CfgItem 5 is sent correctly, but the function takes no argument: all three values are fixed, with MxRtyPassiveActivation = 3. begin() does not call it; all ten example sketches do.",
+                    "evidence": [
+                        "src/PN532.cpp:241",
+                        "src/PN532.cpp:246",
+                        "src/PN532.cpp:247",
+                        "src/PN532.cpp:248",
+                        "src/PN532.cpp:249"
+                    ]
+                },
+                "chip_control.power_down": {
+                    "status": "no",
+                    "searched": "PN532_COMMAND_POWERDOWN: defined at src/PN532.h line 50, never used in src/ or examples/. No function holds RSTPD_N low.",
+                    "note": "SwitchOffRfField() only stops the field. begin() sends a wake-up over SPI, but nothing puts the chip in Power Down."
+                },
+                "chip_control.registers": {
+                    "status": "partly",
+                    "note": "WriteRegister only; the caller passes raw address and value bytes. ReadRegister: PN532_COMMAND_READREGISTER is defined at src/PN532.h line 43 and never used.",
+                    "evidence": [
+                        "src/PN532.cpp:1073",
+                        "src/PN532.cpp:1077",
+                        "examples/PN532_ESP32_Card_Analyzer_V007/PN532_ESP32_Card_Analyzer_V007.ino:967"
+                    ]
+                },
+                "chip_control.gpio": {
+                    "status": "partly",
+                    "note": "WriteGPIO for P30, P31, P33, P35 only; P32 and P34 are forced high and P7 is not validated, as 7.2.7 asks for SPI. ReadGPIO: PN532_COMMAND_READGPIO is defined at src/PN532.h line 45 and never used.",
+                    "evidence": ["src/PN532.cpp:313", "src/PN532.cpp:324", "src/PN532.cpp:325"]
+                },
+                "chip_control.parameters": {
+                    "status": "no",
+                    "searched": "PN532_COMMAND_SETPARAMETERS: defined at src/PN532.h line 48, never used in src/ or examples/."
+                },
+                "chip_control.serial_baud": {
+                    "status": "no",
+                    "searched": "PN532_COMMAND_SETSERIALBAUDRATE: defined at src/PN532.h line 47, never used in src/ or examples/. There is no HSU transport."
+                },
+                "chip_control.reset_recovery": {
+                    "status": "partly",
+                    "note": "begin() pulses RSTPD_N when a pin is given and the DoorOpener sketch calls it again after an error. In the default hardware SPI mode on ESP32 that second call blocks forever on the SPI lock (see defects), so recovery does not work there. Without a reset pin begin() has no way to reset the chip. Software SPI and I2C builds do not hit the lock. Source read: ~/.cache/Espressif/ComponentManager/service_d92d8f1e/espressif__arduino-esp32_3.3.12_ed2a1888/libraries/SPI/src/SPI.cpp (SPI_PARAM_LOCK in beginTransaction, given back only in endTransaction); same in framework-arduinoespressif32@3.20016.0; ~/.espressif/v5.5.5/esp-idf/components/freertos/FreeRTOS-Kernel/queue.c xQueueSemaphoreTake has no holder check. Not run.",
+                    "evidence": [
+                        "src/PN532.cpp:122",
+                        "src/PN532.cpp:124",
+                        "src/PN532.cpp:126",
+                        "src/PN532.cpp:137",
+                        "src/Utils.h:93",
+                        "examples/PN532_ESP32_DESFire_DoorOpener_V005/PN532_ESP32_DESFire_DoorOpener_V005.ino:366",
+                        "examples/PN532_ESP32_DESFire_DoorOpener_V005/PN532_ESP32_DESFire_DoorOpener_V005.ino:452"
+                    ]
+                },
+                "several.several_readers": {
+                    "status": "partly",
+                    "note": "No reader state is global or static: buffer and pins are members, and src/PN532.cpp has no static. But hardware SPI, the default, blocks on the second begin(), and I2C has one fixed address on the global Wire object. Only a software SPI build, set by editing src/Utils.h, avoids both.",
+                    "evidence": ["src/PN532.h:226", "src/PN532.h:232", "src/Utils.h:93", "src/Utils.h:114"]
+                },
+                "several.shared_spi_bus": {
+                    "status": "partly",
+                    "note": "Each object has its own CS pin and CS frames each transfer. The normal start sequence still fails: the second begin() blocks because the first left the SPI transaction open. For the same reason any other library that calls SPI.beginTransaction on this bus blocks too.",
+                    "evidence": ["src/PN532.h:232", "src/PN532.cpp:636", "src/PN532.cpp:650", "src/Utils.h:93"]
+                },
+                "several.thread_safety": {
+                    "status": "no",
+                    "searched": "xSemaphore, SemaphoreHandle, mutex, portENTER_CRITICAL, thread, task in src/ and README.md: no hit. Task API in the examples is only a stack watermark call.",
+                    "note": "mu8_PacketBuffer is shared by all calls with no lock and no stated rule."
+                },
+                "code_health.errors_returned": {
+                    "status": "partly",
+                    "note": "Functions return bool, and ReadPassiveTargetID() separates no card from error. The cause is not returned: timeout, bad checksum, syntax error and every PN532 status code all become false, with the text only on Serial. begin() is void, so a dead chip is not reported there. Only the example Desfire class keeps the last status (GetLastPN532Error).",
+                    "evidence": [
+                        "src/PN532.cpp:349",
+                        "src/PN532.cpp:350",
+                        "src/PN532.cpp:1100",
+                        "src/PN532.cpp:541",
+                        "src/PN532.cpp:815",
+                        "src/PN532.h:179"
+                    ]
+                },
+                "code_health.buffers_bounded": {
+                    "status": "yes",
+                    "note": "LEN from the chip is checked against the read length, which is limited to the buffer, before the copy. UID and ATS lengths are checked too.",
+                    "evidence": [
+                        "src/PN532.cpp:820",
+                        "src/PN532.cpp:877",
+                        "src/PN532.cpp:400",
+                        "src/PN532.cpp:1103",
+                        "src/PN532.cpp:1157",
+                        "src/PN532.cpp:1164"
+                    ]
+                },
+                "code_health.allocation_checked": {
+                    "status": "not_applicable",
+                    "searched": "malloc, calloc, realloc, ps_malloc, heap_caps_malloc, new in src/: no allocation (the word 'new' appears only in comments). Driver code in examples (Desfire.cpp, Classic.cpp, PassportPN532.cpp) uses stack and member buffers.",
+                    "note": "The driver has no dynamic allocation."
+                },
+                "code_health.tests": {
+                    "status": "partly",
+                    "note": "No test folder and no host tests. The only test is a DESFire self test inside one example, off by default, that needs an empty card and a reader. It exercises the example's Desfire class, and through it the driver.",
+                    "evidence": [
+                        "examples/PN532_ESP32_DESFire_DoorOpener_V005/Desfire.cpp:1341",
+                        "examples/PN532_ESP32_DESFire_DoorOpener_V005/PN532_ESP32_DESFire_DoorOpener_V005.ino:113",
+                        "examples/PN532_ESP32_DESFire_DoorOpener_V005/PN532_ESP32_DESFire_DoorOpener_V005.ino:733"
+                    ]
+                },
+                "code_health.examples": {
+                    "status": "yes",
+                    "note": "Ten example folders, most of them complete applications rather than small demonstrations.",
+                    "evidence": [
+                        "examples/PN532_ESP32_NTAG215_Spotify_Player_V033/PN532_ESP32_NTAG215_Spotify_Player_V033.ino:754",
+                        "examples/PN532_ESP32_NTAG215_Spotify_Player_V033/PN532_ESP32_NTAG215_Spotify_Player_V033.ino:756",
+                        "examples/PN532_ESP32_UltralightC_Explorer_V014/PN532_ESP32_UltralightC_Explorer_V014.ino:211",
+                        "examples/PN532_ESP32_NTAG215_NDEF_WebWriter_Dumper_V010/PN532_ESP32_NTAG215_NDEF_WebWriter_Dumper_V010.ino:713",
+                        "examples/PN532_ESP32_Card_Analyzer_V007/PN532_ESP32_Card_Analyzer_V007.ino:1602"
+                    ]
+                },
+                "code_health.docs": {
+                    "status": "partly",
+                    "note": "README.md has installation, wiring and a start-up sample that stops at SamConfig(). It shows no card read, does not mention SetPassiveActivationRetries(), although detection depends on it, and does not say how to select I2C. Comments above many functions in src/PN532.cpp cover part of the API. Its feature list claims items the code lacks (see defects).",
+                    "evidence": ["README.md:50", "README.md:60", "README.md:69", "README.md:72"]
+                },
+                "code_health.license": {
+                    "status": "yes",
+                    "note": "MIT in LICENSE.txt, but other files state other licenses: src/PN532.cpp line 4 says BSD and the example Desfire.cpp header says LGPL version 3 or later.",
+                    "evidence": ["LICENSE.txt:1", "README.md:111"]
+                }
+            },
+            "defects": [
+                {
+                    "what": "Every begin() in the default hardware SPI mode calls SPI.beginTransaction() and nothing calls endTransaction(), and on arduino-esp32 beginTransaction takes a non-recursive mutex with portMAX_DELAY, so a second begin() blocks forever: the DoorOpener re-init path, a second reader, and any other SPI transaction user on the bus (source read: arduino-esp32 3.3.12 and 2.0.16 libraries/SPI/src/SPI.cpp, CONFIG_DISABLE_HAL_LOCKS default n, ESP-IDF components/freertos/FreeRTOS-Kernel/queue.c xQueueSemaphoreTake; not run).",
+                    "severity": "high",
+                    "judged": "SpiClass::Begin calls beginTransaction and nothing in lib_c calls endTransaction. arduino-esp32 2.0.16 and 3.3.12 SPI.cpp take the plain mutex paramLock with portMAX_DELAY in beginTransaction and give it only in endTransaction, CONFIG_DISABLE_HAL_LOCKS is off in the 2.0.16 sdkconfig, so a second begin(), which the DoorOpener RESET command also reaches on a working chip, or any other transaction user on the bus blocks forever (read, not run).",
+                    "evidence": [
+                        "src/Utils.h:93",
+                        "src/PN532.cpp:137",
+                        "examples/PN532_ESP32_DESFire_DoorOpener_V005/PN532_ESP32_DESFire_DoorOpener_V005.ino:366",
+                        "examples/PN532_ESP32_DESFire_DoorOpener_V005/PN532_ESP32_DESFire_DoorOpener_V005.ino:452"
+                    ]
+                },
+                {
+                    "what": "begin() and SamConfig() leave MxRtyPassiveActivation at 0xFF, so with no card ReadPassiveTargetID(), readIso14443A() and readFelica() end in a WaitReady() timeout and return false instead of the documented true with length 0, and no ACK frame is sent, so the chip keeps polling with the RF field on until the next command.",
+                    "severity": "medium",
+                    "read_as": "high",
+                    "judged": "begin() and SamConfig() send no RFConfiguration item 5, so with the default MxRty of 0xFF (7.3.1) and no card the read ends in the 1 s WaitReady timeout and returns false, and nothing aborts the command. A program that calls the public SetPassiveActivationRetries(), as every polling example does, gets the documented result; the README basic sequence omits it.",
+                    "evidence": [
+                        "src/PN532.cpp:350",
+                        "src/PN532.cpp:365",
+                        "src/PN532.cpp:383",
+                        "src/PN532.cpp:681",
+                        "src/PN532.cpp:684",
+                        "README.md:72"
+                    ]
+                },
+                {
+                    "what": "dataExchange() and communicateThru() read rxMax + 8 bytes, but a frame with preamble that carries rxMax data bytes needs rxMax + 9 through DCS, so a response that exactly fills rx fails with 'Packet is longer than requested length' and the clamp to rxMax can never act.",
+                    "severity": "medium",
+                    "evidence": ["src/PN532.cpp:1097", "src/PN532.cpp:1120", "src/PN532.cpp:877", "src/PN532.cpp:1126"]
+                },
+                {
+                    "what": "In src/ dataExchange() and communicateThru() with rxMax above 72 always return false, because rxMax + 8 exceeds PN532_PACKBUFFSIZE or wraps in the byte parameter, and ReadData() rejects it after the command has already been sent to the card, so a write may have happened and the response stays unread in the chip.",
+                    "severity": "medium",
+                    "judged": "rxMax + 8 goes through a byte parameter, and ReadData rejects anything above 80 (or below 5 after the wrap) after SendCommandCheckAck has already sent the command, so rxMax above 72 always returns false with the response unread. The function works up to 72 and fails cleanly above it, and the callers in src stay below that, so this is a limit of a legal input.",
+                    "evidence": [
+                        "src/PN532.cpp:1118",
+                        "src/PN532.cpp:1120",
+                        "src/PN532.cpp:815",
+                        "src/PN532.cpp:820",
+                        "src/PN532.cpp:823",
+                        "src/PN532.h:27"
+                    ]
+                },
+                {
+                    "what": "ReadPassiveTargetID() reads a fixed 28 bytes, so an ISO14443-4 card whose ATS is longer than 7 bytes with a 7-byte UID, or 10 bytes with a 4-byte UID, makes it return false as a chip error, which in the DoorOpener example leads to InitReader() and the begin() hang.",
+                    "severity": "medium",
+                    "evidence": [
+                        "src/PN532.cpp:383",
+                        "src/PN532.cpp:879",
+                        "src/PN532.cpp:349",
+                        "examples/PN532_ESP32_DESFire_DoorOpener_V005/PN532_ESP32_DESFire_DoorOpener_V005.ino:1042",
+                        "examples/PN532_ESP32_DESFire_DoorOpener_V005/PN532_ESP32_DESFire_DoorOpener_V005.ino:366"
+                    ]
+                },
+                {
+                    "what": "ReadPassiveTargetID() reports a card with a 10-byte UID, which 7.3.5 allows as cascade level 3, as true with length 0, the same result as no card.",
+                    "severity": "medium",
+                    "evidence": ["src/PN532.cpp:350", "src/PN532.cpp:400", "src/PN532.cpp:404"]
+                },
+                {
+                    "what": "In I2C mode IsReady() ends each status read with STOP also when RDY = 1 and ReadPacket() then starts a new read, against the 6.2.4 text that the frame shall be read before STOP or its bytes are lost; Fig 31 draws status and frame as separate reads and no hardware test was made, so the loss itself is not shown.",
+                    "severity": "medium",
+                    "evidence": ["src/PN532.cpp:657", "src/PN532.cpp:658", "src/PN532.cpp:960"]
+                },
+                {
+                    "what": "Classic::AuthenticateDataBlock() in the example classes documents 4 or 7 byte UIDs but appends all of them, while 7.3.8 limits authentication data to 10 bytes (Data 0..9), so a 7-byte UID sends a command the chip rejects as a syntax error.",
+                    "severity": "medium",
+                    "evidence": [
+                        "examples/PN532_ESP32_DESFire_DoorOpener_V005/Classic.cpp:220",
+                        "examples/PN532_ESP32_DESFire_DoorOpener_V005/Classic.cpp:236"
+                    ]
+                },
+                {
+                    "what": "In the passport driver copy (both ICAO examples) the checksum loop in WriteCommand() has a byte counter and P reaches 256 or more with cmdlen of 250 or more, which the 255-byte buffer check allows, so dataExchange() with 248 or more bytes of tx never returns, and cmdlen 255 also wraps LEN to 0.",
+                    "severity": "medium",
+                    "judged": "The counter i is a byte and P is 6 + cmdlen, so with cmdlen of 250 or more i < P is always true and the checksum loop never ends; dataExchange admits that with txLen of 248 to 253. It needs a tx length at the top of what the buffer check allows.",
+                    "evidence": [
+                        "examples/PN532_ESP32_ICAO_eID_Inspector_V013/PN532_ESP32_ICAO_eID_Inspector_V013/PassportPN532.cpp:734",
+                        "examples/PN532_ESP32_ICAO_eID_Inspector_V013/PN532_ESP32_ICAO_eID_Inspector_V013/PassportPN532.cpp:724",
+                        "examples/PN532_ESP32_ICAO_eID_Inspector_V013/PN532_ESP32_ICAO_eID_Inspector_V013/PassportPN532.cpp:1135",
+                        "examples/PN532_ESP32_ICAO_eID_Inspector_V013/PN532_ESP32_ICAO_eID_Inspector_V013/PassportPN532.h:39"
+                    ]
+                },
+                {
+                    "what": "In I2C mode the results of Wire.endTransmission() and Wire.requestFrom() are discarded, so a command the chip did not acknowledge at address level, which 6.2.4 says can follow an exchange, is not resent and appears only as a generic ACK timeout.",
+                    "severity": "low",
+                    "evidence": ["src/Utils.h:143", "src/Utils.h:122", "src/PN532.cpp:777"]
+                },
+                {
+                    "what": "The constructor does not initialize mu8_DebugLevel, so a PN532 object that is not static prints debug output depending on stack or heap contents.",
+                    "severity": "low",
+                    "evidence": ["src/PN532.cpp:51", "src/PN532.h:225", "src/PN532.cpp:118"]
+                },
+                {
+                    "what": "InitHardwareSPI() and InitSoftwareSPI() set CS as output without driving it high, and arduino-esp32 pinMode() does not set a level, so CS keeps the output latch value until the first transfer, and if that value is low the reader is selected during traffic for another device on a shared bus.",
+                    "severity": "low",
+                    "evidence": ["src/PN532.cpp:109", "src/PN532.cpp:90"]
+                },
+                {
+                    "what": "InitI2C() and InitSoftwareSPI() call pinMode on the reset pin with no test for 0xFF, the value begin() and InitHardwareSPI() treat as no pin, which on ESP32 only logs an error.",
+                    "severity": "low",
+                    "evidence": ["src/PN532.cpp:68", "src/PN532.cpp:89", "src/PN532.cpp:108"]
+                },
+                {
+                    "what": "readFelica() ignores the result of SwitchOffRfField().",
+                    "severity": "low",
+                    "evidence": ["src/PN532.cpp:1178"]
+                },
+                {
+                    "what": "README.md claims High Speed UART support, but the code has only SPI, software SPI and I2C.",
+                    "severity": "low",
+                    "evidence": ["README.md:3", "README.md:10", "src/Utils.h:24", "src/Utils.h:25", "src/Utils.h:26"]
+                },
+                {
+                    "what": "README.md lists Arduino Uno and Mega, while library.properties declares only esp32.",
+                    "severity": "low",
+                    "evidence": ["README.md:9", "library.properties:9"]
+                },
+                {
+                    "what": "README.md lists DESFire, DES authentication, NDEF and Reader Test Utilities as library features or examples, but src/ has no such code and no reader test example exists; DESFire and NDEF exist only inside example sketches.",
+                    "severity": "low",
+                    "evidence": ["README.md:15", "README.md:16", "README.md:17", "README.md:33", "src/PN532.h:97"]
+                },
+                {
+                    "what": "A comment in src/Utils.h says software SPI is the only valid option for the DoorOpener sketch, while the default is hardware SPI and that sketch calls InitHardwareSPI().",
+                    "severity": "low",
+                    "evidence": [
+                        "src/Utils.h:19",
+                        "src/Utils.h:25",
+                        "examples/PN532_ESP32_DESFire_DoorOpener_V005/PN532_ESP32_DESFire_DoorOpener_V005.ino:313"
+                    ]
+                },
+                {
+                    "what": "The header comment of the passport driver copy says it keeps the original timeouts and receive delays, but PN532_TIMEOUT is 15000 against 1000 and the per-byte SPI receive delay is removed.",
+                    "severity": "low",
+                    "evidence": [
+                        "examples/PN532_ESP32_ICAO_eID_Inspector_V013/PN532_ESP32_ICAO_eID_Inspector_V013/PassportPN532.h:13",
+                        "examples/PN532_ESP32_ICAO_eID_Inspector_V013/PN532_ESP32_ICAO_eID_Inspector_V013/PassportPN532.h:14",
+                        "examples/PN532_ESP32_ICAO_eID_Inspector_V013/PN532_ESP32_ICAO_eID_Inspector_V013/PassportPN532.h:36",
+                        "src/PN532.h:24",
+                        "src/PN532.cpp:947"
+                    ]
+                }
+            ]
+        }
+    ]
+}

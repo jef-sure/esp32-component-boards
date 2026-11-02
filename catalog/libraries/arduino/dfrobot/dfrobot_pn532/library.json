@@ -1,0 +1,12 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "library",
+    "name": "dfrobot_pn532",
+    "title": "DFRobot_PN532",
+    "ecosystem": "arduino",
+    "owner": "dfrobot",
+    "url": "https://github.com/DFRobot/DFRobot_PN532",
+    "license": "MIT",
+    "install": [{"via": "git", "url": "https://github.com/DFRobot/DFRobot_PN532.git"}]
+}

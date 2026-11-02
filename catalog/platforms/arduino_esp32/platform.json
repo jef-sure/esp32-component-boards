@@ -1,0 +1,35 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "platform",
+    "name": "arduino_esp32",
+    "title": "Arduino",
+    "url": "https://github.com/espressif/arduino-esp32",
+    "ecosystem": "arduino",
+    "registry": "https://downloads.arduino.cc/libraries/library_index.json",
+    "project": "a sketch",
+    "writes_projects": false,
+    "versions": {
+        "3.3": {
+            "targets": [
+                "esp32",
+                "esp32s2",
+                "esp32c3",
+                "esp32s3",
+                "esp32c2",
+                "esp32c6",
+                "esp32h2",
+                "esp32p4",
+                "esp32c5",
+                "esp32c61"
+            ],
+            "on": "ESP-IDF 5.5"
+        }
+    },
+    "checked": {
+        "versions": {
+            "level": "vendor-code",
+            "source": "targets of idf_component.yml of arduino-esp32; release 3.3.12 names IDF 5.5.5"
+        }
+    }
+}

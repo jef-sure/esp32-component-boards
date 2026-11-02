@@ -1,0 +1,12 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "addon",
+    "name": "rj45_panel_extension",
+    "title": "RJ45 panel extension",
+    "description": "A short cable from the RJ45 of a board to a socket on the wall of a case.",
+    "stands": "port",
+    "needs": ["ethernet"],
+    "gives": {"provides": ["panel_ethernet"]},
+    "checked": {"facts": {"level": "vendor-docs", "source": "Adafruit 909, Panel Mount Ethernet Extension Cable"}}
+}

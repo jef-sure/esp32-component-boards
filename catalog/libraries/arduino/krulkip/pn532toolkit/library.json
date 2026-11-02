@@ -1,0 +1,12 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "library",
+    "name": "pn532toolkit",
+    "title": "PN532Toolkit",
+    "ecosystem": "arduino",
+    "owner": "krulkip",
+    "url": "https://github.com/krulkip/PN532Toolkit",
+    "license": "MIT",
+    "install": [{"via": "git", "url": "https://github.com/krulkip/PN532Toolkit.git"}]
+}

@@ -23,7 +23,7 @@
     "devices": {
         "audio_dac": {
             "class": "audio",
-            "on": {"i2s.i2s0": {"format": "tdm"}, "i2c.i2c0": {"address": "0x20"}},
+            "on": {"i2s.i2s0": {"format": "tdm"}, "i2c.i2c0": {"address": "0x10"}},
             "pins": {"pa": 42},
             "config": {"direction": "both", "sample_rate": 48000, "clock": "bclk"},
             "chip": "es8389"

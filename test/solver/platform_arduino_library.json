@@ -1,0 +1,7 @@
+{
+    "title": "With Arduino chosen a kit proposes no library it has not audited, and no components of ESP-IDF",
+    "imported": true,
+    "answers": {"platform": "arduino_esp32:3.3", "blocks": [{"role": "nfc", "name": "reader"}]},
+    "says": "audited libraries in order:",
+    "quiet": {"board": "esp32_devkit", "text": "the project gets it"}
+}

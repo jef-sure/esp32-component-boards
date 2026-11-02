@@ -31,7 +31,7 @@
         },
         "lcd_touch": {
             "class": "touch",
-            "on": {"i2c.i2c0": {"address": "0x70"}},
+            "on": {"i2c.i2c0": {"address": "0x38"}},
             "pins": {"int": 39},
             "config": {"over": "display_lcd", "x_max": 320, "y_max": 240},
             "chip": "ft5x06"

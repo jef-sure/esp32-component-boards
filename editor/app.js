@@ -290,23 +290,48 @@ const SelectPage = {
         const money = (price) => (!price ? '' : !price.known ? translate(store.language, 'price not known') : `${price.low === price.high ? price.low : `${price.low}–${price.high}`} ${price.currency}${price.missing.length ? ' + ?' : ''}`);
         const priceLink = (item) => reportLink({ template: 'price.yml', item, currency: store.currency });
         const filter = Vue.ref('');
+        const said = Vue.ref('');
+        const sendSaid = () => {
+            store.sayToAgent(said.value);
+            said.value = '';
+        };
         const groups = computed(() => store.palette.map((group) => ({ ...group, roles: group.roles.filter((role) => translate(store.language, role.text).toLowerCase().includes(filter.value.toLowerCase())) })).filter((group) => group.roles.length));
         const roleOf = (id) => store.palette.flatMap((group) => group.roles).find((role) => role.id === id);
         const nameOf = (event) => event.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '_').replace(/^[^a-z]+/, '').replace(/_+$/, '');
         // what limits a part of a role holds for all its blocks: it is asked on the first
         const firstOfRole = (at) => store.answers.blocks.findIndex((block) => block.role === store.answers.blocks[at].role) === at;
         const outputsQuestion = computed(() => store.questions.find((question) => question.type === 'outputs'));
-        return { store, host, fit, boards, others, asked, addOutput, money, numberOf, priceLink, MARKS, filter, groups, roleOf, nameOf, outputsQuestion, firstOfRole };
+        // the dialog and the palette are where blocks come from: once the dialog starts it takes the column, and the search stays
+        const talking = computed(() => store.agent && store.talk.length > 0);
+        const stream = ref(null);
+        Vue.watch(() => store.talk.length, () => Vue.nextTick(() => {
+            if (stream.value) stream.value.scrollTop = stream.value.scrollHeight;
+        }));
+        return { store, host, fit, boards, others, asked, addOutput, money, numberOf, priceLink, MARKS, filter, groups, roleOf, nameOf, outputsQuestion, firstOfRole, said, sendSaid, talking, stream };
     },
     template: `
-        <div class="select">
+        <div class="select" :class="{ talking }">
             <aside class="palette">
-                <h2>{{ t('Roles') }}</h2>
+                <h2 v-if="!talking">{{ t('Roles') }}</h2>
                 <input type="search" v-model="filter" :placeholder="t('find a role')">
-                <section v-for="group in groups" :key="group.id">
-                    <h3>{{ t(group.text) }}</h3>
-                    <button v-for="role in group.roles" :key="role.id" type="button" class="role" :class="{ empty: !role.count }" draggable="true"
-                        @dragstart="$event.dataTransfer.setData('text/plain', role.id)" @click="store.addBlock(role.id)">{{ t(role.text) }} <span class="note">{{ role.count }}</span></button>
+                <div v-if="!talking || filter" class="roles">
+                    <section v-for="group in groups" :key="group.id">
+                        <h3>{{ t(group.text) }}</h3>
+                        <button v-for="role in group.roles" :key="role.id" type="button" class="role" :class="{ empty: !role.count }" draggable="true"
+                            @dragstart="$event.dataTransfer.setData('text/plain', role.id)" @click="store.addBlock(role.id)">{{ t(role.text) }} <span class="note">{{ role.count }}</span></button>
+                    </section>
+                </div>
+                <section v-if="store.agent" class="talk">
+                    <div ref="stream" class="stream">
+                        <div v-for="item in store.talk" :key="item.id" class="said" :class="item.from">
+                            <pre v-if="item.description">{{ item.text }}</pre><template v-else>{{ item.text }}</template>
+                            <div v-if="item.blocks" class="offer">
+                                <span v-for="block in item.blocks.filter((one) => roleOf(one.role))" :key="block.role + block.name" class="tag">{{ block.name || block.role }}</span>
+                                <button v-if="!store.accepted.includes(item.id)" @click.prevent="store.acceptBlocks(item)">{{ t('put on the canvas') }}</button>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="text" v-model="said" :placeholder="t('Write to the model')" @keydown.enter.prevent="sendSaid">
                 </section>
             </aside>
             <form class="canvas" @submit.prevent @dragover.prevent @drop.prevent="store.addBlock($event.dataTransfer.getData('text/plain'))">
@@ -387,12 +412,13 @@ idf.py reconfigure build flash monitor</pre>
                         <div v-for="module in kit.wiring" :key="module.use" class="wiring"><b>{{ module.title }}</b>
                             <span v-for="wire in module.lines" :key="wire.line"><code>{{ wire.line }}</code> → {{ wire.to }}</span></div>
                     </details>
-                    <button v-if="host.canOpenFolder && !kit.imported" @click="store.planProject(kit)">{{ t('make a project…') }}</button>
+                    <button v-if="host.canOpenFolder && kit.writable" @click="store.planProject(kit)">{{ t('make a project…') }}</button>
                     <span v-if="kit.imported" class="hint">{{ t('imported: no project until this board is in the catalog') }}</span>
+                    <span v-else-if="!kit.writable" class="hint">{{ t('The page writes projects for ESP-IDF only for now.') }}</span>
                     <span v-else class="hint">{{ t('Writing a project into a folder takes Chromium.') }}</span>
                     <details v-if="rest.length" class="more"><summary>{{ t('{0} more on this board', rest.length) }}</summary>
                         <p v-for="other in rest" :key="other.headline">{{ other.headline }} <span class="note">{{ money(other.price) }}</span>
-                            <button v-if="host.canOpenFolder && !other.imported" @click="store.planProject(other)">{{ t('make a project…') }}</button></p>
+                            <button v-if="host.canOpenFolder && other.writable" @click="store.planProject(other)">{{ t('make a project…') }}</button></p>
                     </details>
                 </article>
                 <p v-if="!fit.length">{{ t('Nothing fits these answers.') }}</p>
@@ -439,7 +465,8 @@ const app = createApp({
             <span class="top">
                 <template v-if="store.page === 'select'">
                     <label v-for="question in store.topQuestions" :key="question.id">{{ t(question.text) }}
-                        <input type="number" min="0" step="any" :value="store.answers[question.id]" @input="store.answers[question.id] = numberOf($event)"></label>
+                        <select v-if="question.type === 'choice'" v-model="store.answers[question.id]"><option v-for="choice in question.choices" :key="choice.value" :value="choice.value === 'any' ? undefined : choice.value">{{ t(choice.text) }}</option></select>
+                        <input v-else type="number" min="0" step="any" :value="store.answers[question.id]" @input="store.answers[question.id] = numberOf($event)"></label>
                 </template>
                 <label>{{ t('Prices in') }}
                     <select v-model="store.currency"><option v-for="currency in store.currencies" :key="currency">{{ currency }}</option></select></label>

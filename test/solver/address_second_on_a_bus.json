@@ -1,0 +1,6 @@
+{
+    "title": "Two BME280 on one bus: the second takes the other address of the list, and the person sets it",
+    "imported": true,
+    "answers": {"blocks": [{"role": "pressure", "name": "in"}, {"role": "pressure", "name": "out"}]},
+    "says": "out: set its I2C address to 0x76"
+}

@@ -155,6 +155,27 @@ committed, a program that asks by kind.
   that only listen, by the channels of one.
 - `max7219` and the module `max7219_4in1`: its chain takes no pins, and `high_min_mv` of a chip brings a level shifter.
   The LEDs of the boards name their variant.
+- `tools/boards_mcp.py`: an MCP server that serves the page on 127.0.0.1 and puts the agent of a person beside it, for a
+  dialog, proposals of blocks and a description that a project keeps as `DESCRIPTION.md`. The page needs no key.
+- `kind: platform` in `catalog/platforms/`: which chips each version of ESP-IDF and Arduino takes, where its libraries
+  are published. A choice in the top row limits the boards by their chip.
+- `catalog/libraries/` holds all about libraries. `tools/import_libraries.py` writes `libraries.json`, the leading list with
+  the same facts about each, and `chip_libraries.json`, an index into it. It ranks nothing: popularity is shown and comes
+  last. A library nobody audited is no proposal of a kit, and a library with no chip is a library too.
+- `audit.json` beside a library record keeps what audits found, by commit, and `catalog/rubrics/` what they ask.
+  `tools/audit.py` takes a result and shows what a newer version changed in what was read.
+- A kit names the audited libraries that fit its platform and bus, in order, with no counts: a library answers for what it
+  requires. What was found reaches the model through `library_audits` of `boards_mcp.py`.
+- A chip goes first on the bus its library was tried on, and a kit says so of any other.
+- An SPI host takes six devices in the solver, as in `spi_master.c`: the seventh goes on a second host, with lines of its own.
+- `tools/import_addresses.py` writes the I2C addresses of imported chips, from ESPHome and from library headers with a
+  permissive license. The solver gives a second part of one chip the next free address and tells the person to set it. A
+  clash on an imported list stays an unknown, since the list can be short.
+- `tools/import_board_manager.py` shifts the 8-bit addresses of the packs: ES8311 was at 0x30, not 0x18, on 16 boards.
+  `check_format.py` refuses an imported board with the 8-bit form of an address its chip has.
+- An addon on a port gives what a board lacks, by what the board has and the plug it takes: a PoE splitter on a board
+  with Ethernet, a socket on the wall of a case. `plug` on a step of power, `rj45`, `usb_c`, `micro_usb` in
+  `catalog/connectors/`.
 - The first screen is a palette of roles, a canvas of blocks with a variant, a name and their settings, and the kits.
   Blocks of one role are one need under their names. A field keeps a description of the device. A part with no bus is
   wired by its first way.

@@ -15,7 +15,7 @@
         "axp2101_power_manager": {"class": "pmic", "chip": "axp2101"},
         "audio_dac": {
             "class": "audio",
-            "on": {"i2s.i2s0": {}, "i2c.i2c0": {"address": "0x30"}},
+            "on": {"i2s.i2s0": {}, "i2c.i2c0": {"address": "0x18"}},
             "pins": {"pa": 46},
             "config": {"direction": "out", "sample_rate": 48000},
             "start": {"after": ["axp2101_power_manager"]},

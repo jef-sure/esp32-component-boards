@@ -27,7 +27,7 @@
         },
         "lcd_touch": {
             "class": "touch",
-            "on": {"i2c.i2c0": {"address": "0x2a"}},
+            "on": {"i2c.i2c0": {"address": "0x15"}},
             "pins": {"rst": {"gpio": 1, "active": "low"}},
             "controls": {
                 "orientation": {"how": "driver", "start": {"x": "left-right", "y": "top-bottom", "swap": false}}

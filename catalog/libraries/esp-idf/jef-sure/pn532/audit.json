@@ -1,0 +1,1398 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "audit",
+    "name": "pn532",
+    "title": "PN532",
+    "audits": [
+        {
+            "version": "0.7.6",
+            "tag": "v0.7.6",
+            "blind": true,
+            "commit": "b5048d37b7dc1a767c08b16206a952abbdb7a658",
+            "rubric": "pn532",
+            "rubric_version": 1,
+            "date": "2026-11-01",
+            "by": "claude-opus-5-5",
+            "items": {
+                "transports.i2c": {
+                    "status": "partly",
+                    "note": "The protocol layer is complete: RDY status byte before data, repeats after a refused write, address 0x24. pn532_i2c_attach() on a bus the application created without a queue (ESP-IDF >= 5.4) is synchronous and correct. pn532_i2c_init() creates an asynchronous bus, on which a read returns before its data arrives: see the first defect. By those sources readiness stays false on that bus, so pn532_init() is expected to fail; this comes from reading the library and ESP-IDF, not from a run on hardware.",
+                    "evidence": [
+                        "src/pn532-bus-i2c.c:56",
+                        "src/pn532-bus-i2c.c:93",
+                        "src/pn532-bus-i2c.c:232",
+                        "src/pn532-bus-i2c.c:261"
+                    ]
+                },
+                "transports.spi": {
+                    "status": "yes",
+                    "note": "Half duplex, LSB first, mode 0, NSS driven as a GPIO.",
+                    "evidence": [
+                        "src/pn532-bus-spi.c:115",
+                        "src/pn532-bus-spi.c:131",
+                        "src/pn532-bus-spi.c:152",
+                        "src/pn532-bus-spi.c:339"
+                    ]
+                },
+                "transports.uart": {
+                    "status": "yes",
+                    "note": "HSU with the 0x55 0x55 wake-up preamble, a read driven by the frame header, SetSerialBaudRate and a baud rate probe.",
+                    "evidence": [
+                        "src/pn532-bus-uart.c:57",
+                        "src/pn532-bus-uart.c:84",
+                        "src/pn532-bus-uart.c:231",
+                        "src/pn532-bus-uart.c:321"
+                    ]
+                },
+                "builds_on.esp_idf": {
+                    "status": "yes",
+                    "note": "Not built, by the rules of this audit. No Arduino include. It calls driver/i2c_master.h (the new master API, not driver/i2c.h), driver/spi_master.h and driver/uart.h. The calls guarded by version were compared with the ESP-IDF 5.3.1 and 5.4.1 headers and match; no 5.2 tree was available to check the lower bound of the manifest.",
+                    "evidence": ["include/pn532.h:14", "include/pn532.h:15", "include/pn532.h:16", "CMakeLists.txt:3"]
+                },
+                "builds_on.arduino": {
+                    "status": "no",
+                    "searched": "Case-insensitive 'arduino' in every file of the library, Wire, SPI.h, *.ino, library.properties, library.json, keywords.txt: no match.",
+                    "note": "ESP-IDF only."
+                },
+                "builds_on.esp_idf_component": {
+                    "status": "yes",
+                    "evidence": ["idf_component.yml:1", "idf_component.yml:11", "CMakeLists.txt:8"]
+                },
+                "frames.ack_checked": {
+                    "status": "yes",
+                    "note": "A missing ACK repeats the frame once, then runs the abort procedure and returns a failure. Any other 6 bytes, a NACK included, also abort the command.",
+                    "evidence": [
+                        "src/pn532.c:267",
+                        "src/pn532.c:450",
+                        "src/pn532.c:455",
+                        "src/pn532.c:459",
+                        "src/pn532.c:461"
+                    ]
+                },
+                "frames.checksums_checked": {
+                    "status": "yes",
+                    "note": "A checksum error requests the frame again with a NACK, up to two times.",
+                    "evidence": ["src/pn532.c:352", "src/pn532.c:359", "src/pn532.c:374", "src/pn532.c:376"]
+                },
+                "frames.extended_frames": {
+                    "status": "yes",
+                    "note": "Both directions, with a 280-byte frame limit.",
+                    "evidence": [
+                        "src/pn532.c:158",
+                        "src/pn532.c:162",
+                        "src/pn532.c:349",
+                        "src/pn532.c:351",
+                        "src/pn532-bus-uart.c:114"
+                    ]
+                },
+                "frames.error_frame": {
+                    "status": "yes",
+                    "evidence": ["src/pn532.c:36", "src/pn532.c:333", "src/pn532.c:336"]
+                },
+                "frames.response_code_checked": {
+                    "status": "yes",
+                    "evidence": ["src/pn532.c:390", "src/pn532.c:394", "src/pn532.c:478"]
+                },
+                "waiting.irq": {
+                    "status": "yes",
+                    "note": "Optional. The line level is read, the falling edge only wakes the wait, and the bus status is still polled every 10 ms as a fallback.",
+                    "evidence": ["src/pn532.c:28", "src/pn532.c:221", "src/pn532.c:244", "src/pn532.c:693"]
+                },
+                "waiting.ready_polling": {
+                    "status": "yes",
+                    "note": "UART counts buffered bytes instead. On I2C the poll is correct only on a synchronous bus: see the first defect.",
+                    "evidence": [
+                        "src/pn532.c:252",
+                        "src/pn532-bus-spi.c:152",
+                        "src/pn532-bus-spi.c:177",
+                        "src/pn532-bus-i2c.c:114",
+                        "src/pn532-bus-i2c.c:121"
+                    ]
+                },
+                "waiting.bounded_waits": {
+                    "status": "partly",
+                    "note": "With non-zero timeouts every wait ends: pn532_wait_ready() has a wall-clock deadline in both branches, I2C calls pass 100 ms, UART reads have a budget, SCL stretching is capped, and the defaults are 500 ms and 50 ms. A zero timeout_ms, ack_timeout_ms or timeout argument removes the deadline, and a dead chip then blocks the caller for good. spi_device_acquire_bus() with portMAX_DELAY waits for the bus lock, not for the chip, and ESP-IDF requires that value.",
+                    "evidence": [
+                        "src/pn532.c:218",
+                        "src/pn532.c:230",
+                        "src/pn532.c:253",
+                        "include/pn532.h:142",
+                        "src/pn532-bus-i2c.c:23"
+                    ]
+                },
+                "waiting.nonblocking_detect": {
+                    "status": "no",
+                    "searched": "A function that sends InListPassiveTarget and returns, a separate collect call, InAutoPoll, a use of the IRQ queue outside pn532_wait_ready(). None exists: pn532_14443_get_all_uids_ex() and pn532_14443_select_by_uid() go through pn532_execute_command(), which blocks until the response or the timeout, and pn532_write_frame() is static."
+                },
+                "cards.iso14443a_uid": {
+                    "status": "yes",
+                    "note": "4, 7 and 10 byte UIDs, with cascade tags added for a targeted listing.",
+                    "evidence": [
+                        "src/pn532-14443.c:269",
+                        "src/pn532-14443.c:417",
+                        "src/pn532-14443.c:424",
+                        "src/pn532-14443.c:484"
+                    ]
+                },
+                "cards.two_targets": {
+                    "status": "yes",
+                    "note": "Asks for two, parses both entries with their ATS, and switches between them with InSelect.",
+                    "evidence": [
+                        "src/pn532-14443.c:11",
+                        "src/pn532-14443.c:484",
+                        "src/pn532-14443.c:523",
+                        "src/pn532-14443.c:578"
+                    ]
+                },
+                "cards.mifare_classic": {
+                    "status": "yes",
+                    "note": "Also value blocks: increment, decrement, restore, transfer.",
+                    "evidence": [
+                        "src/pn532-mifare.c:23",
+                        "src/pn532-mifare.c:39",
+                        "src/pn532-mifare.c:59",
+                        "src/pn532-14443.c:679"
+                    ]
+                },
+                "cards.ultralight_ntag": {
+                    "status": "yes",
+                    "note": "READ returns a window of four pages. GET_VERSION tells the NTAG and Ultralight variants apart.",
+                    "evidence": [
+                        "src/pn532-mifare.c:37",
+                        "src/pn532-mifare.c:64",
+                        "src/pn532-ndef.c:913",
+                        "src/pn532-14443.c:139"
+                    ]
+                },
+                "cards.iso14443_4_apdu": {
+                    "status": "yes",
+                    "note": "With a 1500 ms minimum timeout, MI rounds and NAD handling; SELECT and READ BINARY helpers.",
+                    "evidence": ["src/pn532-14443.c:682", "src/pn532-14443.c:706", "src/pn532.c:1011"]
+                },
+                "cards.ndef": {
+                    "status": "yes",
+                    "note": "Reads Type 2, MIFARE Classic through MAD1 and MAD2, and Type 4. Writes Type 2 only.",
+                    "evidence": [
+                        "src/pn532-ndef.c:1055",
+                        "src/pn532-ndef.c:1657",
+                        "src/pn532-ndef.c:1757",
+                        "src/pn532-ndef.c:1820"
+                    ]
+                },
+                "cards.iso14443b": {
+                    "status": "no",
+                    "searched": "BrTy values of InListPassiveTarget (only 0x00 is sent, PN532_MIFARE_ISO14443A), ATQB, ATTRIB, REQB, 14443B, Type B in src and include: no match."
+                },
+                "cards.felica": {
+                    "status": "no",
+                    "searched": "FeliCa, SENSF, POL_REQ, BrTy 0x01 or 0x02 in src and include: no match."
+                },
+                "cards.card_emulation": {
+                    "status": "no",
+                    "searched": "TgInitAsTarget, TgInit, 0x8C, TgGetData, TgSetData, TgResponse in src and include: no match."
+                },
+                "cards.peer_to_peer": {
+                    "status": "no",
+                    "searched": "InJumpForDEP, InJumpForPSL, 0x56, 0x46, InATR, InPSL in src and include: no match. A comment in pn532_in_data_exchange() also says DEP targets are not activated."
+                },
+                "chip_control.firmware_version": {
+                    "status": "yes",
+                    "note": "Also checks that the IC byte is 0x32.",
+                    "evidence": ["src/pn532-internal.h:31", "src/pn532.c:525", "src/pn532.c:532"]
+                },
+                "chip_control.sam_configuration": {
+                    "status": "yes",
+                    "note": "Normal mode only, from pn532_init() and pn532_recover(); the function is static.",
+                    "evidence": ["src/pn532.c:89", "src/pn532.c:862", "src/pn532.c:864"]
+                },
+                "chip_control.rf_field_control": {"status": "yes", "evidence": ["src/pn532.c:788", "src/pn532.c:790"]},
+                "chip_control.retries_control": {
+                    "status": "yes",
+                    "evidence": ["src/pn532.c:851", "src/pn532.c:852", "src/pn532.c:857"]
+                },
+                "chip_control.power_down": {
+                    "status": "partly",
+                    "searched": "Command 0x16, PowerDown, POWERDOWN in src and include: the command code is not defined and no function sends it; the word appears only in comments.",
+                    "note": "Waking up is implemented in every transport and runs from pn532_reset(). The PowerDown command is not: a caller has only the raw pn532_execute_command().",
+                    "evidence": [
+                        "src/pn532.c:615",
+                        "src/pn532-bus-spi.c:201",
+                        "src/pn532-bus-i2c.c:141",
+                        "src/pn532-bus-uart.c:231"
+                    ]
+                },
+                "chip_control.reset_recovery": {
+                    "status": "yes",
+                    "note": "Reset line, or without one the abort procedure and a software restart; the transport can renegotiate the link (HSU baud probe), and the runtime configuration is written again.",
+                    "evidence": [
+                        "src/pn532.c:598",
+                        "src/pn532.c:600",
+                        "src/pn532.c:1258",
+                        "src/pn532.c:1271",
+                        "src/pn532.c:1276"
+                    ]
+                },
+                "several.several_readers": {
+                    "status": "yes",
+                    "note": "State of a reader is in its heap pn532_t and bus struct, and the ISR gets the reader as its argument. The one mutable static, s_spi_hosts, counts devices per SPI host and is shared on purpose; it is not state of one reader. Other statics are const tables.",
+                    "evidence": [
+                        "src/pn532.c:638",
+                        "src/pn532.c:693",
+                        "src/pn532-bus-spi.c:45",
+                        "src/pn532-bus-spi.c:310"
+                    ]
+                },
+                "several.shared_spi_bus": {
+                    "status": "yes",
+                    "note": "Each reader has its own device handle and NSS GPIO. A second pn532_spi_init() on a host reuses the bus, and the bus is held while NSS is low.",
+                    "evidence": [
+                        "src/pn532-bus-spi.c:80",
+                        "src/pn532-bus-spi.c:86",
+                        "src/pn532-bus-spi.c:258",
+                        "src/pn532-bus-spi.c:337",
+                        "src/pn532-bus-spi.c:389"
+                    ]
+                },
+                "several.thread_safety": {
+                    "status": "partly",
+                    "searched": "xSemaphore, SemaphoreHandle, mutex, portENTER_CRITICAL, portMUX in src and include: no match.",
+                    "note": "There is no lock in pn532_t. spi_device_acquire_bus() protects one SPI transaction, not one command. Two rules are stated: the README forbids polling two readers from different tasks, and a comment keeps bus creation and destruction in one task. No rule covers one pn532_t used by several tasks.",
+                    "evidence": ["README.md:421", "src/pn532-bus-spi.c:44", "src/pn532-bus-spi.c:80"]
+                },
+                "code_health.errors_returned": {
+                    "status": "partly",
+                    "note": "Polling returns pn532_poll_status_t and NDEF calls return pn532_ndef_result_t, which tell no card, timeout, transport and protocol failures apart. Block read and write, authentication and APDU exchange return only false or -2: the PN532 status byte goes to a debug log and is not kept, and the enum of last_command_status is in a private header. A refused key and a lost card are the same value.",
+                    "evidence": [
+                        "include/pn532.h:119",
+                        "include/pn532-ndef.h:43",
+                        "src/pn532-14443.c:472",
+                        "include/pn532.h:603",
+                        "src/pn532.c:1069"
+                    ]
+                },
+                "code_health.buffers_bounded": {
+                    "status": "yes",
+                    "note": "No unchecked copy was found in the frame, target, APDU, TLV or NDEF paths.",
+                    "evidence": [
+                        "src/pn532.c:367",
+                        "src/pn532.c:502",
+                        "src/pn532.c:1092",
+                        "src/pn532-14443.c:260",
+                        "src/pn532-14443.c:276",
+                        "src/pn532-14443.c:805",
+                        "src/pn532-ndef.c:310",
+                        "src/pn532-ndef.c:928"
+                    ]
+                },
+                "code_health.allocation_checked": {
+                    "status": "yes",
+                    "note": "Every allocation in src is checked, and the error paths free what was already allocated.",
+                    "evidence": [
+                        "src/pn532.c:639",
+                        "src/pn532.c:645",
+                        "src/pn532.c:685",
+                        "src/pn532-14443.c:514",
+                        "src/pn532-ndef.c:529",
+                        "src/pn532-ndef.c:905",
+                        "src/pn532-ndef.c:1736",
+                        "src/pn532-bus-spi.c:352",
+                        "src/pn532-bus-i2c.c:179"
+                    ]
+                },
+                "code_health.tests": {
+                    "status": "yes",
+                    "note": "70 TEST_CASE entries against a mock bus with simulated cards, for a board or on the host under AddressSanitizer. Not run in this audit. src/pn532-bus-*.c are outside them: no test creates an SPI, I2C or UART transport.",
+                    "evidence": [
+                        "test_apps/polling/main/test_pn532_polling.c:486",
+                        "test_apps/polling/main/test_pn532_polling.c:791",
+                        "host_test/Makefile:2",
+                        ".github/workflows/host-test.yml:16"
+                    ]
+                },
+                "code_health.examples": {
+                    "status": "yes",
+                    "note": "One SPI example project.",
+                    "evidence": [
+                        "examples/simple/main/main.c:520",
+                        "examples/simple/main/main.c:554",
+                        "examples/simple/main/main.c:444",
+                        "examples/simple/README.md:1"
+                    ]
+                },
+                "code_health.docs": {
+                    "status": "yes",
+                    "note": "README of 630 lines and Doxygen comments in the public headers.",
+                    "evidence": ["README.md:1", "README.md:15", "README.md:359", "include/pn532.h:484"]
+                },
+                "code_health.license": {"status": "yes", "evidence": ["LICENSE:1", "idf_component.yml:27"]}
+            },
+            "defects": [
+                {
+                    "what": "pn532_i2c_init() creates the bus with trans_queue_depth = 1, which in ESP-IDF (i2c_new_master_bus(), read in v5.3.1, v5.4.1, v5.5.5 and v6.1) switches the bus to asynchronous mode: i2c_master_receive() returns before the byte arrives, so pn532_i2c_bus_is_ready() tests its zeroed local status and the ISR later writes through a pointer to that dead stack variable, pn532_i2c_bus_read_data() tests a stale buffer, bus errors do not reach the driver, and ESP-IDF states that i2c_master_probe(), the wake-up call here, is not compatible with this mode.",
+                    "severity": "high",
+                    "judged": "trans_queue_depth = 1 sets async_trans in i2c_new_master_bus() (esp_driver_i2c/i2c_master.c, read in v5.3.1 and v5.4.1 under ~/esp and in v5.5.5 and v6.1 under ~/.espressif), so i2c_master_receive() returns ESP_OK after starting the transfer: is_ready compares its zeroed local, the ISR later writes to that dead stack slot, read_data compares old buffer contents, and NACKs never reach the driver. pn532_i2c_init() therefore cannot work with a working chip, while pn532_i2c_attach() on a bus with depth 0 is not affected; read only, not run on a board.",
+                    "measured": {
+                        "level": "hardware",
+                        "source": "trans_queue_depth 1 against 0 on JC4827W543C with its GT911, ESP-IDF 6.1: i2c_master_receive returned ESP_OK after 46 us with the byte not there, and ESP_OK on an absent address. The library itself and a PN532 were not run.",
+                        "by": "boards",
+                        "date": "2026-11-01"
+                    },
+                    "evidence": [
+                        "src/pn532-bus-i2c.c:232",
+                        "src/pn532-bus-i2c.c:108",
+                        "src/pn532-bus-i2c.c:114",
+                        "src/pn532-bus-i2c.c:121",
+                        "src/pn532-bus-i2c.c:94",
+                        "src/pn532-bus-i2c.c:141"
+                    ]
+                },
+                {
+                    "what": "A zero pn532->timeout_ms, a public field, removes the deadline from the commands that pass it (RFConfiguration, InRelease, InSelect, InListPassiveTarget, MIFARE READ), so a dead chip then blocks in pn532_wait_ready() with no end; pn532_uart_set_baud_rate() guards against that value, these do not.",
+                    "severity": "low",
+                    "evidence": ["src/pn532.c:253", "src/pn532.c:526", "src/pn532-bus-uart.c:390"]
+                },
+                {
+                    "what": "pn532_14443_4_transceive() issues a bare InSelect for a target marked tg_stale, although the comment at that mark in pn532_in_data_exchange() says InSelect does not wake such a card and the next exchange times out, so by that comment the APDU after status 0x0B, 0x13 or 0x14 fails and its timeout switches the field off; the NDEF paths check tg_stale, this one does not.",
+                    "severity": "low",
+                    "evidence": [
+                        "src/pn532-14443.c:699",
+                        "src/pn532.c:1059",
+                        "src/pn532.c:1065",
+                        "src/pn532-ndef.c:1841"
+                    ]
+                },
+                {
+                    "what": "classic_read_ndef_from_mad() returns PN532_NDEF_ERR_NO_NDEF when reading the MAD fails, so a lost card or a link failure at that stage looks like a card without NDEF and the retry in pn532_ndef_read_card_auto(), which runs only on PN532_NDEF_ERR_READ_FAILED, is skipped.",
+                    "severity": "low",
+                    "evidence": ["src/pn532-ndef.c:1570", "src/pn532-ndef.c:1571", "src/pn532-ndef.c:1821"]
+                },
+                {
+                    "what": "pn532_uart_bus_write_command() gives uart_wait_tx_done() a fixed 100 ms while the 128-byte FIFO takes 133 ms to empty at 9600 baud, so a command frame of about 100 bytes or more is reported as failed at that rate while it still leaves the UART and the chip runs it; the read side scales its budget with the baud rate.",
+                    "severity": "low",
+                    "evidence": ["src/pn532-bus-uart.c:16", "src/pn532-bus-uart.c:63", "src/pn532-bus-uart.c:101"]
+                },
+                {
+                    "what": "pn532_init() ignores the result of gpio_config() for the reset and IRQ pins, so a pin that cannot be configured leaves a reset that does nothing, or an IRQ level read from an unconfigured pad, with no error; pn532_spi_add_device() does check the same call.",
+                    "severity": "low",
+                    "evidence": ["src/pn532.c:672", "src/pn532.c:683", "src/pn532-bus-spi.c:325"]
+                },
+                {
+                    "what": "The public pn532_mifare_increment(), _decrement(), _restore() and _transfer() read pn532->timeout_ms without a NULL check, so a NULL device crashes there, while the block functions of the same file reject it.",
+                    "severity": "low",
+                    "evidence": ["src/pn532-mifare.c:165", "src/pn532-mifare.c:187", "src/pn532-mifare.c:29"]
+                }
+            ]
+        },
+        {
+            "version": "0.7.7",
+            "tag": "v0.7.7",
+            "blind": true,
+            "commit": "4de9de5a273823b7a4afa98fd0319d7d653db382",
+            "rubric": "pn532",
+            "rubric_version": 2,
+            "date": "2026-11-02",
+            "by": "claude-opus-5-5",
+            "items": {
+                "transports.i2c": {
+                    "status": "partly",
+                    "note": "7-bit address 0x24, clock clamped to 400 kHz, status byte first in each frame read, frame read in one transfer (281 bytes, so a frame of any legal size ends before STOP). After NOT READY a STOP follows and the read is repeated. Not met: pn532_i2c_bus_is_ready() reads the status byte alone, and i2c_master_receive() always ends with STOP (esp_driver_i2c/i2c_master.c, v6.1), so on a ready chip a STOP comes after the status byte and before the frame. UM0701-02 6.2.4 says the rest of the frame shall be read before STOP; the code comment at line 117 admits this. This happens when no IRQ line is used; with IRQ low the status-only read is skipped. See the defects.",
+                    "evidence": [
+                        "include/pn532.h:26",
+                        "include/pn532.h:35",
+                        "src/pn532-bus-i2c.c:198",
+                        "src/pn532-bus-i2c.c:205",
+                        "src/pn532-bus-i2c.c:94",
+                        "src/pn532-bus-i2c.c:96",
+                        "src/pn532-bus-i2c.c:89",
+                        "src/pn532-bus-i2c.c:122",
+                        "src/pn532-bus-i2c.c:129"
+                    ]
+                },
+                "transports.spi": {
+                    "status": "yes",
+                    "note": "Mode 0, LSB first, 8-bit command phase, clock clamped to 5 MHz, half duplex, NSS driven as a GPIO. Half-duplex reads with length 0 and rxlength set pass check_trans_valid() in esp_driver_spi/src/gpspi/spi_master.c (v6.1). The ready check also refuses a status byte with bits 7..4 or 1 set (line 167), which is stricter than 6.2.5, where those bits are rfu or nu.",
+                    "evidence": [
+                        "src/pn532-bus-spi.c:336",
+                        "src/pn532-bus-spi.c:339",
+                        "src/pn532-bus-spi.c:304",
+                        "include/pn532.h:41",
+                        "src/pn532-internal.h:44",
+                        "src/pn532-internal.h:45",
+                        "src/pn532-internal.h:46",
+                        "src/pn532-bus-spi.c:115",
+                        "src/pn532-bus-spi.c:131",
+                        "src/pn532-bus-spi.c:152"
+                    ]
+                },
+                "transports.uart": {
+                    "status": "yes",
+                    "note": "Frames are read by their header, with a time budget sized from the baud rate; ready means 6 or more bytes buffered. Wake-up is a 0x55 preamble followed by a pause, as in 7.2.11. See the defect about 9600 baud.",
+                    "evidence": [
+                        "src/pn532-bus-uart.c:321",
+                        "src/pn532-bus-uart.c:57",
+                        "src/pn532-bus-uart.c:105",
+                        "src/pn532-bus-uart.c:213",
+                        "src/pn532-bus-uart.c:231"
+                    ]
+                },
+                "builds_on.esp_idf": {
+                    "status": "yes",
+                    "note": "Uses driver/i2c_master.h (not the old driver/i2c.h), spi_master and uart; no Arduino layer. Not built, as instructed. scl_wait_us, i2c_master_probe, i2c_master_get_bus_handle, spi_bus_get_max_transaction_len and spi_bus_dma_memory_alloc were found in the headers of ESP-IDF v5.5.5 and v6.1 under ~/.espressif. The manifest says >=5.2.0; 5.2 to 5.4 are not on this machine, so the lower bound is not checked.",
+                    "evidence": [
+                        "include/pn532.h:14",
+                        "include/pn532.h:15",
+                        "include/pn532.h:16",
+                        "src/pn532-bus-i2c.c:248",
+                        "CMakeLists.txt:3",
+                        "idf_component.yml:11"
+                    ]
+                },
+                "builds_on.arduino": {
+                    "status": "no",
+                    "searched": "Arduino.h, Wire.h, SPI.h, the ARDUINO macro, library.properties, setup()/loop() in all files: none. All sources include ESP-IDF driver headers."
+                },
+                "builds_on.esp_idf_component": {
+                    "status": "yes",
+                    "evidence": ["CMakeLists.txt:8", "idf_component.yml:2"]
+                },
+                "frames.ack_checked": {
+                    "status": "yes",
+                    "note": "The ACK is compared byte by byte. A missing ACK makes the host send the frame once more, as 6.2.3 asks, then abort and report PN532_COMMAND_STATUS_ACK_TIMEOUT. A wrong ACK aborts. No code expects a NACK from the chip.",
+                    "evidence": [
+                        "src/pn532.c:267",
+                        "src/pn532.c:443",
+                        "src/pn532.c:455",
+                        "src/pn532.c:459",
+                        "src/pn532.c:461"
+                    ]
+                },
+                "frames.nack_resend": {
+                    "status": "yes",
+                    "note": "A damaged frame or a failed read gets up to two NACKs. A response that never becomes ready ends in the ACK abort, not in a NACK; that is the behaviour the abort_on_timeout item asks for.",
+                    "evidence": [
+                        "src/pn532.c:35",
+                        "src/pn532.c:39",
+                        "src/pn532.c:482",
+                        "src/pn532.c:484",
+                        "src/pn532.c:488"
+                    ]
+                },
+                "frames.checksums_checked": {
+                    "status": "yes",
+                    "evidence": ["src/pn532.c:352", "src/pn532.c:359", "src/pn532.c:373", "src/pn532.c:376"]
+                },
+                "frames.extended_frames": {
+                    "status": "yes",
+                    "note": "Both directions. The buffer of 280 bytes holds the 265 bytes of 6.2.1.2 with header. The UART read handles the 8-byte header too.",
+                    "evidence": [
+                        "src/pn532.c:156",
+                        "src/pn532.c:158",
+                        "src/pn532.c:349",
+                        "src/pn532.c:351",
+                        "include/pn532.h:50"
+                    ]
+                },
+                "frames.error_frame": {
+                    "status": "yes",
+                    "evidence": ["src/pn532.c:36", "src/pn532.c:333", "src/pn532.c:336", "src/pn532.c:495"]
+                },
+                "frames.response_code_checked": {
+                    "status": "yes",
+                    "evidence": ["src/pn532.c:390", "src/pn532.c:394", "src/pn532.c:478"]
+                },
+                "frames.status_decoded": {
+                    "status": "yes",
+                    "note": "InDataExchange and InCommunicateThru mask the byte. InSelect, InDeselect and InRelease compare the whole byte, which is harmless because 7.1 gives NAD and MI for the data commands.",
+                    "evidence": [
+                        "src/pn532.c:58",
+                        "src/pn532.c:1022",
+                        "src/pn532.c:1076",
+                        "src/pn532.c:1102",
+                        "src/pn532.c:1150"
+                    ]
+                },
+                "waiting.irq": {
+                    "status": "yes",
+                    "note": "Optional, per device. The wait checks the line level and uses queued edges as a hint. The bus is also polled every 10 ms in this mode, as a fallback. Fig 47 draws P70_IRQ rising at the start of the read, so the level check after the ACK read is sound.",
+                    "evidence": ["src/pn532.c:20", "src/pn532.c:693", "src/pn532.c:221", "src/pn532.c:244"]
+                },
+                "waiting.ready_polling": {
+                    "status": "yes",
+                    "evidence": [
+                        "src/pn532.c:252",
+                        "src/pn532-bus-spi.c:152",
+                        "src/pn532-bus-spi.c:177",
+                        "src/pn532-bus-i2c.c:122",
+                        "src/pn532-bus-uart.c:213"
+                    ]
+                },
+                "waiting.bounded_waits": {
+                    "status": "yes",
+                    "note": "All waits the library starts itself have a limit: ACK 50 ms, response 500 ms by default, I2C and UART transfers 100 ms. A timeout of 0 means no limit, but only when the caller asks for it: pn532_set_ack_timeout(p, 0), pn532->timeout_ms = 0 or a raw call with timeout 0. spi_device_acquire_bus(portMAX_DELAY) waits for the bus lock, not for the chip.",
+                    "evidence": [
+                        "src/pn532.c:232",
+                        "src/pn532.c:253",
+                        "src/pn532-bus-i2c.c:16",
+                        "src/pn532-bus-uart.c:16",
+                        "src/pn532-bus-uart.c:63",
+                        "src/pn532.c:230"
+                    ]
+                },
+                "waiting.abort_on_timeout": {
+                    "status": "yes",
+                    "note": "Both timeouts send the ACK frame and then drain any frame already on its way. Init also sets MxRtyPassiveActivation to 5, so InListPassiveTarget ends by itself without a card.",
+                    "evidence": [
+                        "src/pn532.c:290",
+                        "src/pn532.c:316",
+                        "src/pn532.c:455",
+                        "src/pn532.c:470",
+                        "src/pn532.c:300",
+                        "src/pn532.c:93"
+                    ]
+                },
+                "waiting.nonblocking_detect": {
+                    "status": "no",
+                    "searched": "A start/collect pair around InListPassiveTarget (0x4A). The only sender is pn532_list_passive_iso14443a_targets(), which goes through the blocking pn532_execute_command(). No *_start, *_begin, *_async, *_collect or *_check function exists for detection, and InAutoPoll is absent. The ISR only feeds a queue read inside that blocking wait."
+                },
+                "cards.iso14443a_uid": {
+                    "status": "yes",
+                    "note": "UID, SENS_RES, SEL_RES and Tg are parsed. Cascade tags are inserted for a targeted listing as 7.3.5 shows.",
+                    "evidence": [
+                        "src/pn532-14443.c:416",
+                        "src/pn532-14443.c:417",
+                        "src/pn532-14443.c:424",
+                        "src/pn532-14443.c:269",
+                        "src/pn532-internal.h:49"
+                    ]
+                },
+                "cards.two_targets": {
+                    "status": "yes",
+                    "note": "Each poll asks for MaxTg = 2, and both entries are parsed with their ATS and returned.",
+                    "evidence": [
+                        "src/pn532-14443.c:11",
+                        "src/pn532-14443.c:484",
+                        "src/pn532-14443.c:523",
+                        "src/pn532-14443.c:527"
+                    ]
+                },
+                "cards.mifare_classic": {
+                    "status": "yes",
+                    "note": "Key A and B, block read and write, value blocks with increment, decrement, restore and transfer. The last four UID bytes are used for a 7- or 10-byte UID.",
+                    "evidence": [
+                        "src/pn532-mifare.c:20",
+                        "src/pn532-mifare.c:23",
+                        "src/pn532-mifare.c:37",
+                        "src/pn532-mifare.c:59",
+                        "src/pn532-14443.c:679"
+                    ]
+                },
+                "cards.ultralight_ntag": {
+                    "status": "yes",
+                    "note": "READ of four pages, WRITE of one page. GET_VERSION through InCommunicateThru tells the family members apart.",
+                    "evidence": [
+                        "src/pn532-mifare.c:37",
+                        "src/pn532-mifare.c:64",
+                        "include/pn532-mifare.h:34",
+                        "src/pn532-14443.c:130"
+                    ]
+                },
+                "cards.iso14443_4_apdu": {
+                    "status": "yes",
+                    "note": "Automatic RATS is kept on for such cards, and SELECT and READ BINARY helpers exist.",
+                    "evidence": ["src/pn532-14443.c:682", "src/pn532-14443.c:706", "src/pn532.c:1011"]
+                },
+                "cards.chaining": {
+                    "status": "partly",
+                    "searched": "Sending direction: any write of MI (bit 6, 0x40) into the Tg byte of InDataExchange. params[0] is the plain target number and PN532_STATUS_MI_MASK is used on the response only.",
+                    "note": "Receiving works: while the status has MI, InDataExchange is repeated with Tg only and the parts are joined, as in 7.4.5. Sending more than one InDataExchange holds is not supported. The comment at pn532.c:992 says MI is reported for DEP targets only, while 7.3.8 also names ISO/IEC14443-4 PCD mode; the code handles MI in both cases.",
+                    "evidence": ["src/pn532.c:1102", "src/pn532.c:1010", "src/pn532.c:972", "src/pn532.c:59"]
+                },
+                "cards.raw_exchange": {
+                    "status": "yes",
+                    "evidence": ["src/pn532.c:1114", "src/pn532.c:1135", "src/pn532.c:1150"]
+                },
+                "cards.auto_poll": {
+                    "status": "no",
+                    "searched": "InAutoPoll, autopoll, command byte 0x60 as a PN532 command. The command list in src/pn532-internal.h has no such entry; 0x60 occurs only as MIFARE AUTH_A and as GET_VERSION on the card.",
+                    "note": "Reachable only by hand through the generic pn532_execute_command(), which takes any command byte; the library has no code for this command."
+                },
+                "cards.ndef": {
+                    "status": "yes",
+                    "note": "Read: Type 2, MIFARE Classic through MAD1/MAD2, Type 4. Write: Type 2 only. NDEF write to Classic and Type 4 is absent. Record parsing checks every length against the input.",
+                    "evidence": [
+                        "src/pn532-ndef.c:1757",
+                        "src/pn532-ndef.c:876",
+                        "src/pn532-ndef.c:1546",
+                        "src/pn532-ndef.c:1652",
+                        "src/pn532-ndef.c:1055"
+                    ]
+                },
+                "cards.iso14443b": {
+                    "status": "no",
+                    "searched": "BrTy 0x03, type B, ATQB, ATTRIB. params[1] of InListPassiveTarget is set in one place only, to PN532_MIFARE_ISO14443A (0x00).",
+                    "note": "Reachable only by hand through the generic pn532_execute_command(), which takes any command byte; the library has no code for this command."
+                },
+                "cards.felica": {
+                    "status": "no",
+                    "searched": "BrTy 0x01 and 0x02, FeliCa, POL_REQ, NFCID2. params[1] of InListPassiveTarget is only ever 0x00.",
+                    "note": "Reachable only by hand through the generic pn532_execute_command(), which takes any command byte; the library has no code for this command."
+                },
+                "cards.jewel": {
+                    "status": "no",
+                    "searched": "BrTy 0x04, Jewel, Innovision, Topaz, RID. params[1] of InListPassiveTarget is only ever 0x00.",
+                    "note": "Reachable only by hand through the generic pn532_execute_command(), which takes any command byte; the library has no code for this command."
+                },
+                "cards.card_emulation": {
+                    "status": "no",
+                    "searched": "TgInitAsTarget (0x8C), TgGetData, TgSetData, TgResponseToInitiator, fISO14443-4_PICC. None in src or include; PN532_PARAM_AUTOMATIC_ATR_RES is the only target-side flag and it only configures SetParameters.",
+                    "note": "Reachable only by hand through the generic pn532_execute_command(), which takes any command byte; the library has no code for this command."
+                },
+                "cards.peer_to_peer": {
+                    "status": "no",
+                    "searched": "InJumpForDEP (0x56), InJumpForPSL (0x46), InATR (0x50), TgInitAsTarget (0x8C), ATR_REQ. None in src or include.",
+                    "note": "Reachable only by hand through the generic pn532_execute_command(), which takes any command byte; the library has no code for this command."
+                },
+                "chip_control.firmware_version": {"status": "yes", "evidence": ["src/pn532.c:525", "src/pn532.c:532"]},
+                "chip_control.general_status": {"status": "yes", "evidence": ["src/pn532.c:548", "src/pn532.c:567"]},
+                "chip_control.sam_configuration": {
+                    "status": "yes",
+                    "note": "Static function, sent at init and in pn532_recover() in normal mode with IRQ on; other modes are not offered. Init sends GetFirmwareVersion first and SAMConfiguration second, while 3.1.3.3 asks for SAMConfiguration to leave LowVbat mode.",
+                    "evidence": ["src/pn532.c:864", "src/pn532.c:89"]
+                },
+                "chip_control.rf_field_control": {
+                    "status": "yes",
+                    "note": "CfgItem 0x01 with AutoRFCA set (bit 1) and RF on or off (bit 0), as in 7.3.1.",
+                    "evidence": ["src/pn532.c:788", "src/pn532.c:790"]
+                },
+                "chip_control.retries_control": {
+                    "status": "yes",
+                    "evidence": ["src/pn532.c:851", "src/pn532.c:852", "src/pn532.c:857"]
+                },
+                "chip_control.power_down": {
+                    "status": "partly",
+                    "searched": "PowerDown command byte 0x16, a function that sends it, WakeUpEnable. The command list in src/pn532-internal.h has no such entry.",
+                    "note": "Waking up exists for all three links and runs at reset and recover. The PowerDown command itself is not sent by any code.",
+                    "evidence": [
+                        "src/pn532.c:615",
+                        "src/pn532-bus-uart.c:231",
+                        "src/pn532-bus-i2c.c:149",
+                        "src/pn532-bus-spi.c:202"
+                    ]
+                },
+                "chip_control.registers": {
+                    "status": "no",
+                    "searched": "ReadRegister (0x06), WriteRegister (0x08). The words appear only in the comment at include/pn532.h:466; no command constant, no call.",
+                    "note": "Reachable only by hand through the generic pn532_execute_command(), which takes any command byte; the library has no code for this command."
+                },
+                "chip_control.gpio": {
+                    "status": "no",
+                    "searched": "ReadGPIO (0x0C), WriteGPIO (0x0E). No command constant and no call; 'GPIO control' appears only in the comment at include/pn532.h:467.",
+                    "note": "Reachable only by hand through the generic pn532_execute_command(), which takes any command byte; the library has no code for this command."
+                },
+                "chip_control.parameters": {
+                    "status": "yes",
+                    "note": "Sent at init and before listings. Only fAutomaticATR_RES and fAutomaticRATS are written, and only the RATS flag changes; the other flags have no API and pn532_set_auto_rats() is declared in src/, not in include/.",
+                    "evidence": ["src/pn532.c:875", "src/pn532.c:872", "src/pn532-internal.h:71"]
+                },
+                "chip_control.serial_baud": {
+                    "status": "yes",
+                    "note": "Rate codes match 7.2.8. The mandatory host ACK is sent, then 2 ms pass before the host changes its rate.",
+                    "evidence": [
+                        "src/pn532-bus-uart.c:391",
+                        "src/pn532-bus-uart.c:402",
+                        "src/pn532-bus-uart.c:405",
+                        "src/pn532-bus-uart.c:35",
+                        "src/pn532-bus-uart.c:36"
+                    ]
+                },
+                "chip_control.reset_recovery": {
+                    "status": "yes",
+                    "note": "Reset line when given, otherwise a software path: abort, wake, firmware check, HSU baud search, configuration written again.",
+                    "evidence": [
+                        "src/pn532.c:598",
+                        "src/pn532.c:1258",
+                        "src/pn532.c:1268",
+                        "src/pn532.c:1276",
+                        "src/pn532-bus-uart.c:257"
+                    ]
+                },
+                "several.several_readers": {
+                    "status": "yes",
+                    "note": "All reader state is in the heap-allocated pn532_t and its bus object. The only writable static is s_spi_hosts, which counts devices per SPI host, not state of a reader. Two readers on I2C need two ports, because the address is fixed by the chip.",
+                    "evidence": [
+                        "src/pn532.c:638",
+                        "src/pn532.c:684",
+                        "src/pn532-bus-spi.c:45",
+                        "src/pn532-14443.c:343"
+                    ]
+                },
+                "several.shared_spi_bus": {
+                    "status": "yes",
+                    "note": "Each reader has its own device handle and NSS GPIO, and the bus is held while NSS is low. pn532_spi_init() also accepts a host that is already initialised, and the bus is freed with the last device.",
+                    "evidence": [
+                        "src/pn532-bus-spi.c:389",
+                        "src/pn532-bus-spi.c:337",
+                        "src/pn532-bus-spi.c:80",
+                        "src/pn532-bus-spi.c:86",
+                        "src/pn532-bus-spi.c:261"
+                    ]
+                },
+                "several.thread_safety": {
+                    "status": "partly",
+                    "searched": "mutex, xSemaphore, portENTER_CRITICAL, pthread in src and include: none. pn532_execute_command() uses send_buf and recv_buf with no lock.",
+                    "note": "Only single SPI transactions are protected. There is no lock around a command. The stated rules are narrow: init and destroy from one task, and the README line that says not to poll two readers from different tasks. No text says that one pn532_t must stay in one task, and that README line sits oddly with the comment at pn532-bus-spi.c:73, which allows a reader polled from another task.",
+                    "evidence": ["README.md:421", "src/pn532-bus-spi.c:44", "src/pn532-bus-spi.c:80"]
+                },
+                "code_health.errors_returned": {
+                    "status": "yes",
+                    "note": "Typed results for polling and NDEF, bool or a negative code elsewhere. The RF status byte of a failed InDataExchange (0x01, 0x14 and so on) goes only to a debug log, so a caller of block read or transceive cannot tell a wrong key from a lost card.",
+                    "evidence": [
+                        "include/pn532.h:117",
+                        "src/pn532-14443.c:472",
+                        "include/pn532-ndef.h:40",
+                        "src/pn532-mifare.c:73",
+                        "src/pn532.c:495"
+                    ]
+                },
+                "code_health.buffers_bounded": {
+                    "status": "partly",
+                    "searched": "All memcpy calls in src. All compare the length with the destination, except the copy into lang_buf at pn532-ndef.c:1885.",
+                    "note": "Frame, target entry, ATS, TLV and NDEF record lengths are checked before use. The exception is pn532_ndef_extract_text(): the language length comes from the card, and the function has no size argument for lang_buf. The header asks for 64 bytes, but the README example passes 8.",
+                    "evidence": [
+                        "src/pn532.c:367",
+                        "src/pn532.c:502",
+                        "src/pn532-14443.c:265",
+                        "src/pn532-14443.c:276",
+                        "src/pn532-ndef.c:310",
+                        "src/pn532-ndef.c:1885"
+                    ]
+                },
+                "code_health.allocation_checked": {
+                    "status": "yes",
+                    "note": "Every calloc, malloc, realloc and heap_caps_malloc is checked and what was already allocated is freed. A failed IRQ queue falls back to polling.",
+                    "evidence": [
+                        "src/pn532.c:639",
+                        "src/pn532.c:645",
+                        "src/pn532-14443.c:514",
+                        "src/pn532-ndef.c:529",
+                        "src/pn532-ndef.c:905",
+                        "src/pn532-bus-spi.c:352",
+                        "src/pn532-bus-i2c.c:187"
+                    ]
+                },
+                "code_health.tests": {
+                    "status": "yes",
+                    "note": "70 Unity test cases against a mock bus, run on the host or on a board, plus an I2C test against a stand-in for the ESP-IDF driver. The SPI and UART transports are outside the host run. Tests were read, not run.",
+                    "evidence": [
+                        "test_apps/polling/main/test_pn532_polling.c:504",
+                        "host_test/Makefile:19",
+                        "host_test/host_i2c_test.c:1",
+                        ".github/workflows/host-test.yml:16"
+                    ]
+                },
+                "code_health.examples": {
+                    "status": "yes",
+                    "evidence": ["examples/simple/main/main.c:520", "examples/simple/main/main.c:398"]
+                },
+                "code_health.docs": {
+                    "status": "yes",
+                    "evidence": ["README.md:1", "README.md:15", "include/pn532.h:456"]
+                },
+                "code_health.license": {"status": "yes", "evidence": ["LICENSE:1"]}
+            },
+            "defects": [
+                {
+                    "what": "Without an IRQ line, pn532_i2c_bus_is_ready() reads the status byte alone, so i2c_master_receive() sends STOP right after a ready status byte (esp_driver_i2c/i2c_master.c, v6.1), which UM0701-02 6.2.4 forbids: the rest of the frame shall be read before STOP or the remaining bytes are lost.",
+                    "severity": "medium",
+                    "evidence": [
+                        "src/pn532-bus-i2c.c:117",
+                        "src/pn532-bus-i2c.c:122",
+                        "src/pn532-bus-i2c.c:88",
+                        "src/pn532.c:252"
+                    ]
+                },
+                {
+                    "what": "pn532_ndef_extract_text() has no size argument and copies up to 63 language bytes taken from the card plus a NUL into lang_buf, and the README example passes char lang[8], so a Text record with a language code longer than 7 bytes overflows that stack buffer.",
+                    "severity": "high",
+                    "read_as": "medium",
+                    "judged": "lang_len is up to 63 from the status byte and lang_buf has no size. The header asks for 64 bytes and examples/simple uses 64, but the README example passes char lang[8], so a Text record with a language code over 7 bytes overruns that stack array when used as documented.",
+                    "evidence": [
+                        "src/pn532-ndef.c:1877",
+                        "src/pn532-ndef.c:1885",
+                        "src/pn532-ndef.c:1887",
+                        "README.md:158",
+                        "README.md:160"
+                    ]
+                },
+                {
+                    "what": "pn532_uart_bus_write_command() gives uart_wait_tx_done() 100 ms, but with no TX ring buffer uart_write_bytes() returns once the bytes are in the 128-byte FIFO (esp_driver_uart/src/uart.c uart_tx_all, soc_caps.h SOC_UART_FIFO_LEN, v6.1), so at 9600 baud a frame of about 97 bytes or more makes the call return false while the PN532 still receives and runs the command, and pn532_execute_command() returns with no abort.",
+                    "severity": "medium",
+                    "evidence": [
+                        "src/pn532-bus-uart.c:16",
+                        "src/pn532-bus-uart.c:321",
+                        "src/pn532-bus-uart.c:63",
+                        "src/pn532-bus-uart.c:66",
+                        "src/pn532.c:447",
+                        "src/pn532.c:448"
+                    ]
+                },
+                {
+                    "what": "pn532_init() does not check gpio_config() for the reset and IRQ pins or gpio_set_intr_type(), so a bad pin number shows up only as a later command failure.",
+                    "severity": "low",
+                    "evidence": ["src/pn532.c:672", "src/pn532.c:683", "src/pn532.c:692"]
+                },
+                {
+                    "what": "pn532_release_target() leaves is_rf_on true, although 7.3.11 says the field goes off when the last target is released, so the next pn532_14443_select_by_uid() of that card sends an InSelect that fails with 0x27 and logs an error before it lists the card again.",
+                    "severity": "low",
+                    "evidence": ["src/pn532.c:936", "src/pn532.c:937", "src/pn532-14443.c:576"]
+                },
+                {
+                    "what": "The README says that with an IRQ pin the driver waits on the interrupt instead of polling the bus, but pn532_wait_ready() reads the bus status in every slice of 10 ms in that mode too.",
+                    "severity": "low",
+                    "evidence": ["README.md:123", "src/pn532.c:221", "src/pn532.c:61"]
+                },
+                {
+                    "what": "README line 500 says that a non-zero status other than 0x27 from deselect leaves the local state untouched, but pn532_in_deselect() clears session_opened on that path.",
+                    "severity": "low",
+                    "evidence": ["README.md:500", "src/pn532.c:1249", "src/pn532.c:1251"]
+                },
+                {
+                    "what": "README line 549 says the host test run leaves out the bus transports, but host_test/Makefile builds src/pn532-bus-i2c.c into it.",
+                    "severity": "low",
+                    "evidence": ["README.md:549", "host_test/Makefile:20"]
+                },
+                {
+                    "what": "pn532.h says the card type is inferred from ATQA/SAK, but pn532_14443_detect_card_type_and_capacity() never reads uid->atqa and switches on the SAK alone.",
+                    "severity": "low",
+                    "evidence": ["include/pn532.h:612", "src/pn532-14443.c:63"]
+                },
+                {
+                    "what": "The README tells the application to write pn532->timeout_ms directly and also tells it not to modify pn532_t fields, and no setter for that timeout exists.",
+                    "severity": "low",
+                    "evidence": ["README.md:438", "README.md:616", "include/pn532.h:129"]
+                },
+                {
+                    "what": "pn532.h names pn532_in_select() as the way to reactivate a deselected target, but that function is declared only in src/pn532-internal.h, which is outside the include directory of the component.",
+                    "severity": "low",
+                    "evidence": ["include/pn532.h:403", "src/pn532-internal.h:66", "CMakeLists.txt:17"]
+                }
+            ]
+        },
+        {
+            "version": "0.8.0",
+            "tag": "v0.8.0",
+            "blind": true,
+            "commit": "7fccb8048dfa2b8ad903e0da7091866e3c2c7da5",
+            "rubric": "pn532",
+            "rubric_version": 2,
+            "date": "2026-11-02",
+            "by": "claude-opus-5-5",
+            "items": {
+                "transports.i2c": {
+                    "status": "partly",
+                    "note": "7-bit address 0x24, clock clamped to 400 kHz, status byte first in each frame read, frame read in one transfer (281 bytes, so a frame of any legal size ends before STOP). After NOT READY a STOP follows and the read is repeated. Not met: pn532_i2c_bus_is_ready() reads the status byte alone, and i2c_master_receive() always ends with STOP (esp_driver_i2c/i2c_master.c, v6.1), so on a ready chip a STOP comes after the status byte and before the frame. UM0701-02 6.2.4 says the rest of the frame shall be read before STOP; the code comment at line 117 admits this. This happens when no IRQ line is used; with IRQ low the status-only read is skipped. See the defects.",
+                    "evidence": [
+                        "include/pn532.h:26",
+                        "include/pn532.h:35",
+                        "src/pn532-bus-i2c.c:198",
+                        "src/pn532-bus-i2c.c:205",
+                        "src/pn532-bus-i2c.c:94",
+                        "src/pn532-bus-i2c.c:96",
+                        "src/pn532-bus-i2c.c:89",
+                        "src/pn532-bus-i2c.c:122",
+                        "src/pn532-bus-i2c.c:129"
+                    ]
+                },
+                "transports.spi": {
+                    "status": "yes",
+                    "note": "Mode 0, LSB first, 8-bit command phase, clock clamped to 5 MHz, half duplex, NSS driven as a GPIO. Half-duplex reads with length 0 and rxlength set pass check_trans_valid() in esp_driver_spi/src/gpspi/spi_master.c (v6.1). The ready check also refuses a status byte with bits 7..4 or 1 set (line 167), which is stricter than 6.2.5, where those bits are rfu or nu.",
+                    "evidence": [
+                        "src/pn532-bus-spi.c:336",
+                        "src/pn532-bus-spi.c:339",
+                        "src/pn532-bus-spi.c:304",
+                        "include/pn532.h:41",
+                        "src/pn532-internal.h:44",
+                        "src/pn532-internal.h:45",
+                        "src/pn532-internal.h:46",
+                        "src/pn532-bus-spi.c:115",
+                        "src/pn532-bus-spi.c:131",
+                        "src/pn532-bus-spi.c:152"
+                    ]
+                },
+                "transports.uart": {
+                    "status": "yes",
+                    "note": "Frames are read by their header, with a time budget sized from the baud rate; ready means 6 or more bytes buffered. Wake-up is a 0x55 preamble followed by a pause, as in 7.2.11. See the defect about 9600 baud.",
+                    "evidence": [
+                        "src/pn532-bus-uart.c:321",
+                        "src/pn532-bus-uart.c:57",
+                        "src/pn532-bus-uart.c:105",
+                        "src/pn532-bus-uart.c:213",
+                        "src/pn532-bus-uart.c:231"
+                    ]
+                },
+                "builds_on.esp_idf": {
+                    "status": "yes",
+                    "note": "Uses driver/i2c_master.h (not the old driver/i2c.h), spi_master and uart. A search of src, include, examples and test_apps finds no Arduino.h, Wire.h or driver/i2c.h. Not built, as instructed. The changes touch no ESP-IDF driver call. The one signature that changed, pn532_ndef_extract_text(), is the same in the header and the definition, and all seven calls (one in the example, six in the tests) pass six arguments. The ESP-IDF headers were not read again in this pass.",
+                    "evidence": [
+                        "include/pn532.h:14",
+                        "include/pn532.h:15",
+                        "include/pn532.h:16",
+                        "src/pn532-bus-i2c.c:248",
+                        "CMakeLists.txt:3",
+                        "idf_component.yml:11",
+                        "include/pn532-ndef.h:259",
+                        "src/pn532-ndef.c:1864"
+                    ]
+                },
+                "builds_on.arduino": {
+                    "status": "no",
+                    "searched": "Arduino.h, Wire.h, SPI.h, the ARDUINO macro, library.properties, setup()/loop() in all files: none. All sources include ESP-IDF driver headers."
+                },
+                "builds_on.esp_idf_component": {
+                    "status": "yes",
+                    "note": "The manifest version moved to 0.8.0; the rest of the manifest and CMakeLists.txt are unchanged.",
+                    "evidence": ["CMakeLists.txt:8", "idf_component.yml:2"]
+                },
+                "frames.ack_checked": {
+                    "status": "yes",
+                    "note": "The ACK is compared byte by byte. A missing ACK makes the host send the frame once more, as 6.2.3 asks, then abort and report PN532_COMMAND_STATUS_ACK_TIMEOUT. A wrong ACK aborts. No code expects a NACK from the chip.",
+                    "evidence": [
+                        "src/pn532.c:267",
+                        "src/pn532.c:443",
+                        "src/pn532.c:455",
+                        "src/pn532.c:459",
+                        "src/pn532.c:461"
+                    ]
+                },
+                "frames.nack_resend": {
+                    "status": "yes",
+                    "note": "A damaged frame or a failed read gets up to two NACKs. A response that never becomes ready ends in the ACK abort, not in a NACK; that is the behaviour the abort_on_timeout item asks for.",
+                    "evidence": [
+                        "src/pn532.c:35",
+                        "src/pn532.c:39",
+                        "src/pn532.c:482",
+                        "src/pn532.c:484",
+                        "src/pn532.c:488"
+                    ]
+                },
+                "frames.checksums_checked": {
+                    "status": "yes",
+                    "evidence": ["src/pn532.c:352", "src/pn532.c:359", "src/pn532.c:373", "src/pn532.c:376"]
+                },
+                "frames.extended_frames": {
+                    "status": "yes",
+                    "note": "Both directions. The buffer of 280 bytes holds the 265 bytes of 6.2.1.2 with header. The UART read handles the 8-byte header too.",
+                    "evidence": [
+                        "src/pn532.c:156",
+                        "src/pn532.c:158",
+                        "src/pn532.c:349",
+                        "src/pn532.c:351",
+                        "include/pn532.h:50"
+                    ]
+                },
+                "frames.error_frame": {
+                    "status": "yes",
+                    "evidence": ["src/pn532.c:36", "src/pn532.c:333", "src/pn532.c:336", "src/pn532.c:495"]
+                },
+                "frames.response_code_checked": {
+                    "status": "yes",
+                    "evidence": ["src/pn532.c:390", "src/pn532.c:394", "src/pn532.c:478"]
+                },
+                "frames.status_decoded": {
+                    "status": "yes",
+                    "note": "InDataExchange and InCommunicateThru mask the byte. InSelect, InDeselect and InRelease compare the whole byte, which is harmless because 7.1 gives NAD and MI for the data commands.",
+                    "evidence": [
+                        "src/pn532.c:58",
+                        "src/pn532.c:1022",
+                        "src/pn532.c:1076",
+                        "src/pn532.c:1102",
+                        "src/pn532.c:1150"
+                    ]
+                },
+                "waiting.irq": {
+                    "status": "yes",
+                    "note": "Optional, per device. The wait checks the line level and uses queued edges as a hint. The bus is also polled every 10 ms in this mode, as a fallback. Fig 47 draws P70_IRQ rising at the start of the read, so the level check after the ACK read is sound.",
+                    "evidence": ["src/pn532.c:20", "src/pn532.c:693", "src/pn532.c:221", "src/pn532.c:244"]
+                },
+                "waiting.ready_polling": {
+                    "status": "yes",
+                    "evidence": [
+                        "src/pn532.c:252",
+                        "src/pn532-bus-spi.c:152",
+                        "src/pn532-bus-spi.c:177",
+                        "src/pn532-bus-i2c.c:122",
+                        "src/pn532-bus-uart.c:213"
+                    ]
+                },
+                "waiting.bounded_waits": {
+                    "status": "yes",
+                    "note": "All waits the library starts itself have a limit: ACK 50 ms, response 500 ms by default, I2C and UART transfers 100 ms. A timeout of 0 means no limit, but only when the caller asks for it: pn532_set_ack_timeout(p, 0), pn532->timeout_ms = 0 or a raw call with timeout 0. spi_device_acquire_bus(portMAX_DELAY) waits for the bus lock, not for the chip.",
+                    "evidence": [
+                        "src/pn532.c:232",
+                        "src/pn532.c:253",
+                        "src/pn532-bus-i2c.c:16",
+                        "src/pn532-bus-uart.c:16",
+                        "src/pn532-bus-uart.c:63",
+                        "src/pn532.c:230"
+                    ]
+                },
+                "waiting.abort_on_timeout": {
+                    "status": "yes",
+                    "note": "Both timeouts send the ACK frame and then drain any frame already on its way. Init also sets MxRtyPassiveActivation to 5, so InListPassiveTarget ends by itself without a card.",
+                    "evidence": [
+                        "src/pn532.c:290",
+                        "src/pn532.c:316",
+                        "src/pn532.c:455",
+                        "src/pn532.c:470",
+                        "src/pn532.c:300",
+                        "src/pn532.c:93"
+                    ]
+                },
+                "waiting.nonblocking_detect": {
+                    "status": "no",
+                    "searched": "A start/collect pair around InListPassiveTarget (0x4A). The only sender is pn532_list_passive_iso14443a_targets(), which goes through the blocking pn532_execute_command(). No *_start, *_begin, *_async, *_collect or *_check function exists for detection, and InAutoPoll is absent. The ISR only feeds a queue read inside that blocking wait."
+                },
+                "cards.iso14443a_uid": {
+                    "status": "yes",
+                    "note": "UID, SENS_RES, SEL_RES and Tg are parsed. Cascade tags are inserted for a targeted listing as 7.3.5 shows.",
+                    "evidence": [
+                        "src/pn532-14443.c:416",
+                        "src/pn532-14443.c:417",
+                        "src/pn532-14443.c:424",
+                        "src/pn532-14443.c:269",
+                        "src/pn532-internal.h:49"
+                    ]
+                },
+                "cards.two_targets": {
+                    "status": "yes",
+                    "note": "Each poll asks for MaxTg = 2, and both entries are parsed with their ATS and returned.",
+                    "evidence": [
+                        "src/pn532-14443.c:11",
+                        "src/pn532-14443.c:484",
+                        "src/pn532-14443.c:523",
+                        "src/pn532-14443.c:527"
+                    ]
+                },
+                "cards.mifare_classic": {
+                    "status": "yes",
+                    "note": "Key A and B, block read and write, value blocks with increment, decrement, restore and transfer. The last four UID bytes are used for a 7- or 10-byte UID.",
+                    "evidence": [
+                        "src/pn532-mifare.c:20",
+                        "src/pn532-mifare.c:23",
+                        "src/pn532-mifare.c:37",
+                        "src/pn532-mifare.c:59",
+                        "src/pn532-14443.c:679"
+                    ]
+                },
+                "cards.ultralight_ntag": {
+                    "status": "yes",
+                    "note": "READ of four pages, WRITE of one page. GET_VERSION through InCommunicateThru tells the family members apart.",
+                    "evidence": [
+                        "src/pn532-mifare.c:37",
+                        "src/pn532-mifare.c:64",
+                        "include/pn532-mifare.h:34",
+                        "src/pn532-14443.c:130"
+                    ]
+                },
+                "cards.iso14443_4_apdu": {
+                    "status": "yes",
+                    "note": "Automatic RATS is kept on for such cards, and SELECT and READ BINARY helpers exist.",
+                    "evidence": ["src/pn532-14443.c:682", "src/pn532-14443.c:706", "src/pn532.c:1011"]
+                },
+                "cards.chaining": {
+                    "status": "partly",
+                    "searched": "Sending direction: any write of MI (bit 6, 0x40) into the Tg byte of InDataExchange. params[0] is the plain target number and PN532_STATUS_MI_MASK is used on the response only.",
+                    "note": "Receiving works: while the status has MI, InDataExchange is repeated with Tg only and the parts are joined, as in 7.4.5. Sending more than one InDataExchange holds is not supported. The comment at pn532.c:992 says MI is reported for DEP targets only, while 7.3.8 also names ISO/IEC14443-4 PCD mode; the code handles MI in both cases.",
+                    "evidence": ["src/pn532.c:1102", "src/pn532.c:1010", "src/pn532.c:972", "src/pn532.c:59"]
+                },
+                "cards.raw_exchange": {
+                    "status": "yes",
+                    "evidence": ["src/pn532.c:1114", "src/pn532.c:1135", "src/pn532.c:1150"]
+                },
+                "cards.auto_poll": {
+                    "status": "no",
+                    "searched": "InAutoPoll, autopoll, command byte 0x60 as a PN532 command. The command list in src/pn532-internal.h has no such entry; 0x60 occurs only as MIFARE AUTH_A and as GET_VERSION on the card.",
+                    "note": "Reachable only by hand through the generic pn532_execute_command(), which takes any command byte; the library has no code for this command."
+                },
+                "cards.ndef": {
+                    "status": "yes",
+                    "note": "Read: Type 2, MIFARE Classic through MAD1/MAD2, Type 4. Write: Type 2 only; pn532_ndef_write_to_selected_card() returns PN532_NDEF_ERR_UNSUPPORTED for block_size 16, so NDEF write to Classic and Type 4 is absent. The read paths and record parsing are not in the diff. pn532_ndef_extract_text() still returns the same text pointer and length; only the copy of the language code changed.",
+                    "evidence": [
+                        "src/pn532-ndef.c:1757",
+                        "src/pn532-ndef.c:876",
+                        "src/pn532-ndef.c:1546",
+                        "src/pn532-ndef.c:1652",
+                        "src/pn532-ndef.c:1055",
+                        "src/pn532-ndef.c:1863"
+                    ]
+                },
+                "cards.iso14443b": {
+                    "status": "no",
+                    "searched": "BrTy 0x03, type B, ATQB, ATTRIB. params[1] of InListPassiveTarget is set in one place only, to PN532_MIFARE_ISO14443A (0x00).",
+                    "note": "Reachable only by hand through the generic pn532_execute_command(), which takes any command byte; the library has no code for this command."
+                },
+                "cards.felica": {
+                    "status": "no",
+                    "searched": "BrTy 0x01 and 0x02, FeliCa, POL_REQ, NFCID2. params[1] of InListPassiveTarget is only ever 0x00.",
+                    "note": "Reachable only by hand through the generic pn532_execute_command(), which takes any command byte; the library has no code for this command."
+                },
+                "cards.jewel": {
+                    "status": "no",
+                    "searched": "BrTy 0x04, Jewel, Innovision, Topaz, RID. params[1] of InListPassiveTarget is only ever 0x00.",
+                    "note": "Reachable only by hand through the generic pn532_execute_command(), which takes any command byte; the library has no code for this command."
+                },
+                "cards.card_emulation": {
+                    "status": "no",
+                    "searched": "TgInitAsTarget (0x8C), TgGetData, TgSetData, TgResponseToInitiator, fISO14443-4_PICC. None in src or include; PN532_PARAM_AUTOMATIC_ATR_RES is the only target-side flag and it only configures SetParameters.",
+                    "note": "Reachable only by hand through the generic pn532_execute_command(), which takes any command byte; the library has no code for this command."
+                },
+                "cards.peer_to_peer": {
+                    "status": "no",
+                    "searched": "InJumpForDEP (0x56), InJumpForPSL (0x46), InATR (0x50), TgInitAsTarget (0x8C), ATR_REQ. None in src or include.",
+                    "note": "Reachable only by hand through the generic pn532_execute_command(), which takes any command byte; the library has no code for this command."
+                },
+                "chip_control.firmware_version": {"status": "yes", "evidence": ["src/pn532.c:525", "src/pn532.c:532"]},
+                "chip_control.general_status": {"status": "yes", "evidence": ["src/pn532.c:548", "src/pn532.c:567"]},
+                "chip_control.sam_configuration": {
+                    "status": "yes",
+                    "note": "Static function, sent at init and in pn532_recover() in normal mode with IRQ on; other modes are not offered. Init sends GetFirmwareVersion first and SAMConfiguration second, while 3.1.3.3 asks for SAMConfiguration to leave LowVbat mode.",
+                    "evidence": ["src/pn532.c:864", "src/pn532.c:89"]
+                },
+                "chip_control.rf_field_control": {
+                    "status": "yes",
+                    "note": "CfgItem 0x01 with AutoRFCA set (bit 1) and RF on or off (bit 0), as in 7.3.1.",
+                    "evidence": ["src/pn532.c:788", "src/pn532.c:790"]
+                },
+                "chip_control.retries_control": {
+                    "status": "yes",
+                    "evidence": ["src/pn532.c:851", "src/pn532.c:852", "src/pn532.c:857"]
+                },
+                "chip_control.power_down": {
+                    "status": "partly",
+                    "searched": "PowerDown command byte 0x16, a function that sends it, WakeUpEnable. The command list in src/pn532-internal.h has no such entry.",
+                    "note": "Waking up exists for all three links and runs at reset and recover. The PowerDown command itself is not sent by any code.",
+                    "evidence": [
+                        "src/pn532.c:615",
+                        "src/pn532-bus-uart.c:231",
+                        "src/pn532-bus-i2c.c:149",
+                        "src/pn532-bus-spi.c:202"
+                    ]
+                },
+                "chip_control.registers": {
+                    "status": "no",
+                    "searched": "ReadRegister (0x06), WriteRegister (0x08). The words appear only in the comment at include/pn532.h:466; no command constant, no call.",
+                    "note": "Reachable only by hand through the generic pn532_execute_command(), which takes any command byte; the library has no code for this command."
+                },
+                "chip_control.gpio": {
+                    "status": "no",
+                    "searched": "ReadGPIO (0x0C), WriteGPIO (0x0E). No command constant and no call; 'GPIO control' appears only in the comment at include/pn532.h:467.",
+                    "note": "Reachable only by hand through the generic pn532_execute_command(), which takes any command byte; the library has no code for this command."
+                },
+                "chip_control.parameters": {
+                    "status": "yes",
+                    "note": "Sent at init and before listings. Only fAutomaticATR_RES and fAutomaticRATS are written, and only the RATS flag changes; the other flags have no API and pn532_set_auto_rats() is declared in src/, not in include/.",
+                    "evidence": ["src/pn532.c:875", "src/pn532.c:872", "src/pn532-internal.h:71"]
+                },
+                "chip_control.serial_baud": {
+                    "status": "yes",
+                    "note": "Rate codes match 7.2.8. The mandatory host ACK is sent, then 2 ms pass before the host changes its rate.",
+                    "evidence": [
+                        "src/pn532-bus-uart.c:391",
+                        "src/pn532-bus-uart.c:402",
+                        "src/pn532-bus-uart.c:405",
+                        "src/pn532-bus-uart.c:35",
+                        "src/pn532-bus-uart.c:36"
+                    ]
+                },
+                "chip_control.reset_recovery": {
+                    "status": "yes",
+                    "note": "Reset line when given, otherwise a software path: abort, wake, firmware check, HSU baud search, configuration written again.",
+                    "evidence": [
+                        "src/pn532.c:598",
+                        "src/pn532.c:1258",
+                        "src/pn532.c:1268",
+                        "src/pn532.c:1276",
+                        "src/pn532-bus-uart.c:257"
+                    ]
+                },
+                "several.several_readers": {
+                    "status": "yes",
+                    "note": "All reader state is in the heap-allocated pn532_t and its bus object. The only writable static is s_spi_hosts, which counts devices per SPI host, not state of a reader. Two readers on I2C need two ports, because the address is fixed by the chip.",
+                    "evidence": [
+                        "src/pn532.c:638",
+                        "src/pn532.c:684",
+                        "src/pn532-bus-spi.c:45",
+                        "src/pn532-14443.c:343"
+                    ]
+                },
+                "several.shared_spi_bus": {
+                    "status": "yes",
+                    "note": "Each reader has its own device handle and NSS GPIO, and the bus is held while NSS is low. pn532_spi_init() also accepts a host that is already initialised, and the bus is freed with the last device.",
+                    "evidence": [
+                        "src/pn532-bus-spi.c:389",
+                        "src/pn532-bus-spi.c:337",
+                        "src/pn532-bus-spi.c:80",
+                        "src/pn532-bus-spi.c:86",
+                        "src/pn532-bus-spi.c:261"
+                    ]
+                },
+                "several.thread_safety": {
+                    "status": "partly",
+                    "searched": "Case-insensitive mutex, semaphore, critical, pthread, lock in src and include: only the comment at pn532-bus-spi.c:44 and the bus lock log text at pn532-bus-spi.c:194. task and thread in README.md and include: only README.md:421 and the Task stack section, which is about stack size. pn532_execute_command() uses send_buf and recv_buf with no lock.",
+                    "note": "The changes touch nothing here. Only single SPI transactions and the wake pulse hold the bus. No lock covers a whole command. The stated rules are narrow: init and destroy of SPI buses from one task, and the README line against polling both readers from different tasks. No text says that one pn532_t must stay in one task, and the comment at pn532-bus-spi.c:73 allows a reader polled from another task.",
+                    "evidence": [
+                        "README.md:421",
+                        "src/pn532-bus-spi.c:44",
+                        "src/pn532-bus-spi.c:73",
+                        "src/pn532-bus-spi.c:80",
+                        "src/pn532-bus-spi.c:95"
+                    ]
+                },
+                "code_health.errors_returned": {
+                    "status": "yes",
+                    "note": "Typed results for polling and NDEF, bool or a negative code elsewhere. The RF status byte of a failed InDataExchange (0x01, 0x14 and so on) still goes only to a debug log (src/pn532.c:1069), so a caller of block read or transceive cannot tell a wrong key from a lost card. A language code cut to fit lang_buf is not an error: pn532_ndef_extract_text() returns true and the header states the truncation; the caller can get the full length from the returned text pointer.",
+                    "evidence": [
+                        "include/pn532.h:117",
+                        "src/pn532-14443.c:472",
+                        "include/pn532-ndef.h:40",
+                        "src/pn532-mifare.c:73",
+                        "src/pn532.c:495",
+                        "src/pn532-ndef.c:1880"
+                    ]
+                },
+                "code_health.buffers_bounded": {
+                    "status": "yes",
+                    "searched": "All 37 memcpy calls in src, the byte writes buf[len++], sectors[count++], areas[*area_count] and hidden[], and the bus read paths. No strcpy, strcat, sprintf or memmove in src.",
+                    "note": "Status moved from partly to yes. The one exception of the old version, the copy into lang_buf, is now limited by lang_buf_len: at most lang_buf_len - 1 bytes plus a NUL, nothing with size 0 or a NULL buffer. The read is bounded by the check of the language length against payload_len, made before the copy. All seven calls in the repository pass a real size or NULL with 0. No other copy changed; the rest were read again and each compares the length with the destination first.",
+                    "evidence": [
+                        "src/pn532-ndef.c:1879",
+                        "src/pn532-ndef.c:1883",
+                        "src/pn532-ndef.c:1884",
+                        "src/pn532-ndef.c:1886",
+                        "src/pn532-ndef.c:1888",
+                        "src/pn532.c:367",
+                        "src/pn532.c:502",
+                        "src/pn532.c:1092",
+                        "src/pn532-14443.c:265",
+                        "src/pn532-14443.c:276",
+                        "src/pn532-ndef.c:310",
+                        "src/pn532-ndef.c:902",
+                        "src/pn532-bus-uart.c:130"
+                    ]
+                },
+                "code_health.allocation_checked": {
+                    "status": "yes",
+                    "note": "The changes add no allocation. Every calloc, malloc, realloc, heap_caps_malloc and spi_bus_dma_memory_alloc result is checked and what was already allocated is freed. A failed IRQ queue falls back to polling.",
+                    "evidence": [
+                        "src/pn532.c:639",
+                        "src/pn532.c:645",
+                        "src/pn532.c:685",
+                        "src/pn532-14443.c:514",
+                        "src/pn532-ndef.c:529",
+                        "src/pn532-ndef.c:888",
+                        "src/pn532-ndef.c:905",
+                        "src/pn532-ndef.c:1140",
+                        "src/pn532-ndef.c:1461",
+                        "src/pn532-ndef.c:1494",
+                        "src/pn532-ndef.c:1736",
+                        "src/pn532-bus-spi.c:311",
+                        "src/pn532-bus-spi.c:352",
+                        "src/pn532-bus-i2c.c:182",
+                        "src/pn532-bus-i2c.c:187",
+                        "src/pn532-bus-uart.c:301"
+                    ]
+                },
+                "code_health.tests": {
+                    "status": "yes",
+                    "note": "71 Unity test cases against a mock bus, run on a board; the host run leaves out one of them (the UART baud test under #ifndef PN532_HOST_TEST) and adds 3 I2C cases against a stand-in for the ESP-IDF driver. The new test covers a 63-byte language code against sizes 8, 64 and 0 and a NULL buffer; on the host it runs under AddressSanitizer. The SPI and UART transports are outside the host run. Tests were read, not run.",
+                    "evidence": [
+                        "test_apps/polling/main/test_pn532_polling.c:504",
+                        "test_apps/polling/main/test_pn532_polling.c:1549",
+                        "test_apps/polling/main/test_pn532_polling.c:2314",
+                        "host_test/Makefile:19",
+                        "host_test/Makefile:20",
+                        "host_test/host_i2c_test.c:1",
+                        ".github/workflows/host-test.yml:16"
+                    ]
+                },
+                "code_health.examples": {
+                    "status": "yes",
+                    "note": "The example passes sizeof(lang) with char lang[64].",
+                    "evidence": ["examples/simple/main/main.c:520", "examples/simple/main/main.c:400"]
+                },
+                "code_health.docs": {
+                    "status": "yes",
+                    "evidence": ["README.md:1", "README.md:15", "include/pn532.h:456", "include/pn532-ndef.h:251"]
+                },
+                "code_health.license": {"status": "yes", "evidence": ["LICENSE:1"]}
+            },
+            "defects": [
+                {
+                    "what": "Without an IRQ line, pn532_i2c_bus_is_ready() reads the status byte alone, so i2c_master_receive() sends STOP right after a ready status byte (esp_driver_i2c/i2c_master.c, v6.1), which UM0701-02 6.2.4 forbids: the rest of the frame shall be read before STOP or the remaining bytes are lost.",
+                    "severity": "medium",
+                    "evidence": [
+                        "src/pn532-bus-i2c.c:117",
+                        "src/pn532-bus-i2c.c:122",
+                        "src/pn532-bus-i2c.c:88",
+                        "src/pn532.c:252"
+                    ]
+                },
+                {
+                    "what": "pn532_uart_bus_write_command() gives uart_wait_tx_done() 100 ms, but with no TX ring buffer uart_write_bytes() returns once the bytes are in the 128-byte FIFO (esp_driver_uart/src/uart.c uart_tx_all, soc_caps.h SOC_UART_FIFO_LEN, v6.1), so at 9600 baud a frame of about 97 bytes or more makes the call return false while the PN532 still receives and runs the command, and pn532_execute_command() returns with no abort.",
+                    "severity": "medium",
+                    "evidence": [
+                        "src/pn532-bus-uart.c:16",
+                        "src/pn532-bus-uart.c:321",
+                        "src/pn532-bus-uart.c:63",
+                        "src/pn532-bus-uart.c:66",
+                        "src/pn532.c:447",
+                        "src/pn532.c:448"
+                    ]
+                },
+                {
+                    "what": "pn532_init() does not check gpio_config() for the reset and IRQ pins or gpio_set_intr_type(), so a bad pin number shows up only as a later command failure.",
+                    "severity": "low",
+                    "evidence": ["src/pn532.c:672", "src/pn532.c:683", "src/pn532.c:692"]
+                },
+                {
+                    "what": "pn532_release_target() leaves is_rf_on true, although 7.3.11 says the field goes off when the last target is released, so the next pn532_14443_select_by_uid() of that card sends an InSelect that fails with 0x27 and logs an error before it lists the card again.",
+                    "severity": "low",
+                    "evidence": ["src/pn532.c:936", "src/pn532.c:937", "src/pn532-14443.c:576"]
+                },
+                {
+                    "what": "pn532.h says the card type is inferred from ATQA/SAK, but pn532_14443_detect_card_type_and_capacity() never reads uid->atqa and switches on the SAK alone.",
+                    "severity": "low",
+                    "evidence": ["include/pn532.h:612", "src/pn532-14443.c:63"]
+                },
+                {
+                    "what": "pn532.h names pn532_in_select() as the way to reactivate a deselected target, but that function is declared only in src/pn532-internal.h, which is outside the include directory of the component.",
+                    "severity": "low",
+                    "evidence": ["include/pn532.h:403", "src/pn532-internal.h:66", "CMakeLists.txt:17"]
+                },
+                {
+                    "what": "The README says that with an IRQ pin the driver waits on the interrupt instead of polling the bus, but pn532_wait_ready() still reads the bus status in every slice of 10 ms in that mode.",
+                    "severity": "low",
+                    "evidence": ["README.md:123", "src/pn532.c:221", "src/pn532.c:61"]
+                },
+                {
+                    "what": "README line 500 says that a non-zero status other than 0x27 from deselect leaves the local state untouched, but pn532_in_deselect() still clears session_opened on that path.",
+                    "severity": "low",
+                    "evidence": ["README.md:500", "src/pn532.c:1249", "src/pn532.c:1251"]
+                },
+                {
+                    "what": "The README still tells the application to write pn532->timeout_ms directly and also tells it not to modify pn532_t fields; the only timeout setter is pn532_set_ack_timeout(), so the response timeout has no setter.",
+                    "severity": "low",
+                    "evidence": [
+                        "README.md:434",
+                        "README.md:438",
+                        "README.md:616",
+                        "include/pn532.h:129",
+                        "include/pn532.h:422"
+                    ]
+                }
+            ],
+            "over": "4de9de5a273823b7a4afa98fd0319d7d653db382"
+        }
+    ]
+}

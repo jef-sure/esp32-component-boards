@@ -1,0 +1,6 @@
+{
+    "title": "Two BMP388 on one bus: no source gives its address, so the kit says it does not know",
+    "imported": true,
+    "answers": {"blocks": [{"role": "pressure", "name": "in"}, {"role": "pressure", "name": "out"}]},
+    "says": "of bmp388 on one bus: its I2C addresses are not in the data"
+}

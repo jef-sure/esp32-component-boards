@@ -32,7 +32,7 @@
         "fs_sdcard": {"class": "storage", "config": {"media": "microsd"}, "on": {"spi.spi2": {"cs": 12}}},
         "audio_dac": {
             "class": "audio",
-            "on": {"i2s.i2s0": {}, "i2c.i2c0": {"address": "0x30"}},
+            "on": {"i2s.i2s0": {}, "i2c.i2c0": {"address": "0x18"}},
             "config": {"direction": "both", "sample_rate": 48000, "clock": "bclk"},
             "chip": "es8311"
         },

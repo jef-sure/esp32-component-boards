@@ -1,0 +1,547 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "audit",
+    "name": "adafruit-busio",
+    "title": "Adafruit BusIO",
+    "audits": [
+        {
+            "version": "1.17.4",
+            "tag": "1.17.4",
+            "blind": true,
+            "commit": "3b8364267c3ee6e16bad91bc2101aefbd5b5915f",
+            "rubric": "arduino_bus",
+            "rubric_version": 1,
+            "date": "2026-11-02",
+            "by": "claude-opus-5-5",
+            "items": {
+                "transports.i2c": {
+                    "status": "yes",
+                    "evidence": [
+                        "Adafruit_I2CDevice.h:10",
+                        "Adafruit_I2CDevice.cpp:115",
+                        "Adafruit_I2CDevice.cpp:161",
+                        "Adafruit_I2CDevice.cpp:202"
+                    ]
+                },
+                "transports.spi": {
+                    "status": "yes",
+                    "note": "Two paths: SPIClass, or bit-banging when the constructor with pins is used.",
+                    "evidence": [
+                        "Adafruit_SPIDevice.h:100",
+                        "Adafruit_SPIDevice.cpp:162",
+                        "Adafruit_SPIDevice.cpp:206",
+                        "Adafruit_SPIDevice.cpp:213"
+                    ]
+                },
+                "builds_on.arduino": {
+                    "status": "yes",
+                    "note": "Judged by reading, not compiled. Flat Arduino library layout. The call at Adafruit_I2CDevice.cpp line 202 has an exact overload at libraries/Wire/src/Wire.h line 124.",
+                    "evidence": [
+                        "library.properties:1",
+                        "library.properties:9",
+                        "Adafruit_I2CDevice.h:4",
+                        "Adafruit_I2CDevice.h:5",
+                        "Adafruit_SPIDevice.h:9"
+                    ]
+                },
+                "builds_on.esp_idf": {
+                    "status": "yes",
+                    "note": "With Arduino as a component only, not on its own: the sources include Arduino.h, Wire.h and SPI.h. Judged by reading, not built. CMakeLists.txt line 11 calls project() inside a component file; its effect under ESP-IDF was not checked.",
+                    "evidence": ["CMakeLists.txt:7", "CMakeLists.txt:9", "component.mk:1", "Adafruit_I2CDevice.h:4"]
+                },
+                "i2c.nack_reported": {
+                    "status": "partly",
+                    "note": "With stop=true the result of endTransmission() is returned as a bool. With stop=false arduino-esp32 sends nothing and returns 0 (libraries/Wire/src/Wire.cpp lines 452-466), so write() returns true with no check. write_then_read() still reports a NACK, because requestFrom() returns 0 and line 205 catches it (Wire.cpp lines 497-520), unless read_len is 0.",
+                    "evidence": [
+                        "Adafruit_I2CDevice.cpp:161",
+                        "Adafruit_I2CDevice.cpp:171",
+                        "Adafruit_I2CDevice.cpp:77",
+                        "Adafruit_I2CDevice.cpp:250"
+                    ]
+                },
+                "i2c.short_read_reported": {
+                    "status": "yes",
+                    "note": "On arduino-esp32 requestFrom() returns all or 0 (cores/esp32/esp32-hal-i2c.c lines 205-209, 234-238). read() stops at the first failed chunk.",
+                    "evidence": [
+                        "Adafruit_I2CDevice.cpp:202",
+                        "Adafruit_I2CDevice.cpp:205",
+                        "Adafruit_I2CDevice.cpp:211"
+                    ]
+                },
+                "i2c.large_transfers": {
+                    "status": "partly",
+                    "note": "With the default Wire buffer a longer write is refused and a longer read is split. The limit is the compile-time I2C_BUFFER_LENGTH, not the buffer of the bus object: after Wire.setBufferSize() below 128 a read is not bounded by the real buffer (see defects).",
+                    "evidence": [
+                        "Adafruit_I2CDevice.cpp:17",
+                        "Adafruit_I2CDevice.cpp:105",
+                        "Adafruit_I2CDevice.cpp:112",
+                        "Adafruit_I2CDevice.cpp:187",
+                        "Adafruit_I2CDevice.cpp:189"
+                    ]
+                },
+                "i2c.repeated_start": {
+                    "status": "yes",
+                    "note": "On arduino-esp32 the write and the read are one call to i2cWriteReadNonStop() (libraries/Wire/src/Wire.cpp line 497). This covers only the first chunk of a read longer than the buffer.",
+                    "evidence": [
+                        "Adafruit_I2CDevice.h:21",
+                        "Adafruit_I2CDevice.cpp:250",
+                        "Adafruit_I2CDevice.cpp:161",
+                        "Adafruit_I2CDevice.cpp:254"
+                    ]
+                },
+                "i2c.speed": {
+                    "status": "partly",
+                    "note": "setClock() is called, its bool result is dropped and true is returned. On arduino-esp32 setClock() returns false before the bus has started (libraries/Wire/src/Wire.cpp lines 380-383).",
+                    "evidence": ["Adafruit_I2CDevice.cpp:313", "Adafruit_I2CDevice.cpp:314"]
+                },
+                "i2c.probe": {
+                    "status": "yes",
+                    "note": "A zero-length write with an ACK check: cores/esp32/esp32-hal-i2c.c lines 162-176. A NACK gives ESP_FAIL and endTransmission() returns 2 (libraries/Wire/src/Wire.cpp lines 465-470).",
+                    "evidence": ["Adafruit_I2CDevice.cpp:69", "Adafruit_I2CDevice.cpp:77", "Adafruit_I2CDevice.cpp:86"]
+                },
+                "spi.transactions": {
+                    "status": "yes",
+                    "note": "write(), read(), write_then_read() and write_and_read() have no return between the two calls. Public transfer() is documented as without transaction.",
+                    "evidence": [
+                        "Adafruit_SPIDevice.cpp:350",
+                        "Adafruit_SPIDevice.cpp:371",
+                        "Adafruit_SPIDevice.cpp:409",
+                        "Adafruit_SPIDevice.cpp:411",
+                        "Adafruit_SPIDevice.cpp:445",
+                        "Adafruit_SPIDevice.cpp:491",
+                        "Adafruit_SPIDevice.cpp:507",
+                        "Adafruit_SPIDevice.cpp:509"
+                    ]
+                },
+                "spi.chip_select": {
+                    "status": "yes",
+                    "note": "These functions have no error path and one exit, and CS is released before it.",
+                    "evidence": [
+                        "Adafruit_SPIDevice.cpp:324",
+                        "Adafruit_SPIDevice.cpp:332",
+                        "Adafruit_SPIDevice.cpp:371",
+                        "Adafruit_SPIDevice.cpp:411",
+                        "Adafruit_SPIDevice.cpp:491",
+                        "Adafruit_SPIDevice.cpp:509"
+                    ]
+                },
+                "spi.mode_and_order": {
+                    "status": "partly",
+                    "note": "Hardware: speed, order and mode go through SPISettings at each beginTransaction(). Bit-banged: order and modes 0, 1 and 3 are correct; mode 2 leaves SCK at the wrong level; speed is not kept (see bit_bang_timing).",
+                    "evidence": [
+                        "Adafruit_SPIDevice.cpp:40",
+                        "Adafruit_SPIDevice.cpp:290",
+                        "Adafruit_SPIDevice.cpp:172",
+                        "Adafruit_SPIDevice.cpp:199",
+                        "Adafruit_SPIDevice.cpp:217",
+                        "Adafruit_SPIDevice.cpp:179"
+                    ]
+                },
+                "spi.bit_bang_timing": {
+                    "status": "partly",
+                    "note": "A delay exists and holds for a freq that divides evenly, such as 100 kHz. Above 500 kHz, the 1 MHz default included, the delay is 0 and nothing limits the clock. Other values round the delay down, and 1953 Hz or less wraps in uint8_t.",
+                    "evidence": [
+                        "Adafruit_SPIDevice.cpp:179",
+                        "Adafruit_SPIDevice.cpp:195",
+                        "Adafruit_SPIDevice.cpp:196",
+                        "Adafruit_SPIDevice.cpp:209",
+                        "Adafruit_SPIDevice.h:107"
+                    ]
+                },
+                "waiting.bounded_waits": {
+                    "status": "partly",
+                    "note": "The library has no polling loop on a device, and bus calls end by the Wire timeout of 50 ms (libraries/Wire/src/Wire.cpp line 48), so a dead device does not hang the program. The waits with portMAX_DELAY on the Wire lock (Wire.cpp lines 291, 421, 504) have no end on the paths listed in defects where the lock stays taken.",
+                    "evidence": [
+                        "Adafruit_I2CDevice.cpp:185",
+                        "Adafruit_I2CDevice.cpp:132",
+                        "Adafruit_I2CDevice.cpp:31",
+                        "Adafruit_SPIDevice.cpp:382"
+                    ]
+                },
+                "several.several_devices": {
+                    "status": "yes",
+                    "note": "All state is in members. No static or file-scope variable in any .h or .cpp of the library.",
+                    "evidence": [
+                        "Adafruit_I2CDevice.h:29",
+                        "Adafruit_I2CDevice.h:30",
+                        "Adafruit_SPIDevice.h:130",
+                        "Adafruit_SPIDevice.h:131",
+                        "Adafruit_BusIO_Register.h:95"
+                    ]
+                },
+                "several.shared_bus": {
+                    "status": "partly",
+                    "note": "SPI: each device applies its own SPISettings at each transaction. I2C: each device has its own address, but setSpeed() changes the bus and is not stored per device, so the last call applies to all devices. Bit-banged: the idle SCK level is set only in begin(), so devices of different CPOL on the same pins do not each get their level.",
+                    "evidence": [
+                        "Adafruit_SPIDevice.cpp:40",
+                        "Adafruit_SPIDevice.cpp:290",
+                        "Adafruit_I2CDevice.h:29",
+                        "Adafruit_I2CDevice.cpp:313",
+                        "Adafruit_SPIDevice.cpp:123"
+                    ]
+                },
+                "several.thread_safety": {
+                    "status": "no",
+                    "searched": "mutex, semaphore, xSemaphore, portENTER_CRITICAL, noInterrupts and lock in every .h and .cpp; a rule for several tasks in README.md and in the doc comments. None found.",
+                    "note": "On arduino-esp32 the bus classes have their own locks: libraries/Wire/src/Wire.cpp line 421 per transmission, libraries/SPI/src/SPI.cpp lines 179 and 195 from beginTransaction() to endTransaction(). Bit-banged SPI, write_then_read() with stop=true and the members of Owner_BusIO_Register have no protection."
+                },
+                "code_health.errors_returned": {
+                    "status": "partly",
+                    "note": "I2C write, read and write_then_read return false. Owner_BusIO_Register::read(void) returns an in-band -1, RegisterBits::read() hides the failure, begin() and setSpeed() drop the bus result, and SPI functions always return true.",
+                    "evidence": [
+                        "Adafruit_I2CDevice.cpp:112",
+                        "Adafruit_I2CDevice.cpp:211",
+                        "Adafruit_BusIO_Register.cpp:190",
+                        "Adafruit_BusIO_Register.cpp:331",
+                        "Adafruit_I2CDevice.cpp:31",
+                        "Adafruit_SPIDevice.cpp:393"
+                    ]
+                },
+                "code_health.buffers_bounded": {
+                    "status": "partly",
+                    "note": "write() and write(uint32_t) check. read(void) does not check _width against _buffer[4], and _addrwidth is not checked against addrbuffer[2].",
+                    "evidence": [
+                        "Adafruit_I2CDevice.cpp:105",
+                        "Adafruit_BusIO_Register.cpp:165",
+                        "Adafruit_BusIO_Register.cpp:189",
+                        "Adafruit_BusIO_Register.cpp:122"
+                    ]
+                },
+                "code_health.allocation_checked": {
+                    "status": "no",
+                    "searched": "new, malloc, calloc and realloc in every .h and .cpp. One allocation: new SPISettings at Adafruit_SPIDevice.cpp line 40, with no check after it. Line 290 dereferences the pointer with no check."
+                },
+                "code_health.tests": {
+                    "status": "no",
+                    "searched": "A test or tests folder, files named test outside examples, and test frameworks: none. .github/workflows/githubci.yml runs clang-format, doxygen and build_platform.py. The sketches spi_modetest, genericdevice_uarttest and genericdevice_uartregtest print values for a person to read and give no pass or fail."
+                },
+                "code_health.examples": {
+                    "status": "yes",
+                    "note": "Ten sketches for I2C, SPI, registers and the generic transport. Eight of them stop in setup() on a UART Serial of arduino-esp32 (see defects).",
+                    "evidence": [
+                        "examples/i2c_readwrite/i2c_readwrite.ino:24",
+                        "examples/i2c_readwrite/i2c_readwrite.ino:35",
+                        "examples/spi_readwrite/spi_readwrite.ino:22",
+                        "examples/i2c_registers/i2c_registers.ino:24",
+                        "examples/spi_register_bits/spi_register_bits.ino:45"
+                    ]
+                },
+                "code_health.docs": {
+                    "status": "yes",
+                    "note": "The API text is the doc comment of each function in the .cpp files. README.md has one line of description and no usage.",
+                    "evidence": [
+                        "README.md:4",
+                        "Adafruit_I2CDevice.cpp:6",
+                        "Adafruit_I2CDevice.cpp:90",
+                        "Adafruit_SPIDevice.cpp:24",
+                        "Adafruit_BusIO_Register.cpp:7"
+                    ]
+                },
+                "code_health.license": {"status": "yes", "evidence": ["LICENSE:1", "LICENSE:5"]}
+            },
+            "defects": [
+                {
+                    "what": "Owner_I2CDevice::end() has an empty body on ARDUINO_ARCH_ESP32: the #if removes _wire->end() and _begun = false, although TwoWire::end() exists on this platform (libraries/Wire/src/Wire.h line 102, Wire.cpp line 325). The bus stays up, the pins stay assigned, _begun stays true, and the void function reports nothing.",
+                    "severity": "high",
+                    "judged": "With ARDUINO_ARCH_ESP32 the #if at Adafruit_I2CDevice.cpp lines 49-54 leaves end() empty although TwoWire::end() exists (read Wire.h line 102, Wire.cpp line 325), so the function cannot work at all on this platform; the effect is that the bus and pins stay held, with no data harm. ARDUINO_ARCH_ESP32 is a build flag that does not appear in the allowed platform files, so it is taken as the standard architecture define.",
+                    "evidence": [
+                        "Adafruit_I2CDevice.cpp:49",
+                        "Adafruit_I2CDevice.cpp:51",
+                        "Adafruit_I2CDevice.cpp:52",
+                        "Adafruit_I2CDevice.cpp:53"
+                    ]
+                },
+                {
+                    "what": "Bit-banged transfer() computes the half period with two integer divisions rounded down. For any freq above 500 kHz the delay is 0, the default 1 MHz included, so nothing limits the clock and it runs at the speed of the loop. Below that the delay is rounded down, so the clock can be faster than asked: 300 kHz gives 1 us per half period in modes 0, 1 and 2, a period of 2 us before loop overhead.",
+                    "severity": "medium",
+                    "evidence": ["Adafruit_SPIDevice.cpp:179", "Adafruit_SPIDevice.cpp:195", "Adafruit_SPIDevice.h:107"]
+                },
+                {
+                    "what": "bitdelay_us is uint8_t, so the delay wraps for freq of 1953 Hz or less: 1000 Hz gives 244 us instead of 500 us, and 1953 Hz gives 0. The clock is then faster than asked. freq = 0 divides by zero.",
+                    "severity": "medium",
+                    "judged": "Line 179 truncates to uint8_t with no clamp or zero check: 1000 Hz gives 244, 1953 Hz gives 0, and freq = 0 divides by zero, as claimed. It applies only to software SPI (the second constructor, _spi null) at very low frequencies; the default 1 MHz gives a delay of 0 with no wrap, and a hardware SPI device returns before this line.",
+                    "evidence": ["Adafruit_SPIDevice.cpp:179"]
+                },
+                {
+                    "what": "Bit-banged SPI_MODE2 takes the SPI_MODE0 branch. begin() leaves SCK high, but each bit ends with BUSIO_SET_CLOCK_LOW(), so SCK stays low after a transfer, which is not the idle level of mode 2. The next transaction starts with SCK low and its first BUSIO_SET_CLOCK_HIGH() is an extra rising edge with CS asserted, before the first sample. A mode 2 device changes MISO on rising edges, so reads after the first transaction can be one bit off.",
+                    "severity": "medium",
+                    "evidence": [
+                        "Adafruit_SPIDevice.cpp:128",
+                        "Adafruit_SPIDevice.cpp:199",
+                        "Adafruit_SPIDevice.cpp:206",
+                        "Adafruit_SPIDevice.cpp:217"
+                    ]
+                },
+                {
+                    "what": "On ESP32 bit-banged pins are driven by a read-modify-write of the whole GPIO output register (GPIO_OUT_REG or GPIO_OUT1_REG, cores/esp32/Arduino.h lines 114 and 120). The step is not atomic: a change of another pin of that port by an interrupt or by the other core between the read and the write is lost. The header disables this for Teensy 4 for this reason and enables it for ESP32.",
+                    "severity": "medium",
+                    "evidence": [
+                        "Adafruit_SPIDevice.cpp:6",
+                        "Adafruit_SPIDevice.cpp:7",
+                        "Adafruit_SPIDevice.cpp:12",
+                        "Adafruit_SPIDevice.h:50",
+                        "Adafruit_SPIDevice.h:74",
+                        "Adafruit_SPIDevice.h:78"
+                    ]
+                },
+                {
+                    "what": "_maxBufferSize is fixed at compile time to I2C_BUFFER_LENGTH (128) and does not follow the bus object. Wire.setBufferSize() accepts 32 or more (libraries/Wire/src/Wire.cpp line 183) and the rx buffer is malloc(bufferSize) (line 150). After Wire.setBufferSize(64), read() of 65 to 128 bytes passes that size to requestFrom(), which has no bound (Wire.cpp line 511, cores/esp32/esp32-hal-i2c.c line 204), and the data goes past the end of the heap block rxBuffer.",
+                    "severity": "medium",
+                    "judged": "Read Wire.cpp lines 150, 183, 497, 511 and esp32-hal-i2c.c lines 204, 233: rxBuffer and the size reach the IDF read with no bound, so after Wire.setBufferSize(64) a read above 64 bytes overruns the heap block (the IDF function itself was not read; ESP32 is a build flag, implied because the library's SPI header compiles on this core only through its ESP32 branch). This is memory corruption, but only after the application shrinks the Wire buffer below the default.",
+                    "evidence": [
+                        "Adafruit_I2CDevice.cpp:17",
+                        "Adafruit_I2CDevice.cpp:187",
+                        "Adafruit_I2CDevice.cpp:202"
+                    ]
+                },
+                {
+                    "what": "write() returns false after a short _wire->write() with no endTransmission(). On arduino-esp32 beginTransmission() has taken the Wire lock (libraries/Wire/src/Wire.cpp line 421), and it is a plain mutex (line 284), so the next beginTransmission() from any task, the same task included, waits forever with portMAX_DELAY. A short write happens when the tx buffer is smaller than the check at line 105 assumes (Wire.setBufferSize() below 128) or is NULL (Wire.begin() failed or Wire.end() was called).",
+                    "severity": "medium",
+                    "evidence": [
+                        "Adafruit_I2CDevice.cpp:115",
+                        "Adafruit_I2CDevice.cpp:119",
+                        "Adafruit_I2CDevice.cpp:123",
+                        "Adafruit_I2CDevice.cpp:128",
+                        "Adafruit_I2CDevice.cpp:132"
+                    ]
+                },
+                {
+                    "what": "write() with stop=false returns true on arduino-esp32 with no byte sent: endTransmission(false) only sets nonStop and returns 0, and the Wire lock stays taken (libraries/Wire/src/Wire.cpp lines 458-466). A following read() sends the bytes, but a following write() drops them (Wire.cpp lines 415-428) and both calls return true. write_then_read() with read_len 0 returns true having sent nothing, and another task then blocks at beginTransmission().",
+                    "severity": "medium",
+                    "evidence": [
+                        "Adafruit_I2CDevice.cpp:161",
+                        "Adafruit_I2CDevice.cpp:166",
+                        "Adafruit_I2CDevice.cpp:185",
+                        "Adafruit_I2CDevice.cpp:250",
+                        "Adafruit_I2CDevice.cpp:254"
+                    ]
+                },
+                {
+                    "what": "begin() ignores the bool of _wire->begin() and sets _begun. With addr_detect=false it returns true on a bus that did not start. With addr_detect=true it returns false, but detected() leaves the Wire lock taken, because endTransmission() returns 4 at the NULL txBuffer check with no release (libraries/Wire/src/Wire.cpp lines 447-450). The next begin() then waits forever at Wire.cpp line 291, so a retry loop hangs instead of failing again. Wire.begin() fails, for example, on Wire1 with no pins set on a board with no SDA1 (Wire.cpp lines 79-85).",
+                    "severity": "medium",
+                    "evidence": [
+                        "Adafruit_I2CDevice.cpp:31",
+                        "Adafruit_I2CDevice.cpp:32",
+                        "Adafruit_I2CDevice.cpp:35",
+                        "Adafruit_I2CDevice.cpp:37"
+                    ]
+                },
+                {
+                    "what": "setSpeed() ignores the bool of _wire->setClock() and returns true. Called before the bus has started, setClock() returns false and changes nothing (libraries/Wire/src/Wire.cpp lines 380-383), and begin() then starts the bus at 100 kHz (cores/esp32/esp32-hal-i2c.c lines 70-71). The call returns true for a speed that was not applied. A request above 1 MHz is clamped to 1 MHz (esp32-hal-i2c.c lines 269-271) and also returns true.",
+                    "severity": "medium",
+                    "evidence": ["Adafruit_I2CDevice.cpp:313", "Adafruit_I2CDevice.cpp:314"]
+                },
+                {
+                    "what": "Owner_BusIO_Register::read(void) returns -1 (0xFFFFFFFF) on failure in the same uint32_t as the data, so for a 4-byte register a failure cannot be told from a value. Owner_BusIO_RegisterBits::read() shifts and masks that value and returns all ones in the slice as data, with no way for the caller to see the failure.",
+                    "severity": "medium",
+                    "evidence": [
+                        "Adafruit_BusIO_Register.cpp:190",
+                        "Adafruit_BusIO_Register.cpp:331",
+                        "Adafruit_BusIO_Register.cpp:333"
+                    ]
+                },
+                {
+                    "what": "Owner_BusIO_RegisterBits::write() does not check the read of its read-modify-write. After a failed read val is 0xFFFFFFFF, so the write that follows sets every other bit of the register to 1 and can return true. A transient bus error on the read changes the configuration of the device.",
+                    "severity": "medium",
+                    "evidence": [
+                        "Adafruit_BusIO_Register.cpp:343",
+                        "Adafruit_BusIO_Register.cpp:350",
+                        "Adafruit_BusIO_Register.cpp:351",
+                        "Adafruit_BusIO_Register.cpp:353"
+                    ]
+                },
+                {
+                    "what": "Owner_BusIO_Register::read(void) passes _width as the length with the 4-byte member _buffer as the destination. _width comes from the constructors and setWidth() with no check, so a width above 4 writes device data past _buffer, over _cached and past the end of the object. print() and println() reach the same code. write(uint32_t) does have the check.",
+                    "severity": "medium",
+                    "judged": "read(void) passes _width to read(_buffer, _width) with no check, the constructors and setWidth() store it unchecked, only write(uint32_t) rejects more than 4, and print() and println() reach the same path. On a calculated 32-bit layout widths 5-7 land in padding, 8-11 reach _cached and 12 or more pass the end of the object; the width comes from the application, defaults to 1, and the generic constructor documents 1-4.",
+                    "evidence": [
+                        "Adafruit_BusIO_Register.h:95",
+                        "Adafruit_BusIO_Register.cpp:28",
+                        "Adafruit_BusIO_Register.cpp:189",
+                        "Adafruit_BusIO_Register.cpp:298",
+                        "Adafruit_BusIO_Register.cpp:366"
+                    ]
+                },
+                {
+                    "what": "addrbuffer has 2 bytes and _addrwidth is passed as its length with no check. With ADDRESSED_OPCODE_BIT0_LOW_TO_WRITE the length is _addrwidth + 1, so address_width=2 reads 3 bytes. Any address_width above 2, from a constructor or setAddressWidth(), does the same on all paths. Stack bytes past the array are sent to the device.",
+                    "severity": "medium",
+                    "judged": "addrbuffer has 2 bytes and every path passes _addrwidth unchecked (lines 122, 146, 149, 223, 247, 250), with _addrwidth + 1 on the opcode type (lines 134, 235), so address_width=2 with that type, a documented value, reads one stack byte past the array and sends it to the device. The default width of 1 is safe, so this is a limit of legal input.",
+                    "evidence": [
+                        "Adafruit_BusIO_Register.cpp:119",
+                        "Adafruit_BusIO_Register.cpp:122",
+                        "Adafruit_BusIO_Register.cpp:134",
+                        "Adafruit_BusIO_Register.cpp:235",
+                        "Adafruit_BusIO_Register.cpp:381"
+                    ]
+                },
+                {
+                    "what": "With address_width=2 the register address is always sent low byte first, on I2C and on SPI. byteorder applies only to data, and nothing selects the order of the address. A device that takes the high byte first, such as a 24LC256-type EEPROM, receives another address, and a read returns the data of that address with true, unless the caller swaps the bytes of reg_addr.",
+                    "severity": "medium",
+                    "evidence": [
+                        "Adafruit_BusIO_Register.cpp:119",
+                        "Adafruit_BusIO_Register.cpp:120",
+                        "Adafruit_BusIO_Register.cpp:122",
+                        "Adafruit_BusIO_Register.cpp:220",
+                        "Adafruit_BusIO_Register.cpp:223"
+                    ]
+                },
+                {
+                    "what": "The mask (1 << (_bits)) - 1 is computed in int and _bits is not checked. For _bits = 32 the shift is undefined behaviour, and for _bits = 31 the subtraction overflows, so a full slice of a 4-byte register does not get a defined mask.",
+                    "severity": "medium",
+                    "judged": "_bits is stored unchecked and the mask is computed in 32-bit int in read() and write(): a shift by 32 is undefined and (1 << 31) - 1 overflows int. Slices up to 30 bits are defined and the examples use at most 15, so this is only at the limit of legal input; the actual result at 31 and 32 was not observed, since nothing was built.",
+                    "evidence": [
+                        "Adafruit_BusIO_Register.cpp:322",
+                        "Adafruit_BusIO_Register.cpp:333",
+                        "Adafruit_BusIO_Register.cpp:346"
+                    ]
+                },
+                {
+                    "what": "_genericdevice has no default initializer and only the GenericDevice constructor sets it. If _i2cdevice and _spidevice are both nullptr (the two-bus constructor takes nullptr for the unused bus and does not refuse both), write() and read() test an indeterminate pointer instead of returning false, and can call through it.",
+                    "severity": "medium",
+                    "evidence": [
+                        "Adafruit_BusIO_Register.h:91",
+                        "Adafruit_BusIO_Register.cpp:83",
+                        "Adafruit_BusIO_Register.cpp:148",
+                        "Adafruit_BusIO_Register.cpp:249"
+                    ]
+                },
+                {
+                    "what": "_read() casts len to uint8_t for requestFrom(). A build can set I2C_BUFFER_LENGTH (libraries/Wire/src/Wire.h lines 42-44) and _maxBufferSize follows it. With 256 or more, a chunk of 256 bytes or more asks for len modulo 256 bytes, recv != len, and the read fails although the bus buffer is large enough.",
+                    "severity": "medium",
+                    "evidence": ["Adafruit_I2CDevice.cpp:202", "Adafruit_I2CDevice.cpp:205"]
+                },
+                {
+                    "what": "Owner_SPIDevice owns _spiSetting through a raw pointer, deletes it in the destructor and has no copy constructor or assignment operator. A copy shares the pointer, so the second destructor deletes it again.",
+                    "severity": "medium",
+                    "evidence": [
+                        "Adafruit_SPIDevice.cpp:40",
+                        "Adafruit_SPIDevice.cpp:102",
+                        "Adafruit_SPIDevice.h:110",
+                        "Adafruit_SPIDevice.h:131"
+                    ]
+                },
+                {
+                    "what": "Owner_SPIDevice stores _begun and never reads it. read(), write() and the others run with no started bus and return true: on arduino-esp32 every SPI call returns at once with a NULL bus (cores/esp32/esp32-hal-spi.c lines 1091 and 1323), and read() leaves sendvalue in the buffer as data. begin() returns true also when spiStartBus() failed, although SPIClass::bus() shows that (libraries/SPI/src/SPI.h line 91).",
+                    "severity": "medium",
+                    "evidence": [
+                        "Adafruit_SPIDevice.cpp:118",
+                        "Adafruit_SPIDevice.cpp:139",
+                        "Adafruit_SPIDevice.cpp:140",
+                        "Adafruit_SPIDevice.cpp:407",
+                        "Adafruit_SPIDevice.cpp:426",
+                        "Adafruit_SPIDevice.h:146"
+                    ]
+                },
+                {
+                    "what": "The DEBUG_SERIAL prints of Owner_SPIDevice count with uint16_t i against a size_t length. With DEBUG_SERIAL defined and a length of 65536 or more the counter wraps and the loop does not end. In write_then_read() this happens with the transaction open and CS asserted.",
+                    "severity": "medium",
+                    "judged": "All four loops compare uint16_t i with a size_t length, so with 65536 or more the condition never fails; in write_then_read() lines 462 and 480 run before endTransactionWithDeassertingCS() at line 491, so CS stays low and paramLock stays taken (SPI.cpp lines 179, 195). DEBUG_SERIAL is commented out at line 3, so this hang exists only in a debug configuration the library offers and does not use by default.",
+                    "evidence": [
+                        "Adafruit_SPIDevice.cpp:3",
+                        "Adafruit_SPIDevice.cpp:382",
+                        "Adafruit_SPIDevice.cpp:415",
+                        "Adafruit_SPIDevice.cpp:462",
+                        "Adafruit_SPIDevice.cpp:480"
+                    ]
+                },
+                {
+                    "what": "The STM32 branch of transfer() calls _spi->transfer(buffer[i]) and drops the return value, so read() and write_and_read() keep the bytes sent instead of the bytes received. This assumes transfer(uint8_t) takes the byte by value as in the Arduino SPI API; the STM32 class was not read. Not reachable on ESP32.",
+                    "severity": "medium",
+                    "evidence": ["Adafruit_SPIDevice.cpp:157", "Adafruit_SPIDevice.cpp:159"]
+                },
+                {
+                    "what": "With no hardware SPI (SPI_INTERFACES_COUNT is 0) the first constructor stores nothing: _cs, _sck, _mosi, _miso, _freq, _dataOrder and _dataMode stay uninitialized, and begin() and transfer() use them as pin numbers and as a divisor. Not reachable on ESP32.",
+                    "severity": "medium",
+                    "judged": "Without BUSIO_HAS_HW_SPI the first constructor stores nothing, so _spi stays nullptr and begin() and transfer() take the software path with uninitialized pins and _freq; medium only as a configuration the library offers for other boards. It cannot happen on ESP32: SPI_INTERFACES_COUNT does not appear in cores/esp32 or the SPI and Wire sources, and the branch's enum would not compile against the SPI_MODE0 macro at esp32-hal-spi.h line 49, which Arduino.h includes.",
+                    "evidence": [
+                        "Adafruit_SPIDevice.cpp:44",
+                        "Adafruit_SPIDevice.cpp:46",
+                        "Adafruit_SPIDevice.cpp:47",
+                        "Adafruit_SPIDevice.cpp:121",
+                        "Adafruit_SPIDevice.h:141"
+                    ]
+                },
+                {
+                    "what": "Eight of the ten examples wait with while (!Serial) before Serial.begin(). On arduino-esp32, when Serial is HardwareSerial, operator bool is false until begin() (cores/esp32/HardwareSerial.cpp lines 71 and 480-483, esp32-hal-uart.c lines 222-226), so the loop does not end and the sketch stops in setup(). Boards with USB CDC on boot use another Serial class.",
+                    "severity": "medium",
+                    "evidence": [
+                        "examples/i2c_address_detect/i2c_address_detect.ino:6",
+                        "examples/i2c_address_detect/i2c_address_detect.ino:9",
+                        "examples/i2c_readwrite/i2c_readwrite.ino:7",
+                        "examples/i2c_registers/i2c_registers.ino:8",
+                        "examples/i2corspi_register/i2corspi_register.ino:12",
+                        "examples/spi_modetest/spi_modetest.ino:10",
+                        "examples/spi_readwrite/spi_readwrite.ino:7",
+                        "examples/spi_register_bits/spi_register_bits.ino:158",
+                        "examples/spi_registers/spi_registers.ino:8"
+                    ]
+                },
+                {
+                    "what": "read() passes stop to requestFrom(), but sendStop is not used in TwoWire::requestFrom() (libraries/Wire/src/Wire.cpp lines 474-521). On arduino-esp32 stop=false has no effect, read_stop has no effect, and each chunk of a split read is a separate i2cRead() transaction, while read() returns true.",
+                    "severity": "low",
+                    "evidence": ["Adafruit_I2CDevice.cpp:188", "Adafruit_I2CDevice.cpp:202"]
+                },
+                {
+                    "what": "new SPISettings is not checked, and beginTransaction() dereferences the pointer with no check.",
+                    "severity": "low",
+                    "evidence": ["Adafruit_SPIDevice.cpp:40", "Adafruit_SPIDevice.cpp:290"]
+                },
+                {
+                    "what": "write(uint32_t) stores _cached before the bus write. After a failed write readCached() returns a value the device does not hold.",
+                    "severity": "low",
+                    "evidence": [
+                        "Adafruit_BusIO_Register.cpp:170",
+                        "Adafruit_BusIO_Register.cpp:180",
+                        "Adafruit_BusIO_Register.cpp:211"
+                    ]
+                },
+                {
+                    "what": "Bit-banged transfer() reads buffer[0] before the loop, also with len 0. read(nullptr, 0) and write_and_read(nullptr, 0) dereference a null pointer there.",
+                    "severity": "low",
+                    "evidence": ["Adafruit_SPIDevice.cpp:178"]
+                },
+                {
+                    "what": "Owner_BusIO_Register::read() and write() with a buffer take the length as uint8_t, while the device classes take size_t. A length of 256 or more from the caller is narrowed at the call: 300 transfers 44 bytes and the call returns true.",
+                    "severity": "low",
+                    "evidence": ["Adafruit_BusIO_Register.h:66", "Adafruit_BusIO_Register.h:71"]
+                },
+                {
+                    "what": "In the example callback uart_read() the test timeout == 0 does not detect a timeout: after while (... && timeout--) ends by timeout the counter is 65535. With no data the function reads -1 into the buffer and returns true. If data arrives just after the counter reached 0 it returns false.",
+                    "severity": "low",
+                    "evidence": [
+                        "examples/genericdevice_uarttest/genericdevice_uarttest.ino:35",
+                        "examples/genericdevice_uarttest/genericdevice_uarttest.ino:38",
+                        "examples/genericdevice_uartregtest/genericdevice_uartregtest.ino:42",
+                        "examples/genericdevice_uartregtest/genericdevice_uartregtest.ino:45"
+                    ]
+                },
+                {
+                    "what": "The example callback uart_readreg() copies 4 bytes and ignores datalen, so a register read with a smaller buffer and len writes past that buffer.",
+                    "severity": "low",
+                    "evidence": ["examples/genericdevice_uartregtest/genericdevice_uartregtest.ino:123"]
+                },
+                {
+                    "what": "The doc comments of read() and write_then_read() say the length cannot be more than maxBufferSize(), and the comment in write() says 32 bytes. read() splits longer reads, and write() is limited by maxBufferSize().",
+                    "severity": "low",
+                    "evidence": [
+                        "Adafruit_I2CDevice.cpp:177",
+                        "Adafruit_I2CDevice.cpp:238",
+                        "Adafruit_I2CDevice.cpp:106",
+                        "Adafruit_I2CDevice.cpp:185"
+                    ]
+                },
+                {
+                    "what": "The doc comment of Owner_BusIO_Register::read(void) says it does no error checking, and the function checks the read. The doc comment of readCached() gives a failure value that the function cannot return.",
+                    "severity": "low",
+                    "evidence": [
+                        "Adafruit_BusIO_Register.cpp:184",
+                        "Adafruit_BusIO_Register.cpp:189",
+                        "Adafruit_BusIO_Register.cpp:209",
+                        "Adafruit_BusIO_Register.cpp:211"
+                    ]
+                }
+            ]
+        }
+    ]
+}

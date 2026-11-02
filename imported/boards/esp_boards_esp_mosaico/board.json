@@ -16,7 +16,7 @@
         "battery_monitor": {"class": "fuel_gauge", "chip": "bq27220"},
         "audio_dac": {
             "class": "audio",
-            "on": {"i2s.i2s0": {}, "i2c.i2c0": {"address": "0x32"}},
+            "on": {"i2s.i2s0": {}, "i2c.i2c0": {"address": "0x19"}},
             "config": {"direction": "both", "sample_rate": 16000},
             "chip": "es8311"
         },

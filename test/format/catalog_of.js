@@ -3,7 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const FILES = { mcu: 'mcu.json', devices: 'device.json', modules: 'module.json', addons: 'addon.json', boards: 'board.json', connectors: 'connector.json' };
+const FILES = { mcu: 'mcu.json', devices: 'device.json', modules: 'module.json', addons: 'addon.json', platforms: 'platform.json', boards: 'board.json', connectors: 'connector.json' };
 const read = (file) => JSON.parse(fs.readFileSync(file));
 const below = (dir) => (fs.existsSync(dir) ? fs.readdirSync(dir).sort().map((name) => path.join(dir, name)) : []);
 
@@ -17,7 +17,7 @@ function catalogOf(roots) {
                 if (!(name in catalog[kind]) && fs.existsSync(path.join(dir, file))) catalog[kind][name] = read(path.join(dir, file));
             }
         }
-        for (const ecosystem of below(path.join(root, 'libraries'))) {
+        for (const ecosystem of below(path.join(root, 'libraries')).filter((entry) => fs.statSync(entry).isDirectory())) {
             for (const dir of below(ecosystem).flatMap(below)) {
                 const record = read(path.join(dir, 'library.json'));
                 const id = `${record.ecosystem}/${record.owner}/${record.name}`;

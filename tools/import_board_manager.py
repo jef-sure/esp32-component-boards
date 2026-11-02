@@ -34,7 +34,6 @@ HEAD = {"format": "jef-sure/boards", "format_version": 2}
 LEVEL = "extracted"
 TOOL = "tools/import_board_manager.py"
 PLACEHOLDER = re.compile(r"\$\{[^}]*\}")  # a value the pack fills in at build time
-SEVEN_BITS = 0x77
 NOT_WIRED = (None, -1, "-1", "GPIO_NUM_NC", "NC")
 NOT_A_CHIP = ("none", "auto", "internal")
 I2S_LINES = ("mclk", "bclk", "ws", "dout", "din")
@@ -83,11 +82,12 @@ def given(mapping):
     return {key: value for key, value in mapping.items() if value is not None}
 
 
-def address(value):
+def address(value, shifted=True):
+    """The packs give touch, codecs and expanders in the 8-bit form, with the read and write bit. A custom device has the 7-bit one."""
     value = value[0] if isinstance(value, list) else value
     if not isinstance(value, int):
         return None
-    return f"{value >> 1 if value > SEVEN_BITS else value:#04x}"
+    return f"{value >> 1 if shifted else value:#04x}"
 
 
 def orientation(flags):
@@ -470,7 +470,7 @@ class Board:
             return
         device["class"] = "pmic"
         bus, _ = self.bus_of(parts, ("i2c",))
-        reach = address(config.get("i2c_addr"))
+        reach = address(config.get("i2c_addr"), shifted=False)
         device["on"] = {bus: {"address": reach}} if bus and reach else {}
 
     def device_fs_fat(self, _name, device, item, config, _chip, parts):

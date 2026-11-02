@@ -1,0 +1,50 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "platform",
+    "name": "esp_idf",
+    "title": "ESP-IDF",
+    "url": "https://github.com/espressif/esp-idf",
+    "ecosystem": "esp-idf",
+    "registry": "https://components.espressif.com",
+    "project": "CMakeLists.txt, main/idf_component.yml",
+    "writes_projects": true,
+    "versions": {
+        "6.1": {
+            "targets": [
+                "esp32",
+                "esp32s2",
+                "esp32c3",
+                "esp32s3",
+                "esp32c2",
+                "esp32c6",
+                "esp32h2",
+                "esp32p4",
+                "esp32c5",
+                "esp32c61"
+            ],
+            "preview": ["esp32h21", "esp32h4", "esp32s31"]
+        },
+        "5.5": {
+            "targets": [
+                "esp32",
+                "esp32s2",
+                "esp32c3",
+                "esp32s3",
+                "esp32c2",
+                "esp32c6",
+                "esp32h2",
+                "esp32p4",
+                "esp32c5",
+                "esp32c61"
+            ],
+            "preview": ["esp32h21", "esp32h4"]
+        }
+    },
+    "checked": {
+        "versions": {
+            "level": "vendor-code",
+            "source": "SUPPORTED_TARGETS and PREVIEW_TARGETS of tools/idf_py_actions/constants.py, ESP-IDF 5.5.5 and 6.1"
+        }
+    }
+}

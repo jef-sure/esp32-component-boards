@@ -1,0 +1,17 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "addon",
+    "name": "poe_splitter_micro_usb",
+    "title": "PoE splitter, Micro USB, 5 V 2.4 A",
+    "description": "Takes data and power from one cable, and gives RJ45 and Micro USB for the board. Isolated.",
+    "stands": "port",
+    "needs": ["ethernet"],
+    "gives": {"provides": ["poe"], "plug": "micro_usb", "mv": 5000, "ma": 2400},
+    "checked": {
+        "facts": {
+            "level": "vendor-docs",
+            "source": "Adafruit 3785, PoE Splitter with MicroUSB Plug, isolated 12 W, 5V 2.4 A"
+        }
+    }
+}

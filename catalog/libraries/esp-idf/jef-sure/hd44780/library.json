@@ -79,5 +79,5 @@
             "date": "2026-10-31"
         }
     },
-    "versions": {"0.1.2": {"frameworks": {"esp-idf": ">=5.3"}}, "0.1.0": {"frameworks": {"esp-idf": ">=5.0"}}}
+    "versions": {"0.1.2": {"platforms": {"esp_idf": ">=5.3"}}, "0.1.0": {"platforms": {"esp_idf": ">=5.0"}}}
 }

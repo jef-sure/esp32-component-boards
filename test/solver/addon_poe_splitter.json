@@ -1,0 +1,8 @@
+{
+    "title": "A board with Ethernet and USB-C takes PoE by a splitter; the board sold with PoE stays first; the plug of the JC1060 is not in the data",
+    "answers": {"ethernet": true, "poe": true},
+    "first": {"name": "esp32_p4_poe_eth", "modules": {}},
+    "kit": {"name": "esp32_p4_eth", "modules": {}},
+    "says": "PoE splitter, USB-C, 5 V 2 A: on the USB Type-C of the board",
+    "fit": ["esp32_p4_eth", "esp32_p4_poe_eth", "jc1060p470c"]
+}

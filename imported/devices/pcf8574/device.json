@@ -5,6 +5,9 @@
     "name": "pcf8574",
     "title": "pcf8574",
     "class": ["rtc"],
-    "checked": {"facts": {"level": "extracted", "source": "the boards that use it"}},
-    "on": {"i2c": {}}
+    "checked": {
+        "facts": {"level": "extracted", "source": "the boards that use it"},
+        "address": {"level": "extracted", "source": "imported/report_addresses.json"}
+    },
+    "on": {"i2c": {"address_try": ["0x21", "0x20", "0x27"]}}
 }

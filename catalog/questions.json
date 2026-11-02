@@ -44,6 +44,8 @@
         {"id": "ethernet", "text": "Ethernet", "type": "flag", "needs": {"provides": "ethernet", "chip": "emac"}},
         {"id": "poe", "text": "Power over Ethernet", "type": "flag", "when": {"ethernet": true}, "needs": {"provides": "poe"}},
         {"id": "taken", "text": "GPIOs already in use, as 14, 15, 16", "type": "text"},
+        {"id": "platform", "text": "Platform", "type": "choice", "top": true, "limit": {"measure": "platform"}, "choices": [
+            {"value": "any", "text": "any"}, {"value": "esp_idf:6.1", "text": "ESP-IDF 6.1"}, {"value": "esp_idf:5.5", "text": "ESP-IDF 5.5"}, {"value": "arduino_esp32:3.3", "text": "Arduino 3.3"}]},
         {"id": "budget", "text": "Budget for one kit", "type": "number", "top": true, "limit": {"measure": "price"}}
     ]
 }

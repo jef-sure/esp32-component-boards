@@ -25,10 +25,13 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import urllib.error
+import urllib.request
 
 import jsonschema
 
 import boards_gen
+import audit
 import resolve
 import rules
 import take_report
@@ -159,10 +162,15 @@ def spoiled(doc, rng):
     return out
 
 
+def documents_under(root):
+    """The files of a tree that are documents of the format: its own files and the lists of libraries are not."""
+    return [path for path in sorted(root.rglob("*.json")) if path.parent != root and path.parent != root / "libraries"]
+
+
 def editor_differs(reached):
     """Gives jsonschema, dump and pins_of of Python and their JS the same input. Returns the counts and where the two part."""
     rng = random.Random(1)
-    files = {str(path.relative_to(ROOT)): json.loads(path.read_text()) for root in (ROOT / "catalog", TESTS / "catalog") for path in sorted(root.rglob("*.json")) if path.parent != root}
+    files = {str(path.relative_to(ROOT)): json.loads(path.read_text()) for root in (ROOT / "catalog", TESTS / "catalog") for path in documents_under(root)}
     docs = {**dict(documents()), **files}
     plain = {name: no_nulls(doc) if "extends" in doc else doc for name, doc in docs.items()}
     raw = {**plain, **{f"{name}, spoiled {i}": spoiled(doc, rng) for name, doc in plain.items() for i in range(6)}}
@@ -212,6 +220,37 @@ def reports_refused():
     return wrong
 
 
+def bridge_problems():
+    """tools/boards_mcp.py over its real stdio and HTTP: it answers MCP, and it gives out only the page."""
+    process = subprocess.Popen([sys.executable, str(ROOT / "tools" / "boards_mcp.py")], stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
+
+    def asked(ident, method, params=None):
+        process.stdin.write(json.dumps({"jsonrpc": "2.0", "id": ident, "method": method, "params": params or {}}) + "\n")
+        process.stdin.flush()
+        return json.loads(process.stdout.readline())["result"]
+
+    def status(path, **headers):
+        try:
+            return urllib.request.urlopen(urllib.request.Request(f"{base}{path}", headers=headers), timeout=5).status
+        except urllib.error.HTTPError as error:
+            return error.code
+
+    problems = []
+    try:
+        if asked(1, "initialize")["serverInfo"]["name"] != "boards" or not asked(2, "tools/list")["tools"]:
+            problems.append("no tools")
+        link = json.loads(asked(3, "tools/call", {"name": "page_link"})["content"][0]["text"])["link"]
+        base = link.split("/editor/")[0]
+        for path, headers, wanted in (("/editor/index.html", {}, 200), ("/agent/messages?seen=0", {}, 401), ("/editor/index.html", {"Host": "evil.example"}, 403), ("/CLAUDE.md", {}, 404),
+                                      ("/.git/config", {}, 404), ("/editor/../CLAUDE.md", {}, 404), ("/editor/%2e%2e/CLAUDE.md", {}, 404), ("/tools/boards_mcp.py", {}, 404)):
+            if status(path, **headers) != wanted:
+                problems.append(f"the server of the page: {path} {headers}: not {wanted}")
+    finally:
+        process.stdin.close()
+        process.wait(timeout=5)
+    return problems
+
+
 def roles_problems(doc):
     """The schema of roles.json, one name for one role, and words that compile."""
     problems = errors_of(ROLES, doc, "roles")
@@ -226,6 +265,76 @@ def roles_problems(doc):
     return problems
 
 
+def library_list_problems():
+    """The list of libraries leads: the index only points into it, and need not cover it."""
+    folder = ROOT / "catalog" / "libraries"
+    libraries = json.loads((folder / "libraries.json").read_text())["libraries"]
+    index = json.loads((folder / "chip_libraries.json").read_text())["chips"]
+    problems = [f"chip_libraries.json: {chip}: {library} is not in libraries.json" for chip, names in index.items() for library in names if library not in libraries]
+    problems += [f"chip_libraries.json: {chip}: {library} does not name it" for chip, names in index.items() for library in names if library in libraries and chip not in libraries[library]["chips"]]
+    problems += [f"libraries.json: {library} requires {needed}, which is not in it" for library, entry in libraries.items() for needed in entry.get("requires", []) if needed not in libraries]
+    records = resolve.all_libraries((ROOT / "catalog",))
+    problems += [f"libraries.json has no {library}, which has a record" for library in records if library not in libraries]
+    return problems + audit_problems()
+
+
+def audit_problems():
+    problems = [f"{path.relative_to(ROOT)}: {problem}" for path in sorted((ROOT / "catalog" / "libraries").glob("*/*/*/audit.json")) for problem in audit.problems_of(path, json.loads(path.read_text()))]
+    path = ROOT / "catalog" / "libraries" / "esp-idf" / "jef-sure" / "pn532" / "audit.json"
+    good = json.loads(path.read_text())
+    entry = good["audits"][0]
+    spoiled = {
+        "an item left out": lambda doc: doc["audits"][0]["items"].pop("frames.ack_checked"),
+        "an item the rubric lacks": lambda doc: doc["audits"][0]["items"].update({"frames.no_such": entry["items"]["frames.ack_checked"]}),
+        "a rubric that does not exist": lambda doc: doc["audits"][0].update({"rubric": "no_such"}),
+        "a version of the rubric to come": lambda doc: doc["audits"][0].update({"rubric_version": 99}),
+        "one commit read twice": lambda doc: doc["audits"].append(doc["audits"][0]),
+        "another name": lambda doc: doc.update({"name": "other"}),
+    }
+    for what, spoil in spoiled.items():
+        doc = json.loads(path.read_text())
+        spoil(doc)
+        if not audit.problems_of(path, doc):
+            problems.append(f"audit.py takes {what}")
+    schema_spoiled = {
+        "yes with no evidence": lambda doc: doc["audits"][0]["items"]["frames.ack_checked"].pop("evidence"),
+        "no with nothing searched": lambda doc: doc["audits"][0]["items"]["cards.iso14443b"].pop("searched"),
+        "a short commit": lambda doc: doc["audits"][0].update({"commit": "b5048d3"}),
+        "a place with no line": lambda doc: doc["audits"][0]["defects"][0].update({"evidence": ["src/pn532.c"]}),
+        "a defect with no place": lambda doc: doc["audits"][0]["defects"][0].update({"evidence": []}),
+    }
+    for what, spoil in schema_spoiled.items():
+        doc = json.loads(path.read_text())
+        spoil(doc)
+        if not errors_of(RAW, doc, "schema"):
+            problems.append(f"the schema takes {what}")
+    return problems
+
+
+def audit_changes_wrong():
+    """audit.py against a real repository: the lines of the old commit a newer one changed, and the files it added."""
+    with tempfile.TemporaryDirectory() as folder:
+        def git(*args):
+            subprocess.run(["git", "-c", "user.name=test", "-c", "user.email=test@example.invalid", "-C", folder, *args], check=True, capture_output=True)
+        git("init", "--quiet")
+        (pathlib.Path(folder) / "a.c").write_text("one\ntwo\nthree\nfour\n")
+        git("add", ".")
+        git("commit", "--quiet", "-m", "first")
+        (pathlib.Path(folder) / "a.c").write_text("one\n2\nthree\nfour\n")
+        (pathlib.Path(folder) / "b.c").write_text("new\n")
+        git("add", ".")
+        (pathlib.Path(folder) / "c.c").write_text("not tracked\n")
+        worktree = audit.changed_lines(folder, "HEAD", None)
+        git("commit", "--quiet", "-m", "second")
+        between = audit.changed_lines(folder, "HEAD~1", "HEAD")
+        (pathlib.Path(folder) / "a.c").write_text("zero\none\n2\nthree\nfour\n")
+        shifted = audit.changed_lines(folder, "HEAD", None)[2]
+    lines, in_file = audit.touched(["a.c:2", "a.c:4"], between[0])
+    wrong = [] if between[:2] == ({"a.c": {2}}, ["b.c"]) and worktree[:2] == ({"a.c": {2}}, ["c.c", "b.c"]) and lines == ["a.c:2"] and in_file else [f"audit.py changes reads {between}, {worktree}, {lines}"]
+    wrong += [] if audit.touched(["a.c:4"], between[0]) == ([], True) else ["audit.py changes takes an unchanged line for a changed one"]
+    return wrong + ([] if audit.moved("a.c:4", shifted) == "a.c:5" and audit.moved("a.c:4", between[2]) == "a.c:4" else [f"audit.py moves lines wrongly: {shifted}"])
+
+
 def imported_problems(doc):
     """What an import must keep to: where a board came from, how far it is trusted, and what is never taken from a pack."""
     problems = [] if "origin" in doc else ["no origin"]
@@ -234,14 +343,26 @@ def imported_problems(doc):
     if "shared_pins" in doc:
         problems.append("shared_pins is for a person to write")
     on_dsi = [name for name, device in doc["devices"].items() if "timing" in (device.get("config") or {}) and any(bus.startswith("dsi.") for bus in device.get("on") or {})]
-    return problems + [f"{name}: DSI timings are measured on a board" for name in on_dsi]
+    problems += [f"{name}: DSI timings are measured on a board" for name in on_dsi]
+    return problems + [f"{name}: {address} is the 8-bit form of {address_of_chip}" for name, address, address_of_chip in shifted_addresses(doc)]
+
+
+def shifted_addresses(doc):
+    """The addresses of a board that are twice one its chip has: the packs give the 8-bit form, and the import must shift it."""
+    for name, device in doc["devices"].items():
+        on_chip = (resolve.load("devices", device["chip"]).get("on") or {}).get("i2c", {}) if "chip" in device else {}
+        known = [on_chip["address"]] if "address" in on_chip else on_chip.get("address_try", [])
+        for connection in (device.get("on") or {}).values():
+            for address in known:
+                if int(connection.get("address", "0"), 16) == 2 * int(address, 16):
+                    yield name, connection["address"], address
 
 
 def main():
     failed = 0
     reached = {}
 
-    files = [path for root in (ROOT / "catalog", ROOT / "imported", ROOT / "imported-shops", TESTS / "catalog") for path in sorted(root.rglob("*.json")) if path.parent != root]
+    files = [path for root in (ROOT / "catalog", ROOT / "imported", ROOT / "imported-shops", TESTS / "catalog") for path in documents_under(root)]
     for path in files:
         doc = json.loads(path.read_text())
         problems = errors_of(RAW, doc, "schema")
@@ -399,6 +520,9 @@ def main():
     problems = errors_of(QUESTIONS, json.loads((ROOT / "catalog" / "questions.json").read_text()), "questions")
     problems += errors_of(RATES, json.loads((ROOT / "catalog" / "rates.json").read_text()), "rates")
     problems += roles_problems(json.loads((ROOT / "catalog" / "roles.json").read_text()))
+    problems += bridge_problems()
+    problems += library_list_problems()
+    problems += audit_changes_wrong()
     failed += reports_refused()
     run = subprocess.run(["node", str(TESTS / "page_cli.js")], capture_output=True, text=True)
     print(run.stdout.strip() + run.stderr.strip()[-300:])

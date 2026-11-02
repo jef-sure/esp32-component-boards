@@ -17,7 +17,7 @@
         }
     },
     "versions": {
-        "1.0.0": {"frameworks": {"arduino-esp32": ">=2.0.0", "esp-idf": ">=5.1"}, "targets": ["esp32", "esp32s3"]}
+        "1.0.0": {"platforms": {"arduino_esp32": ">=2.0.0", "esp_idf": ">=5.1"}, "targets": ["esp32", "esp32s3"]}
     },
     "described": "1.0.0",
     "install": [{"via": "registry"}, {"via": "archive", "url": "https://example.com/arduino_library.zip"}]

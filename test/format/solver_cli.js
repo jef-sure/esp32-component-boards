@@ -8,7 +8,7 @@ const { schemaReader } = require('../../editor/schema.js');
 const { check } = require('../../editor/rules.js');
 const { pinMap, pinProblems } = require('../../editor/pins.js');
 const { documentChecks } = require('../../editor/checks.js');
-const { kitSolver } = require('../../editor/solver.js');
+const { kitSolver, auditSummary, auditedOrder } = require('../../editor/solver.js');
 
 const ROOT = path.join(__dirname, '../../catalog');
 const CASES = path.join(__dirname, '../solver');
@@ -24,13 +24,20 @@ const selections = schemaReader({ $defs: schema.$defs });
 const wider = catalogOf([ROOT, path.join(__dirname, '../../imported-shops'), path.join(__dirname, '../../imported')]);
 const widerLoader = boardResolver(wider);
 const widerChecks = documentChecks({ schema, rules: read(path.join(ROOT, 'rules.json')), loader: widerLoader, schemaReader, check, pinProblems });
-const widerSolver = kitSolver({ catalog: wider, loader: widerLoader, questions: read(path.join(ROOT, 'questions.json')).questions, roles, rates, levels: schema.$defs.level.enum, checksOf: widerChecks, pinMap });
+const auditsOf = (dir, depth) => (depth ? fs.readdirSync(dir, { withFileTypes: true }).filter((entry) => entry.isDirectory()).flatMap((entry) => auditsOf(path.join(dir, entry.name), depth - 1)) : fs.existsSync(path.join(dir, 'audit.json')) ? [[path.relative(path.join(ROOT, 'libraries'), dir), auditSummary(read(path.join(dir, 'audit.json')))]] : []);
+const libraries = { all: read(path.join(ROOT, 'libraries/libraries.json')).libraries, byChip: read(path.join(ROOT, 'libraries/chip_libraries.json')).chips, audits: Object.fromEntries(auditsOf(path.join(ROOT, 'libraries'), 3)) };
+const widerSolver = kitSolver({ catalog: wider, loader: widerLoader, questions: read(path.join(ROOT, 'questions.json')).questions, roles, libraries, rates, levels: schema.$defs.level.enum, checksOf: widerChecks, pinMap });
 
 const wrong = [];
 const projects = new Map();
 
 // What every kit must hold, whatever the answers: the pins, the buses, the order.
 function holdsForEvery(kits, say) {
+    for (const kit of kits.filter((item) => item.project)) {
+        const onHost = {};
+        for (const module of Object.values(kit.project.modules ?? {})) for (const bus of Object.keys(module.on ?? {}).filter((key) => key.startsWith('spi.'))) onHost[bus] = (onHost[bus] ?? 0) + 1;
+        for (const [bus, count] of Object.entries(onHost)) if (count > 6) say(`${kit.name}: ${count} parts on ${bus}, a host takes six`);
+    }
     const lastFit = kits.map((kit) => kit.fits).lastIndexOf(true);
     if (lastFit >= 0 && kits.slice(0, lastFit).some((kit) => !kit.fits)) say('a kit that does not fit comes before one that does');
     for (const kit of kits) {
@@ -122,4 +129,15 @@ for (const name of names) {
     // a module of a case is not in the catalog the generator reads
     if (!given.modules && !given.imported) for (const kit of fit) if (kit.project && !projects.has(JSON.stringify(kit.project))) projects.set(JSON.stringify(kit.project), kit.project);
 }
+// The order of audited libraries, on a table of its own: the real results change with every reading.
+const heard = (statuses, high, medium, health = 0) => ({ statuses: { 'transports.spi': 'yes', 'several.several_readers': 'yes', 'several.shared_spi_bus': 'yes', ...statuses }, high, medium, health });
+const table = {
+    all: { a: { platforms: ['p'] }, b: { platforms: ['p'] }, c: { platforms: ['p'], requires: ['base'] }, base: { requires: ['unread'] }, d: { platforms: ['q'] }, e: { platforms: ['p'] }, f: { platforms: ['p'] }, g: { platforms: ['p'] }, unread: {} },
+    byChip: { chip: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'none'] },
+    audits: { a: heard({}, 1, 2), b: heard({}, 0, 9), c: heard({}, 0, 1), base: heard({}, 1, 1), d: heard({}, 0, 0), e: heard({ 'transports.spi': 'no' }, 0, 0), f: heard({ 'several.several_readers': 'partly', 'transports.spi': 'partly' }, 1, 2, 3), g: heard({ 'cards.x': 'yes', 'several.several_readers': 'no' }, 1, 2) },
+};
+const orderOf = (asked) => auditedOrder(table, { chip: 'chip', platform: 'p', bus: 'spi', ...asked }).map((item) => item.id).join(' ');
+const expected = [[{}, 'b f a c g'], [{ several: true }, 'b f a c'], [{ standard: 'x' }, 'g'], [{ bus: 'uart' }, '']];
+for (const [asked, order] of expected) if (orderOf(asked) !== order) wrong.push(`audited order for ${JSON.stringify(asked)}: ${orderOf(asked)}`);
+if (JSON.stringify(auditedOrder(table, { chip: 'chip', platform: 'p', bus: 'spi' }).find((item) => item.id === 'c')) !== JSON.stringify({ id: 'c', health: 0, high: 1, medium: 2, unread: ['unread'] })) wrong.push('a library does not answer for what it requires');
 console.log(JSON.stringify({ cases: names.length, wrong, projects: [...projects.values()] }));

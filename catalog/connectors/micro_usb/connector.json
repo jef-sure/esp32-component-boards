@@ -1,0 +1,10 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "connector",
+    "name": "micro_usb",
+    "title": "Micro USB",
+    "pins": ["VBUS", "D-", "D+", "ID", "GND"],
+    "volts": 5,
+    "checked": {"standard": {"level": "vendor-docs", "source": "USB 2.0 Micro-B"}}
+}

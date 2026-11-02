@@ -31,7 +31,7 @@
         },
         "lcd_touch": {
             "class": "touch",
-            "on": {"i2c.i2c0": {"address": "0x76"}},
+            "on": {"i2c.i2c0": {"address": "0x3b"}},
             "pins": {},
             "controls": {
                 "orientation": {"how": "driver", "start": {"x": "left-right", "y": "top-bottom", "swap": false}}

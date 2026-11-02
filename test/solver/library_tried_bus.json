@@ -1,0 +1,5 @@
+{
+    "title": "One PN532 goes on SPI, the bus its library was tried on, and not on I2C, which comes first otherwise",
+    "answers": {"nfc_readers": 1},
+    "kit": {"name": "esp32_devkit", "modules": {"pn532_module": 1}, "on": {"pn532_module": "spi"}}
+}

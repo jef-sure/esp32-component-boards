@@ -12,7 +12,7 @@
         {"via": "registry"},
         {"via": "git", "url": "https://github.com/jef-sure/esp32-component-pn532.git", "ref": "v{version}"}
     ],
-    "described": "0.7.5",
+    "described": "0.8.0",
     "transports": {
         "spi": {
             "init": {
@@ -72,7 +72,7 @@
     "checked": {
         "api": {
             "level": "vendor-code",
-            "source": "README of esp32-component-pn532 0.7.5, Features and scope; include/pn532.h",
+            "source": "README of esp32-component-pn532 0.7.5, Features and scope; include/pn532.h, which in 0.8.0 differs by comments; include/pn532-ndef.h",
             "date": "2026-10-31"
         },
         "history": {
@@ -80,9 +80,17 @@
             "covers": ["history"],
             "source": "headers of include/ at every tag of esp32-component-pn532; before tag v0.2.0 nothing is known",
             "date": "2026-10-31"
+        },
+        "transports": {
+            "level": "hardware",
+            "covers": ["transports.spi"],
+            "source": "two PN532 on SPI in the local terminal. I2C and UART were last tried on the first driver, three years ago; the changes of 0.7.7 say it did not run on I2C",
+            "by": "Anton",
+            "date": "2026-11-01"
         }
     },
     "history": [
+        {"before": "0.8.0", "notes": "pn532_ndef_extract_text() took no size of lang_buf."},
         {
             "before": "0.7.0",
             "chips": {
@@ -98,21 +106,24 @@
         {"before": "0.5.0", "transports": {"spi": {"shared": null}, "i2c": {"shared": null}}}
     ],
     "versions": {
-        "0.7.5": {"frameworks": {"esp-idf": ">=5.2.0"}},
-        "0.7.4": {"frameworks": {"esp-idf": ">=5.2.0"}},
-        "0.7.3": {"frameworks": {"esp-idf": ">=5.2.0"}},
+        "0.8.0": {"platforms": {"esp_idf": ">=5.2.0"}},
+        "0.7.7": {"platforms": {"esp_idf": ">=5.2.0"}},
+        "0.7.6": {"platforms": {"esp_idf": ">=5.2.0"}},
+        "0.7.5": {"platforms": {"esp_idf": ">=5.2.0"}},
+        "0.7.4": {"platforms": {"esp_idf": ">=5.2.0"}},
+        "0.7.3": {"platforms": {"esp_idf": ">=5.2.0"}},
         "0.7.2": {"via": ["git"]},
         "0.7.1": {"via": ["git"]},
         "0.7.0": {"via": ["git"]},
-        "0.6.2": {"frameworks": {"esp-idf": ">=5.2.0"}},
+        "0.6.2": {"platforms": {"esp_idf": ">=5.2.0"}},
         "0.6.1": {"via": ["git"]},
         "0.6.0": {"via": ["git"]},
-        "0.5.4": {"frameworks": {"esp-idf": ">=5.2.0"}},
+        "0.5.4": {"platforms": {"esp_idf": ">=5.2.0"}},
         "0.5.3": {"via": ["git"]},
         "0.5.2": {"via": ["git"]},
         "0.5.1": {"via": ["git"]},
         "0.5.0": {"via": ["git"]},
-        "0.4.5": {"frameworks": {"esp-idf": ">=5.2.0"}},
+        "0.4.5": {"platforms": {"esp_idf": ">=5.2.0"}},
         "0.4.4": {"via": ["git"]},
         "0.4.2": {"via": ["git"]},
         "0.3.2": {"via": ["git"]},
@@ -121,6 +132,6 @@
         "0.2.2": {"via": ["git"]},
         "0.2.1": {"via": ["git"]},
         "0.2.0": {"via": ["git"]},
-        "0.0.3": {"frameworks": {"esp-idf": ">=5.2.0"}}
+        "0.0.3": {"platforms": {"esp_idf": ">=5.2.0"}}
     }
 }

@@ -209,6 +209,8 @@ committed, a program that asks by kind.
 - Waveshare ESP32-C3-Zero, `esp32_c3_zero`, from the schematic of Waveshare; the generator takes the ESP32-C3 and C6. Pictures of
   the S3-Zero and the C3-Zero from Anton's photos.
 - A page without an agent shows how to get one, as a single line that opens to the command.
+- A part of a board that names no chip with a price weighs the chips of the catalog that give its role and variant, by the piece:
+  one addressable LED weighs the same on every board. A single SMD LED and an RGB LED of 5050 are in the catalog with prices of LCSC.
 - Temperature has the variants thermocouple, RTD and infrared: the MAX31865 is an RTD, and the words no longer take it for a
   thermocouple.
 - A chip in catalog/devices can have a price by the piece, and a part of a board nobody asked for weighs that many of it:

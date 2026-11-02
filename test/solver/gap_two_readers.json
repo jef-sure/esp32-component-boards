@@ -5,7 +5,7 @@
         "nfc_gap_mm": 100
     },
     "first": {
-        "name": "esp32_s3_zero",
+        "name": "esp32_devkit",
         "modules": {
             "pn532_module": 2
         }

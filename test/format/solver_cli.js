@@ -130,6 +130,10 @@ for (const name of names) {
         }
     }
     if (given.without && fit.some((kit) => kit.modules.some((module) => module.name === given.without))) say(`a kit with ${given.without} fits`);
+    if (given.same_worth) {
+        const worth = given.same_worth.map((board) => fit.find((kit) => kit.name === board)?.unaskedWorth);
+        if (worth.some((value) => value === undefined) || new Set(worth).size > 1) say(`what nobody asked for weighs ${worth.join(' and ')} on ${given.same_worth.join(' and ')}`);
+    }
     if (given.fed) {
         const kit = fit.find((item) => item.name === given.fed.board && item.project?.modules[given.fed.use]);
         if (JSON.stringify(kit?.project.modules[given.fed.use].supply) !== JSON.stringify(given.fed.supply)) say(`fed by ${JSON.stringify(kit?.project.modules[given.fed.use].supply)}`);

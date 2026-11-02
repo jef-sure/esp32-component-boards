@@ -4,7 +4,7 @@
         "display": "graphics"
     },
     "first": {
-        "name": "esp32_s3_zero",
+        "name": "esp32_devkit",
         "modules": {
             "lcd12864_st7920": 1
         }

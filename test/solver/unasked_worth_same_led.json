@@ -1,0 +1,5 @@
+{
+    "title": "One addressable LED weighs the same on every board: the S3 DevKit names no chip for its LED, and the chips of the catalog that give its role and variant price it",
+    "answers": {"blocks": [{"role": "air", "name": "co2", "variant": "co2"}]},
+    "same_worth": ["esp32_s3_zero", "esp32s3_devkit"]
+}

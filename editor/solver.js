@@ -320,6 +320,20 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         return ranges.length ? [Math.min(...ranges.map((range) => range[0])), Math.max(...ranges.map((range) => range[1]))] : null;
     }
 
+    // What one piece of a role costs: the median of the chips of the catalog with a price that give it, by role and variant.
+    let pieces = null;
+    function piecePrices() {
+        const by = new Map();
+        for (const chip of Object.values(catalog.devices)) {
+            const range = rangeOf(chip.price, KIT_CURRENCY);
+            if (!range) continue;
+            for (const [role, given] of Object.entries(chip.provides ?? {})) {
+                for (const key of [...(given?.variant ? [`${role}/${given.variant}`] : []), role]) by.set(key, [...(by.get(key) ?? []), (range[0] + range[1]) / 2]);
+            }
+        }
+        return new Map([...by].map(([key, values]) => [key, values.sort((a, b) => a - b)[Math.floor(values.length / 2)]]));
+    }
+
     // What a part of a role usually costs: the median of the modules priced for it, a pack counted by the piece. A median, as a cheap
     // part named for a role it does not do moves it little. Its own price would be better, but a part of a board has none.
     let typical = null;
@@ -352,10 +366,15 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
     // a part of a board nobody asked for, in money: its role and variant, its role, its class, or any part
     function worthOf(device) {
         // a part whose chip has a price by the piece is worth that many of it: a module of its role counts a ring for one LED
+        const many = device.config?.count ?? device.count ?? 1;
         const own = rangeOf(device.price ?? catalog.devices[device.chip]?.price, KIT_CURRENCY);
-        if (own) return ((own[0] + own[1]) / 2) * (device.config?.count ?? device.count ?? 1);
-        typical ??= typicalPrices();
+        if (own) return ((own[0] + own[1]) / 2) * many;
         const roleKeys = Object.entries(device.provides ?? {}).filter(([role]) => roleOf(role)).flatMap(([role, given]) => [...(given?.variant ? [`${role}/${given.variant}`] : []), role]);
+        // a part with no chip of its own weighs the chips of the catalog that give its role and variant, by the piece
+        pieces ??= piecePrices();
+        const piece = roleKeys.find((key) => pieces.has(key));
+        if (piece) return pieces.get(piece) * many;
+        typical ??= typicalPrices();
         const keys = [...roleKeys, ...(device.classes ?? []).filter((item) => item !== 'other').map((item) => `class:${item}`), ''];
         return typical.get(keys.find((key) => typical.has(key))) ?? 0;
     }

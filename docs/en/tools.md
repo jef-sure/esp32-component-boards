@@ -302,8 +302,10 @@ belongs to a timer, so outputs of one setting share it. The figures are calculat
 
 Kits come in this order: those that fit, the fewest unknowns, the least worth of what the board has and nobody asked for
 (a camera, touch, Ethernet; not the button of a strapping pin), the fewest modules, the fewest wires, then the price. A part of a
-board is worth the price of its chip by the piece, from `price` of its entry in `catalog/devices`, times its `config.count`. A chip
-with no price leaves the median price of the modules of its role and variant, else of its class, else of all parts. The median of
+board is worth the price of its chip by the piece, from `price` of its entry in `catalog/devices`, times its `config.count`. A part
+that names no chip with a price weighs the median price by the piece of the chips of the catalog that give its role and variant,
+as `led_smd`, `led_rgb_5050` and `ws2812b`; with none of those, the median price of the modules of its role and variant, else of
+its class, else of all parts. The median of
 modules is no price of one part, since rings and strips go into it, and the priced modules of `imported-shops/` stay out of the
 repository, so a chip with a price gives the same order everywhere. A budget makes the price a criterion: it then comes right after the unknowns, and a
 missing price counts as an unknown. `tools/check_format.py` gives the kits of `test/solver/` to the

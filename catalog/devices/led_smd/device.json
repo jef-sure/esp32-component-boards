@@ -1,0 +1,22 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "led_smd",
+    "title": "A single-colour SMD LED",
+    "class": "led",
+    "provides": {"led": {"variant": "single"}},
+    "notes": "Any one-colour LED of a board, as 0603 or 0805. It is here for its price by the piece: what an LED of a board that nobody asked for weighs.",
+    "price": {
+        "lcsc": {
+            "shop": "LCSC",
+            "currency": "USD",
+            "range": [0.0031, 0.0059],
+            "date": "2026-11-02",
+            "source": "C2286, Hubei KENTO KT-0603R, red, from 100 to 100000 pieces, as search results of lcsc.com showed the page"
+        }
+    },
+    "checked": {
+        "price": {"level": "unchecked", "covers": ["price"], "source": "search results of lcsc.com, not the live page", "date": "2026-11-02"}
+    }
+}

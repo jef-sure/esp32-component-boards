@@ -4,9 +4,7 @@
     "kind": "module",
     "name": "adafruit_adafruit_max31865_rtd_sensor_breakout",
     "title": "Adafruit MAX31865 RTD Sensor Breakout",
-    "devices": {
-        "temperature": {"on": {"spi": {}}, "provides": {"temperature": {"variant": "probe"}}, "chip": "max31865"}
-    },
+    "devices": {"temperature": {"on": {"spi": {}}, "provides": {"temperature": {"variant": "rtd"}}, "chip": "max31865"}},
     "connectors": {
         "J1": {
             "type": "contacts of the part",

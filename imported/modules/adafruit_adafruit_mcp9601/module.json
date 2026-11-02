@@ -5,7 +5,7 @@
     "name": "adafruit_adafruit_mcp9601",
     "title": "Adafruit MCP9601",
     "devices": {
-        "temperature": {"on": {"i2c": {}}, "provides": {"temperature": {"variant": "probe"}}, "chip": "mcp9601"}
+        "temperature": {"on": {"i2c": {}}, "provides": {"temperature": {"variant": "thermocouple"}}, "chip": "mcp9601"}
     },
     "connectors": {
         "J1": {

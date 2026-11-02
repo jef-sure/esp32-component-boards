@@ -5,7 +5,7 @@
     "name": "adafruit_mcp9600",
     "title": "MCP9600",
     "devices": {
-        "temperature": {"on": {"i2c": {}}, "provides": {"temperature": {"variant": "probe"}}, "chip": "mcp9600"}
+        "temperature": {"on": {"i2c": {}}, "provides": {"temperature": {"variant": "thermocouple"}}, "chip": "mcp9600"}
     },
     "connectors": {
         "J1": {

@@ -1,0 +1,7 @@
+{
+    "title": "A temperature block of the variant RTD takes the MAX31865, and no amplifier of a thermocouple",
+    "imported": true,
+    "answers": {"blocks": [{"role": "temperature", "name": "boiler", "variant": "rtd"}]},
+    "says": "Adafruit MAX31865 RTD Sensor Breakout on SPI",
+    "without": "adafruit_mcp9600"
+}

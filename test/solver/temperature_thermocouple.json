@@ -1,0 +1,6 @@
+{
+    "title": "A temperature block of the variant thermocouple takes an amplifier of a thermocouple, and not the MAX31865, which is an RTD",
+    "imported": true,
+    "answers": {"blocks": [{"role": "temperature", "name": "kiln", "variant": "thermocouple"}]},
+    "without": "adafruit_adafruit_max31865_rtd_sensor_breakout"
+}

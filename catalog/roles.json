@@ -233,7 +233,9 @@
                     "class": "sensor",
                     "words": "temperature|thermo\\w*|tmp\\d{2,3}|mcp9[86]\\d\\d|adt74\\d\\d|pct2075|sht[34]\\w*|hts221|bme[26]\\w*|ds18b20|dht\\d\\d|am23\\d\\d|aht\\d\\d|si70\\d\\d|max318\\d\\d",
                     "variants": [
-                        {"id": "probe", "text": "Thermocouple", "words": "thermocouple|mcp960\\d|max318\\d\\d|ad8495"}
+                        {"id": "thermocouple", "text": "Thermocouple", "words": "thermocouple|mcp960\\d|max3185[56]|ad8495"},
+                        {"id": "rtd", "text": "RTD, PT100 or PT1000", "words": "\\brtd\\b|pt100|pt1000|max31865"},
+                        {"id": "infrared", "text": "Infrared, without contact", "words": "infrared thermometer|thermopile|mlx9061\\d|mlx90632|tmp00[67]"}
                     ]
                 },
                 {

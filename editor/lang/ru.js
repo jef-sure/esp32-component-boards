@@ -250,6 +250,8 @@ LANGUAGES.ru = {
         '{0}: the part you fixed, {1}, does not serve it': '{0}: закреплённая деталь {1} сюда не подходит',
         'by the model': 'от модели',
         'Measures up to, ppm': 'Мерит до, ppm',
+        'RTD, PT100 or PT1000': 'Терморезистор, PT100 или PT1000',
+        'Infrared, without contact': 'Инфракрасный, без контакта',
         'Measures down to, °C': 'Мерит от, °C',
         'Measures up to, °C': 'Мерит до, °C',
         '{0} {1}: no part of the catalog': '{0} {1}: в каталоге нет такой детали',

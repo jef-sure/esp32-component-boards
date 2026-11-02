@@ -4,7 +4,9 @@
     "kind": "module",
     "name": "adafruit_tmp006_thermopile_sensor",
     "title": "TMP006 Thermopile Sensor",
-    "devices": {"temperature": {"on": {"i2c": {}}, "provides": {"temperature": {}}, "chip": "tmp006"}},
+    "devices": {
+        "temperature": {"on": {"i2c": {}}, "provides": {"temperature": {"variant": "infrared"}}, "chip": "tmp006"}
+    },
     "connectors": {
         "J1": {"type": "contacts of the part", "pins": ["VCC", "GND", "SDA", "SCL", "DRDY", "ADDR1", "ADDR0"]}
     },

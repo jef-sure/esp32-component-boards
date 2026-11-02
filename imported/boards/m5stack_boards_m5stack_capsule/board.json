@@ -11,7 +11,12 @@
         "i2s": {"i2s0": {"din": 41, "clk": 40}}
     },
     "devices": {
-        "led_strip": {"class": "led", "pins": {"data": 21}, "config": {"kind": "ws2812", "count": 1}},
+        "led_strip": {
+            "class": "led",
+            "provides": {"led": {"variant": "addressable"}},
+            "pins": {"data": 21},
+            "config": {"kind": "ws2812", "count": 1}
+        },
         "fs_sdcard": {"class": "storage", "config": {"media": "microsd"}, "on": {"spi.spi2": {"cs": 11}}},
         "ir_tx": {"class": "other", "pins": {"out": 4}},
         "wake_button": {"class": "button", "pins": {"in": {"gpio": 42, "active": "low"}}},

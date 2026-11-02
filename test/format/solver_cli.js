@@ -112,6 +112,17 @@ for (const name of names) {
         const left = Object.entries(kit?.project?.devices ?? {}).filter(([, device]) => device.used === false).map(([part]) => part).sort();
         if (JSON.stringify(left) !== JSON.stringify(given.unused.parts)) say(`${given.unused.board} leaves alone: ${left}`);
     }
+    if (given.shared) {
+        const kit = fit.find((item) => item.name === given.shared.board);
+        const [first, second] = given.shared.uses.map((use) => kit?.project.devices[use]?.pins ?? {});
+        for (const line of given.shared.lines) if (first[line] === undefined || first[line] !== second[line]) say(`${line} is not one line of ${given.shared.uses}`);
+        if (first.latch === second.latch) say(`${given.shared.uses} share what is their own`);
+    }
+    if (given.adc) {
+        const kit = fit.find((item) => item.name === given.adc.board);
+        const pin = kit?.project.devices[given.adc.use]?.pins.in;
+        if (!catalog.mcu[catalog.boards[given.adc.board].mcu?.target ?? 'esp32'].gpio.adc1.includes(pin)) say(`${given.adc.use} is on GPIO ${pin}, not on ADC1`);
+    }
     if (given.without && fit.some((kit) => kit.modules.some((module) => module.name === given.without))) say(`a kit with ${given.without} fits`);
     if (given.fed) {
         const kit = fit.find((item) => item.name === given.fed.board && item.project?.modules[given.fed.use]);

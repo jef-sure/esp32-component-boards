@@ -28,7 +28,12 @@
             },
             "chip": "st7789"
         },
-        "led_strip": {"class": "led", "pins": {"data": 4}, "config": {"kind": "sk6812", "count": 7}},
+        "led_strip": {
+            "class": "led",
+            "provides": {"led": {"variant": "addressable"}},
+            "pins": {"data": 4},
+            "config": {"kind": "sk6812", "count": 7}
+        },
         "button_a": {"class": "button", "pins": {"in": {"gpio": 37, "active": "low"}}},
         "button_b": {"class": "button", "pins": {"in": {"gpio": 38, "active": "low"}}},
         "button_c": {"class": "button", "pins": {"in": {"gpio": 39, "active": "low"}}}

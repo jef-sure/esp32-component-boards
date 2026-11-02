@@ -104,7 +104,7 @@ def roles_of(text):
     found = []
     for role in ROLES:
         if re.search(role["words"], text, re.I):
-            variant = next((item for item in role.get("variants", []) if re.search(item["words"], text, re.I)), None)
+            variant = next((item for item in role.get("variants", []) if "words" in item and re.search(item["words"], text, re.I)), None)
             found.append((role, variant))
     return found
 

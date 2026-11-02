@@ -7,7 +7,12 @@
     "mcu": {"target": "esp32c3"},
     "buses": {},
     "devices": {
-        "led_strip": {"class": "led", "pins": {"data": 2}, "config": {"kind": "sk6812", "count": 1}},
+        "led_strip": {
+            "class": "led",
+            "provides": {"led": {"variant": "addressable"}},
+            "pins": {"data": 2},
+            "config": {"kind": "sk6812", "count": 1}
+        },
         "user_button": {"class": "button", "pins": {"in": {"gpio": 3, "active": "low"}}}
     },
     "origin": {

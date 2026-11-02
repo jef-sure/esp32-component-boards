@@ -7,7 +7,12 @@
     "mcu": {"target": "esp32s3"},
     "buses": {"i2c": {"i2c0": {"sda": 13, "scl": 14}}, "spi": {"spi2": {"mosi": 45, "miso": 46, "sclk": 40}}},
     "devices": {
-        "status_led": {"class": "led", "pins": {"data": 21}, "config": {"kind": "ws2812", "count": 1}},
+        "status_led": {
+            "class": "led",
+            "provides": {"led": {"variant": "addressable"}},
+            "pins": {"data": 21},
+            "config": {"kind": "ws2812", "count": 1}
+        },
         "epaper_ssd16xx": {"class": "other", "chip": "ssd16xx_290"},
         "rtc_pcf85063a": {"class": "rtc", "chip": "pcf85063a"},
         "bat_axp2602": {"class": "pmic", "chip": "axp2602"},

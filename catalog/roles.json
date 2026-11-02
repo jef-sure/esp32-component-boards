@@ -22,6 +22,7 @@
                             "needs": {"class": "display", "where": {"config.kind": "character"}}
                         },
                         {"id": "memory", "text": "Memory LCD", "words": "memory display|sharp"},
+                        {"id": "mono_lcd", "text": "Monochrome LCD", "words": "12864|st7920|st756\\d|uc1701|pcd8544|nokia 5110"},
                         {
                             "id": "hub75",
                             "text": "RGB LED panel, HUB75",
@@ -49,7 +50,7 @@
                             "id": "shift_register",
                             "text": "LEDs on shift registers",
                             "words": "74hc595|shift register",
-                            "way": {"lines": ["data", "clock", "latch", "oe"], "ledc": 1}
+                            "way": {"lines": ["data", "clock", "latch", "oe"], "shared": ["data", "clock"], "ledc": 1}
                         }
                     ],
                     "needs": {"class": "display"}
@@ -144,7 +145,7 @@
                     "class": "other",
                     "words": "cap1188|mpr121|at42qt\\d+|touch sensor|capacitive touch sensor|touch pad"
                 },
-                {"id": "button", "text": "Buttons", "class": "button", "words": "\\bbutton|neokey|tactile"},
+                {"id": "button", "text": "Buttons", "class": "button", "words": "\\bbutton|neokey|tactile", "variants": [{"id": "on_gpio", "text": "On a GPIO", "way": {"lines": ["in"]}}]},
                 {
                     "id": "encoder",
                     "text": "Rotary encoder",
@@ -245,7 +246,8 @@
                     "id": "light",
                     "text": "Light",
                     "class": "sensor",
-                    "words": "\\blux\\b|light sensor|bh1750|ltr-?\\d+|veml\\d+|tsl\\d+|ga1a\\w*|alspt\\w*|ambient light"
+                    "words": "\\blux\\b|light sensor|bh1750|ltr-?\\d+|veml\\d+|tsl\\d+|ga1a\\w*|alspt\\w*|ambient light",
+                    "variants": [{"id": "photoresistor", "text": "Photoresistor", "words": "photoresistor|photo cell|\\bldr\\b", "way": {"lines": ["in"], "adc": 1}}]
                 },
                 {
                     "id": "color",
@@ -273,7 +275,8 @@
                     "id": "presence",
                     "text": "Presence and gesture",
                     "class": "sensor",
-                    "words": "gesture|apds-?9960|\\bpir\\b|motion sensor|ld24\\d\\d|radar"
+                    "words": "gesture|apds-?9960|\\bpir\\b|motion sensor|ld24\\d\\d|radar",
+                    "variants": [{"id": "pir", "text": "PIR", "words": "\\bpir\\b"}, {"id": "radar", "text": "Radar", "words": "ld24\\d\\d|radar|mmwave"}]
                 },
                 {
                     "id": "thermal",

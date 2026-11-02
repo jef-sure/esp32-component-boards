@@ -36,7 +36,12 @@
             "config": {"direction": "both", "sample_rate": 48000, "clock": "bclk"},
             "chip": "es8311"
         },
-        "led_strip": {"class": "led", "pins": {"data": 21}, "config": {"kind": "ws2812", "count": 1}},
+        "led_strip": {
+            "class": "led",
+            "provides": {"led": {"variant": "addressable"}},
+            "pins": {"data": 21},
+            "config": {"kind": "ws2812", "count": 1}
+        },
         "ir_tx": {"class": "other", "pins": {"out": 44}},
         "boot_button": {"class": "button", "pins": {"in": {"gpio": 0, "active": "low"}}}
     },

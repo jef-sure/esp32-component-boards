@@ -7,8 +7,13 @@
     "mcu": {"target": "esp32c6"},
     "buses": {},
     "devices": {
-        "led_strip": {"class": "led", "pins": {"data": 20}, "config": {"kind": "ws2812", "count": 1}},
-        "blue_led": {"class": "led", "pins": {"out": 7}},
+        "led_strip": {
+            "class": "led",
+            "provides": {"led": {"variant": "addressable"}},
+            "pins": {"data": 20},
+            "config": {"kind": "ws2812", "count": 1}
+        },
+        "blue_led": {"class": "led", "provides": {"led": {"variant": "single"}}, "pins": {"out": 7}},
         "ir_tx": {"class": "other", "pins": {"out": 3}},
         "user_button": {"class": "button", "pins": {"in": {"gpio": 9, "active": "low"}}}
     },

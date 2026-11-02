@@ -29,7 +29,7 @@
             },
             "chip": "st7789"
         },
-        "status_led": {"class": "led", "pins": {"out": 19}},
+        "status_led": {"class": "led", "provides": {"led": {"variant": "single"}}, "pins": {"out": 19}},
         "button_a": {"class": "button", "pins": {"in": {"gpio": 37, "active": "low"}}},
         "button_b": {"class": "button", "pins": {"in": {"gpio": 39, "active": "low"}}},
         "button_pwr": {"class": "button", "pins": {"in": {"gpio": 35, "active": "low"}}}

@@ -1,0 +1,39 @@
+{
+    "title": "Two chains of shift registers ask for no part: the kit gives them lines, and they share data and clock",
+    "answers": {
+        "blocks": [
+            {
+                "role": "display",
+                "name": "face",
+                "variant": "shift_register"
+            },
+            {
+                "role": "display",
+                "name": "matrix",
+                "variant": "shift_register"
+            }
+        ]
+    },
+    "says": "no part of the catalog, the kit only gives it pins: data, clock, latch, oe",
+    "wiring": {
+        "board": "esp32_devkit",
+        "use": "matrix",
+        "lines": [
+            "data",
+            "clock",
+            "latch",
+            "oe"
+        ]
+    },
+    "shared": {
+        "board": "esp32_devkit",
+        "uses": [
+            "face",
+            "matrix"
+        ],
+        "lines": [
+            "data",
+            "clock"
+        ]
+    }
+}

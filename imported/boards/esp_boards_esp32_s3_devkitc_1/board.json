@@ -7,7 +7,12 @@
     "mcu": {"target": "esp32s3"},
     "buses": {},
     "devices": {
-        "led_strip": {"class": "led", "pins": {"data": 38}, "config": {"kind": "ws2812", "count": 1}},
+        "led_strip": {
+            "class": "led",
+            "provides": {"led": {"variant": "addressable"}},
+            "pins": {"data": 38},
+            "config": {"kind": "ws2812", "count": 1}
+        },
         "boot_button": {"class": "button", "pins": {"in": {"gpio": 0, "active": "low"}}}
     },
     "origin": {

@@ -51,7 +51,12 @@
             "chip": "cst816s"
         },
         "boot_button": {"class": "button", "pins": {"in": {"gpio": 28, "active": "low"}}},
-        "led_strip": {"class": "led", "pins": {"data": 27}, "config": {"kind": "ws2812", "count": 1}},
+        "led_strip": {
+            "class": "led",
+            "provides": {"led": {"variant": "addressable"}},
+            "pins": {"data": 27},
+            "config": {"kind": "ws2812", "count": 1}
+        },
         "bmi270_sensor": {"class": "imu", "chip": "bmi270_sensor"}
     },
     "origin": {

@@ -49,7 +49,7 @@
             "config": {"xclk_hz": 20000000}
         },
         "imu_sensor": {"class": "imu", "chip": "bmi270"},
-        "status_led": {"class": "led", "pins": {"out": 3}}
+        "status_led": {"class": "led", "provides": {"led": {"variant": "single"}}, "pins": {"out": 3}}
     },
     "origin": {
         "from": "esp_friends_boards",

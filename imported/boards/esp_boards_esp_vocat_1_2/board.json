@@ -43,7 +43,7 @@
             "config": {"over": "display_lcd", "x_max": 360, "y_max": 360},
             "chip": "cst816s"
         },
-        "led_green": {"class": "led", "pins": {"out": 43}}
+        "led_green": {"class": "led", "provides": {"led": {"variant": "single"}}, "pins": {"out": 43}}
     },
     "origin": {
         "from": "esp_boards",

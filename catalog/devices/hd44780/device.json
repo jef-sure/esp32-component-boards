@@ -8,6 +8,7 @@
     "part": "HD44780",
     "compat": "hit,hd44780",
     "class": "display",
+    "provides": {"display": {"variant": "character"}},
     "on": {"i2c": {}},
     "config": {"kind": "character"},
     "checked": {"facts": {"level": "hardware", "source": "boards-data, flashed or checked against the schematic"}}

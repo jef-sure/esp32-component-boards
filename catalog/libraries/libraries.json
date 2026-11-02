@@ -4587,7 +4587,7 @@
             "platforms": ["arduino_esp32"],
             "chips": [],
             "stars": 25072,
-            "changed": "2026-11-01",
+            "changed": "2026-11-02",
             "archived": false,
             "license": "MIT"
         },
@@ -5199,7 +5199,7 @@
             "repository": "https://github.com/miguelbalboa/rfid.git",
             "platforms": ["arduino_esp32"],
             "chips": ["mfrc522"],
-            "stars": 3045,
+            "stars": 3044,
             "changed": "2026-10-01",
             "archived": false,
             "license": "Unlicense"
@@ -8436,6 +8436,15 @@
             "changed": "2026-10-22",
             "archived": false,
             "license": "MIT"
+        },
+        "github/borseandy/hlk_ld2410c_lib": {
+            "title": "BorseAndy/HLK_LD2410C_Lib",
+            "repository": "https://github.com/BorseAndy/HLK_LD2410C_Lib",
+            "platforms": ["esp_idf"],
+            "chips": ["ld2410c"],
+            "stars": 1,
+            "changed": "2025-04-06",
+            "archived": false
         },
         "github/csvke/esp32_p4_jc4880p433c_bsp": {
             "title": "csvke/esp32_p4_jc4880p433c_bsp",

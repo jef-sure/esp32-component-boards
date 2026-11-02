@@ -26,7 +26,12 @@
             "chip": "ili9341"
         },
         "fs_sdcard": {"class": "storage", "config": {"media": "microsd"}, "on": {"spi.spi3": {"cs": 4}}},
-        "led_strip": {"class": "led", "pins": {"data": 15}, "config": {"kind": "sk6812", "count": 10}},
+        "led_strip": {
+            "class": "led",
+            "provides": {"led": {"variant": "addressable"}},
+            "pins": {"data": 15},
+            "config": {"kind": "sk6812", "count": 10}
+        },
         "button_a": {"class": "button", "pins": {"in": {"gpio": 39, "active": "low"}}},
         "button_b": {"class": "button", "pins": {"in": {"gpio": 38, "active": "low"}}},
         "button_c": {"class": "button", "pins": {"in": {"gpio": 37, "active": "low"}}}

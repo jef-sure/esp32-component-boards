@@ -607,6 +607,7 @@
             "valid": { "type": "array", "items": { "$ref": "#/$defs/gpio" } },
             "input_only": { "type": "array", "items": { "$ref": "#/$defs/gpio" } },
             "high_mv_max": { "type": "integer", "minimum": 0, "description": "The most a pin takes as a high level, at the usual supply of its domain." },
+        "adc1": { "type": "array", "items": { "$ref": "#/$defs/gpio" }, "description": "The pins of ADC1." },
             "strapping": { "type": "array", "items": { "$ref": "#/$defs/gpio" } },
             "pins": {
               "description": "What each GPIO can do besides being one, by its number. From the documentation of ESP-IDF.",
@@ -757,7 +758,7 @@
       "properties": {
         "high_min_mv": { "type": "integer", "minimum": 1, "description": "The least a line takes as a high level." },
         "lines": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
-        "ledc": { "type": "integer", "minimum": 1, "description": "The LEDC channels one device takes this way." },
+        "ledc": { "type": "integer", "minimum": 1, "description": "The LEDC channels one device takes this way." }, "shared": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 }, "description": "Of lines: those that all the devices of one block share, as data and clock of chains of shift registers." }, "adc": { "type": "integer", "minimum": 1, "description": "The lines read by ADC1." },
         "gives": { "type": "object", "additionalProperties": { "type": "number" }, "description": "The figures of this way, as swing_v across a piezo disc." },
         "do": { "type": "string", "minLength": 1, "description": "What a person does to wire it." }
       }
@@ -1072,7 +1073,7 @@
                       "type": "array",
                       "items": {
                         "type": "object",
-                        "required": ["id", "text", "words"],
+                        "required": ["id", "text"],
                         "additionalProperties": false,
                         "properties": {
                           "id": { "$ref": "#/$defs/name" },

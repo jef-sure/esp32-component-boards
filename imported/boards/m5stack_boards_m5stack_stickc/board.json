@@ -11,7 +11,7 @@
         "i2s": {"i2s0": {"din": 34, "clk": 0}}
     },
     "devices": {
-        "status_led": {"class": "led", "pins": {"out": 10}},
+        "status_led": {"class": "led", "provides": {"led": {"variant": "single"}}, "pins": {"out": 10}},
         "ir_tx": {"class": "other", "pins": {"out": 9}},
         "button_a": {"class": "button", "pins": {"in": {"gpio": 37, "active": "low"}}},
         "button_b": {"class": "button", "pins": {"in": {"gpio": 39, "active": "low"}}}

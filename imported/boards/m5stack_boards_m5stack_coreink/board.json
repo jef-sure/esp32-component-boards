@@ -7,7 +7,7 @@
     "mcu": {"target": "esp32"},
     "buses": {"i2c": {"i2c0": {"sda": 21, "scl": 22}}, "spi": {"spi3": {"mosi": 23, "miso": "nc", "sclk": 18}}},
     "devices": {
-        "status_led": {"class": "led", "pins": {"out": 10}},
+        "status_led": {"class": "led", "provides": {"led": {"variant": "single"}}, "pins": {"out": 10}},
         "user_button": {"class": "button", "pins": {"in": {"gpio": 5, "active": "low"}}},
         "dial_up": {"class": "button", "pins": {"in": {"gpio": 37, "active": "low"}}},
         "dial_press": {"class": "button", "pins": {"in": {"gpio": 38, "active": "low"}}},

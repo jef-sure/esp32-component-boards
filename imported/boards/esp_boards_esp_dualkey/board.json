@@ -12,7 +12,12 @@
         }
     },
     "devices": {
-        "led_strip": {"class": "led", "pins": {"data": 21}, "config": {"kind": "ws2812", "count": 2}},
+        "led_strip": {
+            "class": "led",
+            "provides": {"led": {"variant": "addressable"}},
+            "pins": {"data": 21},
+            "config": {"kind": "ws2812", "count": 2}
+        },
         "key_1": {"class": "button", "pins": {"in": {"gpio": 0, "active": "low"}}},
         "key_2": {"class": "button", "pins": {"in": {"gpio": 17, "active": "low"}}}
     },

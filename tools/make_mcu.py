@@ -165,6 +165,13 @@ def compatibility():
     return chips
 
 
+def adc1_of(target_dir):
+    """The pins of ADC1: Wi-Fi takes ADC2 on the older chips, so a part read with the radio on goes here."""
+    header = next(iter(target_dir.glob("**/soc/adc_channel.h")), None)
+    pins = sorted({int(pin) for pin in re.findall(r"ADC1_CHANNEL_\d+_GPIO_NUM\s+(\d+)", header.read_text())}) if header else []
+    return {"adc1": pins} if pins else {}
+
+
 def main():
     made = []
     supported = compatibility()
@@ -181,7 +188,7 @@ def main():
             print(f"{target}: skipped, a mask does not parse", file=sys.stderr)
             continue
         entry = {"format": "jef-sure/boards", "format_version": 2, "kind": "mcu", "name": target, "title": target.upper().replace("ESP32", "ESP32-").rstrip("-"),
-                 "gpio": {"count": count, "valid": bits(valid, 64), "input_only": bits(valid & ~out, 64)},
+                 "gpio": {"count": count, "valid": bits(valid, 64), "input_only": bits(valid & ~out, 64), **adc1_of(target_dir)},
                  "hosts": {key: value for key, value in (("spi", number(found.get("SOC_SPI_PERIPH_NUM"), found)), ("i2c", number(found.get("SOC_I2C_NUM"), found)), ("uart", number(found.get("SOC_UART_HP_NUM") or found.get("SOC_UART_NUM"), found))) if value is not None},
                  "provides": {name: {} for symbol, name in PROVIDES.items() if found.get(symbol) == "1"},
                  "checked": {"facts": {"level": "vendor-docs", "source": f"ESP-IDF {IDF.name}, components/soc/{target}, soc_caps.h"}}}

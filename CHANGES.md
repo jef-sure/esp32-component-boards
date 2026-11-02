@@ -168,6 +168,11 @@ committed, a program that asks by kind.
   requires. What was found reaches the model through `library_audits` of `boards_mcp.py`.
 - A chip goes first on the bus its library was tried on, and a kit says so of any other.
 - An SPI host takes six devices in the solver, as in `spi_master.c`: the seventh goes on a second host, with lines of its own.
+- A display chip says its variant, so a board with a TFT is no answer to a request for an OLED or for shift registers. A variant
+  with a way of its own, as a chain of shift registers, a photoresistor on ADC1 or a button on a GPIO, needs no part: the kit
+  gives it the lines, and chains share their data and clock in `shared_pins`. `gpio.adc1` of a chip comes from ESP-IDF.
+- The HLK-LD2410C radar, and PIR and radar as variants of presence.
+- The solver tries every choice of modules for a board while they are few, and past that what one change of the best gives, twice.
 - `tools/import_addresses.py` writes the I2C addresses of imported chips, from ESPHome and from library headers with a
   permissive license. The solver gives a second part of one chip the next free address and tells the person to set it. A
   clash on an imported list stays an unknown, since the list can be short.

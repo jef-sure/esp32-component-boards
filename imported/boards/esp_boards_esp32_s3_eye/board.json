@@ -49,7 +49,7 @@
         "adc_button_group_button_2": {"class": "button", "pins": {"in": {"gpio": 1, "analog": [1400, 2195]}}},
         "adc_button_group_button_1": {"class": "button", "pins": {"in": {"gpio": 1, "analog": [2195, 2705]}}},
         "boot_button": {"class": "button", "pins": {"in": {"gpio": 0, "active": "low"}}},
-        "status_led": {"class": "led", "pins": {"out": 3}}
+        "status_led": {"class": "led", "provides": {"led": {"variant": "single"}}, "pins": {"out": 3}}
     },
     "origin": {
         "from": "esp_boards",

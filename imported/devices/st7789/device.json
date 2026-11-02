@@ -6,5 +6,6 @@
     "title": "st7789",
     "class": ["display"],
     "checked": {"facts": {"level": "extracted", "source": "the boards that use it"}},
+    "provides": {"display": {"variant": "tft"}},
     "on": {"spi": {}}
 }

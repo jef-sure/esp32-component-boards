@@ -34,7 +34,12 @@
         "adc_button_group_play": {"class": "button", "pins": {"in": {"gpio": 8, "analog": [1380, 1820]}}},
         "adc_button_group_mode": {"class": "button", "pins": {"in": {"gpio": 8, "analog": [1820, 2195]}}},
         "adc_button_group_rec": {"class": "button", "pins": {"in": {"gpio": 8, "analog": [2195, 2705]}}},
-        "led_strip": {"class": "led", "pins": {"data": 19}, "config": {"kind": "ws2812", "count": 12}}
+        "led_strip": {
+            "class": "led",
+            "provides": {"led": {"variant": "addressable"}},
+            "pins": {"data": 19},
+            "config": {"kind": "ws2812", "count": 12}
+        }
     },
     "origin": {
         "from": "esp_boards",

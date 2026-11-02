@@ -8,9 +8,9 @@
     "buses": {"uart": {"uart1": {"tx": 19, "rx": 18, "rts": "nc", "cts": "nc"}}},
     "devices": {
         "event_signal": {"class": "other", "pins": {"out": 10}},
-        "led_red": {"class": "led", "pins": {"out": 2}},
-        "led_green": {"class": "led", "pins": {"out": 8}},
-        "led_blue": {"class": "led", "pins": {"out": 9}}
+        "led_red": {"class": "led", "provides": {"led": {"variant": "single"}}, "pins": {"out": 2}},
+        "led_green": {"class": "led", "provides": {"led": {"variant": "single"}}, "pins": {"out": 8}},
+        "led_blue": {"class": "led", "provides": {"led": {"variant": "single"}}, "pins": {"out": 9}}
     },
     "origin": {
         "from": "esp_boards",

@@ -1,0 +1,22 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "ld2410c",
+    "title": "HLK-LD2410C 24 GHz presence radar",
+    "class": "sensor",
+    "maker": "hi-link",
+    "part": "HLK-LD2410C",
+    "provides": {"presence": {"variant": "radar"}},
+    "on": {"uart": {}},
+    "notes": [
+        "The UART runs at 256000 baud, 1 stop bit. OUT is high while someone is there: a pin for it is a choice, the UART is enough.",
+        "Its own Bluetooth is on by default."
+    ],
+    "checked": {
+        "facts": {
+            "level": "datasheet",
+            "source": "HLK-LD2410C datasheet: 5 to 12 V, 5 V advised, more than 200 mA, IO level 3.3 V, UART 256000, module 16 x 22 mm"
+        }
+    }
+}

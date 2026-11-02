@@ -25,7 +25,7 @@
             "chip": "st7789"
         },
         "boot_button": {"class": "button", "pins": {"in": {"gpio": 0, "active": "low"}}},
-        "led_blue": {"class": "led", "pins": {"out": 4}},
+        "led_blue": {"class": "led", "provides": {"led": {"variant": "single"}}, "pins": {"out": 4}},
         "fs_sdcard": {"class": "storage", "config": {"media": "microsd"}, "on": {"spi.spi3": {"cs": 13}}}
     },
     "origin": {

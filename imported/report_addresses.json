@@ -49,7 +49,7 @@
         },
         "bme680": {"0x76": "esphome/components/bme680/sensor.py"},
         "bmp085": {"0x77": "esphome/components/bmp085/sensor.py"},
-        "bmp180": {"0x77": "styropyr0/BMP180/BMP180DEFS.h: BMP180_I2C_ADDR"},
+        "bmp180": {"0x77": "bonezegei/Bonezegei_BMP180/Bonezegei_BMP180.h: BMP180_I2C_ADDR"},
         "bmp280": {"0x77": "esphome/components/bmp280_i2c/sensor.py"},
         "bmp390": {"0x77": "esphome/components/bmp3xx_i2c/sensor.py"},
         "bmp581": {"0x46": "esphome/components/bmp581_i2c/sensor.py"},
@@ -132,7 +132,7 @@
         },
         "mpu9250": {
             "0x0c": "wollewald/MPU9250_WE/MPU9250_WE.h: MAGNETOMETER_I2C_ADDRESS",
-            "0x68": "bolderflight/MPU9250/mpu6500.h: I2C_ADDR_PRIM",
+            "0x68": "asukiaaa/MPU9250_asukiaaa/MPU9250_asukiaaa.h: MPU9250_ADDRESS_AD0_LOW",
             "0x69": "asukiaaa/MPU9250_asukiaaa/MPU9250_asukiaaa.h: MPU9250_ADDRESS_AD0_HIGH"
         },
         "ms8607": {
@@ -281,10 +281,10 @@
         "zs042"
     ],
     "refused": [
-        {"chip": "icm20948", "address": "0x0c", "name": "AK09916_I2C_ADDR", "why": "names another chip"},
         {"chip": "is31fl3741", "address": "0x30", "name": "IS3741_ADDR_DEFAULT", "why": "names another chip"},
-        {"chip": "mpu9250", "address": "0x0c", "name": "AK8963_I2C_ADDR_", "why": "names another chip"},
         {"chip": "sgp40", "address": "0x44", "name": "SHT4x_DEFAULT_ADDR", "why": "names another chip"},
+        {"chip": "mpu9250", "address": "0x0c", "name": "AK8963_I2C_ADDR_", "why": "names another chip"},
+        {"chip": "icm20948", "address": "0x0c", "name": "AK09916_I2C_ADDR", "why": "names another chip"},
         {"chip": "vl53l1x", "address": "0x52", "why": "the 8-bit form of another"},
         {"chip": "vl53l4cx", "address": "0x52", "why": "the 8-bit form of another"}
     ]

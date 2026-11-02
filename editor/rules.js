@@ -62,9 +62,13 @@ function post(items, spec) {
     return out;
 }
 
-function select(doc, spec, sets) {
-    if (typeof spec === 'string') return select(doc, sets[spec], sets);
-    if (Array.isArray(spec)) return spec.flatMap((one) => select(doc, one, sets));
+// A named set is asked for by rule after rule: memo holds it for one document, and no rule changes what it holds.
+function select(doc, spec, sets, memo) {
+    if (typeof spec === 'string') {
+        if (!memo.has(spec)) memo.set(spec, select(doc, sets[spec], sets, memo));
+        return memo.get(spec);
+    }
+    if (Array.isArray(spec)) return spec.flatMap((one) => select(doc, one, sets, memo));
     const items = [];
     for (const [node, keys] of walk(doc, spec.path.split('.'), [])) {
         const ctx = {};
@@ -87,15 +91,16 @@ function select(doc, spec, sets) {
 function check(doc, data) {
     const found = [];
     const sets = data.sets;
+    const memo = new Map();
     for (const rule of data.rules) {
         if (!(rule.when || []).every((cond) => holds(doc, cond, {}))) continue;
-        const items = post(select(doc, rule.each, sets), rule);
+        const items = post(select(doc, rule.each, sets, memo), rule);
         const report = (ctx) => found.push({ rule: rule.id, message: fill(rule.message, ctx) });
         if (rule.kind === 'exists' || rule.kind === 'forbid') {
-            const among = new Set(select(doc, rule.among, sets).map((item) => mark(item.value)));
+            const among = new Set(select(doc, rule.among, sets, memo).map((item) => mark(item.value)));
             for (const item of items) if (among.has(mark(item.value)) !== (rule.kind === 'exists')) report(item.ctx);
         } else if (rule.kind === 'unique') {
-            const allowed = new Set(select(doc, rule.except || [], sets).map((item) => mark(item.value)));
+            const allowed = new Set(select(doc, rule.except || [], sets, memo).map((item) => mark(item.value)));
             const seen = new Map();
             for (const item of items) {
                 const key = `${item.ctx.group}\u0000${mark(item.value)}`;
@@ -122,7 +127,7 @@ function check(doc, data) {
                 });
             }
         } else if (rule.kind === 'earlier') {
-            const at = new Map(select(doc, rule.among, sets).map((item) => [mark(item.value), +item.ctx['1']]));
+            const at = new Map(select(doc, rule.among, sets, memo).map((item) => [mark(item.value), +item.ctx['1']]));
             for (const item of items) if (!(at.get(mark(item.value)) < +item.ctx['1'])) report(item.ctx);
         } else if (rule.kind === 'within') {
             for (const item of items) {

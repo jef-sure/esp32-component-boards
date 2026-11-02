@@ -1,0 +1,6 @@
+{
+    "title": "A photoresistor and a plain button ask for no part: the kit gives the one a pin of ADC1 and the other any pin",
+    "answers": {"blocks": [{"role": "light", "name": "photo", "variant": "photoresistor"}, {"role": "button", "name": "back", "variant": "on_gpio"}]},
+    "says": "no part of the catalog, the kit only gives it pins: in",
+    "adc": {"board": "esp32_devkit", "use": "photo"}
+}

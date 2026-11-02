@@ -1,0 +1,17 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "ld2410c_module",
+    "title": "HLK-LD2410C radar module",
+    "maker": "hi-link",
+    "power": [{"name": "VCC", "source": "connector", "volts": [5, 12]}],
+    "devices": {"radar": {"chip": "ld2410c"}},
+    "connectors": {"J1": {"type": "5 pin holes", "pins": ["UART_Tx", "UART_Rx", "OUT", "GND", "VCC"]}},
+    "checked": {
+        "facts": {
+            "level": "datasheet",
+            "source": "HLK-LD2410C datasheet: pins 1 UART_Tx, 2 UART_Rx, 3 OUT, 4 GND, 5 VCC"
+        }
+    }
+}

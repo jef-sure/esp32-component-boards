@@ -7,6 +7,7 @@
     "maker": "sitronix",
     "part": "ST7920",
     "class": "display",
+    "provides": {"display": {"variant": "mono_lcd"}},
     "on": {"spi": {}},
     "config": {"kind": "graphics"},
     "controls": {"orientation": {"how": "driver", "read": "none"}},

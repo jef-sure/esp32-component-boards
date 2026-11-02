@@ -39,7 +39,7 @@
             "config": {"over": "display_lcd", "x_max": 480, "y_max": 480},
             "chip": "cst9217"
         },
-        "status_led": {"class": "led", "pins": {"out": 3}},
+        "status_led": {"class": "led", "provides": {"led": {"variant": "single"}}, "pins": {"out": 3}},
         "vibration_motor": {"class": "other", "pins": {"out": 8}},
         "ai_button": {"class": "button", "pins": {"in": {"gpio": 7, "active": "low"}}},
         "boot_button": {"class": "button", "pins": {"in": {"gpio": 61, "active": "low"}}},

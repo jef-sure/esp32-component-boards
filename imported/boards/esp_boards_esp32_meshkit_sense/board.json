@@ -9,8 +9,8 @@
     "devices": {
         "wake_button": {"class": "button", "pins": {"in": {"gpio": 34, "active": "low"}}},
         "boot_button": {"class": "button", "pins": {"in": {"gpio": 0, "active": "low"}}},
-        "led_wifi": {"class": "led", "pins": {"out": 15}},
-        "led_network": {"class": "led", "pins": {"out": 4}}
+        "led_wifi": {"class": "led", "provides": {"led": {"variant": "single"}}, "pins": {"out": 15}},
+        "led_network": {"class": "led", "provides": {"led": {"variant": "single"}}, "pins": {"out": 4}}
     },
     "origin": {
         "from": "esp_boards",

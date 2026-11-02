@@ -7,6 +7,7 @@
     "maker": "jadard",
     "part": "JD9365DA-H3",
     "class": "display",
+    "provides": {"display": {"variant": "tft"}},
     "on": {"dsi": {"required": true}},
     "config": {"kind": "graphics"},
     "controls": {"orientation": {"how": "driver", "read": "none"}},

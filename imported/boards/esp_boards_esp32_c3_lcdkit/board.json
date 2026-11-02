@@ -36,7 +36,12 @@
             "config": {"direction": "out", "sample_rate": 22050, "clock": "bclk"},
             "chip": "pdm_out"
         },
-        "led_strip": {"class": "led", "pins": {"data": 8}, "config": {"kind": "ws2812", "count": 1}}
+        "led_strip": {
+            "class": "led",
+            "provides": {"led": {"variant": "addressable"}},
+            "pins": {"data": 8},
+            "config": {"kind": "ws2812", "count": 1}
+        }
     },
     "origin": {
         "from": "esp_boards",

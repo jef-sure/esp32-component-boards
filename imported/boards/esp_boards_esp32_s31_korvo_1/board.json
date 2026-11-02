@@ -23,7 +23,12 @@
     },
     "devices": {
         "boot_button": {"class": "button", "pins": {"in": {"gpio": 61, "active": "low"}}},
-        "led_strip": {"class": "led", "pins": {"data": 37}, "config": {"kind": "ws2812", "count": 1}},
+        "led_strip": {
+            "class": "led",
+            "provides": {"led": {"variant": "addressable"}},
+            "pins": {"data": 37},
+            "config": {"kind": "ws2812", "count": 1}
+        },
         "adc_button_group_set": {"class": "button", "pins": {"in": {"gpio": 42, "analog": [190, 600]}}},
         "adc_button_group_mode": {"class": "button", "pins": {"in": {"gpio": 42, "analog": [600, 1080]}}},
         "adc_button_group_volume_down": {"class": "button", "pins": {"in": {"gpio": 42, "analog": [1080, 1605]}}},

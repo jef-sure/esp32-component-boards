@@ -6,5 +6,6 @@
     "title": "co5300",
     "class": ["display"],
     "checked": {"facts": {"level": "extracted", "source": "the boards that use it"}},
+    "provides": {"display": {"variant": "oled"}},
     "on": {"qspi": {}}
 }

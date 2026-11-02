@@ -94,6 +94,10 @@ def orientation(flags):
     return {"how": "driver", "start": {"x": "right-left" if flags.get("mirror_x") else "left-right", "y": "bottom-top" if flags.get("mirror_y") else "top-bottom", "swap": bool(flags.get("swap_xy"))}}
 
 
+# What a display chip is. A chip left out says nothing, and a kit that asks for a variant counts that as an unknown.
+DISPLAY_VARIANTS = {"st7789": "tft", "st7735": "tft", "st7262": "tft", "st7701": "tft", "gc9a01": "tft", "gc9503": "tft", "ek79007": "tft", "axs15231b": "tft", "tab5_lcd": "tft", "generic_rgb": "tft", "co5300": "oled", "sh8601": "oled"}
+
+
 class Import:
     """What one run gathers over all boards."""
 
@@ -108,6 +112,8 @@ class Import:
             return
         entry = self.chips.setdefault(name, {**HEAD, "kind": "device", "name": name, "title": name, "class": [], "checked": {"facts": {"level": LEVEL, "source": "the boards that use it"}}})
         entry["class"] = sorted({*entry["class"], kind})
+        if name in DISPLAY_VARIANTS:
+            entry["provides"] = {"display": {"variant": DISPLAY_VARIANTS[name]}}
         if buses:
             entry["on"] = {**entry.get("on", {}), **{bus: {} for bus in buses}}
 
@@ -443,11 +449,14 @@ class Board:
 
     def device_led_strip(self, _name, device, _item, config, chip, _parts):
         device["class"] = "led"
+        device["provides"] = {"led": {"variant": "addressable"}}
         device["pins"] = wired({"data": config.get("strip_gpio_num")})
         device["config"] = given({"kind": chip or "strip", "count": config.get("max_leds")})
 
     def device_gpio_ctrl(self, name, device, _item, _config, _chip, parts):
         device["class"] = "led" if "led" in name else "other"
+        if device["class"] == "led":
+            device["provides"] = {"led": {"variant": "single"}}
         device["pins"] = wired({"out": self.gpio_of(parts).get("pin")})
 
     def device_ledc_ctrl(self, name, device, _item, config, _chip, parts):

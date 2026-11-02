@@ -4,7 +4,9 @@
     "kind": "module",
     "name": "adafruit_pir_sensor",
     "title": "PIR sensor",
-    "devices": {"presence": {"ways": [{"lines": ["sig"]}], "provides": {"presence": {}}, "class": "sensor"}},
+    "devices": {
+        "presence": {"ways": [{"lines": ["sig"]}], "provides": {"presence": {"variant": "pir"}}, "class": "sensor"}
+    },
     "connectors": {"J1": {"type": "contacts of the part", "pins": ["GND", "VDD", "SIG"]}},
     "maker": "adafruit",
     "power": [{"name": "VCC", "source": "connector"}],

@@ -9,6 +9,9 @@ describes every file. `tools/check_format.py` checks them.
 | `catalog/boards/<name>/board.json` | a board: its wiring and its values; `sdkconfig.defaults` beside it |
 | `catalog/modules/<name>/module.json` | a module: devices without a board, the wiring left to the project |
 | `catalog/devices/<family>/device.json` | a device: its roles, addresses, parameters, what the chip itself can do |
+| `catalog/addons/<name>/addon.json` | an addon: a part in the way of lines, a supply or a port |
+| `catalog/platforms/<name>/platform.json` | a platform: which chips each version takes, where its libraries are published |
+| `catalog/rubrics/<name>/rubric.json` | what an audit of a kind of library asks |
 | `catalog/libraries/<ecosystem>/<owner>/<name>/library.json` | a library: which chips it supports, how it starts them, what it can do with them |
 | `catalog/mcu/<target>/mcu.json` | a chip: its GPIOs, hosts and what it has. Made from ESP-IDF by `tools/make_mcu.py` |
 | `catalog/connectors/<type>/connector.json` | a type of connector: pins, voltage |
@@ -558,6 +561,33 @@ no `logic`, or a chip with no `high_mv_max`, is an unknown of the kit.
 
 `provides.emac` of a chip is the MAC alone. `ethernet` is a port: the device with the PHY provides
 it, as a radio provides `wifi`.
+
+A role in `catalog/roles.json` can have variants, and a chip says its own in `provides`, as `{"display": {"variant": "tft"}}`.
+A part that does not say stays a candidate, and the kit counts that as an unknown. A variant with a `way` needs no part: the kit
+gives it its `lines`, and those in `shared` are one line for all the blocks of that variant. `adc` asks for a pin of `gpio.adc1`.
+
+## Addons
+
+`catalog/addons/<name>/addon.json` is a part that stands in the way of something and takes no pins. `stands` says what it
+stands on: `lines`, `power` or `port`.
+
+On lines, `channels` says how many lines one of them takes, and `both_ways` that a line works in both directions, as I2C needs.
+A kit adds one by itself where a level needs it: a device or a way names `high_min_mv`, the lowest high level it reads, and
+a chip drives 3.3 V.
+
+On a port, `needs` names what a board must provide, and `gives` what the board then has: `provides`, and the `plug`, `mv` and
+`ma` it hands over. A step of `power` names the `plug` it takes, so a PoE splitter comes with the plug of the board. A board
+whose plug is not in the data stays an unknown of the kit.
+
+## Platforms
+
+`catalog/platforms/<name>/platform.json` says what a program is built on. `ecosystem` is the registry its libraries are
+published in, `registry` its address, `project` what a project of it consists of, and `writes_projects` whether the page
+writes one. Each of `versions` has its `targets`, `preview` for those it takes as a preview, and `on` for what it is built on.
+
+A chip says the same from its side in `platforms` of `mcu.json`: `since`, `preview` and `revisions`, which `tools/make_mcu.py`
+reads from COMPATIBILITY.md. `platforms` of a version of a library uses the same names. The choice in the top row of the page
+limits the boards by their chip and the libraries by these names.
 
 ## Ways of wiring
 

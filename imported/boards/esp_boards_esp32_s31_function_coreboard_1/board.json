@@ -34,7 +34,12 @@
             "config": {"direction": "both", "sample_rate": 48000},
             "chip": "es8311"
         },
-        "led_strip": {"class": "led", "pins": {"data": 60}, "config": {"kind": "ws2812", "count": 1}},
+        "led_strip": {
+            "class": "led",
+            "provides": {"led": {"variant": "addressable"}},
+            "pins": {"data": 60},
+            "config": {"kind": "ws2812", "count": 1}
+        },
         "ethernet": {
             "class": "network",
             "provides": {"ethernet": {}},

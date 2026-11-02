@@ -1,5 +1,13 @@
 {
     "title": "A variant the board does not name: it is on the board, and which one stays a question",
-    "answers": {"blocks": [{"role": "display", "variant": "tft"}]},
+    "imported": true,
+    "answers": {
+        "blocks": [
+            {
+                "role": "display",
+                "variant": "tft"
+            }
+        ]
+    },
     "says": "the data does not say of which variant"
 }

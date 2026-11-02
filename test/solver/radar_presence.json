@@ -1,0 +1,5 @@
+{
+    "title": "A radar for presence is the LD2410C on a UART, and a PIR is no answer to it",
+    "answers": {"blocks": [{"role": "presence", "name": "room", "variant": "radar"}]},
+    "kit": {"name": "esp32_devkit", "modules": {"ld2410c_module": 1}, "on": {"ld2410c_module": "uart"}}
+}

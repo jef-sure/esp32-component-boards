@@ -259,7 +259,7 @@ def roles_problems(doc):
     problems += [f"role {name} twice" for name in sorted({name for name in names if names.count(name) > 1})]
     for item in [*roles, *(variant for role in roles for variant in role.get("variants", []))]:
         try:
-            re.compile(item["words"])
+            re.compile(item.get("words", ""))
         except re.error as error:
             problems.append(f"{item['id']}: {error}")
     return problems

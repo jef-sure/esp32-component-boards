@@ -4,6 +4,9 @@
 Usage: board_pins.py BOARD            the map: GPIO -> owner, with the conflicts
        board_pins.py BOARD --tree     the tree: chip -> buses -> devices -> pins
        board_pins.py --all            the map of every board, the conflicts only
+       board_pins.py BOARD --display  its primary display as shown, "1280x800 217x136" (pixels,
+                                      millimetres, 0x0 when the data has no size), for a Makefile;
+                                      nothing and exit 1 when the board has no pixel display
 
 The same questions tools/check_boards.py asks of the data in CI (two owners of one pin, an
 output on an input-only GPIO, a GPIO the chip has not), here to look at. Run from the
@@ -106,6 +109,7 @@ def main():
     parser.add_argument("--all", action="store_true")
     parser.add_argument("--free", nargs="?", const="", metavar="WORD", help="the pins left for what will be connected; ADC, DAC or TOUCH narrows them")
     parser.add_argument("--json", action="store_true", help="the whole map of the pins as JSON")
+    parser.add_argument("--display", action="store_true", help="the primary display as shown: pixels and millimetres")
     parser.add_argument("--project", type=pathlib.Path, help="the program whose components/local-boards to read as well")
     args = parser.parse_args()
     boards, modules = boards_gen.read_all(ROOT / "catalog")
@@ -120,7 +124,12 @@ def main():
         parser.error("a board, or --all")
     for board in boards + modules:
         if board["name"] == args.board:
-            if args.json:
+            if args.display:
+                if not boards_gen.is_pixel(board.get("display")):
+                    return 1
+                width, height, mm_w, mm_h = boards_gen.shown(board["display"])
+                print(f"{width}x{height} {mm_w}x{mm_h}")
+            elif args.json:
                 print(json.dumps(boards_gen.pin_map(board), indent=2))
             elif args.free is not None:
                 print("\n".join(free_pins(board, args.free)))

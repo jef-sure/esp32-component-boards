@@ -47,10 +47,7 @@ bool board_spi_taken(int host)
 }
 
 /* The board wires no I2C bus: nothing for board_glue_i2c to make. */
-const struct board_i2c_pins *board_i2c_pins(void)
-{
-    return NULL;
-}
+const struct board_i2c_table board_i2c_table = {.count = 0};
 
 const struct board_touch_table board_touch_table = {.count = 0};
 

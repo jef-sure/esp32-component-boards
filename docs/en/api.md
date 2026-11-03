@@ -22,8 +22,8 @@ and for a settings page, not for deciding what to do: ask by kind instead.
 
 ```c
 struct board_display {
-    int   width, height; /* as it lies, in pixels */
-    int   mm_w, mm_h;    /* as it lies, in millimetres; 0 when the data has no size */
+    int   width, height; /* as shown, in pixels */
+    int   mm_w, mm_h;    /* as shown, in millimetres; 0 when the data has no size */
     int   dir_x, dir_y;  /* BOARD_DIR_FORWARD: left to right, top to bottom; BOARD_DIR_BACKWARD: the other way */
     bool  swap_xy;
     const char *name; /* its name in the data, for the log */
@@ -40,7 +40,7 @@ A board may have several displays. `board_display_init` starts the primary one;
 the same display. Displays the data joins into one screen (`display_groups`) have
 a place of their own: starting it starts both and gives one wider screen. Such a
 screen does not turn: `board_display_orientation` returns `false`, and each of the
-two keeps its own. `board_touch_start` takes the display the touch lies over and
+two keeps its own. `board_touch_start` takes the display the touch covers and
 returns `false` for another one.
 
 `board_display_init` brings the panel up with the light on, oriented as the
@@ -66,7 +66,7 @@ both directions from what init left:
 board_display_orientation(&display, -display.dir_x, -display.dir_y, display.swap_xy);
 ```
 
-The millimetres are the measured size of the picture as it lies: DGX-DI's
+The millimetres are the measured size of the picture as shown: DGX-DI's
 gestures and the fonts of DGX use them to make a centimetre a centimetre on
 every board.
 
@@ -94,7 +94,7 @@ bool board_touch_start_at(int index, const struct board_display *display, struct
 ```
 
 Sets a panel up under the display taken before, calibrated by the board's measured
-calibration. `board_touch_start` takes the first panel that lies over this display,
+calibration. `board_touch_start` takes the first panel that covers this display,
 `board_touch_start_at` a panel by its place. A second call gives the same panel. `out`
 may be `NULL`. `boards_dgx_di.h` gives the device and the pointer on it:
 
@@ -104,8 +104,8 @@ dgx_di_pointer_t *board_dgx_di_pointer(const struct board_touch *touch);
 ```
 
 The pointer follows the display's orientation: after
-`board_display_orientation` its coordinates are those of the display as it
-lies now. The task that reads it is the program's:
+`board_display_orientation` its coordinates are those of the display in its
+orientation now. The task that reads it is the program's:
 
 ```c
 #include "boards_dgx_di.h"
@@ -126,13 +126,12 @@ calibration in the data was measured on another display size or panel range;
 touch works in both cases, only not straight.
 
 ```c
-bool board_touch_firmware(const uint8_t **start, size_t *size);
+void board_touch_firmware_set(const uint8_t *start, size_t size);
 ```
 
-The hook for a panel that keeps no firmware of its own (the GSL3680 of the
-10.1-inch Guition): the component's version is weak and returns `false`; a
-program that embeds the firmware defines this function itself. See
-[touch-firmware.md](touch-firmware.md).
+The firmware of a panel that keeps none of its own (the GSL3680 of the 10.1-inch
+Guition): a program that embeds it gives the bytes here before `board_touch_start`.
+Without it the touch of that board is off. See [touch-firmware.md](touch-firmware.md).
 
 ## Sound
 
@@ -177,6 +176,19 @@ same task: the display holds the bus until the batch ends.
 
 `board_spi_taken` says whether a host is claimed by any bus of the board, SPI or
 QSPI, so a free host can be found.
+
+```c
+struct i2c_master_bus_t *board_i2c(int port);   /* i2c_master_bus_handle_t of ESP-IDF */
+bool board_i2c_taken(int port);
+```
+
+`board_i2c(0)` returns the I2C master of the board on port 0. The first call makes it,
+from any task, and later calls return the same master, which the parts of the board on
+that bus, as a touch panel or a codec, use as well. A
+device the program adds goes on it with `i2c_master_bus_add_device`; a second gamepad
+of the same address goes on the other port. ESP-IDF takes one master on a port, so a
+program makes its own master only on a port `board_i2c_taken` reports free. NULL when
+the board names no bus on that port or the master cannot be made.
 `board_bus_get("nfc_in_nfc", "cs", &pin)` gives the lines of a device the component does
 not set up, by its name in the data.
 `board_bus_get("sdio.sdio0", "clk", &pin)` reads any number of any bus

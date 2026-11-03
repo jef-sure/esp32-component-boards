@@ -349,7 +349,7 @@
     },
     "hosts": {
         "spi": 3,
-        "i2c": 3,
+        "i2c": 2,
         "uart": 4
     },
     "provides": {

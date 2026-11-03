@@ -37,7 +37,7 @@ const struct board_info *board_info(void);
 enum { BOARD_DIR_FORWARD = 1, BOARD_DIR_BACKWARD = -1 };
 
 /*
- * A graphics display the board has: the panel set up, the light on, lying as the board shows it
+ * A graphics display the board has: the panel set up, the light on, as the board shows it
  * (the orientation its data names), its size in pixels and in millimetres. false when the board
  * has none or it could not be set up; *out untouched then.
  *
@@ -45,9 +45,9 @@ enum { BOARD_DIR_FORWARD = 1, BOARD_DIR_BACKWARD = -1 };
  * board_character_display_init.
  */
 struct board_display {
-    int   width, height; /* as it lies, in pixels */
+    int   width, height; /* as shown, in pixels */
     int   mm_w, mm_h;    /* as measured with a ruler, as it is shown; 0 when the data has no size */
-    int   dir_x, dir_y;  /* how it lies now: BOARD_DIR_FORWARD or BOARD_DIR_BACKWARD */
+    int   dir_x, dir_y;  /* its orientation now: BOARD_DIR_FORWARD or BOARD_DIR_BACKWARD */
     bool  swap_xy;       /* and whether its x runs along the columns of the panel */
     const char *name;    /* its name in the data, for the log */
     int   index;         /* its place among the displays of the board */
@@ -96,11 +96,11 @@ bool board_touch_start_at(int index, const struct board_display *display, struct
  * of the 10.1-inch Guition): written into it over I2C at every start. The vendor's array
  * carries no licence to give away, so it is not in this component: the program that builds
  * for such a board embeds it (EMBED_FILES in its CMakeLists.txt; DGX-DI's
- * tools/gsl_firmware.py makes the file from the board's package) and defines this function
- * itself, giving the embedded bytes. The component's own is weak and returns false: the
- * board builds and runs without the file, its touch off.
+ * tools/gsl_firmware.py makes the file from the board's package) and gives the embedded bytes
+ * here, before board_touch_start. Without it the board builds and runs, its touch off.
+ * A second call replaces the first; NULL or a size of 0 takes it back.
  */
-bool board_touch_firmware(const uint8_t **start, size_t *size);
+void board_touch_firmware_set(const uint8_t *start, size_t size);
 
 /*
  * The sound of the board: its hardware set up and a task of its own taking the next samples
@@ -131,6 +131,19 @@ struct board_spi_bus {
 };
 const struct board_spi_bus *board_spi_bus(int host);
 bool board_spi_taken(int host);
+
+/*
+ * The board's I2C buses, by port, as its data names them ("i2c0" is the chip's port 0). board_i2c
+ * returns the master of the board on a port: the first call makes it, from any task, and later calls
+ * return the same one, which the parts of the board on that port (a touch panel, a codec) use as well.
+ * A device the program adds goes on it with i2c_master_bus_add_device.
+ * ESP-IDF takes one master on a port, so a program makes its own only on a port board_i2c_taken
+ * reports free. NULL when the board has no bus on that port or the master cannot be made. The type
+ * is i2c_master_bus_handle_t of ESP-IDF, named by its tag so this header needs no driver.
+ */
+struct i2c_master_bus_t;
+struct i2c_master_bus_t *board_i2c(int port);
+bool board_i2c_taken(int port);
 
 /*
  * Any number of any bus of the board, by name, and of any device the component does not set

@@ -180,7 +180,7 @@
     },
     "hosts": {
         "spi": 2,
-        "i2c": 2,
+        "i2c": 1,
         "uart": 2
     },
     "provides": {

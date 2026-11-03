@@ -7,8 +7,10 @@ Usage: boards_gen.py [--data DIR] [--out DIR] BOARD
 For one board, reads catalog/boards/BOARD/board.json and writes into boards/BOARD/:
   - BOARD.c               the glue the component compiles when the board is chosen: every
                           function of boards.h, those for the parts the board has set up by
-                          the data, those for the parts it has not answering false
+                          the data, those for the parts it has not returning false
   - board.cmake           what the glue needs at link, derived from what the board has
+  - display.cmake         its primary display as shown, BOARD_PIXELS and BOARD_MM, which
+                          project_include.cmake gives the CMake of a program
 
 With --all, every board and module, and beside them what names them all:
   - boards/boards.cmake   the lists CMakeLists.txt compiles by
@@ -285,8 +287,8 @@ def parts_of(resolved):
     return board
 
 
-def lying(display):
-    """The display as it lies: (width, height, mm_w, mm_h) after the swap of its orientation."""
+def shown(display):
+    """The display as shown: (width, height, mm_w, mm_h) after the swap of its orientation."""
     panel = display["panel"]
     mm_w, mm_h = panel.get("mm_w", 0), panel.get("mm_h", 0)
     if display["original_orientation"].get("swap", False):
@@ -401,8 +403,6 @@ def read_board(path):
                 for key, value in bus.items():
                     if value is not None and not isinstance(value, (int, str)):
                         raise ValueError(f'the bus {kind}.{own} has a "{key}" that is neither a pin nor a parameter')
-    if len(buses.get("i2c") or {}) > 1:
-        raise ValueError("only one I2C bus per board is supported: the glue creates a single I2C master")
 
     # the display: a pixel panel of dgx or a character LCD of hd44780
     display = data.get("display")
@@ -767,8 +767,11 @@ def gen_c(board):
         for own, bus in sorted(plain_spi.items()):
             hz = f", .hz = {bus['hz']}" if bus.get("hz") is not None else ""
             out(f"static const struct board_spi_bus board_spi_{own} = {{.host = {own.upper()}_HOST, .mosi = {c_gpio(bus['mosi'])}, .miso = {c_gpio(bus['miso'])}, .sclk = {c_gpio(bus['sclk'])}{hz}}};")
-        for own, bus in i2c_buses[:1]:
-            out(f"static const struct board_i2c_pins board_i2c_pins_of = {{.port = I2C_NUM_{port_of(own, 'i2c')}, .sda = {c_gpio(bus['sda'])}, .scl = {c_gpio(bus['scl'])}}}; /* i2c.{own} */")
+        if i2c_buses:
+            out("static const struct board_i2c_pins board_i2c_buses[] = {")
+            for own, bus in i2c_buses:
+                out(f"    {{.port = I2C_NUM_{port_of(own, 'i2c')}, .sda = {c_gpio(bus['sda'])}, .scl = {c_gpio(bus['scl'])}}}, /* i2c.{own} */")
+            out("};")
         sounding = {bus_parts(sound["i2s_bus"])[1] for sound in sounds if "i2s_bus" in sound}  # the table of buses keeps the numbers of the rest
         for own, bus in sorted(item for item in (buses.get("i2s") or {}).items() if item[0] in sounding):
             out(f"static const struct board_i2s_bus board_i2s_{own} = {{.port = I2S_NUM_{port_of(own, 'i2s')}, .mclk = {c_gpio(bus['mclk'])}, .bclk = {c_gpio(bus['bclk'])}, .ws = {c_gpio(bus['ws'])}, .dout = {c_gpio(bus['dout'])}, .din = {c_gpio(bus.get('din'))}}};")
@@ -843,17 +846,11 @@ def gen_c(board):
             out("}")
         out("")
         if i2c_buses:
-            out("/* The board's I2C: one master, made by whoever asks first (board_glue_i2c). */")
-            out("const struct board_i2c_pins *board_i2c_pins(void)")
-            out("{")
-            out("    return &board_i2c_pins_of;")
-            out("}")
+            out("/* The board's I2C buses by port: board_glue_i2c makes the master of one at the first ask. */")
+            out("const struct board_i2c_table board_i2c_table = {.buses = board_i2c_buses, .count = sizeof(board_i2c_buses) / sizeof(board_i2c_buses[0])};")
         else:
             out("/* The board wires no I2C bus: nothing for board_glue_i2c to make. */")
-            out("const struct board_i2c_pins *board_i2c_pins(void)")
-            out("{")
-            out("    return NULL;")
-            out("}")
+            out("const struct board_i2c_table board_i2c_table = {.count = 0};")
         out("")
 
     # ---- the display ----
@@ -868,7 +865,8 @@ def gen_c(board):
         library = resolve.library(letters["library"])
         if kind == "i2c":
             step = library["transports"]["i2c"]["shared"]
-            out("    i2c_master_bus_handle_t bus = board_glue_i2c();")
+            # a module leaves its bus to the board: the first I2C bus the board names
+            out(f"    i2c_master_bus_handle_t bus = board_glue_i2c(I2C_NUM_{i2c_port if transport['bus'] == MODULE_BUS else port_of(width, 'i2c')});")
             out(f"    return bus ? {fill_call(step, {'i2c_bus': 'bus', 'address': format(i2c_address(transport.get('address')), '#04x'), **library['transports']['i2c']['defaults']})} : NULL;")
         else:
             out(f"    return {fill_call(library['transports'][transport['bus']]['init'], collections.defaultdict(lambda: c_gpio(None), {pin: c_gpio(num) for pin, num in gpins.items()}))};")
@@ -955,7 +953,9 @@ def gen_c(board):
             out(f"static const struct board_touch_calibration touch{i}_calibrated = {{.aims = touch{i}_aims, .count = {len(aims)}, .width = {cal['width']}, .height = {cal['height']}, "
                 f".blink_ms = {own.get('blink_ms', 0)}, .gap_ms = {own.get('gap_ms', 0)}, .placeholder = {'false' if measured else 'true'}}};")
             irq = touch.get("irq") if kind == "esp_lcd_touch" else touch.get("int")
-            out(f"static const struct board_touch_panel touch{i}_panel = {{.x_max = {touch['x_max'] + 1}, .y_max = {touch['y_max'] + 1}, .rst = {c_gpio(touch.get('rst'))}, .irq = {c_gpio(irq)}, .fingers = {touch.get('fingers', 1)}}};")
+            kind_of_bus, own_bus = bus_parts(touch["bus"]) if isinstance(touch.get("bus"), str) else (None, None)
+            port = f"I2C_NUM_{port_of(own_bus, 'i2c')}" if kind_of_bus == "i2c" else "-1"
+            out(f"static const struct board_touch_panel touch{i}_panel = {{.x_max = {touch['x_max'] + 1}, .y_max = {touch['y_max'] + 1}, .rst = {c_gpio(touch.get('rst'))}, .irq = {c_gpio(irq)}, .i2c_port = {port}, .fingers = {touch.get('fingers', 1)}}};")
             if kind == "gt911":
                 addresses = [f"{i2c_address(a):#04x}" for a in (touch.get("address_try") or ["0x5d"])]
                 out(f"static const uint8_t touch{i}_addresses[] = {{{', '.join(addresses)}}};")
@@ -996,7 +996,7 @@ def gen_c(board):
             iown = bus_parts(sound.get("i2s_bus", ""))[1]
             out(f"/* {sound['name']}: {sound['kind']} at {rate} Hz. */")
             if sound["kind"] == "es8311":
-                out(f"static const struct board_sound_es8311 sound{i}_codec = {{.i2s = &board_i2s_{iown}, .i2c_port = I2C_NUM_{i2c_port}, .address = {i2c_address(sound['address']):#04x}, .pa = {pa},")
+                out(f"static const struct board_sound_es8311 sound{i}_codec = {{.i2s = &board_i2s_{iown}, .i2c_port = I2C_NUM_{port_of(bus_parts(sound['bus'])[1], 'i2c')}, .address = {i2c_address(sound['address']):#04x}, .pa = {pa},")
                 out(f"                                                     .pa_voltage = {float(sound.get('pa_voltage', 5.0))}f, .codec_dac_voltage = {float(sound.get('codec_dac_voltage', 3.3))}f, .volume = {sound['volume']}, .rate = {rate}}};")
                 out("")
             out(f"static bool sound{i}_start(int index, board_sound_source_t source)")
@@ -1086,6 +1086,19 @@ def gen_cmake(board):
     return "\n".join(L) + "\n"
 
 
+def gen_display_cmake(board):
+    """display.cmake: the primary display as shown, for the CMake of a program."""
+    display = board.get("display")
+    L = [f"# The primary display of {board['name']} as shown, made by tools/boards_gen.py from {data_path(board)}:",
+         "# do not edit by hand. project_include.cmake of the component includes it when the board is chosen."]
+    if is_pixel(display):
+        width, height, mm_w, mm_h = shown(display)
+        L += [f"set(BOARD_PIXELS {width} {height})", f"set(BOARD_MM {mm_w} {mm_h}) # 0 0 when the data has no size"]
+    else:
+        L.append("# no pixel display: BOARD_PIXELS and BOARD_MM stay empty")
+    return "\n".join(L) + "\n"
+
+
 # ---------------------------------------------------------------------------------------------
 # what names them all: boards.cmake, Kconfig, the dependencies of the manifest, the table
 # ---------------------------------------------------------------------------------------------
@@ -1109,7 +1122,7 @@ def menu_text(board):
     parts = []
     display = board.get("display")
     if is_pixel(display):
-        w, h, _, _ = lying(display)
+        w, h, _, _ = shown(display)
         parts.append(f"{w}x{h} {display['driver'].upper()}")
     elif is_character(display):
         parts.append(f"{display['geometry']} {display['driver'].upper()}")
@@ -1183,6 +1196,7 @@ def write_local(local):
     for board in boards:
         texts[local / "boards" / board["name"] / f"{board['name']}.c"] = gen_c(board)
         texts[local / "boards" / board["name"] / "board.cmake"] = gen_cmake(board)
+        texts[local / "boards" / board["name"] / "display.cmake"] = gen_display_cmake(board)
     for path, text in texts.items():
         path.write_text(text)
 
@@ -1299,7 +1313,7 @@ def gen_table(boards, lang="en"):
     for board in boards:
         display = board.get("display")
         if is_pixel(display):
-            w, h, mm_w, mm_h = lying(display)
+            w, h, mm_w, mm_h = shown(display)
             bus = bus_parts(display["bus"]["bus"])[0]
             bus_name = {"dsi": "MIPI-DSI", "qspi": "QSPI", "spi": "SPI", "p8": "i80"}[bus]
             disp = f"{w}x{h} {display['driver'].upper()}, {bus_name}" + (f", {mm_w}x{mm_h} mm" if mm_w else "")
@@ -1363,6 +1377,8 @@ def generated_texts(root, boards, modules):
     for board in boards + modules:
         texts[root / "boards" / board["name"] / f"{board['name']}.c"] = gen_c(board)
         texts[root / "boards" / board["name"] / "board.cmake"] = gen_cmake(board)
+    for board in boards:
+        texts[root / "boards" / board["name"] / "display.cmake"] = gen_display_cmake(board)
     texts[root / "boards" / "boards.cmake"] = gen_boards_cmake(boards, modules)
     texts[root / "catalog" / CATALOG_INDEX] = gen_catalog_index(root)
     texts[root / "Kconfig"] = gen_kconfig(boards, modules)
@@ -1406,6 +1422,7 @@ def main():
     glue_dir.mkdir(parents=True, exist_ok=True)
     (glue_dir / f"{board['name']}.c").write_text(gen_c(board))
     (glue_dir / "board.cmake").write_text(gen_cmake(board))
+    (glue_dir / "display.cmake").write_text(gen_display_cmake(board))
     print(f"{glue_dir}: the glue of {board['name']} generated (Kconfig and the lists: --all)")
     return 0
 

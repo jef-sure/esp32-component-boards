@@ -17,7 +17,8 @@ Reads `catalog/boards/*/board.json` and `catalog/modules/*/module.json`, merges
 them with the catalog, applies `catalog/rules.json`, refuses what it cannot make glue for (see
 [data-format.md](data-format.md)), and writes:
 
-- `boards/<board>/<board>.c` and `board.cmake` for every board and module;
+- `boards/<board>/<board>.c` and `board.cmake` for every board and module, `display.cmake`
+  for every board;
 - `boards/boards.cmake`: the lists the component's `CMakeLists.txt` compiles by;
 - `Kconfig`: the choice, the modules' options, the hidden symbols;
 - the `dependencies:` of `idf_component.yml`, between `# boards: dependencies
@@ -58,7 +59,12 @@ together. Seconds, no ESP-IDF; the real check remains the build in CI.
 python3 tools/board_pins.py cyd_s028r           # GPIO -> owner, conflicts marked
 python3 tools/board_pins.py cyd_s028r --tree    # chip -> buses -> devices -> pins
 python3 tools/board_pins.py --all               # every board's conflicts, for CI
+python3 tools/board_pins.py jc1060p470c --display  # 1024x600 154x86: pixels and mm, as shown
 ```
+
+`--display` prints what `BOARD_PIXELS` and `BOARD_MM` hold, for a Makefile that has no
+CMake, as the host build of a game: `HOST_DISPLAY := $(shell python3 .../board_pins.py
+jc1060p470c --display)`. A board with no pixel display prints nothing and exits with 1.
 
 The map the checks are made on, for a human to look at: every GPIO the data
 names, who owns it and in which direction, with *TWO OWNERS*, *INPUT ONLY,
@@ -262,7 +268,7 @@ is built against and requires, from the tags of git the versions the registry ha
 
 ## The page
 
-`editor/index.html` answers what to build and on what, and edits the files of the catalog. It needs no
+`editor/index.html` shows what to build and on what, and edits the files of the catalog. It needs no
 build and no network, only a static server from the root of the repository: Live Server of VS Code, or
 
 ```sh

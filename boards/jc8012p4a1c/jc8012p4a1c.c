@@ -20,10 +20,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* Guition JC8012P4A1C: 10.1-inch 800x1280 JD9365 on MIPI-DSI (lying 1280x800), GSL3680 touch (firmware written into it at start), ES8311 sound. */
+/* Guition JC8012P4A1C: 10.1-inch 800x1280 JD9365 on MIPI-DSI (shown 1280x800), GSL3680 touch (firmware written into it at start), ES8311 sound. */
 
 /* The buses of the board. */
-static const struct board_i2c_pins board_i2c_pins_of = {.port = I2C_NUM_0, .sda = GPIO_NUM_7, .scl = GPIO_NUM_8}; /* i2c.i2c0 */
+static const struct board_i2c_pins board_i2c_buses[] = {
+    {.port = I2C_NUM_0, .sda = GPIO_NUM_7, .scl = GPIO_NUM_8}, /* i2c.i2c0 */
+};
 static const struct board_i2s_bus board_i2s_i2s0 = {.port = I2S_NUM_0, .mclk = GPIO_NUM_13, .bclk = GPIO_NUM_12, .ws = GPIO_NUM_10, .dout = GPIO_NUM_9, .din = GPIO_NUM_11};
 
 /* Every bus of the board, its numbers by name: the kinds the component sets up and the
@@ -55,11 +57,8 @@ bool board_spi_taken(int host)
     return false;
 }
 
-/* The board's I2C: one master, made by whoever asks first (board_glue_i2c). */
-const struct board_i2c_pins *board_i2c_pins(void)
-{
-    return &board_i2c_pins_of;
-}
+/* The board's I2C buses by port: board_glue_i2c makes the master of one at the first ask. */
+const struct board_i2c_table board_i2c_table = {.buses = board_i2c_buses, .count = sizeof(board_i2c_buses) / sizeof(board_i2c_buses[0])};
 
 /* lcd: a 800x1280 jd9365 on dsi.dsi0. */
 static dgx_bus_protocols_t *display0_bus(void)
@@ -81,7 +80,7 @@ const struct board_display_table board_display_table = {.panels = display_panels
 /* touch: gsl3680 on i2c.i2c0, the calibration of its measured board. */
 static const dgx_di_aim_t touch0_aims[] = {{.meant_x = 48, .meant_y = 48, .x = 74, .y = 859}, {.meant_x = 751, .meant_y = 48, .x = 77, .y = 69}, {.meant_x = 48, .meant_y = 1231, .x = 1588, .y = 871}, {.meant_x = 751, .meant_y = 1231, .x = 1591, .y = 81}, {.meant_x = 399, .meant_y = 48, .x = 76, .y = 451}, {.meant_x = 399, .meant_y = 1231, .x = 1590, .y = 463}, {.meant_x = 48, .meant_y = 640, .x = 835, .y = 865}, {.meant_x = 751, .meant_y = 640, .x = 839, .y = 75}, {.meant_x = 399, .meant_y = 640, .x = 837, .y = 457}};
 static const struct board_touch_calibration touch0_calibrated = {.aims = touch0_aims, .count = 9, .width = 800, .height = 1280, .blink_ms = 22, .gap_ms = 0, .placeholder = false};
-static const struct board_touch_panel touch0_panel = {.x_max = 1664, .y_max = 896, .rst = GPIO_NUM_22, .irq = GPIO_NUM_21, .fingers = 5};
+static const struct board_touch_panel touch0_panel = {.x_max = 1664, .y_max = 896, .rst = GPIO_NUM_22, .irq = GPIO_NUM_21, .i2c_port = I2C_NUM_0, .fingers = 5};
 static dgx_di_gsl3680_t touch0_device;
 
 static bool touch0_start(int index, const struct board_display *display, struct board_touch *out)

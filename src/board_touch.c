@@ -13,7 +13,7 @@ bool board_touch_start_at(int index, const struct board_display *display, struct
     if (index < 0 || index >= board_touch_table.count) return false;
     const struct board_touch_entry *entry   = &board_touch_table.entries[index];
     struct board_touch             *started = &board_touch_table.started[index];
-    if (display && display->name && strcmp(display->name, entry->over) != 0) return false; /* the display it lies over */
+    if (display && display->name && strcmp(display->name, entry->over) != 0) return false; /* the display it covers */
     if (!started->name) {
         if (!entry->start(index, display, started)) return false;
         started->name  = entry->name;

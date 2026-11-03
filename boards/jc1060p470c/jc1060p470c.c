@@ -25,7 +25,9 @@
 /* Guition JC1060P470C: 7-inch 1024x600 JD9165 on MIPI-DSI, GT911 touch, ES8311 sound: an ESP32-P4 with Wi-Fi and BLE in an ESP32-C6 on the same module. */
 
 /* The buses of the board. */
-static const struct board_i2c_pins board_i2c_pins_of = {.port = I2C_NUM_0, .sda = GPIO_NUM_7, .scl = GPIO_NUM_8}; /* i2c.i2c0 */
+static const struct board_i2c_pins board_i2c_buses[] = {
+    {.port = I2C_NUM_0, .sda = GPIO_NUM_7, .scl = GPIO_NUM_8}, /* i2c.i2c0 */
+};
 static const struct board_i2s_bus board_i2s_i2s0 = {.port = I2S_NUM_0, .mclk = GPIO_NUM_13, .bclk = GPIO_NUM_12, .ws = GPIO_NUM_10, .dout = GPIO_NUM_9, .din = GPIO_NUM_48};
 
 /* Every bus of the board, its numbers by name: the kinds the component sets up and the
@@ -57,11 +59,8 @@ bool board_spi_taken(int host)
     return false;
 }
 
-/* The board's I2C: one master, made by whoever asks first (board_glue_i2c). */
-const struct board_i2c_pins *board_i2c_pins(void)
-{
-    return &board_i2c_pins_of;
-}
+/* The board's I2C buses by port: board_glue_i2c makes the master of one at the first ask. */
+const struct board_i2c_table board_i2c_table = {.buses = board_i2c_buses, .count = sizeof(board_i2c_buses) / sizeof(board_i2c_buses[0])};
 
 /* lcd: a 1024x600 jd9165 on dsi.dsi0. */
 static dgx_bus_protocols_t *display0_bus(void)
@@ -83,7 +82,7 @@ const struct board_display_table board_display_table = {.panels = display_panels
 /* touch: gt911 on i2c.i2c0, the calibration of its measured board. */
 static const dgx_di_aim_t touch0_aims[] = {{.meant_x = 48, .meant_y = 48, .x = 58, .y = 67}, {.meant_x = 975, .meant_y = 48, .x = 976, .y = 60}, {.meant_x = 48, .meant_y = 551, .x = 56, .y = 560}, {.meant_x = 975, .meant_y = 551, .x = 974, .y = 553}, {.meant_x = 512, .meant_y = 48, .x = 517, .y = 63}, {.meant_x = 512, .meant_y = 551, .x = 516, .y = 556}, {.meant_x = 48, .meant_y = 300, .x = 57, .y = 311}, {.meant_x = 975, .meant_y = 300, .x = 975, .y = 304}, {.meant_x = 512, .meant_y = 300, .x = 517, .y = 307}};
 static const struct board_touch_calibration touch0_calibrated = {.aims = touch0_aims, .count = 9, .width = 1024, .height = 600, .blink_ms = 0, .gap_ms = 0, .placeholder = false};
-static const struct board_touch_panel touch0_panel = {.x_max = 1024, .y_max = 600, .rst = GPIO_NUM_22, .irq = GPIO_NUM_21, .fingers = 5};
+static const struct board_touch_panel touch0_panel = {.x_max = 1024, .y_max = 600, .rst = GPIO_NUM_22, .irq = GPIO_NUM_21, .i2c_port = I2C_NUM_0, .fingers = 5};
 static const uint8_t touch0_addresses[] = {0x5d, 0x14};
 static const struct board_touch_gt911 touch0_driver = {.panel = &touch0_panel, .addresses = touch0_addresses, .address_count = 2, .i2c_hz = 400000};
 static dgx_di_esp_lcd_touch_t touch0_device;

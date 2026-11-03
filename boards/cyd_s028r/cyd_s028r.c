@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* CYD (ESP32-2432S028R): 2.8-inch 320x240 ILI9341 on SPI2, lying landscape; a resistive XPT2046 touch on SPI3 (one finger); sound the chip's own 8-bit DAC on GPIO26 through the board's amplifier; the BOOT button; the microSD slot wired to pins no host is left for (spi3 is the touch's): kept as data for the program. */
+/* CYD (ESP32-2432S028R): 2.8-inch 320x240 ILI9341 on SPI2, shown landscape; a resistive XPT2046 touch on SPI3 (one finger); sound the chip's own 8-bit DAC on GPIO26 through the board's amplifier; the BOOT button; the microSD slot wired to pins no host is left for (spi3 is the touch's): kept as data for the program. */
 
 /* The buses of the board. */
 static const struct board_spi_bus board_spi_spi3 = {.host = SPI3_HOST, .mosi = GPIO_NUM_32, .miso = GPIO_NUM_39, .sclk = GPIO_NUM_25, .hz = 1000000};
@@ -63,10 +63,7 @@ bool board_spi_taken(int host)
 }
 
 /* The board wires no I2C bus: nothing for board_glue_i2c to make. */
-const struct board_i2c_pins *board_i2c_pins(void)
-{
-    return NULL;
-}
+const struct board_i2c_table board_i2c_table = {.count = 0};
 
 /* lcd: a 240x320 ili9341 on spi.spi2. */
 static dgx_bus_protocols_t *display0_bus(void)
@@ -88,7 +85,7 @@ const struct board_display_table board_display_table = {.panels = display_panels
 /* touch: atanisoft/esp_lcd_touch_xpt2046 on spi.spi3, the calibration of its measured board. */
 static const dgx_di_aim_t touch0_aims[] = {{.meant_x = 30, .meant_y = 30, .x = 3432, .y = 439}, {.meant_x = 209, .meant_y = 30, .x = 751, .y = 479}, {.meant_x = 30, .meant_y = 289, .x = 3398, .y = 3346}, {.meant_x = 209, .meant_y = 289, .x = 702, .y = 3328}, {.meant_x = 119, .meant_y = 30, .x = 2064, .y = 464}, {.meant_x = 119, .meant_y = 289, .x = 2037, .y = 3370}, {.meant_x = 30, .meant_y = 160, .x = 3395, .y = 1907}, {.meant_x = 209, .meant_y = 160, .x = 656, .y = 1874}, {.meant_x = 119, .meant_y = 160, .x = 2081, .y = 1902}};
 static const struct board_touch_calibration touch0_calibrated = {.aims = touch0_aims, .count = 9, .width = 240, .height = 320, .blink_ms = 101, .gap_ms = 0, .placeholder = false};
-static const struct board_touch_panel touch0_panel = {.x_max = 4096, .y_max = 4096, .rst = GPIO_NUM_NC, .irq = GPIO_NUM_36, .fingers = 1};
+static const struct board_touch_panel touch0_panel = {.x_max = 4096, .y_max = 4096, .rst = GPIO_NUM_NC, .irq = GPIO_NUM_36, .i2c_port = -1, .fingers = 1};
 static const struct board_touch_spi touch0_driver = {.panel = &touch0_panel, .host = SPI3_HOST, .cs = GPIO_NUM_33, .hz = 1000000, .create = esp_lcd_touch_new_spi_xpt2046};
 static dgx_di_esp_lcd_touch_t touch0_device;
 

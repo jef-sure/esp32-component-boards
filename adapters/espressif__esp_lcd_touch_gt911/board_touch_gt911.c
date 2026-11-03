@@ -8,9 +8,9 @@ static const char *TAG = "board";
 
 esp_lcd_touch_handle_t board_glue_touch_gt911_new(const struct board_touch_gt911 *gt911)
 {
-    i2c_master_bus_handle_t bus = board_glue_i2c();
-    if (!bus) return NULL;
     const struct board_touch_panel *touch = gt911->panel;
+    i2c_master_bus_handle_t         bus   = board_glue_i2c(touch->i2c_port);
+    if (!bus) return NULL;
     esp_lcd_touch_config_t    config = {.x_max = touch->x_max, .y_max = touch->y_max, .rst_gpio_num = (gpio_num_t)touch->rst, .int_gpio_num = (gpio_num_t)touch->irq};
     const bool                choose_address = touch->rst != GPIO_NUM_NC && touch->irq != GPIO_NUM_NC;
     esp_lcd_touch_handle_t    handle         = NULL;
@@ -26,7 +26,7 @@ esp_lcd_touch_handle_t board_glue_touch_gt911_new(const struct board_touch_gt911
         if (esp_lcd_touch_new_i2c_gt911(io, &config, &handle) != ESP_OK) esp_lcd_panel_io_del(io); /* off the bus: the next address */
     }
     if (!handle) {
-        ESP_LOGE(TAG, "esp_lcd_touch_new_i2c_gt911: no touch panel answers on the board's I2C bus");
+        ESP_LOGE(TAG, "esp_lcd_touch_new_i2c_gt911: no touch panel found on the board's I2C bus");
     }
     return handle;
 }

@@ -130,6 +130,12 @@ snippet above only sets the variable when none is given.
   of DGX.
 - The glue of the chosen board, compiled into the component by
   `CONFIG_BOARD_<BOARD>`; its `board.cmake` names the components it needs.
+- The size of the primary display for the program's CMake, as shown: `BOARD_PIXELS`
+  (width and height) and `BOARD_MM` (in millimetres, `0 0` when the data has no size),
+  set by the component's `project_include.cmake`. `main/CMakeLists.txt` has them before
+  and after `idf_component_register`; in the early expansion of the requirements they
+  are empty, and so they are for a board with no pixel display. A game hands them to DGX
+  once: `dgx_fonts_board(PIXELS ${BOARD_PIXELS} MM ${BOARD_MM})`.
 
 The component manager evaluates its rules against the `sdkconfig`. When the
 project has none yet, the first `idf.py build` generates it from the defaults,

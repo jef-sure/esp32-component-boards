@@ -46,9 +46,9 @@ static void sound_release(void)
 bool board_glue_sound_es8311_start(int index, const struct board_sound_es8311 *codec, board_sound_source_t source)
 {
     if (speaker) return true;
-    i2c_master_bus_handle_t i2c = board_glue_i2c();
+    i2c_master_bus_handle_t i2c = board_glue_i2c(codec->i2c_port);
     if (!i2c) {
-        ESP_LOGE(TAG, "board_glue_i2c: no I2C bus for the codec");
+        ESP_LOGE(TAG, "board_glue_i2c: no I2C bus on port %d for the codec", codec->i2c_port);
         return false;
     }
     const struct board_i2s_bus *bus  = codec->i2s;

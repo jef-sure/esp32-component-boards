@@ -1,0 +1,5 @@
+{
+    "title": "A chip with one SPI host for the program: two readers share it, and the kit says why",
+    "answers": {"board": "esp32_c3_zero", "blocks": [{"role": "nfc", "name": "nfc_in"}, {"role": "nfc", "name": "nfc_out"}]},
+    "says": "nfc_in, nfc_out share SPI2"
+}

@@ -1,0 +1,5 @@
+{
+    "title": "Two readers on SPI each take a host of their own while the chip has one, so their tasks run apart",
+    "answers": {"blocks": [{"role": "nfc", "name": "nfc_in"}, {"role": "nfc", "name": "nfc_out"}]},
+    "says": "nfc_in, nfc_out: each on an SPI host of its own"
+}

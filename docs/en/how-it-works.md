@@ -8,7 +8,7 @@ way they are.
 ## The data
 
 `catalog/boards/<board>/board.json` is the only place a board is described; what
-its chips are lies in `catalog/devices/` and `catalog/mcu/`, under it. It
+its chips are is described in `catalog/devices/` and `catalog/mcu/`, under it. It
 names the chip, the buses the board wires (each by the host or port of the
 chip it claims), and the devices on those buses: the display, the touch panel,
 the sound, the button, the SD slot. A device references a bus by name and
@@ -31,13 +31,16 @@ defaults. See [choosing-a-board.md](choosing-a-board.md).
 
 `tools/boards_gen.py` reads every `board.json`, checks it (unknown driver,
 missing pin, a bus the display references but the board does not wire, pixels
-and millimetres lying different ways) and writes:
+and millimetres in different orientations) and writes:
 
 - `boards/<board>/<board>.c`: the glue. It defines **every** function of
   `boards.h`. For the parts the board has, the function sets the hardware up
   from the data; for the parts it has not, the function returns `false`. So
   the contract of `boards.h` holds at link time on every board, and a program
   never needs `#if` on the board's name.
+- `boards/<board>/display.cmake`: the primary display as shown, `BOARD_PIXELS` and
+  `BOARD_MM`, which the component's `project_include.cmake` gives the CMake of a
+  program when the board is chosen (see [choosing-a-board.md](choosing-a-board.md)).
 - `boards/<board>/board.cmake`: the components the glue needs, derived from
   what the board has (`esp_driver_spi`, `jef-sure__dgx`, `espressif__esp_codec_dev`, ...).
   They are added after `idf_component_register`, as optional requirements
@@ -95,12 +98,10 @@ The component's `CMakeLists.txt` compiles only the chosen board's glue, by
   gives and shared by the touch panel, the codec and a character display module.
 - `board_spi.c`: the SPI hosts the component sets up.
 - `board_sound.c`: the task that paces samples to the output of the board.
-- `board_touch_fw.c`: the weak `board_touch_firmware()` that returns `false`.
-  A program that embeds the firmware of a GSL3680 defines the strong one. Weak
-  here and strong in the program's own component is safe: they are in
-  different archives. Inside this component nothing is weak, because a weak
-  symbol in one object of a static library does not reliably yield to a strong
-  one in another object of the same library.
+- `board_touch_fw.c`: `board_touch_firmware_set()`, which keeps the firmware of a
+  GSL3680 the program gives. Nothing in this component is weak: a strong definition
+  of the program in a file linked by nothing else loses to a weak one of a static
+  library, so the program gives the bytes by a call.
 
 ## The adapters
 

@@ -33,7 +33,7 @@ idf_component_register(SRCS "main.c"
 
 ESP-IDF places the file in flash with the symbols
 `_binary_jc8012p4a1c_touch_fw_start` and `_end`. In the program, define the
-hook the component declares in `boards.h`:
+bytes to the component before the touch starts:
 
 ```c
 #include "boards.h"
@@ -41,20 +41,21 @@ hook the component declares in `boards.h`:
 extern const uint8_t touch_fw_start[] asm("_binary_jc8012p4a1c_touch_fw_start");
 extern const uint8_t touch_fw_end[] asm("_binary_jc8012p4a1c_touch_fw_end");
 
-bool board_touch_firmware(const uint8_t **start, size_t *size)
+void app_main(void)
 {
-    *start = touch_fw_start;
-    *size  = (size_t)(touch_fw_end - touch_fw_start);
-    return true;
+    board_touch_firmware_set(touch_fw_start, (size_t)(touch_fw_end - touch_fw_start));
+    /* then board_display_init, board_touch_start, as for any board */
 }
 ```
 
-The component's own `board_touch_firmware` is weak and returns `false`; the
-program's strong definition takes its place at link. The glue of the board
-calls it at `board_touch_start`, hands the bytes to DGX-DI's GSL3680 driver,
-which writes them into the chip.
+The glue of the board takes them at `board_touch_start` and hands them to
+DGX-DI's GSL3680 driver, which writes them into the chip. Without the call the
+board runs and its touch stays off, and `board_touch_start` says so in the log.
+It is a call, not a function the program defines in place of the component's:
+a strong definition in a file the program links by nothing else loses to a weak
+one, and the touch would stay off with no word.
 
-A program built for several boards keeps the file and the function under a
+A program built for several boards keeps the file and the call under a
 condition, so the CYD S028R build does not look for a file it has not:
 
 ```cmake
@@ -67,4 +68,4 @@ if(TOUCH_FW)
 endif()
 ```
 
-and `#ifdef HAVE_TOUCH_FW` around the function in C.
+and `#ifdef HAVE_TOUCH_FW` around the call in C.

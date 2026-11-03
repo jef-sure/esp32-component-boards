@@ -7,7 +7,7 @@
     "maker": "jingcai",
     "part": "ESP32-2432S028R",
     "revision": "V0.1",
-    "description": "2.8-inch 320x240 ILI9341 on SPI2, lying landscape; a resistive XPT2046 touch on SPI3 (one finger); sound the chip's own 8-bit DAC on GPIO26 through the board's amplifier; the BOOT button; the microSD slot wired to pins no host is left for (spi3 is the touch's): kept as data for the program",
+    "description": "2.8-inch 320x240 ILI9341 on SPI2, shown landscape; a resistive XPT2046 touch on SPI3 (one finger); sound the chip's own 8-bit DAC on GPIO26 through the board's amplifier; the BOOT button; the microSD slot wired to pins no host is left for (spi3 is the touch's): kept as data for the program",
     "notes": [
         "One product page sells three kinds of this board with the same pins: ILI9341, ILI9341 with another init sequence, ST7789. This data was tried with the ILI9341 driver of DGX.",
         "The reset of the panel is wired to EN: no GPIO resets it alone.",

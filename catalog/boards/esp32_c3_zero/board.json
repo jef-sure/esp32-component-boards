@@ -78,7 +78,7 @@
             "by": "rssi_probe on Anton's desk, one access point on channel 1, 60 s each",
             "unit": "MAC 8c:d0:b2:a8:e0:b1",
             "date": "2026-11-02",
-            "notes": "Median RSSI on its pins, face down: -60 dBm at 0 and -64 at 90 degrees; lying face up on the desk: -64 at 0 degrees."
+            "notes": "Median RSSI on its pins, face down: -60 dBm at 0 and -64 at 90 degrees; face up, flat on the desk: -64 at 0 degrees."
         }
     }
 }

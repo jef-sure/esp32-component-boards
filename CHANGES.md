@@ -18,10 +18,9 @@ committed, a program that asks by kind.
   fails when any of them differs from the data.
 - The contract of `boards.h` holds at link on every board: the glue defines
   every function, those for parts the board has not return `false`.
-- `board_display_orientation` turns the display and keeps the size as it lies;
+- `board_display_orientation` turns the display and gives the size as shown;
   `board_character_display_init` for an HD44780 on the board or as a module;
-  `board_touch_firmware` as the hook a program defines to give the GSL3680 its
-  firmware; `board_sound_source` to change the source of the sound.
+  `board_touch_firmware_set` for a program to give the GSL3680 its firmware; `board_sound_source` to change the source of the sound.
 - The CYD S028R as it is: the XPT2046 touch on its own SPI3 (pins 25, 32, 39, cs 33,
   irq 36) through `atanisoft/esp_lcd_touch_xpt2046`, the speaker on the DAC at
   GPIO 26 fed by DMA (`dac_continuous`, which ESP-IDF 6 still has), the BOOT
@@ -136,7 +135,7 @@ committed, a program that asks by kind.
 - A kit says what its board holds and nobody asked for, and such a part counts after the modules and
   before the wires, so a display does not come first for one wire less. `"used": false` on a device of a
   project: its pins stay taken, no library comes for it, its `board_*_init` returns false. A kit sets it on
-  what was not asked for, but not on the display a touch that was asked for lies over.
+  what was not asked for, but not on the display under a touch that was asked for.
 - `tools/import_board_manager.py` takes the boards of esp_board_manager packs into `imported/`, a tree the checks
   read after `catalog/`, with no glue and no build. It gives no value a pack does not, takes no DSI timings and
   writes no `shared_pins`. `lanes` of a CSI bus and `sample_rate` of a sound are no longer required by the format.
@@ -167,7 +166,10 @@ committed, a program that asks by kind.
 - A kit names the audited libraries that fit its platform and bus, in order, with no counts: a library answers for what it
   requires. What was found reaches the model through `library_audits` of `boards_mcp.py`.
 - A chip goes first on the bus its library was tried on, and a kit says so of any other.
-- An SPI host takes six devices in the solver, as in `spi_master.c`: the seventh goes on a second host, with lines of its own.
+- SPI parts each take a host of their own while the chip has a free one and the pins for it, so their tasks run apart
+  (Anton: the terminal and dotview-clock are built so); a host is shared when none is left, up to six devices as in
+  `spi_master.c`, and the kit says which. A kit opens a second I2C port when the bus of the board does not come out:
+  the JC4827W543C takes a CO2 sensor on GPIO 6 and 7. The I2C ports of a chip in catalog/mcu are its HP ports.
 - A display chip says its variant, so a board with a TFT is no answer to a request for an OLED or for shift registers. A variant
   with a way of its own, as a chain of shift registers, a photoresistor on ADC1 or a button on a GPIO, needs no part: the kit
   gives it the lines, and chains share their data and clock in `shared_pins`. `gpio.adc1` of a chip comes from ESP-IDF.
@@ -225,6 +227,20 @@ committed, a program that asks by kind.
 - The page: the button that pins is `pin`, not `fix`; the lines of the ranking are notes and stay out of the README of a
   project; the hint about Chromium is not shown in Chromium; an answer of a block to a question of another variant does not
   act; `within` reads `!=`.
+- A board may name several I2C buses, one a port, and the glue makes a master on each at the first ask. The program gets
+  it with `board_i2c(port)` and adds its devices on it, or makes its own on a port `board_i2c_taken` reports free:
+  ESP-IDF takes one master on a port. A touch panel, a codec and a module take the port of their own bus. The master is
+  made under a lock, so a program task and the start of the touch panel asking at once get the same one.
+- The firmware of a GSL3680 is given by `board_touch_firmware_set()` before `board_touch_start`, no longer by a weak
+  `board_touch_firmware()` the program redefines: a definition in a file the program links by nothing else lost to the
+  weak one, and the touch of the 10.1-inch board stayed off with no word (found by the audit of 2026-11-03).
+- The CMake of a program gets the primary display of the board chosen as shown: `BOARD_PIXELS` and `BOARD_MM`, from
+  `boards/<board>/display.cmake`, which the generator makes from the data, through `project_include.cmake` of the
+  component, for a board of the catalog or of `components/local-boards`. They are set before `idf_component_register`
+  and empty in the early expansion of the requirements (ESP-IDF 6.1 and 5.5.5). `board_pins.py <board> --display`
+  prints the same for a Makefile. The four boards dgx-ge has give the numbers its own `board.cmake` writes by hand.
+- Comments, logs and docs say what the hardware is and does, not what it "answers" or how it "lies": a display has an
+  orientation, a touch panel covers a display, a log says "no touch panel found" (the audit of 2026-11-03, item 5.12).
 - What a board has and nobody asked for weighs the lowest price by the piece: of its chip, from `price` of its entry in
   catalog/devices, else of the cheapest chip of its role and variant, else of the cheapest module of its role, class or of all.
   A price of nothing is no price, and a part weighs at least a cent (Anton, 2026-11-03). One LED of a board is cents on every

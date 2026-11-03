@@ -19,7 +19,7 @@
 /* The character display: a 20x4 hd44780 on i2c.i2c0. */
 static lcd_bus_hd44780_t *character_bus(void)
 {
-    i2c_master_bus_handle_t bus = board_glue_i2c();
+    i2c_master_bus_handle_t bus = board_glue_i2c(I2C_NUM_0);
     return bus ? lcd_bus_pcf8574_i2c_create_on_bus(bus, 0x27, 0) : NULL;
 }
 

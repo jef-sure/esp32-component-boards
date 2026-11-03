@@ -91,7 +91,7 @@
             "by": "rssi_probe on Anton's desk, one access point on channel 1, 60 s each",
             "unit": "MAC ac:27:6e:ce:c8:88",
             "date": "2026-11-02",
-            "notes": "Median RSSI on foam, 0 degrees: -64 dBm; lying on the desk: -66 at 0 and -70 at 90 degrees. In the same place an ESP32 DevKit with an ESP-WROOM-32 on its pins gave -63 at 0 degrees, an ESP32-C6 Super Mini on foam -59 and -70."
+            "notes": "Median RSSI on foam, 0 degrees: -64 dBm; flat on the desk: -66 at 0 and -70 at 90 degrees. In the same place an ESP32 DevKit with an ESP-WROOM-32 on its pins gave -63 at 0 degrees, an ESP32-C6 Super Mini on foam -59 and -70."
         }
     }
 }

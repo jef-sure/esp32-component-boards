@@ -25,7 +25,7 @@ esp_lcd_touch_handle_t board_glue_touch_spi_new(const struct board_touch_spi *sp
     esp_lcd_touch_handle_t       handle = NULL;
     err                                 = spi->create(io, &panel, &handle);
     if (err != ESP_OK || !handle) {
-        ESP_LOGE(TAG, "esp_lcd_touch_new_spi: %s: no touch panel answers on the board's SPI bus", esp_err_to_name(err));
+        ESP_LOGE(TAG, "esp_lcd_touch_new_spi: %s: no touch panel found on the board's SPI bus", esp_err_to_name(err));
         esp_lcd_panel_io_del(io);
         return NULL;
     }

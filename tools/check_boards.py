@@ -55,7 +55,7 @@ API = (
     "const struct board_spi_bus *board_spi_bus(int host)",
     "bool board_spi_taken(int host)",
     "bool board_bus_get(const char *bus, const char *field, long *out)",
-    "const struct board_i2c_pins *board_i2c_pins(void)",
+    "const struct board_i2c_table board_i2c_table",
     "const struct board_data board_data =",
 )
 MODULE_API = ("bool board_character_display_init(struct board_character_display *out)",)

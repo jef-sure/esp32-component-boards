@@ -6,7 +6,7 @@
     "title": "Guition JC8012P4A1C",
     "maker": "guition",
     "part": "JC8012P4A1C",
-    "description": "10.1-inch 800x1280 JD9365 on MIPI-DSI (lying 1280x800), GSL3680 touch (firmware written into it at start), ES8311 sound",
+    "description": "10.1-inch 800x1280 JD9365 on MIPI-DSI (shown 1280x800), GSL3680 touch (firmware written into it at start), ES8311 sound",
     "notes": [
         "BOOT (GPIO35) is under the cover.",
         "The nets named ES7210_* on the schematic are lines of the ES8311: its sheets have no ES7210 chip.",
@@ -85,7 +85,7 @@
             "covers": ["devices.rtc"],
             "by": "a test firmware",
             "date": "2026-10-31",
-            "notes": "It answers at 0x32 and the seconds advance. VLF is set: with no backup cell the time is lost at power off."
+            "notes": "It responds at 0x32 and the seconds advance. VLF is set: with no backup cell the time is lost at power off."
         },
         "power": {
             "level": "schematic",

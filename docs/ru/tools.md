@@ -17,7 +17,8 @@ python3 tools/boards_gen.py cyd_s028r      # one board's glue and board.cmake on
 каталог, применяет `catalog/rules.json`, отказывается от того, для чего не может
 сделать клей (см. [data-format.md](data-format.md)), и записывает:
 
-- `boards/<board>/<board>.c` и `board.cmake` для каждой платы и модуля;
+- `boards/<board>/<board>.c` и `board.cmake` для каждой платы и модуля, `display.cmake`
+  для каждой платы;
 - `boards/boards.cmake`: списки, по которым компилирует `CMakeLists.txt` компонента;
 - `Kconfig`: choice, опции модулей, скрытые символы;
 - `dependencies:` в `idf_component.yml`, между `# boards: dependencies
@@ -59,7 +60,13 @@ GPIO только для ввода; у компонента, который н�
 python3 tools/board_pins.py cyd_s028r           # GPIO -> owner, conflicts marked
 python3 tools/board_pins.py cyd_s028r --tree    # chip -> buses -> devices -> pins
 python3 tools/board_pins.py --all               # every board's conflicts, for CI
+python3 tools/board_pins.py jc1060p470c --display  # 1024x600 154x86: pixels and mm, as shown
 ```
+
+`--display` печатает то же, что содержат `BOARD_PIXELS` и `BOARD_MM`, для Makefile без
+CMake, например для сборки игры на компьютере: `HOST_DISPLAY := $(shell python3
+.../board_pins.py jc1060p470c --display)`. Плата без пиксельного дисплея ничего не
+печатает и выходит с кодом 1.
 
 Карта, по которой делаются проверки, — чтобы на неё смотрел человек: каждый
 GPIO, который называют данные, кто им владеет и в каком направлении, с
@@ -264,7 +271,7 @@ python3 tools/sync_versions.py
 
 ## Страница
 
-`editor/index.html` отвечает, что собрать и на чём, и правит файлы каталога. Ей не нужны ни сборка, ни
+`editor/index.html` показывает, что собрать и на чём, и правит файлы каталога. Ей не нужны ни сборка, ни
 сеть, только статический сервер из корня репозитория: Live Server из VS Code или
 
 ```sh

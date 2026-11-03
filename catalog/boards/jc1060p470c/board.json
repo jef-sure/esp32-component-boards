@@ -129,7 +129,7 @@
             "covers": ["devices.rtc"],
             "by": "a test firmware",
             "date": "2026-10-31",
-            "notes": "It answers at 0x32 and the seconds advance. VLF is set and the weekday is not valid: with no backup cell the time is lost at power off."
+            "notes": "It responds at 0x32 and the seconds advance. VLF is set and the weekday is not valid: with no backup cell the time is lost at power off."
         },
         "power": {
             "level": "schematic",

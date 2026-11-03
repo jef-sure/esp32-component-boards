@@ -24,17 +24,25 @@ struct board_data {
 };
 extern const struct board_data board_data;
 
-/* The pins of the board's I2C, from the data of the board: NULL when it has none. */
+/* The pins of an I2C bus of the board on a port, from the data of the board: NULL when it has none there. */
 struct board_i2c_pins {
     int port, sda, scl;
 };
-const struct board_i2c_pins *board_i2c_pins(void);
+struct board_i2c_table {
+    const struct board_i2c_pins *buses;
+    size_t                       count;
+};
+extern const struct board_i2c_table board_i2c_table; /* given by the glue of the board */
+const struct board_i2c_pins *board_i2c_pins(int port);
 
 /*
- * The I2C master of the board, made once and kept, shared by whoever needs it: the touch
- * panel, the codec, a character display module. NULL when the board has no I2C in its data.
+ * The I2C master of the board on a port, made once and kept, shared by whoever needs it: the touch
+ * panel, the codec, a character display module, the program. NULL when the board has no I2C there.
  */
-i2c_master_bus_handle_t board_glue_i2c(void);
+i2c_master_bus_handle_t board_glue_i2c(int port);
+
+/* The firmware of the touch panel the program gave with board_touch_firmware_set; false when it gave none. */
+bool board_glue_touch_firmware(const uint8_t **start, size_t *size);
 
 /* Sets up an SPI host once, with DMA: a touch panel on it, a display sharing it. */
 bool board_glue_spi_host(const struct board_spi_bus *bus);
@@ -42,14 +50,15 @@ bool board_glue_spi_host(const struct board_spi_bus *bus);
 /* A touch panel as its data says, for whatever drives it. x_max and y_max are counts: the data's largest coordinate plus one. */
 struct board_touch_panel {
     int x_max, y_max;
-    int rst, irq; /* GPIO_NUM_NC when not wired */
+    int rst, irq;  /* GPIO_NUM_NC when not wired */
+    int i2c_port;  /* the port of its I2C bus; -1 for a panel on SPI */
     int fingers;
 };
 
 /* The touch panels of the board: the glue gives the table, src/board_touch.c starts them on demand. */
 struct board_touch_entry {
     const char *name;
-    const char *over; /* the display it lies over */
+    const char *over; /* the display it covers */
     bool (*start)(int index, const struct board_display *display, struct board_touch *out);
 };
 struct board_touch_table {

@@ -455,27 +455,36 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
     }
 
     // The bus of a kind to join: one the board has and a display does not hold, or a new one on a free host.
-    function busOf(board, kind, pins, added, hz, alone, kept, silent, placed) {
+    function busOf(board, kind, pins, added, hz, alone, kept, silent, placed, spread) {
         const spec = KIT_BUSES[kind];
         const room = (own) => !spec.most || Object.values(board.devices).filter((device) => `${kind}.${own}` in (device.on || {})).length + (placed[own] ?? 0) < spec.most;
         const named = Object.keys(board.buses?.[kind] || {});
         const held = (own) => Object.values(board.devices).some((device) => `${kind}.${own}` in (device.on || {}) && (spec.fixed || isDisplay(device)));
         if (spec.fixed) return named.find((own) => !held(own)) ?? { problem: t('no free {0} bus on this board', kind.toUpperCase()) };
         const sharing = !spec.alone && !alone;
+        // a host of its own: a free host of the chip, its lines from the free pins
+        const fresh = () => {
+            const kinds = Object.keys(KIT_BUSES).filter((other) => KIT_BUSES[other].host === spec.host);
+            const taken = new Set(kinds.flatMap((other) => [...Object.keys(board.buses?.[other] || {}), ...Object.keys(added[other] || {})]));
+            const own = hostNames(board, spec.host).find((name) => !taken.has(name));
+            if (!own) return { problem: t('no free {0} host on this board: {1}', spec.host.toUpperCase(), [...taken].join(', ') || t('it has none')) };
+            const lines = spec.lines.filter((line) => !(silent && line === 'miso')); // a device with no line back leaves it unwired
+            if (pins.length < lines.length + (spec.select ? 1 : 0)) return { problem: shortOfPins(lines.length, pins.length) };
+            added[kind] = { ...added[kind], [own]: { ...Object.fromEntries(spec.lines.map((line) => [line, lines.includes(line) ? pins.shift() : 'nc'])), ...(hz ? { hz } : {}) } };
+            if (alone) kept.add(own);
+            return own;
+        };
+        // SPI parts each take a host of their own while the chip has one, so their tasks run apart (Anton: the terminal and
+        // dotview-clock are built so); a host is shared when none is left or its pins are not there
+        if (kind === 'spi' && sharing && spread) {
+            const own = fresh();
+            if (typeof own === 'string') return own;
+        }
         const open = sharing && Object.keys(added[kind] || {}).find((own) => !kept.has(own) && room(own));
         if (open) return open;
         const shared = sharing && named.find((own) => !held(own) && reaches(board, kind, own) && room(own));
         if (shared) return shared;
-        if (kind === 'i2c' && named.length) return { problem: t('the I2C bus of this board does not come out, or a display holds it, and the glue makes one I2C master') };
-        const kinds = Object.keys(KIT_BUSES).filter((other) => KIT_BUSES[other].host === spec.host);
-        const taken = new Set(kinds.flatMap((other) => [...Object.keys(board.buses?.[other] || {}), ...Object.keys(added[other] || {})]));
-        const own = hostNames(board, spec.host).find((name) => !taken.has(name));
-        if (!own) return { problem: t('no free {0} host on this board: {1}', spec.host.toUpperCase(), [...taken].join(', ') || t('it has none')) };
-        const lines = spec.lines.filter((line) => !(silent && line === 'miso')); // a device with no line back leaves it unwired
-        if (pins.length < lines.length) return { problem: shortOfPins(lines.length, pins.length) };
-        added[kind] = { ...added[kind], [own]: { ...Object.fromEntries(spec.lines.map((line) => [line, lines.includes(line) ? pins.shift() : 'nc'])), ...(hz ? { hz } : {}) } };
-        if (alone) kept.add(own);
-        return own;
+        return fresh();
     }
 
     // How good the antenna of a radio of the board is by its design, 0 to 10, the best of the radios that give it; null when no data
@@ -518,7 +527,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
     }
 
     // A project of a board and the modules picked, or {problem} when the pins or the hosts run out.
-    function projectOf(name, board, picks, unused) {
+    function projectOf(name, board, picks, unused, spread = true) {
         // the pins a part of the person's own is soldered to are out of what the kit hands out
         const soldered = picks.flatMap((pick) => Object.values(pick.way?.fixed ?? {}));
         const pins = freePins(board).filter((pin) => !soldered.includes(pin));
@@ -543,7 +552,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
                 devices[pick.use] = { class: 'other', pins: { ...common, ...pick.way.fixed, ...Object.fromEntries(own.map((line, i) => [line, i < read.length ? read[i] : pins.shift()])) } };
                 if (!Object.keys(devices[pick.use].pins).length) delete devices[pick.use].pins;
                 if (pick.way.bus) {
-                    const bus = busOf(board, pick.way.bus, pins, buses, undefined, false, kept, false, placed);
+                    const bus = busOf(board, pick.way.bus, pins, buses, undefined, false, kept, false, placed, spread);
                     if (bus.problem) return bus;
                     placed[bus] = (placed[bus] ?? 0) + 1;
                     const wires = KIT_BUSES[pick.way.bus].select ? { cs: pins.shift() } : {};
@@ -561,7 +570,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
                 continue;
             }
             const alone = isDisplay(pick.module.device) && KIT_BUSES[pick.transport].select;
-            const own = busOf(board, pick.transport, pins, buses, pick.module.device.on?.[pick.transport]?.hz, alone, kept, alone && pick.module.device.logic === 'none', placed);
+            const own = busOf(board, pick.transport, pins, buses, pick.module.device.on?.[pick.transport]?.hz, alone, kept, alone && pick.module.device.logic === 'none', placed, spread);
             if (own.problem) return own;
             placed[own] = (placed[own] ?? 0) + 1;
             const wires = {};
@@ -629,7 +638,9 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         const problems = new Set();
         for (const transports of product(ways)) {
             const picks = picksFor(shortfalls, choice, transports);
-            const project = projectOf(name, board, picks, unused);
+            // SPI parts on hosts of their own first; when the pins or the hosts run out that way, the same parts sharing hosts
+            const apart = projectOf(name, board, picks, unused);
+            const project = apart.problem ? projectOf(name, board, picks, unused, false) : apart;
             if (project.problem) {
                 problems.add(project.problem);
                 continue;
@@ -1065,6 +1076,13 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             for (const item of modules) {
                 const entries = Object.values(catalog.modules[item.name].checked ?? {});
                 if (entries.some((entry) => entry.level === 'unchecked' && entry.covers?.includes('power'))) lines.push({ level: 'do', text: t('{0}: its supply and levels are not measured', item.title) });
+            }
+            // the SPI parts on hosts of their own run apart; those on one host wait for each other
+            const onSpi = Object.entries(project?.modules ?? {}).flatMap(([use, item]) => Object.keys(item.on ?? {}).filter((bus) => bus.startsWith('spi.')).map((bus) => ({ use, bus })));
+            if (onSpi.length > 1) {
+                const sharing = [...Map.groupBy(onSpi, (item) => item.bus)].filter(([, items]) => items.length > 1);
+                for (const [bus, items] of sharing) lines.push({ level: 'note', text: t('{0} share {1}: no free SPI host, or no pins for one, is left for them', items.map((item) => item.use).join(', '), bus.split('.')[1].toUpperCase()) });
+                if (!sharing.length) lines.push({ level: 'note', text: t('{0}: each on an SPI host of its own, so their tasks run apart', onSpi.map((item) => item.use).join(', ')) });
             }
             const libraries = librariesOf(resolved);
             // the versions that take the chip, narrowed by what the libraries of the kit are built against

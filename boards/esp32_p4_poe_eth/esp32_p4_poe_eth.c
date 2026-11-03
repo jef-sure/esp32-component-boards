@@ -18,7 +18,9 @@
 /* Waveshare ESP32-P4-POE-ETH: The ESP32-P4-ETH sold with a PoE module on its header H7. */
 
 /* The buses of the board. */
-static const struct board_i2c_pins board_i2c_pins_of = {.port = I2C_NUM_0, .sda = GPIO_NUM_7, .scl = GPIO_NUM_8}; /* i2c.i2c0 */
+static const struct board_i2c_pins board_i2c_buses[] = {
+    {.port = I2C_NUM_0, .sda = GPIO_NUM_7, .scl = GPIO_NUM_8}, /* i2c.i2c0 */
+};
 static const struct board_i2s_bus board_i2s_i2s0 = {.port = I2S_NUM_0, .mclk = GPIO_NUM_13, .bclk = GPIO_NUM_12, .ws = GPIO_NUM_10, .dout = GPIO_NUM_9, .din = GPIO_NUM_11};
 
 /* Every bus of the board, its numbers by name: the kinds the component sets up and the
@@ -50,11 +52,8 @@ bool board_spi_taken(int host)
     return false;
 }
 
-/* The board's I2C: one master, made by whoever asks first (board_glue_i2c). */
-const struct board_i2c_pins *board_i2c_pins(void)
-{
-    return &board_i2c_pins_of;
-}
+/* The board's I2C buses by port: board_glue_i2c makes the master of one at the first ask. */
+const struct board_i2c_table board_i2c_table = {.buses = board_i2c_buses, .count = sizeof(board_i2c_buses) / sizeof(board_i2c_buses[0])};
 
 const struct board_touch_table board_touch_table = {.count = 0};
 

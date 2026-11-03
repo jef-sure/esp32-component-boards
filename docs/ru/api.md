@@ -23,8 +23,8 @@ const struct board_info *board_info(void);
 
 ```c
 struct board_display {
-    int   width, height; /* as it lies, in pixels */
-    int   mm_w, mm_h;    /* as it lies, in millimetres; 0 when the data has no size */
+    int   width, height; /* as shown, in pixels */
+    int   mm_w, mm_h;    /* as shown, in millimetres; 0 when the data has no size */
     int   dir_x, dir_y;  /* BOARD_DIR_FORWARD: left to right, top to bottom; BOARD_DIR_BACKWARD: the other way */
     bool  swap_xy;
     const char *name; /* its name in the data, for the log */
@@ -41,7 +41,7 @@ bool board_display_orientation(struct board_display *display, int dir_x, int dir
 же дисплей. У дисплеев, которые данные объединяют в один экран (`display_groups`), есть
 свой номер: запуск по нему поднимает оба и отдаёт один широкий экран. Такой экран не
 поворачивается: `board_display_orientation` возвращает `false`, а у каждого из двух
-остаётся своя ориентация. `board_touch_start` принимает дисплей, над которым лежит тач,
+остаётся своя ориентация. `board_touch_start` принимает дисплей под тачем,
 и возвращает `false` для другого.
 
 `board_display_init` поднимает панель с включённой подсветкой, ориентированную
@@ -68,7 +68,7 @@ MIPI-DSI это `dgx_dsi_frame_us()`, чтобы задавать темп ри�
 board_display_orientation(&display, -display.dir_x, -display.dir_y, display.swap_xy);
 ```
 
-Миллиметры — это измеренный размер картинки как лежит: жесты DGX-DI и шрифты
+Миллиметры — это измеренный размер картинки в том виде, как она показана: жесты DGX-DI и шрифты
 DGX используют их, чтобы сантиметр был сантиметром на каждой плате.
 
 ## Символьный дисплей
@@ -105,7 +105,7 @@ dgx_di_pointer_t *board_dgx_di_pointer(const struct board_touch *touch);
 ```
 
 Указатель следует за ориентацией дисплея: после `board_display_orientation` его
-координаты — координаты дисплея как он лежит теперь. Задача, которая его
+координаты — координаты дисплея в его нынешней ориентации. Задача, которая его
 читает, — дело программы:
 
 ```c
@@ -127,13 +127,12 @@ for (;;) {
 Тач работает в обоих случаях, только неточно.
 
 ```c
-bool board_touch_firmware(const uint8_t **start, size_t *size);
+void board_touch_firmware_set(const uint8_t *start, size_t size);
 ```
 
-Хук для панели, которая не хранит собственной прошивки (GSL3680 10,1-дюймовой
-Guition): версия компонента слабая и возвращает `false`; программа, встраивающая
-прошивку, определяет эту функцию сама. См.
-[touch-firmware.md](touch-firmware.md).
+Прошивка панели, которая не хранит своей (GSL3680 10,1-дюймовой Guition):
+программа, встраивающая её, передаёт байты здесь, до `board_touch_start`. Без этого
+тач такой платы выключен. См. [touch-firmware.md](touch-firmware.md).
 
 ## Звук
 
@@ -185,6 +184,20 @@ bool board_bus_get(const char *bus, const char *field, long *out);
 `board_bus_get("sdio.sdio0", "clk", &pin)`
 читает любое число любой шины, которую называют данные, включая роды, которые
 компонент не настраивает.
+
+```c
+struct i2c_master_bus_t *board_i2c(int port);   /* i2c_master_bus_handle_t ESP-IDF */
+bool board_i2c_taken(int port);
+```
+
+`board_i2c(0)` возвращает мастер I2C платы на порту 0. Первый вызов из любой задачи
+создаёт его, следующие возвращают тот же мастер, которым пользуются и части платы на
+этой шине, например тач или кодек.
+Устройство, которое добавляет программа, садится на него через
+`i2c_master_bus_add_device`; второй геймпад с тем же адресом — на другой порт.
+ESP-IDF допускает один мастер на порт, поэтому программа создаёт свой мастер
+только на порту, который `board_i2c_taken` называет свободным. NULL, если на
+этом порту у платы нет шины или мастер не создаётся.
 
 ## Кнопки
 

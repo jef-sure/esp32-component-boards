@@ -42,20 +42,21 @@ ESP-IDF помещает файл во флеш с символами
 extern const uint8_t touch_fw_start[] asm("_binary_jc8012p4a1c_touch_fw_start");
 extern const uint8_t touch_fw_end[] asm("_binary_jc8012p4a1c_touch_fw_end");
 
-bool board_touch_firmware(const uint8_t **start, size_t *size)
+void app_main(void)
 {
-    *start = touch_fw_start;
-    *size  = (size_t)(touch_fw_end - touch_fw_start);
-    return true;
+    board_touch_firmware_set(touch_fw_start, (size_t)(touch_fw_end - touch_fw_start));
+    /* затем board_display_init, board_touch_start, как для любой платы */
 }
 ```
 
-Собственная `board_touch_firmware` компонента слабая и возвращает `false`;
-сильное определение программы занимает её место при компоновке. Клей платы
-вызывает её в `board_touch_start`, передаёт байты драйверу GSL3680 из DGX-DI,
-который записывает их в чип.
+Клей платы берёт их в `board_touch_start` и передаёт драйверу GSL3680 из DGX-DI,
+который записывает их в чип. Без этого вызова плата работает, тач выключен, и
+`board_touch_start` пишет об этом в лог. Это вызов, а не функция, которую программа
+определяет вместо функции компонента: сильное определение в файле, на который
+программа больше ничем не ссылается, проигрывает слабому, и тач остался бы
+выключенным без единого слова.
 
-Программа, собираемая для нескольких плат, держит файл и функцию под условием,
+Программа, собираемая для нескольких плат, держит файл и вызов под условием,
 чтобы сборка для CYD S028R не искала файл, которого у неё нет:
 
 ```cmake
@@ -68,4 +69,4 @@ if(TOUCH_FW)
 endif()
 ```
 
-и `#ifdef HAVE_TOUCH_FW` вокруг функции в C.
+и `#ifdef HAVE_TOUCH_FW` вокруг вызова в C.

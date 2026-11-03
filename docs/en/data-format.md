@@ -208,7 +208,7 @@ and both displays must have one depth. Each keeps its own bus and orientation:
 
 ### Touch
 
-`config.over` names the display the touch lies over, or `"none"`. The generator
+`config.over` names the display the touch covers, or `"none"`. The generator
 needs a display: `"none"` waits for DGX-DI. `x_max` and `y_max` are the largest
 raw coordinates, not their number; the calibration must have the same values and
 the size of the panel. See [calibration.md](calibration.md). `fingers` comes from the

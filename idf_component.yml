@@ -55,6 +55,7 @@ files:
   include:
     - "idf_component.yml"
     - "CMakeLists.txt"
+    - "project_include.cmake"
     - "Kconfig"
     - "include/**/*.h"
     - "src/**/*.c"

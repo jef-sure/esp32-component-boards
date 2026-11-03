@@ -33,7 +33,7 @@ static const struct board_i2s_bus board_i2s_i2s0 = {.port = I2S_NUM_0, .mclk = G
 /* Every bus of the board, its numbers by name: the kinds the component sets up and the
  * kinds it only keeps for the program, for a program that sets its own hardware up on the
  * board's wiring instead of copying pins. */
-static const struct board_bus_field board_bus_fields[] = {{"spi.spi3", "miso", 13}, {"spi.spi3", "mosi", 11}, {"spi.spi3", "sclk", 12}, {"i2s.i2s0", "bclk", 42}, {"i2s.i2s0", "dout", 41}, {"i2s.i2s0", "ws", 2}, {"qspi.spi2", "d0", 21}, {"qspi.spi2", "d1", 48}, {"qspi.spi2", "d2", 40}, {"qspi.spi2", "d3", 39}, {"qspi.spi2", "hz", 40000000}, {"qspi.spi2", "sclk", 47}, {"i2c.i2c0", "scl", 4}, {"i2c.i2c0", "sda", 8}, {"battery", "in", 5}, {"sd", "cs", 10}};
+static const struct board_bus_field board_bus_fields[] = {{"spi.spi3", "miso", 13}, {"spi.spi3", "mosi", 11}, {"spi.spi3", "sclk", 12}, {"i2s.i2s0", "bclk", 42}, {"i2s.i2s0", "dout", 41}, {"i2s.i2s0", "ws", 2}, {"qspi.spi2", "d0", 21}, {"qspi.spi2", "d1", 48}, {"qspi.spi2", "d2", 40}, {"qspi.spi2", "d3", 39}, {"qspi.spi2", "hz", 40000000}, {"qspi.spi2", "sclk", 47}, {"i2c.i2c0", "scl", 4}, {"i2c.i2c0", "sda", 8}, {"battery", "in", 5}, {"sd", "cs", 10}, {"sd", "host", SPI3_HOST}};
 const struct board_bus_table board_bus_table = {.fields = board_bus_fields, .count = sizeof(board_bus_fields) / sizeof(board_bus_fields[0])};
 
 /* The SPI buses open to the program's devices. A host with only a display on it is not one of them. */

@@ -85,6 +85,20 @@ python3 tools/board_select.py jc1060p470c --module lcd2004_pcf8574 --reset ~/myp
 `sdkconfig.old`, чтобы новые умолчания были прочитаны. См.
 [choosing-a-board.md](choosing-a-board.md).
 
+## board_project.py
+
+```sh
+python3 tools/board_project.py ~/my_game --board jc8012p4a1c
+python3 tools/board_project.py ~/terminal --board jc1060p470c --module lcd2004_pcf8574
+python3 tools/board_project.py ~/again --selection ~/old/selection.json
+```
+
+Новый проект на плате, выбранной вручную, без страницы: те же файлы, что страница пишет в новую папку (их
+перечисляет `editor/skeleton/files.json`, оба читают этот список), заполненные так же, и `selection.json` без
+ответов. Компонент берётся из git на коммите этой копии. `--selection` берёт плату и модули из `selection.json`.
+Папка пуста или содержит только `.git`, `.gitignore`, README или LICENSE; ничего в ней не заменяется. Следующая
+команда, которую он печатает, — та же, что в README проекта.
+
 ## board_bom.py
 
 ```sh

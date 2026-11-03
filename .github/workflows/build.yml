@@ -103,3 +103,30 @@ jobs:
           target: esp32s3
           path: examples/local_boards
           command: idf.py build
+
+  multi-board:
+    name: one program for two boards on ESP-IDF ${{ matrix.idf }}
+    needs: check
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        idf: [release-v5.5, v6.1]
+    steps:
+      - uses: actions/checkout@v4
+      - name: choose the boards
+        run: python3 tools/board_select.py cyd_s028r jc8012p4a1c examples/multi_board
+      - name: build for the CYD S028R
+        uses: espressif/esp-idf-ci-action@v1
+        with:
+          esp_idf_version: ${{ matrix.idf }}
+          target: esp32
+          path: examples/multi_board
+          command: idf.py -B build-cyd_s028r -D SDKCONFIG=build-cyd_s028r/sdkconfig -D BOARD=cyd_s028r build
+      - name: build for the JC8012P4A1C beside it
+        uses: espressif/esp-idf-ci-action@v1
+        with:
+          esp_idf_version: ${{ matrix.idf }}
+          target: esp32p4
+          path: examples/multi_board
+          command: idf.py -B build-jc8012p4a1c -D SDKCONFIG=build-jc8012p4a1c/sdkconfig -D BOARD=jc8012p4a1c build

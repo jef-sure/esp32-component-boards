@@ -244,6 +244,13 @@ committed, a program that asks by kind.
   references (the audit of 2026-11-03, 5.7). The glue gives tables only: `board_bus_get`, `board_spi_bus`,
   `board_spi_taken` and the functions of a display a board has not are written once in `src/` instead of being generated
   into every glue, and `CONFIG_BOARD_MODULE_CHARACTER_DISPLAY` is gone (5.10 in part, 5.20).
+- `tools/board_project.py DIR --board B [--module M]` writes a new project on a board chosen by hand, without the page:
+  the files of `editor/skeleton/files.json`, filled as the page fills them, and `selection.json` with no answers;
+  `--selection` takes the board and the modules of a `selection.json` back. The page reads the same list of files
+  (the audit of 2026-11-03, 1.3).
+- `board_bus_get` gives a device the component does not set up the bus it is on: `host` (as `SPI3_HOST`), `port` of
+  I2C or a UART, and `address` on I2C when the data gives one. A program took the readers of the terminal by their names
+  alone; before, it had to write the host in its code.
 - The SSD1351 OLED is in catalog/devices, from the driver of DGX. The glue of a board with a group of displays names
   the board in `board_data`, no longer its last group: a loop over the groups reused the name of the board.
 - `BOARD_PIXELS` and `BOARD_MM` of a board whose primary display is a group of two side by side are those of the

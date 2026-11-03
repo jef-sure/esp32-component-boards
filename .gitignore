@@ -6,6 +6,7 @@ examples/*/build*/
 examples/*/sdkconfig
 examples/*/sdkconfig.old
 examples/*/sdkconfig.defaults.board
+examples/multi_board/sdkconfig.defaults.*
 examples/*/managed_components/
 examples/*/dependencies.lock*
 examples/*/components/local-boards/CMakeLists.txt

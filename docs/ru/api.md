@@ -194,7 +194,18 @@ bool board_bus_get(const char *bus, const char *field, long *out);
 
 `board_spi_taken` говорит, занят ли хост какой-либо шиной платы, SPI или QSPI,
 так что можно найти свободный хост. `board_bus_get("nfc_in_nfc", "cs", &pin)` даёт линии
-устройства, которое компонент не настраивает, по его имени в данных.
+устройства, которое компонент не настраивает, по его имени в данных, и шину, на
+которой оно стоит: `"host"` (хост SPI, например `SPI3_HOST`, для `board_spi_bus`),
+`"port"` (I2C или UART) и `"address"` (7 бит, на I2C, если он есть в данных). Так
+программа берёт считыватель без единого пина платы в своём коде:
+
+```c
+long host, cs;
+const board_spi_bus_t *bus;
+if (board_bus_get("nfc_in_nfc", "host", &host) && board_bus_get("nfc_in_nfc", "cs", &cs) && (bus = board_spi_bus((int)host)))
+    reader = pn532_spi_init(bus->host, bus->sclk, bus->miso, bus->mosi, cs, 0);
+```
+
 `board_bus_get("sdio.sdio0", "clk", &pin)`
 читает любое число любой шины, которую называют данные, включая роды, которые
 компонент не настраивает.

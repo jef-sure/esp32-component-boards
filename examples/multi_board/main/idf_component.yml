@@ -1,0 +1,6 @@
+## The example takes the component it lies in by directory (EXTRA_COMPONENT_DIRS in the project's CMakeLists.txt),
+## so it names no dependency on it here. A project of its own names jef-sure/boards in this file, as the skeleton
+## of the page and tools/board_project.py write it.
+dependencies:
+  idf:
+    version: ">=5.5"

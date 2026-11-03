@@ -205,7 +205,18 @@ of the same address goes on the other port. ESP-IDF takes one master on a port, 
 program makes its own master only on a port `board_i2c_taken` reports free. NULL when
 the board names no bus on that port or the master cannot be made.
 `board_bus_get("nfc_in_nfc", "cs", &pin)` gives the lines of a device the component does
-not set up, by its name in the data.
+not set up, by its name in the data, and the bus it is on: `"host"` (an SPI host, as
+`SPI3_HOST`, for `board_spi_bus`), `"port"` (of I2C or a UART) and `"address"` (7 bits,
+on I2C, when the data gives it). A program so takes a reader with no pin of the board in
+its code:
+
+```c
+long host, cs;
+const board_spi_bus_t *bus;
+if (board_bus_get("nfc_in_nfc", "host", &host) && board_bus_get("nfc_in_nfc", "cs", &cs) && (bus = board_spi_bus((int)host)))
+    reader = pn532_spi_init(bus->host, bus->sclk, bus->miso, bus->mosi, cs, 0);
+```
+
 `board_bus_get("sdio.sdio0", "clk", &pin)` reads any number of any bus
 the data names, including the kinds the component does not set up.
 

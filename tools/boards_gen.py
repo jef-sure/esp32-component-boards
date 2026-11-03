@@ -135,11 +135,17 @@ def adapter_dir(record):
     return f"adapters/{record['owner']}__{record['name']}"
 
 
-def started(board):
-    """What the glue starts: for each device the library, its entry for the chip and the libraries that come with it."""
+def started_devices(board):
+    """What the glue starts, device by device: the device, its library and the libraries that come with it."""
     for device in (*(board.get("displays") or ()), *board["touches"], *board["sounds"]):
         record = resolve.library(device["library"])
-        yield record, device["entry"], [resolve.library(name) for name in (record.get("adapter") or {}).get("with", ())]
+        yield device, record, [resolve.library(name) for name in (record.get("adapter") or {}).get("with", ())]
+
+
+def started(board):
+    """What the glue starts: for each device the library, its entry for the chip and the libraries that come with it."""
+    for device, record, also in started_devices(board):
+        yield record, device["entry"], also
 
 
 def port_of(own, prefix):
@@ -247,9 +253,17 @@ def sound_part(name, device):
 
 
 def kept_numbers(device):
-    """The numbers of a device the component does not set up: its cs and its pins, for board_bus_get."""
+    """The numbers of a device the component does not set up, for board_bus_get: the host or port of its bus, its
+    address on I2C, its cs and its pins. A host is printed as its constant (SPI3_HOST), a port as its number."""
     numbers = {}
-    for connection in (device.get("on") or {}).values():
+    for bus_name, connection in (device.get("on") or {}).items():
+        kind, own = bus_parts(bus_name)
+        if kind in ("spi", "qspi") and own:
+            numbers["host"] = f"{own.upper()}_HOST"
+        elif kind in ("i2c", "uart") and own:
+            numbers["port"] = port_of(own, kind)
+        if kind == "i2c" and i2c_address(connection.get("address")) is not None:
+            numbers["address"] = i2c_address(connection["address"])
         if isinstance(connection.get("cs"), dict) and "gpio" in connection["cs"]:
             numbers["cs"] = connection["cs"]["gpio"]
     numbers.update({line: value["gpio"] for line, value in (device.get("pins") or {}).items() if isinstance(value, dict) and "gpio" in value})
@@ -766,7 +780,7 @@ def gen_c(board):
             headers.append("driver/spi_common.h")
     if any(sound["kind"] != "dac" for sound in sounds):
         headers.append("driver/i2s_std.h")  # I2S_NUM_* of the table of buses
-    if plain_spi:
+    if plain_spi or any(key == "host" for numbers in board["kept"].values() for key in numbers):
         headers.append("driver/spi_common.h")  # SPI2_HOST of the table of buses
     for header in sorted(set(headers)):
         out(f"#include <{header}>" if header in ("stdlib.h", "string.h") else f"#include \"{header}\"")

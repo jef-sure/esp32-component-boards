@@ -14,15 +14,7 @@ const FORMAT = { format: 'jef-sure/boards', format_version: 2 };
 const NAME = /^[a-z0-9_]+$/;
 const REPOSITORY_ONLY = /^(\.git|\.gitignore|\.gitattributes|README.*|LICENSE.*)$/i; // a folder with only these is still empty for a new project
 const LOCAL_BOARD = (name) => `components/local-boards/boards/${name}/board.json`;
-const SKELETON = [
-    ['skeleton/CMakeLists.txt', 'CMakeLists.txt'],
-    ['skeleton/gitignore', '.gitignore'],
-    ['skeleton/README.md', 'README.md'],
-    ['skeleton/main/CMakeLists.txt', 'main/CMakeLists.txt'],
-    ['skeleton/main/idf_component.yml', 'main/idf_component.yml'],
-    ['../examples/hello_board/main/main.c', 'main/main.c'],
-    ['../examples/hello_board/sdkconfig.defaults', 'sdkconfig.defaults'],
-];
+const SKELETON = 'skeleton/files.json'; // the files of a new project, which tools/board_project.py writes too
 const TREE_ORDER = ['mcu', 'power', 'buses', 'devices', 'modules', 'connectors', 'shared_pins', 'display_groups', 'price', 'checked'];
 
 const isPlain = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
@@ -142,7 +134,9 @@ async function skeletonOf(kit, name, board, version) {
         '@COMPONENT_VERSION@': version,
     };
     const files = {};
-    for (const [from, to] of SKELETON) {
+    const list = await fetch(SKELETON);
+    if (!list.ok) throw new Error(`${SKELETON}: ${list.status}`);
+    for (const [from, to] of (await list.json()).files) {
         const answer = await fetch(from);
         if (!answer.ok) throw new Error(`${from}: ${answer.status}`);
         files[to] = Object.entries(fill).reduce((text, [mark, value]) => text.replaceAll(mark, value), await answer.text());

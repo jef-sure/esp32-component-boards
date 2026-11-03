@@ -81,6 +81,20 @@ Writes `~/myproject/sdkconfig.defaults.board`: the board's defaults, then
 each module's. With `--reset` moves an existing `sdkconfig` to `sdkconfig.old`
 so the new defaults are read. See [choosing-a-board.md](choosing-a-board.md).
 
+## board_project.py
+
+```sh
+python3 tools/board_project.py ~/my_game --board jc8012p4a1c
+python3 tools/board_project.py ~/terminal --board jc1060p470c --module lcd2004_pcf8574
+python3 tools/board_project.py ~/again --selection ~/old/selection.json
+```
+
+A new project on a board chosen by hand, without the page: the files the page writes for a new folder
+(`editor/skeleton/files.json` lists them, both read the list), filled the same way, and `selection.json` with no
+answers. The component comes from git at the commit of this checkout. `--selection` takes the board and the modules a
+`selection.json` names. The folder is empty or holds only `.git`, `.gitignore`, a README or a LICENSE; nothing in it is
+replaced. The command it prints next is the one in the README of the project.
+
 ## board_bom.py
 
 ```sh

@@ -1,0 +1,12 @@
+{
+    "description": "The files of a new project, from (relative to editor/) and to (in the project): the page and tools/board_project.py write the same.",
+    "files": [
+        ["skeleton/CMakeLists.txt", "CMakeLists.txt"],
+        ["skeleton/gitignore", ".gitignore"],
+        ["skeleton/README.md", "README.md"],
+        ["skeleton/main/CMakeLists.txt", "main/CMakeLists.txt"],
+        ["skeleton/main/idf_component.yml", "main/idf_component.yml"],
+        ["../examples/hello_board/main/main.c", "main/main.c"],
+        ["../examples/hello_board/sdkconfig.defaults", "sdkconfig.defaults"]
+    ]
+}

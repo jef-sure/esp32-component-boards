@@ -15,6 +15,13 @@ if(NOT SDKCONFIG_DEFAULTS)
     endif()
 endif()
 
+# the computer (BOARD=host, the linux target of ESP-IDF): only main and what it asks, the drivers of a chip are not there
+if(BOARD STREQUAL "host")
+    set(COMPONENTS main)
+    # in a shell of ESP-IDF the linker of a chip comes first in PATH: the compiler of the computer looks in /usr/bin first
+    set(CMAKE_EXE_LINKER_FLAGS "-B/usr/bin/")
+endif()
+
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 # the lock of the components in the build directory: two boards built side by side keep their own
 idf_build_set_property(DEPENDENCIES_LOCK ${CMAKE_BINARY_DIR}/dependencies.lock)

@@ -119,6 +119,22 @@ idf.py -B build-jc1060p470c -D SDKCONFIG=build-jc1060p470c/sdkconfig -D BOARD=jc
 `-D SDKCONFIG_DEFAULTS=...` в командной строке побеждает оба варианта: фрагмент
 CMake выше задаёт переменную только когда она не задана.
 
+## Компьютер
+
+Программа работает на компьютере так же, как на плате: доска `host`, цель `linux` ESP-IDF, окно SDL2 размером с дисплей
+платы, которую она показывает.
+
+```sh
+python3 managed_components/jef-sure__boards/tools/board_select.py host --as jc8012p4a1c .
+idf.py -B build-host -D SDKCONFIG=build-host/sdkconfig -D BOARD=host build
+build-host/<project>.elf
+```
+
+`board_select.py` пишет `sdkconfig.defaults.host` рядом с файлами плат проекта, а CMake заготовки собирает для компьютера
+только `main` и то, что он требует. `BOARD_PIXELS` и `BOARD_MM` берутся у показываемой платы. Звук у компьютера есть, через
+SDL; закрытое окно завершает программу. Окно остаётся чёрным, а тача нет, пока DGX и DGX-DI не собираются под цель
+`linux`. Нужны SDL2 и libbsd (`libsdl2-dev`, `libbsd-dev`); работает на Linux, Windows целью ESP-IDF не является.
+
 ## Что приходит вместе с выбором
 
 - Драйверы DGX панели платы: `select`-ы в choice в Kconfig компонента

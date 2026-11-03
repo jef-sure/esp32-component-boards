@@ -109,6 +109,7 @@ names the board `none`.
 - `board_display_none.c`: the display functions of a board with no display of
   that kind, returning `false`.
 - `board_none.c`: the empty tables when no board is chosen.
+- `board_host.c`: `boards.h` of the computer over SDL2, the only source built for the linux target.
 - `board_sound.c`: the task that paces samples to the output of the board.
 - `board_touch_fw.c`: `board_touch_firmware_set()`, which keeps the firmware of a
   GSL3680 the program gives. Nothing in this component is weak: a strong definition

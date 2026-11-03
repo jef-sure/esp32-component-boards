@@ -78,6 +78,7 @@ GPIO, который называют данные, кто им владеет �
 ```sh
 python3 tools/board_select.py cyd_s028r ~/myproject
 python3 tools/board_select.py jc1060p470c --module lcd2004_pcf8574 --reset ~/myproject
+python3 tools/board_select.py host --as jc8012p4a1c ~/myproject    # the computer, as large as the 10-inch board
 ```
 
 Записывает `~/myproject/sdkconfig.defaults.board`: умолчания платы, затем

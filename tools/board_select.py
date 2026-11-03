@@ -3,6 +3,11 @@
 
 Usage: board_select.py BOARD [--module MODULE ...] [--reset] PROJECT_DIR
        board_select.py BOARD BOARD ... PROJECT_DIR
+       board_select.py host --as BOARD ... PROJECT_DIR
+
+host is the computer: the linux target of ESP-IDF, a window of SDL2 as large as the display of the board named by
+--as (src/board_host.c of the component). It is chosen like a board and built like one: idf.py -D BOARD=host build,
+then the program build-host/<project>.elf runs on the computer.
 
 BOARD is a board of the catalog, or a board of the program: components/local-boards/boards/BOARD/board.json
 in the project. The glue of a board of the program is made there, beside its data.
@@ -98,6 +103,27 @@ def defaults_text(project, local, board, modules, revision):
     return "".join(parts), mcu["target"]
 
 
+HOST = "host"
+
+
+def host_text(local, shows):
+    """The defaults of the computer: the linux target, and the size of the display of the board it shows."""
+    if not shows:
+        raise SystemExit("host shows a board: name it with --as, as host --as jc8012p4a1c")
+    path = local / "boards" / shows / "board.json"
+    path = path if path.exists() else ROOT / "catalog" / "boards" / shows / "board.json"
+    if not path.exists():
+        raise SystemExit(f"{shows}: no such board in catalog/boards/ or in components/local-boards/boards/")
+    primary = boards_gen.primary_shown(boards_gen.read_board(path))
+    if not primary:
+        raise SystemExit(f"{shows} has no pixel display for the computer to show")
+    width, height, mm_w, mm_h = primary
+    return (f"# The computer, chosen by tools/board_select.py of jef-sure/boards: a window as large as {shows}\n"
+            "# Read before the project's own sdkconfig.defaults. Made from the data of the component: do not edit.\n"
+            f'CONFIG_IDF_TARGET="linux"\nCONFIG_BOARD_SELECT_HOST=y\nCONFIG_BOARD_HOST_SHOWS="{shows}"\n'
+            f"CONFIG_BOARD_HOST_WIDTH={width}\nCONFIG_BOARD_HOST_HEIGHT={height}\nCONFIG_BOARD_HOST_MM_W={mm_w}\nCONFIG_BOARD_HOST_MM_H={mm_h}\n"), "linux"
+
+
 def chosen(sdkconfig):
     """The board an sdkconfig was made for, or None."""
     found = re.search(r"^CONFIG_BOARD_SELECT_(\w+)=y$", sdkconfig.read_text(), flags=re.M) if sdkconfig.exists() else None
@@ -117,6 +143,7 @@ def main():
     parser.add_argument("--module", action="append", default=[], help="a module the board carries (its directory name in catalog/modules/); may repeat; one board only")
     parser.add_argument("--revision", help="the revision of the chip, when it is not the one the data of the board names: 3.1")
     parser.add_argument("--reset", action="store_true", help="move the project's sdkconfig aside, so the new board's defaults are read")
+    parser.add_argument("--as", dest="shows", metavar="BOARD", help="for host: the board whose display the window of the computer has")
     args = parser.parse_intermixed_args()  # options may stand between the boards and the project, as board_select.py b --reset .
     if len(args.names) < 2:
         parser.error("name a board and the project's directory")
@@ -130,7 +157,7 @@ def main():
 
     if len(boards) > 1:
         for board in boards:
-            text, target = defaults_text(project, local, board, [], None)
+            text, target = host_text(local, args.shows) if board == HOST else defaults_text(project, local, board, [], None)
             out = project / f"sdkconfig.defaults.{board}"
             out.write_text(text)
             print(f"{out}: {board}, {target}")
@@ -140,6 +167,15 @@ def main():
         return 0
 
     board = boards[0]
+    if board == HOST:
+        # the computer always stands beside a board of the project: a file and a build directory of its own
+        if args.module:
+            raise SystemExit("the computer carries no module")
+        text, _ = host_text(local, args.shows)
+        out = project / f"sdkconfig.defaults.{HOST}"
+        out.write_text(text)
+        print(f"{out}: {HOST}, linux\nNow: idf.py -B build-{HOST} -D SDKCONFIG=build-{HOST}/sdkconfig -D BOARD={HOST} build, then build-{HOST}/<project>.elf")
+        return 0
     sdkconfig = project / "sdkconfig"
     before = chosen(sdkconfig)
     if before and before != board and not args.reset:

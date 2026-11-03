@@ -62,6 +62,8 @@ API = (
     "const struct board_i2c_table board_i2c_table",
     "const struct board_data board_data =",
 )
+HOST = "board_host.c"  # boards.h of the computer, the linux target only
+NOT_A_BOARD = {"board_none.c", HOST}  # they define what a glue gives: read beside a glue, they would hide what it lacks
 MODULE_API = ("bool board_character_display_init(struct board_character_display *out)",)
 
 
@@ -169,7 +171,7 @@ def main():
         glue = ROOT / "boards" / board["name"] / f"{board['name']}.c"
         if glue.exists():
             # the functions of a part a board has may lie in the core or in an adapter
-            core = "".join(path.read_text() for path in sorted((ROOT / "src").glob("*.c")) if path.name != "board_none.c")
+            core = "".join(path.read_text() for path in sorted((ROOT / "src").glob("*.c")) if path.name not in NOT_A_BOARD)
             core += "".join(path.read_text() for record, _, _ in boards_gen.started(board) for path in adapter_sources(record))
             errors += check_api(board, glue.read_text() + core)
         for problem in boards_gen.pin_problems(board):
@@ -178,7 +180,8 @@ def main():
             errors += host_syntax(glue)
     if syntax:
         for source in sorted((ROOT / "src").glob("*.c")) + sorted((ROOT / "adapters").glob("*/*.c")):
-            errors += host_syntax(source)
+            if source.name != HOST:  # SDL2 and the linux target: CI builds it for the computer
+                errors += host_syntax(source)
 
     for record in resolve.all_libraries(tuple(resolve.ROOTS)).values():
         for path in adapter_files(record):

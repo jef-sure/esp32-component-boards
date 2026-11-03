@@ -120,6 +120,23 @@ revision are only in what `board_select.py` writes.
 A `-D SDKCONFIG_DEFAULTS=...` on the command line wins over both: the CMake
 snippet above only sets the variable when none is given.
 
+## The computer
+
+A program runs on the computer as on a board: the board `host`, the linux target of ESP-IDF, a window of SDL2 as large
+as the display of the board it shows.
+
+```sh
+python3 managed_components/jef-sure__boards/tools/board_select.py host --as jc8012p4a1c .
+idf.py -B build-host -D SDKCONFIG=build-host/sdkconfig -D BOARD=host build
+build-host/<project>.elf
+```
+
+`board_select.py` writes `sdkconfig.defaults.host` beside the files of the boards of the project, and the CMake of the
+skeleton builds only `main` and what it asks for the computer. `BOARD_PIXELS` and `BOARD_MM` are those of the board
+shown. The computer has the sound, by SDL; a window that is closed ends the program. The window stays black and there is
+no touch until DGX and DGX-DI build for the linux target. It takes SDL2 and libbsd of the computer (`libsdl2-dev`,
+`libbsd-dev`) and runs on Linux; Windows is not a target of ESP-IDF.
+
 ## What comes with the choice
 
 - The DGX drivers of the board's panel: `select`s of the choice in the

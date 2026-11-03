@@ -1182,7 +1182,24 @@ def gen_kconfig(boards, modules):
     out("")
     for board in boards:
         L.extend(kconfig_board(board))
+    out("config BOARD_SELECT_HOST")
+    out("    bool \"The computer: a window of SDL2 as large as the board it shows\"")
+    out("    depends on IDF_TARGET_LINUX")
+    out("    help")
+    out(kconfig_help("The linux target of ESP-IDF: the program runs on the computer, src/board_host.c gives boards.h over "
+                     "SDL2. tools/board_select.py host --as <board> writes the size of the board shown."))
+    out("")
     out("endchoice")
+    out("")
+    out("if BOARD_SELECT_HOST")
+    out("config BOARD_HOST_SHOWS")
+    out("    string \"The board the window shows\"")
+    for symbol, prompt, value in (("WIDTH", "Its width in pixels, as shown", 320), ("HEIGHT", "Its height in pixels, as shown", 240),
+                                  ("MM_W", "Its width in millimetres, 0 when the data has no size", 0), ("MM_H", "Its height in millimetres, 0 when the data has no size", 0)):
+        out(f"config BOARD_HOST_{symbol}")
+        out(f"    int \"{prompt}\"")
+        out(f"    default {value}")
+    out("endif")
     out("")
     if modules:
         # the kinds of bus the boards open to a module: a module on I2C is offered only with a board that has one

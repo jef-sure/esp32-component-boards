@@ -248,6 +248,11 @@ committed, a program that asks by kind.
   `board_sound_start`, `board_sound_source` and their `_at` forms take `ctx`, given back to it at every call, so the mixer
   of a game needs no static. The task takes the source and its context together. The names `board_`, `boards_`,
   `BOARD_` and `CONFIG_BOARD_` are said to be the component's (both found by 7c after the move of dgx-ge was decided).
+- The computer is a board: `board_select.py host --as <board>` and `idf.py -D BOARD=host build` build the program for
+  the linux target of ESP-IDF, `src/board_host.c` gives `boards.h` over SDL2 (a window as large as the board shown, its
+  sound, the time), and `BOARD_PIXELS`/`BOARD_MM` are those of that board. hello_board built so runs on the computer
+  unchanged. The window stays black and there is no touch until DGX and DGX-DI build for that target (Anton,
+  2026-11-03: the host of dgx-ge as a board; Windows later, through a Makefile).
 - The ESP32-C2, C3 and H2 have their table of pins in catalog/mcu: make_mcu.py read only tables with a column of RTC
   or LP GPIO, and those three have none. So their strapping pins were not in the data, and a kit on the C3-Zero put the
   MISO of a reader on GPIO 2. The strapping pins are those the table marks and those the note under it names (the H2

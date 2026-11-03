@@ -69,24 +69,6 @@ RULES = json.loads((ROOT / "catalog" / "rules.json").read_text())
 # the SPI buses a chip has: the name of the data ("spi2", "spi3") is the claim of
 # the host, and a chip that has fewer refuses more names. A C-series chip has SPI2
 # alone for the program: SOC_SPI_PERIPH_NUM 2 counts SPI1 of the flash.
-SPI_BUSES = {
-    "esp32": ("spi2", "spi3"),
-    "esp32s3": ("spi2", "spi3"),
-    "esp32p4": ("spi2", "spi3"),
-    "esp32c3": ("spi2",),
-    "esp32c6": ("spi2",),
-}
-
-# the GPIOs a chip has, and the ones that are input only (an output on them is an
-# error of the data, not of the board)
-GPIOS = {
-    "esp32": (range(0, 40), (34, 35, 36, 37, 38, 39)),
-    "esp32s3": (range(0, 49), ()),
-    "esp32p4": (range(0, 55), ()),
-    "esp32c3": (range(0, 22), ()),  # SOC_GPIO_PIN_COUNT 22
-    "esp32c6": (range(0, 31), ()),  # SOC_GPIO_PIN_COUNT 31
-}
-
 I2C_HZ_DEFAULT = 400000
 INPUT_LINES = ("in", "int", "irq", "te", "busy")  # lines of a device that only come in
 STARTED_CLASSES = {"display", "touch", "audio", "button"}  # the rest is kept as data
@@ -383,8 +365,9 @@ def read_board(path):
     if is_module and (data["buttons"] or data["touches"] or data["sounds"]):
         raise ValueError("a module set up on its own is a display for now: name the others in modules of the board")
     target = data.get("mcu", {}).get("target")
-    if not is_module and target not in SPI_BUSES:
-        raise ValueError(f'the target is one of {", ".join(SPI_BUSES)}, not "{target}"')
+    facts = chip_facts(target) if not is_module else None
+    if not is_module and not facts:
+        raise ValueError(f'catalog/mcu has no chip "{target}"')
 
     # the buses: a name a bus, its pins its own; an spi name is the claim of the host
     buses = data.get("buses") or {}
@@ -393,8 +376,8 @@ def read_board(path):
     for kind, named in buses.items():
         for own, bus in (named or {}).items():
             if kind in ("spi", "qspi"):
-                if own not in SPI_BUSES[target]:
-                    raise ValueError(f'the chip {target} has no "{own}" to wire: {", ".join(SPI_BUSES[target])}')
+                if facts and own not in facts[0]:
+                    raise ValueError(f'the chip {target} has no "{own}" to wire: {", ".join(facts[0])}')
                 signals = ("mosi", "sclk") if kind == "spi" else ("d0", "d1", "d2", "d3", "sclk")  # a display may have no miso
                 for signal in signals:
                     if not isinstance(bus.get(signal), int):
@@ -618,13 +601,27 @@ def pin_map(board):
     return out
 
 
+def chip_facts(target):
+    """What a board is checked against, from catalog/mcu (tools/make_mcu.py, ESP-IDF): the SPI hosts it can wire (SPI1
+    is the flash's), the GPIOs of the chip and those only for input. None for a target the catalog has not."""
+    if not target:
+        return None
+    try:
+        mcu = resolve.load("mcu", target)
+    except resolve.Refused:
+        return None
+    gpio = mcu["gpio"]
+    return tuple(f"spi{n}" for n in range(2, mcu["hosts"]["spi"] + 1)), set(gpio["valid"]), set(gpio.get("input_only") or ())
+
+
 def pin_problems(board):
     """What the map of pins says is wrong: two owners of one pin, an output on an input-only GPIO, a GPIO the chip has not."""
     problems = []
     target = board.get("mcu", {}).get("target")
-    if target not in GPIOS:
+    facts = chip_facts(target)
+    if not facts:
         return problems
-    valid, input_only = GPIOS[target]
+    _, valid, input_only = facts
     owners = {}
     for pin, owner, direction in pins_of(board):
         if pin not in valid:

@@ -25,7 +25,7 @@ import resolve  # noqa: E402
 
 
 def pin_map(board):
-    valid, input_only = boards_gen.GPIOS.get(board["mcu"]["target"], (range(0, 64), ()))
+    _, valid, input_only = boards_gen.chip_facts(board["mcu"]["target"]) or ((), set(range(64)), set())
     owners = {}
     for pin, owner, direction in boards_gen.pins_of(board):
         owners.setdefault(pin, []).append((owner, direction))

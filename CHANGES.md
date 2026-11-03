@@ -244,6 +244,9 @@ committed, a program that asks by kind.
   references (the audit of 2026-11-03, 5.7). The glue gives tables only: `board_bus_get`, `board_spi_bus`,
   `board_spi_taken` and the functions of a display a board has not are written once in `src/` instead of being generated
   into every glue, and `CONFIG_BOARD_MODULE_CHARACTER_DISPLAY` is gone (5.10 in part, 5.20).
+- The generator checks a board against its chip in catalog/mcu, which make_mcu.py takes from ESP-IDF: the SPI hosts it
+  can wire, its GPIOs and those only for input. Its own tables of five chips are gone; a pin a chip has not, as GPIO 24 of
+  an ESP32, is now seen (the audit of 2026-11-03, 5.9).
 - `tools/board_project.py DIR --board B [--module M]` writes a new project on a board chosen by hand, without the page:
   the files of `editor/skeleton/files.json`, filled as the page fills them, and `selection.json` with no answers;
   `--selection` takes the board and the modules of a `selection.json` back. The page reads the same list of files

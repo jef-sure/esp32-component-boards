@@ -13,14 +13,14 @@
 #include "boards_dgx.h"
 #include "boards_dgx_di.h"
 
-struct board_display display = {0};
+board_display_t display = {0};
 if (board_display_init(&display)) {
     /* display.width, display.height: 1024x600 or 320x240, whatever the chosen board has;
        display.mm_w, display.mm_h: its size in millimetres */
     dgx_screen_t *screen = board_dgx_screen(&display);
 }
 
-struct board_touch touch;
+board_touch_t touch;
 if (board_touch_start(&display, &touch)) {
     /* the touch panel under that display, calibrated by the board's data */
     dgx_di_pointer_t *pointer = board_dgx_di_pointer(&touch);

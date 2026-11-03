@@ -7,10 +7,10 @@
 
 void app_main(void)
 {
-    const struct board_info *board = board_info();
+    const board_info_t *board = board_info();
     printf("the board: %s (%s), %s\n", board->title, board->name, board->target);
 
-    struct board_display display = {0};
+    board_display_t display = {0};
     if (!board_display_init(&display)) {
         printf("the display: none, or it could not be set up\n");
         return;

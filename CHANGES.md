@@ -244,6 +244,9 @@ committed, a program that asks by kind.
   references (the audit of 2026-11-03, 5.7). The glue gives tables only: `board_bus_get`, `board_spi_bus`,
   `board_spi_taken` and the functions of a display a board has not are written once in `src/` instead of being generated
   into every glue, and `CONFIG_BOARD_MODULE_CHARACTER_DISPLAY` is gone (5.10 in part, 5.20).
+- Every public structure of `boards.h` has a typedef ending in `_t` (`board_info_t`, `board_display_t`,
+  `board_character_display_t`, `board_touch_t`, `board_spi_bus_t`), and the headers and examples use them; the tags
+  stay for a declaration ahead (the audit of 2026-11-03, 5.14).
 - Comments, logs and docs say what the hardware is and does, not what it "answers" or how it "lies": a display has an
   orientation, a touch panel covers a display, a log says "no touch panel found" (the audit of 2026-11-03, item 5.12).
 - What a board has and nobody asked for weighs the lowest price by the piece: of its chip, from `price` of its entry in

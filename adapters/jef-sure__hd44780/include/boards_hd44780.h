@@ -9,7 +9,7 @@ extern "C" {
 #endif
 
 /* The display, for lcd_set_cursor, lcd_write_str and the rest of hd44780.h. NULL before board_character_display_init. */
-hd44780_t *board_hd44780(const struct board_character_display *display);
+hd44780_t *board_hd44780(const board_character_display_t *display);
 
 #ifdef __cplusplus
 }

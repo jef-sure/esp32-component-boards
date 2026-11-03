@@ -26,12 +26,12 @@ extern "C" {
 #endif
 
 /* What the board the build chose is. */
-struct board_info {
+typedef struct board_info {
     const char *name;   /* its directory name, as its data names it */
     const char *title;  /* what the menu of the configuration showed */
-    const char *target; /* the chip of it: esp32, esp32s3, esp32p4 */
-};
-const struct board_info *board_info(void);
+    const char *target; /* the chip of it, as CONFIG_IDF_TARGET names it */
+} board_info_t;
+const board_info_t *board_info(void);
 
 /* The way a display runs along an axis: left to right and top to bottom, or the other way. */
 enum { BOARD_DIR_FORWARD = 1, BOARD_DIR_BACKWARD = -1 };
@@ -44,17 +44,17 @@ enum { BOARD_DIR_FORWARD = 1, BOARD_DIR_BACKWARD = -1 };
  * A character display (HD44780: a 2004 on a PCF8574) is not this: it has no pixels, see
  * board_character_display_init.
  */
-struct board_display {
+typedef struct board_display {
     int   width, height; /* as shown, in pixels */
     int   mm_w, mm_h;    /* as measured with a ruler, as it is shown; 0 when the data has no size */
     int   dir_x, dir_y;  /* its orientation now: BOARD_DIR_FORWARD or BOARD_DIR_BACKWARD */
     bool  swap_xy;       /* and whether its x runs along the columns of the panel */
     const char *name;    /* its name in the data, for the log */
     int   index;         /* its place among the displays of the board */
-};
+} board_display_t;
 int  board_display_count(void);
-bool board_display_init(struct board_display *out);                /* the primary one, as board_display_init_at(0, out) */
-bool board_display_init_at(int index, struct board_display *out);  /* 0 is the primary one; a second call gives the same display */
+bool board_display_init(board_display_t *out);                /* the primary one, as board_display_init_at(0, out) */
+bool board_display_init_at(int index, board_display_t *out);  /* 0 is the primary one; a second call gives the same display */
 
 /*
  * The display turned: the panel's own orientation call with these (BOARD_DIR_* values), the
@@ -62,17 +62,17 @@ bool board_display_init_at(int index, struct board_display *out);  /* 0 is the p
  * the board the other way up flips dir_x and dir_y from what board_display_init left in
  * *display. false when the board has no graphics display, and for displays shown as one screen.
  */
-bool board_display_orientation(struct board_display *display, int dir_x, int dir_y, bool swap_xy);
+bool board_display_orientation(board_display_t *display, int dir_x, int dir_y, bool swap_xy);
 
 /*
  * A character display (HD44780) the board has or a module on its I2C bus brings (the 2004 on
  * a PCF8574 backpack, CONFIG_BOARD_MODULE_LCD2004_PCF8574): set up, cleared, its light on. false
  * when there is none or it does not respond; *out untouched then.
  */
-struct board_character_display {
+typedef struct board_character_display {
     int cols, rows; /* its geometry, in characters */
-};
-bool board_character_display_init(struct board_character_display *out);
+} board_character_display_t;
+bool board_character_display_init(board_character_display_t *out);
 
 /*
  * The touch panel of the board, under the display taken before, calibrated by the board's data
@@ -81,15 +81,15 @@ bool board_character_display_init(struct board_character_display *out);
  * be set up. out may be NULL. The task that reads the panel is the program's: this sets the panel
  * up, it does not read it.
  */
-struct board_touch {
+typedef struct board_touch {
     int fingers;      /* how many it follows at once */
     int x_max, y_max; /* its largest raw coordinates */
     const char *name; /* its name in the data, for the log */
     int index;        /* its place among the touch panels of the board */
-};
+} board_touch_t;
 int  board_touch_count(void);
-bool board_touch_start(const struct board_display *display, struct board_touch *out); /* the first one over this display */
-bool board_touch_start_at(int index, const struct board_display *display, struct board_touch *out); /* a second call gives the same panel */
+bool board_touch_start(const board_display_t *display, board_touch_t *out); /* the first one over this display */
+bool board_touch_start_at(int index, const board_display_t *display, board_touch_t *out); /* a second call gives the same panel */
 
 /*
  * The firmware of the touch panel, for a board whose panel keeps none of its own (the GSL3680
@@ -124,12 +124,12 @@ void board_sound_source_at(int index, board_sound_source_t source);
  * returns NULL when the host has no such bus, and when the bus has only a display: a display
  * driver may keep such a bus between drawings, so a device added to it would wait forever.
  */
-struct board_spi_bus {
+typedef struct board_spi_bus {
     int           host;            /* the host of the chip the name claims: SPI2_HOST, SPI3_HOST */
     int           mosi, miso, sclk; /* its pins; -1 (GPIO_NUM_NC) for a line not wired */
     unsigned long hz;              /* 0: none of the bus's own; a device's ask comes on top */
-};
-const struct board_spi_bus *board_spi_bus(int host);
+} board_spi_bus_t;
+const board_spi_bus_t *board_spi_bus(int host);
 bool board_spi_taken(int host);
 
 /*

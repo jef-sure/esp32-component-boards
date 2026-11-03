@@ -37,7 +37,7 @@ static void pressed(lv_event_t *event)
 
 void app_main(void)
 {
-    struct board_display board = {0};
+    board_display_t board = {0};
     if (!board_display_init(&board)) {
         ESP_LOGE(TAG, "board_display_init failed");
         return;
@@ -56,7 +56,7 @@ void app_main(void)
 
     bool can_press = false;
 #if CONFIG_BOARD_TOUCH
-    struct board_touch touch;
+    board_touch_t touch;
     dgx_di_pointer_t  *pointer = board_touch_start(&board, &touch) ? board_dgx_di_pointer(&touch) : NULL;
     if (pointer) dgx_lvgl_pointer_create(display, pointer);
     else ESP_LOGI(TAG, "board_touch_start: no touch panel");

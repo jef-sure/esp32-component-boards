@@ -46,8 +46,8 @@ logs it both in words and as a C initializer. DGX-DI's example `touch_check`
 runs it on a board's own display. In a program of this component:
 
 ```c
-struct board_display display = {0};
-struct board_touch touch;
+board_display_t display = {0};
+board_touch_t touch;
 board_display_init(&display);
 board_touch_start(&display, &touch);
 dgx_di_calibration_t measured;

@@ -46,8 +46,8 @@ DGX-DI предоставляет `dgx_di_calibrate_measure(device, screen, roun
 запускает её на собственном дисплее платы. В программе этого компонента:
 
 ```c
-struct board_display display = {0};
-struct board_touch touch;
+board_display_t display = {0};
+board_touch_t touch;
 board_display_init(&display);
 board_touch_start(&display, &touch);
 dgx_di_calibration_t measured;

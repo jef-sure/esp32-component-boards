@@ -20,7 +20,7 @@ beside the board's.
 ## Using it
 
 ```c
-struct board_character_display lcd;
+board_character_display_t lcd;
 if (board_character_display_init(&lcd)) {
     lcd_set_cursor(board_hd44780(&lcd), 0, 0);
     lcd_write_str(board_hd44780(&lcd), "hello");

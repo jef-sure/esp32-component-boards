@@ -5,34 +5,36 @@ for a part the board does not have returns `false` (or `NULL`) and leaves its
 output untouched; the program needs no `#if` on the board. `boards.h` names no
 library: it gives sizes, millimetres and orientation. The handles of a library
 come from the header of its adapter, and from there the program uses that library
-directly: `boards_dgx.h`, `boards_dgx_di.h`, `boards_hd44780.h`.
+directly: `boards_dgx.h`, `boards_dgx_di.h`, `boards_hd44780.h`. Every public
+structure has a typedef ending in `_t`, as `board_display_t`; its tag stays, so a
+header of the program can declare it ahead (`struct board_display;`).
 
 ## What the board is
 
 ```c
-struct board_info { const char *name, *title, *target; };
-const struct board_info *board_info(void);
+typedef struct board_info { const char *name, *title, *target; } board_info_t;
+const board_info_t *board_info(void);
 ```
 
 `name` is the directory in `catalog/boards/` (`"cyd_s028r"`), `title` what the menu
-showed, `target` the chip (`"esp32"`, `"esp32s3"`, `"esp32p4"`). For the log
+showed, `target` the chip as `CONFIG_IDF_TARGET` names it (`"esp32"`, `"esp32s3"`, `"esp32p4"`, `"esp32c3"`). For the log
 and for a settings page, not for deciding what to do: ask by kind instead.
 
 ## A graphics display
 
 ```c
-struct board_display {
+typedef struct board_display {
     int   width, height; /* as shown, in pixels */
     int   mm_w, mm_h;    /* as shown, in millimetres; 0 when the data has no size */
     int   dir_x, dir_y;  /* BOARD_DIR_FORWARD: left to right, top to bottom; BOARD_DIR_BACKWARD: the other way */
     bool  swap_xy;
     const char *name; /* its name in the data, for the log */
     int   index;      /* its place among the displays of the board */
-};
+} board_display_t;
 int  board_display_count(void);
-bool board_display_init(struct board_display *out);
-bool board_display_init_at(int index, struct board_display *out);
-bool board_display_orientation(struct board_display *display, int dir_x, int dir_y, bool swap_xy);
+bool board_display_init(board_display_t *out);
+bool board_display_init_at(int index, board_display_t *out);
+bool board_display_orientation(board_display_t *display, int dir_x, int dir_y, bool swap_xy);
 ```
 
 A board may have several displays. `board_display_init` starts the primary one;
@@ -48,8 +50,8 @@ board shows it (the data's `original_orientation`), and fills `*out`. The
 handles of DGX are in `boards_dgx.h`:
 
 ```c
-dgx_screen_t        *board_dgx_screen(const struct board_display *display);
-dgx_bus_protocols_t *board_dgx_bus(const struct board_display *display);
+dgx_screen_t        *board_dgx_screen(const board_display_t *display);
+dgx_bus_protocols_t *board_dgx_bus(const board_display_t *display);
 ```
 
 The screen is what `dgx_draw.h` draws on. The bus is for what only the bus knows:
@@ -73,8 +75,8 @@ every board.
 ## A character display
 
 ```c
-struct board_character_display { int cols, rows; };
-bool board_character_display_init(struct board_character_display *out);
+typedef struct board_character_display { int cols, rows; } board_character_display_t;
+bool board_character_display_init(board_character_display_t *out);
 ```
 
 An HD44780 the board has, or a module on its I2C bus brings. The display is
@@ -87,10 +89,10 @@ on boards without.
 ## The touch panel
 
 ```c
-struct board_touch { int fingers; int x_max, y_max; const char *name; int index; };
+typedef struct board_touch { int fingers; int x_max, y_max; const char *name; int index; } board_touch_t;
 int  board_touch_count(void);
-bool board_touch_start(const struct board_display *display, struct board_touch *out);
-bool board_touch_start_at(int index, const struct board_display *display, struct board_touch *out);
+bool board_touch_start(const board_display_t *display, board_touch_t *out);
+bool board_touch_start_at(int index, const board_display_t *display, board_touch_t *out);
 ```
 
 Sets a panel up under the display taken before, calibrated by the board's measured
@@ -99,8 +101,8 @@ calibration. `board_touch_start` takes the first panel that covers this display,
 may be `NULL`. `boards_dgx_di.h` gives the device and the pointer on it:
 
 ```c
-dgx_di_device_t  *board_dgx_di_device(const struct board_touch *touch);
-dgx_di_pointer_t *board_dgx_di_pointer(const struct board_touch *touch);
+dgx_di_device_t  *board_dgx_di_device(const board_touch_t *touch);
+dgx_di_pointer_t *board_dgx_di_pointer(const board_touch_t *touch);
 ```
 
 The pointer follows the display's orientation: after
@@ -109,7 +111,7 @@ orientation now. The task that reads it is the program's:
 
 ```c
 #include "boards_dgx_di.h"
-struct board_touch touch;
+board_touch_t touch;
 board_touch_start(&display, &touch);
 dgx_di_pointer_t *pointer = board_dgx_di_pointer(&touch);
 for (;;) {
@@ -154,8 +156,8 @@ program's business: this is the hardware and its pacing, nothing more.
 ## Buses
 
 ```c
-struct board_spi_bus { int host, mosi, miso, sclk; unsigned long hz; };
-const struct board_spi_bus *board_spi_bus(int host);
+typedef struct board_spi_bus { int host, mosi, miso, sclk; unsigned long hz; } board_spi_bus_t;
+const board_spi_bus_t *board_spi_bus(int host);
 bool board_spi_taken(int host);
 bool board_bus_get(const char *bus, const char *field, long *out);
 ```

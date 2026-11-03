@@ -36,10 +36,10 @@ static void tone(int16_t *samples, size_t count)
 
 void app_main(void)
 {
-    const struct board_info *board = board_info();
+    const board_info_t *board = board_info();
     printf("the board: %s (%s), %s\n", board->title, board->name, board->target);
 
-    struct board_display display = {0};
+    board_display_t display = {0};
     if (board_display_init(&display)) {
         printf("the display: %d x %d pixels", display.width, display.height);
         if (display.mm_w) printf(", %d x %d mm", display.mm_w, display.mm_h);
@@ -54,7 +54,7 @@ void app_main(void)
         printf("the display: none, or it could not be set up\n");
     }
 
-    struct board_character_display lcd;
+    board_character_display_t lcd;
     if (board_character_display_init(&lcd)) {
         printf("the character display: %d x %d\n", lcd.cols, lcd.rows);
 #if CONFIG_BOARD_DISPLAY_HD44780
@@ -71,7 +71,7 @@ void app_main(void)
         printf("the character display: none\n");
     }
 
-    struct board_touch touch;
+    board_touch_t touch;
     if (board_touch_start(&display, &touch)) printf("the touch: %d fingers\n", touch.fingers);
     else printf("the touch: none, or it could not be set up\n");
 

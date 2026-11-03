@@ -5,35 +5,37 @@
 выход; программе не нужен `#if` на плату. `boards.h` не называет ни одной библиотеки:
 он даёт размеры, миллиметры и ориентацию. Дескрипторы библиотеки даёт заголовок её
 адаптера, и дальше программа использует эту библиотеку напрямую: `boards_dgx.h`,
-`boards_dgx_di.h`, `boards_hd44780.h`.
+`boards_dgx_di.h`, `boards_hd44780.h`. У каждой публичной структуры есть typedef
+с окончанием `_t`, например `board_display_t`; тег остаётся, чтобы заголовок
+программы мог объявить её заранее (`struct board_display;`).
 
 ## Что это за плата
 
 ```c
-struct board_info { const char *name, *title, *target; };
-const struct board_info *board_info(void);
+typedef struct board_info { const char *name, *title, *target; } board_info_t;
+const board_info_t *board_info(void);
 ```
 
 `name` — каталог в `catalog/boards/` (`"cyd_s028r"`), `title` — то, что показывало
-меню, `target` — чип (`"esp32"`, `"esp32s3"`, `"esp32p4"`). Для лога и для
+меню, `target` — чип, как его называет `CONFIG_IDF_TARGET` (`"esp32"`, `"esp32s3"`, `"esp32p4"`, `"esp32c3"`). Для лога и для
 страницы настроек, а не для того, чтобы решать, что делать: вместо этого
 спрашивайте по роду.
 
 ## Графический дисплей
 
 ```c
-struct board_display {
+typedef struct board_display {
     int   width, height; /* as shown, in pixels */
     int   mm_w, mm_h;    /* as shown, in millimetres; 0 when the data has no size */
     int   dir_x, dir_y;  /* BOARD_DIR_FORWARD: left to right, top to bottom; BOARD_DIR_BACKWARD: the other way */
     bool  swap_xy;
     const char *name; /* its name in the data, for the log */
     int   index;      /* its place among the displays of the board */
-};
+} board_display_t;
 int  board_display_count(void);
-bool board_display_init(struct board_display *out);
-bool board_display_init_at(int index, struct board_display *out);
-bool board_display_orientation(struct board_display *display, int dir_x, int dir_y, bool swap_xy);
+bool board_display_init(board_display_t *out);
+bool board_display_init_at(int index, board_display_t *out);
+bool board_display_orientation(board_display_t *display, int dir_x, int dir_y, bool swap_xy);
 ```
 
 Дисплеев на плате может быть несколько. `board_display_init` запускает основной,
@@ -49,8 +51,8 @@ bool board_display_orientation(struct board_display *display, int dir_x, int dir
 `*out`. Дескрипторы DGX лежат в `boards_dgx.h`:
 
 ```c
-dgx_screen_t        *board_dgx_screen(const struct board_display *display);
-dgx_bus_protocols_t *board_dgx_bus(const struct board_display *display);
+dgx_screen_t        *board_dgx_screen(const board_display_t *display);
+dgx_bus_protocols_t *board_dgx_bus(const board_display_t *display);
 ```
 
 На экране рисует `dgx_draw.h`. Шина нужна для того, что знает только она: на
@@ -74,8 +76,8 @@ DGX используют их, чтобы сантиметр был сантим
 ## Символьный дисплей
 
 ```c
-struct board_character_display { int cols, rows; };
-bool board_character_display_init(struct board_character_display *out);
+typedef struct board_character_display { int cols, rows; } board_character_display_t;
+bool board_character_display_init(board_character_display_t *out);
 ```
 
 HD44780, который есть у платы, или который приносит модуль на её шине I2C.
@@ -88,10 +90,10 @@ HD44780, который есть у платы, или который прино
 ## Тач-панель
 
 ```c
-struct board_touch { int fingers; int x_max, y_max; const char *name; int index; };
+typedef struct board_touch { int fingers; int x_max, y_max; const char *name; int index; } board_touch_t;
 int  board_touch_count(void);
-bool board_touch_start(const struct board_display *display, struct board_touch *out);
-bool board_touch_start_at(int index, const struct board_display *display, struct board_touch *out);
+bool board_touch_start(const board_display_t *display, board_touch_t *out);
+bool board_touch_start_at(int index, const board_display_t *display, board_touch_t *out);
 ```
 
 Настраивает панель под дисплеем, полученным раньше, с измеренной калибровкой платы.
@@ -100,8 +102,8 @@ bool board_touch_start_at(int index, const struct board_display *display, struct
 нём даёт `boards_dgx_di.h`:
 
 ```c
-dgx_di_device_t  *board_dgx_di_device(const struct board_touch *touch);
-dgx_di_pointer_t *board_dgx_di_pointer(const struct board_touch *touch);
+dgx_di_device_t  *board_dgx_di_device(const board_touch_t *touch);
+dgx_di_pointer_t *board_dgx_di_pointer(const board_touch_t *touch);
 ```
 
 Указатель следует за ориентацией дисплея: после `board_display_orientation` его
@@ -110,7 +112,7 @@ dgx_di_pointer_t *board_dgx_di_pointer(const struct board_touch *touch);
 
 ```c
 #include "boards_dgx_di.h"
-struct board_touch touch;
+board_touch_t touch;
 board_touch_start(&display, &touch);
 dgx_di_pointer_t *pointer = board_dgx_di_pointer(&touch);
 for (;;) {
@@ -158,8 +160,8 @@ void board_sound_source_at(int index, board_sound_source_t source);
 ## Шины
 
 ```c
-struct board_spi_bus { int host, mosi, miso, sclk; unsigned long hz; };
-const struct board_spi_bus *board_spi_bus(int host);
+typedef struct board_spi_bus { int host, mosi, miso, sclk; unsigned long hz; } board_spi_bus_t;
+const board_spi_bus_t *board_spi_bus(int host);
 bool board_spi_taken(int host);
 bool board_bus_get(const char *bus, const char *field, long *out);
 ```

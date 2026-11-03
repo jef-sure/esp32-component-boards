@@ -253,6 +253,7 @@ LANGUAGES.ru = {
         '{0} on the pins of its IO MUX': '{0} на своих пинах IO MUX',
         '{0} is a strapping pin ({1}): nothing on it should hold a level of its own at reset': '{0} — пин загрузки ({1}): ничто на нём не должно держать свой уровень при сбросе',
         'it selects {0}': 'он выбирает {0}',
+        '{0} is a pin of JTAG: the kit leaves no debugging by JTAG on it': '{0} — пин JTAG: комплект оставляет его без отладки по JTAG',
         '{0}: its strapping pins are not in the data: a pin of this kit may be one': '{0}: пинов загрузки нет в данных, пин этого комплекта может оказаться одним из них',
         '{0}: {1} more parts were not tried; pin a part in the block to choose one': '{0}: ещё {1} деталей не пробовались; чтобы выбрать одну, закрепи деталь в блоке',
         '{0} boards fit. To narrow: a budget or a platform above, pin a part in a block, or pin a board.': 'Подходит плат: {0}. Чтобы сузить: бюджет или платформа сверху, закреплённая деталь в блоке или закреплённая плата.',

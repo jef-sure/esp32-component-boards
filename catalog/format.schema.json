@@ -604,7 +604,7 @@
             "required": ["id", "kind", "says", "why"],
             "properties": {
               "id": { "$ref": "#/$defs/name" },
-              "kind": { "enum": ["prefer_pins", "keep_out"] },
+              "kind": { "enum": ["prefer_pins", "keep_out", "note_cost"] },
               "says": { "type": "string", "description": "The line of a kit, {0} what it is about." },
               "why": { "type": "string" }
             },
@@ -624,6 +624,13 @@
                     "what": { "enum": ["strapping"], "description": "Which pins: the strapping pins of the chip." },
                     "harm": { "type": "array", "items": { "enum": ["run", "download"] }, "description": "A pin whose boot.harm is one of these is kept out; one with no boot at all too." }
                   }
+                }
+              },
+              {
+                "if": { "properties": { "kind": { "const": "note_cost" } } },
+                "then": {
+                  "required": ["note"],
+                  "properties": { "note": { "type": "string", "minLength": 1, "description": "A note of gpio.pins of the chip that costs something rather than keeps a pin out." } }
                 }
               }
             ]

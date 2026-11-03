@@ -248,6 +248,10 @@ committed, a program that asks by kind.
   `board_sound_start`, `board_sound_source` and their `_at` forms take `ctx`, given back to it at every call, so the mixer
   of a game needs no static. The task takes the source and its context together. The names `board_`, `boards_`,
   `BOARD_` and `CONFIG_BOARD_` are said to be the component's (both found by 7c after the move of dgx-ge was decided).
+- A third judgement, `jtag_is_a_cost`, of a new kind `note_cost`: a pin with the note JTAG is given with a line that JTAG
+  is gone, as a cost rather than a danger. A display with no line back on an ESP32 DevKit takes SPI2 on 13 and 14 with
+  its CS on 15, as the left display of dotview-clock is wired. Other notes (the pins of the flash, of USB, of the
+  console) still keep a pin out.
 - The strapping pins of a chip are as its datasheet of Espressif gives them, copied, not judged: the rows of its table
   of boot modes (`gpio.boot_modes`: the level of each pin for `spi_boot` and for each download mode) and, for each pin,
   `boot` with what it selects, its pull at reset and the footnote of the table. The datasheets lie in

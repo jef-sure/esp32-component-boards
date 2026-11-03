@@ -707,11 +707,15 @@ kit, `selection.json` keeps it, and a case of `test/solver/` checks the `id`, no
 | kind | fields | what it does |
 |---|---|---|
 | `prefer_pins` | `bus`, `pins` (a field of the chip) | a new host of `bus` takes the pins the chip names for it when all are free; those pins go last for anything else |
-| `keep_out` | `what` (`strapping`), `harm` | a strapping pin whose `boot.harm` is listed, or which has no `boot`, is given to nothing; the others are given with a line |
+| `keep_out` | `what` (`strapping`), `harm` | a strapping pin whose harm is listed, or which has no `boot`, is given to nothing; the others are given with a line |
+| `note_cost` | `note` | a pin with that note of the docs is given, with a line of what it costs; any other note keeps a pin out |
 
-A strapping pin of a chip has `boot` in `gpio.pins` of `mcu.json`, from the datasheet: `selects` (boot mode, flash
-voltage, rom messages, sdio timing, jtag source), `harm` (`run`: a wrong level keeps the program from starting;
-`download`: only the download mode; `null`: a log, a timing or the source of JTAG) and `pull` at reset.
+The strapping pins of a chip are copied from its datasheet, not judged: `gpio.boot_modes` holds the rows of its table
+of boot modes (the level of each pin, or `any`, for `spi_boot` and for each download mode), and each strapping pin has
+`boot` in `gpio.pins`: `selects` (boot mode, flash voltage, rom messages, sdio timing, jtag source), `pull` at reset, the
+`footnote` of the table and `decides: false` where that footnote says its level decides no mode. The harm is the
+solver's to read: `run` where the row `spi_boot` names a level or the pin selects the voltage of the flash (the program
+does not start), `download` where only another row names one, none otherwise.
 
 `host_on_its_iomux` is the first: an SPI host on the pins of its IO MUX (`iomux` of `mcu.json`, from `spi_pins.h` of
 ESP-IDF), as a wired board takes them.

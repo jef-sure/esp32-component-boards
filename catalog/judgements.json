@@ -19,6 +19,13 @@
             ],
             "says": "{0} is a strapping pin ({1}): nothing on it should hold a level of its own at reset",
             "why": "A strapping pin is sampled at reset. The datasheet gives what it selects and the rows of the table of boot modes (gpio.boot_modes, gpio.pins.*.boot of the chip); the solver reads from them the harm of a level there: run, where the start of the program or the voltage of the flash depends on it, download, where only a download mode does, none otherwise. The kit keeps out the harms listed here and a strapping pin the datasheet does not describe; it may take the others, as GPIO 5 of an ESP32, which the terminal takes for a CS."
+        },
+        {
+            "id": "jtag_is_a_cost",
+            "kind": "note_cost",
+            "note": "JTAG",
+            "says": "{0} is a pin of JTAG: the kit leaves no debugging by JTAG on it",
+            "why": "A note of the docs of ESP-IDF on a pin keeps it out of a kit. The pins of JTAG are a cost, not a danger: a kit may take them, and says so, as the terminal and dotview-clock take 13 and 14 of an ESP32 for SPI2."
         }
     ]
 }

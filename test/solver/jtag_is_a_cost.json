@@ -1,0 +1,5 @@
+{
+    "title": "The pins of JTAG are a cost, not a danger: a display with no line back on an ESP32 DevKit takes SPI2 on 13 and 14 with its CS on 15, as the left display of dotview-clock is wired, and the kit says that JTAG is gone",
+    "answers": {"board": "esp32_devkit", "blocks": [{"role": "display", "variant": "mono_lcd", "name": "screen"}]},
+    "judged": {"board": "esp32_devkit", "ids": ["host_on_its_iomux", "strapping_by_harm", "jtag_is_a_cost"], "buses": {"spi2": {"mosi": 13, "sclk": 14}}, "cs": {"spi2": 15}}
+}

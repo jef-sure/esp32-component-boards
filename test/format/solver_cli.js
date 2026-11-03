@@ -50,7 +50,8 @@ function holdsForEvery(kits, say) {
             const entry = map[pin];
             // a strapping pin only where a judgement let it, and the kit says so; its note is the judgement's
             const judged = kit.says.some((said) => said.judgement === 'strapping_by_harm' && said.pin === pin);
-            const notes = (entry?.notes || []).filter((note) => !note.startsWith('Strapping pin'));
+            const costed = kit.says.some((said) => said.judgement === 'jtag_is_a_cost' && said.pin === pin);
+            const notes = (entry?.notes || []).filter((note) => !note.startsWith('Strapping pin') && !(note === 'JTAG' && costed));
             const fine = entry && entry.state === 'free' && (!entry.strapping || judged) && !entry.input_only && !notes.length && (!outside || entry.connectors.length);
             if (!fine && !what.includes(' ')) say(`${kit.name}: ${what} ${line} is on GPIO ${pin}`);
             if (what.includes(' ') && outside && !entry?.connectors.length) say(`${kit.name}: ${what} ${line} does not come out, GPIO ${pin}`);

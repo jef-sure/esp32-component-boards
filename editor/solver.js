@@ -429,8 +429,9 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
     function freePins(board) {
         const map = pinMap(board);
         const hasOutside = Object.values(map).some((entry) => entry.connectors.length);
-        // the note of a strapping pin is the judgement's to weigh; any other note keeps a pin out
-        const notes = (entry) => (entry.notes || []).filter((note) => !note.startsWith('Strapping pin'));
+        // the note of a strapping pin is keep_out's to weigh, a note that is a cost note_cost's; any other keeps a pin out
+        const costs = new Set(judgementsOf('note_cost').map((judgement) => judgement.note));
+        const notes = (entry) => (entry.notes || []).filter((note) => !note.startsWith('Strapping pin') && !costs.has(note));
         return Object.entries(map)
             .filter(([pin, entry]) => entry.state === 'free' && (!entry.strapping || strappingGiven(board, pin, entry)) && !entry.input_only && !notes(entry).length && (!hasOutside || entry.connectors.length))
             .map(([pin]) => +pin);
@@ -1138,6 +1139,12 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
                 for (const judgement of judgementsOf('keep_out').filter((item) => item.what === 'strapping')) {
                     for (const [pin, entry] of Object.entries(after)) {
                         if (entry.strapping && entry.boot && entry.owners.length && !before[pin]?.owners.length) lines.push({ level: 'note', text: t(judgement.says, `GPIO ${pin}`, entry.boot.footnote ?? t('it selects {0}', entry.boot.selects.join(', '))), judgement: judgement.id, pin: +pin });
+                    }
+                }
+                // a pin the kit takes whose note is a cost, with the judgement that weighs it
+                for (const judgement of judgementsOf('note_cost')) {
+                    for (const [pin, entry] of Object.entries(after)) {
+                        if ((entry.notes || []).includes(judgement.note) && entry.owners.length && !before[pin]?.owners.length) lines.push({ level: 'note', text: t(judgement.says, `GPIO ${pin}`), judgement: judgement.id, pin: +pin });
                     }
                 }
             }

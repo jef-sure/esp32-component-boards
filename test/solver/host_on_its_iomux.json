@@ -1,5 +1,5 @@
 {
-    "title": "A new SPI host takes the pins of its IO MUX when they are free: on an ESP32 DevKit SPI3 is on 23, 19 and 18, the lines the terminal has there; its CS and SPI2 are not as the terminal has them, CS 5 and MISO 12 being strapping pins the solver keeps out",
+    "title": "A new SPI host takes the pins of its IO MUX when they are free: on an ESP32 DevKit SPI3 is on 23, 19 and 18, the lines the terminal has there; SPI2 is not, its MISO 12 selecting the voltage of the flash at reset (strapping_harmless.json has the CS)",
     "answers": {"blocks": [{"role": "nfc", "name": "nfc_in"}, {"role": "nfc", "name": "nfc_out"}]},
     "judged": {"board": "esp32_devkit", "ids": ["host_on_its_iomux"], "buses": {"spi3": {"mosi": 23, "miso": 19, "sclk": 18}}}
 }

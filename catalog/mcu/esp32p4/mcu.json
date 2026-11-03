@@ -82,6 +82,20 @@
             37,
             38
         ],
+        "boot_modes": {
+            "spi_boot": {
+                "35": 1,
+                "36": "any",
+                "37": "any",
+                "38": "any"
+            },
+            "joint_download_boot": {
+                "35": 0,
+                "36": 1,
+                "37": "any",
+                "38": "any"
+            }
+        },
         "pins": {
             "0": {
                 "low_power": "LP_GPIO0"
@@ -216,27 +230,60 @@
             "34": {
                 "notes": [
                     "Strapping pin"
-                ]
+                ],
+                "boot": {
+                    "selects": [
+                        "jtag source"
+                    ],
+                    "pull": null
+                }
             },
             "35": {
                 "notes": [
                     "Strapping pin"
-                ]
+                ],
+                "boot": {
+                    "selects": [
+                        "boot mode"
+                    ],
+                    "pull": "up"
+                }
             },
             "36": {
                 "notes": [
                     "Strapping pin"
-                ]
+                ],
+                "boot": {
+                    "selects": [
+                        "boot mode",
+                        "rom messages"
+                    ],
+                    "pull": null
+                }
             },
             "37": {
                 "notes": [
                     "Strapping pin"
-                ]
+                ],
+                "boot": {
+                    "selects": [
+                        "boot mode"
+                    ],
+                    "pull": null,
+                    "footnote": "For details about the functionalities of GPIO37 and GPIO38, see ESP32-P4 Technical Reference Manual > Chapter Chip Boot Control."
+                }
             },
             "38": {
                 "notes": [
                     "Strapping pin"
-                ]
+                ],
+                "boot": {
+                    "selects": [
+                        "boot mode"
+                    ],
+                    "pull": null,
+                    "footnote": "For details about the functionalities of GPIO37 and GPIO38, see ESP32-P4 Technical Reference Manual > Chapter Chip Boot Control."
+                }
             },
             "49": {
                 "analog": [
@@ -327,6 +374,15 @@
                 "gpio.strapping"
             ],
             "source": "ESP-IDF esp-idf, docs/en/api-reference/peripherals/gpio/esp32p4.inc"
+        },
+        "boot": {
+            "level": "datasheet",
+            "covers": [
+                "gpio.boot_modes",
+                "gpio.strapping",
+                "gpio.pins"
+            ],
+            "source": "~/dgx-bench/datasheets-espressif-2026-11-04/esp32p4/esp32-p4_datasheet_en_v0.7.pdf, Tables 3-1 and 3-3"
         },
         "iomux": {
             "level": "vendor-docs",

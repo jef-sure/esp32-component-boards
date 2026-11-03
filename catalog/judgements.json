@@ -8,6 +8,17 @@
             "pins": "iomux",
             "says": "{0} on the pins of its IO MUX",
             "why": "A host on the pins of its own IO MUX runs at its full speed, and wired boards often take them: SPI3 of the terminal and of dotview-clock is on 23 and 18. Taken only when every line of the host is free there; a pin the solver keeps out, as a strapping pin, leaves the host to other pins, so SPI2 of an ESP32, whose MISO is GPIO 12, is not on its IO MUX in a kit while the terminal has it there."
+        },
+        {
+            "id": "strapping_by_harm",
+            "kind": "keep_out",
+            "what": "strapping",
+            "harm": [
+                "run",
+                "download"
+            ],
+            "says": "{0} is a strapping pin ({1}): nothing on it should hold a level of its own at reset",
+            "why": "A strapping pin is sampled at reset. The datasheet gives what it selects and the rows of the table of boot modes (gpio.boot_modes, gpio.pins.*.boot of the chip); the solver reads from them the harm of a level there: run, where the start of the program or the voltage of the flash depends on it, download, where only a download mode does, none otherwise. The kit keeps out the harms listed here and a strapping pin the datasheet does not describe; it may take the others, as GPIO 5 of an ESP32, which the terminal takes for a CS."
         }
     ]
 }

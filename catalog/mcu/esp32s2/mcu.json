@@ -72,12 +72,28 @@
             45,
             46
         ],
+        "boot_modes": {
+            "spi_boot": {
+                "0": 1,
+                "46": "any"
+            },
+            "joint_download_boot": {
+                "0": 0,
+                "46": 0
+            }
+        },
         "pins": {
             "0": {
                 "low_power": "RTC_GPIO0",
                 "notes": [
                     "Strapping pin"
-                ]
+                ],
+                "boot": {
+                    "selects": [
+                        "boot mode"
+                    ],
+                    "pull": "up"
+                }
             },
             "1": {
                 "analog": [
@@ -260,13 +276,26 @@
             "45": {
                 "notes": [
                     "Strapping pin"
-                ]
+                ],
+                "boot": {
+                    "selects": [
+                        "flash voltage"
+                    ],
+                    "pull": "down"
+                }
             },
             "46": {
                 "notes": [
                     "GPI",
                     "Strapping pin"
-                ]
+                ],
+                "boot": {
+                    "selects": [
+                        "boot mode",
+                        "rom messages"
+                    ],
+                    "pull": "down"
+                }
             }
         },
         "notes": [
@@ -307,6 +336,15 @@
                 "gpio.strapping"
             ],
             "source": "ESP-IDF esp-idf, docs/en/api-reference/peripherals/gpio/esp32s2.inc"
+        },
+        "boot": {
+            "level": "datasheet",
+            "covers": [
+                "gpio.boot_modes",
+                "gpio.strapping",
+                "gpio.pins"
+            ],
+            "source": "~/dgx-bench/datasheets-espressif-2026-11-04/esp32s2/esp32-s2_datasheet_en_v1.9.pdf, Tables 3-1 and 3-3"
         },
         "iomux": {
             "level": "vendor-docs",

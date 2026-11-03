@@ -45,6 +45,23 @@
             4,
             5
         ],
+        "strapping": [
+            3,
+            4,
+            7,
+            8,
+            9
+        ],
+        "boot_modes": {
+            "spi_boot": {
+                "8": "any",
+                "9": 1
+            },
+            "joint_download_boot": {
+                "8": 1,
+                "9": 0
+            }
+        },
         "pins": {
             "0": {
                 "low_power": "LP_GPIO0"
@@ -62,13 +79,25 @@
                 "analog": [
                     "ADC1_CH1"
                 ],
-                "low_power": "LP_GPIO3"
+                "low_power": "LP_GPIO3",
+                "boot": {
+                    "selects": [
+                        "sdio timing"
+                    ],
+                    "pull": null
+                }
             },
             "4": {
                 "analog": [
                     "ADC1_CH2"
                 ],
-                "low_power": "LP_GPIO4"
+                "low_power": "LP_GPIO4",
+                "boot": {
+                    "selects": [
+                        "sdio timing"
+                    ],
+                    "pull": null
+                }
             },
             "5": {
                 "analog": [
@@ -78,6 +107,31 @@
             },
             "6": {
                 "low_power": "LP_GPIO6"
+            },
+            "7": {
+                "boot": {
+                    "selects": [
+                        "jtag source"
+                    ],
+                    "pull": null
+                }
+            },
+            "8": {
+                "boot": {
+                    "selects": [
+                        "boot mode",
+                        "rom messages"
+                    ],
+                    "pull": null
+                }
+            },
+            "9": {
+                "boot": {
+                    "selects": [
+                        "boot mode"
+                    ],
+                    "pull": "up"
+                }
             },
             "12": {
                 "notes": [
@@ -148,10 +202,19 @@
         "pins": {
             "level": "vendor-docs",
             "covers": [
+                "gpio.pins",
+                "gpio.strapping"
+            ],
+            "source": "ESP-IDF esp-idf, docs/en/api-reference/peripherals/gpio/esp32c61.inc"
+        },
+        "boot": {
+            "level": "datasheet",
+            "covers": [
+                "gpio.boot_modes",
+                "gpio.strapping",
                 "gpio.pins"
             ],
-            "source": "ESP-IDF esp-idf, docs/en/api-reference/peripherals/gpio/esp32c61.inc",
-            "notes": "the strapping pins are not named there"
+            "source": "~/dgx-bench/datasheets-espressif-2026-11-04/esp32c61/esp32-c61_datasheet_en_v1.1.pdf, Tables 3-1 and 3-3"
         },
         "iomux": {
             "level": "vendor-docs",

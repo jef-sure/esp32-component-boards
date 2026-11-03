@@ -40,6 +40,53 @@ GPIO_HIGH_MV_MAX = {target: 3600 for target in ("esp32", "esp32s2", "esp32s3", "
 WIFI_TX_POWER = {"how": "wifi_tx_power", "min": 8, "max": 84, "unit": "0.25 dBm", "read": "command"}
 
 
+# The strapping pins of a chip as its datasheet of Espressif gives them ("Boot Configurations"), copied, not judged:
+# the rows of its table of boot mode control (a level, or "any", for each pin of the mode) and, for each strapping pin,
+# what it selects, its own pull at reset (None when it floats) and the footnote of the table when there is one. Which
+# level harms what is the solver's to say (keep_out). MTMS, MTDI and MTDO are given as their GPIOs. The files lie in
+# ~/dgx-bench/datasheets-espressif-2026-11-04/<chip>/; no header of ESP-IDF has this.
+BOOT_MODE, FLASH_VOLTAGE, ROM_MESSAGES, SDIO_TIMING, JTAG_SOURCE = "boot mode", "flash voltage", "rom messages", "sdio timing", "jtag source"
+DATASHEETS = "~/dgx-bench/datasheets-espressif-2026-11-04"
+BOOT = {
+    "esp32": ("esp32/esp32_datasheet_en_v5.3.pdf, Tables 3-1 and 3-3",
+              {"spi_boot": {0: 1, 2: "any"}, "joint_download_boot": {0: 0, 2: 0}},
+              {0: ([BOOT_MODE], "up"), 2: ([BOOT_MODE], "down"), 5: ([SDIO_TIMING], "up"), 12: ([FLASH_VOLTAGE], "down"), 15: ([ROM_MESSAGES, SDIO_TIMING], "up")}),
+    "esp32s2": ("esp32s2/esp32-s2_datasheet_en_v1.9.pdf, Tables 3-1 and 3-3",
+                {"spi_boot": {0: 1, 46: "any"}, "joint_download_boot": {0: 0, 46: 0}},
+                {0: ([BOOT_MODE], "up"), 45: ([FLASH_VOLTAGE], "down"), 46: ([BOOT_MODE, ROM_MESSAGES], "down")}),
+    "esp32s3": ("esp32s3/esp32-s3_datasheet_en_v2.2.pdf, Tables 3-1 and 3-3",
+                {"spi_boot": {0: 1, 46: "any"}, "joint_download_boot": {0: 0, 46: 0}},
+                {0: ([BOOT_MODE], "up"), 3: ([JTAG_SOURCE], None), 45: ([FLASH_VOLTAGE], "down"), 46: ([BOOT_MODE, ROM_MESSAGES], "down")}),
+    "esp32c2": ("esp32c2/esp8684_datasheet_en_v2.3.pdf, Tables 10 and 12",
+                {"spi_boot": {9: 1, 8: "any"}, "joint_download_boot": {9: 0, 8: 1}},
+                {8: ([BOOT_MODE, ROM_MESSAGES], None), 9: ([BOOT_MODE], "up")}),
+    "esp32c3": ("esp32c3/esp32-c3_datasheet_en_v2.4.pdf, Tables 3-1 and 3-3",
+                {"spi_boot": {2: 1, 8: "any", 9: 1}, "joint_download_boot": {2: 1, 8: 1, 9: 0}},
+                {2: ([BOOT_MODE], None, "GPIO2 actually does not determine SPI Boot and Joint Download Boot mode, but it is recommended to pull this pin up due to glitches.", False),
+                 8: ([BOOT_MODE, ROM_MESSAGES], None), 9: ([BOOT_MODE], "up")}),
+    "esp32c5": ("esp32c5/esp32-c5_datasheet_en_v1.5.pdf, Tables 3-1 and 3-3",
+                {"spi_boot": {26: "any", 27: "any", 28: 1}, "joint_download_boot_0": {26: "any", 27: 1, 28: 0}, "joint_download_boot_1": {26: 0, 27: 0, 28: 0}},
+                {2: ([SDIO_TIMING], None), 3: ([SDIO_TIMING], None), 7: ([JTAG_SOURCE], None), 25: ([SDIO_TIMING], None),
+                 26: ([BOOT_MODE], None), 27: ([BOOT_MODE, ROM_MESSAGES], "up"), 28: ([BOOT_MODE], "up")}),
+    "esp32c6": ("esp32c6/esp32-c6_datasheet_en_v1.5.pdf, Tables 3-1 and 3-3",
+                {"spi_boot": {8: "any", 9: 1}, "joint_download_boot": {8: 1, 9: 0}},
+                {4: ([SDIO_TIMING], None), 5: ([SDIO_TIMING], None), 8: ([BOOT_MODE, ROM_MESSAGES], None), 9: ([BOOT_MODE], "up"), 15: ([JTAG_SOURCE], None)}),
+    "esp32c61": ("esp32c61/esp32-c61_datasheet_en_v1.1.pdf, Tables 3-1 and 3-3",
+                 {"spi_boot": {8: "any", 9: 1}, "joint_download_boot": {8: 1, 9: 0}},
+                 {3: ([SDIO_TIMING], None), 4: ([SDIO_TIMING], None), 7: ([JTAG_SOURCE], None), 8: ([BOOT_MODE, ROM_MESSAGES], None), 9: ([BOOT_MODE], "up")}),
+    "esp32h2": ("esp32h2/esp32-h2_datasheet_en_v1.3.pdf, Tables 3-1 and 3-3",
+                {"spi_boot": {8: "any", 9: 1}, "joint_download_boot": {8: 1, 9: 0}},
+                {8: ([BOOT_MODE, ROM_MESSAGES], None), 9: ([BOOT_MODE], "up"), 25: ([JTAG_SOURCE], None)}),
+    "esp32p4": ("esp32p4/esp32-p4_datasheet_en_v0.7.pdf, Tables 3-1 and 3-3",
+                {"spi_boot": {35: 1, 36: "any", 37: "any", 38: "any"}, "joint_download_boot": {35: 0, 36: 1, 37: "any", 38: "any"}},
+                {34: ([JTAG_SOURCE], None), 35: ([BOOT_MODE], "up"), 36: ([BOOT_MODE, ROM_MESSAGES], None),
+                 37: ([BOOT_MODE], None, "For details about the functionalities of GPIO37 and GPIO38, see ESP32-P4 Technical Reference Manual > Chapter Chip Boot Control."),
+                 38: ([BOOT_MODE], None, "For details about the functionalities of GPIO37 and GPIO38, see ESP32-P4 Technical Reference Manual > Chapter Chip Boot Control.")}),
+    "esp32s31": ("esp32s31/esp32-s31_datasheet_en_v0.5.pdf, Tables 3-1 and 3-3",
+                 {"spi_boot": {61: 1, 60: "any"}, "joint_download_boot": {61: 0, 60: 1}, "invalid_combination": {61: 0, 60: 0}},
+                 {36: ([FLASH_VOLTAGE], None), 37: ([JTAG_SOURCE], None), 60: ([BOOT_MODE, ROM_MESSAGES], "up"), 61: ([BOOT_MODE], "up")}),
+}
+
 IOMUX_LINES = {"MOSI": "mosi", "MISO": "miso", "CLK": "sclk", "CS": "cs", "WP": "wp", "HD": "hd"}  # names of spi_pins.h -> of the buses
 
 
@@ -241,13 +288,23 @@ def main():
         for note in notes:
             if note.startswith("Strapping pin"):
                 strapping |= {int(number) for number in re.findall(r"GPIO(\d+)", note.split("strapping pins")[0])}
-        entry["gpio"].update({**({"strapping": sorted(strapping)} if strapping else {}), "pins": pins, "notes": notes})
+        # the datasheet adds what the docs leave out (MTMS and MTDI of the C5 and the C61), and says what each pin does
+        datasheet, modes, boot = BOOT.get(target, (None, {}, {}))
+        strapping |= set(boot)
+        for pin, (selects, pull, *footnote) in boot.items():
+            # decides: False where the footnote says the level of the pin does not determine the mode its row names
+            pins.setdefault(str(pin), {})["boot"] = {"selects": selects, "pull": pull, **({"footnote": footnote[0]} if footnote else {}), **({"decides": footnote[1]} if len(footnote) > 1 else {})}
+        # pins by number, as a JS object orders keys that are numbers whatever order they were written in
+        boot_modes = {"boot_modes": {mode: {str(pin): level for pin, level in sorted(levels.items())} for mode, levels in modes.items()}} if modes else {}
+        entry["gpio"].update({**({"strapping": sorted(strapping)} if strapping else {}), **boot_modes, "pins": dict(sorted(pins.items(), key=lambda item: int(item[0]))), "notes": notes})
         source = f"ESP-IDF {IDF.name}, docs/en/api-reference/peripherals/gpio/{target}.inc"
         if strapping:
             entry["checked"]["pins"] = {"level": "vendor-docs", "covers": ["gpio.pins", "gpio.strapping"], "source": source}
         else:
-            print(f"{target}: the docs name no strapping pins: gpio.strapping left out, give it from the datasheet", file=sys.stderr)
+            print(f"{target}: neither the docs nor a datasheet here name its strapping pins: gpio.strapping left out", file=sys.stderr)
             entry["checked"]["pins"] = {"level": "vendor-docs", "covers": ["gpio.pins"], "source": source, "notes": "the strapping pins are not named there"}
+        if datasheet:
+            entry["checked"]["boot"] = {"level": "datasheet", "covers": ["gpio.boot_modes", "gpio.strapping", "gpio.pins"], "source": f"{DATASHEETS}/{datasheet}"}
         limits, older = limits_of(target)
         if limits:
             entry["limits"] = limits

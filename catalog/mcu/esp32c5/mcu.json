@@ -49,11 +49,30 @@
         "high_mv_max": 3600,
         "strapping": [
             2,
+            3,
             7,
             25,
+            26,
             27,
             28
         ],
+        "boot_modes": {
+            "spi_boot": {
+                "26": "any",
+                "27": "any",
+                "28": 1
+            },
+            "joint_download_boot_0": {
+                "26": "any",
+                "27": 1,
+                "28": 0
+            },
+            "joint_download_boot_1": {
+                "26": 0,
+                "27": 0,
+                "28": 0
+            }
+        },
         "pins": {
             "0": {
                 "low_power": "LP_GPIO0"
@@ -71,13 +90,25 @@
                 "low_power": "LP_GPIO2",
                 "notes": [
                     "Strapping pin"
-                ]
+                ],
+                "boot": {
+                    "selects": [
+                        "sdio timing"
+                    ],
+                    "pull": null
+                }
             },
             "3": {
                 "analog": [
                     "ADC1_CH2"
                 ],
-                "low_power": "LP_GPIO3"
+                "low_power": "LP_GPIO3",
+                "boot": {
+                    "selects": [
+                        "sdio timing"
+                    ],
+                    "pull": null
+                }
             },
             "4": {
                 "analog": [
@@ -100,7 +131,13 @@
             "7": {
                 "notes": [
                     "Strapping pin"
-                ]
+                ],
+                "boot": {
+                    "selects": [
+                        "jtag source"
+                    ],
+                    "pull": null
+                }
             },
             "13": {
                 "notes": [
@@ -150,17 +187,44 @@
             "25": {
                 "notes": [
                     "Strapping pin"
-                ]
+                ],
+                "boot": {
+                    "selects": [
+                        "sdio timing"
+                    ],
+                    "pull": null
+                }
+            },
+            "26": {
+                "boot": {
+                    "selects": [
+                        "boot mode"
+                    ],
+                    "pull": null
+                }
             },
             "27": {
                 "notes": [
                     "Strapping pin"
-                ]
+                ],
+                "boot": {
+                    "selects": [
+                        "boot mode",
+                        "rom messages"
+                    ],
+                    "pull": "up"
+                }
             },
             "28": {
                 "notes": [
                     "Strapping pin"
-                ]
+                ],
+                "boot": {
+                    "selects": [
+                        "boot mode"
+                    ],
+                    "pull": "up"
+                }
             }
         },
         "notes": [
@@ -198,6 +262,15 @@
                 "gpio.strapping"
             ],
             "source": "ESP-IDF esp-idf, docs/en/api-reference/peripherals/gpio/esp32c5.inc"
+        },
+        "boot": {
+            "level": "datasheet",
+            "covers": [
+                "gpio.boot_modes",
+                "gpio.strapping",
+                "gpio.pins"
+            ],
+            "source": "~/dgx-bench/datasheets-espressif-2026-11-04/esp32c5/esp32-c5_datasheet_en_v1.5.pdf, Tables 3-1 and 3-3"
         },
         "iomux": {
             "level": "vendor-docs",

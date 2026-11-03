@@ -604,7 +604,7 @@
             "required": ["id", "kind", "says", "why"],
             "properties": {
               "id": { "$ref": "#/$defs/name" },
-              "kind": { "enum": ["prefer_pins"] },
+              "kind": { "enum": ["prefer_pins", "keep_out"] },
               "says": { "type": "string", "description": "The line of a kit, {0} what it is about." },
               "why": { "type": "string" }
             },
@@ -614,6 +614,16 @@
                 "then": {
                   "required": ["bus", "pins"],
                   "properties": { "bus": { "enum": ["spi"] }, "pins": { "enum": ["iomux"], "description": "A field of the chip: its pins of each host." } }
+                }
+              },
+              {
+                "if": { "properties": { "kind": { "const": "keep_out" } } },
+                "then": {
+                  "required": ["what", "harm"],
+                  "properties": {
+                    "what": { "enum": ["strapping"], "description": "Which pins: the strapping pins of the chip." },
+                    "harm": { "type": "array", "items": { "enum": ["run", "download"] }, "description": "A pin whose boot.harm is one of these is kept out; one with no boot at all too." }
+                  }
                 }
               }
             ]
@@ -670,9 +680,27 @@
                 "properties": {
                   "analog": { "type": "array", "items": { "type": "string" } },
                   "low_power": { "type": "string" },
-                  "notes": { "type": "array", "items": { "type": "string" } }
+                  "notes": { "type": "array", "items": { "type": "string" } },
+                  "boot": {
+                    "description": "A strapping pin as the datasheet gives it: what it selects at reset, its own pull then (null when it floats) and the footnote of the table of boot modes. Which level harms what, the solver says (keep_out).",
+                    "type": "object",
+                    "required": ["selects", "pull"],
+                    "additionalProperties": false,
+                    "properties": {
+                      "selects": { "type": "array", "minItems": 1, "items": { "enum": ["boot mode", "flash voltage", "rom messages", "sdio timing", "jtag source"] } },
+                      "pull": { "enum": ["up", "down", null] },
+                      "footnote": { "type": "string" },
+                      "decides": { "const": false, "description": "The footnote says the level of this pin does not determine the mode its rows name." }
+                    }
+                  }
                 }
               }
+            },
+            "boot_modes": {
+              "description": "The rows of the table of boot mode control of the datasheet, by the name of the mode (spi_boot, the program starting; the others): the level of each strapping pin of the mode, or any.",
+              "type": "object",
+              "required": ["spi_boot"],
+              "additionalProperties": { "type": "object", "propertyNames": { "pattern": "^[0-9]+$" }, "additionalProperties": { "enum": [0, 1, "any"] } }
             },
             "notes": { "description": "What those notes mean, and when a pin may be used.", "type": "array", "items": { "type": "string" } }
           }

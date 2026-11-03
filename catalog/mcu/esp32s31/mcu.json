@@ -89,6 +89,20 @@
             60,
             61
         ],
+        "boot_modes": {
+            "spi_boot": {
+                "60": "any",
+                "61": 1
+            },
+            "joint_download_boot": {
+                "60": 1,
+                "61": 0
+            },
+            "invalid_combination": {
+                "60": 0,
+                "61": 0
+            }
+        },
         "pins": {
             "0": {
                 "low_power": "LP_GPIO0"
@@ -219,12 +233,24 @@
             "36": {
                 "notes": [
                     "Strapping pin"
-                ]
+                ],
+                "boot": {
+                    "selects": [
+                        "flash voltage"
+                    ],
+                    "pull": null
+                }
             },
             "37": {
                 "notes": [
                     "Strapping pin"
-                ]
+                ],
+                "boot": {
+                    "selects": [
+                        "jtag source"
+                    ],
+                    "pull": null
+                }
             },
             "38": {
                 "notes": [
@@ -334,12 +360,25 @@
             "60": {
                 "notes": [
                     "Strapping pin"
-                ]
+                ],
+                "boot": {
+                    "selects": [
+                        "boot mode",
+                        "rom messages"
+                    ],
+                    "pull": "up"
+                }
             },
             "61": {
                 "notes": [
                     "Strapping pin"
-                ]
+                ],
+                "boot": {
+                    "selects": [
+                        "boot mode"
+                    ],
+                    "pull": "up"
+                }
             }
         },
         "notes": [
@@ -382,6 +421,15 @@
                 "gpio.strapping"
             ],
             "source": "ESP-IDF esp-idf, docs/en/api-reference/peripherals/gpio/esp32s31.inc"
+        },
+        "boot": {
+            "level": "datasheet",
+            "covers": [
+                "gpio.boot_modes",
+                "gpio.strapping",
+                "gpio.pins"
+            ],
+            "source": "~/dgx-bench/datasheets-espressif-2026-11-04/esp32s31/esp32-s31_datasheet_en_v0.5.pdf, Tables 3-1 and 3-3"
         },
         "iomux": {
             "level": "vendor-docs",

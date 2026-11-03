@@ -407,11 +407,32 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
     }
 
     // The pins left to wire to: free and with nothing to remember about them. A board with connectors in its data gives only what comes out.
+    // The harm of a level on a strapping pin, read from what the datasheet gives: the voltage of the flash, or a level the start of the
+    // program (the row spi_boot of the table of boot modes) names, is run; a level only another row names is download; a pin
+    // whose level the footnote says decides nothing, or which no row names, is none. A pin the datasheet does not describe: unknown.
+    function bootHarm(board, pin, entry) {
+        if (!entry.boot) return 'unknown';
+        if (entry.boot.selects.includes('flash voltage')) return 'run';
+        if (entry.boot.decides === false) return null;
+        const modes = board.mcu.facts.gpio.boot_modes ?? {};
+        const named = (row) => row?.[pin] !== undefined && row[pin] !== 'any';
+        if (named(modes.spi_boot)) return 'run';
+        return Object.entries(modes).some(([mode, row]) => mode !== 'spi_boot' && named(row)) ? 'download' : null;
+    }
+
+    // keep_out of strapping pins: given only when a judgement lets its harm go; an unknown one never
+    function strappingGiven(board, pin, entry) {
+        const harm = bootHarm(board, pin, entry);
+        return harm !== 'unknown' && judgementsOf('keep_out').some((judgement) => judgement.what === 'strapping' && !judgement.harm.includes(harm));
+    }
+
     function freePins(board) {
         const map = pinMap(board);
         const hasOutside = Object.values(map).some((entry) => entry.connectors.length);
+        // the note of a strapping pin is the judgement's to weigh; any other note keeps a pin out
+        const notes = (entry) => (entry.notes || []).filter((note) => !note.startsWith('Strapping pin'));
         return Object.entries(map)
-            .filter(([, entry]) => entry.state === 'free' && !entry.strapping && !entry.input_only && !(entry.notes || []).length && (!hasOutside || entry.connectors.length))
+            .filter(([pin, entry]) => entry.state === 'free' && (!entry.strapping || strappingGiven(board, pin, entry)) && !entry.input_only && !notes(entry).length && (!hasOutside || entry.connectors.length))
             .map(([pin]) => +pin);
     }
 
@@ -1110,6 +1131,16 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             }
             // a host of the kit on the pins a judgement names, with the id of that judgement
             const chip = (resolved ?? base)?.mcu?.facts;
+            // a strapping pin the kit takes, with the judgement that lets it and what the pin selects
+            if (project) {
+                const before = pinMap(base);
+                const after = pinMap(resolved);
+                for (const judgement of judgementsOf('keep_out').filter((item) => item.what === 'strapping')) {
+                    for (const [pin, entry] of Object.entries(after)) {
+                        if (entry.strapping && entry.boot && entry.owners.length && !before[pin]?.owners.length) lines.push({ level: 'note', text: t(judgement.says, `GPIO ${pin}`, entry.boot.footnote ?? t('it selects {0}', entry.boot.selects.join(', '))), judgement: judgement.id, pin: +pin });
+                    }
+                }
+            }
             if (chip && project && !chip.gpio?.strapping) lines.push({ level: 'unknown', text: t('{0}: its strapping pins are not in the data: a pin of this kit may be one', chip.title ?? chip.name) });
             for (const judgement of judgementsOf('prefer_pins')) {
                 for (const [own, bus] of Object.entries(project?.buses?.[judgement.bus] ?? {})) {

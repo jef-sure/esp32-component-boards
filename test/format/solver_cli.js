@@ -48,7 +48,10 @@ function holdsForEvery(kits, say) {
         const outside = Object.values(map).some((entry) => entry.connectors.length);
         for (const { pin, what, line } of kit.wires) {
             const entry = map[pin];
-            const fine = entry && entry.state === 'free' && !entry.strapping && !entry.input_only && !(entry.notes || []).length && (!outside || entry.connectors.length);
+            // a strapping pin only where a judgement let it, and the kit says so; its note is the judgement's
+            const judged = kit.says.some((said) => said.judgement === 'strapping_by_harm' && said.pin === pin);
+            const notes = (entry?.notes || []).filter((note) => !note.startsWith('Strapping pin'));
+            const fine = entry && entry.state === 'free' && (!entry.strapping || judged) && !entry.input_only && !notes.length && (!outside || entry.connectors.length);
             if (!fine && !what.includes(' ')) say(`${kit.name}: ${what} ${line} is on GPIO ${pin}`);
             if (what.includes(' ') && outside && !entry?.connectors.length) say(`${kit.name}: ${what} ${line} does not come out, GPIO ${pin}`);
             if (what.includes(' ') && !board.buses?.[what.split(' ')[0].toLowerCase()]?.[what.split(' ')[1]] && !fine) say(`${kit.name}: ${what} ${line} is on GPIO ${pin}`);
@@ -155,6 +158,11 @@ for (const name of names) {
         const ids = new Set(kit?.says.filter((line) => line.judgement).map((line) => line.judgement));
         for (const id of given.judged.ids) if (!ids.has(id)) say(`${given.judged.board}: no line of the judgement ${id}`);
         for (const [bus, lines] of Object.entries(given.judged.buses ?? {})) for (const [line, pin] of Object.entries(lines)) if (kit?.project.buses?.spi?.[bus]?.[line] !== pin) say(`${given.judged.board}: ${bus}.${line} is ${kit?.project.buses?.spi?.[bus]?.[line]}, not ${pin}`);
+        // the cs of the part on a host
+        for (const [bus, pin] of Object.entries(given.judged.cs ?? {})) {
+            const on = Object.values(kit?.project.modules ?? {}).map((item) => item.on?.[`spi.${bus}`]?.cs).filter((cs) => cs !== undefined);
+            if (!on.includes(pin)) say(`${given.judged.board}: the cs on ${bus} is ${on.join(', ') || 'none'}, not ${pin}`);
+        }
     }
     for (const kit of fit) if (kit.project && (given.imported ? widerChecks : checksOf)(kit.project).problems.length) say(`${kit.name}: its project does not pass the checks`);
     if (given.imported && !kits.some((kit) => kit.imported && kit.fits)) say('no imported board fits');

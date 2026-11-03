@@ -707,6 +707,11 @@ kit, `selection.json` keeps it, and a case of `test/solver/` checks the `id`, no
 | kind | fields | what it does |
 |---|---|---|
 | `prefer_pins` | `bus`, `pins` (a field of the chip) | a new host of `bus` takes the pins the chip names for it when all are free; those pins go last for anything else |
+| `keep_out` | `what` (`strapping`), `harm` | a strapping pin whose `boot.harm` is listed, or which has no `boot`, is given to nothing; the others are given with a line |
+
+A strapping pin of a chip has `boot` in `gpio.pins` of `mcu.json`, from the datasheet: `selects` (boot mode, flash
+voltage, rom messages, sdio timing, jtag source), `harm` (`run`: a wrong level keeps the program from starting;
+`download`: only the download mode; `null`: a log, a timing or the source of JTAG) and `pull` at reset.
 
 `host_on_its_iomux` is the first: an SPI host on the pins of its IO MUX (`iomux` of `mcu.json`, from `spi_pins.h` of
 ESP-IDF), as a wired board takes them.

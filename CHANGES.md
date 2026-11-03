@@ -248,6 +248,16 @@ committed, a program that asks by kind.
   `board_sound_start`, `board_sound_source` and their `_at` forms take `ctx`, given back to it at every call, so the mixer
   of a game needs no static. The task takes the source and its context together. The names `board_`, `boards_`,
   `BOARD_` and `CONFIG_BOARD_` are said to be the component's (both found by 7c after the move of dgx-ge was decided).
+- The strapping pins of a chip are as its datasheet of Espressif gives them, copied, not judged: the rows of its table
+  of boot modes (`gpio.boot_modes`: the level of each pin for `spi_boot` and for each download mode) and, for each pin,
+  `boot` with what it selects, its pull at reset and the footnote of the table. The datasheets lie in
+  `~/dgx-bench/datasheets-espressif-2026-11-04/`, named in `checked.boot`. The list of strapping pins joins the docs of
+  ESP-IDF and the datasheet, which name different ones for the C5, C61, H2 and S31; the H21 and H4 have no PDF and keep
+  the docs alone. A second judgement, `strapping_by_harm`, reads the harm of a level there: run (the start of the
+  program or the voltage of the flash), download, or none; it keeps out run, download and a pin no datasheet describes,
+  and lets the others go with a line that names the pin. Two readers on an ESP32 DevKit now have SPI3 on 23, 19, 18
+  with the CS on GPIO 5, as the terminal is wired; GPIO 2 of a C3 goes with the footnote of its datasheet (7c read the
+  tables against the PDFs).
 - The computer is a board: `board_select.py host --as <board>` and `idf.py -D BOARD=host build` build the program for
   the linux target of ESP-IDF, `src/board_host.c` gives `boards.h` over SDL2 (a window as large as the board shown, its
   sound, the time), and `BOARD_PIXELS`/`BOARD_MM` are those of that board. hello_board built so runs on the computer

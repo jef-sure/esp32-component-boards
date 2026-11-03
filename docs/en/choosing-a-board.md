@@ -131,6 +131,9 @@ idf.py -B build-host -D SDKCONFIG=build-host/sdkconfig -D BOARD=host build
 build-host/<project>.elf
 ```
 
+Its log comes as it is written in a terminal; through a pipe it is buffered, and `stdbuf -o0 build-host/<project>.elf`
+gives it at once.
+
 `board_select.py` writes `sdkconfig.defaults.host` beside the files of the boards of the project, and the CMake of the
 skeleton builds only `main` and what it asks for the computer. `BOARD_PIXELS` and `BOARD_MM` are those of the board
 shown. The computer has the sound, by SDL; a window that is closed ends the program. The window stays black and there is

@@ -51,7 +51,7 @@ config BOARD_SELECT_ESP32_P4_ETH
     help
         An ESP32-P4 with 100 Mbit Ethernet on an IP101, an ES8311 with a
         microphone and a speaker output, a microSD slot, MIPI CSI and DSI
-        connectors, a 40-pin header in the layout of a Pico. No radio..
+        connectors, a 40-pin header in the layout of a Pico. No radio.
 
 config BOARD_SELECT_ESP32_P4_POE_ETH
     bool "Waveshare ESP32-P4-POE-ETH: ES8311 sound"
@@ -201,6 +201,10 @@ config BOARD_JC8012P4A1C
 config BOARD_DISPLAY_GRAPHICS
     int
     default 1 if BOARD_SELECT_CYD_S028R || BOARD_SELECT_JC1060P470C || BOARD_SELECT_JC4827W543C || BOARD_SELECT_JC8012P4A1C
+    default 0
+
+config BOARD_DISPLAY_GROUP
+    int
     default 0
 
 config BOARD_DISPLAY_HD44780

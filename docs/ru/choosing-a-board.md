@@ -130,6 +130,9 @@ idf.py -B build-host -D SDKCONFIG=build-host/sdkconfig -D BOARD=host build
 build-host/<project>.elf
 ```
 
+В терминале лог идёт сразу; через трубу он буферизуется, и `stdbuf -o0 build-host/<project>.elf` выдаёт его без
+задержки.
+
 `board_select.py` пишет `sdkconfig.defaults.host` рядом с файлами плат проекта, а CMake заготовки собирает для компьютера
 только `main` и то, что он требует. `BOARD_PIXELS` и `BOARD_MM` берутся у показываемой платы. Звук у компьютера есть, через
 SDL; закрытое окно завершает программу. Окно остаётся чёрным, а тача нет, пока DGX и DGX-DI не собираются под цель

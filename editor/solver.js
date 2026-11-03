@@ -1148,6 +1148,9 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
                     }
                 }
             }
+            // strapping pins the docs name and no datasheet describes: kept out, and said
+            const undescribed = (chip?.gpio?.strapping ?? []).filter((pin) => !chip.gpio.pins?.[pin]?.boot);
+            if (project && undescribed.length) lines.push({ level: 'note', text: t('GPIO {0}: strapping pins by the docs of ESP-IDF, with no description of their boot in the data: the kit leaves them', undescribed.join(', ')), judgement: 'strapping_by_harm' });
             if (chip && project && !chip.gpio?.strapping) lines.push({ level: 'unknown', text: t('{0}: its strapping pins are not in the data: a pin of this kit may be one', chip.title ?? chip.name) });
             for (const judgement of judgementsOf('prefer_pins')) {
                 for (const [own, bus] of Object.entries(project?.buses?.[judgement.bus] ?? {})) {

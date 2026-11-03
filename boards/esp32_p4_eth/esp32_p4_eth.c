@@ -13,7 +13,7 @@
 #include "board_sound_es8311.h"
 #include "driver/i2s_std.h"
 
-/* Waveshare ESP32-P4-ETH: An ESP32-P4 with 100 Mbit Ethernet on an IP101, an ES8311 with a microphone and a speaker output, a microSD slot, MIPI CSI and DSI connectors, a 40-pin header in the layout of a Pico. No radio.. */
+/* Waveshare ESP32-P4-ETH: An ESP32-P4 with 100 Mbit Ethernet on an IP101, an ES8311 with a microphone and a speaker output, a microSD slot, MIPI CSI and DSI connectors, a 40-pin header in the layout of a Pico. No radio. */
 
 /* The buses of the board. */
 static const struct board_i2c_pins board_i2c_buses[] = {

@@ -23,15 +23,22 @@
 #include "boards_hd44780.h"
 #endif
 
-/* A second of a tone, then silence: the speaker of the board heard once. */
+enum { TONE_PERIOD = 50 }; /* samples a wave: 441 Hz at 22050 */
+#define TONE_AMPLITUDE 8000.0f
+#define TWO_PI         6.2831853f
+
+/* A second of a tone at the rate of the board, then silence: the speaker of the board heard once. */
+struct tone {
+    uint32_t rate, phase, made;
+};
+
 static void tone(void *ctx, int16_t *samples, size_t count)
 {
-    (void)ctx;
-    static uint32_t phase, made;
+    struct tone *wave = ctx;
     for (size_t i = 0; i < count; ++i) {
-        samples[i] = made < 22050 ? (int16_t)(sinf((float)phase * 6.2831853f / 50.0f) * 8000.0f) : 0; /* 441 Hz at 22050 */
-        phase = (phase + 1) % 50;
-        ++made;
+        samples[i]  = wave->made < wave->rate ? (int16_t)(sinf((float)wave->phase * TWO_PI / TONE_PERIOD) * TONE_AMPLITUDE) : 0;
+        wave->phase = (wave->phase + 1) % TONE_PERIOD;
+        ++wave->made;
     }
 }
 
@@ -82,9 +89,15 @@ void app_main(void)
         if (board_button_at(i, &pressed)) printf("  %s: %s\n", board_button_name(i), pressed ? "held" : "free");
     }
 
-    uint32_t rate;
-    if (board_sound_start(tone, NULL, &rate)) printf("the sound: %lu Hz, a second of a tone\n", (unsigned long)rate);
-    else printf("the sound: none, or it could not be set up\n");
+    static struct tone wave;
+    board_sound_t      sound;
+    if (board_sound_init(&sound)) {
+        wave.rate = sound.rate;
+        board_sound_start(tone, &wave, NULL);
+        printf("the sound: %lu Hz, a second of a tone\n", (unsigned long)sound.rate);
+    } else {
+        printf("the sound: none, or it could not be set up\n");
+    }
 
     long hz;
     if (board_bus_get("spi.spi2", "hz", &hz)) printf("the display's SPI runs at %ld Hz\n", hz);

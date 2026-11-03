@@ -22,6 +22,7 @@ static const char *TAG = "board_report";
 #define I2C_LAST    0x77
 #define I2C_PROBE_MS 20
 #define MB          (1024 * 1024)
+#define I2C_GLITCH_IGNORE 7 /* clock cycles a glitch may last, as the examples of ESP-IDF set it */
 
 static void scan_i2c(void)
 {
@@ -30,7 +31,7 @@ static void scan_i2c(void)
         printf("]");
         return;
     }
-    const i2c_master_bus_config_t config = {.i2c_port = -1, .sda_io_num = CONFIG_REPORT_I2C_SDA, .scl_io_num = CONFIG_REPORT_I2C_SCL, .clk_source = I2C_CLK_SRC_DEFAULT, .glitch_ignore_cnt = 7, .flags.enable_internal_pullup = true};
+    const i2c_master_bus_config_t config = {.i2c_port = -1, .sda_io_num = CONFIG_REPORT_I2C_SDA, .scl_io_num = CONFIG_REPORT_I2C_SCL, .clk_source = I2C_CLK_SRC_DEFAULT, .glitch_ignore_cnt = I2C_GLITCH_IGNORE, .flags.enable_internal_pullup = true};
     i2c_master_bus_handle_t bus;
     esp_err_t err = i2c_new_master_bus(&config, &bus);
     if (err != ESP_OK) {

@@ -1,5 +1,5 @@
 # The glue of cyd_s028r, made by tools/boards_gen.py from its data: the components it needs,
-# derived from what the board has (the components of ESP-IDF 5.3 and later; extra_requires
+# derived from what the board has (the components of ESP-IDF 5.5 and later; extra_requires
 # in catalog/boards/cyd_s028r/board.json adds what the structure cannot say). Do not edit by hand.
 # Added after idf_component_register, when the configuration is known: a requirement that
 # depends on the board chosen cannot stand in REQUIRES. Optional: a component the rules of the

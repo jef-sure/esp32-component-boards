@@ -693,11 +693,21 @@ def module_symbol(board):
     return f"BOARD_MODULE_{board['name'].upper()}"
 
 
+BUS_REQUIRES = {"i2c": "esp_driver_i2c", "i2s": "esp_driver_i2s", "spi": "esp_driver_spi", "qspi": "esp_driver_spi", "gpio": "esp_driver_gpio"}
+
+
+def sentence(text):
+    """A text of the data as a sentence: its own full stop, or one."""
+    return text if text.rstrip().endswith((".", "!", "?")) else f"{text}."
+
+
 def derive_requires(board):
     """What the glue needs at link, derived from what the board has."""
     requires = set()
     for kind in (board.get("buses") or {}):
-        requires.add({"i2c": "esp_driver_i2c", "i2s": "esp_driver_i2s", "spi": "esp_driver_spi", "qspi": "esp_driver_spi"}.get(kind, "esp_driver_gpio"))
+        # the kinds the glue sets up itself; a kind it only keeps for the program (dsi, rmii, uart, sdio) brings nothing
+        if kind in BUS_REQUIRES:
+            requires.add(BUS_REQUIRES[kind])
     for record, _, also in started(board):
         requires.update(idf_name(used) for used in (record, *also))
         requires.update(record["adapter"].get("requires", ()))
@@ -782,7 +792,7 @@ def gen_c(board):
     for header in sorted(set(headers)):
         out(f"#include <{header}>" if header in ("stdlib.h", "string.h") else f"#include \"{header}\"")
     out("")
-    out(f"/* {board['title']}: {board['description']}. */")
+    out(f"/* {board['title']}: {sentence(board['description'])} */")
     out("")
 
     # ---- the pins of the board, each named by the part it serves ----
@@ -1029,7 +1039,7 @@ def gen_cmake(board):
     name = board["name"]
     requires = derive_requires(board)
     L = [f"# The glue of {name}, made by tools/boards_gen.py from its data: the components it needs,",
-         f"# derived from what the board has (the components of ESP-IDF 5.3 and later; extra_requires",
+         f"# derived from what the board has (the components of ESP-IDF 5.5 and later; extra_requires",
          f"# in {data_path(board)} adds what the structure cannot say). Do not edit by hand.",
          "# Added after idf_component_register, when the configuration is known: a requirement that",
          "# depends on the board chosen cannot stand in REQUIRES. Optional: a component the rules of the",
@@ -1109,7 +1119,7 @@ def kconfig_board(board):
     for group in (board.get("display_groups") or {}).values():
         selects += resolve.library(board["display"]["library"])["groups"][group["how"]]["select"]
     L.extend(f"    select {symbol}" for symbol in dict.fromkeys(selects))
-    L.extend(["    help", kconfig_help(board["description"] + "."), ""])
+    L.extend(["    help", kconfig_help(sentence(board["description"])), ""])
     return L
 
 
@@ -1218,7 +1228,7 @@ def gen_kconfig(boards, modules):
             out(f"    bool \"{menu_text(module)}\"")
             out("    depends on " + " && ".join(["!BOARD_SELECT_NONE", *(bus_symbol(kind) for kind in bus_kinds(module))]))
             out("    help")
-            out(kconfig_help(module["description"] + "."))
+            out(kconfig_help(sentence(module["description"])))
             out("")
     out("# Hidden symbols the rules of idf_component.yml and CMakeLists.txt look at: the board chosen,")
     out("# as a number (a number is easier for a rule to compare).")
@@ -1241,6 +1251,7 @@ def gen_kconfig(boards, modules):
             all_features.setdefault(feature, []).append(module_symbol(module))
     for symbol, _, _ in feature_deps():
         all_features.setdefault(symbol, [])
+    all_features.setdefault("BOARD_DISPLAY_GROUP", [])  # #if in the adapter of DGX: defined, 0, on a board with no group
     for feature in sorted(all_features):
         out(f"config {feature}")
         out("    int")

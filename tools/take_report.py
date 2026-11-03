@@ -63,10 +63,56 @@ def take(body, issue, catalog, today):
     path = catalog / kind / name / FILES[kind]
     if not path.is_file():
         raise ValueError(f"Item: the catalog has no {item}")
-    doc = json.loads(path.read_text())
+    text = path.read_text()
+    doc = json.loads(text)
     doc.setdefault("price", {})[f"report_{issue}"] = offer
-    path.write_text(resolve.dump(doc))
+    path.write_text(with_offer(text, f"report_{issue}", offer, doc))
     return f"{item}: {offer['shop']}, {offer['range']} {offer['currency']}"
+
+
+def closing(text, start):
+    """Where the object that opens at text[start] closes, strings skipped."""
+    depth, quoted, escaped = 0, False, False
+    for at in range(start, len(text)):
+        char = text[at]
+        if quoted:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == '"':
+                quoted = False
+            continue
+        if char == '"':
+            quoted = True
+        elif char in "{[":
+            depth += 1
+        elif char in "}]":
+            depth -= 1
+            if not depth:
+                return at
+    return -1
+
+
+def with_offer(text, key, offer, doc):
+    """The file with one offer more, by a line put into its text, so the rest of the file stays as it was written; the
+    whole file anew (resolve.dump) when the text is not in a shape that takes one."""
+    line = f'        "{key}": {resolve.dump(offer, 8, len(key) + 4)}'
+    found = re.search(r'^    "price": \{', text, re.M)
+    if found:
+        end = closing(text, found.end() - 1)
+        before = text[:end].rstrip()
+        made = f"{before}{'' if before.endswith('{') else ','}\n{line}\n    " + text[end:]
+    else:
+        last = closing(text, text.index("{"))
+        before = text[:last].rstrip()
+        made = f'{before},\n    "price": {{\n{line}\n    }}\n' + text[last:]
+    try:
+        if json.loads(made) == doc:
+            return made
+    except ValueError:
+        pass
+    return resolve.dump(doc) + "\n"
 
 
 def main():

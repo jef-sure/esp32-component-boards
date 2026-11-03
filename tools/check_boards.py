@@ -30,41 +30,13 @@ sys.path.insert(0, str(ROOT / "tools"))
 import boards_gen  # noqa: E402
 import resolve
 
-# what boards.h declares, defined by the glue, by src/ or by an adapter the board starts, and the tables every glue gives
-API = (
-    "int board_display_count(void)",
-    "bool board_display_init(struct board_display *out)",
-    "bool board_display_init_at(int index, struct board_display *out)",
-    "bool board_display_orientation(struct board_display *display, int dir_x, int dir_y, bool swap_xy)",
-    "bool board_character_display_init(struct board_character_display *out)",
-    "int board_touch_count(void)",
-    "bool board_touch_start(const struct board_display *display, struct board_touch *out)",
-    "bool board_touch_start_at(int index, const struct board_display *display, struct board_touch *out)",
-    "const struct board_touch_table board_touch_table",
-    "int board_sound_count(void)",
-    "bool board_sound_init(board_sound_t *out)",
-    "bool board_sound_init_at(int index, board_sound_t *out)",
-    "bool board_sound_start(board_sound_source_t source, void *ctx, uint32_t *rate_out)",
-    "bool board_sound_start_at(int index, board_sound_source_t source, void *ctx, uint32_t *rate_out)",
-    "void board_sound_source(board_sound_source_t source, void *ctx)",
-    "void board_sound_source_at(int index, board_sound_source_t source, void *ctx)",
-    "const struct board_sound_table board_sound_table",
-    "int board_button_count(void)",
-    "const char *board_button_name(int index)",
-    "bool board_button(bool *pressed)",
-    "bool board_button_at(int index, bool *pressed)",
-    "const struct board_button_table board_button_table",
-    "const struct board_spi_bus *board_spi_bus(int host)",
-    "bool board_spi_taken(int host)",
-    "bool board_bus_get(const char *bus, const char *field, long *out)",
-    "const struct board_bus_table board_bus_table",
-    "const struct board_spi_table board_spi_table",
-    "const struct board_i2c_table board_i2c_table",
-    "const struct board_data board_data =",
-)
+# what a board must define, read from the headers rather than kept here twice: every function boards.h declares (in the
+# glue, in src/ or in an adapter the board starts) and every table board_glue.h names extern (in the glue)
+API_FUNCTIONS = sorted(set(re.findall(r"^[A-Za-z_][\w \*]*?\b(board_\w+)\s*\([^;{]*\)\s*;", (ROOT / "include" / "boards.h").read_text(), re.M)))
+API_TABLES = sorted(set(re.findall(r"^extern const struct \w+ (board_\w+);", (ROOT / "src" / "board_glue.h").read_text(), re.M)))
 HOST = "board_host.c"  # boards.h of the computer, the linux target only
 NOT_A_BOARD = {"board_none.c", HOST}  # they define what a glue gives: read beside a glue, they would hide what it lacks
-MODULE_API = ("bool board_character_display_init(struct board_character_display *out)",)
+MODULE_API = ["board_character_display_init"]  # a module gives the function of its kind
 
 
 def error(msg):
@@ -107,11 +79,15 @@ def check_defaults(board):
 
 
 def check_api(board, text):
-    """The glue defines every function of boards.h, a module the one of its kind."""
+    """The glue defines every function of boards.h with what the board starts, a module the one of its kind, and the tables."""
     errors = 0
-    for signature in (MODULE_API if board.get("module") else API):
-        if signature not in text:
-            errors += error(f"boards/{board['name']}/{board['name']}.c: does not define {signature.split('(')[0].split()[-1]}: the contract of boards.h would not hold at link")
+    module = board.get("module")
+    for name in MODULE_API if module else API_FUNCTIONS:
+        if not re.search(rf"\b{name}\s*\([^;{{]*\)\s*\{{", text):
+            errors += error(f"boards/{board['name']}/{board['name']}.c: {name} is defined nowhere: the contract of boards.h would not hold at link")
+    for name in () if module else API_TABLES:
+        if not re.search(rf"\bconst struct \w+ {name}\s*=", text):
+            errors += error(f"boards/{board['name']}/{board['name']}.c: does not give {name}")
     return errors
 
 

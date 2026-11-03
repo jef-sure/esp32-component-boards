@@ -248,6 +248,16 @@ committed, a program that asks by kind.
   `board_sound_start`, `board_sound_source` and their `_at` forms take `ctx`, given back to it at every call, so the mixer
   of a game needs no static. The task takes the source and its context together. The names `board_`, `boards_`,
   `BOARD_` and `CONFIG_BOARD_` are said to be the component's (both found by 7c after the move of dgx-ge was decided).
+- Small things of the audit of 2026-11-03 (5.16 to 5.22): the generated texts end in one full stop, not two; a kind of bus
+  the glue only keeps (dsi, rmii, uart, sdio) brings no `esp_driver_gpio`; `board.cmake` says ESP-IDF 5.5, as the
+  manifest; `CONFIG_BOARD_DISPLAY_GROUP` is always in the Kconfig, 0 on a board with no group; hello_board takes the rate
+  of its tone from `board_sound_init` and names its numbers; `board_select.py --revision` names the revisions it knows
+  instead of a traceback, and says when a chip has none. `check_boards.py` reads what a board must define from
+  `boards.h` and `board_glue.h` instead of a second list by hand, which had lost four functions (5.23).
+  `take_report.py` puts a reported price into the text of the file, one offer more, and checks by parsing that the file
+  says what it should; only a file it cannot take so is written anew (5.17). A kit on a chip whose docs name strapping
+  pins no datasheet describes says that it leaves them. The log of a program on the computer is buffered in a pipe:
+  `stdbuf -o0` gives it at once.
 - A third judgement, `jtag_is_a_cost`, of a new kind `note_cost`: a pin with the note JTAG is given with a line that JTAG
   is gone, as a cost rather than a danger. A display with no line back on an ESP32 DevKit takes SPI2 on 13 and 14 with
   its CS on 15, as the left display of dotview-clock is wired. Other notes (the pins of the flash, of USB, of the

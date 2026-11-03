@@ -89,7 +89,13 @@ def defaults_text(project, local, board, modules, revision):
     else:
         parts.append(defaults_of(board, "board"))
     mcu = resolve.chain(resolve.load("boards", board))["mcu"]
-    lines = resolve.chip_settings(mcu, revision)
+    if revision and "revisions" not in resolve.load("mcu", mcu["target"]):
+        raise SystemExit(f"{mcu['target']}: catalog/mcu describes no revisions of it, so --revision {revision} means nothing")
+    try:
+        lines = resolve.chip_settings(mcu, revision)
+    except (resolve.Refused, ValueError) as err:
+        options = resolve.load("mcu", mcu["target"])["revisions"]["options"]
+        raise SystemExit(f"--revision {revision}: {err}; the options of {mcu['target']}: {', '.join(f'{n // 100}.{n % 100}' for n in options)}")
     if lines:
         parts.append(f"\n# What revision {revision or mcu['revision']} of the chip takes, from catalog/mcu/\n" + "\n".join(lines) + "\n")
     buses = resolve.chain(resolve.load("boards", board)).get("buses") or {}

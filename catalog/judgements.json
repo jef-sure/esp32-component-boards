@@ -7,7 +7,7 @@
             "bus": "spi",
             "pins": "iomux",
             "says": "{0} on the pins of its IO MUX",
-            "why": "A host on the pins of its own IO MUX runs at its full speed, and a wired board usually takes them: the terminal is wired so. Taken only when every line of the host is free there; a pin the solver keeps out, as a strapping pin, leaves the host to other pins."
+            "why": "A host on the pins of its own IO MUX runs at its full speed, and wired boards often take them: SPI3 of the terminal and of dotview-clock is on 23 and 18. Taken only when every line of the host is free there; a pin the solver keeps out, as a strapping pin, leaves the host to other pins, so SPI2 of an ESP32, whose MISO is GPIO 12, is not on its IO MUX in a kit while the terminal has it there."
         }
     ]
 }

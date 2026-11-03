@@ -15,15 +15,19 @@ static const char *TAG = "board";
 
 enum { SOUND_TASK_STACK = 3072, SOUND_TASK_PRIORITY = 6 };
 
-static _lock_t sound_lock; /* two tasks starting one sound at once get one setup and one task */
+static _lock_t      sound_lock;                                   /* two tasks starting one sound at once get one setup and one task */
+static portMUX_TYPE source_lock = portMUX_INITIALIZER_UNLOCKED; /* the task never takes a source with the context of another */
 
 static void sound_task(void *arg)
 {
     struct board_sound_stream *stream = arg;
     bool                       told   = false;
     for (;;) {
+        taskENTER_CRITICAL(&source_lock);
         board_sound_source_t source = stream->source;
-        if (source) source(stream->samples, BOARD_SOUND_FRAMES);
+        void                *ctx    = stream->ctx;
+        taskEXIT_CRITICAL(&source_lock);
+        if (source) source(ctx, stream->samples, BOARD_SOUND_FRAMES);
         else memset(stream->samples, 0, sizeof(stream->samples));
         esp_err_t err = stream->output->write(stream->samples, BOARD_SOUND_FRAMES);
         if (err == ESP_OK) continue;
@@ -70,14 +74,23 @@ bool board_sound_init(board_sound_t *out)
     return board_sound_init_at(0, out);
 }
 
-bool board_sound_start_at(int index, board_sound_source_t source, uint32_t *rate_out)
+/* The source of a stream and its context, as one. */
+static void source_set(struct board_sound_stream *stream, board_sound_source_t source, void *ctx)
+{
+    taskENTER_CRITICAL(&source_lock);
+    stream->source = source;
+    stream->ctx    = ctx;
+    taskEXIT_CRITICAL(&source_lock);
+}
+
+bool board_sound_start_at(int index, board_sound_source_t source, void *ctx, uint32_t *rate_out)
 {
     if (index < 0 || index >= board_sound_table.count) return false;
     struct board_sound_stream *stream = &board_sound_table.streams[index];
     _lock_acquire(&sound_lock);
     bool ready = sound_ready(index);
     if (ready) {
-        stream->source = source;
+        source_set(stream, source, ctx);
         if (!stream->running) {
             stream->running = xTaskCreate(sound_task, "sound", SOUND_TASK_STACK, stream, SOUND_TASK_PRIORITY, NULL) == pdPASS;
             if (!stream->running) ESP_LOGE(TAG, "xTaskCreate: sound");
@@ -89,17 +102,17 @@ bool board_sound_start_at(int index, board_sound_source_t source, uint32_t *rate
     return ready;
 }
 
-bool board_sound_start(board_sound_source_t source, uint32_t *rate_out)
+bool board_sound_start(board_sound_source_t source, void *ctx, uint32_t *rate_out)
 {
-    return board_sound_start_at(0, source, rate_out);
+    return board_sound_start_at(0, source, ctx, rate_out);
 }
 
-void board_sound_source_at(int index, board_sound_source_t source)
+void board_sound_source_at(int index, board_sound_source_t source, void *ctx)
 {
-    if (index >= 0 && index < board_sound_table.count) board_sound_table.streams[index].source = source;
+    if (index >= 0 && index < board_sound_table.count) source_set(&board_sound_table.streams[index], source, ctx);
 }
 
-void board_sound_source(board_sound_source_t source)
+void board_sound_source(board_sound_source_t source, void *ctx)
 {
-    board_sound_source_at(0, source);
+    board_sound_source_at(0, source, ctx);
 }

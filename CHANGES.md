@@ -244,6 +244,10 @@ committed, a program that asks by kind.
   references (the audit of 2026-11-03, 5.7). The glue gives tables only: `board_bus_get`, `board_spi_bus`,
   `board_spi_taken` and the functions of a display a board has not are written once in `src/` instead of being generated
   into every glue, and `CONFIG_BOARD_MODULE_CHARACTER_DISPLAY` is gone (5.10 in part, 5.20).
+- The source of the sound takes a context: `board_sound_source_t` is `(void *ctx, int16_t *samples, size_t count)`, and
+  `board_sound_start`, `board_sound_source` and their `_at` forms take `ctx`, given back to it at every call, so the mixer
+  of a game needs no static. The task takes the source and its context together. The names `board_`, `boards_`,
+  `BOARD_` and `CONFIG_BOARD_` are said to be the component's (both found by 7c after the move of dgx-ge was decided).
 - The solver takes its first judgement from data: catalog/judgements.json, each judgement of a kind editor/solver.js has
   a function for, with an id that a line of a kit carries (on hover on the page, to the model, in `selection.json`, and
   checked by `test/solver/`). `host_on_its_iomux` puts a new SPI host on the pins of its IO MUX when they are free, as a

@@ -1,6 +1,8 @@
 # API: boards.h
 
-`#include "boards.h"`. Каждая функция ниже существует на каждой плате. Функция
+`#include "boards.h"`. Каждая функция ниже существует на каждой плате. Имена `board_`,
+`boards_`, `BOARD_` и `CONFIG_BOARD_` принадлежат компоненту: программа или библиотека
+поверх него называет своё иначе. Функция
 для части, которой у платы нет, возвращает `false` (или `NULL`) и не трогает свой
 выход; программе не нужен `#if` на плату. `boards.h` не называет ни одной библиотеки:
 он даёт размеры, миллиметры и ориентацию. Дескрипторы библиотеки даёт заголовок её
@@ -140,14 +142,14 @@ void board_touch_firmware_set(const uint8_t *start, size_t size);
 
 ```c
 typedef struct board_sound { uint32_t rate; const char *name; int index; } board_sound_t;
-typedef void (*board_sound_source_t)(int16_t *samples, size_t count);
+typedef void (*board_sound_source_t)(void *ctx, int16_t *samples, size_t count);
 int  board_sound_count(void);
 bool board_sound_init(board_sound_t *out);
 bool board_sound_init_at(int index, board_sound_t *out);
-bool board_sound_start(board_sound_source_t source, uint32_t *rate_out);
-bool board_sound_start_at(int index, board_sound_source_t source, uint32_t *rate_out);
-void board_sound_source(board_sound_source_t source);
-void board_sound_source_at(int index, board_sound_source_t source);
+bool board_sound_start(board_sound_source_t source, void *ctx, uint32_t *rate_out);
+bool board_sound_start_at(int index, board_sound_source_t source, void *ctx, uint32_t *rate_out);
+void board_sound_source(board_sound_source_t source, void *ctx);
+void board_sound_source_at(int index, board_sound_source_t source, void *ctx);
 ```
 
 Функции без `_at` относятся к первому выходу.
@@ -162,7 +164,8 @@ void board_sound_source_at(int index, board_sound_source_t source);
 
 `board_sound_start` делает ту же настройку и запускает задачу, которая
 просит у `source` следующие `count` сэмплов, 16-битных моно с частотой
-`*rate_out`, и отправляет их; записи блокируются на железе, которое и задаёт
+`*rate_out`, и отправляет их; `ctx` возвращается в `source` при каждом вызове,
+например микшер программы, из которого она заполняет сэмплы; записи блокируются на железе, которое и задаёт
 темп. `source` может быть `NULL` для тишины и быть задан позже через
 `board_sound_source`. Задача работает, пока не остановится прошивка. Повторный
 вызов любой из двух функций возвращает тот же звук, из любой задачи. Микшер и

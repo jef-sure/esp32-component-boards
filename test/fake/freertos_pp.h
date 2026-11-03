@@ -6,3 +6,8 @@ typedef void *SemaphoreHandle_t;
 int vTaskDelay(int ticks);
 #define taskYIELD() ((void)0)
 int xTaskCreate(void (*fn)(void *), const char *name, int stack, void *arg, int prio, void *handle);
+/* the spinlock of a critical section, as portmacro.h and task.h of ESP-IDF 6.1 name it */
+typedef struct { int owner, count; } portMUX_TYPE;
+#define portMUX_INITIALIZER_UNLOCKED {0, 0}
+void taskENTER_CRITICAL(portMUX_TYPE *mux);
+void taskEXIT_CRITICAL(portMUX_TYPE *mux);

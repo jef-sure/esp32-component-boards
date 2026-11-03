@@ -1,6 +1,8 @@
 # The API: boards.h
 
-`#include "boards.h"`. Every function below exists on every board. A function
+`#include "boards.h"`. Every function below exists on every board. The names `board_`,
+`boards_`, `BOARD_` and `CONFIG_BOARD_` are the component's: a program or a library on top
+names its own otherwise. A function
 for a part the board does not have returns `false` (or `NULL`) and leaves its
 output untouched; the program needs no `#if` on the board. `boards.h` names no
 library: it gives sizes, millimetres and orientation. The handles of a library
@@ -139,14 +141,14 @@ Without it the touch of that board is off. See [touch-firmware.md](touch-firmwar
 
 ```c
 typedef struct board_sound { uint32_t rate; const char *name; int index; } board_sound_t;
-typedef void (*board_sound_source_t)(int16_t *samples, size_t count);
+typedef void (*board_sound_source_t)(void *ctx, int16_t *samples, size_t count);
 int  board_sound_count(void);
 bool board_sound_init(board_sound_t *out);
 bool board_sound_init_at(int index, board_sound_t *out);
-bool board_sound_start(board_sound_source_t source, uint32_t *rate_out);
-bool board_sound_start_at(int index, board_sound_source_t source, uint32_t *rate_out);
-void board_sound_source(board_sound_source_t source);
-void board_sound_source_at(int index, board_sound_source_t source);
+bool board_sound_start(board_sound_source_t source, void *ctx, uint32_t *rate_out);
+bool board_sound_start_at(int index, board_sound_source_t source, void *ctx, uint32_t *rate_out);
+void board_sound_source(board_sound_source_t source, void *ctx);
+void board_sound_source_at(int index, board_sound_source_t source, void *ctx);
 ```
 
 The functions without `_at` are for the first output. `board_sound_init` sets the
@@ -159,7 +161,8 @@ volume with `esp_codec_dev_set_out_vol`), `board_i2s_channel()` in
 mixer of its own writes there itself and does not call `board_sound_start`.
 
 `board_sound_start` does the same setup and runs a task that asks `source` for the
-next `count` samples, 16-bit mono at `*rate_out`, and sends them; the writes block
+next `count` samples, 16-bit mono at `*rate_out`, and sends them; `ctx` comes back to
+`source` with every call, as the mixer of the program it fills from; the writes block
 on the hardware, which sets the pace. `source` may be `NULL` for silence and set
 later with `board_sound_source`. The task runs until the firmware stops. A second
 call of either returns the same sound, from any task. A mixer, a format other than

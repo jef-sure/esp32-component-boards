@@ -118,14 +118,14 @@ typedef struct board_sound {
     const char *name;  /* its name in the data, for the log */
     int         index; /* its place among the sounds of the board */
 } board_sound_t;
-typedef void (*board_sound_source_t)(int16_t *samples, size_t count);
+typedef void (*board_sound_source_t)(void *ctx, int16_t *samples, size_t count); /* ctx: as given to start or source */
 int  board_sound_count(void);
 bool board_sound_init(board_sound_t *out); /* the first one, as board_sound_init_at(0, out) */
 bool board_sound_init_at(int index, board_sound_t *out);
-bool board_sound_start(board_sound_source_t source, uint32_t *rate_out); /* the first one */
-bool board_sound_start_at(int index, board_sound_source_t source, uint32_t *rate_out);
-void board_sound_source(board_sound_source_t source);
-void board_sound_source_at(int index, board_sound_source_t source);
+bool board_sound_start(board_sound_source_t source, void *ctx, uint32_t *rate_out); /* the first one */
+bool board_sound_start_at(int index, board_sound_source_t source, void *ctx, uint32_t *rate_out);
+void board_sound_source(board_sound_source_t source, void *ctx);
+void board_sound_source_at(int index, board_sound_source_t source, void *ctx);
 
 /*
  * The board's SPI buses, as its data names them (the name is the host: "spi2" is the chip's

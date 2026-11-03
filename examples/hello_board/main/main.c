@@ -24,8 +24,9 @@
 #endif
 
 /* A second of a tone, then silence: the speaker of the board heard once. */
-static void tone(int16_t *samples, size_t count)
+static void tone(void *ctx, int16_t *samples, size_t count)
 {
+    (void)ctx;
     static uint32_t phase, made;
     for (size_t i = 0; i < count; ++i) {
         samples[i] = made < 22050 ? (int16_t)(sinf((float)phase * 6.2831853f / 50.0f) * 8000.0f) : 0; /* 441 Hz at 22050 */
@@ -82,7 +83,7 @@ void app_main(void)
     }
 
     uint32_t rate;
-    if (board_sound_start(tone, &rate)) printf("the sound: %lu Hz, a second of a tone\n", (unsigned long)rate);
+    if (board_sound_start(tone, NULL, &rate)) printf("the sound: %lu Hz, a second of a tone\n", (unsigned long)rate);
     else printf("the sound: none, or it could not be set up\n");
 
     long hz;

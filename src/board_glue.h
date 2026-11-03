@@ -110,6 +110,7 @@ struct board_sound_entry {
 struct board_sound_stream {
     const struct board_sound_output *output; /* NULL until the hardware is set up */
     board_sound_source_t             source;
+    void                            *ctx; /* given back to source */
     uint32_t                         rate;
     bool                             running; /* its task started */
     int16_t                          samples[BOARD_SOUND_FRAMES];

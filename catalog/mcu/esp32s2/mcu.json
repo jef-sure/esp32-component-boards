@@ -69,7 +69,8 @@
         "high_mv_max": 3600,
         "strapping": [
             0,
-            45
+            45,
+            46
         ],
         "pins": {
             "0": {
@@ -263,7 +264,8 @@
             },
             "46": {
                 "notes": [
-                    "GPI\uff1bStrapping pin"
+                    "GPI",
+                    "Strapping pin"
                 ]
             }
         },

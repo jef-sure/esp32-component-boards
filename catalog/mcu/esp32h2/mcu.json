@@ -44,7 +44,140 @@
             4,
             5
         ],
-        "high_mv_max": 3600
+        "high_mv_max": 3600,
+        "strapping": [
+            2,
+            3,
+            8,
+            9,
+            25
+        ],
+        "pins": {
+            "1": {
+                "analog": [
+                    "ADC1_CH0"
+                ]
+            },
+            "2": {
+                "analog": [
+                    "ADC1_CH1"
+                ],
+                "notes": [
+                    "Strapping pin"
+                ]
+            },
+            "3": {
+                "analog": [
+                    "ADC1_CH2"
+                ],
+                "notes": [
+                    "Strapping pin"
+                ]
+            },
+            "4": {
+                "analog": [
+                    "ADC1_CH3"
+                ]
+            },
+            "5": {
+                "analog": [
+                    "ADC1_CH4"
+                ]
+            },
+            "7": {
+                "low_power": "RTC"
+            },
+            "8": {
+                "low_power": "RTC",
+                "notes": [
+                    "Strapping pin"
+                ]
+            },
+            "9": {
+                "low_power": "RTC",
+                "notes": [
+                    "Strapping pin"
+                ]
+            },
+            "10": {
+                "analog": [
+                    "ANA_CMPR_CH0 reference voltage"
+                ],
+                "low_power": "RTC"
+            },
+            "11": {
+                "analog": [
+                    "ANA_CMPR_CH0 input (non-inverting)"
+                ],
+                "low_power": "RTC"
+            },
+            "12": {
+                "low_power": "RTC"
+            },
+            "13": {
+                "low_power": "RTC"
+            },
+            "14": {
+                "low_power": "RTC"
+            },
+            "15": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            },
+            "16": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            },
+            "17": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            },
+            "18": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            },
+            "19": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            },
+            "20": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            },
+            "21": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            },
+            "25": {
+                "notes": [
+                    "Strapping pin"
+                ]
+            },
+            "26": {
+                "notes": [
+                    "USB-JTAG"
+                ]
+            },
+            "27": {
+                "notes": [
+                    "USB-JTAG"
+                ]
+            }
+        },
+        "notes": [
+            "Strapping pin: GPIO2, GPIO3, GPIO8, GPIO9, and GPIO25 are strapping pins. For more information, please refer to ESP32H2 datasheet.",
+            "SPI0/1: GPIO15-21 are usually used for SPI flash and not recommended for other uses.",
+            "USB-Serial-JTAG: GPIO 26 and 27 are used by USB-Serial-JTAG by default. In order to use them as GPIOs, USB-Serial-JTAG will be disabled by the drivers.",
+            "For chip variants with an SiP flash built in, GPIO15\u2013GPIO21 are dedicated to connecting the SiP flash and are not fan-out to the external pins. In addition, GPIO6\u2013GPIO7 are also not fan-out to the external pins. In conclusion, only GPIO0\u2013GPIO5, GPIO8\u2013GPIO14, GPIO22\u2013GPIO27 are available to users.",
+            "RTC: GPIO7\u2013GPIO14 can be used to wake up the chip from Deep-sleep mode. Note that although GPIO7 is an RTC GPIO, it cannot be used for external wake-up since it is not led out. Other GPIOs can only wake up the chip from Light-sleep mode. For more information, please refer to Section :ref:Wakeup Sources."
+        ]
     },
     "hosts": {
         "spi": 2,
@@ -66,6 +199,14 @@
                 "gpio.high_mv_max"
             ],
             "source": "Espressif datasheet of the chip, DC characteristics: VIH at most VDD + 0.3 V, at VDD 3.3 V"
+        },
+        "pins": {
+            "level": "vendor-docs",
+            "covers": [
+                "gpio.pins",
+                "gpio.strapping"
+            ],
+            "source": "ESP-IDF esp-idf, docs/en/api-reference/peripherals/gpio/esp32h2.inc"
         },
         "iomux": {
             "level": "vendor-docs",

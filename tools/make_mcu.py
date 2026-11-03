@@ -102,13 +102,25 @@ def pin_table(target):
     if not path.exists():
         return {}, []
     text = path.read_text()
+    # the rows of the list-table, by the names of its columns: some chips have no column of RTC or LP GPIO
+    rows = [[first.strip(), *(cell.strip() for cell in re.findall(r"\n[ \t]+-[ \t]*([^\n]*)", rest))] for first, rest in re.findall(r"\* - ([^\n]*)((?:\n[ \t]+-[^\n]*)*)", text)]
+    if not rows or rows[0][0] != "GPIO":
+        return {}, []
+    columns = {name: i for i, name in enumerate(rows[0])}
+    cell = lambda row, *names: next((row[columns[name]] for name in names if name in columns and columns[name] < len(row)), "")
     pins = {}
-    for pin, analog, low_power, comments in re.findall(r"\* - GPIO(\d+)\n\s+-([^\n]*)\n\s+-([^\n]*)\n\s+-([^\n]*)", text):
-        entry = {"analog": [part.strip() for part in analog.split(",") if part.strip()], "low_power": low_power.strip(),
-                 "notes": [part.strip() for part in comments.split(";") if part.strip()]}
+    for row in rows[1:]:
+        if not row[0].startswith("GPIO"):
+            continue
+        notes = [part.strip() for part in re.split(r"[;；,]", cell(row, "Comments", "Comment")) if part.strip()]
+        low_power = cell(row, "RTC GPIO", "LP GPIO")
+        if not low_power and "RTC" in notes:  # a table with no column of its own says RTC among the comments
+            notes.remove("RTC")
+            low_power = "RTC"
+        entry = {"analog": [part.strip() for part in cell(row, "Analog Function").split(",") if part.strip()], "low_power": low_power, "notes": notes}
         entry = {key: value for key, value in entry.items() if value}
         if entry:
-            pins[pin] = entry
+            pins[row[0][len("GPIO"):]] = entry
     block = re.search(r"\.\. note::\n\n((?:[ \t]+[^\n]*\n)+)", text)
     notes = [re.sub(r"`([^`<]*?)\s*<[^>]*>`_*", r"\1", line.strip()[2:]) for line in (block[1] if block else "").splitlines() if line.strip().startswith("- ")]
     return pins, notes
@@ -222,9 +234,20 @@ def main():
         if "wifi" in entry["provides"]:
             entry["controls"] = {"wifi_tx_power": WIFI_TX_POWER}
         pins, notes = pin_table(target)
-        if pins:
-            entry["gpio"].update({"strapping": [int(pin) for pin, info in pins.items() if "Strapping pin" in info.get("notes", ())], "pins": pins, "notes": notes})
-            entry["checked"]["pins"] = {"level": "vendor-docs", "covers": ["gpio.pins", "gpio.strapping"], "source": f"ESP-IDF {IDF.name}, docs/en/api-reference/peripherals/gpio/{target}.inc"}
+        if not pins:
+            raise SystemExit(f"{target}: no table of pins read from docs/en/api-reference/peripherals/gpio/{target}.inc: the parse or the docs changed")
+        # the strapping pins the table marks and those the note under it lists; none named is not the same as none there
+        strapping = {int(pin) for pin, info in pins.items() if any(note.startswith("Strapping pin") for note in info.get("notes", ()))}
+        for note in notes:
+            if note.startswith("Strapping pin"):
+                strapping |= {int(number) for number in re.findall(r"GPIO(\d+)", note.split("strapping pins")[0])}
+        entry["gpio"].update({**({"strapping": sorted(strapping)} if strapping else {}), "pins": pins, "notes": notes})
+        source = f"ESP-IDF {IDF.name}, docs/en/api-reference/peripherals/gpio/{target}.inc"
+        if strapping:
+            entry["checked"]["pins"] = {"level": "vendor-docs", "covers": ["gpio.pins", "gpio.strapping"], "source": source}
+        else:
+            print(f"{target}: the docs name no strapping pins: gpio.strapping left out, give it from the datasheet", file=sys.stderr)
+            entry["checked"]["pins"] = {"level": "vendor-docs", "covers": ["gpio.pins"], "source": source, "notes": "the strapping pins are not named there"}
         limits, older = limits_of(target)
         if limits:
             entry["limits"] = limits

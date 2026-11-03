@@ -45,7 +45,6 @@
             4,
             5
         ],
-        "strapping": [],
         "pins": {
             "0": {
                 "low_power": "LP_GPIO0"
@@ -149,10 +148,10 @@
         "pins": {
             "level": "vendor-docs",
             "covers": [
-                "gpio.pins",
-                "gpio.strapping"
+                "gpio.pins"
             ],
-            "source": "ESP-IDF esp-idf, docs/en/api-reference/peripherals/gpio/esp32c61.inc"
+            "source": "ESP-IDF esp-idf, docs/en/api-reference/peripherals/gpio/esp32c61.inc",
+            "notes": "the strapping pins are not named there"
         },
         "iomux": {
             "level": "vendor-docs",

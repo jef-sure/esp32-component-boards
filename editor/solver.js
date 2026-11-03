@@ -1110,6 +1110,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             }
             // a host of the kit on the pins a judgement names, with the id of that judgement
             const chip = (resolved ?? base)?.mcu?.facts;
+            if (chip && project && !chip.gpio?.strapping) lines.push({ level: 'unknown', text: t('{0}: its strapping pins are not in the data: a pin of this kit may be one', chip.title ?? chip.name) });
             for (const judgement of judgementsOf('prefer_pins')) {
                 for (const [own, bus] of Object.entries(project?.buses?.[judgement.bus] ?? {})) {
                     const named = chip?.[judgement.pins]?.[judgement.bus]?.[own];

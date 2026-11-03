@@ -248,6 +248,11 @@ committed, a program that asks by kind.
   `board_sound_start`, `board_sound_source` and their `_at` forms take `ctx`, given back to it at every call, so the mixer
   of a game needs no static. The task takes the source and its context together. The names `board_`, `boards_`,
   `BOARD_` and `CONFIG_BOARD_` are said to be the component's (both found by 7c after the move of dgx-ge was decided).
+- The ESP32-C2, C3 and H2 have their table of pins in catalog/mcu: make_mcu.py read only tables with a column of RTC
+  or LP GPIO, and those three have none. So their strapping pins were not in the data, and a kit on the C3-Zero put the
+  MISO of a reader on GPIO 2. The strapping pins are those the table marks and those the note under it names (the H2
+  gets 8 and 9, the S2 gets 46, written with a full-width semicolon). The C61, whose docs name none, has no list and a
+  kit on it says so; make_mcu.py fails on a chip whose table does not parse (found by 7c).
 - The solver takes its first judgement from data: catalog/judgements.json, each judgement of a kind editor/solver.js has
   a function for, with an id that a line of a kit carries (on hover on the page, to the model, in `selection.json`, and
   checked by `test/solver/`). `host_on_its_iomux` puts a new SPI host on the pins of its IO MUX when they are free, as a

@@ -140,6 +140,15 @@ for (const name of names) {
         if (JSON.stringify(kit?.project.modules[given.fed.use].supply) !== JSON.stringify(given.fed.supply)) say(`fed by ${JSON.stringify(kit?.project.modules[given.fed.use].supply)}`);
     }
     if (given.says && !kits.some((kit) => kit.says.some((line) => line.text.includes(given.says)))) say(`no kit says "${given.says}"`);
+    // no line of the kit on these pins, as the strapping pins of a chip
+    if (given.keeps_out) {
+        const kit = fit.find((item) => item.name === given.keeps_out.board);
+        const used = [];
+        const walk = (node) => { if (typeof node === 'number') used.push(node); else if (node && typeof node === 'object') Object.entries(node).forEach(([key, value]) => key !== 'hz' && key !== 'address' && walk(value)); };
+        walk({ buses: kit?.project?.buses, devices: kit?.project?.devices, modules: Object.values(kit?.project?.modules ?? {}).map((item) => ({ on: item.on, pins: item.pins })) });
+        if (!kit) say(`no kit on ${given.keeps_out.board}`);
+        for (const pin of given.keeps_out.pins) if (used.includes(pin)) say(`${given.keeps_out.board}: GPIO ${pin} is in the kit`);
+    }
     // a line a judgement made is checked by its id, not by its text
     if (given.judged) {
         const kit = fit.find((item) => item.name === given.judged.board);

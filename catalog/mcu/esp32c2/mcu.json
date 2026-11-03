@@ -36,6 +36,90 @@
             2,
             3,
             4
+        ],
+        "strapping": [
+            8,
+            9
+        ],
+        "pins": {
+            "0": {
+                "analog": [
+                    "ADC1_CH0"
+                ],
+                "low_power": "RTC"
+            },
+            "1": {
+                "analog": [
+                    "ADC1_CH1"
+                ],
+                "low_power": "RTC"
+            },
+            "2": {
+                "analog": [
+                    "ADC1_CH2"
+                ],
+                "low_power": "RTC"
+            },
+            "3": {
+                "analog": [
+                    "ADC1_CH3"
+                ],
+                "low_power": "RTC"
+            },
+            "4": {
+                "analog": [
+                    "ADC1_CH4"
+                ],
+                "low_power": "RTC"
+            },
+            "5": {
+                "low_power": "RTC"
+            },
+            "8": {
+                "notes": [
+                    "Strapping pin"
+                ]
+            },
+            "9": {
+                "notes": [
+                    "Strapping pin"
+                ]
+            },
+            "12": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            },
+            "13": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            },
+            "14": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            },
+            "15": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            },
+            "16": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            },
+            "17": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            }
+        },
+        "notes": [
+            "Strapping pin: GPIO8 and GPIO9 are strapping pins. For more information, please refer to ESP8684 datasheet.",
+            "SPI0/1: GPIO12-17 are usually used for SPI flash and not recommended for other uses.",
+            "RTC: GPIO0-5 can be used to wake up the chip from Deep-sleep mode. Other GPIOs can only wake up the chip from Light-sleep mode. For more information, please refer to Section :ref:Wakeup Sources."
         ]
     },
     "hosts": {
@@ -51,6 +135,14 @@
         "facts": {
             "level": "vendor-docs",
             "source": "ESP-IDF esp-idf, components/soc/esp32c2, soc_caps.h"
+        },
+        "pins": {
+            "level": "vendor-docs",
+            "covers": [
+                "gpio.pins",
+                "gpio.strapping"
+            ],
+            "source": "ESP-IDF esp-idf, docs/en/api-reference/peripherals/gpio/esp32c2.inc"
         },
         "iomux": {
             "level": "vendor-docs",

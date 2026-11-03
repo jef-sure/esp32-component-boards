@@ -38,7 +38,109 @@
             3,
             4
         ],
-        "high_mv_max": 3600
+        "high_mv_max": 3600,
+        "strapping": [
+            2,
+            8,
+            9
+        ],
+        "pins": {
+            "0": {
+                "analog": [
+                    "ADC1_CH0"
+                ],
+                "low_power": "RTC"
+            },
+            "1": {
+                "analog": [
+                    "ADC1_CH1"
+                ],
+                "low_power": "RTC"
+            },
+            "2": {
+                "analog": [
+                    "ADC1_CH2"
+                ],
+                "low_power": "RTC",
+                "notes": [
+                    "Strapping pin"
+                ]
+            },
+            "3": {
+                "analog": [
+                    "ADC1_CH3"
+                ],
+                "low_power": "RTC"
+            },
+            "4": {
+                "analog": [
+                    "ADC1_CH4"
+                ],
+                "low_power": "RTC"
+            },
+            "5": {
+                "analog": [
+                    "ADC2_CH0"
+                ],
+                "low_power": "RTC"
+            },
+            "8": {
+                "notes": [
+                    "Strapping pin"
+                ]
+            },
+            "9": {
+                "notes": [
+                    "Strapping pin"
+                ]
+            },
+            "12": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            },
+            "13": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            },
+            "14": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            },
+            "15": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            },
+            "16": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            },
+            "17": {
+                "notes": [
+                    "SPI0/1"
+                ]
+            },
+            "18": {
+                "notes": [
+                    "USB-JTAG"
+                ]
+            },
+            "19": {
+                "notes": [
+                    "USB-JTAG"
+                ]
+            }
+        },
+        "notes": [
+            "Strapping pin: GPIO2, GPIO8 and GPIO9 are strapping pins. For more information, please refer to ESP32-C3 Datasheet.",
+            "SPI0/1: GPIO12 ~ GPIO17 are usually used for SPI flash and are not recommended for other uses.",
+            "USB-JTAG: GPIO18 and GPIO19 are used by USB-JTAG by default. If they are reconfigured to operate as normal GPIOs, USB-JTAG functionality will be disabled.",
+            "RTC: GPIO0 ~ GPIO5 can be used to wake up the chip from Deep-sleep mode. Other GPIOs can only wake up the chip from Light-sleep mode. For more information, please refer to Section :ref:Wakeup Sources."
+        ]
     },
     "hosts": {
         "spi": 2,
@@ -61,6 +163,14 @@
                 "gpio.high_mv_max"
             ],
             "source": "Espressif datasheet of the chip, DC characteristics: VIH at most VDD + 0.3 V, at VDD 3.3 V"
+        },
+        "pins": {
+            "level": "vendor-docs",
+            "covers": [
+                "gpio.pins",
+                "gpio.strapping"
+            ],
+            "source": "ESP-IDF esp-idf, docs/en/api-reference/peripherals/gpio/esp32c3.inc"
         },
         "iomux": {
             "level": "vendor-docs",

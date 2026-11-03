@@ -62,6 +62,13 @@
             ],
             "source": "Espressif datasheet of the chip, DC characteristics: VIH at most VDD + 0.3 V, at VDD 3.3 V"
         },
+        "iomux": {
+            "level": "vendor-docs",
+            "covers": [
+                "iomux"
+            ],
+            "source": "ESP-IDF esp-idf, spi_pins.h of esp32c3"
+        },
         "platforms": {
             "level": "vendor-docs",
             "covers": [
@@ -81,6 +88,18 @@
     },
     "limits": {
         "cpu_mhz": 160
+    },
+    "iomux": {
+        "spi": {
+            "spi2": {
+                "miso": 2,
+                "hd": 4,
+                "wp": 5,
+                "sclk": 6,
+                "mosi": 7,
+                "cs": 10
+            }
+        }
     },
     "platforms": {
         "esp_idf": {

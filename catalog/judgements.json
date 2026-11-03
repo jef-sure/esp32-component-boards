@@ -1,0 +1,13 @@
+{
+    "description": "The judgements of the solver as data. A kind is one function of editor/solver.js; a record is one judgement with its id, and a line of a kit it made carries that id, so a wrong line points at its judgement or at the engine.",
+    "judgements": [
+        {
+            "id": "host_on_its_iomux",
+            "kind": "prefer_pins",
+            "bus": "spi",
+            "pins": "iomux",
+            "says": "{0} on the pins of its IO MUX",
+            "why": "A host on the pins of its own IO MUX runs at its full speed, and a wired board usually takes them: the terminal is wired so. Taken only when every line of the host is free there; a pin the solver keeps out, as a strapping pin, leaves the host to other pins."
+        }
+    ]
+}

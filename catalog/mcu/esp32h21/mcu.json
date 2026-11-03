@@ -171,6 +171,25 @@
                 "gpio.strapping"
             ],
             "source": "ESP-IDF esp-idf, docs/en/api-reference/peripherals/gpio/esp32h21.inc"
+        },
+        "iomux": {
+            "level": "vendor-docs",
+            "covers": [
+                "iomux"
+            ],
+            "source": "ESP-IDF esp-idf, spi_pins.h of esp32h21"
+        }
+    },
+    "iomux": {
+        "spi": {
+            "spi2": {
+                "wp": 0,
+                "hd": 1,
+                "sclk": 2,
+                "mosi": 3,
+                "miso": 4,
+                "cs": 12
+            }
         }
     }
 }

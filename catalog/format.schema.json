@@ -590,6 +590,37 @@
         "firmware": { "$ref": "#/$defs/firmware" }
       }
     },
+    "judgements": {
+      "description": "catalog/judgements.json: the judgements of the solver, each of a kind editor/solver.js has a function for.",
+      "type": "object",
+      "required": ["judgements"],
+      "additionalProperties": false,
+      "properties": {
+        "description": { "type": "string" },
+        "judgements": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "kind", "says", "why"],
+            "properties": {
+              "id": { "$ref": "#/$defs/name" },
+              "kind": { "enum": ["prefer_pins"] },
+              "says": { "type": "string", "description": "The line of a kit, {0} what it is about." },
+              "why": { "type": "string" }
+            },
+            "allOf": [
+              {
+                "if": { "properties": { "kind": { "const": "prefer_pins" } } },
+                "then": {
+                  "required": ["bus", "pins"],
+                  "properties": { "bus": { "enum": ["spi"] }, "pins": { "enum": ["iomux"], "description": "A field of the chip: its pins of each host." } }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
     "mcuFile": {
       "required": ["gpio"],
       "properties": {
@@ -647,6 +678,11 @@
           }
         },
         "hosts": { "type": "object", "additionalProperties": { "type": "integer" } },
+        "iomux": {
+          "type": "object",
+          "description": "The pins of the IO MUX of a host, by kind and name as buses name them (spi.spi2): a host on them runs at its full speed, and a wired board usually takes them. From spi_pins.h of ESP-IDF.",
+          "additionalProperties": { "type": "object", "additionalProperties": { "type": "object", "additionalProperties": { "type": "integer", "minimum": 0 } } }
+        },
         "frequency_sources": { "type": "object", "description": "Where the chip gets a frequency, in the order to try them.", "additionalProperties": { "$ref": "#/$defs/frequencySource" } },
         "provides": { "$ref": "#/$defs/provides" },
         "controls": { "$ref": "#/$defs/controls" },

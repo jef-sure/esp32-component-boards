@@ -326,6 +326,13 @@
             ],
             "source": "ESP-IDF esp-idf, docs/en/api-reference/peripherals/gpio/esp32s3.inc"
         },
+        "iomux": {
+            "level": "vendor-docs",
+            "covers": [
+                "iomux"
+            ],
+            "source": "ESP-IDF esp-idf, spi_pins.h of esp32s3"
+        },
         "platforms": {
             "level": "vendor-docs",
             "covers": [
@@ -411,6 +418,18 @@
     "limits": {
         "psram_mhz": 120,
         "cpu_mhz": 240
+    },
+    "iomux": {
+        "spi": {
+            "spi2": {
+                "hd": 9,
+                "cs": 10,
+                "mosi": 11,
+                "sclk": 12,
+                "miso": 13,
+                "wp": 14
+            }
+        }
     },
     "platforms": {
         "esp_idf": {

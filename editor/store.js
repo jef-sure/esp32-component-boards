@@ -64,10 +64,11 @@ function readCatalog(files) {
     library.checksOf = documentChecks({ schema: library.schema, rules: library.rules, loader: library.loader, schemaReader, check, pinProblems });
     library.questions = JSON.parse(files['questions.json']).questions;
     library.rates = JSON.parse(files['rates.json']);
+    library.judgements = JSON.parse(files['judgements.json'] ?? '{"judgements": []}').judgements;
     library.roles = JSON.parse(files['roles.json']).groups;
     const audits = Object.keys(files).filter((path) => /^libraries\/.*\/audit\.json$/.test(path)).map((path) => [path.split('/').slice(1, 4).join('/'), auditSummary(JSON.parse(files[path]))]);
     library.candidates = { all: JSON.parse(files['libraries/libraries.json'] ?? '{"libraries": {}}').libraries, byChip: JSON.parse(files['libraries/chip_libraries.json'] ?? '{"chips": {}}').chips, audits: Object.fromEntries(audits) };
-    library.solver = kitSolver({ catalog, loader: library.loader, questions: library.questions, roles: library.roles, libraries: library.candidates, rates: library.rates.rates, levels: library.levels, t: (text, ...values) => translate(useEditor().language, text, ...values), checksOf: library.checksOf, pinMap });
+    library.solver = kitSolver({ catalog, loader: library.loader, questions: library.questions, roles: library.roles, libraries: library.candidates, rates: library.rates.rates, levels: library.levels, judgements: library.judgements, t: (text, ...values) => translate(useEditor().language, text, ...values), checksOf: library.checksOf, pinMap });
 }
 
 function labelOf(key, value) {
@@ -358,7 +359,7 @@ const useEditor = Pinia.defineStore('editor', {
             }
             const message = { id: ++library.asked, answers, language: this.language };
             if (library.sent !== this.stamp) {
-                message.documents = { catalog: library.catalog, schema: library.schema, rules: library.rules, questions: library.questions, roles: library.roles, libraries: library.candidates, rates: library.rates.rates };
+                message.documents = { catalog: library.catalog, schema: library.schema, rules: library.rules, questions: library.questions, roles: library.roles, libraries: library.candidates, rates: library.rates.rates, judgements: library.judgements };
                 library.sent = this.stamp;
             }
             this.solving = true;

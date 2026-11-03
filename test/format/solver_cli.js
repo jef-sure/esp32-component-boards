@@ -18,7 +18,8 @@ const checksOf = documentChecks({ schema: read(path.join(ROOT, 'format.schema.js
 const rates = read(path.join(ROOT, 'rates.json')).rates;
 const schema = read(path.join(ROOT, 'format.schema.json'));
 const roles = read(path.join(ROOT, 'roles.json')).groups;
-const solver = kitSolver({ catalog, loader, questions: read(path.join(ROOT, 'questions.json')).questions, roles, rates, levels: schema.$defs.level.enum, checksOf, pinMap });
+const judgements = read(path.join(ROOT, 'judgements.json')).judgements;
+const solver = kitSolver({ catalog, loader, questions: read(path.join(ROOT, 'questions.json')).questions, roles, rates, levels: schema.$defs.level.enum, checksOf, pinMap, judgements });
 const selections = schemaReader({ $defs: schema.$defs });
 // The catalog with imported/ behind it, for the cases that say "imported".
 const wider = catalogOf([ROOT, path.join(__dirname, '../../imported-shops'), path.join(__dirname, '../../imported')]);
@@ -26,7 +27,7 @@ const widerLoader = boardResolver(wider);
 const widerChecks = documentChecks({ schema, rules: read(path.join(ROOT, 'rules.json')), loader: widerLoader, schemaReader, check, pinProblems });
 const auditsOf = (dir, depth) => (depth ? fs.readdirSync(dir, { withFileTypes: true }).filter((entry) => entry.isDirectory()).flatMap((entry) => auditsOf(path.join(dir, entry.name), depth - 1)) : fs.existsSync(path.join(dir, 'audit.json')) ? [[path.relative(path.join(ROOT, 'libraries'), dir), auditSummary(read(path.join(dir, 'audit.json')))]] : []);
 const libraries = { all: read(path.join(ROOT, 'libraries/libraries.json')).libraries, byChip: read(path.join(ROOT, 'libraries/chip_libraries.json')).chips, audits: Object.fromEntries(auditsOf(path.join(ROOT, 'libraries'), 3)) };
-const widerSolver = kitSolver({ catalog: wider, loader: widerLoader, questions: read(path.join(ROOT, 'questions.json')).questions, roles, libraries, rates, levels: schema.$defs.level.enum, checksOf: widerChecks, pinMap });
+const widerSolver = kitSolver({ catalog: wider, loader: widerLoader, questions: read(path.join(ROOT, 'questions.json')).questions, roles, libraries, rates, levels: schema.$defs.level.enum, checksOf: widerChecks, pinMap, judgements });
 
 const wrong = [];
 const projects = new Map();
@@ -139,6 +140,13 @@ for (const name of names) {
         if (JSON.stringify(kit?.project.modules[given.fed.use].supply) !== JSON.stringify(given.fed.supply)) say(`fed by ${JSON.stringify(kit?.project.modules[given.fed.use].supply)}`);
     }
     if (given.says && !kits.some((kit) => kit.says.some((line) => line.text.includes(given.says)))) say(`no kit says "${given.says}"`);
+    // a line a judgement made is checked by its id, not by its text
+    if (given.judged) {
+        const kit = fit.find((item) => item.name === given.judged.board);
+        const ids = new Set(kit?.says.filter((line) => line.judgement).map((line) => line.judgement));
+        for (const id of given.judged.ids) if (!ids.has(id)) say(`${given.judged.board}: no line of the judgement ${id}`);
+        for (const [bus, lines] of Object.entries(given.judged.buses ?? {})) for (const [line, pin] of Object.entries(lines)) if (kit?.project.buses?.spi?.[bus]?.[line] !== pin) say(`${given.judged.board}: ${bus}.${line} is ${kit?.project.buses?.spi?.[bus]?.[line]}, not ${pin}`);
+    }
     for (const kit of fit) if (kit.project && (given.imported ? widerChecks : checksOf)(kit.project).problems.length) say(`${kit.name}: its project does not pass the checks`);
     if (given.imported && !kits.some((kit) => kit.imported && kit.fits)) say('no imported board fits');
     if (!given.imported) holdsForEvery(kits, say);

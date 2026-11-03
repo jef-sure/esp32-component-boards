@@ -196,6 +196,13 @@
             ],
             "source": "ESP-IDF esp-idf, docs/en/api-reference/peripherals/gpio/esp32h4.inc"
         },
+        "iomux": {
+            "level": "vendor-docs",
+            "covers": [
+                "iomux"
+            ],
+            "source": "ESP-IDF esp-idf, spi_pins.h of esp32h4"
+        },
         "platforms": {
             "level": "vendor-docs",
             "covers": [
@@ -206,6 +213,18 @@
     },
     "limits": {
         "psram_mhz": 64
+    },
+    "iomux": {
+        "spi": {
+            "spi2": {
+                "miso": 15,
+                "hd": 19,
+                "wp": 18,
+                "sclk": 16,
+                "mosi": 17,
+                "cs": 20
+            }
+        }
     },
     "platforms": {
         "esp_idf": {

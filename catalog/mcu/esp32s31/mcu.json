@@ -382,6 +382,13 @@
                 "gpio.strapping"
             ],
             "source": "ESP-IDF esp-idf, docs/en/api-reference/peripherals/gpio/esp32s31.inc"
+        },
+        "iomux": {
+            "level": "vendor-docs",
+            "covers": [
+                "iomux"
+            ],
+            "source": "ESP-IDF esp-idf, spi_pins.h of esp32s31"
         }
     },
     "controls": {
@@ -396,5 +403,17 @@
     "limits": {
         "psram_mhz": 250,
         "cpu_mhz": 320
+    },
+    "iomux": {
+        "spi": {
+            "spi2": {
+                "sclk": 20,
+                "mosi": 21,
+                "miso": 22,
+                "cs": 23,
+                "hd": 24,
+                "wp": 25
+            }
+        }
     }
 }

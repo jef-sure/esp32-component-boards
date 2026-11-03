@@ -244,6 +244,12 @@ committed, a program that asks by kind.
   references (the audit of 2026-11-03, 5.7). The glue gives tables only: `board_bus_get`, `board_spi_bus`,
   `board_spi_taken` and the functions of a display a board has not are written once in `src/` instead of being generated
   into every glue, and `CONFIG_BOARD_MODULE_CHARACTER_DISPLAY` is gone (5.10 in part, 5.20).
+- The solver takes its first judgement from data: catalog/judgements.json, each judgement of a kind editor/solver.js has
+  a function for, with an id that a line of a kit carries (on hover on the page, to the model, in `selection.json`, and
+  checked by `test/solver/`). `host_on_its_iomux` puts a new SPI host on the pins of its IO MUX when they are free, as a
+  wired board takes them: two readers on an ESP32 DevKit get SPI3 on 23, 19 and 18, as the terminal has them. The chips
+  in catalog/mcu have `iomux`, from `spi_pins.h` of ESP-IDF (Anton's decision of 2026-11-03: the judgements of the
+  solver go into data, one at a step).
 - The generator checks a board against its chip in catalog/mcu, which make_mcu.py takes from ESP-IDF: the SPI hosts it
   can wire, its GPIOs and those only for input. Its own tables of five chips are gone; a pin a chip has not, as GPIO 24 of
   an ESP32, is now seen (the audit of 2026-11-03, 5.9).

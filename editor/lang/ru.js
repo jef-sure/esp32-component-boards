@@ -250,6 +250,7 @@ LANGUAGES.ru = {
         'by the model': 'от модели',
         '{0} share {1}: no free SPI host, or no pins for one, is left for them': '{0} делят {1}: свободного хоста SPI или пинов для него не осталось',
         '{0}: each on an SPI host of its own, so their tasks run apart': '{0}: у каждого свой хост SPI, их задачи работают независимо',
+        '{0} on the pins of its IO MUX': '{0} на своих пинах IO MUX',
         '{0}: {1} more parts were not tried; pin a part in the block to choose one': '{0}: ещё {1} деталей не пробовались; чтобы выбрать одну, закрепи деталь в блоке',
         '{0} boards fit. To narrow: a budget or a platform above, pin a part in a block, or pin a board.': 'Подходит плат: {0}. Чтобы сузить: бюджет или платформа сверху, закреплённая деталь в блоке или закреплённая плата.',
         '{0} more boards': 'ещё плат: {0}',

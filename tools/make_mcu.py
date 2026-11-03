@@ -40,6 +40,9 @@ GPIO_HIGH_MV_MAX = {target: 3600 for target in ("esp32", "esp32s2", "esp32s3", "
 WIFI_TX_POWER = {"how": "wifi_tx_power", "min": 8, "max": 84, "unit": "0.25 dBm", "read": "command"}
 
 
+IOMUX_LINES = {"MOSI": "mosi", "MISO": "miso", "CLK": "sclk", "CS": "cs", "WP": "wp", "HD": "hd"}  # names of spi_pins.h -> of the buses
+
+
 def defines(path):
     found = {}
     for line in path.read_text().splitlines():
@@ -172,6 +175,20 @@ def adc1_of(target_dir):
     return {"adc1": pins} if pins else {}
 
 
+def iomux_of(target):
+    """The pins of the IO MUX of each SPI host from SPI2 on, from spi_pins.h (in esp_hal_gpspi since ESP-IDF 6, in soc before)."""
+    for header in (IDF / f"components/esp_hal_gpspi/{target}/include/soc/spi_pins.h", IDF / f"components/soc/{target}/include/soc/spi_pins.h"):
+        if header.exists():
+            break
+    else:
+        return {}
+    hosts = {}
+    for host, line, pin in re.findall(r"#define\s+SPI(\d)_IOMUX_PIN_NUM_(MOSI|MISO|CLK|CS|WP|HD)\s+(\d+)\b", header.read_text()):
+        if int(host) >= 2:
+            hosts.setdefault(f"spi{host}", {})[IOMUX_LINES[line]] = int(pin)
+    return {"spi": dict(sorted(hosts.items()))} if hosts else {}
+
+
 def main():
     made = []
     supported = compatibility()
@@ -218,6 +235,10 @@ def main():
             entry["sdkconfig"] = {"revision": f"CONFIG_{prefix}_REV_MIN_{{value}}", "psram_mhz": "CONFIG_SPIRAM_SPEED_{value}M", "cpu_mhz": "CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_{value}", "lines": []}
             entry["revisions"] = {"described": "3.99", "options": [int(n) for n in re.findall(rf"config {prefix}_REV_MIN_(\d+)\b", kconfig)],
                                   "history": [{"before": "3.0", "limits": older, "sdkconfig": {"lines": [f"CONFIG_{prefix}_SELECTS_REV_LESS_V3=y"]}}]}
+        iomux = iomux_of(target)
+        if iomux:
+            entry["iomux"] = iomux
+            entry["checked"]["iomux"] = {"level": "vendor-docs", "covers": ["iomux"], "source": f"ESP-IDF {IDF.name}, spi_pins.h of {target}"}
         if target in supported:
             entry["platforms"] = {"esp_idf": supported[target]}
             entry["checked"]["platforms"] = {"level": "vendor-docs", "covers": ["platforms"], "source": "COMPATIBILITY.md of ESP-IDF"}

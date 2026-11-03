@@ -154,6 +154,13 @@
             ],
             "source": "ESP-IDF esp-idf, docs/en/api-reference/peripherals/gpio/esp32c61.inc"
         },
+        "iomux": {
+            "level": "vendor-docs",
+            "covers": [
+                "iomux"
+            ],
+            "source": "ESP-IDF esp-idf, spi_pins.h of esp32c61"
+        },
         "platforms": {
             "level": "vendor-docs",
             "covers": [
@@ -174,6 +181,18 @@
     "limits": {
         "psram_mhz": 120,
         "cpu_mhz": 160
+    },
+    "iomux": {
+        "spi": {
+            "spi2": {
+                "miso": 2,
+                "hd": 3,
+                "wp": 4,
+                "sclk": 6,
+                "mosi": 7,
+                "cs": 8
+            }
+        }
     },
     "platforms": {
         "esp_idf": {

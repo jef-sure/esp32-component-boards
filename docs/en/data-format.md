@@ -17,6 +17,7 @@ describes every file. `tools/check_format.py` checks them.
 | `catalog/connectors/<type>/connector.json` | a type of connector: pins, voltage |
 | `catalog/rules.json` | what makes a board wrong and a schema cannot see |
 | `catalog/questions.json` | what the selection asks, and what each answer asks of a board |
+| `catalog/judgements.json` | the judgements of the solver: how it chooses where a choice is open, each with an id |
 | `catalog/index.json` | the list of these files for the page of the editor, made by `tools/boards_gen.py --all` |
 | `components/local-boards/` of a program | what is the program's own, in the same layout: read before the catalog |
 
@@ -694,6 +695,21 @@ names what an entry is about, the whole file without it. `result` is `confirmed`
 when absent, `pending` for what is still to be tried, `refuted` for a source that
 disagrees. `unit` says which piece of the board was tried. A variant inherits the entries of its base marked `on_board`, because
 they were earned on another board.
+
+## Judgements of the solver
+
+`catalog/judgements.json` holds how the solver chooses where the data leaves a choice open. A judgement has an `id`, a
+`kind` and the fields of its kind, `says` (the line of a kit, `{0}` what it is about) and `why`. A kind is one function
+of `editor/solver.js`, and the schema lists the kinds there are: a new judgement of a known kind is a record, a new kind
+is code. A line of a kit that a judgement made carries its `id`: the page shows it on hover, the model gets it with the
+kit, `selection.json` keeps it, and a case of `test/solver/` checks the `id`, not the text.
+
+| kind | fields | what it does |
+|---|---|---|
+| `prefer_pins` | `bus`, `pins` (a field of the chip) | a new host of `bus` takes the pins the chip names for it when all are free; those pins go last for anything else |
+
+`host_on_its_iomux` is the first: an SPI host on the pins of its IO MUX (`iomux` of `mcu.json`, from `spi_pins.h` of
+ESP-IDF), as a wired board takes them.
 
 ## What is refused
 

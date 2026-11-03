@@ -44,6 +44,7 @@ RAW = jsonschema.Draft202012Validator(SCHEMA)
 RESOLVED = jsonschema.Draft202012Validator({"$ref": "#/$defs/resolved", "$defs": SCHEMA["$defs"]})
 QUESTIONS = jsonschema.Draft202012Validator({"$ref": "#/$defs/questions", "$defs": SCHEMA["$defs"]})
 RATES = jsonschema.Draft202012Validator({"$ref": "#/$defs/rates", "$defs": SCHEMA["$defs"]})
+JUDGEMENTS = jsonschema.Draft202012Validator({"$ref": "#/$defs/judgements", "$defs": SCHEMA["$defs"]})
 ROLES = jsonschema.Draft202012Validator({"$ref": "#/$defs/roles", "$defs": SCHEMA["$defs"]})
 RULES = json.loads((ROOT / "catalog" / "rules.json").read_text())
 FILE_RULES = {**RULES, "rules": [rule for rule in RULES["rules"] if rule.get("in_files")]}
@@ -546,6 +547,7 @@ def main():
 
     problems = errors_of(QUESTIONS, json.loads((ROOT / "catalog" / "questions.json").read_text()), "questions")
     problems += errors_of(RATES, json.loads((ROOT / "catalog" / "rates.json").read_text()), "rates")
+    problems += errors_of(JUDGEMENTS, json.loads((ROOT / "catalog" / "judgements.json").read_text()), "judgements")
     problems += roles_problems(json.loads((ROOT / "catalog" / "roles.json").read_text()))
     problems += bridge_problems()
     problems += library_list_problems()

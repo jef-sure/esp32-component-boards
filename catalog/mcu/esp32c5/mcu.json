@@ -199,6 +199,13 @@
             ],
             "source": "ESP-IDF esp-idf, docs/en/api-reference/peripherals/gpio/esp32c5.inc"
         },
+        "iomux": {
+            "level": "vendor-docs",
+            "covers": [
+                "iomux"
+            ],
+            "source": "ESP-IDF esp-idf, spi_pins.h of esp32c5"
+        },
         "platforms": {
             "level": "vendor-docs",
             "covers": [
@@ -219,6 +226,18 @@
     "limits": {
         "psram_mhz": 120,
         "cpu_mhz": 240
+    },
+    "iomux": {
+        "spi": {
+            "spi2": {
+                "miso": 2,
+                "hd": 4,
+                "wp": 5,
+                "sclk": 6,
+                "mosi": 7,
+                "cs": 10
+            }
+        }
     },
     "platforms": {
         "esp_idf": {

@@ -6,10 +6,10 @@ importScripts('schema.js', 'rules.js', 'resolve.js', 'pins.js', 'checks.js', 'so
 let solver = null;
 let language = 'en';
 
-function take({ catalog, schema, rules, questions, rates, roles, libraries }) {
+function take({ catalog, schema, rules, questions, rates, roles, libraries, judgements }) {
     const loader = boardResolver(catalog);
     const checksOf = documentChecks({ schema, rules, loader, schemaReader, check, pinProblems });
-    solver = kitSolver({ catalog, loader, questions, roles, libraries, rates, levels: schema.$defs.level.enum, t: (text, ...values) => translate(language, text, ...values), checksOf, pinMap });
+    solver = kitSolver({ catalog, loader, questions, roles, libraries, rates, levels: schema.$defs.level.enum, judgements, t: (text, ...values) => translate(language, text, ...values), checksOf, pinMap });
 }
 
 onmessage = ({ data }) => {

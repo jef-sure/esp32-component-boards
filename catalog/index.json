@@ -48,6 +48,7 @@
     "devices/ws2812b/device.json",
     "devices/xpt2046/device.json",
     "format.schema.json",
+    "judgements.json",
     "libraries/arduino/adafruit/adafruit-busio/audit.json",
     "libraries/arduino/adafruit/adafruit-busio/library.json",
     "libraries/arduino/adafruit/adafruit-pn532/audit.json",

@@ -91,7 +91,9 @@ function auditedOrder(libraries, { chip, platform, bus, several, standard }) {
         .sort((a, b) => a.high - b.high || a.medium - b.medium || b.health - a.health || a.id.localeCompare(b.id));
 }
 
-function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: {}, byChip: {}, audits: {} }, rates, levels, checksOf, pinMap, t = (text, ...values) => text.replace(/\{(\d)\}/g, (_, i) => values[+i]) }) {
+function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: {}, byChip: {}, audits: {} }, rates, levels, checksOf, pinMap, judgements = [], t = (text, ...values) => text.replace(/\{(\d)\}/g, (_, i) => values[+i]) }) {
+    // the judgements of catalog/judgements.json, by kind: each kind is a function here
+    const judgementsOf = (kind) => judgements.filter((item) => item.kind === kind);
     const shortOfPins = (wanted, left) => t('it takes {0} more pins and {1} free ones come out of this board', wanted, left);
     const valueAt = (node, path) => path.split('.').reduce((at, key) => (at === undefined || at === null ? undefined : at[key]), node);
     // A part of a need: by its class, or by the role it names. A variant it does not name stays in: the kit can only say so.
@@ -420,6 +422,21 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         return KIT_BUSES[kind].lines.every((line) => map[board.buses[kind][own][line]?.gpio]?.connectors.length);
     }
 
+    // prefer_pins: the pins a judgement names for a host, from a field of the chip (its IO MUX), when every line asked is free
+    function ownPins(board, kind, own, lines, pins) {
+        for (const judgement of judgementsOf('prefer_pins')) {
+            const named = judgement.bus === kind && board.mcu.facts[judgement.pins]?.[kind]?.[own];
+            if (named && lines.every((line) => pins.includes(named[line]))) return named;
+        }
+        return null;
+    }
+
+    // The cs of a device on a host: the one a judgement names for the host while it is free, else the next free pin.
+    function selectOf(board, kind, own, pins) {
+        const cs = ownPins(board, kind, own, [], pins)?.cs;
+        return cs !== undefined && pins.includes(cs) ? pins.splice(pins.indexOf(cs), 1)[0] : pins.shift();
+    }
+
     function hostNames(board, host) {
         const count = board.mcu.facts.hosts?.[host] ?? 0;
         // SPI1 belongs to the flash, UART0 to the console
@@ -470,7 +487,9 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             if (!own) return { problem: t('no free {0} host on this board: {1}', spec.host.toUpperCase(), [...taken].join(', ') || t('it has none')) };
             const lines = spec.lines.filter((line) => !(silent && line === 'miso')); // a device with no line back leaves it unwired
             if (pins.length < lines.length + (spec.select ? 1 : 0)) return { problem: shortOfPins(lines.length, pins.length) };
-            added[kind] = { ...added[kind], [own]: { ...Object.fromEntries(spec.lines.map((line) => [line, lines.includes(line) ? pins.shift() : 'nc'])), ...(hz ? { hz } : {}) } };
+            const named = ownPins(board, kind, own, lines, pins);
+            if (named) for (const line of lines) pins.splice(pins.indexOf(named[line]), 1);
+            added[kind] = { ...added[kind], [own]: { ...Object.fromEntries(spec.lines.map((line) => [line, lines.includes(line) ? (named ? named[line] : pins.shift()) : 'nc'])), ...(hz ? { hz } : {}) } };
             if (alone) kept.add(own);
             return own;
         };
@@ -530,7 +549,12 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
     function projectOf(name, board, picks, unused, spread = true) {
         // the pins a part of the person's own is soldered to are out of what the kit hands out
         const soldered = picks.flatMap((pick) => Object.values(pick.way?.fixed ?? {}));
-        const pins = freePins(board).filter((pin) => !soldered.includes(pin));
+        // the pins a judgement names for a host the board does not wire yet go last, so a new host can take them all
+        const free = freePins(board).filter((pin) => !soldered.includes(pin));
+        const theirs = new Set(judgementsOf('prefer_pins').flatMap((judgement) => hostNames(board, KIT_BUSES[judgement.bus].host)
+            .filter((own) => !Object.values(board.buses ?? {}).some((named) => own in named))
+            .flatMap((own) => [...KIT_BUSES[judgement.bus].lines, 'cs'].map((line) => board.mcu.facts[judgement.pins]?.[judgement.bus]?.[own]?.[line]))));
+        const pins = [...free.filter((pin) => !theirs.has(pin)), ...free.filter((pin) => theirs.has(pin))];
         const buses = {};
         const modules = { ...unused.modules };
         const devices = { ...unused.devices };
@@ -555,7 +579,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
                     const bus = busOf(board, pick.way.bus, pins, buses, undefined, false, kept, false, placed, spread);
                     if (bus.problem) return bus;
                     placed[bus] = (placed[bus] ?? 0) + 1;
-                    const wires = KIT_BUSES[pick.way.bus].select ? { cs: pins.shift() } : {};
+                    const wires = KIT_BUSES[pick.way.bus].select ? { cs: selectOf(board, pick.way.bus, bus, pins) } : {};
                     if (wires.cs === undefined && KIT_BUSES[pick.way.bus].select) return { problem: shortOfPins(1, 0) };
                     devices[pick.use].on = { [`${pick.way.bus}.${bus}`]: { ...wires, ...(pick.way.address ? { address: pick.way.address } : {}) } };
                 }
@@ -576,7 +600,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             const wires = {};
             if (KIT_BUSES[pick.transport].select) {
                 if (!pins.length) return { problem: shortOfPins(1, 0) };
-                wires.cs = pins.shift();
+                wires.cs = selectOf(board, pick.transport, own, pins);
             }
             if (pick.transport === 'i2c') {
                 held[own] ??= new Set(Object.values(board.devices).flatMap((device) => device.on?.[`i2c.${own}`]?.address ?? device.on?.[`i2c.${own}`]?.address_try?.[0] ?? []));
@@ -1084,6 +1108,14 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
                 for (const [bus, items] of sharing) lines.push({ level: 'note', text: t('{0} share {1}: no free SPI host, or no pins for one, is left for them', items.map((item) => item.use).join(', '), bus.split('.')[1].toUpperCase()) });
                 if (!sharing.length) lines.push({ level: 'note', text: t('{0}: each on an SPI host of its own, so their tasks run apart', onSpi.map((item) => item.use).join(', ')) });
             }
+            // a host of the kit on the pins a judgement names, with the id of that judgement
+            const chip = (resolved ?? base)?.mcu?.facts;
+            for (const judgement of judgementsOf('prefer_pins')) {
+                for (const [own, bus] of Object.entries(project?.buses?.[judgement.bus] ?? {})) {
+                    const named = chip?.[judgement.pins]?.[judgement.bus]?.[own];
+                    if (named && KIT_BUSES[judgement.bus].lines.every((line) => bus[line] === 'nc' || bus[line] === named[line])) lines.push({ level: 'note', text: t(judgement.says, own.toUpperCase()), judgement: judgement.id });
+                }
+            }
             const libraries = librariesOf(resolved);
             // the versions that take the chip, narrowed by what the libraries of the kit are built against
             const ranges = (id) => [...new Set(Object.values(resolved.devices).filter((device) => device.library && device.used !== false)
@@ -1143,7 +1175,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             board: kit.name,
             modules: kit.modules.map(({ name, count, on }) => ({ name, count, on })),
             libraries: kit.libraries.map(({ name, version }) => ({ name, version })),
-            says: kit.says.map(({ level, text }) => ({ level, text })),
+            says: kit.says.map(({ level, text, judgement }) => ({ level, text, ...(judgement ? { judgement } : {}) })),
             others: others.filter((item) => item.fits).map((item) => item.headline),
             rejected: others.filter((item) => !item.fits).map((item) => ({ board: item.name, why: item.says.filter((line) => line.level === 'no').map((line) => line.text) })),
         };

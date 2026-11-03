@@ -328,6 +328,13 @@
             ],
             "source": "ESP-IDF esp-idf, docs/en/api-reference/peripherals/gpio/esp32p4.inc"
         },
+        "iomux": {
+            "level": "vendor-docs",
+            "covers": [
+                "iomux"
+            ],
+            "source": "ESP-IDF esp-idf, spi_pins.h of esp32p4"
+        },
         "platforms": {
             "level": "vendor-docs",
             "covers": [
@@ -448,6 +455,18 @@
                 }
             }
         ]
+    },
+    "iomux": {
+        "spi": {
+            "spi2": {
+                "hd": 6,
+                "cs": 7,
+                "mosi": 8,
+                "sclk": 9,
+                "miso": 10,
+                "wp": 11
+            }
+        }
     },
     "platforms": {
         "esp_idf": {

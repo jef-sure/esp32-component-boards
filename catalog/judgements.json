@@ -32,6 +32,13 @@
             "kind": "unnamed_variant",
             "says": "{0}: the board has one, of a variant the data does not name, and a module of the catalog names it",
             "why": "A part of a board whose data names no variant may or may not be the variant asked: counted as an answer with an unknown, it came before a kit with a module that names the variant (an imported AtomS3R with some LED before a DevKit with a 7-segment backpack). Where the catalog has a module that names the variant, the part of the board answers nothing and stays a line; where none does, it stays an answer with the unknown, as before."
+        },
+        {
+            "id": "ledc_channels",
+            "kind": "resource_limit",
+            "resource": "ledc",
+            "says": "LEDC: {0} channels asked, the chip has {1}",
+            "why": "A way of a part names the LEDC channels it takes (ledc of the way: the OE of a chain of shift registers, the three colours of an RGB LED). They and the outputs of the page come out of the same channels of the chip (frequency_sources.ledc.outputs): a kit that asks more is refused, before its pins are counted."
         }
     ]
 }

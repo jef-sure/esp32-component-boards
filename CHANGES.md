@@ -248,6 +248,10 @@ committed, a program that asks by kind.
   `board_sound_start`, `board_sound_source` and their `_at` forms take `ctx`, given back to it at every call, so the mixer
   of a game needs no static. The task takes the source and its context together. The names `board_`, `boards_`,
   `BOARD_` and `CONFIG_BOARD_` are said to be the component's (both found by 7c after the move of dgx-ge was decided).
+- A fifth judgement, `ledc_channels`, of the kind `resource_limit`: the LEDC channels the ways of the parts take (a chain
+  of shift registers, an RGB LED) are counted with those of the outputs against the chip, as data-format.md said and the
+  solver did not do. Three RGB LEDs no longer fit an ESP32-S3, which has eight. The C3 and the C6 have no frequency
+  sources in the data and are not counted yet.
 - The reading distance and the cards of an NFC reader are asked of each block (`"asked": "block"` in questions.json), so
   two readers ask their own; the distance between readers stays a question of the page. Two blocks of one role are
   always two parts: with different answers one module served both. The model gets these questions from `roles`

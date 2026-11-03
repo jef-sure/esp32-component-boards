@@ -624,8 +624,9 @@ the fewest lines first.
 ```
 
 So each piezo disc takes one pin and one channel, or two of each when a question asks for more swing.
-The solver takes the first way that gives what is asked and counts the channels against `hosts.ledc`
-of the chip.
+The solver takes the first way that gives what is asked and counts its channels, with those the outputs of the page
+take, against `frequency_sources.ledc.outputs` of the chip (the judgement `ledc_channels`). A chip whose frequency
+sources are not in the data, as the C3 and the C6 for now, is not counted.
 
 ## Frequency sources
 
@@ -710,6 +711,7 @@ kit, `selection.json` keeps it, and a case of `test/solver/` checks the `id`, no
 | `keep_out` | `what` (`strapping`), `harm` | a strapping pin whose harm is listed, or which has no `boot`, is given to nothing; the others are given with a line |
 | `note_cost` | `note` | a pin with that note of the docs is given, with a line of what it costs; any other note keeps a pin out |
 | `unnamed_variant` | | a part of the board of no named variant answers nothing for a variant asked when a module of the catalog names it, and stays a line |
+| `resource_limit` | `resource` (`ledc`) | a kit that asks more of the resource than the chip has is refused |
 
 The strapping pins of a chip are copied from its datasheet, not judged: `gpio.boot_modes` holds the rows of its table
 of boot modes (the level of each pin, or `any`, for `spi_boot` and for each download mode), and each strapping pin has

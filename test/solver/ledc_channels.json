@@ -1,0 +1,24 @@
+{
+    "title": "The LEDC channels the ways of parts take are counted: three RGB LEDs ask nine, and an ESP32-S3 has eight, so the S3 DevKit is refused by the judgement ledc_channels before its pins are counted",
+    "answers": {
+        "board": "esp32s3_devkit",
+        "blocks": [
+            {
+                "role": "led",
+                "variant": "rgb",
+                "name": "a"
+            },
+            {
+                "role": "led",
+                "variant": "rgb",
+                "name": "b"
+            },
+            {
+                "role": "led",
+                "variant": "rgb",
+                "name": "c"
+            }
+        ]
+    },
+    "says": "LEDC: 9 channels asked, the chip has 8"
+}

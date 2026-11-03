@@ -681,7 +681,18 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
     }
 
     // Tries the ways to wire a choice of modules; the checks of the tools take the first that holds.
-    function wired(name, board, shortfalls, choice, unused) {
+    // resource_limit of ledc: the channels the ways of the parts take (ledc of a way), beside those the outputs took
+    function ledcShort(board, shortfalls, choice, taken) {
+        const judgement = judgementsOf('resource_limit').find((item) => item.resource === 'ledc');
+        const have = board.mcu.facts.frequency_sources?.ledc?.outputs;
+        if (!judgement || have === undefined) return null;
+        const asked = taken + choice.reduce((sum, module, i) => sum + shortfalls[i].count * (module.way?.ledc ?? module.device?.ways?.[0]?.ledc ?? 0), 0);
+        return asked > have ? { problem: t(judgement.says, asked, have), judgement: judgement.id } : null;
+    }
+
+    function wired(name, board, shortfalls, choice, unused, ledcTaken = 0) {
+        const short = ledcShort(board, shortfalls, choice, ledcTaken);
+        if (short) return short;
         const unfed = choice.find((module) => !supplyOf(board, module));
         if (unfed) return { problem: t('{0}: no line of this board gives the voltage it takes', unfed.title) };
         const ways = choice.map((module) => [...transportsOf(module.device)].sort((a, b) => triedBuses(module.device.chip).includes(b) - triedBuses(module.device.chip).includes(a)));
@@ -1033,12 +1044,12 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             const kept = shortfalls.map((_, i) => i).filter((i) => !gone.has(i));
             const key = kept.map((i) => choice[i].name).join();
             if (triedKits.has(key)) return triedKits.get(key);
-            const result = wired(name, board, kept.map((i) => shortfalls[i]), kept.map((i) => choice[i]), unused);
+            const result = wired(name, board, kept.map((i) => shortfalls[i]), kept.map((i) => choice[i]), unused, plan?.used?.ledc?.lines ?? 0);
             // the blocks one part serves, in the order the person put them
             const serving = new Map([...gone].map(([, at]) => [at, [at]]));
             for (const [i, at] of gone) serving.get(at).push(i);
             const also = [...serving].map(([at, served]) => ({ level: 'yes', text: t('{0} serves: {1}', choice[at].title, served.sort((a, b) => a - b).map((i) => shortfalls[i].need.title).join(', ')) }));
-            const item = result.project ? kit(name, doc, result.resolved, [...says, ...also], result.project, result.picks, board) : { name, title: doc.title ?? name, fits: false, says: [...says, { level: 'no', text: result.problem }], modules: [], wires: [], price: null, project: null };
+            const item = result.project ? kit(name, doc, result.resolved, [...says, ...also], result.project, result.picks, board) : { name, title: doc.title ?? name, fits: false, says: [...says, { level: 'no', text: result.problem, ...(result.judgement ? { judgement: result.judgement } : {}) }], modules: [], wires: [], price: null, project: null };
             // which part each block gets, for the canvas to show the blocks one part serves together
             // unit: the part as bought, so two SCD41 for two rooms are not one
             if (item.fits) item.served = shortfalls.map((shortfall, i) => ({ role: shortfall.need.id, names: shortfall.need.names ?? [], unit: gone.get(i) ?? i, title: choice[gone.get(i) ?? i].title })).filter((entry) => entry.role);

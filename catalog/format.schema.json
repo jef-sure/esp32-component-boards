@@ -604,7 +604,7 @@
             "required": ["id", "kind", "says", "why"],
             "properties": {
               "id": { "$ref": "#/$defs/name" },
-              "kind": { "enum": ["prefer_pins", "keep_out", "note_cost", "unnamed_variant"] },
+              "kind": { "enum": ["prefer_pins", "keep_out", "note_cost", "unnamed_variant", "resource_limit"] },
               "says": { "type": "string", "description": "The line of a kit, {0} what it is about." },
               "why": { "type": "string" }
             },
@@ -632,6 +632,10 @@
                   "required": ["note"],
                   "properties": { "note": { "type": "string", "minLength": 1, "description": "A note of gpio.pins of the chip that costs something rather than keeps a pin out." } }
                 }
+              },
+              {
+                "if": { "properties": { "kind": { "const": "resource_limit" } } },
+                "then": { "required": ["resource"], "properties": { "resource": { "enum": ["ledc"], "description": "What is counted: ledc, the channels of LEDC the ways of the parts and the outputs take." } } }
               }
             ]
           }

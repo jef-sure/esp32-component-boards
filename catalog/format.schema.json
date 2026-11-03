@@ -1107,6 +1107,7 @@
       "additionalProperties": false,
       "properties": {
         "id": { "$ref": "#/$defs/name" },
+        "asked": { "const": "block", "description": "Asked of each block of its class, the answer in asks of the block, so two readers can ask different things; without it the question is one for the page." },
         "text": { "type": "string", "minLength": 1 },
         "type": { "enum": ["choice", "flag", "count", "number", "text", "outputs", "version"], "description": "outputs: a list of tones and PWM signals, each with its frequency and what it needs. version: a version of the platform answered, from catalog/platforms." },
         "top": { "type": "boolean", "description": "Shown in the top row of the page, not among the questions about the hardware." },

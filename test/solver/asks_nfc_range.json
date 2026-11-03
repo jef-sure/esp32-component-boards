@@ -1,0 +1,26 @@
+{
+    "title": "The reading distance is asked of each reader: one that must reach 80 mm takes a PN5180, and the other, which asks nothing, a part of its own, a PN532 among the kits; one PN5180 is no answer to both (the old questions of the page into the asks of a block, NFC first, as Anton decided)",
+    "answers": {
+        "board": "esp32_devkit",
+        "blocks": [
+            {
+                "role": "nfc",
+                "name": "nfc_in",
+                "asks": {
+                    "nfc_range_mm": 80
+                }
+            },
+            {
+                "role": "nfc",
+                "name": "nfc_out"
+            }
+        ]
+    },
+    "kit": {
+        "name": "esp32_devkit",
+        "modules": {
+            "pn5180_module": 1,
+            "pn532_module": 1
+        }
+    }
+}

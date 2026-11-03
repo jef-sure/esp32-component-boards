@@ -248,6 +248,10 @@ committed, a program that asks by kind.
   `board_sound_start`, `board_sound_source` and their `_at` forms take `ctx`, given back to it at every call, so the mixer
   of a game needs no static. The task takes the source and its context together. The names `board_`, `boards_`,
   `BOARD_` and `CONFIG_BOARD_` are said to be the component's (both found by 7c after the move of dgx-ge was decided).
+- The reading distance and the cards of an NFC reader are asked of each block (`"asked": "block"` in questions.json), so
+  two readers ask their own; the distance between readers stays a question of the page. Two blocks of one role are
+  always two parts: with different answers one module served both. The model gets these questions from `roles`
+  (Anton's decision: the old questions of the page into the asks of a block, NFC first).
 - A fourth judgement, `unnamed_variant_is_no_answer`: a part of a board whose data names no variant answers nothing
   for a variant asked when a module of the catalog names that variant, and stays a line of the kit. Segment LEDs no
   longer give first an imported M5 Atom with some LED and no module, but a DevKit with a segment backpack (the audit of

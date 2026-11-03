@@ -274,11 +274,16 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         is: (value, asked) => value === asked,
     };
 
+    // an answer of a block that asks something: none for an empty field or "any"
+    const blockAnswer = (value) => (value === undefined || value === null || value === '' || value === 'any' ? undefined : value);
+
     function limitsOf(need, wanted) {
-        const measured = questions.filter((item) => item.limit?.measure && item.limit.of && item.limit.of === need.class && wanted.limits[item.limit.measure] !== undefined)
-            .map((item) => ({ asked: wanted.limits[item.limit.measure], fits: (value, asked) => value >= asked, ...MEASURES[item.limit.measure] }));
+        // a question asked of each block takes the block's answer first, the one of the page after it (an older answer)
+        const answerOf = (item) => (item.asked === 'block' && blockAnswer(need.asks?.[item.id]) !== undefined ? need.asks[item.id] : wanted.limits[item.limit.measure]);
+        const measured = questions.filter((item) => item.limit?.measure && item.limit.of && item.limit.of === need.class && answerOf(item) !== undefined)
+            .map((item) => ({ asked: answerOf(item), fits: (value, asked) => value >= asked, ...MEASURES[item.limit.measure] }));
         // what a block asks of the data of its part: a value not in the data leaves the part in, as an unknown
-        const asked = Object.entries(need.asks ?? {}).filter(([, value]) => value !== undefined && value !== null && value !== '').map(([id, value]) => {
+        const asked = Object.entries(need.asks ?? {}).filter(([, value]) => blockAnswer(value) !== undefined).map(([id, value]) => {
             const question = questions.find((item) => item.id === id && item.limit?.field);
             // an answer kept from another variant of the block does not act: a CO2 range does not limit a VOC sensor
             if (!question || (question.limit.variant && question.limit.variant !== need.variant)) return null;
@@ -963,7 +968,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
                 if (quality !== null) say('do', t('{0}: antenna quality {1} of 10', need.title, quality));
                 continue;
             }
-            for (const question of wanted.unanswered) if (question.limit.of === need.class) say('unknown', t(MEASURES[question.limit.measure].unanswered));
+            for (const question of wanted.unanswered) if (question.limit.of === need.class && blockAnswer(need.asks?.[question.id]) === undefined) say('unknown', t(MEASURES[question.limit.measure].unanswered));
             const limits = limitsOf(need, wanted);
             // a part the person fixed is wanted as it is: what the board has of that role does not replace it
             const on = need.part ? [] : Object.values(board.devices).filter((device) => isClass(device, need));
@@ -1013,8 +1018,10 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             shortfalls.forEach((shortfall, i) => {
                 // a part that already serves another block stays: a chain would leave both without it
                 if (shortfall.need.output || choice[i].way || [...gone.values()].includes(i)) return;
-                // a need with a fixed part is covered only by that same part: one SCD41 fixed for CO2 and for humidity is one part
+                // a need with a fixed part is covered only by that same part: one SCD41 fixed for CO2 and for humidity is one part;
+                // two blocks of one role are two things, whatever they ask: one reader is no answer to two
                 const at = choice.findIndex((module, other) => other !== i && !gone.has(other) && !module.way && !shortfalls[other].need.output
+                    && shortfalls[other].need.id !== shortfall.need.id
                     && (!shortfall.need.part || module.name === shortfall.need.part) && shortfalls[other].count >= shortfall.count && isClass(module.device, shortfall.need) && reaching(shortfall.need, module));
                 if (at >= 0) gone.set(i, at);
             });

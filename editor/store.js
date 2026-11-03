@@ -193,7 +193,10 @@ const useEditor = Pinia.defineStore('editor', {
         },
         // What a block asks of the data of its part: the questions of its role, and of its variant.
         asksOf() {
-            return (block) => library.questions.filter((question) => question.limit?.field && question.limit.of === block.role && (!question.limit.variant || question.limit.variant === block.variant));
+            // the fields of its part, and the questions of its class asked of each block
+            const classOf = (block) => library.roles.flatMap((group) => group.roles).find((role) => role.id === block.role)?.needs?.class;
+            return (block) => library.questions.filter((question) => (question.limit?.field && question.limit.of === block.role && (!question.limit.variant || question.limit.variant === block.variant))
+                || (question.asked === 'block' && question.limit?.of && question.limit.of === classOf(block)));
         },
         // The parts of the catalog a block can have, for the person to fix one.
         partsOf() {
@@ -201,7 +204,7 @@ const useEditor = Pinia.defineStore('editor', {
         },
         // What a block asks besides its variant: the questions that limit parts of its class.
         settings(state) {
-            return (role) => library.questions.filter((question) => question.limit?.of && question.limit.of === role.needs?.class && library.solver.holds(question, { ...state.answers, nfc_readers: state.answers.blocks.filter((block) => block.role === role.id).length }));
+            return (role) => library.questions.filter((question) => question.asked !== 'block' && question.limit?.of && question.limit.of === role.needs?.class && library.solver.holds(question, { ...state.answers, nfc_readers: state.answers.blocks.filter((block) => block.role === role.id).length }));
         },
         readOnly() {
             return !this.entry || READ_ONLY_GROUPS.has(this.entry.group) || Boolean(this.entry.doc.origin); // what is imported is regenerated

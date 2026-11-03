@@ -303,8 +303,8 @@ const SelectPage = {
         // An answer of a block to a question about the data of its part; an empty field takes it back.
         const setAsk = (block, question, event) => {
             const asks = { ...(block.asks ?? {}) };
-            if (event.target.value === '') delete asks[question.id];
-            else asks[question.id] = Number(event.target.value);
+            if (event.target.value === '' || event.target.value === 'any') delete asks[question.id];
+            else asks[question.id] = question.type === 'choice' ? event.target.value : Number(event.target.value);
             block.asks = Object.keys(asks).length ? asks : undefined;
         };
         // How a person gets the dialog with a model: one command. A page served from a copy of the repository finds the server beside
@@ -393,7 +393,9 @@ const SelectPage = {
                             <label v-if="block.bus === 'i2c'">{{ t('Its I2C address') }} <input type="text" v-model="block.address" placeholder="0x40"></label>
                         </template>
                         <label v-for="question in store.asksOf(block)" :key="question.id">{{ t(question.text) }}
-                            <input type="number" step="any" :value="block.asks?.[question.id]" :placeholder="t('any')" @change="setAsk(block, question, $event)"></label>
+                            <select v-if="question.type === 'choice'" :value="block.asks?.[question.id] ?? 'any'" @change="setAsk(block, question, $event)">
+                                <option v-for="choice in question.choices" :key="choice.value" :value="choice.value">{{ t(choice.text) }}</option></select>
+                            <input v-else type="number" step="any" :value="block.asks?.[question.id]" :placeholder="t('any')" @change="setAsk(block, question, $event)"></label>
                         <p v-if="servedBy(block)" class="served">→ {{ servedBy(block).title }}<template v-if="servedBy(block).with.length"> · {{ t('the same part: {0}', servedBy(block).with.join(', ')) }}</template></p>
                         <label v-for="question in firstOfRole(i) ? store.settings(roleOf(block.role)) : []" :key="question.id">{{ t(question.text) }}
                             <select v-if="question.type === 'choice'" :value="store.answers[question.id] ?? question.choices[0].value" @change="store.answers[question.id] = $event.target.value">

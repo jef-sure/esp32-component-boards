@@ -247,7 +247,7 @@ def call(desk, link, name, arguments):
         desk.add("model", text=arguments["text"], description=True)
         return {"shown": True}
     if name == "roles":
-        asks = [question for question in json.loads((ROOT / "catalog" / "questions.json").read_text())["questions"] if question.get("limit", {}).get("field")]
+        asks = [question for question in json.loads((ROOT / "catalog" / "questions.json").read_text())["questions"] if question.get("limit", {}).get("field") or question.get("asked") == "block"]
         return {"groups": json.loads((ROOT / "catalog" / "roles.json").read_text())["groups"], "asks": asks}
     if name == "find_parts":
         return find_parts(arguments["words"])

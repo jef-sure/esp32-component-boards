@@ -244,6 +244,14 @@ committed, a program that asks by kind.
   references (the audit of 2026-11-03, 5.7). The glue gives tables only: `board_bus_get`, `board_spi_bus`,
   `board_spi_taken` and the functions of a display a board has not are written once in `src/` instead of being generated
   into every glue, and `CONFIG_BOARD_MODULE_CHARACTER_DISPLAY` is gone (5.10 in part, 5.20).
+- `BOARD_PIXELS` and `BOARD_MM` of a board whose primary display is a group of two side by side are those of the
+  group, as `board_display_init` gives it (256x128 for two 128x128), no longer those of its first member.
+- `board_sound_init()` sets the sound of the board up without a task and returns `board_sound_t`; the header of its
+  adapter gives the handle of the library: `board_esp_codec_dev()` (ES8311), `board_i2s_channel()` (an amplifier on
+  I2S), `board_dac_continuous()` (the DAC of an ESP32). A program with a mixer of its own writes there itself and sets
+  the volume of the codec; `board_sound_start` runs its task over the same setup. Setup and task are made under a lock.
+  The ES8311 checks each step of its setup and names the call that failed, and the DAC turns its amplifier on or fails
+  (the audit of 2026-11-03, 5.15, 5.13, 5.21).
 - Every public structure of `boards.h` has a typedef ending in `_t` (`board_info_t`, `board_display_t`,
   `board_character_display_t`, `board_touch_t`, `board_spi_bus_t`), and the headers and examples use them; the tags
   stay for a declaration ahead (the audit of 2026-11-03, 5.14).

@@ -496,6 +496,12 @@ def main():
         print(f"a display in a module did not reach the generator: {display}")
         failed += 1
 
+    # the CMake of a program gets a primary group as board_display_init gives it: two 128x128 side by side
+    primary = boards_gen.primary_shown(boards_gen.read_board(TESTS / "good" / "dotview_clock.json"))
+    if primary != (256, 128, 54, 27):
+        print(f"the primary group of dotview_clock is {primary}, not 256x128 and 54x27 mm")
+        failed += 1
+
     # a GPIO of a power step or a divider is taken, and the glue refuses what it cannot set
     taken = {pin for pin, _, _ in boards_gen.pins_of(reached["good_physical_switched_rail.json"])} & {14}
     taken |= {pin for pin, _, _ in boards_gen.pins_of(reached["good_physical_divider_switch.json"])} & {15}

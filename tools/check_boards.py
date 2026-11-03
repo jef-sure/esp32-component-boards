@@ -42,6 +42,8 @@ API = (
     "bool board_touch_start_at(int index, const struct board_display *display, struct board_touch *out)",
     "const struct board_touch_table board_touch_table",
     "int board_sound_count(void)",
+    "bool board_sound_init(board_sound_t *out)",
+    "bool board_sound_init_at(int index, board_sound_t *out)",
     "bool board_sound_start(board_sound_source_t source, uint32_t *rate_out)",
     "bool board_sound_start_at(int index, board_sound_source_t source, uint32_t *rate_out)",
     "void board_sound_source(board_sound_source_t source)",

@@ -1,5 +1,6 @@
 /* Sound through an I2S amplifier with no codec to set up. It has no volume of its own: a program scales its samples. */
 #include "board_sound_i2s.h"
+#include "boards_esp_driver_i2s.h"
 #include "driver/i2s_std.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
@@ -7,6 +8,7 @@
 static const char *TAG = "board";
 
 static i2s_chan_handle_t sound_tx;
+static int               sound_index = -1;
 
 static esp_err_t i2s_write(int16_t *samples, size_t count)
 {
@@ -16,7 +18,7 @@ static esp_err_t i2s_write(int16_t *samples, size_t count)
 
 static const struct board_sound_output output = {"i2s_channel_write", i2s_write};
 
-bool board_glue_sound_i2s_start(int index, const struct board_i2s_bus *bus, uint32_t rate, board_sound_source_t source)
+bool board_glue_sound_i2s_init(int index, const struct board_i2s_bus *bus, uint32_t rate)
 {
     if (sound_tx) return true;
     i2s_chan_config_t chan = I2S_CHANNEL_DEFAULT_CONFIG(bus->port, I2S_ROLE_MASTER);
@@ -44,13 +46,14 @@ bool board_glue_sound_i2s_start(int index, const struct board_i2s_bus *bus, uint
         i2s_del_channel(tx);
         return false;
     }
-    sound_tx = tx;
-    if (!board_glue_sound_run(index, &output, rate, source)) {
-        i2s_channel_disable(tx);
-        i2s_del_channel(tx);
-        sound_tx = NULL;
-        return false;
-    }
+    sound_tx    = tx;
+    sound_index = index;
+    board_glue_sound_ready(index, &output);
     ESP_LOGI(TAG, "I2S at %lu Hz", (unsigned long)rate);
     return true;
+}
+
+i2s_chan_handle_t board_i2s_channel(const board_sound_t *sound)
+{
+    return sound && sound_tx && sound->index == sound_index ? sound_tx : NULL;
 }

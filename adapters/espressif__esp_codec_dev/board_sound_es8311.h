@@ -13,4 +13,4 @@ struct board_sound_es8311 {
     uint32_t                    rate;
 };
 
-bool board_glue_sound_es8311_start(int index, const struct board_sound_es8311 *codec, board_sound_source_t source);
+bool board_glue_sound_es8311_init(int index, const struct board_sound_es8311 *codec);

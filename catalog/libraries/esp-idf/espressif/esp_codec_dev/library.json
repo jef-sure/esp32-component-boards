@@ -51,7 +51,7 @@
         "version": "~1.6.2",
         "symbol": "BOARD_SOUND_ES8311",
         "requires": ["esp_driver_i2s"],
-        "headers": ["board_sound_es8311.h"],
+        "headers": ["board_sound_es8311.h"], "public": "boards_esp_codec_dev.h",
         "sources": {"BOARD_SOUND_ES8311": ["board_sound_es8311.c"]},
         "notes": "1.6.2 is what the example of DGX-GE asks: the sound of the JC8012P4A1C was heard there."
     },

@@ -125,9 +125,10 @@ def main():
     for board in boards + modules:
         if board["name"] == args.board:
             if args.display:
-                if not boards_gen.is_pixel(board.get("display")):
+                primary = boards_gen.primary_shown(board)
+                if not primary:
                     return 1
-                width, height, mm_w, mm_h = boards_gen.shown(board["display"])
+                width, height, mm_w, mm_h = primary
                 print(f"{width}x{height} {mm_w}x{mm_h}")
             elif args.json:
                 print(json.dumps(boards_gen.pin_map(board), indent=2))

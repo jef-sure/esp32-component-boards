@@ -1,6 +1,6 @@
 #pragma once
 #include "../esp_idf_stubs.h"
-typedef struct i2s_chan_handle_s *i2s_chan_handle_t;
+typedef struct i2s_channel_obj_t *i2s_chan_handle_t; /* as driver/i2s_types.h of ESP-IDF 6.1 */
 typedef enum { I2S_NUM_0 = 0 } i2s_port_t;
 typedef enum { I2S_ROLE_MASTER } i2s_role_t;
 typedef enum { I2S_DATA_BIT_WIDTH_16BIT } i2s_data_bit_width_t;

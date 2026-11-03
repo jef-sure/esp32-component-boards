@@ -139,8 +139,11 @@ void board_touch_firmware_set(const uint8_t *start, size_t size);
 ## Звук
 
 ```c
+typedef struct board_sound { uint32_t rate; const char *name; int index; } board_sound_t;
 typedef void (*board_sound_source_t)(int16_t *samples, size_t count);
 int  board_sound_count(void);
+bool board_sound_init(board_sound_t *out);
+bool board_sound_init_at(int index, board_sound_t *out);
 bool board_sound_start(board_sound_source_t source, uint32_t *rate_out);
 bool board_sound_start_at(int index, board_sound_source_t source, uint32_t *rate_out);
 void board_sound_source(board_sound_source_t source);
@@ -149,13 +152,22 @@ void board_sound_source_at(int index, board_sound_source_t source);
 
 Функции без `_at` относятся к первому выходу.
 
-`board_sound_start` настраивает кодек, усилитель или ЦАП и запускает задачу, которая
+`board_sound_init` настраивает кодек, усилитель или ЦАП и возвращает частоту, а
+заголовок адаптера даёт дескриптор библиотеки: `board_esp_codec_dev()` в
+`boards_esp_codec_dev.h` (ES8311: запись через `esp_codec_dev_write`, громкость
+через `esp_codec_dev_set_out_vol`), `board_i2s_channel()` в
+`boards_esp_driver_i2s.h` (усилитель на I2S), `board_dac_continuous()` в
+`boards_esp_driver_dac.h` (ЦАП ESP32, 8 бит на сэмпл). Программа со своим
+микшером пишет туда сама и `board_sound_start` не вызывает.
+
+`board_sound_start` делает ту же настройку и запускает задачу, которая
 просит у `source` следующие `count` сэмплов, 16-битных моно с частотой
 `*rate_out`, и отправляет их; записи блокируются на железе, которое и задаёт
 темп. `source` может быть `NULL` для тишины и быть задан позже через
-`board_sound_source`. Задача работает, пока не остановится прошивка. Микшер,
-громкость, формат, отличный от 16-битного моно, — дело программы: здесь железо
-и его темп, ничего больше.
+`board_sound_source`. Задача работает, пока не остановится прошивка. Повторный
+вызов любой из двух функций возвращает тот же звук, из любой задачи. Микшер и
+формат, отличный от 16-битного моно, — дело программы: здесь железо и его темп,
+ничего больше.
 
 ## Шины
 
@@ -231,6 +243,9 @@ hd44780, драйвер тача, esp_codec_dev), и их пути include до�
 #endif
 #if CONFIG_BOARD_DISPLAY_HD44780
 #include "boards_hd44780.h"
+#endif
+#if CONFIG_BOARD_SOUND_ES8311
+#include "boards_esp_codec_dev.h"
 #endif
 ```
 

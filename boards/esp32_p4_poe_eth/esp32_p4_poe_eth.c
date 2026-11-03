@@ -38,12 +38,12 @@ const struct board_touch_table board_touch_table = {.count = 0};
 static const struct board_sound_es8311 sound0_codec = {.i2s = &board_i2s_i2s0, .i2c_port = I2C_NUM_0, .address = 0x18, .pa = GPIO_NUM_53,
                                                      .pa_voltage = 5.0f, .codec_dac_voltage = 3.3f, .volume = 25, .rate = 22050};
 
-static bool sound0_start(int index, board_sound_source_t source)
+static bool sound0_init(int index)
 {
-    return board_glue_sound_es8311_start(index, &sound0_codec, source);
+    return board_glue_sound_es8311_init(index, &sound0_codec);
 }
 
-static const struct board_sound_entry sound_entries[] = {{.name = "sound", .rate = 22050, .start = sound0_start}};
+static const struct board_sound_entry sound_entries[] = {{.name = "sound", .rate = 22050, .init = sound0_init}};
 static struct board_sound_stream sound_streams[1];
 const struct board_sound_table board_sound_table = {.entries = sound_entries, .streams = sound_streams, .count = 1};
 

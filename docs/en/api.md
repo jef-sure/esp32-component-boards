@@ -138,20 +138,33 @@ Without it the touch of that board is off. See [touch-firmware.md](touch-firmwar
 ## Sound
 
 ```c
+typedef struct board_sound { uint32_t rate; const char *name; int index; } board_sound_t;
 typedef void (*board_sound_source_t)(int16_t *samples, size_t count);
 int  board_sound_count(void);
+bool board_sound_init(board_sound_t *out);
+bool board_sound_init_at(int index, board_sound_t *out);
 bool board_sound_start(board_sound_source_t source, uint32_t *rate_out);
 bool board_sound_start_at(int index, board_sound_source_t source, uint32_t *rate_out);
 void board_sound_source(board_sound_source_t source);
 void board_sound_source_at(int index, board_sound_source_t source);
 ```
 
-The functions without `_at` are for the first output. A start sets the codec, the amplifier or the DAC up and runs a task that asks
-`source` for the next `count` samples, 16-bit mono at `*rate_out`, and sends
-them; the writes block on the hardware, which sets the pace. `source` may be
-`NULL` for silence and set later with `board_sound_source`. The task runs until
-the firmware stops. A mixer, a volume, a format other than 16-bit mono are the
-program's business: this is the hardware and its pacing, nothing more.
+The functions without `_at` are for the first output. `board_sound_init` sets the
+codec, the amplifier or the DAC up and returns its rate, and the header of its
+adapter gives the handle of the library: `board_esp_codec_dev()` in
+`boards_esp_codec_dev.h` (an ES8311: write with `esp_codec_dev_write`, set the
+volume with `esp_codec_dev_set_out_vol`), `board_i2s_channel()` in
+`boards_esp_driver_i2s.h` (an amplifier on I2S), `board_dac_continuous()` in
+`boards_esp_driver_dac.h` (the DAC of an ESP32, 8 bits a sample). A program with a
+mixer of its own writes there itself and does not call `board_sound_start`.
+
+`board_sound_start` does the same setup and runs a task that asks `source` for the
+next `count` samples, 16-bit mono at `*rate_out`, and sends them; the writes block
+on the hardware, which sets the pace. `source` may be `NULL` for silence and set
+later with `board_sound_source`. The task runs until the firmware stops. A second
+call of either returns the same sound, from any task. A mixer, a format other than
+16-bit mono are the program's business: this is the hardware and its pacing,
+nothing more.
 
 ## Buses
 
@@ -225,6 +238,9 @@ includes the adapter's header under the symbol that says the part is there:
 #endif
 #if CONFIG_BOARD_DISPLAY_HD44780
 #include "boards_hd44780.h"
+#endif
+#if CONFIG_BOARD_SOUND_ES8311
+#include "boards_esp_codec_dev.h"
 #endif
 ```
 

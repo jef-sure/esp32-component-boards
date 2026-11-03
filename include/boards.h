@@ -103,15 +103,25 @@ bool board_touch_start_at(int index, const board_display_t *display, board_touch
 void board_touch_firmware_set(const uint8_t *start, size_t size);
 
 /*
- * The sound of the board: its hardware set up and a task of its own taking the next samples
- * from the program (16 bits a sample, mono, at *rate_out) and sending them to the speaker;
- * the task ends only when the firmware stops. source may be NULL: silence, until the program
- * gives one with board_sound_source. false when the board has no sound or it could not be set
- * up. How the program makes its samples is its business: this is the hardware of the board
- * and the pacing of the output, nothing of a mixer.
+ * The sound of the board. board_sound_init sets its hardware up and returns what it is: the
+ * header of its adapter gives the handle of the library (boards_esp_codec_dev.h,
+ * boards_esp_driver_i2s.h, boards_esp_driver_dac.h), and a program that writes its samples itself
+ * stops there. board_sound_start does the same and runs a task of its own that takes the next
+ * samples from the program (16 bits a sample, mono, at *rate_out) and sends them to the speaker;
+ * the task ends only when the firmware stops. source may be NULL: silence, until the program gives
+ * one with board_sound_source. false when the board has no sound or it could not be set up. A
+ * second call returns the same sound. How the program makes its samples is its business: this is
+ * the hardware of the board and the pacing of the output, nothing of a mixer.
  */
+typedef struct board_sound {
+    uint32_t    rate;  /* samples a second, 16 bits each, mono */
+    const char *name;  /* its name in the data, for the log */
+    int         index; /* its place among the sounds of the board */
+} board_sound_t;
 typedef void (*board_sound_source_t)(int16_t *samples, size_t count);
 int  board_sound_count(void);
+bool board_sound_init(board_sound_t *out); /* the first one, as board_sound_init_at(0, out) */
+bool board_sound_init_at(int index, board_sound_t *out);
 bool board_sound_start(board_sound_source_t source, uint32_t *rate_out); /* the first one */
 bool board_sound_start_at(int index, board_sound_source_t source, uint32_t *rate_out);
 void board_sound_source(board_sound_source_t source);

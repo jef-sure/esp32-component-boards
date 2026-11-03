@@ -78,12 +78,12 @@ const struct board_touch_slots board_touch_slots = {.slots = touch_slots, .count
 const struct board_touch_table board_touch_table = {.entries = touch_entries, .started = touches_started, .count = 1};
 
 /* sound: dac at 22050 Hz. */
-static bool sound0_start(int index, board_sound_source_t source)
+static bool sound0_init(int index)
 {
-    return board_glue_sound_dac_start(index, GPIO_NUM_26, GPIO_NUM_NC, 22050, source);
+    return board_glue_sound_dac_init(index, GPIO_NUM_26, GPIO_NUM_NC, 22050);
 }
 
-static const struct board_sound_entry sound_entries[] = {{.name = "sound", .rate = 22050, .start = sound0_start}};
+static const struct board_sound_entry sound_entries[] = {{.name = "sound", .rate = 22050, .init = sound0_init}};
 static struct board_sound_stream sound_streams[1];
 const struct board_sound_table board_sound_table = {.entries = sound_entries, .streams = sound_streams, .count = 1};
 

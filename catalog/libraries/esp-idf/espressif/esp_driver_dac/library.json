@@ -14,7 +14,7 @@
     "adapter": {
         "symbol": "BOARD_SOUND_DAC",
         "requires": ["esp_driver_gpio"],
-        "headers": ["board_sound_dac.h"],
+        "headers": ["board_sound_dac.h"], "public": "boards_esp_driver_dac.h",
         "sources": {"BOARD_SOUND_DAC": ["board_sound_dac.c"]}
     }
 }

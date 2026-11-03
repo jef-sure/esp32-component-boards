@@ -98,18 +98,20 @@ struct board_sound_output {
     const char *name; /* the call behind write, for the log */
     esp_err_t (*write)(int16_t *samples, size_t count); /* waits for the hardware, which sets the pace */
 };
-bool board_glue_sound_run(int index, const struct board_sound_output *output, uint32_t rate, board_sound_source_t source);
+/* Called by an adapter when the hardware of a sound is set up: the task, if the program starts it, writes through output. */
+void board_glue_sound_ready(int index, const struct board_sound_output *output);
 
-/* The sound outputs of the board: the glue gives the table, src/board_sound.c runs a task for each. */
+/* The sound outputs of the board: the glue gives the table, src/board_sound.c sets each up and runs its task on demand. */
 struct board_sound_entry {
     const char *name;
     uint32_t    rate;
-    bool (*start)(int index, board_sound_source_t source);
+    bool (*init)(int index); /* sets the hardware up and calls board_glue_sound_ready */
 };
 struct board_sound_stream {
-    const struct board_sound_output *output; /* NULL until it runs */
+    const struct board_sound_output *output; /* NULL until the hardware is set up */
     board_sound_source_t             source;
     uint32_t                         rate;
+    bool                             running; /* its task started */
     int16_t                          samples[BOARD_SOUND_FRAMES];
 };
 struct board_sound_table {

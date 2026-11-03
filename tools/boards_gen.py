@@ -296,6 +296,20 @@ def shown(display):
     return panel["width"], panel["height"], mm_w, mm_h
 
 
+def primary_shown(board):
+    """The primary display as board_display_init gives it, (width, height, mm_w, mm_h), or None. A primary group of
+    two side by side is as adapters/jef-sure__dgx/board_display.c makes it: widths added, the taller height, the
+    millimetres only when both members have them."""
+    displays = {display["name"]: display for display in board.get("displays") or []}
+    for group in (board.get("display_groups") or {}).values():
+        if group.get("primary"):
+            left, right = shown(displays[group["left"]]), shown(displays[group["right"]])
+            sized = bool(left[2] and right[2])
+            return left[0] + right[0], max(left[1], right[1]), left[2] + right[2] if sized else 0, max(left[3], right[3]) if sized else 0
+    display = board.get("display")
+    return shown(display) if is_pixel(display) else None
+
+
 def not_started(device):
     """What the data of a device says and the glue cannot do yet."""
     config = device.get("config") or {}
@@ -965,17 +979,17 @@ def gen_c(board):
                 out(f"static const struct board_sound_es8311 sound{i}_codec = {{.i2s = &board_i2s_{iown}, .i2c_port = I2C_NUM_{port_of(bus_parts(sound['bus'])[1], 'i2c')}, .address = {i2c_address(sound['address']):#04x}, .pa = {pa},")
                 out(f"                                                     .pa_voltage = {float(sound.get('pa_voltage', 5.0))}f, .codec_dac_voltage = {float(sound.get('codec_dac_voltage', 3.3))}f, .volume = {sound['volume']}, .rate = {rate}}};")
                 out("")
-            out(f"static bool sound{i}_start(int index, board_sound_source_t source)")
+            out(f"static bool sound{i}_init(int index)")
             out("{")
             if sound["kind"] == "es8311":
-                out(f"    return board_glue_sound_es8311_start(index, &sound{i}_codec, source);")
+                out(f"    return board_glue_sound_es8311_init(index, &sound{i}_codec);")
             elif sound["kind"] == "i2s":
-                out(f"    return board_glue_sound_i2s_start(index, &board_i2s_{iown}, {rate}, source);")
+                out(f"    return board_glue_sound_i2s_init(index, &board_i2s_{iown}, {rate});")
             else:
-                out(f"    return board_glue_sound_dac_start(index, {c_gpio(sound.get('out'))}, {pa}, {rate}, source);")
+                out(f"    return board_glue_sound_dac_init(index, {c_gpio(sound.get('out'))}, {pa}, {rate});")
             out("}")
             out("")
-            entries.append(f'{{.name = "{sound["name"]}", .rate = {rate}, .start = sound{i}_start}}')
+            entries.append(f'{{.name = "{sound["name"]}", .rate = {rate}, .init = sound{i}_init}}')
         if sounds:
             out(f"static const struct board_sound_entry sound_entries[] = {{{', '.join(entries)}}};")
             out(f"static struct board_sound_stream sound_streams[{len(sounds)}];")
@@ -1019,11 +1033,11 @@ def gen_cmake(board):
 
 def gen_display_cmake(board):
     """display.cmake: the primary display as shown, for the CMake of a program."""
-    display = board.get("display")
+    primary = primary_shown(board)
     L = [f"# The primary display of {board['name']} as shown, made by tools/boards_gen.py from {data_path(board)}:",
          "# do not edit by hand. project_include.cmake of the component includes it when the board is chosen."]
-    if is_pixel(display):
-        width, height, mm_w, mm_h = shown(display)
+    if primary:
+        width, height, mm_w, mm_h = primary
         L += [f"set(BOARD_PIXELS {width} {height})", f"set(BOARD_MM {mm_w} {mm_h}) # 0 0 when the data has no size"]
     else:
         L.append("# no pixel display: BOARD_PIXELS and BOARD_MM stay empty")

@@ -1,8 +1,10 @@
 /*
- * The task of the sound: it takes the program's next samples and hands them to the output of the
- * board's kind of sound, whose write waits for the hardware.
+ * The sound of the board: its hardware set up once by the adapter of its kind, and on demand a task
+ * that takes the program's next samples and hands them to that output, whose write waits for the
+ * hardware.
  */
 #include <string.h>
+#include <sys/lock.h>
 
 #include "board_glue.h"
 #include "esp_log.h"
@@ -12,6 +14,8 @@
 static const char *TAG = "board";
 
 enum { SOUND_TASK_STACK = 3072, SOUND_TASK_PRIORITY = 6 };
+
+static _lock_t sound_lock; /* two tasks starting one sound at once get one setup and one task */
 
 static void sound_task(void *arg)
 {
@@ -29,18 +33,19 @@ static void sound_task(void *arg)
     }
 }
 
-bool board_glue_sound_run(int index, const struct board_sound_output *output, uint32_t rate, board_sound_source_t source)
+void board_glue_sound_ready(int index, const struct board_sound_output *output)
 {
-    struct board_sound_stream *stream = &board_sound_table.streams[index];
-    stream->source                    = source;
-    stream->rate                      = rate;
-    stream->output                    = output;
-    if (xTaskCreate(sound_task, "sound", SOUND_TASK_STACK, stream, SOUND_TASK_PRIORITY, NULL) != pdPASS) {
-        ESP_LOGE(TAG, "xTaskCreate: sound");
-        stream->output = NULL;
-        return false;
-    }
-    return true;
+    board_sound_table.streams[index].output = output;
+}
+
+/* The hardware of a sound set up once; under sound_lock. */
+static bool sound_ready(int index)
+{
+    struct board_sound_stream      *stream = &board_sound_table.streams[index];
+    const struct board_sound_entry *entry  = &board_sound_table.entries[index];
+    if (!stream->output && !entry->init(index)) return false;
+    stream->rate = entry->rate;
+    return stream->output != NULL;
 }
 
 int board_sound_count(void)
@@ -48,14 +53,40 @@ int board_sound_count(void)
     return board_sound_table.count;
 }
 
+bool board_sound_init_at(int index, board_sound_t *out)
+{
+    if (index < 0 || index >= board_sound_table.count) return false;
+    _lock_acquire(&sound_lock);
+    bool ready = sound_ready(index);
+    _lock_release(&sound_lock);
+    if (!ready) return false;
+    const struct board_sound_entry *entry = &board_sound_table.entries[index];
+    if (out) *out = (board_sound_t){.rate = entry->rate, .name = entry->name, .index = index};
+    return true;
+}
+
+bool board_sound_init(board_sound_t *out)
+{
+    return board_sound_init_at(0, out);
+}
+
 bool board_sound_start_at(int index, board_sound_source_t source, uint32_t *rate_out)
 {
     if (index < 0 || index >= board_sound_table.count) return false;
-    const struct board_sound_entry *entry = &board_sound_table.entries[index];
-    if (board_sound_table.streams[index].output) board_sound_table.streams[index].source = source;
-    else if (!entry->start(index, source)) return false;
-    if (rate_out) *rate_out = entry->rate;
-    return true;
+    struct board_sound_stream *stream = &board_sound_table.streams[index];
+    _lock_acquire(&sound_lock);
+    bool ready = sound_ready(index);
+    if (ready) {
+        stream->source = source;
+        if (!stream->running) {
+            stream->running = xTaskCreate(sound_task, "sound", SOUND_TASK_STACK, stream, SOUND_TASK_PRIORITY, NULL) == pdPASS;
+            if (!stream->running) ESP_LOGE(TAG, "xTaskCreate: sound");
+            ready = stream->running;
+        }
+    }
+    _lock_release(&sound_lock);
+    if (ready && rate_out) *rate_out = board_sound_table.entries[index].rate;
+    return ready;
 }
 
 bool board_sound_start(board_sound_source_t source, uint32_t *rate_out)

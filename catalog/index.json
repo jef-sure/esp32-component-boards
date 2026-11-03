@@ -42,6 +42,7 @@
     "devices/pn532/device.json",
     "devices/rx8025t/device.json",
     "devices/scd4x/device.json",
+    "devices/ssd1351/device.json",
     "devices/st77916/device.json",
     "devices/st7920/device.json",
     "devices/ws2812b/device.json",

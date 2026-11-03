@@ -861,8 +861,8 @@ def gen_c(board):
         out("")
     if pixel:
         rows, group_rows = [], []
-        for name, group in sorted(groups.items(), key=lambda item: not item[1].get("primary")):
-            group_rows.append((name, group))
+        for group_name, group in sorted(groups.items(), key=lambda item: not item[1].get("primary")):
+            group_rows.append((group_name, group))
         first = len(group_rows) if any(group.get("primary") for _, group in group_rows) else 0  # a primary group stands first
         place = {shown["name"]: first + i for i, shown in enumerate(displays)}
         for i, shown in enumerate(displays):

@@ -4,12 +4,15 @@
     "kind": "device",
     "name": "ssd1351",
     "title": "SSD1351 OLED",
+    "maker": "solomon-systech",
+    "part": "SSD1351",
     "class": "display",
+    "provides": {"display": {"variant": "oled"}},
     "on": {"spi": {"required": true}},
     "config": {"kind": "graphics"},
     "controls": {
         "orientation": {"how": "driver", "read": "none"},
         "brightness": {"how": "panel_command", "min": 0, "max": 255, "read": "none"}
     },
-    "checked": {"facts": {"level": "vendor-code", "source": "include/drivers/ssd1351.h of DGX"}}
+    "checked": {"facts": {"level": "vendor-code", "source": "include/drivers/ssd1351.h of DGX 0.10.5"}}
 }

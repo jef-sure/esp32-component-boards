@@ -497,9 +497,14 @@ def main():
         failed += 1
 
     # the CMake of a program gets a primary group as board_display_init gives it: two 128x128 side by side
-    primary = boards_gen.primary_shown(boards_gen.read_board(TESTS / "good" / "dotview_clock.json"))
+    dotview = boards_gen.read_board(TESTS / "good" / "dotview_clock.json")
+    primary = boards_gen.primary_shown(dotview)
     if primary != (256, 128, 54, 27):
         print(f"the primary group of dotview_clock is {primary}, not 256x128 and 54x27 mm")
+        failed += 1
+    # and the glue of a board with a group still names the board, not its group
+    if '.name = "dotview_clock"' not in boards_gen.gen_c({**dotview, "description": "a case"}):
+        print("the glue of dotview_clock does not name the board in board_data")
         failed += 1
 
     # a GPIO of a power step or a divider is taken, and the glue refuses what it cannot set

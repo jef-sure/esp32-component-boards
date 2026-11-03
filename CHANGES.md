@@ -244,6 +244,8 @@ committed, a program that asks by kind.
   references (the audit of 2026-11-03, 5.7). The glue gives tables only: `board_bus_get`, `board_spi_bus`,
   `board_spi_taken` and the functions of a display a board has not are written once in `src/` instead of being generated
   into every glue, and `CONFIG_BOARD_MODULE_CHARACTER_DISPLAY` is gone (5.10 in part, 5.20).
+- The SSD1351 OLED is in catalog/devices, from the driver of DGX. The glue of a board with a group of displays names
+  the board in `board_data`, no longer its last group: a loop over the groups reused the name of the board.
 - `BOARD_PIXELS` and `BOARD_MM` of a board whose primary display is a group of two side by side are those of the
   group, as `board_display_init` gives it (256x128 for two 128x128), no longer those of its first member.
 - `board_sound_init()` sets the sound of the board up without a task and returns `board_sound_t`; the header of its

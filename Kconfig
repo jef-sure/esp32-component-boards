@@ -103,11 +103,15 @@ config BOARD_SELECT_JC8012P4A1C
 
 endchoice
 
+config BOARD_BUS_I2C
+    bool
+    default y if BOARD_SELECT_ESP32_P4_ETH || BOARD_SELECT_ESP32_P4_POE_ETH || BOARD_SELECT_JC1060P470C || BOARD_SELECT_JC4827W543C || BOARD_SELECT_JC8012P4A1C
+
 # A module is not a board of its own: it is on whichever board the choice above picked, and
 # its glue comes in beside the board's (its sdkconfig.defaults turns it on, read after the board's).
 config BOARD_MODULE_LCD2004_PCF8574
     bool "2004 LCD on a PCF8574: 20x4 HD44780"
-    depends on !BOARD_SELECT_NONE
+    depends on !BOARD_SELECT_NONE && BOARD_BUS_I2C
     help
         A 20x4 HD44780 on the common I2C backpack (P0 RS, P1 RW, P2 E, P3
         backlight, P4-P7 D4-D7): not a board of its own, a display any board's

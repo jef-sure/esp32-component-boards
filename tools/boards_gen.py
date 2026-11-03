@@ -657,6 +657,15 @@ def choice_symbol(board):
     return f"BOARD_SELECT_{board['name'].upper()}"
 
 
+def bus_kinds(doc):
+    """The kinds of bus a module's devices sit on, as i2c: a board without such a bus cannot carry the module."""
+    return sorted({kind.split(".")[0] for device in (doc.get("devices") or {}).values() if isinstance(device, dict) for kind in (device.get("on") or {})})
+
+
+def bus_symbol(kind):
+    return f"BOARD_BUS_{kind.upper()}"
+
+
 def module_symbol(board):
     return f"BOARD_MODULE_{board['name'].upper()}"
 
@@ -1206,12 +1215,21 @@ def gen_kconfig(boards, modules):
     out("endchoice")
     out("")
     if modules:
+        # the kinds of bus the boards open to a module: a module on I2C is offered only with a board that has one
+        kinds = sorted({kind for module in modules for kind in bus_kinds(module)})
+        for kind in kinds:
+            having = [choice_symbol(board) for board in boards if kind in (board.get("buses") or {})]
+            out(f"config {bus_symbol(kind)}")
+            out("    bool")
+            if having:
+                out(f"    default y if {' || '.join(having)}")
+            out("")
         out("# A module is not a board of its own: it is on whichever board the choice above picked, and")
         out("# its glue comes in beside the board's (its sdkconfig.defaults turns it on, read after the board's).")
         for module in modules:
             out(f"config {module_symbol(module)}")
             out(f"    bool \"{menu_text(module)}\"")
-            out("    depends on !BOARD_SELECT_NONE")
+            out("    depends on " + " && ".join(["!BOARD_SELECT_NONE", *(bus_symbol(kind) for kind in bus_kinds(module))]))
             out("    help")
             out(kconfig_help(module["description"] + "."))
             out("")

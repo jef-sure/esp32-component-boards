@@ -68,10 +68,11 @@ no module is needed.
 ## Adding a module
 
 Another character display on a backpack is another directory with its
-geometry and address. A module of another kind (a sensor, a radio) needs a
-kind in `boards.h`, a branch in the generator and a feature symbol; that is
-the shape planned for the next version, where devices are a list rather than
-one slot per kind.
+geometry and address. A module of another kind (a sensor, a radio) is data: its
+devices are named in the module, a kit names the library of its chip, and the
+program starts it. The glue starts only displays, touch panels, sound and
+buttons; another kind it starts needs a kind in `boards.h` and a branch in the
+generator.
 
 ## On a board
 

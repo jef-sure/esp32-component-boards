@@ -22,10 +22,13 @@ The first `reconfigure` fetches the component, and `board_select.py` comes with 
 ```sh
 idf.py reconfigure
 python3 managed_components/jef-sure__boards/tools/board_select.py --reset @BOARD@ .
-idf.py reconfigure build flash monitor
 ```
+
+`board_select.py` names the next command: `idf.py reconfigure build`, or `idf.py set-target <target>` first when the
+build directory was made for another chip. Then `idf.py flash monitor`.
 
 `selection.json` keeps how this kit was chosen: the answers, what fits too and why the rest does not. Open
 this folder on the page of the component to see it again.
 
-After changing the board of a project already built, run `idf.py reconfigure build`.
+To change the board later: `board_select.py <board> --reset .` and the command it names. To build for several boards,
+see choosing-a-board.md of the component.

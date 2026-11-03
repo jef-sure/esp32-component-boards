@@ -245,6 +245,22 @@ def bridge_problems():
                                       ("/.git/config", {}, 404), ("/editor/../CLAUDE.md", {}, 404), ("/editor/%2e%2e/CLAUDE.md", {}, 404), ("/tools/boards_mcp.py", {}, 404)):
             if status(path, **headers) != wanted:
                 problems.append(f"the server of the page: {path} {headers}: not {wanted}")
+        # a body of the wrong form is refused, and the tools still answer after it
+        token = link.split("agent=")[1]
+        for path, body in (("/agent/state", b"[1, 2]"), ("/agent/state", b'{"blocks": 7}'), ("/agent/state", b'{"blocks": [3]}'), ("/agent/say", b'{"text": 5}'), ("/agent/state", b"{not json")):
+            request = urllib.request.Request(f"{base}{path}", data=body, method="POST", headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"})
+            try:
+                code = urllib.request.urlopen(request, timeout=5).status
+            except urllib.error.HTTPError as error:
+                code = error.code
+            if code != 400:
+                problems.append(f"the server of the page takes {body!r} on {path}: {code}")
+        if status("/agent/messages?seen=x", Authorization=f"Bearer {token}") != 400:
+            problems.append("the server of the page: a count that is not one is not refused")
+        for ident, name in ((4, "page_state"), (5, "edit_blocks")):
+            answer = asked(ident, "tools/call", {"name": name, "arguments": {"why": "a check", "remove": ["x"]}})
+            if answer.get("isError") and name == "page_state":
+                problems.append(f"{name} fails after a refused body")
     finally:
         process.stdin.close()
         process.wait(timeout=5)
@@ -553,6 +569,14 @@ def main():
     for problem in problems:
         print(problem)
     failed += bool(problems)
+
+    # the page loads the catalog by its index: a file the index misses is not in the page, so the index is checked here too
+    index = ROOT / "catalog" / boards_gen.CATALOG_INDEX
+    if index.read_text() != boards_gen.gen_catalog_index(ROOT):
+        print(f"{index.relative_to(ROOT)} is not what the data says (run tools/boards_gen.py --all)")
+        failed += 1
+    else:
+        print("the index of the catalog: as the data says")
 
     for name, path in (("data_jc4827w543c.json", "devices.sound"), ("data_cyd_s028r.json", "devices.touch"), ("good_cyd_s028r_v3.json", "devices.touch"), ("good_imported_like.json", "devices.lcd")):
         print(f"{name[:-5]} {path}: {resolve.trust(reached[name], path, LEVELS)}")

@@ -61,20 +61,30 @@ Guition.
 памяти и флеша платы и строку, которая выбирает её в меню конфигурации.
 
 ```sh
-idf.py add-dependency "jef-sure/boards^0.0.1"
+idf.py reconfigure    # скачивает компонент, названный в main/idf_component.yml
 python3 managed_components/jef-sure__boards/tools/board_select.py cyd_s028r .
 idf.py build flash monitor
 ```
 
-`CMakeLists.txt` проекта читает этот файл перед своими собственными
-умолчаниями:
+Компонента пока нет в реестре: `main/idf_component.yml` берёт его из git на коммите
+(`git: https://github.com/jef-sure/esp32-component-boards.git`, `version: <коммит>`);
+после публикации — `jef-sure/boards: "^0.0.1"`. `CMakeLists.txt` проекта читает файл
+платы перед своими умолчаниями, а с `-D BOARD=<плата>` — один из нескольких:
 
 ```cmake
-if(NOT SDKCONFIG_DEFAULTS AND EXISTS ${CMAKE_CURRENT_LIST_DIR}/sdkconfig.defaults.board)
-    set(SDKCONFIG_DEFAULTS "sdkconfig.defaults.board;sdkconfig.defaults")
+set(BOARD "" CACHE STRING "a board of this project: its file sdkconfig.defaults.<board>")
+if(NOT SDKCONFIG_DEFAULTS)
+    if(BOARD)
+        set(SDKCONFIG_DEFAULTS "sdkconfig.defaults.${BOARD};sdkconfig.defaults")
+    elseif(EXISTS ${CMAKE_CURRENT_LIST_DIR}/sdkconfig.defaults.board)
+        set(SDKCONFIG_DEFAULTS "sdkconfig.defaults.board;sdkconfig.defaults")
+    endif()
 endif()
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
+idf_build_set_property(DEPENDENCIES_LOCK ${CMAKE_BINARY_DIR}/dependencies.lock)
 ```
+
+Смена платы и сборка для нескольких плат — в [choosing-a-board.md](docs/ru/choosing-a-board.md).
 
 Ни `set-target`, ни `menuconfig`. Меню (*Boards → Board the program runs
 on*) следует за файлом; оно есть, чтобы посмотреть и чтобы переопределить. Что
@@ -100,8 +110,9 @@ GT911, ни библиотеку кодека. См. [docs/ru/choosing-a-board.m
 | Guition JC8012P4A1C | ESP32-P4 | 1280x800 JD9365, MIPI-DSI, 217x136 mm | GSL3680 (прошивку встраивает программа) | ES8311 | да |
 <!-- boards:end -->
 
-Модуль едет на любой выбранной плате: `board_select.py cyd_s028r --module
-lcd2004_pcf8574 .` добавляет символьный LCD 20x4 на шину I2C платы.
+Модуль подключается к выбранной плате по её шине: `board_select.py jc1060p470c --module
+lcd2004_pcf8574 .` добавляет символьный LCD 20x4 на её шину I2C. Плата, у которой такой шины
+нет, как у CYD S028R для I2C, модуль не берёт: меню его не предлагает, а `board_select.py` говорит почему.
 
 GSL3680 10,1-дюймовой платы не хранит
 собственной прошивки, а массив производителя не несёт лицензии на

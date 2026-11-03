@@ -179,7 +179,6 @@ committed, a program that asks by kind.
   without it. The button of a strapping pin is not counted, and an imported board says that its pack lists only some of its parts.
 - Pictures of parts: `tools/import_pictures.py` draws the breadboard drawing of the Fritzing part of each imported module
   into a WebP of 320 px. They are under CC BY-SA 3.0, each names its author, and a kit shows them with that credit.
-- A part of a board nobody asked for weighs its worth: the median price of the modules of its role and variant.
 - A block of your own part replaces the field of pins in use: its lines, those already soldered as line=GPIO, and its bus with
   an address. The kit keeps those pins for it and the checks name it when another owner wants one.
 - A card is titled by its board, with the parts bought one by one under it, and the page asks the solver only what it shows:
@@ -209,13 +208,30 @@ committed, a program that asks by kind.
 - Waveshare ESP32-C3-Zero, `esp32_c3_zero`, from the schematic of Waveshare; the generator takes the ESP32-C3 and C6. Pictures of
   the S3-Zero and the C3-Zero from Anton's photos.
 - A page without an agent shows how to get one, as a single line that opens to the command.
-- A part of a board that names no chip with a price weighs the chips of the catalog that give its role and variant, by the piece:
-  one addressable LED weighs the same on every board. A single SMD LED and an RGB LED of 5050 are in the catalog with prices of LCSC.
+- `tools/board_select.py` no longer writes a board a build would not give: a change of board without `--reset` fails
+  with the command, and after `--reset` it names `idf.py set-target <target>` when the build directory was made for
+  another chip. Several boards write `sdkconfig.defaults.<board>` each, with the lines of the revision of the chip, and
+  build with `-B build-<board> -D SDKCONFIG=... -D BOARD=<board>`; the CMake of the skeleton, the examples and the docs
+  reads `BOARD` and keeps the lock of the components in the build directory. The recipe that read the defaults of the
+  catalog from managed_components/ is gone: it lost the lines of the revision of a P4.
+- A module is offered only with a board that opens the bus it sits on: the Kconfig has a symbol for each kind of bus, and
+  `board_select.py` refuses the 2004 module on the CYD, which opens no I2C bus to a module. When the page updates a program
+  of its own, it also shows the CMake lines that read the board and the PRIV_REQUIRES of main.
+- Until the component is in the registry, the docs take it from git at a commit, and a project the page writes gets the
+  commit the server of the model reports.
+- `tools/check_format.py` checks the index of the catalog, as `check_boards.py` does: a stale index hid two chips from the
+  page. The server of the model refuses a body of the wrong form with 400 and answers a tool that fails with an error,
+  instead of dying. The checks of CI run on every branch, the builds on main and pull requests.
+- The page: the button that pins is `pin`, not `fix`; the lines of the ranking are notes and stay out of the README of a
+  project; the hint about Chromium is not shown in Chromium; an answer of a block to a question of another variant does not
+  act; `within` reads `!=`.
+- What a board has and nobody asked for weighs the lowest price by the piece: of its chip, from `price` of its entry in
+  catalog/devices, else of the cheapest chip of its role and variant, else of the cheapest module of its role, class or of all.
+  A price of nothing is no price, and a part weighs at least a cent (Anton, 2026-11-03). One LED of a board is cents on every
+  board, where the median of the modules of its role, rings and strips, made it 11 EUR. The WS2812B, a single SMD LED and an
+  RGB LED of 5050 are in the catalog with prices of LCSC, and the LEDs of both Zero boards name the WS2812B.
 - Temperature has the variants thermocouple, RTD and infrared: the MAX31865 is an RTD, and the words no longer take it for a
   thermocouple.
-- A chip in catalog/devices can have a price by the piece, and a part of a board nobody asked for weighs that many of it:
-  one WS2812B is cents, where the median of the modules of its role, rings and strips, made it 11 EUR. The median stays
-  for a part whose chip has no price. The WS2812B is in the catalog with a price of LCSC, and the LEDs of both Zero boards name it.
 - The model gets in page_state why the boards that do not fit do not, the most common first, with how many boards each.
 - tools/boards_mcp.py finds the versions of ESP-IDF and of the Arduino core on the computer, and a kit names which of its
   versions are there. A request the page cannot send to its solver is said in the console and counted on the page.

@@ -23,3 +23,5 @@ examples/*/components/local-boards/boards/*/board.cmake
 .vscode/
 .cursor/
 .github/copilot-instructions.md
+# the settings of an agent of a person: the server of the model is given by tools/boards_mcp.py --install
+/.mcp.json

@@ -130,8 +130,10 @@ def handler_of(desk, token, port):
             if address.path == "/agent/messages":
                 if not self.agent_call():
                     return self.answer(401)
-                seen = int(urllib.parse.parse_qs(address.query).get("seen", ["0"])[0])
-                return self.answer(200, desk.since(seen, LONGEST_POLL_S))
+                seen = urllib.parse.parse_qs(address.query).get("seen", ["0"])[0]
+                if not seen.isdigit():
+                    return self.answer(400, {"error": "seen is a count"})
+                return self.answer(200, desk.since(int(seen), LONGEST_POLL_S))
             if address.path == "/agent/installed":
                 return self.answer(200, installed()) if self.agent_call() else self.answer(401)
             # the path as it will be read, not as it was sent: /editor/../CLAUDE.md is no file of the page
@@ -147,16 +149,43 @@ def handler_of(desk, token, port):
             length = int(self.headers.get("Content-Length", "0"))
             if length > LONGEST_BODY:
                 return self.answer(413)
-            body = json.loads(self.rfile.read(length) or "{}")
+            try:
+                body = json.loads(self.rfile.read(length) or "{}")
+            except (UnicodeDecodeError, json.JSONDecodeError):
+                return self.answer(400, {"error": "not JSON"})
+            # only a body of the form the page sends: the tools read the state later, in the thread of MCP
+            problem = state_problem(body) if self.path == "/agent/state" else say_problem(body) if self.path == "/agent/say" else None
+            if problem:
+                return self.answer(400, {"error": problem})
             if self.path == "/agent/state":
                 desk.state = body
             elif self.path == "/agent/say":
-                desk.add("person", text=str(body.get("text", "")))
+                desk.add("person", text=body["text"])
             else:
                 return self.answer(404)
             return self.answer(200, {})
 
     return Page
+
+
+def state_problem(body):
+    """What is wrong with a state the page sent, or None: an object whose blocks, kits and refusals are lists of objects."""
+    if not isinstance(body, dict):
+        return "the state is an object"
+    lists = {"blocks": dict, "kits": dict, "refusals": dict}
+    for key, kind in lists.items():
+        if key in body and not (isinstance(body[key], list) and all(isinstance(item, kind) for item in body[key])):
+            return f"{key} is a list of objects"
+    if any(not isinstance(block.get("role"), str) for block in body.get("blocks", [])):
+        return "a block has a role"
+    if "task" in body and not isinstance(body["task"], str):
+        return "task is a text"
+    return None
+
+
+def say_problem(body):
+    """What is wrong with what the person said, or None: an object with a text."""
+    return None if isinstance(body, dict) and isinstance(body.get("text"), str) else "a text"
 
 
 def find_parts(words):
@@ -243,7 +272,7 @@ def answer_of(desk, link, request):
         try:
             value = call(desk, link, params.get("name"), params.get("arguments") or {})
             result = {"content": [{"type": "text", "text": json.dumps(value, ensure_ascii=False)}]}
-        except (KeyError, ValueError) as error:
+        except Exception as error:  # a tool that fails answers with an error: the conversation goes on
             result = {"content": [{"type": "text", "text": f"{params.get('name')}: {error!r}"}], "isError": True}
     else:
         return {"jsonrpc": "2.0", "id": ident, "error": {"code": -32601, "message": f"no method {method}"}}
@@ -264,7 +293,10 @@ def installed():
                 idf.add(f"{parts['MAJOR']}.{parts['MINOR']}.{parts['PATCH']}")
     arduino = {folder.name for folder in home.glob(".arduino15/packages/esp32/hardware/esp32/*") if re.fullmatch(r"\d+\.\d+\.\d+", folder.name)}
     newest = lambda versions: sorted(versions, key=lambda text: [int(part) for part in text.split(".")], reverse=True)
-    return {"esp_idf": newest(idf), "arduino_esp32": newest(arduino)}
+    # the commit of the catalog the page reads, for a project to take the component at it
+    head = subprocess.run(["git", "-C", str(ROOT), "rev-parse", "HEAD"], capture_output=True, text=True) if shutil.which("git") and (ROOT / ".git").exists() else None
+    component = head.stdout.strip() if head and head.returncode == 0 else None
+    return {"esp_idf": newest(idf), "arduino_esp32": newest(arduino), "component": component}
 
 
 def install():

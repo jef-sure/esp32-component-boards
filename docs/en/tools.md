@@ -1,7 +1,9 @@
 # The tools
 
-All in `tools/`, Python 3.8 or later, no packages beyond the standard
-library. Run them from the root of the repository (or of
+All in `tools/`, Python 3.8 or later. Most need only the standard library:
+`check_format.py` needs `jsonschema` and Node.js, which runs the JavaScript of
+the page; the importers need `jsonschema`, and `import_pictures.py` Chrome and
+ImageMagick. Run them from the root of the repository (or of
 `managed_components/jef-sure__boards/`).
 
 ## boards_gen.py
@@ -245,7 +247,7 @@ it to help choose the hardware of a device.
 The agent gives the person a link with a token. On that page a dialog appears, and once it starts it takes the column of the roles, whose search stays: the model reads the description, the blocks
 and the best kits, sets the blocks with their variants and parts, the conditions of the solver, and writes a description that a
 project keeps as `DESCRIPTION.md`. What the person fixes is theirs: the pin of a block, a part chosen in it, or the button
-`fix this board` of a card. The server refuses the model a change of it, the page refuses it again, and the solver keeps a
+`pin this board` of a card. The server refuses the model a change of it, the page refuses it again, and the solver keeps a
 fixed part for its block and tries only a fixed board.
 The field on top is the theme the model starts from, and the dialog develops it: a changed theme reaches the model with the next answer of `wait_for_person`. The solver stays in the page. A page opened any other way has no dialog and works as before.
 
@@ -302,12 +304,11 @@ belongs to a timer, so outputs of one setting share it. The figures are calculat
 
 Kits come in this order: those that fit, the fewest unknowns, the least worth of what the board has and nobody asked for
 (a camera, touch, Ethernet; not the button of a strapping pin), the fewest modules, the fewest wires, then the price. A part of a
-board is worth the price of its chip by the piece, from `price` of its entry in `catalog/devices`, times its `config.count`. A part
-that names no chip with a price weighs the median price by the piece of the chips of the catalog that give its role and variant,
-as `led_smd`, `led_rgb_5050` and `ws2812b`; with none of those, the median price of the modules of its role and variant, else of
-its class, else of all parts. The median of
-modules is no price of one part, since rings and strips go into it, and the priced modules of `imported-shops/` stay out of the
-repository, so a chip with a price gives the same order everywhere. A budget makes the price a criterion: it then comes right after the unknowns, and a
+board is worth the lowest price of its chip by the piece, from `price` of its entry in `catalog/devices`, times its
+`config.count`. A part that names no chip with a price weighs the cheapest chip of the catalog that gives its role and variant, as
+`led_smd`, `led_rgb_5050` and `ws2812b`; with none of those, the cheapest module of its role and variant, else of its role, its
+class or of all, by the piece. A price of nothing is no price, and a part weighs at least a cent: nothing is free. The priced
+modules of `imported-shops/` stay out of the repository, so only a chip with a price gives the same order everywhere. A budget makes the price a criterion: it then comes right after the unknowns, and a
 missing price counts as an unknown. `tools/check_format.py` gives the kits of `test/solver/` to the
 generator as well.
 

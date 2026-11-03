@@ -31,6 +31,8 @@
     "devices/jd9165/device.json",
     "devices/jd9365/device.json",
     "devices/ld2410c/device.json",
+    "devices/led_rgb_5050/device.json",
+    "devices/led_smd/device.json",
     "devices/max7219/device.json",
     "devices/mfrc522/device.json",
     "devices/nv3041a/device.json",

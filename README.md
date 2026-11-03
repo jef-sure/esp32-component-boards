@@ -61,19 +61,30 @@ board's chip, memory and flash settings, and the line that chooses it in the
 menu of the configuration.
 
 ```sh
-idf.py add-dependency "jef-sure/boards^0.0.1"
+idf.py reconfigure    # fetches the component, named in main/idf_component.yml
 python3 managed_components/jef-sure__boards/tools/board_select.py cyd_s028r .
 idf.py build flash monitor
 ```
 
-The project's `CMakeLists.txt` reads that file before its own defaults:
+The component is not in the registry yet: `main/idf_component.yml` takes it from git at a
+commit (`git: https://github.com/jef-sure/esp32-component-boards.git`, `version: <a commit>`);
+once it is published, `jef-sure/boards: "^0.0.1"`. The project's `CMakeLists.txt` reads the
+file of the board before its own defaults, and with `-D BOARD=<board>` one of several:
 
 ```cmake
-if(NOT SDKCONFIG_DEFAULTS AND EXISTS ${CMAKE_CURRENT_LIST_DIR}/sdkconfig.defaults.board)
-    set(SDKCONFIG_DEFAULTS "sdkconfig.defaults.board;sdkconfig.defaults")
+set(BOARD "" CACHE STRING "a board of this project: its file sdkconfig.defaults.<board>")
+if(NOT SDKCONFIG_DEFAULTS)
+    if(BOARD)
+        set(SDKCONFIG_DEFAULTS "sdkconfig.defaults.${BOARD};sdkconfig.defaults")
+    elseif(EXISTS ${CMAKE_CURRENT_LIST_DIR}/sdkconfig.defaults.board)
+        set(SDKCONFIG_DEFAULTS "sdkconfig.defaults.board;sdkconfig.defaults")
+    endif()
 endif()
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
+idf_build_set_property(DEPENDENCIES_LOCK ${CMAKE_BINARY_DIR}/dependencies.lock)
 ```
+
+Changing the board and building for several boards are in [choosing-a-board.md](docs/en/choosing-a-board.md).
 
 No `set-target`, no `menuconfig`. The menu (*Boards → Board the program runs
 on*) follows the file; it is there to look at and to override. What the board
@@ -99,8 +110,9 @@ codec library. See [docs/en/choosing-a-board.md](docs/en/choosing-a-board.md).
 | Guition JC8012P4A1C | ESP32-P4 | 1280x800 JD9365, MIPI-DSI, 217x136 mm | GSL3680 (firmware embedded by the program) | ES8311 | yes |
 <!-- boards:end -->
 
-A module is connected to whichever board is chosen: `board_select.py cyd_s028r --module
-lcd2004_pcf8574 .` adds a 20x4 character LCD on the board's I2C bus.
+A module is connected to the chosen board by a bus of the board: `board_select.py jc1060p470c --module
+lcd2004_pcf8574 .` adds a 20x4 character LCD on its I2C bus. A board that opens no such bus, as the CYD S028R
+for I2C, does not take the module: the menu does not offer it and `board_select.py` says why.
 
 The GSL3680 of the
 10.1-inch board keeps no firmware of its own, and the vendor's array carries no

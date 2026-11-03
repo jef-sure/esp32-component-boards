@@ -55,7 +55,7 @@ function holdsForEvery(kits, say) {
         const uarts = Object.values(kit.project.modules).flatMap(({ on }) => Object.keys(on || {})).filter((bus) => bus.startsWith('uart.'));
         if (new Set(uarts).size !== uarts.length) say(`${kit.name}: two devices on one UART`);
         const devices = loader.resolve(kit.project).devices;
-        const isDisplay = (use) => Object.keys(devices).some((name) => name.startsWith(`${use}_`) && (devices[name].classes || []).includes('display'));
+        const isDisplay = (use) => Object.keys(devices).some((name) => name.startsWith(`${use}_`) && ((devices[name].classes || []).includes('display') || devices[name].provides?.display));
         for (const [use, { on }] of Object.entries(kit.project.modules)) {
             for (const bus of Object.keys(on || {})) {
                 const sharing = Object.entries(kit.project.modules).filter(([other, entry]) => other !== use && bus in (entry.on || {}));
@@ -163,6 +163,6 @@ for (const [asked, order] of expected) if (orderOf(asked) !== order) wrong.push(
 if (JSON.stringify(auditedOrder(table, { chip: 'chip', platform: 'p', bus: 'spi' }).find((item) => item.id === 'c')) !== JSON.stringify({ id: 'c', health: 0, high: 1, medium: 2, unread: ['unread'] })) wrong.push('a library does not answer for what it requires');
 // Ranges of manifests against the versions of a platform: a line meets a range when some release of it does.
 for (const [version, range, meets] of [['5.5', '>=5.2.0', true], ['5.5', '>=5.5.2', true], ['5.5', '>=6.0', false], ['6.1', '^5.3', false], ['5.5', '^5.3', true],
-    ['5.5', '~5.4', false], ['6.1', '>=5.3,<6.0', false], ['5.5', '>=5.3 <6.0', true], ['5.5', '*', true], ['5.5', 'git+https://x', true]])
+    ['5.5', '~5.4', false], ['6.1', '>=5.3,<6.0', false], ['5.5', '>=5.3 <6.0', true], ['5.5', '*', true], ['5.5', 'git+https://x', true], ['5.5', '!=5.5', false], ['6.1', '>=5.0,!=6.0', true], ['6.1', '>=5.0 !=6.1', false]])
     if (within(version, range) !== meets) wrong.push(`${version} against ${range}: ${!meets}`);
 console.log(JSON.stringify({ cases: names.length, wrong, projects: [...projects.values()] }));

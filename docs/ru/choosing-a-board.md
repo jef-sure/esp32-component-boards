@@ -7,20 +7,44 @@
 
 ```sh
 idf.py create-project hello && cd hello
-idf.py add-dependency "jef-sure/boards^0.0.1"
 ```
 
-В `CMakeLists.txt`, до подключения `project.cmake`, прочитайте умолчания
-платы перед собственными умолчаниями проекта:
+Компонента пока нет в реестре: берите его из git на определённом коммите, чтобы
+завтра сборка дала то же самое. После публикации его место займёт `idf.py
+add-dependency "jef-sure/boards^0.0.1"`.
+
+```yaml
+# main/idf_component.yml
+dependencies:
+  jef-sure/boards:
+    git: https://github.com/jef-sure/esp32-component-boards.git
+    version: <коммит>
+```
+
+В `CMakeLists.txt`, до подключения `project.cmake`, прочитайте умолчания платы
+перед собственными умолчаниями проекта и держите lock компонентов в каталоге
+сборки:
 
 ```cmake
 cmake_minimum_required(VERSION 3.22)
-if(NOT SDKCONFIG_DEFAULTS AND EXISTS ${CMAKE_CURRENT_LIST_DIR}/sdkconfig.defaults.board)
-    set(SDKCONFIG_DEFAULTS "sdkconfig.defaults.board;sdkconfig.defaults")
+set(BOARD "" CACHE STRING "a board of this project: its file sdkconfig.defaults.<board>")
+if(NOT SDKCONFIG_DEFAULTS)
+    if(BOARD)
+        if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/sdkconfig.defaults.${BOARD})
+            message(FATAL_ERROR "no sdkconfig.defaults.${BOARD} here: run board_select.py ${BOARD} ... . of jef-sure/boards")
+        endif()
+        set(SDKCONFIG_DEFAULTS "sdkconfig.defaults.${BOARD};sdkconfig.defaults")
+    elseif(EXISTS ${CMAKE_CURRENT_LIST_DIR}/sdkconfig.defaults.board)
+        set(SDKCONFIG_DEFAULTS "sdkconfig.defaults.board;sdkconfig.defaults")
+    endif()
 endif()
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
+idf_build_set_property(DEPENDENCIES_LOCK ${CMAKE_BINARY_DIR}/dependencies.lock)
 project(hello)
 ```
+
+`BOARD` выбирает одну из нескольких плат (см. ниже); без него читается один файл
+`sdkconfig.defaults.board`.
 
 В `main/CMakeLists.txt` — `PRIV_REQUIRES jef-sure__boards`: каталог компонента
 под `managed_components/`. (Checkout компонента, взятый через `override_path`
@@ -45,8 +69,8 @@ ESP-IDF берёт target из первого файла в `SDKCONFIG_DEFAULTS`
 называет, поэтому `idf.py set-target` не нужен, а меню *Boards → Board the
 program runs on* показывает выбранную плату.
 
-Добавьте `sdkconfig.defaults.board` в `.gitignore` проекта, если проект
-собирается для нескольких плат; закоммитьте его, если проект для одной.
+Закоммитьте `sdkconfig.defaults.board`, если проект для одной платы; проект для
+нескольких держит вместо него `sdkconfig.defaults.<плата>` (см. ниже).
 
 ## Модуль
 
@@ -65,22 +89,35 @@ ESP-IDF читает `sdkconfig.defaults*` только когда создаё�
 
 ```sh
 python3 managed_components/jef-sure__boards/tools/board_select.py jc4827w543c --reset .
-idf.py build
 ```
 
-`--reset` переносит старый `sdkconfig` в `sdkconfig.old`. Без него
-`board_select.py` записывает файл и сообщает вам, что `sdkconfig` мешает.
-Проект, собираемый для нескольких плат сразу, держит каталог сборки на каждую
-плату:
+`--reset` переносит старый `sdkconfig` в `sdkconfig.old` и называет следующую
+команду. Каталог сборки хранит цель своего чипа в кеше CMake, а кеш читается
+раньше любых умолчаний: если у новой платы другой чип, команда — `idf.py
+set-target <цель>`, она чистит сборку и делает новый `sdkconfig` из умолчаний,
+затем `idf.py build`; с тем же чипом — `idf.py reconfigure build`. Без `--reset`
+`board_select.py` ничего не пишет и выходит с ошибкой, если `sdkconfig` сделан для
+другой платы: сборка дала бы ту плату.
+
+## Несколько плат
+
+Проект для нескольких плат держит на каждую файл умолчаний и каталог сборки:
 
 ```sh
-idf.py -B build-cyd_s028r -D SDKCONFIG=build-cyd_s028r/sdkconfig \
-       -D SDKCONFIG_DEFAULTS="managed_components/jef-sure__boards/catalog/boards/cyd_s028r/sdkconfig.defaults;sdkconfig.defaults" build
+python3 managed_components/jef-sure__boards/tools/board_select.py cyd_s028r jc1060p470c .
+idf.py -B build-cyd_s028r -D SDKCONFIG=build-cyd_s028r/sdkconfig -D BOARD=cyd_s028r build
+idf.py -B build-jc1060p470c -D SDKCONFIG=build-jc1060p470c/sdkconfig -D BOARD=jc1060p470c build
 ```
 
-`-D SDKCONFIG_DEFAULTS=...` в командной строке побеждает
-`sdkconfig.defaults.board`: фрагмент CMake выше задаёт переменную только когда
-она не задана.
+`board_select.py` пишет `sdkconfig.defaults.<плата>` на каждую плату, со строками
+ревизии её чипа, и печатает эти команды. Эти файлы коммитятся: свежий клон читает
+их раньше, чем скачан компонент. У каждого каталога сборки своя цель, свой
+`sdkconfig` и свой lock компонентов, поэтому платы друг другу не мешают. Файлы
+каталога напрямую не читаются: строки ревизии есть только в том, что пишет
+`board_select.py`.
+
+`-D SDKCONFIG_DEFAULTS=...` в командной строке побеждает оба варианта: фрагмент
+CMake выше задаёт переменную только когда она не задана.
 
 ## Что приходит вместе с выбором
 

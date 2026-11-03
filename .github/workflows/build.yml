@@ -1,11 +1,12 @@
 # The boards built, every one: the data checked, every glue compiled against test/fake on the
 # host, then examples/hello_board built for every board under two versions of ESP-IDF, the
 # oldest the manifest promises and the newest. A board that does not build does not merge.
+# The checks run on every branch, so a working branch is not left without them; the builds on
+# main and on pull requests.
 name: build
 
 on:
   push:
-    branches: [main]
   pull_request:
 
 jobs:
@@ -24,6 +25,7 @@ jobs:
   build:
     name: ${{ matrix.board }}${{ matrix.module && format(' + {0}', matrix.module) || '' }} on ESP-IDF ${{ matrix.idf }}
     needs: check
+    if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

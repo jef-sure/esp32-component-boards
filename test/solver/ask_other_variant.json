@@ -1,0 +1,6 @@
+{
+    "title": "An answer kept from another variant of a block does not act: a CO2 range left on a block turned to VOC names no unknown",
+    "answers": {"blocks": [{"role": "air", "name": "air", "variant": "voc", "asks": {"co2_up_to": 5000}}]},
+    "imported": true,
+    "quiet": {"board": "esp32_devkit", "text": "Measures up to, ppm"}
+}

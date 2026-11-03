@@ -32,7 +32,9 @@ const isCollection = (v) => (isPlain(v) || Array.isArray(v)) && Object.keys(v).l
 
 // What the page has read, kept out of reactive state: the loader clones entries, which a proxy does not allow.
 const COMPONENT_NAME = 'jef-sure/boards';
-const COMPONENT_LINES = `  ${COMPONENT_NAME}:\n    git: https://github.com/jef-sure/esp32-component-boards.git\n    version: main`;
+// until the component is in the registry it comes from git, at the commit of the catalog the page used when the server of the
+// model told it, so that a build gives the same tomorrow; main when nothing told it
+const COMPONENT_LINES = (version) => `  ${COMPONENT_NAME}:\n    git: https://github.com/jef-sure/esp32-component-boards.git\n    version: ${version}`;
 const PREFERENCES = { language: 'boards.language', currency: 'boards.currency', answers: 'boards.answers' }; // keys of localStorage
 const SELECTION = 'selection.json';
 const ISSUES = 'https://github.com/jef-sure/esp32-component-boards/issues/new';
@@ -114,8 +116,18 @@ function librariesText(kit) {
 
 const dependencyOf = (library) => (library.registry ? `  ${library.name}: "^${library.version}"` : `  ${library.name}:\n    git: ${library.url}`);
 
+// The lines of the skeleton's CMakeLists.txt that read the board and keep the lock in the build directory, for a program of its own.
+async function cmakeSnippet() {
+    const answer = await fetch('skeleton/CMakeLists.txt');
+    if (!answer.ok) return null;
+    const lines = (await answer.text()).split('\n');
+    const first = lines.findIndex((line) => line.startsWith('# BOARD='));
+    const last = lines.findIndex((line) => line.includes('DEPENDENCIES_LOCK'));
+    return first >= 0 && last > first ? lines.slice(first, last + 1).join('\n') : null;
+}
+
 // The files of a new project: the templates of the page, and the smallest program of the component.
-async function skeletonOf(kit, name, board) {
+async function skeletonOf(kit, name, board, version) {
     const parts = [`- ${kit.title}`, ...kit.modules.map((item) => `- ${item.count} x ${item.title}, on ${item.on.toUpperCase()}`)];
     const notes = kit.says.filter((line) => line.level === 'do').map((line) => `- ${line.text}`);
     const fill = {
@@ -127,6 +139,7 @@ async function skeletonOf(kit, name, board) {
         '@WIRES@': wiresText(kit),
         '@LIBRARIES@': librariesText(kit),
         '@DEPENDENCIES@': kit.libraries.filter((library) => library.own).map(dependencyOf).join('\n'),
+        '@COMPONENT_VERSION@': version,
     };
     const files = {};
     for (const [from, to] of SKELETON) {
@@ -462,7 +475,7 @@ const useEditor = Pinia.defineStore('editor', {
                 const files = {};
                 const board = kit.project ? name : kit.name;
                 if (kit.project) files[LOCAL_BOARD(name)] = `${catalogJson({ ...kit.project, name, title: kit.modules.length ? `${kit.title} with ${kit.modules.map((item) => item.title).join(', ')}` : kit.title })}\n`;
-                if (mode === 'create') Object.assign(files, await skeletonOf(kit, name, board));
+                if (mode === 'create') Object.assign(files, await skeletonOf(kit, name, board, this.installed?.component ?? 'main'));
                 if (this.description) files[DESCRIPTION] = `${this.description.trim()}\n`;
                 files[SELECTION] = `${JSON.stringify(library.solver.selectionOf(kit, this.kits, copied(this.answers), this.currency), null, 4)}\n`;
                 const rows = [];
@@ -472,7 +485,12 @@ const useEditor = Pinia.defineStore('editor', {
                     rows.push({ path, text, old, state, replace: false });
                 }
                 const manifest = mode === 'update' ? await host.readIn(folder, 'main/idf_component.yml') : null;
-                this.plan = { folder: Vue.markRaw(folder), folderName: folder.name, mode, rows, board, written: null, manifestLines: mode === 'update' ? [...(manifest?.includes(COMPONENT_NAME) ? [] : [COMPONENT_LINES]), ...kit.libraries.filter((library) => library.own && !manifest?.includes(library.name)).map(dependencyOf)] : [] };
+                // a program of its own also needs the CMake that reads the board and main naming the component: shown, not written
+                const project = mode === 'update' ? await host.readIn(folder, 'CMakeLists.txt') : null;
+                const main = mode === 'update' ? await host.readIn(folder, 'main/CMakeLists.txt') : null;
+                const cmakeLines = mode === 'update' && !project?.includes('sdkconfig.defaults.board') ? await cmakeSnippet() : null;
+                const requiresLine = mode === 'update' && main && !main.includes('jef-sure__boards') ? 'PRIV_REQUIRES jef-sure__boards' : null;
+                this.plan = { folder: Vue.markRaw(folder), folderName: folder.name, mode, rows, board, written: null, cmakeLines, requiresLine, manifestLines: mode === 'update' ? [...(manifest?.includes(COMPONENT_NAME) ? [] : [COMPONENT_LINES(this.installed?.component ?? 'main')]), ...kit.libraries.filter((library) => library.own && !manifest?.includes(library.name)).map(dependencyOf)] : [] };
             });
         },
         // Writes what is new and what was ticked. Nothing else is touched and nothing is removed.

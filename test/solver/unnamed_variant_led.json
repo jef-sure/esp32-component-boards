@@ -1,0 +1,6 @@
+{
+    "title": "Segment LEDs asked: a board with an LED of no named variant (the imported M5 Atom boards) does not come first with no module, as the catalog has segment backpacks; the first kit takes one (the audit of 2026-11-03, 4.5)",
+    "imported": true,
+    "answers": {"blocks": [{"role": "led", "variant": "segment", "name": "digits"}]},
+    "first_takes_a_module": true
+}

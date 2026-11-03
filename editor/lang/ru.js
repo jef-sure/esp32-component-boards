@@ -253,6 +253,7 @@ LANGUAGES.ru = {
         '{0} on the pins of its IO MUX': '{0} на своих пинах IO MUX',
         '{0} is a strapping pin ({1}): nothing on it should hold a level of its own at reset': '{0} — пин загрузки ({1}): ничто на нём не должно держать свой уровень при сбросе',
         'it selects {0}': 'он выбирает {0}',
+        '{0}: the board has one, of a variant the data does not name, and a module of the catalog names it': '{0}: на плате есть, но вариант в данных не назван, а модуль каталога его называет',
         'GPIO {0}: strapping pins by the docs of ESP-IDF, with no description of their boot in the data: the kit leaves them': 'GPIO {0}: пины загрузки по документации ESP-IDF, описания их загрузки в данных нет: комплект их не берёт',
         '{0} is a pin of JTAG: the kit leaves no debugging by JTAG on it': '{0} — пин JTAG: комплект оставляет его без отладки по JTAG',
         '{0}: its strapping pins are not in the data: a pin of this kit may be one': '{0}: пинов загрузки нет в данных, пин этого комплекта может оказаться одним из них',

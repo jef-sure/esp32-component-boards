@@ -604,7 +604,7 @@
             "required": ["id", "kind", "says", "why"],
             "properties": {
               "id": { "$ref": "#/$defs/name" },
-              "kind": { "enum": ["prefer_pins", "keep_out", "note_cost"] },
+              "kind": { "enum": ["prefer_pins", "keep_out", "note_cost", "unnamed_variant"] },
               "says": { "type": "string", "description": "The line of a kit, {0} what it is about." },
               "why": { "type": "string" }
             },

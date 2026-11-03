@@ -26,6 +26,12 @@
             "note": "JTAG",
             "says": "{0} is a pin of JTAG: the kit leaves no debugging by JTAG on it",
             "why": "A note of the docs of ESP-IDF on a pin keeps it out of a kit. The pins of JTAG are a cost, not a danger: a kit may take them, and says so, as the terminal and dotview-clock take 13 and 14 of an ESP32 for SPI2."
+        },
+        {
+            "id": "unnamed_variant_is_no_answer",
+            "kind": "unnamed_variant",
+            "says": "{0}: the board has one, of a variant the data does not name, and a module of the catalog names it",
+            "why": "A part of a board whose data names no variant may or may not be the variant asked: counted as an answer with an unknown, it came before a kit with a module that names the variant (an imported AtomS3R with some LED before a DevKit with a 7-segment backpack). Where the catalog has a module that names the variant, the part of the board answers nothing and stays a line; where none does, it stays an answer with the unknown, as before."
         }
     ]
 }

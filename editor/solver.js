@@ -974,9 +974,14 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
                 return rejected();
             }
             for (const limit of limits) if (large.some((device) => limit.of(device) === null)) say('unknown', t(limit.unknown));
-            if (need.variant && large.some((device) => !device.provides?.[need.id]?.variant)) say('unknown', t('{0} is on the board, and the data does not say of which variant', need.title));
-            else if (large.length) say('yes', t('{0} is on the board', need.title));
-            if (large.length < need.count) shortfalls.push({ need, count: need.count - large.length });
+            // unnamed_variant: a part of no named variant answers nothing where a module of the catalog names the one asked
+            const unnamed = need.variant ? large.filter((device) => !device.provides?.[need.id]?.variant) : [];
+            const named = judgementsOf('unnamed_variant')[0];
+            const answering = unnamed.length && named && modulesWith(need).some((module) => module.device.provides?.[need.id]?.variant === need.variant) ? large.filter((device) => !unnamed.includes(device)) : large;
+            if (answering.length < large.length) says.push({ level: 'note', text: t(named.says, need.title), judgement: named.id });
+            if (need.variant && answering.some((device) => !device.provides?.[need.id]?.variant)) say('unknown', t('{0} is on the board, and the data does not say of which variant', need.title));
+            else if (answering.length) say('yes', t('{0} is on the board', need.title));
+            if (answering.length < need.count) shortfalls.push({ need, count: need.count - answering.length });
         }
         if (!shortfalls.length && !unasked.length) return [kit(name, doc, board, says, null, [])];
         const reaching = (need, module) => limitsOf(need, wanted).every((limit) => meets(limit, module.device));

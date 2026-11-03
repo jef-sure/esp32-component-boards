@@ -91,6 +91,7 @@ for (const name of names) {
         JSON.stringify(kit.modules.map((item) => [item.name, item.count]).sort()) === JSON.stringify(Object.entries(want.modules).sort()) &&
         Object.entries(want.on || {}).every(([module, on]) => kit.modules.find((item) => item.name === module)?.on === on);
     if (given.first && !(fit[0] && same(fit[0], given.first))) say(`first is ${fit[0] ? `${fit[0].name} ${JSON.stringify(fit[0].modules)}` : 'nothing'}`);
+    if (given.first_takes_a_module && !fit[0]?.modules.length) say(`first is ${fit[0]?.name ?? 'nothing'}, which takes no module`);
     if (given.kit && !fit.some((kit) => same(kit, given.kit))) say(`no such kit: ${fit.map((kit) => `${kit.name} ${JSON.stringify(kit.modules)}`).join('; ')}`);
     if (given.fit && JSON.stringify([...new Set(fit.map((kit) => kit.name))].sort()) !== JSON.stringify(given.fit)) say(`fit ${fit.map((kit) => kit.name)}`);
     if (given.lines) {

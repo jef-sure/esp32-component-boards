@@ -709,6 +709,7 @@ kit, `selection.json` keeps it, and a case of `test/solver/` checks the `id`, no
 | `prefer_pins` | `bus`, `pins` (a field of the chip) | a new host of `bus` takes the pins the chip names for it when all are free; those pins go last for anything else |
 | `keep_out` | `what` (`strapping`), `harm` | a strapping pin whose harm is listed, or which has no `boot`, is given to nothing; the others are given with a line |
 | `note_cost` | `note` | a pin with that note of the docs is given, with a line of what it costs; any other note keeps a pin out |
+| `unnamed_variant` | | a part of the board of no named variant answers nothing for a variant asked when a module of the catalog names it, and stays a line |
 
 The strapping pins of a chip are copied from its datasheet, not judged: `gpio.boot_modes` holds the rows of its table
 of boot modes (the level of each pin, or `any`, for `spi_boot` and for each download mode), and each strapping pin has

@@ -183,11 +183,6 @@ config BOARD_DISPLAY_HD44780
     default 1 if BOARD_MODULE_LCD2004_PCF8574
     default 0
 
-config BOARD_MODULE_CHARACTER_DISPLAY
-    int
-    default 1 if BOARD_MODULE_LCD2004_PCF8574
-    default 0
-
 config BOARD_SOUND_DAC
     int
     default 1 if BOARD_SELECT_CYD_S028R

@@ -1,6 +1,7 @@
 /*
- * SPI hosts set up by the component: the host of a touch panel, and a host a display shares
- * with other devices, which a display driver that sets its host up keeps for itself.
+ * The SPI buses of the board from the table of the glue, and the hosts set up by the component:
+ * the host of a touch panel, and a host a display shares with other devices, which a display
+ * driver that sets its host up keeps for itself.
  */
 #include "board_glue.h"
 
@@ -8,6 +9,20 @@
 #include "esp_log.h"
 
 static const char *TAG = "board";
+
+const struct board_spi_bus *board_spi_bus(int host)
+{
+    for (size_t i = 0; i < board_spi_table.count; ++i)
+        if (board_spi_table.buses[i]->host == host) return board_spi_table.buses[i];
+    return NULL;
+}
+
+bool board_spi_taken(int host)
+{
+    for (size_t i = 0; i < board_spi_table.taken_count; ++i)
+        if (board_spi_table.taken[i] == host) return true;
+    return false;
+}
 
 bool board_glue_spi_host(const struct board_spi_bus *bus)
 {

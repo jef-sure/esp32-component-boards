@@ -6,7 +6,8 @@
 # the boards (selects). Kconfig and boards/boards.cmake are made by tools/boards_gen.py --all
 # from the data, as the glue is.
 include("${CMAKE_CURRENT_LIST_DIR}/boards/boards.cmake")
-idf_component_register(SRCS "src/boards.c" "src/board_i2c.c" "src/board_spi.c" "src/board_button.c" "src/board_sound.c" "src/board_touch.c" "src/board_touch_fw.c"
+idf_component_register(SRCS "src/boards.c" "src/board_bus.c" "src/board_i2c.c" "src/board_spi.c" "src/board_button.c" "src/board_sound.c" "src/board_touch.c"
+                            "src/board_touch_fw.c" "src/board_display_none.c"
                        INCLUDE_DIRS "include" ${BOARDS_ADAPTER_INCLUDES}
                        PRIV_INCLUDE_DIRS "src" ${BOARDS_ADAPTER_DIRS}
                        PRIV_REQUIRES esp_driver_i2c esp_driver_gpio esp_driver_spi)
@@ -15,6 +16,10 @@ idf_component_register(SRCS "src/boards.c" "src/board_i2c.c" "src/board_spi.c" "
 # by the symbol its data owns (CONFIG_BOARD_<BOARD>, 1 when chosen), and a module's by its
 # option (CONFIG_BOARD_MODULE_<MODULE>). The lists come from the data: boards/boards.cmake.
 set(_boards_glue "")
+if(CONFIG_BOARD_SELECT_NONE)
+    # no board: the tables of a glue, all empty, so that every function of boards.h returns false
+    list(APPEND _boards_glue src/board_none.c)
+endif()
 foreach(_board ${BOARDS_LIST})
     string(TOUPPER "${_board}" _upper)
     if(CONFIG_BOARD_${_upper})

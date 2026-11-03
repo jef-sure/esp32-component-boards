@@ -239,6 +239,11 @@ committed, a program that asks by kind.
   component, for a board of the catalog or of `components/local-boards`. They are set before `idf_component_register`
   and empty in the early expansion of the requirements (ESP-IDF 6.1 and 5.5.5). `board_pins.py <board> --display`
   prints the same for a Makefile. The four boards dgx-ge has give the numbers its own `board.cmake` writes by hand.
+- A build with no board chosen links: `src/board_none.c` gives the tables of a glue, all empty, every function of
+  `boards.h` returns false and `board_info()` names the board `none`. Before, the link failed on seven undefined
+  references (the audit of 2026-11-03, 5.7). The glue gives tables only: `board_bus_get`, `board_spi_bus`,
+  `board_spi_taken` and the functions of a display a board has not are written once in `src/` instead of being generated
+  into every glue, and `CONFIG_BOARD_MODULE_CHARACTER_DISPLAY` is gone (5.10 in part, 5.20).
 - Comments, logs and docs say what the hardware is and does, not what it "answers" or how it "lies": a display has an
   orientation, a touch panel covers a display, a log says "no touch panel found" (the audit of 2026-11-03, item 5.12).
 - What a board has and nobody asked for weighs the lowest price by the piece: of its chip, from `price` of its entry in

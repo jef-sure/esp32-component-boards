@@ -30,7 +30,7 @@ sys.path.insert(0, str(ROOT / "tools"))
 import boards_gen  # noqa: E402
 import resolve
 
-# what boards.h declares and every board's glue must define
+# what boards.h declares, defined by the glue, by src/ or by an adapter the board starts, and the tables every glue gives
 API = (
     "int board_display_count(void)",
     "bool board_display_init(struct board_display *out)",
@@ -55,6 +55,8 @@ API = (
     "const struct board_spi_bus *board_spi_bus(int host)",
     "bool board_spi_taken(int host)",
     "bool board_bus_get(const char *bus, const char *field, long *out)",
+    "const struct board_bus_table board_bus_table",
+    "const struct board_spi_table board_spi_table",
     "const struct board_i2c_table board_i2c_table",
     "const struct board_data board_data =",
 )
@@ -165,7 +167,7 @@ def main():
         glue = ROOT / "boards" / board["name"] / f"{board['name']}.c"
         if glue.exists():
             # the functions of a part a board has may lie in the core or in an adapter
-            core = "".join((ROOT / "src" / name).read_text() for name in ("board_sound.c", "board_touch.c", "board_button.c"))
+            core = "".join(path.read_text() for path in sorted((ROOT / "src").glob("*.c")) if path.name != "board_none.c")
             core += "".join(path.read_text() for record, _, _ in boards_gen.started(board) for path in adapter_sources(record))
             errors += check_api(board, glue.read_text() + core)
         for problem in boards_gen.pin_problems(board):

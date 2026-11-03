@@ -1,8 +1,9 @@
 /*
  * The glue of cyd_s028r, made by tools/boards_gen.py from catalog/boards/cyd_s028r/board.json: do not
  * edit by hand: edit the data and generate again (tools/check_boards.py checks the two agree).
- * Every function of boards.h is here: by the data for the parts the board has, returning
- * false for the parts it has not, so the contract of boards.h holds at link.
+ * The data of the board as tables, and the functions of the parts it starts: src/ reads the
+ * tables, and what the board has not returns false there, so the contract of boards.h holds
+ * at link.
  */
 #include "boards.h"
 #include "board_glue.h"
@@ -18,9 +19,6 @@
 #include "driver/spi_common.h"
 #include "drivers/ili9341.h"
 #include "esp_lcd_touch_xpt2046.h"
-#include "esp_log.h"
-#include <stdlib.h>
-#include <string.h>
 
 /* CYD (ESP32-2432S028R): 2.8-inch 320x240 ILI9341 on SPI2, shown landscape; a resistive XPT2046 touch on SPI3 (one finger); sound the chip's own 8-bit DAC on GPIO26 through the board's amplifier; the BOOT button; the microSD slot wired to pins no host is left for (spi3 is the touch's): kept as data for the program. */
 
@@ -30,37 +28,14 @@ static const struct board_spi_bus board_spi_spi3 = {.host = SPI3_HOST, .mosi = G
 /* Every bus of the board, its numbers by name: the kinds the component sets up and the
  * kinds it only keeps for the program, for a program that sets its own hardware up on the
  * board's wiring instead of copying pins. */
-static const struct board_bus_field board_bus_table[] = {{"spi.spi2", "hz", 40000000}, {"spi.spi2", "miso", 12}, {"spi.spi2", "mosi", 13}, {"spi.spi2", "sclk", 14}, {"spi.spi3", "hz", 1000000}, {"spi.spi3", "miso", 39}, {"spi.spi3", "mosi", 32}, {"spi.spi3", "sclk", 25}, {"sdspi.sd", "miso", 19}, {"sdspi.sd", "mosi", 23}, {"sdspi.sd", "sclk", 18}, {"light", "in", 34}, {"rgb", "b", 17}, {"rgb", "g", 16}, {"rgb", "r", 4}, {"sd", "cs", 5}};
-
-bool board_bus_get(const char *bus, const char *field, long *out)
-{
-    for (size_t i = 0; i < sizeof(board_bus_table) / sizeof(board_bus_table[0]); ++i) {
-        if (board_bus_table[i].bus && strcmp(board_bus_table[i].bus, bus) == 0 && strcmp(board_bus_table[i].field, field) == 0) {
-            if (out) *out = board_bus_table[i].value;
-            return true;
-        }
-    }
-    return false;
-}
+static const struct board_bus_field board_bus_fields[] = {{"spi.spi2", "hz", 40000000}, {"spi.spi2", "miso", 12}, {"spi.spi2", "mosi", 13}, {"spi.spi2", "sclk", 14}, {"spi.spi3", "hz", 1000000}, {"spi.spi3", "miso", 39}, {"spi.spi3", "mosi", 32}, {"spi.spi3", "sclk", 25}, {"sdspi.sd", "miso", 19}, {"sdspi.sd", "mosi", 23}, {"sdspi.sd", "sclk", 18}, {"light", "in", 34}, {"rgb", "b", 17}, {"rgb", "g", 16}, {"rgb", "r", 4}, {"sd", "cs", 5}};
+const struct board_bus_table board_bus_table = {.fields = board_bus_fields, .count = sizeof(board_bus_fields) / sizeof(board_bus_fields[0])};
 
 /* The SPI buses open to the program's devices. A host with only a display on it is not one of them. */
 static const struct board_spi_bus *const board_spi_buses[] = {&board_spi_spi3};
-
-const struct board_spi_bus *board_spi_bus(int host)
-{
-    for (size_t i = 0; i < sizeof(board_spi_buses) / sizeof(board_spi_buses[0]); ++i)
-        if (board_spi_buses[i]->host == host) return board_spi_buses[i];
-    return NULL;
-}
-
 /* The hosts the board's buses claim, SPI and QSPI alike: spi2, spi3. */
-bool board_spi_taken(int host)
-{
-    static const int taken[] = {SPI2_HOST, SPI3_HOST};
-    for (size_t i = 0; i < sizeof(taken) / sizeof(taken[0]); ++i)
-        if (taken[i] == host) return true;
-    return false;
-}
+static const int board_spi_hosts[] = {SPI2_HOST, SPI3_HOST};
+const struct board_spi_table board_spi_table = {.buses = board_spi_buses, .count = sizeof(board_spi_buses) / sizeof(board_spi_buses[0]), .taken = board_spi_hosts, .taken_count = sizeof(board_spi_hosts) / sizeof(board_spi_hosts[0])};
 
 /* The board wires no I2C bus: nothing for board_glue_i2c to make. */
 const struct board_i2c_table board_i2c_table = {.count = 0};
@@ -114,16 +89,6 @@ const struct board_sound_table board_sound_table = {.entries = sound_entries, .s
 
 static const struct board_button_entry button_entries[] = {{.name = "boot", .pin = 0, .active_low = true}};
 const struct board_button_table board_button_table = {.entries = button_entries, .count = 1};
-
-/* What the board has not: the rest of boards.h, returning false, so that the same program
- * links and runs on every board. */
-#if !CONFIG_BOARD_MODULE_CHARACTER_DISPLAY /* a module on the board's bus gives this one instead */
-bool board_character_display_init(struct board_character_display *out)
-{
-    (void)out;
-    return false;
-}
-#endif
 
 /* What the board is, for board_info(). */
 const struct board_data board_data = {.name = "cyd_s028r", .title = "CYD (ESP32-2432S028R)", .target = "esp32"};

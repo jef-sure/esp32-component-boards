@@ -33,11 +33,12 @@ defaults. See [choosing-a-board.md](choosing-a-board.md).
 missing pin, a bus the display references but the board does not wire, pixels
 and millimetres in different orientations) and writes:
 
-- `boards/<board>/<board>.c`: the glue. It defines **every** function of
-  `boards.h`. For the parts the board has, the function sets the hardware up
-  from the data; for the parts it has not, the function returns `false`. So
-  the contract of `boards.h` holds at link time on every board, and a program
-  never needs `#if` on the board's name.
+- `boards/<board>/<board>.c`: the glue. It gives the data of the board as
+  tables (the numbers of its buses, its SPI and I2C buses, its buttons, touch
+  panels and sounds) and the functions that start the parts it has. The core in
+  `src/` reads the tables, and for a part the board has not a function of `src/`
+  returns `false`. So **every** function of `boards.h` exists at link time on
+  every board, and a program never needs `#if` on the board's name.
 - `boards/<board>/display.cmake`: the primary display as shown, `BOARD_PIXELS` and
   `BOARD_MM`, which the component's `project_include.cmake` gives the CMake of a
   program when the board is chosen (see [choosing-a-board.md](choosing-a-board.md)).
@@ -87,16 +88,27 @@ build with no board chosen downloads nothing of DGX. This is the mechanism of
 the data instead of written by hand.
 
 The component's `CMakeLists.txt` compiles only the chosen board's glue, by
-`CONFIG_BOARD_<BOARD>`, and includes its `board.cmake` for the link.
+`CONFIG_BOARD_<BOARD>`, and includes its `board.cmake` for the link. With
+*None* chosen it compiles `src/board_none.c` instead: the tables of a glue, all
+empty, so the program links, every part returns `false` and `board_info()`
+names the board `none`.
 
 ## The core
 
 `src/` is small, depends on no board and names no library:
 
 - `boards.c`: `board_info()`, from the `board_data` the glue defines.
-- `board_i2c.c`: the board's I2C master, made once from the pins the glue
-  gives and shared by the touch panel, the codec and a character display module.
-- `board_spi.c`: the SPI hosts the component sets up.
+- `board_bus.c`: `board_bus_get()`, the numbers of the board's buses by name.
+- `board_i2c.c`: the board's I2C masters, one a port, made once under a lock
+  from the pins the glue gives and shared by the touch panel, the codec, a
+  character display module and the program.
+- `board_spi.c`: the SPI buses open to the program and the hosts the board
+  claims, from the table of the glue, and the SPI hosts the component sets up.
+- `board_button.c`: the buttons, from the table of the glue.
+- `board_touch.c`: the touch panels, each started once, on demand.
+- `board_display_none.c`: the display functions of a board with no display of
+  that kind, returning `false`.
+- `board_none.c`: the empty tables when no board is chosen.
 - `board_sound.c`: the task that paces samples to the output of the board.
 - `board_touch_fw.c`: `board_touch_firmware_set()`, which keeps the firmware of a
   GSL3680 the program gives. Nothing in this component is weak: a strong definition
@@ -130,8 +142,9 @@ on a PCF8574 backpack. It is described as a board without a chip
 (`"kind": "module"`), has an option of its own in the menu
 (`CONFIG_BOARD_MODULE_LCD2004_PCF8574`), and its `sdkconfig.defaults` turns
 that option on. Its glue defines the function of its kind,
-`board_character_display_init`, and every board's glue leaves that function
-out when a module provides it (`#if !CONFIG_BOARD_MODULE_CHARACTER_DISPLAY`).
+`board_character_display_init`, and the one of `src/board_display_none.c` that
+returns `false` is left out while a character display is there
+(`#if !CONFIG_BOARD_DISPLAY_HD44780`).
 See [modules.md](modules.md).
 
 ## The checks

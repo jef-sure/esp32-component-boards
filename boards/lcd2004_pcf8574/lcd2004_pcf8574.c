@@ -1,8 +1,8 @@
 /*
  * The glue of lcd2004_pcf8574, made by tools/boards_gen.py from catalog/modules/lcd2004_pcf8574/module.json: do not
  * edit by hand: edit the data and generate again (tools/check_boards.py checks the two agree).
- * A module: not a board but a device the chosen board's bus carries; it gives the function of
- * its kind, and the board's glue leaves that one out (CONFIG_BOARD_MODULE_CHARACTER_DISPLAY).
+ * A module: not a board but a device the chosen board's bus carries. It gives the function of
+ * its kind, and CONFIG_BOARD_DISPLAY_HD44780 leaves out the one of src/ that returns false.
  */
 #include "boards.h"
 #include "board_glue.h"
@@ -10,9 +10,6 @@
 #include "sdkconfig.h"
 
 #include "board_character.h"
-#include "esp_log.h"
-#include <stdlib.h>
-#include <string.h>
 
 /* 2004 LCD on a PCF8574: A 20x4 HD44780 on the common I2C backpack (P0 RS, P1 RW, P2 E, P3 backlight, P4-P7 D4-D7): not a board of its own, a display any board's I2C bus can carry. */
 

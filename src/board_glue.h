@@ -4,9 +4,10 @@
  * The inside of the boards: the contract between the core (src/), the adapters of the libraries
  * (adapters/) and the glue of the chosen board (boards/<board>/<board>.c, made by
  * tools/boards_gen.py from catalog/boards/<board>/board.json). It names no library. Not for a
- * program: boards.h is; this is how a board is brought in. The glue gives the data and every
- * function boards.h declares; a part the board has not is a function returning false, generated
- * into the same glue, so that the contract of boards.h holds at link on every board.
+ * program: boards.h is; this is how a board is brought in. The glue gives the data as tables and
+ * the functions of the parts it starts; src/ reads the tables, and a part the board has not is a
+ * function of src/ returning false, so that the contract of boards.h holds at link on every board.
+ * With no board chosen, src/board_none.c gives the tables, all empty.
  */
 #include "boards.h"
 
@@ -129,6 +130,20 @@ struct board_bus_field {
     const char *field; /* "mosi", "clk", "hz": a number the bus carries */
     long        value;
 };
+struct board_bus_table {
+    const struct board_bus_field *fields;
+    size_t                        count;
+};
+extern const struct board_bus_table board_bus_table; /* given by the glue of the board */
+
+/* The SPI buses open to the program's devices (a host with only a display on it is not one), and the hosts any bus of the board claims. */
+struct board_spi_table {
+    const struct board_spi_bus *const *buses;
+    size_t                             count;
+    const int                         *taken;
+    size_t                             taken_count;
+};
+extern const struct board_spi_table board_spi_table; /* given by the glue of the board */
 
 #ifdef __cplusplus
 }

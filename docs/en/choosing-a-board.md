@@ -127,7 +127,7 @@ snippet above only sets the variable when none is given.
 - The other parts: rules in the component's `idf_component.yml` on hidden
   symbols beside the choice. A build for the CYD S028R gets `atanisoft/esp_lcd_touch_xpt2046`
   and nothing of the GT911 or the ES8311; a build with *None* chosen gets none
-  of DGX.
+  of DGX, and links: every function of `boards.h` returns `false`.
 - The glue of the chosen board, compiled into the component by
   `CONFIG_BOARD_<BOARD>`; its `board.cmake` names the components it needs.
 - The size of the primary display for the program's CMake, as shown: `BOARD_PIXELS`

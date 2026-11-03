@@ -58,10 +58,9 @@ it on the I2C bus of the board.
 ```
 
 Its glue defines only the function of its kind,
-`board_character_display_init`. Every board's glue has that function too,
-returning `false`, but under `#if !CONFIG_BOARD_MODULE_CHARACTER_DISPLAY`, so
-when the module is on the board's version steps aside and the module's is the
-one that links. A board that has an HD44780 soldered on (on I2C or on GPIOs)
+`board_character_display_init`. `src/board_display_none.c` has that function
+too, returning `false`, but under `#if !CONFIG_BOARD_DISPLAY_HD44780`, so when
+the module is on, the module's function is the one that links. A board that has an HD44780 soldered on (on I2C or on GPIOs)
 describes it in its own `display` and defines the real function itself; then
 no module is needed.
 

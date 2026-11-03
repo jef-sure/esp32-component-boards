@@ -623,8 +623,6 @@ def features_of(board):
     features = set()
     if board.get("display_groups"):
         features.add("BOARD_DISPLAY_GROUP")
-    if is_character(board.get("display")) and board.get("module"):
-        features.add("BOARD_MODULE_CHARACTER_DISPLAY")
     for record, entry, also in started(board):
         features.update(used["adapter"]["symbol"] for used in (record, *also))
         features.update(entry["adapter"].get("symbols", ()))
@@ -728,18 +726,19 @@ def gen_c(board):
     out(f" * The glue of {name}, made by tools/boards_gen.py from {data_path(board)}: do not")
     out(" * edit by hand: edit the data and generate again (tools/check_boards.py checks the two agree).")
     if is_module:
-        out(" * A module: not a board but a device the chosen board's bus carries; it gives the function of")
-        out(" * its kind, and the board's glue leaves that one out (CONFIG_BOARD_MODULE_CHARACTER_DISPLAY).")
+        out(" * A module: not a board but a device the chosen board's bus carries. It gives the function of")
+        out(" * its kind, and CONFIG_BOARD_DISPLAY_HD44780 leaves out the one of src/ that returns false.")
     else:
-        out(" * Every function of boards.h is here: by the data for the parts the board has, returning")
-        out(" * false for the parts it has not, so the contract of boards.h holds at link.")
+        out(" * The data of the board as tables, and the functions of the parts it starts: src/ reads the")
+        out(" * tables, and what the board has not returns false there, so the contract of boards.h holds")
+        out(" * at link.")
     out(" */")
     out("#include \"boards.h\"")
     out("#include \"board_glue.h\"")
     out("")
     out("#include \"sdkconfig.h\"")
     out("")
-    headers = ["stdlib.h", "string.h", "esp_log.h"]
+    headers = []
     for record, entry, also in started(board):
         headers += [header for used in (record, *also) for header in used["adapter"].get("headers", ())] + entry["adapter"].get("headers", [])
     if character and bus_parts(letters["bus"]["bus"])[0] == "gpio":
@@ -791,59 +790,26 @@ def gen_c(board):
         out(" * board's wiring instead of copying pins. */")
         if rows:
             entries = ", ".join(f'{{"{bus}", "{key}", {value}}}' for bus, key, value in rows)
-            out(f"static const struct board_bus_field board_bus_table[] = {{{entries}}};")
+            out(f"static const struct board_bus_field board_bus_fields[] = {{{entries}}};")
+            out("const struct board_bus_table board_bus_table = {.fields = board_bus_fields, .count = sizeof(board_bus_fields) / sizeof(board_bus_fields[0])};")
         else:
-            out("static const struct board_bus_field board_bus_table[] = {{0, 0, 0}}; /* the board wires no bus of numbers */")
-        out("")
-        out("bool board_bus_get(const char *bus, const char *field, long *out)")
-        out("{")
-        out("    for (size_t i = 0; i < sizeof(board_bus_table) / sizeof(board_bus_table[0]); ++i) {")
-        out("        if (board_bus_table[i].bus && strcmp(board_bus_table[i].bus, bus) == 0 && strcmp(board_bus_table[i].field, field) == 0) {")
-        out("            if (out) *out = board_bus_table[i].value;")
-        out("            return true;")
-        out("        }")
-        out("    }")
-        out("    return false;")
-        out("}")
+            out("const struct board_bus_table board_bus_table = {.count = 0}; /* the board wires no bus of numbers */")
         out("")
 
         # ---- the shared buses as the program sees them ----
         spi_hosts = sorted(set(list(buses.get("spi") or {}) + list(buses.get("qspi") or {})))
+        fields = []
         if plain_spi:
             entries = ", ".join(f"&board_spi_{own}" for own in sorted(plain_spi))
             out("/* The SPI buses open to the program's devices. A host with only a display on it is not one of them. */")
             out(f"static const struct board_spi_bus *const board_spi_buses[] = {{{entries}}};")
-            out("")
-            out("const struct board_spi_bus *board_spi_bus(int host)")
-            out("{")
-            out("    for (size_t i = 0; i < sizeof(board_spi_buses) / sizeof(board_spi_buses[0]); ++i)")
-            out("        if (board_spi_buses[i]->host == host) return board_spi_buses[i];")
-            out("    return NULL;")
-            out("}")
-        else:
-            out("/* The board has no SPI bus open to the program's devices. */")
-            out("const struct board_spi_bus *board_spi_bus(int host)")
-            out("{")
-            out("    (void)host;")
-            out("    return NULL;")
-            out("}")
-        out("")
+            fields += [".buses = board_spi_buses", ".count = sizeof(board_spi_buses) / sizeof(board_spi_buses[0])"]
         if spi_hosts:
             taken = ", ".join(f"{own.upper()}_HOST" for own in spi_hosts)
             out(f"/* The hosts the board's buses claim, SPI and QSPI alike: {', '.join(spi_hosts)}. */")
-            out("bool board_spi_taken(int host)")
-            out("{")
-            out(f"    static const int taken[] = {{{taken}}};")
-            out("    for (size_t i = 0; i < sizeof(taken) / sizeof(taken[0]); ++i)")
-            out("        if (taken[i] == host) return true;")
-            out("    return false;")
-            out("}")
-        else:
-            out("bool board_spi_taken(int host)")
-            out("{")
-            out("    (void)host;")
-            out("    return false;")
-            out("}")
+            out(f"static const int board_spi_hosts[] = {{{taken}}};")
+            fields += [".taken = board_spi_hosts", ".taken_count = sizeof(board_spi_hosts) / sizeof(board_spi_hosts[0])"]
+        out(f"const struct board_spi_table board_spi_table = {{{', '.join(fields) or '.count = 0'}}};")
         out("")
         if i2c_buses:
             out("/* The board's I2C buses by port: board_glue_i2c makes the master of one at the first ask. */")
@@ -1025,43 +991,8 @@ def gen_c(board):
             out("const struct board_button_table board_button_table = {.count = 0};")
         out("")
 
-    # ---- what the board has not: the rest of boards.h, returning false ----
+    # ---- what the board is; what it has not returns false in src/ ----
     if not is_module:
-        out("/* What the board has not: the rest of boards.h, returning false, so that the same program")
-        out(" * links and runs on every board. */")
-        if not pixel:
-            out("int board_display_count(void)")
-            out("{")
-            out("    return 0;")
-            out("}")
-            out("")
-            out("bool board_display_init(struct board_display *out)")
-            out("{")
-            out("    (void)out;")
-            out("    return false;")
-            out("}")
-            out("")
-            out("bool board_display_init_at(int index, struct board_display *out)")
-            out("{")
-            out("    (void)index, (void)out;")
-            out("    return false;")
-            out("}")
-            out("")
-            out("bool board_display_orientation(struct board_display *display, int dir_x, int dir_y, bool swap_xy)")
-            out("{")
-            out("    (void)display, (void)dir_x, (void)dir_y, (void)swap_xy;")
-            out("    return false;")
-            out("}")
-            out("")
-        if not character:
-            out("#if !CONFIG_BOARD_MODULE_CHARACTER_DISPLAY /* a module on the board's bus gives this one instead */")
-            out("bool board_character_display_init(struct board_character_display *out)")
-            out("{")
-            out("    (void)out;")
-            out("    return false;")
-            out("}")
-            out("#endif")
-            out("")
         target = board.get("mcu", {}).get("target", "any")
         out("/* What the board is, for board_info(). */")
         out(f"const struct board_data board_data = {{.name = \"{name}\", .title = \"{board['title']}\", .target = \"{target}\"}};")
@@ -1268,7 +1199,6 @@ def gen_kconfig(boards, modules):
             all_features.setdefault(feature, []).append(module_symbol(module))
     for symbol, _, _ in feature_deps():
         all_features.setdefault(symbol, [])
-    all_features.setdefault("BOARD_MODULE_CHARACTER_DISPLAY", [])
     for feature in sorted(all_features):
         out(f"config {feature}")
         out("    int")

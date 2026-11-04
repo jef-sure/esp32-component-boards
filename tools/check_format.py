@@ -252,7 +252,12 @@ def reports_refused():
         if offer != {"shop": "Some shop", "currency": "USD", "range": [3.0, 5.0], "date": "2026-11-01", "source": "Issue 7, as reported"}:
             print(f"take_report.py wrote {offer}")
             wrong += 1
-        for field, value in (("item", "../../etc/passwd"), ("item", "modules/pn5180_module"), ("item", "modules/x; rm -rf /"), ("currency", "dollars"), ("price", "free"), ("price", "5-3"), ("qty", "many"), ("shop", "x" * 61)):
+        take_report.take(body.format(**{**fine, "price": "3,76", "shop": "aliexpress"}), 9, catalog, "2026-11-01")
+        offer = json.loads((catalog / "modules" / "pn532_module" / "module.json").read_text())["price"]["report_9"]
+        if offer["range"] != [3.76, 3.76] or offer["shop"] != "AliExpress":
+            print(f"take_report.py took 3,76 of aliexpress as {offer['range']} of {offer['shop']}")
+            wrong += 1
+        for field, value in (("item", "../../etc/passwd"), ("item", "modules/pn5180_module"), ("item", "modules/x; rm -rf /"), ("currency", "dollars"), ("price", "free"), ("price", "5-3"), ("price", "1,200"), ("price", "€3"), ("qty", "many"), ("shop", "x" * 61)):
             try:
                 take_report.take(body.format(**{**fine, field: value}), 8, catalog, "2026-11-01")
                 print(f"take_report.py took {field}: {value}")

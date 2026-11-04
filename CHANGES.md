@@ -250,7 +250,7 @@ committed, a program that asks by kind.
   `BOARD_` and `CONFIG_BOARD_` are said to be the component's (both found by 7c after the move of dgx-ge was decided).
 - The package for the registry holds what its list names and nothing else: `files` excludes everything first, since the
   manager applies include after exclude and brought back all it had excluded. Packed from a working copy it held
-  114 MB, imported/ and imported-shops/ with the data of shops, and the managed components of the examples; now 312
+  114 MB, imported/ and imported-shops/ with the data of shops, and the managed components of the examples; now 300
   files, the same as git tracks less test/, .github/ and imported/, and of tools/ only those a program uses and what
   they import (the checks need test/). Board pictures of catalog/ go with it. check_format.py packs it and checks this.
 - choosing-a-board.md says what stays with the program: its own defaults, read after the board's, keep what it uses
@@ -269,6 +269,10 @@ committed, a program that asks by kind.
   only a library of another author listed (the audit of 2026-11-03, 4.20). It is not audited yet.
 - The prices of LCSC of the WS2812B, the 0603 LED and the 5050 RGB LED are two offers each, by quantity, not one range
   for any quantity (the audit of 2026-11-03, 4.16); the source says the tiers were read from search results.
+- A reported price takes a decimal comma, 3,76, with one or two digits after it; 1,200 is refused, as it may be a
+  thousand and two hundred. The shop is written as the catalog writes it, AliExpress for aliexpress. The workflow runs
+  once for an issue (the form gave two runs and two comments), runs again when the issue is edited, and a refused
+  report gets its reason alone, not the output of check_format (issue 3).
 - The ESP32-C3-Zero and the ESP32-S3-Zero have their USB-C as a part, `usb` with `d_minus` and `d_plus`, from their
   schematics: GPIO 18 and 19 on the C3, 19 and 20 on the S3, the USB Serial/JTAG of the chip. A pin a part of the person's
   own cannot have is named with its owner and the note of the chip, as `usb.d_minus, USB-JTAG`.

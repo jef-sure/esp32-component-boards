@@ -19,7 +19,9 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 FILES = {"boards": "board.json", "modules": "module.json", "addons": "addon.json"}
 ITEM = re.compile(r"^(boards|modules|addons)/[a-z0-9_]+$")
 CURRENCY = re.compile(r"^[A-Z]{3}$")
-PRICE = re.compile(r"^(\d+(?:\.\d+)?)(?:\s*-\s*(\d+(?:\.\d+)?))?$")
+# A decimal comma has one or two digits after it: 1,200 may be a thousand and two hundred, and is refused.
+NUMBER = r"\d+(?:\.\d+|,\d{1,2})?"
+PRICE = re.compile(rf"^({NUMBER})(?:\s*-\s*({NUMBER}))?$")
 EMPTY = "_No response_"
 
 
@@ -36,15 +38,17 @@ def offer_of(fields, issue, today):
     """The file of the item and its offer. Raises ValueError with what is wrong."""
     item, shop, currency = fields.get("Item", ""), fields.get("Shop", ""), fields.get("Currency", "").upper()
     if not ITEM.match(item):
-        raise ValueError(f"Item: not one of the catalog, as modules/pn532_module: {item[:60]}")
+        # The comment shows it in a code span, where a @name mentions no one.
+        shown = item.partition("\n")[0][:60].replace("`", "")
+        raise ValueError(f"Item: not one of the catalog, as modules/pn532_module: `{shown}`")
     if not shop or len(shop) > 60 or "\n" in shop:
         raise ValueError("Shop: one short line")
     if not CURRENCY.match(currency):
         raise ValueError("Currency: three letters")
     price = PRICE.match(fields.get("Price of one", ""))
     if not price:
-        raise ValueError("Price of one: a number, or a range as 3-5")
-    low, high = float(price[1]), float(price[2] or price[1])
+        raise ValueError("Price of one: a number as 3.76 or 3,76, or a range as 3-5, without a currency sign or a thousands separator")
+    low, high = (float(number.replace(",", ".")) for number in (price[1], price[2] or price[1]))
     if low > high:
         raise ValueError("Price of one: the range runs down")
     offer = {"shop": shop, "currency": currency, "range": [low, high], "date": today, "source": f"Issue {issue}, as reported"}
@@ -56,9 +60,20 @@ def offer_of(fields, issue, today):
     return item, offer
 
 
+def shop_names(catalog):
+    """The shops of the catalog as it writes them, by the name in lower case."""
+    names = {}
+    for path in catalog.glob("*/*/*.json"):
+        doc = json.loads(path.read_text())
+        for offer in (doc.get("price") or {}).values() if isinstance(doc, dict) else ():
+            names.setdefault(offer["shop"].lower(), offer["shop"])
+    return names
+
+
 def take(body, issue, catalog, today):
     fields = fields_of(body)
     item, offer = offer_of(fields, issue, today)
+    offer["shop"] = shop_names(catalog).get(offer["shop"].lower(), offer["shop"])
     kind, name = item.split("/")
     path = catalog / kind / name / FILES[kind]
     if not path.is_file():

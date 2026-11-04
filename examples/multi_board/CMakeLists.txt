@@ -2,7 +2,7 @@
 # and each board builds in a directory of its own with its own sdkconfig and lock of the components:
 #
 #     python3 ../../tools/board_select.py cyd_s028r jc8012p4a1c .
-#     idf.py build                                 # ESP-IDF 6: the first preset, cyd_s028r
+#     idf.py build                                 # ESP-IDF 6: the preset default, the current board
 #     idf.py --preset jc8012p4a1c build            # another
 #     idf.py -B build/cyd_s028r -D SDKCONFIG=build/cyd_s028r/sdkconfig -D BOARD=cyd_s028r build   # ESP-IDF 5
 #

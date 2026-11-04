@@ -37,9 +37,10 @@ ESP-IDF reads the defaults only into a new sdkconfig, so an sdkconfig made befor
 
 Several boards write PROJECT_DIR/sdkconfig.defaults.<BOARD> each, and PROJECT_DIR/CMakePresets.json: a preset
 for each board, in the order named, with its build directory build/<BOARD>, its sdkconfig and its lock of components
-there. ESP-IDF 6 reads the presets: idf.py build builds the first board, the current one, idf.py --preset <BOARD>
-build another, and the extension of ESP-IDF for VS Code chooses one as a project configuration. ESP-IDF 5 does not
-read them:
+there, and the preset default, a copy of the preset of the current board (--current, else the first). ESP-IDF 6 reads
+the presets: idf.py build builds default, idf.py --preset <BOARD> build another, and the extension of ESP-IDF for VS
+Code chooses one as a project configuration. board_select.py --current BOARD PROJECT_DIR rewrites only default, so
+the boards keep their order. ESP-IDF 5 does not read them:
 
     idf.py -B build/<BOARD> -D SDKCONFIG=build/<BOARD>/sdkconfig -D BOARD=<BOARD> build
 
@@ -123,17 +124,38 @@ HOST = "host"
 RECORD = "# board_select.py "  # the first line of a file it writes: the arguments that make it again
 PRESETS = "CMakePresets.json"
 VENDOR = "jef-sure/boards"  # the vendor map of CMake presets that marks the file as written here
+DEFAULT = "default"  # the preset idf.py builds when none is named
 
 
-def presets_text(project, boards, targets, command):
-    """CMakePresets.json of the boards: one preset each, the first the board idf.py builds with no --preset."""
+def our_presets(project, boards):
+    """The presets of the project when this command wrote them, None when there are none; refuses those of another."""
     path = project / PRESETS
-    if path.exists() and VENDOR not in json.loads(path.read_text()).get("vendor", {}):
+    if not path.exists():
+        return None
+    doc = json.loads(path.read_text())
+    if VENDOR not in doc.get("vendor", {}):
         raise SystemExit(f"{path}: written by someone else, so it is not touched: add the presets of {', '.join(boards)} to it, "
                          f"or remove it and run the command again")
+    return doc
+
+
+def with_current(doc, current):
+    """The presets with default, the one idf.py builds when no preset is named: a copy of the preset of the current board,
+    in the same build directory, so the boards keep their order and only default changes with the current one."""
+    boards = [preset for preset in doc["configurePresets"] if preset["name"] != DEFAULT]
+    chosen = next((preset for preset in boards if preset["name"] == current), None)
+    if not chosen:
+        raise SystemExit(f"--current {current}: not a board of {PRESETS} ({', '.join(preset['name'] for preset in boards)})")
+    default = {**chosen, "name": DEFAULT, "displayName": f"The current board: {chosen['displayName']}"}
+    return resolve.dump({**doc, "configurePresets": [*boards, default]}) + "\n"
+
+
+def presets_text(project, boards, targets, current, command):
+    """CMakePresets.json of the boards: one preset each in the order named, and default for the current one."""
+    our_presets(project, boards)
     presets = [{"name": board, "displayName": title_of(board), "binaryDir": f"build/{board}",
                 "cacheVariables": {"BOARD": board, "IDF_TARGET": target, "SDKCONFIG": f"build/{board}/sdkconfig"}} for board, target in zip(boards, targets)]
-    return resolve.dump({"version": 3, "vendor": {VENDOR: {"made by": command}}, "configurePresets": presets}) + "\n"
+    return with_current({"version": 3, "vendor": {VENDOR: {"made by": command}}, "configurePresets": presets}, current)
 
 
 def title_of(board):
@@ -210,11 +232,20 @@ def main():
     parser.add_argument("--reset", action="store_true", help="move the project's sdkconfig aside, so the new board's defaults are read")
     parser.add_argument("--as", dest="shows", metavar="BOARD", help="for host: the board whose display the window of the computer has")
     parser.add_argument("--again", action="store_true", help="make every sdkconfig.defaults.* of the project again, by the command each was made with")
+    parser.add_argument("--current", metavar="BOARD", help="of several boards, the one idf.py builds when no preset is named; alone with the project, it changes only that")
     args = parser.parse_intermixed_args()  # options may stand between the boards and the project, as board_select.py b --reset .
     if args.again:
-        if len(args.names) != 1 or args.module or args.revision or args.reset or args.shows:
+        if len(args.names) != 1 or args.module or args.revision or args.reset or args.shows or args.current:
             parser.error("--again takes only the project's directory")
         return again(parser, pathlib.Path(args.names[0]))
+    if args.current and len(args.names) == 1:
+        project = pathlib.Path(args.names[0])
+        doc = our_presets(project, [args.current])
+        if doc is None:
+            raise SystemExit(f"{project}: no {PRESETS} there: name the boards, board_select.py BOARD BOARD ... --current {args.current} {project}")
+        (project / PRESETS).write_text(with_current(doc, args.current))
+        print(f"{project / PRESETS}: {args.current} is the current board, idf.py build builds it")
+        return 0
     if len(args.names) < 2:
         parser.error("name a board and the project's directory")
     *boards, project = args.names
@@ -223,6 +254,8 @@ def main():
         raise SystemExit(f"{project}: no CMakeLists.txt there, is it a project?")
     if len(boards) > 1 and (args.module or args.revision or args.reset):
         raise SystemExit("--module, --revision and --reset are for one board; several boards each take their own build directory")
+    if args.current and (len(boards) == 1 or args.current not in boards):
+        raise SystemExit(f"--current {args.current}: one of the boards named, when there are several")
     local = resolve.add_project(project)
 
     if len(boards) > 1:
@@ -234,14 +267,14 @@ def main():
             texts[project / f"sdkconfig.defaults.{board}"] = made_by(board, shows=args.shows if board == HOST else None) + text
             targets.append(target)
         command = "board_select.py " + " ".join([*boards, *([f"--as {args.shows}"] if args.shows else []), "."])
-        texts[project / PRESETS] = presets_text(project, boards, targets, command)
+        texts[project / PRESETS] = presets_text(project, boards, targets, args.current or boards[0], command)
         for out, text in texts.items():
             out.write_text(text)
         for out, board, target in zip(texts, boards, targets):
             print(f"{out}: {board}, {target}")
-        print(f"{project / PRESETS}: a preset for each, {boards[0]} first\n"
-              f"ESP-IDF 6: idf.py build builds {boards[0]}, idf.py --preset <board> build another, each in build/<board>.\n"
-              "ESP-IDF 5 does not read the presets:")
+        print(f"{project / PRESETS}: a preset for each, and default for the current one, {args.current or boards[0]}\n"
+              f"ESP-IDF 6: idf.py build builds {args.current or boards[0]}, idf.py --preset <board> build another, each in build/<board>;\n"
+              f"board_select.py --current <board> {project} changes the current one. ESP-IDF 5 does not read the presets:")
         for board in boards:
             print(f"  idf.py -B build/{board} -D SDKCONFIG=build/{board}/sdkconfig -D BOARD={board} build")
         return 0

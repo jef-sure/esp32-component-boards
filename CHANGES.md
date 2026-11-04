@@ -290,8 +290,9 @@ committed, a program that asks by kind.
   by its pack again, though a price is already of one piece. A low of 0, "less than 3", counts as 3 in the list of goods too, as on the
   page: the list printed EUR 0.00 for the ESP32 DevKit (7c).
 - Several boards in one project have a current one: `board_select.py` writes `CMakePresets.json` beside the defaults, a
-  preset for each board in the order named, built in `build/<board>`. ESP-IDF 6 reads it: `idf.py build` builds the
-  first board, `idf.py --preset <board> build` another, and the extension of ESP-IDF for VS Code chooses one as a
+  preset for each board in the order named, built in `build/<board>`, and `default`, a copy of the preset of the current
+  board; `--current <board>` changes only `default`, so the boards keep their order (Anton). ESP-IDF 6 reads it:
+  `idf.py build` builds `default`, `idf.py --preset <board> build` another, and the extension of ESP-IDF for VS Code chooses one as a
   project configuration. ESP-IDF 5 is given the directories, now `build/<board>` too. A line in `CMakeLists.txt` cannot
   choose the board: the chip of a build directory is fixed before that file is read. Built on 6.1 by the presets and
   on 5.5.5 by the directories, for hello_board (CYD S028R and JC4827W543C) and multi_board; CI builds multi_board both

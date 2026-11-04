@@ -19,7 +19,8 @@ Checks of the data format. Needs jsonschema and node: the Python of ESP-IDF has 
 10. the archive compote packs for the registry holds only files git tracks, none of test/, .github/ or
    imported/ (when compote of ESP-IDF and git are there);
 11. take_report.py takes a price and a shop from an issue, and every offer names a shop of catalog/shops.json;
-12. board_select.py writes a preset for each board in the order named, and leaves a CMakePresets.json of another alone.
+12. board_select.py writes a preset for each board in the order named and default for the current one, changes only default
+   with --current, and leaves a CMakePresets.json of another alone.
 """
 import copy
 import json
@@ -270,8 +271,13 @@ def presets_wrong():
         subprocess.run(command, capture_output=True, check=True)
         written = project / "CMakePresets.json"
         presets = [(item["name"], item["binaryDir"], item["cacheVariables"]["IDF_TARGET"]) for item in json.loads(written.read_text())["configurePresets"]] if written.exists() else None
-        if presets != [("cyd_s028r", "build/cyd_s028r", "esp32"), ("jc4827w543c", "build/jc4827w543c", "esp32s3")]:
+        if presets != [("cyd_s028r", "build/cyd_s028r", "esp32"), ("jc4827w543c", "build/jc4827w543c", "esp32s3"), ("default", "build/cyd_s028r", "esp32")]:
             wrong.append(f"the presets are {presets}")
+        # another current board changes default only
+        subprocess.run([sys.executable, str(ROOT / "tools" / "board_select.py"), "--current", "jc4827w543c", str(project)], capture_output=True, check=True)
+        names = [(item["name"], item["binaryDir"]) for item in json.loads(written.read_text())["configurePresets"]]
+        if names != [("cyd_s028r", "build/cyd_s028r"), ("jc4827w543c", "build/jc4827w543c"), ("default", "build/jc4827w543c")]:
+            wrong.append(f"after --current the presets are {names}")
         for path in project.glob("sdkconfig.defaults.*"):
             path.unlink()
         (project / "CMakePresets.json").write_text('{"version": 3, "configurePresets": []}\n')

@@ -112,16 +112,18 @@ idf.py --preset jc1060p470c build     # another
 
 `board_select.py` writes `sdkconfig.defaults.<board>` for each, with the lines of
 the revision of its chip, and `CMakePresets.json`: a preset for each board, in the
-order named, with its build directory `build/<board>`. Commit those files: a fresh
+order named, with its build directory `build/<board>`, and the preset `default`, a
+copy of the preset of the current board in the same directory. Commit those files: a fresh
 clone reads them before the component is downloaded. Each build directory has its
 own target, `sdkconfig` and lock of the components, so the boards do not disturb
 each other. The files of the catalog are not read directly: the lines of the
 revision are only in what `board_select.py` writes.
 
-ESP-IDF 6 reads the presets. The first one is the current board: `idf.py build`,
-`flash` and `monitor` take it with no more words. `idf.py --preset <board>` or
-`IDF_PRESET=<board>` in the environment takes another, and so does putting its
-preset first. The extension of ESP-IDF for VS Code shows the presets as project
+ESP-IDF 6 reads the presets. `default` is the current board, the first named unless
+`--current <board>` says another: `idf.py build`, `flash` and `monitor` take it with
+no more words. `idf.py --preset <board>` or `IDF_PRESET=<board>` in the environment
+takes another for one command; `board_select.py --current <board> .` makes another
+current and changes nothing but `default`, so the boards keep their order. The extension of ESP-IDF for VS Code shows the presets as project
 configurations: *ESP-IDF: Select Project Configuration* chooses one, and the status
 bar names it. A board does not change in the same build directory: the chip of a
 build directory is fixed in its CMake cache before `CMakeLists.txt` is read, so a

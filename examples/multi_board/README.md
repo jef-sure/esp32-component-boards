@@ -5,12 +5,13 @@ One program built for two boards with different chips, each with its own default
 
 ```sh
 python3 ../../tools/board_select.py cyd_s028r jc8012p4a1c .
-idf.py build                          # ESP-IDF 6: the first board, cyd_s028r, in build/cyd_s028r
+idf.py build                          # ESP-IDF 6: the current board, the first named, in build/cyd_s028r
 idf.py --preset jc8012p4a1c build     # the other, in build/jc8012p4a1c
 ```
 
 `board_select.py` writes `sdkconfig.defaults.cyd_s028r`, `sdkconfig.defaults.jc8012p4a1c` and `CMakePresets.json`, a
-preset for each board in the order named. ESP-IDF 5 does not read presets:
+preset for each board in the order named and `default` for the current one; `board_select.py --current jc8012p4a1c .`
+makes the other current. ESP-IDF 5 does not read presets:
 
 ```sh
 idf.py -B build/cyd_s028r -D SDKCONFIG=build/cyd_s028r/sdkconfig -D BOARD=cyd_s028r build

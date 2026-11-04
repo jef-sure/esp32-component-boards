@@ -137,6 +137,14 @@ bar names it. A board does not change in the same build directory: the chip of a
 build directory is fixed in its CMake cache before `CMakeLists.txt` is read, so a
 line there could not choose another chip.
 
+The page does the same from its kits: *add to the project* on a card puts a kit among the boards of the project, the
+radio beside each makes one current, and *make the project of these boards…* writes them. It writes `selection.json`,
+whose `boards` keep the order they were added and `current` the current one, a board of the program
+`<project>_<board>` for a kit with a project of its own, and `sdkconfig.defaults.<board>` of each with the command
+that makes it in its first line: `board_select.py --again .` makes the rest, the defaults, the presets and the glue.
+Opened from `tools/boards_mcp.py`, the page writes through it and the server runs `--again` itself, so the project
+builds at once; it also starts from the `selection.json` of the project, to add a board.
+
 ESP-IDF 5 does not read presets; each board is named on the command line:
 
 ```sh

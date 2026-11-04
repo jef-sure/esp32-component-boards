@@ -336,7 +336,10 @@ const SelectPage = {
         }));
         // what a kit adds to its board, the board being the title of the card
         const partsOf = (kit) => [...kit.modules, ...(kit.addons ?? [])].map((item) => `${item.count > 1 ? `${item.count} x ` : ''}${item.title}`).join(' + ');
-        return { store, host, fit, boards, others, asked, addOutput, money, numberOf, priceLink, MARKS, filter, groups, roleOf, nameOf, outputsQuestion, firstOfRole, said, sendSaid, talking, stream, partsOf, boardTitle, servedBy, install, local, copied, copyInstall, setAsk, shownBoards, BOARDS_SHOWN };
+        // a project is written into a folder picked in Chromium, or through tools/boards_mcp.py into its own
+        const canWrite = computed(() => host.canOpenFolder || Boolean(store.project?.mode));
+        const chosenHas = (kit) => store.chosen.some((item) => item.headline === kit.headline);
+        return { store, host, fit, boards, others, asked, addOutput, money, numberOf, priceLink, MARKS, filter, groups, roleOf, nameOf, outputsQuestion, firstOfRole, said, sendSaid, talking, stream, partsOf, boardTitle, servedBy, install, local, copied, copyInstall, setAsk, shownBoards, BOARDS_SHOWN, canWrite, chosenHas };
     },
     template: `
         <div class="select" :class="{ talking }">
@@ -428,16 +431,24 @@ const SelectPage = {
                     <h3>{{ t(store.plan.mode === 'create' ? 'A new project in' : 'The project') }} {{ store.plan.folderName }}</h3>
                     <table>
                         <tr v-for="row in store.plan.rows" :key="row.path" :class="row.state">
-                            <td><code>{{ row.path }}</code></td>
+                            <td><code>{{ row.path }}</code><span v-if="row.made" class="hint">&nbsp;· {{ t('made by board_select.py --again') }}</span></td>
                             <td v-if="row.state === 'new'">{{ t('new') }}</td>
                             <td v-else-if="row.state === 'same'">{{ t('the same, left as it is') }}</td>
                             <td v-else-if="row.state === 'kept'">{{ t('it is there, left as it is') }}</td>
+                            <td v-else-if="row.state === 'ours'">{{ t('written here before and not changed since: replaced') }}</td>
+                            <td v-else-if="row.state === 'refused'" class="no">{{ t('not written: {0}', row.why) }}</td>
+                            <td v-else-if="row.state === 'changed'"><label><input type="checkbox" v-model="row.replace"> {{ t('yours, or changed by you: replace it') }}</label></td>
                             <td v-else><label><input type="checkbox" v-model="row.replace"> {{ t('it differs: replace it') }}</label></td>
                         </tr>
                     </table>
-                    <details v-for="row in store.plan.rows.filter((item) => item.state === 'changes')" :key="row.path"><summary>{{ t('{0}: what lies there and what would', row.path) }}</summary>
-                        <div class="both"><pre>{{ row.old }}</pre><pre>{{ row.text }}</pre></div>
+                    <details v-for="row in store.plan.rows.filter((item) => (item.state === 'changes' || item.state === 'changed') && item.old !== null)" :key="row.path"><summary>{{ t('{0}: what lies there and what would', row.path) }}</summary>
+                        <div class="both"><pre>{{ row.old }}</pre><pre>{{ row.text ?? t('what board_select.py --again makes') }}</pre></div>
                     </details>
+                    <fieldset v-if="store.plan.allow && !store.plan.written" class="allow">
+                        <legend>{{ t('The server of the model writes into {0}', store.plan.folderName) }}</legend>
+                        <label><input type="radio" value="once" v-model="store.plan.allow"> {{ t('this time; ask me again next time') }}</label>
+                        <label><input type="radio" value="for ever" v-model="store.plan.allow"> {{ t('for this project from now on') }}</label>
+                    </fieldset>
                     <div v-if="store.plan.cmakeLines" class="locked">{{ t('Put these into CMakeLists.txt yourself, the include of project.cmake among them: they read the board.') }}
                         <pre>{{ store.plan.cmakeLines }}</pre></div>
                     <div v-if="store.plan.requiresLine" class="locked">{{ t('In main/CMakeLists.txt, in idf_component_register: {0}', store.plan.requiresLine) }}</div>
@@ -446,10 +457,19 @@ const SelectPage = {
                     <p v-if="!store.plan.written"><button @click="store.writeProject()">{{ t('write') }}</button> <button @click="store.plan = null">{{ t('cancel') }}</button></p>
                     <div v-else>
                         <p class="good">{{ t('{0} file(s) written, nothing else touched.', store.plan.written.length) }}</p>
-                        <pre>idf.py reconfigure
-python3 managed_components/jef-sure__boards/tools/board_select.py --reset {{ store.plan.board }} .
-idf.py reconfigure build flash monitor</pre>
+                        <pre v-if="store.plan.bridge">idf.py build flash monitor</pre>
+                        <pre v-else>idf.py reconfigure
+python3 managed_components/jef-sure__boards/tools/board_select.py --again .
+idf.py build flash monitor</pre>
+                        <p class="hint">{{ t('idf.py builds {0}; idf.py --preset <board> builds another, and in VS Code ESP-IDF: Select Project Configuration chooses it.', store.plan.current) }}</p>
                     </div>
+                </section>
+                <section v-if="store.chosen.length" class="chosen">
+                    <h3>{{ t('The boards of the project') }}</h3>
+                    <p v-for="item in store.chosen" :key="item.headline">
+                        <label :title="t('the current board: idf.py builds it when no preset is named')"><input type="radio" :value="item.headline" v-model="store.current"> {{ item.kit.headline }}</label>
+                        <button class="drop" :title="t('take it out of the project')" @click="store.chooseKit(item.kit)">×</button></p>
+                    <button v-if="canWrite" @click="store.planProject()">{{ t('make the project of these boards…') }}</button>
                 </section>
                 <p v-if="store.answers.board" class="fixed-board">{{ t('Board pinned: {0}', boardTitle(store.answers.board)) }}
                     <button class="drop" :title="t('free the board')" @click="store.answers.board = undefined">×</button></p>
@@ -475,14 +495,16 @@ idf.py reconfigure build flash monitor</pre>
                         <div v-for="module in kit.wiring" :key="module.use" class="wiring"><b>{{ module.title }}</b>
                             <span v-for="wire in module.lines" :key="wire.line"><code>{{ wire.line }}</code> → {{ wire.to }}</span></div>
                     </details>
-                    <button v-if="host.canOpenFolder && kit.writable" @click="store.planProject(kit)">{{ t('make a project…') }}</button>
+                    <button v-if="kit.writable" :class="{ on: chosenHas(kit) }" :title="t('A board the program is built for: a project may have several.')" @click="store.chooseKit(kit)">{{ t(chosenHas(kit) ? 'in the project' : 'add to the project') }}</button>
+                    <button v-if="canWrite && kit.writable" @click="store.planProject(kit)">{{ t('make a project…') }}</button>
                     <button v-if="store.answers.board !== kit.name" :title="t('Pin this board: the solver and the model try no other.')" @click="store.answers.board = kit.name">{{ t('pin this board') }}</button>
                     <span v-if="kit.imported" class="hint">{{ t('imported: no project until this board is in the catalog') }}</span>
                     <span v-else-if="!kit.writable" class="hint">{{ t('The page writes projects for ESP-IDF only for now.') }}</span>
-                    <span v-else-if="!host.canOpenFolder" class="hint">{{ t('Writing a project into a folder takes Chromium.') }}</span>
+                    <span v-else-if="!canWrite" class="hint">{{ t('Writing a project into a folder takes Chromium, or the page opened from tools/boards_mcp.py.') }}</span>
                     <details v-if="rest.length" class="more"><summary>{{ t('{0} more on this board', rest.length) }}</summary>
                         <p v-for="other in rest" :key="other.headline">+ {{ partsOf(other) || t('nothing more') }} <span class="note">{{ money(other.price) }}</span>
-                            <button v-if="host.canOpenFolder && other.writable" @click="store.planProject(other)">{{ t('make a project…') }}</button></p>
+                            <button v-if="other.writable" :class="{ on: chosenHas(other) }" @click="store.chooseKit(other)">{{ t(chosenHas(other) ? 'in the project' : 'add to the project') }}</button>
+                            <button v-if="canWrite && other.writable" @click="store.planProject(other)">{{ t('make a project…') }}</button></p>
                     </details>
                 </article>
                 <button v-if="boards.length > shownBoards" @click="shownBoards += BOARDS_SHOWN">{{ t('{0} more boards', Math.min(BOARDS_SHOWN, boards.length - shownBoards)) }}</button>

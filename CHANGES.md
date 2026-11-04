@@ -339,6 +339,17 @@ committed, a program that asks by kind.
   tables of programs expect it. Measured: without the support of XMC flash it is 24576, exactly the limit; without the
   timestamps of its log, no smaller. hello_board builds on 6.1 and 5.5.5 and runs on the board ("flash io: qio"), and so
   does the clock, its settings in NVS kept.
+- The page makes a project of several boards (Anton: choose several kits, mark the current one). *add to the project* on
+  a card collects kits; the current one is a radio, a field of its own in `selection.json`, which is format 3: `boards`
+  in the order added, `current`, the answers of the project. It writes a board of the program `<project>_<board>` for a
+  kit with a project, and `sdkconfig.defaults.<board>` of each whose first line is the command; `board_select.py
+  --again .` makes the defaults, the presets (of one named board too) and the glue. Opened from `tools/boards_mcp.py`
+  it writes through the server, which runs `--again`, shows the files that makes, asks once or for ever, and ticks a
+  person's file by what was shown; it starts from the project's `selection.json`. The server serves the files of the
+  skeleton outside editor/, which a new project from it could not fetch before. `board_project.py` writes the same
+  files. Driven in headless Chrome over the bridge: a project of the CYD S028R and the JC4827W543C written and built
+  on 6.1 for both with no command, then opened again and given an ESP32 DevKit. `--again` read the order of the boards
+  from a field `name` that selection.json does not have: it is `board`.
 - A level seen on hardware is a note, not a part: `high_seen_mv` of a chip, the lowest high that drove it on hardware,
   with its trial in `checked`, and the judgement `level_seen_on_hardware`. The WS2812B takes 3.5 V by its datasheet;
   the 3.3 V of an ESP32 drove Anton's garland, so a kit of strips says so and adds no level shifter (Anton: "in

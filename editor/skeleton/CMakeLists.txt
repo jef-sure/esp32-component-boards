@@ -1,5 +1,5 @@
-# @TITLE@. The board is chosen once, by tools/board_select.py of jef-sure/boards, which writes
-# sdkconfig.defaults.board here; a board of this program lies in components/local-boards/.
+# @TITLE@. The boards are chosen by tools/board_select.py of jef-sure/boards: sdkconfig.defaults.<board> of each and
+# CMakePresets.json, whose preset sets BOARD; a board of this program lies in components/local-boards/.
 cmake_minimum_required(VERSION 3.22)
 # BOARD=<board> builds with sdkconfig.defaults.<board>, which board_select.py writes for several boards; one board
 # is sdkconfig.defaults.board. A -D SDKCONFIG_DEFAULTS=... on the command line wins over both.

@@ -189,7 +189,7 @@ class Project:
         import board_select
 
         boards = board_select.boards_of(self.root)
-        if len(boards) > 1:
+        if boards:
             # stdout of the bridge is the channel of MCP: what the tool says goes to stderr
             with contextlib.redirect_stdout(sys.stderr):
                 board_select.seed_locks(self.root, boards)

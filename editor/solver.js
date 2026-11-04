@@ -3,6 +3,7 @@
 'use strict';
 
 const KIT_FORMAT = { format: 'jef-sure/boards', format_version: 2 };
+const SELECTION_VERSION = 3; // selection.json with the kits of several boards and the current one
 const CHIP_HIGH_MV = 3300; // what a pin of an ESP32 gives as high
 const MOST_MODULES = 6; // the parts tried for one need: more make the search longer and the list no clearer
 const OWN_PART = 'own_part'; // the role of a part of the person's own, which the catalog has not
@@ -1429,16 +1430,24 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
     }
 
     // What a project keeps of how it was chosen, so that the choice can be read and made again.
-    function selectionOf(kit, kits, answers, currency) {
-        const others = kits.filter((item) => item !== kit);
+    // selection.json of a project: the kits chosen, each by the name board_select.py takes, in the order they were added,
+    // and the current one apart, so the order stays as it is when another becomes current.
+    function selectionOf(chosen, current, kits, answers, currency) {
+        const kitsChosen = new Set(chosen.map((item) => item.kit));
+        const others = kits.filter((item) => !kitsChosen.has(item));
         return {
-            ...KIT_FORMAT,
+            format: KIT_FORMAT.format,
+            format_version: SELECTION_VERSION,
             currency,
             answers,
-            board: kit.name,
-            modules: kit.modules.map(({ name, count, on }) => ({ name, count, on })),
-            libraries: kit.libraries.map(({ name, version }) => ({ name, version })),
-            says: kit.says.map(({ level, text, judgement }) => ({ level, text, ...(judgement ? { judgement } : {}) })),
+            boards: chosen.map(({ kit, board }) => ({
+                board,
+                ...(board !== kit.name ? { base: kit.name } : {}),
+                modules: kit.modules.map(({ name, count, on }) => ({ name, count, on })),
+                libraries: kit.libraries.map(({ name, version }) => ({ name, version })),
+                says: kit.says.map(({ level, text, judgement }) => ({ level, text, ...(judgement ? { judgement } : {}) })),
+            })),
+            current,
             others: others.filter((item) => item.fits).map((item) => item.headline),
             rejected: others.filter((item) => !item.fits).map((item) => ({ board: item.name, why: item.says.filter((line) => line.level === 'no').map((line) => line.text) })),
         };

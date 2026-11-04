@@ -14,6 +14,7 @@ const FORMAT = { format: 'jef-sure/boards', format_version: 2 };
 const NAME = /^[a-z0-9_]+$/;
 const REPOSITORY_ONLY = /^(\.git|\.gitignore|\.gitattributes|README.*|LICENSE.*)$/i; // a folder with only these is still empty for a new project
 const LOCAL_BOARD = (name) => `components/local-boards/boards/${name}/board.json`;
+const STUB = (board) => `# board_select.py ${board}`; // the first line of the defaults of a board: the command that makes them
 const SKELETON = 'skeleton/files.json'; // the files of a new project, which tools/board_project.py writes too
 const TREE_ORDER = ['mcu', 'power', 'buses', 'devices', 'modules', 'connectors', 'shared_pins', 'display_groups', 'price', 'checked'];
 
@@ -109,29 +110,34 @@ function librariesText(kit) {
 
 const dependencyOf = (library) => (library.registry ? `  ${library.name}: "^${library.version}"` : `  ${library.name}:\n    git: ${library.url}`);
 
-// The lines of the skeleton's CMakeLists.txt that read the board and keep the lock in the build directory, for a program of its own.
+// The lines of the skeleton's CMakeLists.txt that read the board and give each board its lock, for a program of its own.
 async function cmakeSnippet() {
     const answer = await fetch('skeleton/CMakeLists.txt');
     if (!answer.ok) return null;
     const lines = (await answer.text()).split('\n');
     const first = lines.findIndex((line) => line.startsWith('# BOARD='));
-    const last = lines.findIndex((line) => line.includes('DEPENDENCIES_LOCK'));
-    return first >= 0 && last > first ? lines.slice(first, last + 1).join('\n') : null;
+    const lock = lines.findIndex((line) => line.includes('DEPENDENCIES_LOCK'));
+    const last = lines.findIndex((line, at) => at > lock && line.trim() === 'endif()');
+    return first >= 0 && lock > first && last > lock ? lines.slice(first, last + 1).join('\n') : null;
 }
 
-// The files of a new project: the templates of the page, and the smallest program of the component.
-async function skeletonOf(kit, name, board, version) {
+// The section of the README of a project for one of its kits: the board, what it takes, its wires and its libraries.
+function kitSection(kit, board) {
     const parts = [`- ${kit.title}`, ...kit.modules.map((item) => `- ${item.count} x ${item.title}, on ${item.on.toUpperCase()}`)];
     const notes = kit.says.filter((line) => line.level === 'do').map((line) => `- ${line.text}`);
+    return [`## ${kit.title}: \`${board}\``, '', '### What it takes', '', ...parts, ...notes, '', '### The wires', '', wiresText(kit), '', '### The libraries', '', librariesText(kit)].join('\n');
+}
+
+// The files of a new project for its kits, each [kit, board], board the name board_select.py takes: the templates of the
+// page, and the smallest program of the component.
+async function skeletonOf(chosen, current, name, version) {
     const fill = {
         '@NAME@': name,
         '@TITLE@': name,
-        '@BOARD_TITLE@': kit.title,
-        '@BOARD@': board,
-        '@PARTS@': [...parts, ...notes].join('\n'),
-        '@WIRES@': wiresText(kit),
-        '@LIBRARIES@': librariesText(kit),
-        '@DEPENDENCIES@': kit.libraries.filter((library) => library.own).map(dependencyOf).join('\n'),
+        '@KITS@': chosen.map(([kit, board]) => kitSection(kit, board)).join('\n\n'),
+        '@CURRENT@': current,
+        // what the kits take that the program names itself, once
+        '@DEPENDENCIES@': [...new Map(chosen.flatMap(([kit]) => kit.libraries.filter((library) => library.own)).map((library) => [library.name, dependencyOf(library)])).values()].join('\n'),
         '@COMPONENT_VERSION@': version,
     };
     const files = {};
@@ -172,6 +178,10 @@ const useEditor = Pinia.defineStore('editor', {
         applied: 0, // the last message of the model whose edits are on the canvas
         installed: null, // the versions of the platforms on the computer, from the server of the model
         description: '', // what the model wrote in the end: a project gets it
+        chosen: [], // the kits of the project, in the order they were added: [{ headline, kit }]
+        current: null, // the headline of the kit idf.py builds when no preset is named
+        wanted: null, // selection.json of a folder opened, until the kits it names are counted
+        project: null, // the folder tools/boards_mcp.py may write a project into: { path, name, mode, for_ever }
     }),
     getters: {
         entry(state) {
@@ -267,6 +277,13 @@ const useEditor = Pinia.defineStore('editor', {
             if (!this.agent) return;
             this.listen(0);
             this.agentCall('installed').then((versions) => (this.installed = versions)).catch(() => {});
+            // the project of the server, when it has one with a selection.json: the page starts where it was left
+            this.agentCall('project').then(async (project) => {
+                this.project = project;
+                if (project.mode !== 'update') return;
+                const saved = await this.agentCall('project/file?path=selection.json').catch(() => null);
+                if (saved?.text) this.takeSelection(saved.text);
+            }).catch(() => {});
         },
         async agentCall(path, options = {}) {
             const answer = await fetch(`/agent/${path}`, { ...options, headers: { Authorization: `Bearer ${this.agent}` } });
@@ -341,6 +358,7 @@ const useEditor = Pinia.defineStore('editor', {
                 if (data.id !== library.asked) return;
                 this.kits = data.kits;
                 this.solving = false;
+                this.restoreChosen();
                 this.tellAgent();
             };
             library.worker.onerror = () => {
@@ -358,6 +376,7 @@ const useEditor = Pinia.defineStore('editor', {
             const answers = { ...Object.fromEntries(kept), currency: this.currency, ...(this.installed ? { installed: copied(this.installed) } : {}) };
             if (!library.worker) {
                 this.kits = library.solver.solve(answers);
+                this.restoreChosen();
                 return;
             }
             const message = { id: ++library.asked, answers, language: this.language };
@@ -373,7 +392,25 @@ const useEditor = Pinia.defineStore('editor', {
                 console.error('postMessage to the solver:', error);
                 this.solving = false;
                 this.kits = library.solver.solve(answers);
+                this.restoreChosen();
             }
+        },
+        // A kit added to the project, or taken out of it; the first one added is current until another is made so.
+        chooseKit(kit) {
+            const at = this.chosen.findIndex((item) => item.headline === kit.headline);
+            if (at >= 0) this.chosen.splice(at, 1);
+            else this.chosen.push({ headline: kit.headline, kit: copied(kit) });
+            if (!this.chosen.some((item) => item.headline === this.current)) this.current = this.chosen[0]?.headline ?? null;
+        },
+        // The kits selection.json of a folder names, found among those counted for its answers: by the board and the modules.
+        restoreChosen() {
+            if (!this.wanted) return;
+            const key = (board, modules) => `${board}+${modules.map((item) => item.name).sort().join(',')}`;
+            const counted = new Map(this.kits.filter((kit) => kit.fits).map((kit) => [key(kit.name, kit.modules), kit]));
+            const found = this.wanted.boards.map((entry) => ({ entry, kit: counted.get(key(entry.base ?? entry.board, entry.modules)) })).filter((item) => item.kit);
+            this.chosen = found.map(({ kit }) => ({ headline: kit.headline, kit: copied(kit) }));
+            this.current = found.find(({ entry }) => entry.board === this.wanted.current)?.kit.headline ?? this.chosen[0]?.headline ?? null;
+            this.wanted = null;
         },
         async start() {
             this.startWorker();
@@ -389,13 +426,18 @@ const useEditor = Pinia.defineStore('editor', {
         async openPicked(list) {
             await this.run(async () => this.take(await host.readPicked(list)));
         },
+        // selection.json of a project: its answers, and its kits when they are counted again
+        takeSelection(selection) {
+            const saved = JSON.parse(selection);
+            this.answers = { outputs: [], ...saved.answers };
+            this.currency = saved.currency;
+            this.page = 'select';
+            // a selection.json before format 3 had one kit at its top
+            this.wanted = saved.boards ? { boards: saved.boards, current: saved.current } : { boards: [{ board: saved.board, modules: saved.modules ?? [] }], current: saved.board };
+            this.askKits();
+        },
         take({ local, files, selection }) {
-            if (selection) {
-                const saved = JSON.parse(selection);
-                this.answers = { outputs: [], ...saved.answers };
-                this.currency = saved.currency;
-                this.page = 'select';
-            }
+            if (selection) this.takeSelection(selection);
             if (!local) {
                 this.load(files);
                 return;
@@ -461,40 +503,89 @@ const useEditor = Pinia.defineStore('editor', {
             else delete node[last];
             this.changed();
         },
-        // What a project gets: the folder decides. Nothing is written here.
-        async planProject(kit) {
+        // What a project gets: the folder decides. Nothing is written here. The kits are one taken from its card, or those
+        // added to the project; each gets the name board_select.py takes, a board of the catalog as it is, a kit with modules a
+        // board of the program <project>_<board>, and a file of defaults whose first line is the command that makes it.
+        async planProject(single) {
             await this.run(async () => {
                 const name = this.projectName;
                 if (!NAME.test(name)) throw new Error('a project name is lowercase letters, digits and _');
-                if (kit.project && library.catalog.boards[name]) throw new Error(`the catalog has a board ${name}: give the project another name`);
-                const { folder, names } = await host.pickProject();
-                const mode = names.includes('CMakeLists.txt') ? 'update' : names.every((item) => REPOSITORY_ONLY.test(item)) ? 'create' : null;
-                if (!mode) throw new Error(`${folder.name}: not empty and not a program: nothing is written there`);
-                const files = {};
-                const board = kit.project ? name : kit.name;
-                if (kit.project) files[LOCAL_BOARD(name)] = `${catalogJson({ ...kit.project, name, title: kit.modules.length ? `${kit.title} with ${kit.modules.map((item) => item.title).join(', ')}` : kit.title })}\n`;
-                if (mode === 'create') Object.assign(files, await skeletonOf(kit, name, board, this.installed?.component ?? 'main'));
-                if (this.description) files[DESCRIPTION] = `${this.description.trim()}\n`;
-                files[SELECTION] = `${JSON.stringify(library.solver.selectionOf(kit, this.kits, copied(this.answers), this.currency), null, 4)}\n`;
-                const rows = [];
-                for (const [path, text] of Object.entries(files)) {
-                    const old = await host.readIn(folder, path);
-                    const state = old === null ? 'new' : old === text ? 'same' : path === LOCAL_BOARD(name) || path === SELECTION || path === DESCRIPTION ? 'changes' : 'kept';
-                    rows.push({ path, text, old, state, replace: false });
+                const kits = single ? [single] : this.chosen.map((item) => item.kit);
+                if (!kits.length) throw new Error('no kit in the project: add one from its card');
+                const taken = new Set();
+                const chosen = kits.map((kit) => {
+                    const base = kit.project ? `${name}_${kit.name}` : kit.name;
+                    let board = base;
+                    for (let n = 2; taken.has(board); ++n) board = `${base}_${n}`;
+                    taken.add(board);
+                    if (kit.project && library.catalog.boards[board]) throw new Error(`the catalog has a board ${board}: give the project another name`);
+                    return [kit, board];
+                });
+                const currentKit = single ?? this.chosen.find((item) => item.headline === this.current)?.kit ?? kits[0];
+                const current = chosen.find(([kit]) => kit === currentKit)?.[1] ?? chosen[0][1];
+                // through tools/boards_mcp.py into its folder, or into one picked here
+                const bridge = this.project?.mode ? this.project : null;
+                let folder = null;
+                let mode = bridge?.mode;
+                if (!bridge) {
+                    const picked = await host.pickProject();
+                    folder = picked.folder;
+                    mode = picked.names.includes('CMakeLists.txt') ? 'update' : picked.names.every((item) => REPOSITORY_ONLY.test(item)) ? 'create' : null;
+                    if (!mode) throw new Error(`${folder.name}: not empty and not a program: nothing is written there`);
                 }
-                const manifest = mode === 'update' ? await host.readIn(folder, 'main/idf_component.yml') : null;
-                // a program of its own also needs the CMake that reads the board and main naming the component: shown, not written
-                const project = mode === 'update' ? await host.readIn(folder, 'CMakeLists.txt') : null;
-                const main = mode === 'update' ? await host.readIn(folder, 'main/CMakeLists.txt') : null;
-                const cmakeLines = mode === 'update' && !project?.includes('sdkconfig.defaults.board') ? await cmakeSnippet() : null;
+                const read = async (path) => (bridge ? (await this.agentCall(`project/file?path=${encodeURIComponent(path)}`).catch(() => null))?.text ?? null : host.readIn(folder, path));
+                const files = {};
+                for (const [kit, board] of chosen) {
+                    if (kit.project) files[LOCAL_BOARD(board)] = `${catalogJson({ ...kit.project, name: board, title: kit.modules.length ? `${kit.title} with ${kit.modules.map((item) => item.title).join(', ')}` : kit.title })}\n`;
+                    files[`sdkconfig.defaults.${board}`] = `${STUB(board)}\n# The page wrote this line only: board_select.py --again . makes the defaults of the board.\n`;
+                }
+                if (mode === 'create') Object.assign(files, await skeletonOf(chosen, current, name, this.installed?.component ?? 'main'));
+                if (this.description) files[DESCRIPTION] = `${this.description.trim()}\n`;
+                files[SELECTION] = `${JSON.stringify(library.solver.selectionOf(chosen.map(([kit, board]) => ({ kit, board })), current, this.kits, copied(this.answers), this.currency), null, 4)}\n`;
+                const rows = [];
+                if (bridge) {
+                    // the server says what lies there and what board_select.py --again makes after these files
+                    const planned = await this.agentCall('project/plan', { method: 'POST', body: JSON.stringify({ files }) });
+                    if (planned.failed) throw new Error(`board_select.py --again: ${planned.failed}`);
+                    for (const [path, state] of Object.entries({ ...planned.files, ...planned.made })) {
+                        rows.push({ path, text: files[path] ?? null, old: state.state === 'changed' ? await read(path) : null, state: state.state, why: state.why, digest: state.digest, made: path in planned.made, replace: false });
+                    }
+                } else {
+                    for (const [path, text] of Object.entries(files)) {
+                        const old = await host.readIn(folder, path);
+                        // a file of defaults made from its first line is that file
+                        const made = path.startsWith('sdkconfig.defaults.') && old?.startsWith(`${text.split('\n')[0]}\n`);
+                        const state = old === null ? 'new' : old === text || made ? 'same' : path === SELECTION || path === DESCRIPTION || path.startsWith('components/local-boards/') ? 'changes' : 'kept';
+                        rows.push({ path, text, old, state, replace: false });
+                    }
+                }
+                const manifest = mode === 'update' ? await read('main/idf_component.yml') : null;
+                // a program of its own also needs the CMake that reads the boards and main naming the component: shown, not written
+                const project = mode === 'update' ? await read('CMakeLists.txt') : null;
+                const main = mode === 'update' ? await read('main/CMakeLists.txt') : null;
+                const cmakeLines = mode === 'update' && !project?.includes('sdkconfig.defaults.${BOARD}') ? await cmakeSnippet() : null;
                 const requiresLine = mode === 'update' && main && !main.includes('jef-sure__boards') ? 'PRIV_REQUIRES jef-sure__boards' : null;
-                this.plan = { folder: Vue.markRaw(folder), folderName: folder.name, mode, rows, board, written: null, cmakeLines, requiresLine, manifestLines: mode === 'update' ? [...(manifest?.includes(COMPONENT_NAME) ? [] : [COMPONENT_LINES(this.installed?.component ?? 'main')]), ...kit.libraries.filter((library) => library.own && !manifest?.includes(library.name)).map(dependencyOf)] : [] };
+                const own = [...new Map(kits.flatMap((kit) => kit.libraries.filter((item) => item.own)).map((item) => [item.name, item])).values()];
+                this.plan = { folder: folder && Vue.markRaw(folder), bridge: Boolean(bridge), folderName: bridge ? bridge.path : folder.name, mode, rows, files, current, boards: chosen.map(([, board]) => board), written: null,
+                    allow: bridge && !bridge.for_ever ? 'once' : null, cmakeLines, requiresLine,
+                    manifestLines: mode === 'update' ? [...(manifest?.includes(COMPONENT_NAME) ? [] : [COMPONENT_LINES(this.installed?.component ?? 'main')]), ...own.filter((item) => !manifest?.includes(item.name)).map(dependencyOf)] : [] };
             });
         },
         // Writes what is new and what was ticked. Nothing else is touched and nothing is removed.
         async writeProject() {
             await this.run(async () => {
                 const plan = this.plan;
+                if (plan.bridge) {
+                    // a tick names what the list showed: a file changed again since is refused by the server
+                    const replace = Object.fromEntries(plan.rows.filter((row) => row.state === 'changed' && row.replace).map((row) => [row.path, row.digest]));
+                    const done = await this.agentCall('project/write', { method: 'POST', body: JSON.stringify({ files: plan.files, replace, ...(plan.allow ? { allow: plan.allow } : {}) }) });
+                    if (done.failed) throw new Error(`board_select.py --again: ${done.failed}`);
+                    const refused = Object.keys(done.refused ?? {});
+                    if (refused.length) throw new Error(`nothing is written: ${refused.join(', ')} changed after the list was made or may not be written; make the list again`);
+                    if (plan.allow === 'for ever') this.project.for_ever = true;
+                    plan.written = done.written;
+                    return;
+                }
                 const chosen = plan.rows.filter((row) => row.state === 'new' || (row.state === 'changes' && row.replace));
                 // the folder may have changed since the list was made: a file that appeared is somebody's
                 for (const row of chosen) {

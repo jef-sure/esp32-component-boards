@@ -35,6 +35,8 @@ PROTOCOL = "2025-06-18"
 NAME = "boards"
 VERSION = "0.0.1"
 SERVED = ("/editor/", "/catalog/", "/imported/", "/imported-shops/")
+# the files a new project takes from outside editor/, as editor/skeleton/files.json names them: those and no others of their folders
+SKELETON_FILES = {posixpath.normpath(f"/editor/{source}") for source, _ in json.loads((ROOT / "editor" / "skeleton" / "files.json").read_text())["files"]}
 LONGEST_BODY = 4 * 1024 * 1024
 LONGEST_POLL_S = 25
 LONGEST_WAIT_S = 120
@@ -164,7 +166,7 @@ def handler_of(desk, token, port, project=None):
                 return self.answer(200, {"text": path.read_text(errors="replace")}) if path.is_file() else self.answer(404)
             # the path as it will be read, not as it was sent: /editor/../CLAUDE.md is no file of the page
             clean = posixpath.normpath(urllib.parse.unquote(address.path))
-            if not f"{clean}/".startswith(SERVED):
+            if not f"{clean}/".startswith(SERVED) and clean not in SKELETON_FILES:
                 return self.answer(404)
             self.path = clean + ("/" if address.path.endswith("/") else "")
             return super().do_GET()

@@ -289,7 +289,7 @@ def presets_wrong():
         # the files a page writes, the command in their first line and the order in selection.json: --again makes the rest
         for path in project.glob("sdkconfig.defaults.*"):
             path.write_text(f"# board_select.py {path.name.split('.')[-1]}\n")
-        (project / "selection.json").write_text('{"boards": [{"name": "jc4827w543c"}, {"name": "cyd_s028r"}], "current": "cyd_s028r"}')
+        (project / "selection.json").write_text('{"boards": [{"board": "jc4827w543c"}, {"board": "cyd_s028r"}], "current": "cyd_s028r"}')
         subprocess.run([sys.executable, str(ROOT / "tools" / "board_select.py"), "--again", str(project)], capture_output=True, check=True)
         names = [(item["name"], item["binaryDir"]) for item in json.loads(written.read_text())["configurePresets"]]
         if names != [("jc4827w543c", "build/jc4827w543c"), ("cyd_s028r", "build/cyd_s028r"), ("default", "build/cyd_s028r")] or "CONFIG_IDF_TARGET" not in (project / "sdkconfig.defaults.cyd_s028r").read_text():
@@ -412,7 +412,8 @@ def bridge_problems():
         link = json.loads(asked(3, "tools/call", {"name": "page_link"})["content"][0]["text"])["link"]
         base = link.split("/editor/")[0]
         for path, headers, wanted in (("/editor/index.html", {}, 200), ("/agent/messages?seen=0", {}, 401), ("/editor/index.html", {"Host": "evil.example"}, 403), ("/CLAUDE.md", {}, 404),
-                                      ("/.git/config", {}, 404), ("/editor/../CLAUDE.md", {}, 404), ("/editor/%2e%2e/CLAUDE.md", {}, 404), ("/tools/boards_mcp.py", {}, 404)):
+                                      ("/.git/config", {}, 404), ("/editor/../CLAUDE.md", {}, 404), ("/editor/%2e%2e/CLAUDE.md", {}, 404), ("/tools/boards_mcp.py", {}, 404),
+                                      ("/examples/hello_board/main/main.c", {}, 200), ("/examples/hello_board/CMakeLists.txt", {}, 404)):
             if status(path, **headers) != wanted:
                 problems.append(f"the server of the page: {path} {headers}: not {wanted}")
         # a body of the wrong form is refused, and the tools still answer after it
@@ -458,7 +459,7 @@ def project_problems(base, own, project, config):
             return error.code, None
 
     problems = []
-    files = {"CMakeLists.txt": "project(garland)\n", "selection.json": json.dumps({"boards": [{"name": "jc4827w543c"}, {"name": "cyd_s028r"}], "current": "cyd_s028r"}),
+    files = {"CMakeLists.txt": "project(garland)\n", "selection.json": json.dumps({"boards": [{"board": "jc4827w543c"}, {"board": "cyd_s028r"}], "current": "cyd_s028r"}),
              "sdkconfig.defaults.jc4827w543c": "# board_select.py jc4827w543c\n", "sdkconfig.defaults.cyd_s028r": "# board_select.py cyd_s028r\n",
              "sdkconfig.defaults.esp32p4": "CONFIG_PARTITION_TABLE_CUSTOM=y\n"}
     if got("/agent/project")[1] != {"path": str(project.resolve()), "name": "garland", "mode": "create", "for_ever": False}:

@@ -217,7 +217,8 @@ def again(parser, project):
         print(f"{path}: {board}, {target}, again")
         if path.name != "sdkconfig.defaults.board":
             targets[board] = target
-    if len(targets) > 1:
+    # a file named by its board is one of the boards of the presets, one of them alone too, as the page writes it
+    if targets:
         boards, current = order_of(project, list(targets))
         command = "board_select.py --again ."  # the same wherever the project lies
         (project / PRESETS).write_text(presets_text(project, boards, [targets[board] for board in boards], current, command))
@@ -232,7 +233,7 @@ def order_of(project, boards):
     """The order of several boards and the current one: as selection.json of the page has them, else as the presets of the
     project had them, else by name and the first."""
     chosen = project / "selection.json"
-    listed = [entry.get("name") for entry in json.loads(chosen.read_text()).get("boards", [])] if chosen.exists() else []
+    listed = [entry.get("board") for entry in json.loads(chosen.read_text()).get("boards", [])] if chosen.exists() else []
     current = json.loads(chosen.read_text()).get("current") if chosen.exists() else None
     presets = project / PRESETS
     if not listed and presets.exists() and VENDOR in json.loads(presets.read_text()).get("vendor", {}):

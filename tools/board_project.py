@@ -10,7 +10,8 @@ The component comes from git at the commit of this checkout. No solver runs: sel
 kit the page chose is taken back with --selection. Then, in DIR, as its README says:
 
     idf.py reconfigure
-    python3 managed_components/jef-sure__boards/tools/board_select.py --reset BOARD [--module MODULE] .
+    python3 managed_components/jef-sure__boards/tools/board_select.py --again .
+    idf.py build
 """
 
 import argparse
@@ -80,7 +81,9 @@ def main():
         parser.error("--board or --selection, one of them")
     if args.selection:
         chosen = json.loads(args.selection.read_text())
-        args.board, args.module = chosen["board"], [module["name"] for module in chosen.get("modules") or ()]
+        # the current kit of several; a selection.json before format 3 held one kit at its top
+        kit = next((item for item in chosen["boards"] if item["board"] == chosen.get("current")), chosen["boards"][0]) if "boards" in chosen else chosen
+        args.board, args.module = kit.get("base", kit["board"]), [module["name"] for module in kit.get("modules") or ()]
     name = args.name or args.dir.resolve().name
     if not NAME.match(name):
         raise SystemExit(f"{name}: a project name is lowercase letters, digits and _: give one with --name")
@@ -93,14 +96,14 @@ def main():
         raise SystemExit(f"{err}")
     parts = [f"- {board['title']}", *(f"- 1 x {module['title']}, on {', '.join(boards_gen.bus_kinds(module)).upper()}" for module in modules)]
     started = libraries([board, *modules])
+    # the section of the kit in the README, as the page writes one for each kit
+    section = "\n".join([f"## {board['title']}: `{args.board}`", "", "### What it takes", "", *parts, "", "### The wires", "", wires(board, modules), "",
+                         "### The libraries", "", libraries_text(started)])
     fill = {
         "@NAME@": name,
         "@TITLE@": name,
-        "@BOARD_TITLE@": board["title"],
-        "@BOARD@": args.board,
-        "@PARTS@": "\n".join(parts),
-        "@WIRES@": wires(board, modules),
-        "@LIBRARIES@": libraries_text(started),
+        "@KITS@": section,
+        "@CURRENT@": args.board,
         "@DEPENDENCIES@": "",
         "@COMPONENT_VERSION@": commit(),
     }
@@ -110,11 +113,16 @@ def main():
         for mark, value in fill.items():
             text = text.replace(mark, value)
         files[target] = text
-    selection = {"format": "jef-sure/boards", "format_version": 2, "currency": "EUR", "answers": {}, "board": args.board,
-                 "modules": [{"name": module["name"], "count": 1, "on": ", ".join(boards_gen.bus_kinds(module))} for module in modules],
-                 "libraries": [{"name": item["name"], "version": item["version"]} for item in started],
-                 "says": [{"level": "note", "text": BY_HAND}], "others": [], "rejected": []}
+    selection = {"format": "jef-sure/boards", "format_version": 3, "currency": "EUR", "answers": {},
+                 "boards": [{"board": args.board,
+                             "modules": [{"name": module["name"], "count": 1, "on": ", ".join(boards_gen.bus_kinds(module))} for module in modules],
+                             "libraries": [{"name": item["name"], "version": item["version"]} for item in started],
+                             "says": [{"level": "note", "text": BY_HAND}]}],
+                 "current": args.board, "others": [], "rejected": []}
     files[SELECTION] = json.dumps(selection, indent=4) + "\n"
+    # the first line is the command that makes the defaults of the board, as the page writes it: board_select.py --again does
+    module_args = "".join(f" --module {module}" for module in args.module)
+    files[f"sdkconfig.defaults.{args.board}"] = f"# board_select.py {args.board}{module_args}\n# board_project.py wrote this line only: board_select.py --again . makes the defaults of the board.\n"
     for target in files:
         if (args.dir / target).exists():
             raise SystemExit(f"{args.dir / target}: there already: nothing is written")
@@ -123,8 +131,7 @@ def main():
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(text)
         print(f"{path}: written")
-    module_args = "".join(f" --module {module}" for module in args.module)
-    print(f"Now, in {args.dir}: idf.py reconfigure, then\n    python3 managed_components/jef-sure__boards/tools/board_select.py --reset {args.board}{module_args} .")
+    print(f"Now, in {args.dir}: idf.py reconfigure, then\n    python3 managed_components/jef-sure__boards/tools/board_select.py --again .\nand idf.py build")
     return 0
 
 

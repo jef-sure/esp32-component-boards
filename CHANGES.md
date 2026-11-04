@@ -272,7 +272,21 @@ committed, a program that asks by kind.
 - A reported price is read as it is written in one country or another: 3,76 and 1.234,56 as in Germany, 1,234.56,
   1 234,56, 1'234.56, 12,34,567 as in India, with the sign or the code of its currency when it is the one of the form.
   One mark before three digits, as 1,200, reads two ways, 1.2 and 1200, and is refused with both. The shop is written
-  as the catalog writes it, AliExpress for aliexpress. The workflow runs
+  as the catalog writes it, AliExpress for aliexpress.
+- `catalog/shops.json` names each shop once, by a key, with its title, its domains, other names and its `kind`: `store`,
+  `marketplace` (AliExpress, Amazon, eBay) or `classifieds` (Kleinanzeigen, Quoka). The `shop` of an offer is a key of
+  it, or absent when the source names none ("not named" is gone); `seller` names who sold on a marketplace, and the
+  sellers written into a `source` moved there. A report finds its shop by an address (`https://de.aliexpress.com/...`),
+  a name or a name close to one; a name of two shops, as `amazon`, is refused. A shop the list lacks is added with no
+  title, and the pull request asks for it. The two Amazon offers are of amazon.de (Anton), the two of eBay were searches
+  on ebay.de. The field of the form for a pack is "Pack of", beside the new "Seller" (7c, Anton).
+- The offers of one shop at one quantity are reports of its sellers, kept all: the page and `board_bom.py` count their
+  median, the low and the high apart, then the cheapest shop and the dearest. Before, the lowest of all offers was the
+  price, so one cheap report moved it, and each report made the range wider (Anton). The page counts a price once.
+- Two displays as one screen, tried on a board: the DotView clock (two SSD1351 on SPI2 and SPI3, `display_groups`)
+  showed one picture across both, read its photoresistor on the pin of the data while the screens lit it, and its button.
+  The y of each panel in `test/format/good/dotview_clock.json` is turned: the clock's own program has an older copy
+  of DGX, which scanned the SSD1351 from the other end. The workflow runs
   once for an issue (the form gave two runs and two comments), runs again when the issue is edited, and a refused
   report gets its reason alone, not the output of check_format (issue 3).
 - The ESP32-C3-Zero and the ESP32-S3-Zero have their USB-C as a part, `usb` with `d_minus` and `d_plus`, from their

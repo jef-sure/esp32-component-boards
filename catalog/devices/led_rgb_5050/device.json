@@ -9,7 +9,7 @@
     "notes": "Three LEDs in one package, each on a pin of its own. It is here for its price by the piece: what an RGB LED of a board that nobody asked for weighs.",
     "price": {
         "lcsc": {
-            "shop": "LCSC",
+            "shop": "lcsc",
             "currency": "USD",
             "range": [0.047, 0.047],
             "qty": 10,
@@ -17,7 +17,7 @@
             "source": "C2874125, NationStar NH-5050RGBA-SH: search results of lcsc.com gave 0.024 to 0.047 for 10 to 4500 pieces; the high end is taken for the least quantity and the low for the largest, as the tiers of LCSC go down."
         },
         "lcsc_4500": {
-            "shop": "LCSC",
+            "shop": "lcsc",
             "currency": "USD",
             "range": [0.024, 0.024],
             "qty": 4500,

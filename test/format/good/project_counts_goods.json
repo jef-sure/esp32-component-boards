@@ -7,7 +7,7 @@
   "extends": "cyd_s028r",
   "price": {
     "paid": {
-      "shop": "a local shop",
+      "shop": "a_local_shop",
       "currency": "EUR",
       "range": [
         9,
@@ -25,7 +25,7 @@
       "tariff": "731815",
       "price": {
         "box": {
-          "shop": "AliExpress",
+          "shop": "aliexpress",
           "currency": "EUR",
           "range": [
             0.05,

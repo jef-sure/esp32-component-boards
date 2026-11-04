@@ -12,7 +12,7 @@
     "notes": ["Stronger in the field than the PN532 module, from experience. The range is a guide from the comparison of Anton, not measured."],
     "price": {
         "aliexpress": {
-            "shop": "AliExpress",
+            "shop": "aliexpress",
             "currency": "EUR",
             "range": [5, 5],
             "date": "2026-11-01",

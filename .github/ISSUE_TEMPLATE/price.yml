@@ -14,8 +14,14 @@ body:
     id: shop
     attributes:
       label: Shop
+      description: Its name or its address, such as aliexpress.com or LCSC.
     validations:
       required: true
+  - type: input
+    id: seller
+    attributes:
+      label: Seller
+      description: On a marketplace such as AliExpress, eBay or Amazon, the seller or store, when you know it.
   - type: input
     id: currency
     attributes:
@@ -33,5 +39,5 @@ body:
   - type: input
     id: qty
     attributes:
-      label: Sold by
+      label: Pack of
       description: How many in a pack, when it is not sold by one.

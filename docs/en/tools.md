@@ -109,7 +109,7 @@ replaced. The command it prints next is the one in the README of the project.
 
 ```sh
 python3 tools/board_bom.py my_board --project .                        # one product
-python3 tools/board_bom.py my_board --project . --units 10 --shop AliExpress  # ten, at the prices of one shop
+python3 tools/board_bom.py my_board --project . --units 10 --shop aliexpress  # ten, at the prices of one shop
 python3 tools/board_bom.py my_board --project . --units 10 --duty 3 EUR  # with a duty per tariff code
 python3 tools/board_bom.py my_board --project . --csv my_board.csv      # the lines for a spreadsheet
 ```
@@ -121,7 +121,8 @@ over its base board.
 
 Prices are ranges, so a total is a range. A line with no price is named, and the total then
 reads "at least". Currencies are not converted. For a quantity the tool takes, per shop, the
-offer of the largest `qty` that the quantity reaches.
+offers of the largest `qty` that the quantity reaches, and of several the median, as the page does. `--shop` takes a shop of `catalog/shops.json` by its name, its
+title or its address, as a report does.
 
 Delivery and duty depend on the order, so they are not in the data. `--duty` adds an amount per
 tariff code: the fewest codes are those known, in one parcel; the most is every line in a parcel
@@ -178,7 +179,12 @@ issue comes from anyone, so it is only read as fields, and `.github/workflows/re
 workflow opens a pull request, and a person merges it; a refused report gets a comment with the reason, and an edit of the
 issue is read again. A price is read as it is written in one country or another: 3.76, 3,76, 1,234.56, 1.234,56,
 1 234,56, 1'234.56, 12,34,567, with the sign or the code of its currency or without. One mark before three digits, as
-1,200, reads two ways and is refused with both readings. A shop is written as the catalog already writes it. `check_format.py` tries the tool on good and bad reports.
+1,200, reads two ways and is refused with both readings. The shop is found in `catalog/shops.json` by its address
+(`https://de.aliexpress.com/item/...` is `aliexpress`), its name or a name close to one (`aliexpres`); a name of two
+shops, as `amazon`, is refused. An address or a name the list lacks becomes a new shop with no title, and the pull
+request says to write it: `check_format.py` refuses the shop until then. A seller is taken on a marketplace or
+classifieds only. `check_format.py` tries the tool on good and
+bad reports.
 
 ## import_board_manager.py
 

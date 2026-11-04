@@ -8,7 +8,6 @@
     "description": "A 128x64 monochrome LCD in serial mode: E is the clock, R/W the data, RS the chip select, PSB to ground",
     "price": {
         "anton": {
-            "shop": "not named",
             "currency": "EUR",
             "range": [6.5, 6.5],
             "date": "2026-11-01",

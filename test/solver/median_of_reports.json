@@ -1,0 +1,13 @@
+{
+    "title": "The offers of one shop are reports of its sellers: the shop counts their median, the cheapest shop the low and the dearest the high",
+    "answers": {"wifi": true},
+    "change": {"esp32_devkit": {"price": {
+        "amazon": null,
+        "aliexpress": null,
+        "one": {"shop": "aliexpress", "currency": "EUR", "range": [3, 3], "date": "2026-11-04", "source": "the case"},
+        "two": {"shop": "aliexpress", "currency": "EUR", "range": [4, 5], "date": "2026-11-04", "source": "the case"},
+        "three": {"shop": "aliexpress", "currency": "EUR", "range": [10, 12], "date": "2026-11-04", "source": "the case"},
+        "other": {"shop": "lcsc", "currency": "EUR", "range": [6, 7], "date": "2026-11-04", "source": "the case"}
+    }}},
+    "cost": {"board": "esp32_devkit", "low": 4, "high": 7}
+}

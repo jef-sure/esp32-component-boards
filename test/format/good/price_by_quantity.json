@@ -27,7 +27,7 @@
   "tariff": "854370",
   "price": {
     "one": {
-      "shop": "AliExpress",
+      "shop": "aliexpress",
       "currency": "EUR",
       "range": [
         1.5,
@@ -37,7 +37,7 @@
       "source": "shape only"
     },
     "ten": {
-      "shop": "AliExpress",
+      "shop": "aliexpress",
       "currency": "EUR",
       "range": [
         1,

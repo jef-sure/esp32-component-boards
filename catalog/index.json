@@ -121,5 +121,6 @@
     "roles.json",
     "rubrics/arduino_bus/rubric.json",
     "rubrics/pn532/rubric.json",
-    "rules.json"
+    "rules.json",
+    "shops.json"
 ]

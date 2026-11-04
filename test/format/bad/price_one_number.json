@@ -28,7 +28,7 @@
     "title": "A price without a range",
     "price": {
       "one": {
-        "shop": "AliExpress",
+        "shop": "aliexpress",
         "currency": "EUR",
         "range": 3,
         "date": "2026-10-31",

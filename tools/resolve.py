@@ -6,6 +6,7 @@ read. The order, general to particular: device, family variant, board, board var
 (mine for the model, the project).
 """
 import copy
+import difflib
 import functools
 import json
 import pathlib
@@ -356,6 +357,56 @@ def dump(value, indent=0, used=0):
         body = ",\n".join(f"{pad}{json.dumps(key, ensure_ascii=False)}: {dump(item, indent + 4, len(key) + 4)}" for key, item in value.items())
         return "{\n" + body + "\n" + " " * indent + "}"
     return "[\n" + ",\n".join(pad + dump(item, indent + 4) for item in value) + "\n" + " " * indent + "]"
+
+
+SHOP_CLOSE = 0.8  # the difflib ratio from which a name as written is taken for a name of a shop
+ADDRESS = re.compile(r"^(?:[a-z][a-z0-9+.-]*://)?(?:www\.)?([a-z0-9-]+(?:\.[a-z0-9-]+)+)(?::[0-9]+)?(?:[/?#].*)?$")
+SHOP_NAME = re.compile(r"^[\w .&'-]{1,40}$")
+SELLER = re.compile(r"^[\w .&'-]{1,60}$")
+
+
+def shops():
+    """The shops of catalog/shops.json by their names."""
+    return json.loads((ROOT / "catalog" / "shops.json").read_text())["shops"]
+
+
+def shop_key(text):
+    return re.sub(r"[\W_]+", "", text.lower())
+
+
+def shop_of(text, known):
+    """The shop a person wrote: by the domain of an address, by a name, or by a name close to one of known.
+    Returns (name, None) for a shop of known, (name, entry) for one it lacks, the entry with no title.
+    Raises ValueError when the text is no name or names two shops."""
+    written = text.strip()
+    address = ADDRESS.match(written.lower())
+    if address:
+        labels = address[1].split(".")
+        for start in range(len(labels) - 1):
+            found = sorted(name for name, shop in known.items() if ".".join(labels[start:]) in shop.get("domains", ()))
+            if found:
+                return found[0], None
+        # an address is copied, not typed: one the list lacks is a new shop, and so is a short link as amzn.eu
+        return slug_of(address[1]), {"domains": [address[1]]}
+    if not SHOP_NAME.match(written):
+        raise ValueError("Shop: a name of letters and digits, or the address of the shop")
+    key = shop_key(written)
+    keys = {name: {shop_key(word) for word in (name, shop.get("title", ""), *shop.get("names", ()))} - {""} for name, shop in known.items()}
+    found = sorted(name for name, words in keys.items() if key in words)
+    if not found:
+        found = sorted(name for name, words in keys.items() if any(difflib.SequenceMatcher(None, key, word).ratio() >= SHOP_CLOSE for word in words))
+    if len(found) > 1:
+        raise ValueError(f"Shop: {written} may be {' or '.join(known[name].get('title', name) for name in found)}: name one, or give its address")
+    if found:
+        return found[0], None
+    if not re.search("[a-z0-9]", written.lower()):
+        raise ValueError("Shop: a new shop needs a name in Latin letters, or its address")
+    return slug_of(written), {"names": [written]}
+
+
+def slug_of(text):
+    name = re.sub(r"[^a-z0-9]+", "_", text.lower()).strip("_")
+    return name if name[0].isalpha() else f"shop_{name}"
 
 
 def trust(board, path, order):

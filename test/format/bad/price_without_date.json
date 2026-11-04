@@ -28,7 +28,7 @@
     "title": "A price nobody can date",
     "price": {
       "one": {
-        "shop": "AliExpress",
+        "shop": "aliexpress",
         "currency": "EUR",
         "range": [
           1.5,

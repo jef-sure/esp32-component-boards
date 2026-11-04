@@ -23,7 +23,6 @@
     },
     "price": {
         "anton": {
-            "shop": "not named",
             "currency": "EUR",
             "range": [5, 5],
             "date": "2026-11-02",

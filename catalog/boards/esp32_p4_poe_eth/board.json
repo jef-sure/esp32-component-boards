@@ -9,7 +9,7 @@
     "description": "The ESP32-P4-ETH sold with a PoE module on its header H7",
     "price": {
         "aliexpress": {
-            "shop": "AliExpress",
+            "shop": "aliexpress",
             "currency": "EUR",
             "range": [28, 28],
             "date": "2026-11-01",

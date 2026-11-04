@@ -206,7 +206,7 @@ def module_of(source, path, part, known, run, shop=None):
     if "adafruit" in source:
         doc["maker"] = "adafruit"
     if listed:
-        doc["price"] = {"adafruit": {"shop": "Adafruit", "currency": "USD", "range": [float(listed["price"])] * 2, "date": run.date, "source": "A copy of the product list of adafruit.com"}}
+        doc["price"] = {"adafruit": {"shop": "adafruit", "currency": "USD", "range": [float(listed["price"])] * 2, "date": run.date, "source": "A copy of the product list of adafruit.com"}}
     if number:
         doc["part"] = number[1]
     supply = supply_of(part["contacts"])

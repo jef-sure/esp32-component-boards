@@ -6,14 +6,15 @@
     "title": "CLRC663 module",
     "price": {
         "aliexpress": {
-            "shop": "AliExpress",
+            "shop": "aliexpress",
             "currency": "EUR",
             "range": [
                 7.39,
                 7.39
             ],
             "date": "2026-11-01",
-            "source": "Anton: EC Buying, approximate"
+            "seller": "EC Buying",
+            "source": "Anton, approximate"
         }
     },
     "power": [

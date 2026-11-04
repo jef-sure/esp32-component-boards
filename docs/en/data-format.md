@@ -690,14 +690,15 @@ one, as a project adds what it really paid.
 
 ```json
 "price": {
-    "amazon": {"shop": "Amazon", "currency": "EUR", "range": [6, 6], "date": "2026-10-31", "source": "from memory"},
-    "aliexpress": {"shop": "AliExpress", "currency": "EUR", "range": [0, 3], "date": "2026-10-31", "source": "from memory"}
+    "amazon": {"shop": "amazon_de", "currency": "EUR", "range": [6, 6], "date": "2026-10-31", "source": "from memory"},
+    "aliexpress": {"shop": "aliexpress", "currency": "EUR", "range": [0, 3], "date": "2026-10-31", "source": "from memory"}
 }
 ```
 
 | field | what |
 |---|---|
-| `shop` | where it is sold |
+| `shop` | where it is sold: a shop of `catalog/shops.json`. Absent when the source names no shop |
+| `seller` | who sold it on a marketplace or classifieds, as written, when it is known |
 | `currency` | the code, as `EUR` |
 | `range` | lowest and highest price of one unit, never one number. "Less than 3" is `[0, 3]`, and a kit counts it as 3 |
 | `qty` | the least quantity this price holds for, 1 when absent. Several offers of one shop give its prices by batch |
@@ -710,6 +711,23 @@ rate there counts as no price.
 
 Delivery and duty are not here: they depend on the whole order, not on one board. See
 [board_bom.py](tools.md#board_bompy).
+
+`catalog/shops.json` names each shop once: its title, the domains it sells on and other names people write.
+
+```json
+"aliexpress": {"title": "AliExpress", "domains": ["aliexpress.com", "aliexpress.ru", "aliexpress.us"], "names": ["ali", "али"]},
+"amazon_de": {"title": "Amazon.de", "domains": ["amazon.de"], "names": ["amazon"]}
+```
+
+A shop is one checkout. The stores of Amazon in two countries are two shops, while AliExpress and eBay are one shop on
+all their domains. A name of two shops, as `amazon`, finds neither, so a report has to say which. `kind` says what
+stands behind the checkout: `store` (when absent) sells its own stock; `marketplace` (AliExpress, Amazon, eBay) has
+many sellers, and an offer there may name its `seller`; `classifieds` (Kleinanzeigen, Quoka) is a person selling one
+thing, the price by agreement.
+
+The offers of one shop at one quantity are kept all, each report its own: they are prices of different sellers, and
+a seller is rarely remembered. The page and `board_bom.py` count the median of their lows and of their highs as the
+price of that shop; the cheapest shop then gives the low of the item, the dearest its high.
 
 `tariff` is the customs tariff code of the goods, HS or CN, digits only. Duties on small
 parcels are counted by it. `count` on a device says how many of it one product takes, for

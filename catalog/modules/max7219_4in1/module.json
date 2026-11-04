@@ -17,11 +17,21 @@
     "connectors": {"J1": {"type": "5 wires", "pins": ["VCC", "GND", "DIN", "CS", "CLK"]}},
     "price": {
         "aliexpress": {
-            "shop": "AliExpress",
+            "shop": "aliexpress",
+            "seller": "Tenstar Robot",
             "currency": "EUR",
-            "range": [3.69, 4.09],
+            "range": [4.09, 4.09],
             "date": "2026-11-01",
-            "source": "A listing of Anton, Tenstar Robot: 4.09, from 5 pieces 3.69"
+            "source": "A listing of Anton"
+        },
+        "aliexpress_from_5": {
+            "shop": "aliexpress",
+            "seller": "Tenstar Robot",
+            "currency": "EUR",
+            "range": [3.69, 3.69],
+            "qty": 5,
+            "date": "2026-11-01",
+            "source": "A listing of Anton"
         }
     },
     "checked": {

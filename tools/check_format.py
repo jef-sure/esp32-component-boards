@@ -49,6 +49,7 @@ RAW = jsonschema.Draft202012Validator(SCHEMA)
 RESOLVED = jsonschema.Draft202012Validator({"$ref": "#/$defs/resolved", "$defs": SCHEMA["$defs"]})
 QUESTIONS = jsonschema.Draft202012Validator({"$ref": "#/$defs/questions", "$defs": SCHEMA["$defs"]})
 RATES = jsonschema.Draft202012Validator({"$ref": "#/$defs/rates", "$defs": SCHEMA["$defs"]})
+SHOPS = jsonschema.Draft202012Validator({"$ref": "#/$defs/shops", "$defs": SCHEMA["$defs"]})
 JUDGEMENTS = jsonschema.Draft202012Validator({"$ref": "#/$defs/judgements", "$defs": SCHEMA["$defs"]})
 ROLES = jsonschema.Draft202012Validator({"$ref": "#/$defs/roles", "$defs": SCHEMA["$defs"]})
 RULES = json.loads((ROOT / "catalog" / "rules.json").read_text())
@@ -235,8 +236,30 @@ def goods_wrong():
         finally:
             resolve.ROOTS.remove(root)
     counted = [line["count"] for line in lines if line["title"] == "MAX7219 matrix, four 8x8 in a row"]
-    print(f"goods: {'0 wrong' if counted == [2] else f'the chain of two counts {counted}'}")
-    return counted != [2]
+    wrong = [f"the chain of two counts {counted}"] if counted != [2] else []
+    # the offers of one shop are reports of its sellers: their median, as test/solver/median_of_reports.json for the page
+    case = json.loads((TESTS.parent / "solver" / "median_of_reports.json").read_text())
+    offers = {key: offer for key, offer in case["change"]["esp32_devkit"]["price"].items() if offer}
+    costs = board_bom.costs_of({"title": "the case", "price": offers}, 1, None)
+    if costs != {"EUR": (case["cost"]["low"], case["cost"]["high"]) * 2}:
+        wrong.append(f"the reports of a shop cost {costs}")
+    print(f"goods: {'0 wrong' if not wrong else '; '.join(wrong)}")
+    return len(wrong)
+
+
+def shop_problems():
+    """Every offer of the data names a shop of catalog/shops.json or none, and a seller only on a marketplace or classifieds."""
+    known = json.loads((ROOT / "catalog" / "shops.json").read_text())["shops"]
+    found = []
+    for root in ("catalog", "imported", "imported-shops"):
+        for path in sorted((ROOT / root).glob("*/*/*.json")):
+            doc = json.loads(path.read_text())
+            for key, offer in ((doc.get("price") or {}) if isinstance(doc, dict) else {}).items():
+                if "shop" in offer and offer["shop"] not in known:
+                    found.append(f"{path.relative_to(ROOT)}: price {key}: the shop {offer['shop']} is not in catalog/shops.json")
+                elif "seller" in offer and known.get(offer.get("shop"), {}).get("kind", "store") == "store":
+                    found.append(f"{path.relative_to(ROOT)}: price {key}: a seller, and the shop {offer.get('shop')} sells its own stock")
+    return found
 
 
 def reports_refused():
@@ -245,16 +268,19 @@ def reports_refused():
     with tempfile.TemporaryDirectory() as folder:
         catalog = pathlib.Path(folder)
         shutil.copytree(ROOT / "catalog" / "modules" / "pn532_module", catalog / "modules" / "pn532_module")
-        body = "### Item\n\n{item}\n\n### Shop\n\n{shop}\n\n### Currency\n\n{currency}\n\n### Price of one\n\n{price}\n\n### Sold by\n\n{qty}\n"
-        fine = {"item": "modules/pn532_module", "shop": "Some shop", "currency": "USD", "price": "3-5", "qty": "_No response_"}
+        shutil.copy(ROOT / "catalog" / "shops.json", catalog / "shops.json")
+        body = ("### Item\n\n{item}\n\n### Shop\n\n{shop}\n\n### Seller\n\n{seller}\n\n### Currency\n\n{currency}\n\n### Price of one\n\n{price}\n\n"
+                "### Pack of\n\n{qty}\n")
+        fine = {"item": "modules/pn532_module", "shop": "https://de.aliexpress.com/item/1.html", "currency": "USD", "price": "3-5", "qty": "_No response_",
+                "seller": "_No response_"}
         take_report.take(body.format(**fine), 7, catalog, "2026-11-01")
         offer = json.loads((catalog / "modules" / "pn532_module" / "module.json").read_text())["price"]["report_7"]
-        if offer != {"shop": "Some shop", "currency": "USD", "range": [3.0, 5.0], "date": "2026-11-01", "source": "Issue 7, as reported"}:
+        if offer != {"shop": "aliexpress", "currency": "USD", "range": [3.0, 5.0], "date": "2026-11-01", "source": "Issue 7, as reported"}:
             print(f"take_report.py wrote {offer}")
             wrong += 1
         take_report.take(body.format(**{**fine, "price": "3,76", "shop": "aliexpress"}), 9, catalog, "2026-11-01")
         offer = json.loads((catalog / "modules" / "pn532_module" / "module.json").read_text())["price"]["report_9"]
-        if offer["range"] != [3.76, 3.76] or offer["shop"] != "AliExpress":
+        if offer["range"] != [3.76, 3.76] or offer["shop"] != "aliexpress":
             print(f"take_report.py took 3,76 of aliexpress as {offer['range']} of {offer['shop']}")
             wrong += 1
         # prices as they are written in one country or another
@@ -266,13 +292,37 @@ def reports_refused():
                 wrong += 1
         for field, value in (("item", "../../etc/passwd"), ("item", "modules/pn5180_module"), ("item", "modules/x; rm -rf /"), ("currency", "dollars"),
                              ("price", "free"), ("price", "5-3"), ("price", "1,200"), ("price", "1.200"), ("price", "€3"), ("price", "1.234.5"),
-                             ("price", "1-2-3"), ("qty", "many"), ("shop", "x" * 61)):
+                             ("price", "1-2-3"), ("qty", "many"), ("shop", "x" * 201), ("shop", "amazon"), ("shop", "amazn"), ("shop", "<b>"),
+                             ("shop", "Чип и Дип"), ("seller", "<a href=x>"), ("seller", "x" * 61)):
             try:
                 take_report.take(body.format(**{**fine, field: value}), 8, catalog, "2026-11-01")
                 print(f"take_report.py took {field}: {value}")
                 wrong += 1
             except ValueError:
                 pass
+        # a shop by its address, its name or a name close to one; a shop the list lacks is added with no title
+        known = json.loads((catalog / "shops.json").read_text())["shops"]
+        for text, name in (("Amazon.de", "amazon_de"), ("https://www.amazon.de/dp/B0C", "amazon_de"), ("ebay.co.uk", "ebay"), ("Ali Express", "aliexpress"),
+                           ("aliexpres", "aliexpress"), ("LCSC", "lcsc")):
+            if resolve.shop_of(text, known) != (name, None):
+                print(f"take_report.py found {resolve.shop_of(text, known)} for {text}")
+                wrong += 1
+        take_report.take(body.format(**{**fine, "seller": "Tenstar Robot", "qty": "5"}), 11, catalog, "2026-11-01")
+        offer = json.loads((catalog / "modules" / "pn532_module" / "module.json").read_text())["price"]["report_11"]
+        if (offer.get("seller"), offer.get("qty")) != ("Tenstar Robot", 5):
+            print(f"take_report.py took the seller and the pack as {offer.get('seller')}, {offer.get('qty')}")
+            wrong += 1
+        try:
+            take_report.take(body.format(**{**fine, "shop": "LCSC", "seller": "Somebody"}), 12, catalog, "2026-11-01")
+            print("take_report.py took a seller of LCSC, which sells its own stock")
+            wrong += 1
+        except ValueError:
+            pass
+        said, new_shop = take_report.take(body.format(**{**fine, "shop": "amzn.eu"}), 10, catalog, "2026-11-01")
+        added = json.loads((catalog / "shops.json").read_text())["shops"].get("amzn_eu")
+        if not new_shop or added != {"domains": ["amzn.eu"]}:
+            print(f"take_report.py added the shop amzn.eu as {added}")
+            wrong += 1
     print(f"reports: {'0' if not wrong else wrong} wrong")
     return wrong
 
@@ -603,6 +653,8 @@ def main():
 
     problems = errors_of(QUESTIONS, json.loads((ROOT / "catalog" / "questions.json").read_text()), "questions")
     problems += errors_of(RATES, json.loads((ROOT / "catalog" / "rates.json").read_text()), "rates")
+    problems += errors_of(SHOPS, json.loads((ROOT / "catalog" / "shops.json").read_text()), "shops")
+    problems += shop_problems()
     problems += errors_of(JUDGEMENTS, json.loads((ROOT / "catalog" / "judgements.json").read_text()), "judgements")
     problems += roles_problems(json.loads((ROOT / "catalog" / "roles.json").read_text()))
     problems += bridge_problems()

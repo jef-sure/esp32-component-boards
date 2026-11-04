@@ -62,10 +62,11 @@
       "propertyNames": { "$ref": "#/$defs/name" },
       "additionalProperties": {
         "type": "object",
-        "required": ["shop", "currency", "range", "date", "source"],
+        "required": ["currency", "range", "date", "source"],
         "additionalProperties": false,
         "properties": {
-          "shop": { "type": "string", "minLength": 1 },
+          "shop": { "$ref": "#/$defs/name", "description": "A shop of catalog/shops.json. Absent when the source names no shop." },
+          "seller": { "type": "string", "minLength": 1, "maxLength": 60, "description": "Who sold it on a marketplace or classifieds, as written: the shop is the checkout, the seller holds the stock." },
           "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
           "range": { "$ref": "#/$defs/range", "description": "Lowest and highest price of one unit. Less than 3 is [0, 3]: a bound, not an invented low, and a kit counts it as 3." },
           "qty": { "type": "integer", "minimum": 1, "description": "The least quantity this price holds for. 1 when absent." },
@@ -819,6 +820,31 @@
         "date": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
         "source": { "type": "string", "minLength": 1 },
         "rates": { "type": "object", "propertyNames": { "pattern": "^[A-Z]{3}$" }, "additionalProperties": { "type": "number", "exclusiveMinimum": 0 } }
+      }
+    },
+    "shops": {
+      "description": "The shops offers name: catalog/shops.json. A shop is one checkout, the seller of a marketplace is a field of the offer: the stores of Amazon in two countries are two shops, AliExpress and eBay are one on all their domains. tools/take_report.py finds a reported shop here by its domain, its name or a name close to one.",
+      "type": "object",
+      "required": ["format", "format_version", "shops"],
+      "additionalProperties": false,
+      "properties": {
+        "format": { "const": "jef-sure/boards" },
+        "format_version": { "type": "integer" },
+        "shops": {
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/name" },
+          "additionalProperties": {
+            "type": "object",
+            "required": ["title"],
+            "additionalProperties": false,
+            "properties": {
+              "title": { "type": "string", "minLength": 1, "description": "The name as a list of prices prints it. A shop a report adds has none until a person writes it." },
+              "kind": { "enum": ["store", "marketplace", "classifieds"], "description": "store when absent: it sells its own stock. marketplace: many sellers behind one checkout, an offer may name its seller. classifieds: a person sells one thing, the price by agreement, no checkout." },
+              "domains": { "type": "array", "items": { "type": "string", "pattern": "^[a-z0-9-]+(\\.[a-z0-9-]+)+$" }, "description": "Where the shop sells; a host under one of them is the shop too." },
+              "names": { "type": "array", "items": { "type": "string", "minLength": 1 }, "description": "Other names people write. A name of two shops, as amazon, finds neither: the report has to say which." }
+            }
+          }
+        }
       }
     },
     "frequencySource": {

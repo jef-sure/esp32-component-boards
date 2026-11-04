@@ -21,7 +21,7 @@
     },
     "price": {
         "aliexpress": {
-            "shop": "AliExpress",
+            "shop": "aliexpress",
             "currency": "EUR",
             "range": [5.29, 5.29],
             "date": "2026-11-01",

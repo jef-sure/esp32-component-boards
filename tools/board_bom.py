@@ -3,7 +3,7 @@
 
 Usage: board_bom.py PROJECT                     the list for one product
        board_bom.py PROJECT --units 10          the list for ten
-       board_bom.py PROJECT --shop AliExpress   the prices of one shop
+       board_bom.py PROJECT --shop aliexpress   the prices of one shop of catalog/shops.json, by its name or address
        board_bom.py PROJECT --duty 3 EUR        a duty per tariff code in the order
        board_bom.py PROJECT --csv list.csv      the same lines for a spreadsheet
 
@@ -16,6 +16,7 @@ import argparse
 import collections
 import csv
 import pathlib
+import statistics
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -60,19 +61,23 @@ def lines_of(name):
 
 
 def offers_for(line, units, shop):
-    """Per shop, the offer of the largest quantity that this many units reach."""
+    """Per shop and currency, the offers of the largest quantity that this many units reach, as one: they are reports of
+    the sellers of the shop, so it counts their median, the low and the high apart, as the page does."""
     best = {}
     for name, offer in (line.get("price") or {}).items():
         low, high = offer["range"]
         if low > high:
             raise ValueError(f"{line['title']}: price {name}: the range runs down: {offer['range']}")
-        if shop and offer["shop"].lower() != shop.lower():
+        if shop and offer.get("shop") != shop:
             continue
         least = offer.get("qty", 1)
-        key = (offer["shop"], offer["currency"])
-        if least <= units and least >= best.get(key, {}).get("qty", 1):
-            best[key] = offer
-    return list(best.values())
+        key = (offer.get("shop"), offer["currency"])
+        if least > units or least < best.get(key, (1, []))[0]:
+            continue
+        reports = best[key][1] if key in best and best[key][0] == least else []
+        best[key] = (least, reports + [offer["range"]])
+    return [{"currency": currency, "qty": least, "range": [statistics.median(r[0] for r in ranges), statistics.median(r[1] for r in ranges)]}
+            for (_, currency), (least, ranges) in best.items()]
 
 
 def costs_of(line, units, shop):
@@ -111,7 +116,7 @@ def report(product, lines, args):
             totals[currency][0] += low
             totals[currency][1] += high
     width = max(len(row["title"]) for row in rows)
-    out = [f"{product['title']}: {args.units} of it" + (f", prices of {args.shop}" if args.shop else ""), ""]
+    out = [f"{product['title']}: {args.units} of it" + (f", prices of {resolve.shops()[args.shop]['title']}" if args.shop else ""), ""]
     out += [f"{row['units']:>4}  {row['title']:<{width}}  {row['each']:<20}  {row['cost']}" for row in rows]
     out.append("")
     out += [f"goods: {money(currency, *total)}" for currency, total in sorted(totals.items())]
@@ -143,7 +148,7 @@ def main():
     parser.add_argument("board", help="a board of the catalog, or of the program given by --project")
     parser.add_argument("--project", type=pathlib.Path, help="the program whose components/local-boards to read before the catalog")
     parser.add_argument("--units", type=int, default=1, help="how many products are built")
-    parser.add_argument("--shop", help="use only the prices of this shop")
+    parser.add_argument("--shop", help="use only the prices of this shop: its name, its title or its address, as in catalog/shops.json")
     parser.add_argument("--duty", nargs=2, metavar=("AMOUNT", "CURRENCY"), help="a duty on each tariff code in the order")
     parser.add_argument("--csv", type=pathlib.Path, help="write the lines to this file as well")
     args = parser.parse_args()
@@ -151,6 +156,14 @@ def main():
         resolve.add_project(args.project)
     if args.units < 1:
         parser.error("--units must be 1 or more")
+    if args.shop:
+        known = resolve.shops()
+        try:
+            args.shop, new_shop = resolve.shop_of(args.shop, known)
+        except ValueError as error:
+            parser.error(str(error))
+        if new_shop:
+            parser.error(f"--shop: no such shop in catalog/shops.json ({', '.join(known)})")
     try:
         product, lines = lines_of(args.board)
         text, rows = report(product, lines, args)

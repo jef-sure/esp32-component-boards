@@ -32,11 +32,11 @@
     },
     "price": {
         "ebay": {
-            "shop": "eBay.de",
+            "shop": "ebay",
             "currency": "EUR",
             "range": [7, 10],
             "date": "2026-11-01",
-            "source": "Listings of N16R8 boards found by a search, before delivery, not a purchase"
+            "source": "Listings of N16R8 boards found by a search on ebay.de, before delivery, not a purchase"
         }
     },
     "checked": {

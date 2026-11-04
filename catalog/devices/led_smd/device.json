@@ -9,7 +9,7 @@
     "notes": "Any one-colour LED of a board, as 0603 or 0805. It is here for its price by the piece: what an LED of a board that nobody asked for weighs.",
     "price": {
         "lcsc": {
-            "shop": "LCSC",
+            "shop": "lcsc",
             "currency": "USD",
             "range": [0.0059, 0.0059],
             "qty": 100,
@@ -17,7 +17,7 @@
             "source": "C2286, Hubei KENTO KT-0603R, red: search results of lcsc.com gave 0.0031 to 0.0059 for 100 to 100000 pieces; the high end is taken for the least quantity and the low for the largest, as the tiers of LCSC go down."
         },
         "lcsc_100000": {
-            "shop": "LCSC",
+            "shop": "lcsc",
             "currency": "USD",
             "range": [0.0031, 0.0031],
             "qty": 100000,

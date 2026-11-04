@@ -1,0 +1,40 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "shops": {
+        "adafruit": {"title": "Adafruit", "domains": ["adafruit.com"]},
+        "aliexpress": {
+            "title": "AliExpress",
+            "kind": "marketplace",
+            "domains": ["aliexpress.com", "aliexpress.ru", "aliexpress.us"],
+            "names": ["ali", "али", "алиэкспресс"]
+        },
+        "amazon_com": {"title": "Amazon.com", "kind": "marketplace", "domains": ["amazon.com"], "names": ["amazon"]},
+        "amazon_de": {"title": "Amazon.de", "kind": "marketplace", "domains": ["amazon.de"], "names": ["amazon"]},
+        "ebay": {
+            "title": "eBay",
+            "kind": "marketplace",
+            "domains": [
+                "ebay.com",
+                "ebay.de",
+                "ebay.co.uk",
+                "ebay.fr",
+                "ebay.it",
+                "ebay.es",
+                "ebay.nl",
+                "ebay.at",
+                "ebay.ch",
+                "ebay.pl",
+                "ebay.ca",
+                "ebay.com.au"
+            ]
+        },
+        "kleinanzeigen": {
+            "title": "Kleinanzeigen",
+            "kind": "classifieds",
+            "domains": ["kleinanzeigen.de", "ebay-kleinanzeigen.de"]
+        },
+        "lcsc": {"title": "LCSC", "domains": ["lcsc.com"]},
+        "quoka": {"title": "Quoka", "kind": "classifieds", "domains": ["quoka.de"]}
+    }
+}

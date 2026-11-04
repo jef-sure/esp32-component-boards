@@ -11,7 +11,7 @@
     "devices": {"nfc": {"chip": "pn532", "antenna": {"kind": "on_board"}, "logic": "3V3", "provides": {"nfc": {"range_mm": [40, 60], "reads": [{"card": "DESFire EV1", "through_mm": 4.6, "mm": 30}, {"card": "MIFARE Classic 1K", "through_mm": 4.6, "mm": 20}]}}}},
     "price": {
         "aliexpress": {
-            "shop": "AliExpress",
+            "shop": "aliexpress",
             "currency": "EUR",
             "range": [3, 3],
             "date": "2026-11-01",

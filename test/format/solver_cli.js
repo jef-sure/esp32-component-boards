@@ -101,6 +101,7 @@ for (const name of names) {
     if (given.cost) {
         const kit = fit.find((item) => item.name === given.cost.board && (!given.cost.module || item.modules.some((module) => module.name === given.cost.module)));
         if (kit?.price.low !== given.cost.low) say(`${given.cost.board} costs at least ${kit?.price.low}`);
+        if (given.cost.high !== undefined && kit?.price.high !== given.cost.high) say(`${given.cost.board} costs at most ${kit?.price.high}`);
     }
     if (given.wiring) {
         const kit = fit.find((item) => item.name === given.wiring.board);

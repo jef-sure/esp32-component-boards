@@ -336,8 +336,32 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         return rate ? [(offer.range[0] || offer.range[1]) * rate, offer.range[1] * rate] : null;
     }
 
+    function median(values) {
+        const sorted = [...values].sort((a, b) => a - b);
+        const middle = Math.floor(sorted.length / 2);
+        return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
+    }
+
+    // The offers of one shop at one quantity are reports of its sellers, kept all: the shop counts their median, the low and the
+    // high apart (Anton, 2026-11-04). Then the cheapest shop gives the low and the dearest the high. Counted once for a price
+    // and a currency: nothing changes a price in place, a changed catalog brings new objects.
+    const ranged = new WeakMap();
     function rangeOf(price, currency) {
-        const ranges = Object.values(price || {}).map((offer) => converted(offer, currency)).filter(Boolean);
+        if (!price) return null;
+        if (!ranged.has(price)) ranged.set(price, new Map());
+        const known = ranged.get(price);
+        if (!known.has(currency)) known.set(currency, counted(price, currency));
+        return known.get(currency);
+    }
+
+    function counted(price, currency) {
+        const reports = new Map();
+        for (const offer of Object.values(price || {})) {
+            const range = converted(offer, currency);
+            const key = `${offer.shop ?? ''}/${offer.qty ?? 1}`;
+            if (range) reports.set(key, [...(reports.get(key) ?? []), range]);
+        }
+        const ranges = [...reports.values()].map((list) => [median(list.map((range) => range[0])), median(list.map((range) => range[1]))]);
         return ranges.length ? [Math.min(...ranges.map((range) => range[0])), Math.max(...ranges.map((range) => range[1]))] : null;
     }
 

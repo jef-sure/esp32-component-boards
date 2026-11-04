@@ -2,6 +2,8 @@
 """
 Takes a price from the text of an issue of the form .github/ISSUE_TEMPLATE/price.yml and adds it to the file of
 its item as an offer. The text comes from anyone: it is only read as fields, and the item must be one of the catalog.
+The shop is found in catalog/shops.json by its address or its name; one that is not there is added with no title,
+which check_format.py refuses until a person writes it, and the tool exits with NEW_SHOP.
 
 Usage: take_report.py BODY_FILE --issue NUMBER [--catalog DIR]
 """
@@ -28,6 +30,7 @@ DASH = re.compile(r"\s*[-\u2013\u2014]\s*")
 SIGNS = {"€": {"EUR"}, "£": {"GBP"}, "₹": {"INR"}, "¥": {"JPY", "CNY"}, "$": {"USD", "AUD", "CAD", "NZD", "SGD", "HKD", "MXN"}}
 PRICE_FORMS = "a number as 3.76, 3,76, 1,234.56 or 1.234,56, or a range as 3-5"
 EMPTY = "_No response_"
+NEW_SHOP = 3  # the exit code when the price is taken with a shop the catalog did not have
 
 
 def fields_of(body):
@@ -87,40 +90,37 @@ def price_of(text, currency):
     return [low, high]
 
 
-def offer_of(fields, issue, today):
-    """The file of the item and its offer. Raises ValueError with what is wrong."""
+def offer_of(fields, issue, today, known):
+    """The item, its offer and the entry of a shop known lacks, or None. Raises ValueError with what is wrong."""
     item, shop, currency = fields.get("Item", ""), fields.get("Shop", ""), fields.get("Currency", "").upper()
     if not ITEM.match(item):
         # The comment shows it in a code span, where a @name mentions no one.
         shown = item.partition("\n")[0][:60].replace("`", "")
         raise ValueError(f"Item: not one of the catalog, as modules/pn532_module: `{shown}`")
-    if not shop or len(shop) > 60 or "\n" in shop:
-        raise ValueError("Shop: one short line")
+    if not shop or len(shop) > 200 or "\n" in shop:
+        raise ValueError("Shop: one line, a name or an address")
+    shop, new_shop = resolve.shop_of(shop, known)
+    seller = fields.get("Seller", "")
+    if seller and not resolve.SELLER.match(seller):
+        raise ValueError("Seller: a name of letters and digits, at most 60")
+    if seller and not new_shop and known[shop].get("kind", "store") == "store":
+        raise ValueError(f"Seller: {known[shop]['title']} sells its own stock, it has no sellers")
     if not CURRENCY.match(currency):
         raise ValueError("Currency: three letters")
-    offer = {"shop": shop, "currency": currency, "range": price_of(fields.get("Price of one", ""), currency), "date": today, "source": f"Issue {issue}, as reported"}
-    qty = fields.get("Sold by", "")
+    offer = {"shop": shop, **({"seller": seller} if seller else {}), "currency": currency, "range": price_of(fields.get("Price of one", ""), currency), "date": today, "source": f"Issue {issue}, as reported"}
+    qty = fields.get("Pack of", fields.get("Sold by", ""))  # Sold by: the label before the field Seller came
     if qty:
         if not qty.isdigit() or int(qty) < 1:
-            raise ValueError("Sold by: a whole number")
+            raise ValueError("Pack of: a whole number")
         offer["qty"] = int(qty)
-    return item, offer
-
-
-def shop_names(catalog):
-    """The shops of the catalog as it writes them, by the name in lower case."""
-    names = {}
-    for path in catalog.glob("*/*/*.json"):
-        doc = json.loads(path.read_text())
-        for offer in (doc.get("price") or {}).values() if isinstance(doc, dict) else ():
-            names.setdefault(offer["shop"].lower(), offer["shop"])
-    return names
+    return item, offer, new_shop
 
 
 def take(body, issue, catalog, today):
-    fields = fields_of(body)
-    item, offer = offer_of(fields, issue, today)
-    offer["shop"] = shop_names(catalog).get(offer["shop"].lower(), offer["shop"])
+    """Writes the offer, and a shop the catalog lacks. Returns what was taken and whether the shop is new."""
+    shops_path = catalog / "shops.json"
+    shops = json.loads(shops_path.read_text())
+    item, offer, new_shop = offer_of(fields_of(body), issue, today, shops["shops"])
     kind, name = item.split("/")
     path = catalog / kind / name / FILES[kind]
     if not path.is_file():
@@ -129,7 +129,13 @@ def take(body, issue, catalog, today):
     doc = json.loads(text)
     doc.setdefault("price", {})[f"report_{issue}"] = offer
     path.write_text(with_offer(text, f"report_{issue}", offer, doc))
-    return f"{item}: {offer['shop']}, {offer['range']} {offer['currency']}"
+    said = f"{item}: {offer['shop']}, {offer['range']} {offer['currency']}"
+    if new_shop:
+        shops["shops"] = dict(sorted({**shops["shops"], offer["shop"]: new_shop}.items()))
+        shops_path.write_text(resolve.dump(shops) + "\n")
+        said += (f"\n{offer['shop']} is a new shop of catalog/shops.json, with no title: write its title there, or move the offer to a"
+                 " shop the list has, as one country of a shop that sells in several")
+    return said, bool(new_shop)
 
 
 def closing(text, start):
@@ -184,11 +190,12 @@ def main():
     parser.add_argument("--catalog", type=pathlib.Path, default=ROOT / "catalog")
     args = parser.parse_args()
     try:
-        print(take(args.body.read_text(), args.issue, args.catalog, datetime.date.today().isoformat()))
+        said, new_shop = take(args.body.read_text(), args.issue, args.catalog, datetime.date.today().isoformat())
     except ValueError as error:
         print(error)
         return 1
-    return 0
+    print(said)
+    return NEW_SHOP if new_shop else 0
 
 
 if __name__ == "__main__":

@@ -13,11 +13,11 @@
     },
     "price": {
         "ebay": {
-            "shop": "eBay.de",
+            "shop": "ebay",
             "currency": "EUR",
             "range": [7, 12],
             "date": "2026-11-01",
-            "source": "Listings found by a search, not a purchase"
+            "source": "Listings found by a search on ebay.de, not a purchase"
         }
     },
     "checked": {

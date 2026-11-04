@@ -57,7 +57,8 @@ and millimetres in different orientations) and writes:
 - `Kconfig`: the choice of the board, one option per module, and the hidden
   symbols described below.
 - the `dependencies:` block of `idf_component.yml`, between two marker lines.
-- the table of boards in the READMEs, between two marker lines.
+- the table of boards in the READMEs, between two marker lines;
+- the line of the matrix of `.github/workflows/build.yml` that names the boards CI builds, between two marker lines.
 
 The generated files are committed. A program that takes the component from
 the registry builds without Python and without any tool of this repository.

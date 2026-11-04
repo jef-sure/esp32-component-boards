@@ -1,0 +1,26 @@
+{
+  "expect": "a chain passes the data of one chip, and its members chain max7219, ws2812b",
+  "board": {
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "project",
+    "name": "garland",
+    "extends": "esp32_devkit",
+    "title": "The garland of led_strip: a strip of 5 m and one of 1 m in a row on GPIO 14",
+    "modules": {
+      "garland": {
+        "chain": [
+          {
+            "module": "ws2812b_strip_5m_60"
+          },
+          {
+            "module": "max7219_4in1"
+          }
+        ],
+        "pins": {
+          "data": 14
+        }
+      }
+    }
+  }
+}

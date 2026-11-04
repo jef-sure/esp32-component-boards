@@ -208,7 +208,31 @@ function boardResolver(catalog) {
         });
     }
 
+    // The chip a product chains, by its parts: one, or the product is no member of a chain.
+    function chainedChip(name, moduleName) {
+        const module = chain(load('modules', moduleName));
+        const chips = new Set(Object.values(module.devices || {}).filter((part) => part.chip && has(load('devices', part.chip), 'chain')).map((part) => part.chip));
+        if (chips.size !== 1) throw new Refused(`${name}: ${moduleName} is a member of a chain only with one part that goes in a chain`);
+        return [...chips][0];
+    }
+
+    // A chain of several products on the wires of one: the first is wired as a module of the use, and each next takes its
+    // input from the output of the one before, so it brings no lines. A chain passes the data of one chip.
+    function useChain(doc, name, use) {
+        const chips = new Set(use.chain.map((member) => chainedChip(name, member.module)));
+        if (chips.size > 1) throw new Refused(`${name}: a chain passes the data of one chip, and its members chain ${[...chips].sort().join(', ')}`);
+        const [first, ...rest] = use.chain;
+        const { chain: _, ...wiring } = use;
+        const members = [useModule(doc, name, { ...wiring, ...first })];
+        for (const member of rest) {
+            const module = chain(load('modules', member.module));
+            members.push({ module: member.module, title: module.title, ...picked(member, ['count']), ...picked(module, MODULE_FACTS) });
+        }
+        return { title: members.map((member) => member.title).join(', then '), chain: members };
+    }
+
     function useModule(doc, name, use) {
+        if (has(use, 'chain')) return useChain(doc, name, use);
         const module = chain(load('modules', use.module));
         addModules(module);
         const parts = module.devices;

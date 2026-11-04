@@ -244,7 +244,33 @@ def supplied(steps, supply, name):
     return [{**{key: item for key, item in step.items() if key != "source"}, "from": supply[step["name"]]} if step.get("name") in supply else step for step in steps]
 
 
+def chained_chip(name, module_name):
+    """The chip a product chains, by its parts: one, or the product is no member of a chain."""
+    module = chain(load("modules", module_name))
+    chips = {part["chip"] for part in (module.get("devices") or {}).values() if part.get("chip") and "chain" in load("devices", part["chip"])}
+    if len(chips) != 1:
+        raise Refused(f"{name}: {module_name} is a member of a chain only with one part that goes in a chain")
+    return chips.pop()
+
+
+def use_chain(doc, name, use):
+    """A chain of several products on the wires of one: the first is wired as a module of the use, and each next takes its
+    input from the output of the one before, so it brings no lines. A chain passes the data of one chip."""
+    chips = {chained_chip(name, member["module"]) for member in use["chain"]}
+    if len(chips) > 1:
+        raise Refused(f"{name}: a chain passes the data of one chip, and its members chain {', '.join(sorted(chips))}")
+    first, *rest = use["chain"]
+    members = [use_module(doc, name, {**{key: value for key, value in use.items() if key != "chain"}, **first})]
+    for member in rest:
+        module = chain(load("modules", member["module"]))
+        members.append({"module": member["module"], "title": module["title"], **({"count": member["count"]} if "count" in member else {}),
+                        **{key: module[key] for key in MODULE_FACTS if key in module}})
+    return {"title": ", then ".join(member["title"] for member in members), "chain": members}
+
+
 def use_module(doc, name, use):
+    if "chain" in use:
+        return use_chain(doc, name, use)
     module = chain(load("modules", use["module"]))
     add_modules(module)
     parts = module["devices"]

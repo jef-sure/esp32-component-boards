@@ -1754,11 +1754,24 @@
           "propertyNames": { "$ref": "#/$defs/name" },
           "additionalProperties": {
             "type": "object",
-            "required": ["module"],
+            "anyOf": [{ "required": ["module"] }, { "required": ["chain"] }],
+            "if": { "required": ["chain"] },
+            "then": { "properties": { "module": false, "count": false } },
             "additionalProperties": false,
             "properties": {
               "module": { "$ref": "#/$defs/name" },
               "count": { "type": "integer", "minimum": 1, "description": "How many of this product in one chain on the same wires; more than 1 only when a part of it has chain. Its price and its lines of the list of goods count each." },
+              "chain": {
+                "type": "array",
+                "minItems": 2,
+                "description": "A chain of several products, in order from the board, as a strip of 5 m and one of 1 m in a row: the wiring of the use is that of the first, each next takes its input from the output of the one before. One product is module and count.",
+                "items": {
+                  "type": "object",
+                  "required": ["module"],
+                  "additionalProperties": false,
+                  "properties": { "module": { "$ref": "#/$defs/name" }, "count": { "type": "integer", "minimum": 1 } }
+                }
+              },
               "on": { "$ref": "#/$defs/on" },
               "config": { "type": "object" },
               "pins": { "$ref": "#/$defs/pins" },

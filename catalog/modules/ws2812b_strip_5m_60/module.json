@@ -1,0 +1,19 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "ws2812b_strip_5m_60",
+    "title": "WS2812B strip, 5 m, 60 a metre",
+    "description": "300 WS2812B on a flexible strip, one data line through all of them: the end of the strip goes on into the next one",
+    "power": [{"name": "5V", "source": "connector", "volts": [3.5, 5.3], "feeds": ["leds"]}],
+    "devices": {"leds": {"chip": "ws2812b", "logic": "5V", "config": {"count": 300}}},
+    "checked": {
+        "strip": {
+            "level": "hardware",
+            "by": "Anton",
+            "date": "2026-11-04",
+            "covers": ["devices.leds"],
+            "notes": "The garland of ~/git/led_strip: a strip of 5 m and one of 1 m in a row, 360 LEDs on one data line of an ESP32, fed from a supply of their own. The volts are those of the WS2812B."
+        }
+    }
+}

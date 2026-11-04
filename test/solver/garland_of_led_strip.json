@@ -1,14 +1,40 @@
 {
-    "title": "The garland of ~/git/led_strip: 360 WS2812B on one data line, two strips of 300 and 60 in a row, and three buttons on an ESP32. The chain of a way counts its chips, in the project and in the price",
+    "title": "The garland of ~/git/led_strip: what Anton has, a strip of 5 m and one of 1 m in a row, 360 WS2812B on one data line, and three buttons on an ESP32",
     "answers": {
         "board": "esp32_devkit",
         "blocks": [
-            {"role": "led", "variant": "addressable", "name": "garland", "asks": {"chain_outputs": 360}},
-            {"role": "button", "variant": "on_gpio", "name": "program"},
-            {"role": "button", "variant": "on_gpio", "name": "palette"},
-            {"role": "button", "variant": "on_gpio", "name": "onoff"}
+            {
+                "role": "led",
+                "variant": "addressable",
+                "name": "garland",
+                "asks": {
+                    "chain_outputs": 360
+                },
+                "part": [
+                    {
+                        "part": "ws2812b_strip_5m_60"
+                    },
+                    {
+                        "part": "ws2812b_strip_1m_60"
+                    }
+                ]
+            },
+            {
+                "role": "button",
+                "variant": "on_gpio",
+                "name": "program"
+            },
+            {
+                "role": "button",
+                "variant": "on_gpio",
+                "name": "palette"
+            },
+            {
+                "role": "button",
+                "variant": "on_gpio",
+                "name": "onoff"
+            }
         ]
     },
-    "says": "360 x Worldsemi WS2812B in one chain for 360 outputs, on the lines: data",
-    "cost": {"board": "esp32_devkit", "low": 34.9}
+    "says": "WS2812B strip, 5 m, 60 a metre, then WS2812B strip, 1 m, 60 a metre in one chain on the wires of the first"
 }

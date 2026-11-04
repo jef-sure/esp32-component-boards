@@ -303,6 +303,13 @@ committed, a program that asks by kind.
   project with its `count`, so the page prices the chips by their tiers and `board_bom.py` lists them at the price of
   their chip. The WS2812B has its draw, 60 mA for white, and the 3.5 V its data input needs at 5 V, from the datasheet
   of Worldsemi.
+- A chain of several products: `chain` of a use of a project, products and counts in order from the board, wired as
+  the first (7c). Anton's two strips are modules, `ws2812b_strip_5m_60` and `ws2812b_strip_1m_60`, and the WS2812B has
+  the way of its data line. A block says what the person already has with `part`, a list for a chain; with nothing
+  named the solver makes the chain of the fewest outputs over those asked, then of the fewest joints (Anton: a penalty
+  for each joint), so 360 is a strip of 5 m and one of 1 m, not six of 1 m. The list of goods has a line for each
+  product. A program reads the data pin by `board_bus_get("garland_leds", "data")`; a probe of the garland builds on
+  ESP-IDF 6.1.
 - Two displays as one screen, tried on a board: the DotView clock (two SSD1351 on SPI2 and SPI3, `display_groups`)
   showed one picture across both, read its photoresistor on the pin of the data while the screens lit it, and its button.
   The y of each panel in `test/format/good/dotview_clock.json` is turned: the clock's own program has an older copy

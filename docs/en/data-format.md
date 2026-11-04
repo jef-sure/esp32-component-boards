@@ -656,6 +656,21 @@ chips in the kit, and the project holds them as that chip with its `count`, so t
 limit of its own: what limits it is the time an update takes along the whole of it. The bits of an update and the
 speed of the bus join the data when a question asks how often the outputs change.
 
+A chain of several products is `chain` of the use instead of `module`: the products and their counts in order from
+the board. The wiring of the use is that of the first, and each next takes its input from the output of the one
+before; the products chain one chip. A chain of one product keeps `module` and `count`.
+
+```json
+"modules": { "garland": { "chain": [{ "module": "ws2812b_strip_5m_60" }, { "module": "ws2812b_strip_1m_60" }], "pins": { "data": 14 } } }
+```
+
+A block says what the person already has with `part`: a name of a module, or for a chain a list of products and
+their counts in order, `[{"part": "ws2812b_strip_5m_60", "count": 1}, {"part": "ws2812b_strip_1m_60"}]`. The kit
+takes the list, and what the outputs asked take more of the first product. With nothing named, the solver makes the
+chain of the products of the catalog that chain the same chip: the fewest outputs over those asked, then the fewest
+pieces, since each joint of two products is one more to solder. 360 WS2812B are a strip of 5 m and one of 1 m, not six
+of 1 m.
+
 ## Frequency sources
 
 `frequency_sources` of a chip in `catalog/mcu/` lists where it gets a frequency, in the order to try

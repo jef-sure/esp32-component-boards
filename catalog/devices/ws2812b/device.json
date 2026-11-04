@@ -9,6 +9,7 @@
     "part": "WS2812B",
     "provides": {"led": {"variant": "addressable"}},
     "chain": {"per": 1},
+    "ways": [{"lines": ["data"], "do": "data to its GPIO, DOUT of the last one on to the next strip"}],
     "draw": {"white": {"ma": 60}},
     "high_min_mv": 3500,
     "notes": "One RGB LED with its driver in the package, chained on one data line. Its price here is by the piece, for the worth of one on a board that nobody asked for.",

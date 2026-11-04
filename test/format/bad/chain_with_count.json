@@ -1,0 +1,27 @@
+{
+  "expect": "modules/garland: False schema does not allow 2",
+  "board": {
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "project",
+    "name": "garland",
+    "extends": "esp32_devkit",
+    "title": "The garland of led_strip: a strip of 5 m and one of 1 m in a row on GPIO 14",
+    "modules": {
+      "garland": {
+        "chain": [
+          {
+            "module": "ws2812b_strip_5m_60"
+          },
+          {
+            "module": "ws2812b_strip_1m_60"
+          }
+        ],
+        "count": 2,
+        "pins": {
+          "data": 14
+        }
+      }
+    }
+  }
+}

@@ -15,7 +15,8 @@ idf.py build flash monitor
 ```
 
 When the page wrote the project through `tools/boards_mcp.py`, `--again` has run already: `idf.py build` is the first
-command.
+command. The `build/` and `sdkconfig` the first `reconfigure` leaves are not read after it: each board builds in
+`build/<board>` with its own.
 
 `idf.py build` builds the current board, `@CURRENT@`; `idf.py --preset <board> build` another, each in `build/<board>`.
 In VS Code, *ESP-IDF: Select Project Configuration* chooses the board. `board_select.py --current <board> .` makes

@@ -402,10 +402,11 @@ const useEditor = Pinia.defineStore('editor', {
             else this.chosen.push({ headline: kit.headline, kit: copied(kit) });
             if (!this.chosen.some((item) => item.headline === this.current)) this.current = this.chosen[0]?.headline ?? null;
         },
-        // The kits selection.json of a folder names, found among those counted for its answers: by the board and the modules.
+        // The kits selection.json of a folder names, found among those counted for its answers: by the board and the modules
+        // with their counts, so two kits that differ in the count of a module stay two.
         restoreChosen() {
             if (!this.wanted) return;
-            const key = (board, modules) => `${board}+${modules.map((item) => item.name).sort().join(',')}`;
+            const key = (board, modules) => `${board}+${modules.map((item) => `${item.name}x${item.count ?? 1}`).sort().join(',')}`;
             const counted = new Map(this.kits.filter((kit) => kit.fits).map((kit) => [key(kit.name, kit.modules), kit]));
             const found = this.wanted.boards.map((entry) => ({ entry, kit: counted.get(key(entry.base ?? entry.board, entry.modules)) })).filter((item) => item.kit);
             this.chosen = found.map(({ kit }) => ({ headline: kit.headline, kit: copied(kit) }));

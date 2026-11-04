@@ -12,6 +12,7 @@
     "ways": [{"lines": ["data"], "do": "data to its GPIO, DOUT of the last one on to the next strip"}],
     "draw": {"white": {"ma": 60}},
     "high_min_mv": 3500,
+    "high_seen_mv": 3300,
     "notes": "One RGB LED with its driver in the package, chained on one data line. Its price here is by the piece, for the worth of one on a board that nobody asked for.",
     "price": {
         "lcsc": {
@@ -37,6 +38,13 @@
             "covers": ["draw", "high_min_mv"],
             "source": "Worldsemi WS2812B datasheet, Chinese, the copy of LCSC (atta.szlcsc.com, 1499049112282.pdf, sha256 9aca0cff...): 20 mA each of red, green and blue; VIH 0.7 VDD at VDD 4.5 to 5.5 V, so 3.5 V at 5 V; VDD 3.5 to 5.3 V",
             "date": "2026-11-04"
+        },
+        "garland": {
+            "level": "hardware",
+            "by": "Anton",
+            "date": "2026-11-04",
+            "covers": ["high_seen_mv"],
+            "source": "The garland of ~/git/led_strip: 360 WS2812B on two strips, the data line straight from GPIO 14 of an ESP32, the strips fed with 5 V of their own"
         },
         "price": {"level": "unchecked", "covers": ["price"], "source": "search results of lcsc.com, not the live page", "date": "2026-11-02"}
     }

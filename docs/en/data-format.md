@@ -597,7 +597,9 @@ stands on: `lines`, `power` or `port`.
 
 On lines, `channels` says how many lines one of them takes, and `both_ways` that a line works in both directions, as I2C needs.
 A kit adds one by itself where a level needs it: a device or a way names `high_min_mv`, the lowest high level it reads, and
-a chip drives 3.3 V.
+a chip drives 3.3 V. A chip whose `high_seen_mv`, the lowest high that drove it on hardware with its trial in `checked`, is
+3.3 V or less gets a note instead (the judgement `level_seen_on_hardware`): the WS2812B takes 3.5 V by its datasheet, and
+the 3.3 V of an ESP32 drove the 360 of Anton's garland.
 
 On a port, `needs` names what a board must provide, and `gives` what the board then has: `provides`, and the `plug`, `mv` and
 `ma` it hands over. A step of `power` names the `plug` it takes, so a PoE splitter comes with the plug of the board. A board

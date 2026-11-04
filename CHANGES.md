@@ -308,7 +308,11 @@ committed, a program that asks by kind.
   the way of its data line. A block says what the person already has with `part`, a list for a chain; with nothing
   named the solver makes the chain of the fewest joints (Anton: a penalty for each joint), then of the fewest outputs
   over those asked, so 360 is a strip of 5 m and one of 1 m, not six of 1 m, and 240 one strip of 5 m, not four of
-  1 m (7c). The list of goods has a line for each
+  1 m (7c).
+- A level seen on hardware is a note, not a part: `high_seen_mv` of a chip, the lowest high that drove it on hardware,
+  with its trial in `checked`, and the judgement `level_seen_on_hardware`. The WS2812B takes 3.5 V by its datasheet;
+  the 3.3 V of an ESP32 drove Anton's garland, so a kit of strips says so and adds no level shifter (Anton: "in
+  practice it nearly always works"; the shape by 7c). A chip with no trial still gets the shifter. The list of goods has a line for each
   product. A program reads the data pin by `board_bus_get("garland_leds", "data")`; a probe of the garland builds on
   ESP-IDF 6.1. A use of a resolved board is in one form, its title and the chain of its products, one product a
   chain of one, so a reader of it has one case (7c); a rule reads the chip of a module at `modules.*.chain.*.mcu`.

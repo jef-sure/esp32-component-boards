@@ -972,6 +972,12 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         const limit = resolved.mcu.facts.gpio.high_mv_max;
         for (const pick of new Map(picks.filter((item) => !item.way).map((item) => [item.module.name, item])).values()) {
             const low = pick.module.device.high_min_mv ?? pick.module.device.ways?.[0]?.high_min_mv;
+            // seen_level: a high a trial on hardware drove it with is a note, not a part
+            const seen = judgementsOf('seen_level')[0];
+            if (low > CHIP_HIGH_MV && seen && pick.module.device.high_seen_mv <= CHIP_HIGH_MV) {
+                lines.push({ level: 'note', text: t(seen.says, pick.module.title, low / 1000, pick.module.device.high_seen_mv / 1000), judgement: seen.id });
+                continue;
+            }
             if (low > CHIP_HIGH_MV) {
                 lines.push({ level: 'do', text: t('{0}: it takes {1} V as high and this chip gives {2} V: put a level shifter on its line', pick.module.title, low / 1000, CHIP_HIGH_MV / 1000) });
                 shifted.push({ both: false, lines: wired(pick) });

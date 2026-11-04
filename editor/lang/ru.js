@@ -71,6 +71,7 @@ LANGUAGES.ru = {
         '{0}: {1} in one chain on the wires of one, the output of each into the input of the next': '{0}: {1} шт. одной цепочкой на проводах одного, выход каждого во вход следующего',
         '{0}: {1} in one chain on the wires of the first, the output of each into the input of the next': '{0}: {1} одной цепочкой на проводах первого, выход каждого во вход следующего',
         ', then ': ', затем ',
+        '{0}: it takes {1} V as high by its datasheet, and {2} V drove it on hardware: a level shifter on its line is the sure way': '{0}: по даташиту высоким уровнем ему нужно {1} В, на железе его вёл и уровень {2} В: надёжнее поставить на линию преобразователь уровня',
         '{0}: {1} in one chain, {2} outputs each, on the lines: {3}': '{0}: {1} одной цепочкой, по {2} выходов на каждый, на линиях: {3}',
         '{0}: {1} x {2} in one chain for {3} outputs, on the lines: {4}': '{0}: {1} x {2} одной цепочкой на {3} выходов, на линиях: {4}',
         'how many outputs a part drives without a chain is not in the data': 'сколько выходов у детали без цепочки, в данных нет',

@@ -13,7 +13,7 @@
             "by": "Anton",
             "date": "2026-11-04",
             "covers": ["devices.leds"],
-            "notes": "The garland of ~/git/led_strip: a strip of 5 m and one of 1 m in a row, 360 LEDs on one data line of an ESP32, fed from a supply of their own. The volts are those of the WS2812B."
+            "notes": "The garland of ~/git/led_strip: a strip of 5 m and one of 1 m in a row, 360 LEDs on one data line of an ESP32, fed from a supply of their own; the data from the ESP32 is the high_seen_mv of the WS2812B. The volts are those of the WS2812B."
         }
     }
 }

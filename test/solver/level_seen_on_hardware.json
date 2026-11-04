@@ -1,0 +1,17 @@
+{
+    "title": "A WS2812B strip from a GPIO of an ESP32: 3.5 V by the datasheet, 3.3 V drove it on hardware, so a note and no level shifter",
+    "answers": {
+        "board": "esp32_devkit",
+        "blocks": [
+            {
+                "role": "led",
+                "variant": "addressable",
+                "name": "garland",
+                "asks": {
+                    "chain_outputs": 60
+                }
+            }
+        ]
+    },
+    "says": "3.3 V drove it on hardware"
+}

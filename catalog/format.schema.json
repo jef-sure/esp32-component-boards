@@ -404,6 +404,7 @@
       "properties": {
         "class": { "$ref": "#/$defs/class" },
         "high_min_mv": { "type": "integer", "minimum": 1, "description": "The least its inputs take as a high level, when it is more than a chip of 3.3 V gives." },
+        "high_seen_mv": { "type": "integer", "minimum": 1, "description": "The lowest high that drove its inputs on hardware, below high_min_mv of its datasheet; the trial goes in checked." },
         "maker": { "$ref": "#/$defs/maker" },
         "part": { "type": "string", "minLength": 1, "description": "The maker's part number, when the chip's entry does not say it or says less." },
         "marking": { "type": "string", "minLength": 1, "description": "What the package shows, when the part is not known." },
@@ -552,6 +553,7 @@
       "required": ["class"],
       "properties": {
         "high_min_mv": { "type": "integer", "minimum": 1 },
+        "high_seen_mv": { "type": "integer", "minimum": 1 },
         "price": { "$ref": "#/$defs/price", "description": "What one chip costs, by the piece: the worth of such a part on a board that nobody asked for. A board or a module does not inherit it: its own price is that of the whole." },
         "identify": {
           "description": "How a program tells this chip from its clones: a register and what it holds in the original.",
@@ -617,7 +619,7 @@
             "required": ["id", "kind", "says", "why"],
             "properties": {
               "id": { "$ref": "#/$defs/name" },
-              "kind": { "enum": ["prefer_pins", "keep_out", "note_cost", "unnamed_variant", "resource_limit"] },
+              "kind": { "enum": ["prefer_pins", "keep_out", "note_cost", "unnamed_variant", "resource_limit", "seen_level"] },
               "says": { "type": "string", "description": "The line of a kit, {0} what it is about." },
               "why": { "type": "string" }
             },

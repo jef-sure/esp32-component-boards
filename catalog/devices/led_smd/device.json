@@ -11,9 +11,18 @@
         "lcsc": {
             "shop": "LCSC",
             "currency": "USD",
-            "range": [0.0031, 0.0059],
+            "range": [0.0059, 0.0059],
+            "qty": 100,
             "date": "2026-11-02",
-            "source": "C2286, Hubei KENTO KT-0603R, red, from 100 to 100000 pieces, as search results of lcsc.com showed the page"
+            "source": "C2286, Hubei KENTO KT-0603R, red: search results of lcsc.com gave 0.0031 to 0.0059 for 100 to 100000 pieces; the high end is taken for the least quantity and the low for the largest, as the tiers of LCSC go down."
+        },
+        "lcsc_100000": {
+            "shop": "LCSC",
+            "currency": "USD",
+            "range": [0.0031, 0.0031],
+            "qty": 100000,
+            "date": "2026-11-02",
+            "source": "C2286, Hubei KENTO KT-0603R, red: search results of lcsc.com gave 0.0031 to 0.0059 for 100 to 100000 pieces; the high end is taken for the least quantity and the low for the largest, as the tiers of LCSC go down."
         }
     },
     "checked": {

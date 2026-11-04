@@ -11,9 +11,18 @@
         "lcsc": {
             "shop": "LCSC",
             "currency": "USD",
-            "range": [0.024, 0.047],
+            "range": [0.047, 0.047],
+            "qty": 10,
             "date": "2026-11-02",
-            "source": "C2874125, NationStar NH-5050RGBA-SH, from 10 to 4500 pieces, as search results of lcsc.com showed the page"
+            "source": "C2874125, NationStar NH-5050RGBA-SH: search results of lcsc.com gave 0.024 to 0.047 for 10 to 4500 pieces; the high end is taken for the least quantity and the low for the largest, as the tiers of LCSC go down."
+        },
+        "lcsc_4500": {
+            "shop": "LCSC",
+            "currency": "USD",
+            "range": [0.024, 0.024],
+            "qty": 4500,
+            "date": "2026-11-02",
+            "source": "C2874125, NationStar NH-5050RGBA-SH: search results of lcsc.com gave 0.024 to 0.047 for 10 to 4500 pieces; the high end is taken for the least quantity and the low for the largest, as the tiers of LCSC go down."
         }
     },
     "checked": {

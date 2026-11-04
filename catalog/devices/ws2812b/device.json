@@ -14,9 +14,18 @@
         "lcsc": {
             "shop": "LCSC",
             "currency": "USD",
-            "range": [0.047, 0.099],
+            "range": [0.099, 0.099],
+            "qty": 5,
             "date": "2026-11-02",
-            "source": "C114586, WS2812B-B/W, from 5 to 1000 pieces, as search results of lcsc.com showed the page; the live page gives no table to a fetch"
+            "source": "C114586, WS2812B-B/W: search results of lcsc.com gave 0.047 to 0.099 for 5 to 1000 pieces; the high end is taken for the least quantity and the low for the largest, as the tiers of LCSC go down. The live page gives no table to a fetch."
+        },
+        "lcsc_1000": {
+            "shop": "LCSC",
+            "currency": "USD",
+            "range": [0.047, 0.047],
+            "qty": 1000,
+            "date": "2026-11-02",
+            "source": "C114586, WS2812B-B/W: search results of lcsc.com gave 0.047 to 0.099 for 5 to 1000 pieces; the high end is taken for the least quantity and the low for the largest, as the tiers of LCSC go down. The live page gives no table to a fetch."
         }
     },
     "checked": {

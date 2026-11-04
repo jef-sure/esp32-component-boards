@@ -20,7 +20,7 @@ Checks of the data format. Needs jsonschema and node: the Python of ESP-IDF has 
    imported/ (when compote of ESP-IDF and git are there);
 11. take_report.py takes a price and a shop from an issue, and every offer names a shop of catalog/shops.json;
 12. board_select.py writes a preset for each board in the order named and default for the current one, changes only default
-   with --current, and leaves a CMakePresets.json of another alone.
+   with --current, makes them again by selection.json with --again, and leaves a CMakePresets.json of another alone.
 """
 import copy
 import json
@@ -284,6 +284,14 @@ def presets_wrong():
         names = [(item["name"], item["binaryDir"]) for item in json.loads(written.read_text())["configurePresets"]]
         if names != [("cyd_s028r", "build/cyd_s028r"), ("jc4827w543c", "build/jc4827w543c"), ("default", "build/jc4827w543c")]:
             wrong.append(f"after --current the presets are {names}")
+        # the files a page writes, the command in their first line and the order in selection.json: --again makes the rest
+        for path in project.glob("sdkconfig.defaults.*"):
+            path.write_text(f"# board_select.py {path.name.split('.')[-1]}\n")
+        (project / "selection.json").write_text('{"boards": [{"name": "jc4827w543c"}, {"name": "cyd_s028r"}], "current": "cyd_s028r"}')
+        subprocess.run([sys.executable, str(ROOT / "tools" / "board_select.py"), "--again", str(project)], capture_output=True, check=True)
+        names = [(item["name"], item["binaryDir"]) for item in json.loads(written.read_text())["configurePresets"]]
+        if names != [("jc4827w543c", "build/jc4827w543c"), ("cyd_s028r", "build/cyd_s028r"), ("default", "build/cyd_s028r")] or "CONFIG_IDF_TARGET" not in (project / "sdkconfig.defaults.cyd_s028r").read_text():
+            wrong.append(f"--again from the files of a page made the presets {names}")
         for path in project.glob("sdkconfig.defaults.*"):
             path.unlink()
         (project / "CMakePresets.json").write_text('{"version": 3, "configurePresets": []}\n')

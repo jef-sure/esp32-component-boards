@@ -145,7 +145,9 @@ idf.py -B build/jc1060p470c -D SDKCONFIG=build/jc1060p470c/sdkconfig -D BOARD=jc
 ```
 
 A `CMakePresets.json` that `board_select.py` did not write is not touched: the
-command says so, and the presets are added by hand.
+command says so, and the presets are added by hand. `board_select.py --again .` makes
+every file again by the command in its first line; with several boards it writes the
+presets too, in the order of the boards of `selection.json` and with its `current`.
 
 A `-D SDKCONFIG_DEFAULTS=...` on the command line wins over both: the CMake
 snippet above only sets the variable when none is given.

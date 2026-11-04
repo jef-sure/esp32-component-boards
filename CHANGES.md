@@ -319,6 +319,9 @@ committed, a program that asks by kind.
   when the versions differ, restarted again and again. `board_select.py` copies the lock of the project to each board
   the first time and says that it is not read after. One lock for two boards would keep the solution of the first: the
   component manager solves again when the manifest changes (7c, from its source).
+- `board_select.py --again` writes the presets of several boards too, in the order of the boards of `selection.json` and
+  with its `current`, else as the presets had them; a file whose first line alone is the command is made in full. So a
+  page that writes `selection.json` and such files leaves one command to the person, or none when a bridge runs it.
 - A level seen on hardware is a note, not a part: `high_seen_mv` of a chip, the lowest high that drove it on hardware,
   with its trial in `checked`, and the judgement `level_seen_on_hardware`. The WS2812B takes 3.5 V by its datasheet;
   the 3.3 V of an ESP32 drove Anton's garland, so a kit of strips says so and adds no level shifter (Anton: "in

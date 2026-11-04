@@ -32,7 +32,9 @@ of its chip in its CMake cache, so a change of the chip takes idf.py set-target,
 command then names.
 
 Each file begins with the command that made it and the version of the component; when the component
-changes, board_select.py --again PROJECT_DIR makes every such file of the project again the same way.
+changes, board_select.py --again PROJECT_DIR makes every such file of the project again the same way. A file whose
+first line alone is the command, as the page writes it, is made the same way; with several boards --again writes the
+presets too, in the order and with the current board of selection.json.
 ESP-IDF reads the defaults only into a new sdkconfig, so an sdkconfig made before keeps what it had.
 
 Several boards write PROJECT_DIR/sdkconfig.defaults.<BOARD> each, and PROJECT_DIR/CMakePresets.json: a preset
@@ -195,15 +197,39 @@ def again(parser, project):
     files = [path for path in sorted(project.glob("sdkconfig.defaults.*")) if path.read_text().startswith(RECORD)]
     if not files:
         raise SystemExit(f"{project}: no sdkconfig.defaults.* there says how it was made: choose the board again")
+    targets = {}
     for path in files:
         args = parser.parse_intermixed_args(shlex.split(path.read_text().splitlines()[0][len(RECORD):]) + [str(project)])
         board = args.names[0]
         text, target = host_text(local, args.shows) if board == HOST else defaults_text(project, local, board, args.module, args.revision)
         path.write_text(made_by(board, args.module, args.revision, args.shows) + text)
         print(f"{path}: {board}, {target}, again")
+        if path.name != "sdkconfig.defaults.board":
+            targets[board] = target
+    if len(targets) > 1:
+        boards, current = order_of(project, list(targets))
+        command = f"board_select.py --again {project}"
+        (project / PRESETS).write_text(presets_text(project, boards, [targets[board] for board in boards], current, command))
+        print(f"{project / PRESETS}: a preset for each, and default for the current one, {current}")
+        seed_locks(project, boards)
     print("An sdkconfig made before keeps what it had: ESP-IDF reads the defaults only into a new one. To take what changed,\n"
           "board_select.py BOARD --reset PROJECT_DIR for one board, or remove build/<BOARD>/sdkconfig of several.")
     return 0
+
+
+def order_of(project, boards):
+    """The order of several boards and the current one: as selection.json of the page has them, else as the presets of the
+    project had them, else by name and the first."""
+    chosen = project / "selection.json"
+    listed = [entry.get("name") for entry in json.loads(chosen.read_text()).get("boards", [])] if chosen.exists() else []
+    current = json.loads(chosen.read_text()).get("current") if chosen.exists() else None
+    presets = project / PRESETS
+    if not listed and presets.exists() and VENDOR in json.loads(presets.read_text()).get("vendor", {}):
+        made = json.loads(presets.read_text())["configurePresets"]
+        listed = [preset["name"] for preset in made if preset["name"] != DEFAULT]
+        current = current or next((preset["cacheVariables"]["BOARD"] for preset in made if preset["name"] == DEFAULT), None)
+    order = [board for board in listed if board in boards] + sorted(board for board in boards if board not in listed)
+    return order, current if current in order else order[0]
 
 
 def host_text(local, shows):

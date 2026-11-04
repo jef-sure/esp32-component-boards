@@ -257,7 +257,16 @@ def reports_refused():
         if offer["range"] != [3.76, 3.76] or offer["shop"] != "AliExpress":
             print(f"take_report.py took 3,76 of aliexpress as {offer['range']} of {offer['shop']}")
             wrong += 1
-        for field, value in (("item", "../../etc/passwd"), ("item", "modules/pn5180_module"), ("item", "modules/x; rm -rf /"), ("currency", "dollars"), ("price", "free"), ("price", "5-3"), ("price", "1,200"), ("price", "€3"), ("qty", "many"), ("shop", "x" * 61)):
+        # prices as they are written in one country or another
+        for text, currency, value in (("1.234,56", "EUR", [1234.56] * 2), ("1,234.56", "USD", [1234.56] * 2), ("1 234,56", "EUR", [1234.56] * 2),
+                                      ("1'234.56", "CHF", [1234.56] * 2), ("1,20,000", "INR", [120000.0] * 2), ("0,082", "EUR", [0.082] * 2),
+                                      ("3,5 – 4,2", "EUR", [3.5, 4.2]), ("3,76 €", "EUR", [3.76] * 2), ("$5", "USD", [5.0] * 2)):
+            if take_report.price_of(text, currency) != value:
+                print(f"take_report.py read {text} as {take_report.price_of(text, currency)}")
+                wrong += 1
+        for field, value in (("item", "../../etc/passwd"), ("item", "modules/pn5180_module"), ("item", "modules/x; rm -rf /"), ("currency", "dollars"),
+                             ("price", "free"), ("price", "5-3"), ("price", "1,200"), ("price", "1.200"), ("price", "€3"), ("price", "1.234.5"),
+                             ("price", "1-2-3"), ("qty", "many"), ("shop", "x" * 61)):
             try:
                 take_report.take(body.format(**{**fine, field: value}), 8, catalog, "2026-11-01")
                 print(f"take_report.py took {field}: {value}")

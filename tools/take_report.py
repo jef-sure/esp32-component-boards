@@ -19,9 +19,14 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 FILES = {"boards": "board.json", "modules": "module.json", "addons": "addon.json"}
 ITEM = re.compile(r"^(boards|modules|addons)/[a-z0-9_]+$")
 CURRENCY = re.compile(r"^[A-Z]{3}$")
-# A decimal comma has one or two digits after it: 1,200 may be a thousand and two hundred, and is refused.
-NUMBER = r"\d+(?:\.\d+|,\d{1,2})?"
-PRICE = re.compile(rf"^({NUMBER})(?:\s*-\s*({NUMBER}))?$")
+# Digits with the marks people put between them: a point or a comma, and a space, a no-break space or an apostrophe
+# that only part thousands.
+NUMBER = re.compile(r"^\d(?:[\d.,' \u00a0\u202f\u2009]*\d)?$")
+GROUPS = " '\u00a0\u202f\u2009"
+DASH = re.compile(r"\s*[-\u2013\u2014]\s*")
+# A sign in the price is taken when it is one of the currency of the form.
+SIGNS = {"€": {"EUR"}, "£": {"GBP"}, "₹": {"INR"}, "¥": {"JPY", "CNY"}, "$": {"USD", "AUD", "CAD", "NZD", "SGD", "HKD", "MXN"}}
+PRICE_FORMS = "a number as 3.76, 3,76, 1,234.56 or 1.234,56, or a range as 3-5"
 EMPTY = "_No response_"
 
 
@@ -32,6 +37,54 @@ def fields_of(body):
         label, _, value = part.partition("\n")
         found[label.strip()] = "" if value.strip() == EMPTY else value.strip()
     return found
+
+
+def number_of(text):
+    """A price as it is written in one country or another: 3.76, 3,76, 1,234.56, 1.234,56, 1 234,56, 1'234.56.
+    Raises ValueError when it is not a number, or when it reads two ways."""
+    if not NUMBER.match(text):
+        raise ValueError(f"Price of one: {PRICE_FORMS}")
+    marks = [char for char in text if char in ".,"]
+    decimal = None
+    if len(set(marks)) == 2:
+        decimal = marks[-1]
+    elif len(marks) == 1:
+        whole, fraction = re.split("[.,]", text)
+        # one mark before three digits is a decimal mark or a thousands one: 1,200 is 1.2 in Germany and 1200 in England
+        if len(fraction) == 3 and whole.strip(GROUPS) != "0" and not any(char in GROUPS for char in text):
+            raise ValueError(f"Price of one: {text} reads two ways, {whole}.{fraction} and {whole}{fraction}: write {whole}{fraction} for the second, "
+                             f"{whole}{marks[0]}{fraction}0 for the first")
+        decimal = marks[0]
+    whole, _, fraction = text.rpartition(decimal) if decimal else (text, "", "")
+    parted_by = set(re.sub(r"\d", "", whole))
+    groups = re.split(r"[.,' \u00a0\u202f\u2009]", whole)
+    if len(parted_by) > 1 or decimal in parted_by or not grouped([len(group) for group in groups]):
+        raise ValueError(f"Price of one: {text}: the thousands are not parted by three digits; {PRICE_FORMS}")
+    return float("".join(groups) + "." + (fraction or "0"))
+
+
+def grouped(sizes):
+    """Digit groups of a whole number: by three, as 1,234,567, or in India by two before the last three, as 12,34,567."""
+    if len(sizes) == 1:
+        return True
+    if sizes[-1] != 3:
+        return False
+    return 1 <= sizes[0] <= 3 and all(size == 3 for size in sizes[1:]) or 1 <= sizes[0] <= 2 and all(size == 2 for size in sizes[1:-1])
+
+
+def price_of(text, currency):
+    """The range of a price, with the currency taken out when it is the one of the form."""
+    text = re.sub(rf"(?i)\b{currency}\b", " ", text)
+    for sign, codes in SIGNS.items():
+        if currency in codes:
+            text = text.replace(sign, " ")
+    numbers = DASH.split(text.strip())
+    if len(numbers) > 2:
+        raise ValueError(f"Price of one: {PRICE_FORMS}")
+    low, high = number_of(numbers[0]), number_of(numbers[-1])
+    if low > high:
+        raise ValueError("Price of one: the range runs down")
+    return [low, high]
 
 
 def offer_of(fields, issue, today):
@@ -45,13 +98,7 @@ def offer_of(fields, issue, today):
         raise ValueError("Shop: one short line")
     if not CURRENCY.match(currency):
         raise ValueError("Currency: three letters")
-    price = PRICE.match(fields.get("Price of one", ""))
-    if not price:
-        raise ValueError("Price of one: a number as 3.76 or 3,76, or a range as 3-5, without a currency sign or a thousands separator")
-    low, high = (float(number.replace(",", ".")) for number in (price[1], price[2] or price[1]))
-    if low > high:
-        raise ValueError("Price of one: the range runs down")
-    offer = {"shop": shop, "currency": currency, "range": [low, high], "date": today, "source": f"Issue {issue}, as reported"}
+    offer = {"shop": shop, "currency": currency, "range": price_of(fields.get("Price of one", ""), currency), "date": today, "source": f"Issue {issue}, as reported"}
     qty = fields.get("Sold by", "")
     if qty:
         if not qty.isdigit() or int(qty) < 1:

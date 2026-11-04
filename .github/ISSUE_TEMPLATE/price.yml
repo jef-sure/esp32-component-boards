@@ -27,7 +27,7 @@ body:
     id: price
     attributes:
       label: Price of one
-      description: One number, as 3.76 or 3,76, or a range as 3-5. Without delivery.
+      description: One number, as 3.76, 3,76 or 1.234,56, or a range as 3-5. Without delivery.
     validations:
       required: true
   - type: input

@@ -176,8 +176,9 @@ any currency compare on the page. It needs the network and nothing else; the pag
 Takes a price from an issue of the form `price.yml` and adds it to the file of its item as an offer. The text of an
 issue comes from anyone, so it is only read as fields, and `.github/workflows/reports.yml` gives it through a file. The
 workflow opens a pull request, and a person merges it; a refused report gets a comment with the reason, and an edit of the
-issue is read again. A price may have a decimal comma with one or two digits after it; a shop is written as the catalog
-already writes it. `check_format.py` tries the tool on good and bad reports.
+issue is read again. A price is read as it is written in one country or another: 3.76, 3,76, 1,234.56, 1.234,56,
+1 234,56, 1'234.56, 12,34,567, with the sign or the code of its currency or without. One mark before three digits, as
+1,200, reads two ways and is refused with both readings. A shop is written as the catalog already writes it. `check_format.py` tries the tool on good and bad reports.
 
 ## import_board_manager.py
 

@@ -269,8 +269,10 @@ committed, a program that asks by kind.
   only a library of another author listed (the audit of 2026-11-03, 4.20). It is not audited yet.
 - The prices of LCSC of the WS2812B, the 0603 LED and the 5050 RGB LED are two offers each, by quantity, not one range
   for any quantity (the audit of 2026-11-03, 4.16); the source says the tiers were read from search results.
-- A reported price takes a decimal comma, 3,76, with one or two digits after it; 1,200 is refused, as it may be a
-  thousand and two hundred. The shop is written as the catalog writes it, AliExpress for aliexpress. The workflow runs
+- A reported price is read as it is written in one country or another: 3,76 and 1.234,56 as in Germany, 1,234.56,
+  1 234,56, 1'234.56, 12,34,567 as in India, with the sign or the code of its currency when it is the one of the form.
+  One mark before three digits, as 1,200, reads two ways, 1.2 and 1200, and is refused with both. The shop is written
+  as the catalog writes it, AliExpress for aliexpress. The workflow runs
   once for an issue (the form gave two runs and two comments), runs again when the issue is edited, and a refused
   report gets its reason alone, not the output of check_format (issue 3).
 - The ESP32-C3-Zero and the ESP32-S3-Zero have their USB-C as a part, `usb` with `d_minus` and `d_plus`, from their

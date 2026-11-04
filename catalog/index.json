@@ -72,6 +72,7 @@
     "libraries/esp-idf/jef-sure/dgx-lvgl/library.json",
     "libraries/esp-idf/jef-sure/dgx/library.json",
     "libraries/esp-idf/jef-sure/hd44780/library.json",
+    "libraries/esp-idf/jef-sure/ld2410c/library.json",
     "libraries/esp-idf/jef-sure/pn5180/library.json",
     "libraries/esp-idf/jef-sure/pn532/audit.json",
     "libraries/esp-idf/jef-sure/pn532/library.json",

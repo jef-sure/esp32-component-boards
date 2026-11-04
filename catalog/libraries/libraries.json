@@ -8346,6 +8346,17 @@
             "archived": false,
             "license": "MIT"
         },
+        "esp-idf/jef-sure/ld2410c": {
+            "title": "LD2410C",
+            "version": "0.1.5",
+            "repository": "https://github.com/jef-sure/esp32-component-ld2410c",
+            "platforms": ["esp_idf"],
+            "chips": ["ld2410c"],
+            "stars": 1,
+            "changed": "2026-10-07",
+            "archived": false,
+            "license": "MIT"
+        },
         "esp-idf/jef-sure/pn5180": {
             "title": "PN5180",
             "version": "0.6.0",

@@ -388,7 +388,7 @@
         ],
         "jd9365": ["arduino/esp-arduino-libs/esp32_display_panel", "esp-idf/jef-sure/dgx", "github/0015/a3d"],
         "lc709203f": ["arduino/adafruit/adafruit-lc709203f"],
-        "ld2410c": ["github/borseandy/hlk_ld2410c_lib"],
+        "ld2410c": ["esp-idf/jef-sure/ld2410c", "github/borseandy/hlk_ld2410c_lib"],
         "lp5562": ["arduino/tedlanghorst/lp5562", "esp-idf/lp5562/lp5562"],
         "lpd8806": ["arduino/adafruit/lpd8806"],
         "lps28": [

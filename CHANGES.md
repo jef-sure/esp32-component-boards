@@ -248,6 +248,8 @@ committed, a program that asks by kind.
   `board_sound_start`, `board_sound_source` and their `_at` forms take `ctx`, given back to it at every call, so the mixer
   of a game needs no static. The task takes the source and its context together. The names `board_`, `boards_`,
   `BOARD_` and `CONFIG_BOARD_` are said to be the component's (both found by 7c after the move of dgx-ge was decided).
+- The record of `jef-sure/ld2410c` 0.1.5, from its README and header, and its line in libraries.json: the LD2410C had
+  only a library of another author listed (the audit of 2026-11-03, 4.20). It is not audited yet.
 - The prices of LCSC of the WS2812B, the 0603 LED and the 5050 RGB LED are two offers each, by quantity, not one range
   for any quantity (the audit of 2026-11-03, 4.16); the source says the tiers were read from search results.
 - The ESP32-C3-Zero and the ESP32-S3-Zero have their USB-C as a part, `usb` with `d_minus` and `d_plus`, from their

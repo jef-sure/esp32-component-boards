@@ -1,0 +1,39 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "library",
+    "ecosystem": "esp-idf",
+    "owner": "jef-sure",
+    "name": "ld2410c",
+    "title": "LD2410C",
+    "url": "https://github.com/jef-sure/esp32-component-ld2410c",
+    "license": "MIT",
+    "install": [
+        {"via": "registry"},
+        {"via": "git", "url": "https://github.com/jef-sure/esp32-component-ld2410c.git", "ref": "v{version}"}
+    ],
+    "described": "0.1.5",
+    "chips": {
+        "ld2410c": {
+            "header": "ld2410c.h",
+            "on": ["uart"],
+            "init": [
+                {
+                    "call": "ld2410c_init",
+                    "args": ["{port}", "{timeout_ms}"],
+                    "returns": "radar",
+                    "notes": "The program installs the driver of the UART, 256000 baud 8N1 by default, and sets its pins before: ld2410c_init takes only the port and a timeout of each wait.",
+                    "ok": {"not": "NULL"}
+                }
+            ],
+            "notes": "The driver does no locking: one task uses the handle, or the program guards every call."
+        }
+    },
+    "checked": {
+        "api": {
+            "level": "vendor-code",
+            "source": "README and include/ld2410c.h of esp32-component-ld2410c 0.1.5",
+            "date": "2026-11-04"
+        }
+    }
+}

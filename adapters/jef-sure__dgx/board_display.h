@@ -10,6 +10,7 @@ struct board_display_panel {
     int         dir_x, dir_y;                 /* how the board shows it */
     bool        swap_xy;
     int         backlight, backlight_on;      /* lit here after the driver starts; GPIO_NUM_NC when the driver does it */
+    const struct board_spi_bus *host;         /* an SPI host it shares with other parts, set up here first; NULL when it has its own */
     dgx_bus_protocols_t *(*bus)(void);
     dgx_screen_t *(*screen)(dgx_bus_protocols_t *bus);
     void (*orientation)(dgx_screen_t *scr, dgx_orientation_t dir_x, dgx_orientation_t dir_y, bool swap_xy);

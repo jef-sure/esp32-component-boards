@@ -252,6 +252,10 @@ committed, a program that asks by kind.
   of the chip in the record of its library, and the data of its kind (`board_touch_gt911`, `board_touch_spi`,
   `board_touch_gsl3680`, `board_sound_es8311`, `board_sound_dac`, the I2S bus). The functions `touchN_start` and
   `soundN_init` the generator wrote into every glue are gone; the adapters take the row (the audit of 2026-11-03, 5.10).
+  The glue of a character display gives `board_character_panel` with the port of its I2C bus, and the adapter of
+  hd44780 takes the master of the port and defines `board_character_display_init`; a display that shares its SPI host
+  names it in its row, and the adapter of DGX sets it up. Each function left in a glue is one call filled from the
+  record of a library: the bus and the screen of a display, the bus of a character display.
 - The order of audited libraries in a kit holds its basis, shown by the page on hover: for each library the version
   read, the defects with what it requires, the points of `frames`, `waiting` and `code_health`, the date and the file of
   the audit (Anton: the audits serve the choice, and the reason of a choice can be looked at, not shown off). They ship

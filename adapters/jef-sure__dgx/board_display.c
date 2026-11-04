@@ -27,6 +27,7 @@ static void keep_orientation(const struct board_display_panel *panel, struct boa
 
 static bool start_panel(const struct board_display_panel *panel, struct board_display_started *d)
 {
+    if (panel->host && !board_glue_spi_host(panel->host)) return false;
     dgx_bus_protocols_t *bus = panel->bus();
     if (!bus) return false;
     dgx_screen_t *screen = panel->screen(bus);

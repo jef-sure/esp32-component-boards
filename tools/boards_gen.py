@@ -765,8 +765,8 @@ def gen_c(board):
     out(f" * The glue of {name}, made by tools/boards_gen.py from {data_path(board)}: do not")
     out(" * edit by hand: edit the data and generate again (tools/check_boards.py checks the two agree).")
     if is_module:
-        out(" * A module: not a board but a device the chosen board's bus carries. It gives the function of")
-        out(" * its kind, and CONFIG_BOARD_DISPLAY_HD44780 leaves out the one of src/ that returns false.")
+        out(" * A module: not a board but a device the chosen board's bus carries. It gives the table of its")
+        out(" * kind; the adapter of its library reads it, and the function of src/ that returns false is left out.")
     else:
         out(" * The data of the board as tables, and the functions of the parts it starts: src/ reads the")
         out(" * tables, and what the board has not returns false there, so the contract of boards.h holds")
@@ -865,24 +865,22 @@ def gen_c(board):
         gpins = transport.get("pins", {})
         cols, rows = letters["geometry"].split("x")
         out(f"/* The character display: a {letters['geometry']} {letters['driver']} on {transport['bus']}. */")
-        out("static lcd_bus_hd44780_t *character_bus(void)")
-        out("{")
         library = resolve.library(letters["library"])
         if kind == "i2c":
             step = library["transports"]["i2c"]["shared"]
+            out("static lcd_bus_hd44780_t *character_bus(i2c_master_bus_handle_t i2c)")
+            out("{")
+            out(f"    return {fill_call(step, {'i2c_bus': 'i2c', 'address': format(i2c_address(transport.get('address')), '#04x'), **library['transports']['i2c']['defaults']})};")
             # a module leaves its bus to the board: the first I2C bus the board names
-            out(f"    i2c_master_bus_handle_t bus = board_glue_i2c(I2C_NUM_{i2c_port if transport['bus'] == MODULE_BUS else port_of(width, 'i2c')});")
-            out(f"    return bus ? {fill_call(step, {'i2c_bus': 'bus', 'address': format(i2c_address(transport.get('address')), '#04x'), **library['transports']['i2c']['defaults']})} : NULL;")
+            where = f".i2c_port = I2C_NUM_{i2c_port if transport['bus'] == MODULE_BUS else port_of(width, 'i2c')}, .on_i2c = character_bus"
         else:
+            out("static lcd_bus_hd44780_t *character_bus(void)")
+            out("{")
             out(f"    return {fill_call(library['transports'][transport['bus']]['init'], collections.defaultdict(lambda: c_gpio(None), {pin: c_gpio(num) for pin, num in gpins.items()}))};")
+            where = ".i2c_port = -1, .on_gpio = character_bus"
         out("}")
         out("")
-        out(f"static const struct board_character_panel character_panel = {{.geometry = HD44780_GEOMETRY_{cols}X{rows}, .cols = {cols}, .rows = {rows}, .bus = character_bus}};")
-        out("")
-        out("bool board_character_display_init(struct board_character_display *out)")
-        out("{")
-        out("    return board_glue_character_init(&character_panel, out);")
-        out("}")
+        out(f"const struct board_character_panel board_character_panel = {{.geometry = HD44780_GEOMETRY_{cols}X{rows}, .cols = {cols}, .rows = {rows}, {where}}};")
         out("")
     if pixel:
         rows, group_rows = [], []
@@ -909,11 +907,7 @@ def gen_c(board):
             values.update({"dc": "GPIO_NUM_NC", **{line: c_gpio(db[line]) for line in ("cs", "dc") if line in db and not (own_select and line == "cs")}})
             values.update({"hz": db["hz"]} if "hz" in db else {})  # the speed of a device goes before that of its bus
             values.setdefault("cs", "GPIO_NUM_NC")
-            if bus_name in shared:
-                out(f"    if (!board_glue_spi_host(&board_spi_{own})) return NULL;")
-                out(f"    return {fill_call(transport['shared'], values)};")
-            else:
-                out(f"    return {fill_call(transport['init'], values)};")
+            out(f"    return {fill_call(transport['shared' if bus_name in shared else 'init'], values)};")
             out("}")
             out("")
             backlight = c_gpio(shown.get("backlight"))
@@ -928,7 +922,7 @@ def gen_c(board):
             light = backlight if any(step.get("line") == "backlight" for step in entry.get("setup", ())) else "GPIO_NUM_NC"
             rows.append(f"    {{.name = \"{shown['name']}\", .glass_w = {panel['width']}, .glass_h = {panel['height']}, .mm_w = {panel.get('mm_w', 0)}, .mm_h = {panel.get('mm_h', 0)}, "
                         f".dir_x = {library['values']['dir_x'][orientation['x']]}, .dir_y = {library['values']['dir_y'][orientation['y']]}, .swap_xy = {'true' if orientation.get('swap', False) else 'false'}, "
-                        f".backlight = {light}, .backlight_on = {1 if shown.get('backlight_on_high', True) else 0}, .bus = display{i}_bus, .screen = display{i}_screen, .orientation = {entry['controls']['orientation']['call']}}},")
+                        f".backlight = {light}, .backlight_on = {1 if shown.get('backlight_on_high', True) else 0}, {f'.host = &board_spi_{own}, ' if bus_name in shared else ''}.bus = display{i}_bus, .screen = display{i}_screen, .orientation = {entry['controls']['orientation']['call']}}},")
         grouped = [f"    {{.name = \"{name}\", .group = true, .left = {place[group['left']]}, .right = {place[group['right']]}}}," for name, group in group_rows]
         table = grouped + rows if first else rows + grouped
         out("static const struct board_display_panel display_panels[] = {")

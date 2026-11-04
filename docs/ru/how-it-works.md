@@ -145,10 +145,10 @@ espressif/esp_lcd_touch_gt911:
 символьный LCD 2004 на переходнике PCF8574. Он описан как плата без чипа
 (`"kind": "module"`), имеет собственную опцию в меню
 (`CONFIG_BOARD_MODULE_LCD2004_PCF8574`), и его `sdkconfig.defaults` включает
-эту опцию. Его клей определяет функцию своего рода,
-`board_character_display_init`, а версия из `src/board_display_none.c`,
-возвращающая `false`, не компилируется, пока символьный дисплей есть
-(`#if !CONFIG_BOARD_DISPLAY_HD44780`).
+эту опцию. Его клей отдаёт таблицу своего рода, `board_character_panel`;
+адаптер hd44780 определяет по ней `board_character_display_init`, а версия из
+`src/board_display_none.c`, возвращающая `false`, не компилируется, пока символьный
+дисплей есть (`#if !CONFIG_BOARD_DISPLAY_HD44780`).
 См. [modules.md](modules.md).
 
 ## Проверки

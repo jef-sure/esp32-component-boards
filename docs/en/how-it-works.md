@@ -146,10 +146,10 @@ A module is a device any board's bus can carry: today the 2004 character LCD
 on a PCF8574 backpack. It is described as a board without a chip
 (`"kind": "module"`), has an option of its own in the menu
 (`CONFIG_BOARD_MODULE_LCD2004_PCF8574`), and its `sdkconfig.defaults` turns
-that option on. Its glue defines the function of its kind,
-`board_character_display_init`, and the one of `src/board_display_none.c` that
-returns `false` is left out while a character display is there
-(`#if !CONFIG_BOARD_DISPLAY_HD44780`).
+that option on. Its glue gives the table of its kind, `board_character_panel`;
+the adapter of hd44780 defines `board_character_display_init` from it, and the one
+of `src/board_display_none.c` that returns `false` is left out while a character
+display is there (`#if !CONFIG_BOARD_DISPLAY_HD44780`).
 See [modules.md](modules.md).
 
 ## The checks

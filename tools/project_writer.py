@@ -19,18 +19,22 @@ import json
 import os
 import pathlib
 import re
+import secrets
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 WRITTEN = ".boards/written.json"
+NEW_FILE_MODE = 0o666  # the umask of the person takes from it
 ALLOWED = "allowed.json"
 # what the build and the component manager make, and the folder of git, whose hooks are code: never written here
 MADE_BY_OTHERS = re.compile(r"^(build.*|managed_components)$")
 LOCK = re.compile(r"^dependencies\.lock.*$")
-EMPTY = re.compile(r"^(\.git|\.gitignore|\.gitattributes|README.*|LICENSE.*)$", re.I)  # a folder of only these is empty, as store.js says
+# a folder of only these is empty: hidden ones, as .git and the .vscode VS Code makes in any folder it opens, a README, a licence
+EMPTY = re.compile(r"^(\..*|README.*|LICENSE.*)$", re.I)
 # what board_select.py --again reads of a project
 AGAIN_READS = ("CMakeLists.txt", "selection.json", "CMakePresets.json", "dependencies.lock")
 
@@ -62,11 +66,16 @@ def digest(text):
 
 
 def put(path, text):
-    """A file written whole or not at all: beside it first, then renamed over it."""
+    """A file written whole or not at all: beside it first, then renamed over it. A new file is readable as any file
+    the person makes (0666 under the umask), one that is replaced keeps its mode."""
     path.parent.mkdir(parents=True, exist_ok=True)
-    with tempfile.NamedTemporaryFile("w", dir=path.parent, prefix=f".{path.name}.", delete=False) as file:
+    beside = path.parent / f".{path.name}.{secrets.token_hex(4)}"
+    descriptor = os.open(beside, os.O_WRONLY | os.O_CREAT | os.O_EXCL, NEW_FILE_MODE)
+    with os.fdopen(descriptor, "w") as file:
         file.write(text)
-    os.replace(file.name, path)
+    if path.exists():
+        os.chmod(beside, stat.S_IMODE(path.stat().st_mode))
+    os.replace(beside, path)
 
 
 def config_dir():
@@ -106,7 +115,8 @@ class Project:
         put(path, json.dumps(allowed, indent=2, sort_keys=True) + "\n")
 
     def states(self, files):
-        """For each file: refused with why, new, same, ours (unchanged since written here) or changed (a person's)."""
+        """For each file: refused with why, new, same, ours (unchanged since written here) or changed (a person's), with
+        the digest of what lies there now: a tick to replace a person's file names it, so it replaces what was shown."""
         written = self.written()
         found = {}
         for rel, text in files.items():
@@ -116,7 +126,8 @@ class Project:
                 continue
             path = self.root / rel
             old = path.read_text(errors="replace") if path.exists() else None
-            found[rel] = {"state": "new" if old is None else "same" if old == text else "ours" if written.get(rel) == digest(old) else "changed"}
+            state = "new" if old is None else "same" if old == text else "ours" if written.get(rel) == digest(old) else "changed"
+            found[rel] = {"state": state, **({"digest": digest(old)} if old is not None else {})}
         return found
 
     def made_again(self, files):
@@ -152,15 +163,17 @@ class Project:
         made, failed = self.made_again(files)
         return {"files": self.states(files), "made": self.states(made), **({"failed": failed} if failed else {})}
 
-    def write(self, files, replace=()):
-        """Writes files and what --again makes after them, all or nothing: refused when one is refused or is a person's
-        and not in replace. Returns the paths written and those refused."""
+    def write(self, files, replace=None):
+        """Writes files and what --again makes after them, all or nothing: refused when one is refused, or is a person's
+        and replace does not name it with the digest of what lies there, as the plan showed it: a file changed again
+        since is refused. Returns the paths written and those refused."""
+        replace = replace or {}
         made, failed = self.made_again(files)
         if failed:
             return {"written": [], "refused": {}, "failed": failed}
         every = {**files, **made}
         states = self.states(every)
-        refused = {rel: state for rel, state in states.items() if state["state"] == "refused" or (state["state"] == "changed" and rel not in replace)}
+        refused = {rel: state for rel, state in states.items() if state["state"] == "refused" or (state["state"] == "changed" and replace.get(rel) != state["digest"])}
         if refused:
             return {"written": [], "refused": refused}
         written = self.written()
@@ -172,11 +185,11 @@ class Project:
             written[rel] = digest(text)
         put(self.root / WRITTEN, json.dumps(written, indent=2, sort_keys=True) + "\n")
         # each board's lock starts as the project's, once: a file of the component manager, neither hashed nor replaced here
-        boards = [path.name.split(".", 2)[2] for path in self.root.glob("sdkconfig.defaults.*") if path.name != "sdkconfig.defaults.board"]
-        if len(boards) > 1:
-            sys.path.insert(0, str(ROOT / "tools"))
-            import board_select
+        sys.path.insert(0, str(ROOT / "tools"))
+        import board_select
 
+        boards = board_select.boards_of(self.root)
+        if len(boards) > 1:
             # stdout of the bridge is the channel of MCP: what the tool says goes to stderr
             with contextlib.redirect_stdout(sys.stderr):
                 board_select.seed_locks(self.root, boards)

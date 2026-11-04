@@ -191,10 +191,21 @@ def made_by(board, modules=(), revision=None, shows=None):
     return f"{RECORD}{' '.join(words)}\n# from {made}: board_select.py --again PROJECT_DIR makes it again when the component changes\n"
 
 
+def made_here(project):
+    """The files of the project board_select.py wrote: those whose first line is its command. ESP-IDF's own files of a
+    target, as sdkconfig.defaults.esp32p4, are not among them."""
+    return [path for path in sorted(project.glob("sdkconfig.defaults.*")) if path.read_text(errors="replace").startswith(RECORD)]
+
+
+def boards_of(project):
+    """The boards of a project of several: those of the files board_select.py wrote, but the one board alone."""
+    return [path.name.split(".", 2)[2] for path in made_here(project) if path.name != "sdkconfig.defaults.board"]
+
+
 def again(parser, project):
     """Every file of the project board_select.py wrote, made again by the command its first line keeps."""
     local = resolve.add_project(project)
-    files = [path for path in sorted(project.glob("sdkconfig.defaults.*")) if path.read_text().startswith(RECORD)]
+    files = made_here(project)
     if not files:
         raise SystemExit(f"{project}: no sdkconfig.defaults.* there says how it was made: choose the board again")
     targets = {}

@@ -329,7 +329,10 @@ committed, a program that asks by kind.
   paths, the build or the locks, and no path through a link; all or nothing, by renames. It runs `board_select.py --again`
   on a copy first and writes what that makes by the same rule, so a project of several boards needs no command. A request
   that changes anything carries the token in its header and the `Origin` of the page. check_format drives it over HTTP
-  on a project of its own; the page does not use it yet.
+  on a project of its own; the page does not use it yet. 7c found four holes, closed: a tick to replace a person's file names the
+  digest the plan showed, so a file changed again since is refused; the boards whose locks are seeded are those of the
+  files `board_select.py` wrote, not ESP-IDF's own `sdkconfig.defaults.<target>`; a new file has the mode 0666 under the
+  umask, a replaced one keeps its own; a folder of only hidden entries, as the `.vscode` VS Code makes, is empty.
 - A level seen on hardware is a note, not a part: `high_seen_mv` of a chip, the lowest high that drove it on hardware,
   with its trial in `checked`, and the judgement `level_seen_on_hardware`. The WS2812B takes 3.5 V by its datasheet;
   the 3.3 V of an ESP32 drove Anton's garland, so a kit of strips says so and adds no level shifter (Anton: "in

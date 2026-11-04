@@ -195,12 +195,13 @@ def handler_of(desk, token, port, project=None):
 
         def project_post(self, body):
             """A plan of a write, or the write: files by their paths in the project; what is a person's is replaced only
-            when listed in replace, and nothing is written without allow, once or for ever, unless the person gave it for ever."""
+            when replace names it with the digest the plan showed, and nothing is written without allow, once or for ever,
+            unless the person gave it for ever."""
             if not project or not project.mode():
                 return self.answer(404, {"error": "no project to write: the server was started in no folder of a program"})
-            files, replace = body.get("files") if isinstance(body, dict) else None, body.get("replace", []) if isinstance(body, dict) else None
-            if not isinstance(files, dict) or not isinstance(replace, list):
-                return self.answer(400, {"error": "files by their paths, and replace a list"})
+            files, replace = body.get("files") if isinstance(body, dict) else None, body.get("replace", {}) if isinstance(body, dict) else None
+            if not isinstance(files, dict) or not isinstance(replace, dict):
+                return self.answer(400, {"error": "files by their paths, and replace the digests the plan showed by the paths"})
             if self.path == "/agent/project/plan":
                 return self.answer(200, project.plan(files))
             if not project.allowed_for_ever():

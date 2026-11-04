@@ -29,6 +29,7 @@ import pathlib
 import random
 import re
 import shutil
+import stat
 import subprocess
 import sys
 import tarfile
@@ -388,8 +389,10 @@ def bridge_problems():
     folder = tempfile.TemporaryDirectory()
     project, config = pathlib.Path(folder.name) / "garland", pathlib.Path(folder.name) / "config"
     project.mkdir()
+    # what VS Code makes in a folder it opens: the folder is still empty of a program
+    (project / ".vscode").mkdir()
     process = subprocess.Popen([sys.executable, str(ROOT / "tools" / "boards_mcp.py"), "--project", str(project)], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                               text=True, env={**os.environ, "XDG_CONFIG_HOME": str(config)})
+                               stderr=subprocess.DEVNULL, text=True, env={**os.environ, "XDG_CONFIG_HOME": str(config)})
 
     def asked(ident, method, params=None):
         process.stdin.write(json.dumps({"jsonrpc": "2.0", "id": ident, "method": method, "params": params or {}}) + "\n")
@@ -456,7 +459,8 @@ def project_problems(base, own, project, config):
 
     problems = []
     files = {"CMakeLists.txt": "project(garland)\n", "selection.json": json.dumps({"boards": [{"name": "jc4827w543c"}, {"name": "cyd_s028r"}], "current": "cyd_s028r"}),
-             "sdkconfig.defaults.jc4827w543c": "# board_select.py jc4827w543c\n", "sdkconfig.defaults.cyd_s028r": "# board_select.py cyd_s028r\n"}
+             "sdkconfig.defaults.jc4827w543c": "# board_select.py jc4827w543c\n", "sdkconfig.defaults.cyd_s028r": "# board_select.py cyd_s028r\n",
+             "sdkconfig.defaults.esp32p4": "CONFIG_PARTITION_TABLE_CUSTOM=y\n"}
     if got("/agent/project")[1] != {"path": str(project.resolve()), "name": "garland", "mode": "create", "for_ever": False}:
         problems.append(f"the project of the bridge: {got('/agent/project')}")
     if post("/agent/project/plan", {"files": files}, {**own, "Origin": "http://evil.example"})[0] != 401:
@@ -469,13 +473,28 @@ def project_problems(base, own, project, config):
     code, done = post("/agent/project/write", {"files": files, "allow": "once"})
     if code != 200 or "CMakePresets.json" not in done["written"] or "CONFIG_IDF_TARGET" not in (project / "sdkconfig.defaults.cyd_s028r").read_text():
         problems.append(f"a write allowed once: {code} {done}")
+    # the lock the program had is where the lock of each board starts
+    (project / "dependencies.lock").write_text("dependencies:\n  idf:\n    version: 6.1.0\n")
+    # a file the server writes is readable as any the person makes
+    umask = os.umask(0)
+    os.umask(umask)
+    mode = stat.S_IMODE((project / "CMakeLists.txt").stat().st_mode) if (project / "CMakeLists.txt").exists() else None
+    if mode != 0o666 & ~umask:
+        problems.append(f"a new file has the mode {oct(mode) if mode is not None else 'of none'}")
     # a file a person changed is replaced only when ticked, and nothing of a refused write lands
     edited = project / "sdkconfig.defaults.cyd_s028r"
     edited.write_text(edited.read_text() + "CONFIG_MINE=y\n")
     code, done = post("/agent/project/write", {"files": {**files, "main/main.c": "void app_main(void) {}\n"}, "allow": "once"})
     if code != 200 or "sdkconfig.defaults.cyd_s028r" not in done["refused"] or (project / "main" / "main.c").exists() or "CONFIG_MINE" not in edited.read_text():
         problems.append(f"a change of a person is not kept: {done}")
-    code, done = post("/agent/project/write", {"files": files, "replace": ["sdkconfig.defaults.cyd_s028r"], "allow": "once"})
+    # a tick replaces what the plan showed: changed again since, the file is refused
+    shown = post("/agent/project/plan", {"files": files})[1]["made"]["sdkconfig.defaults.cyd_s028r"]["digest"]
+    edited.write_text(edited.read_text() + "CONFIG_MINE_AGAIN=y\n")
+    code, done = post("/agent/project/write", {"files": files, "replace": {"sdkconfig.defaults.cyd_s028r": shown}, "allow": "once"})
+    if code != 200 or "sdkconfig.defaults.cyd_s028r" not in done["refused"] or "CONFIG_MINE_AGAIN" not in edited.read_text():
+        problems.append(f"a tick replaced a file changed after the plan: {done}")
+    shown = post("/agent/project/plan", {"files": files})[1]["made"]["sdkconfig.defaults.cyd_s028r"]["digest"]
+    code, done = post("/agent/project/write", {"files": files, "replace": {"sdkconfig.defaults.cyd_s028r": shown}, "allow": "once"})
     if code != 200 or "CONFIG_MINE" in edited.read_text():
         problems.append(f"a change ticked to replace is not replaced: {done}")
     for path in (".git/hooks/pre-commit", "../outside.txt", "build/x.c", "dependencies.lock.cyd_s028r"):
@@ -489,6 +508,9 @@ def project_problems(base, own, project, config):
         problems.append("a write allowed for ever asks again")
     if json.loads((config / "jef-sure-boards" / "allowed.json").read_text()) != {str(project.resolve()): "garland"}:
         problems.append("for ever is not kept by the path and the name of the project")
+    # a file of ESP-IDF for a target is no board: the locks are seeded for the two boards only
+    if sorted(path.name for path in project.glob("dependencies.lock.*")) != ["dependencies.lock.cyd_s028r", "dependencies.lock.jc4827w543c"]:
+        problems.append(f"locks seeded: {sorted(path.name for path in project.glob('dependencies.lock.*'))}")
     return problems
 
 

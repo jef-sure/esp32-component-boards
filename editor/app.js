@@ -356,7 +356,7 @@ const SelectPage = {
     template: `
         <div class="select" :class="{ talking }">
             <aside class="palette">
-                <details v-if="!store.agent" class="agent-hint"><summary>{{ t('Talk with a model') }}</summary>
+                <details v-if="!store.agent || store.modelless" class="agent-hint"><summary>{{ t('Talk with a model') }}</summary>
                     <p class="hint">{{ t(local ? 'Once, in the folder you started this page from:' : 'Once, in any folder:') }}</p>
                     <div class="command"><code>{{ install }}</code><button type="button" @click="copyInstall">{{ t(copied ? 'copied' : 'copy') }}</button></div>
                     <p class="hint">{{ t('Then ask your agent to help choose the hardware: it gives a link to this page, with a dialog.') }}</p>
@@ -370,7 +370,7 @@ const SelectPage = {
                             @dragstart="$event.dataTransfer.setData('text/plain', role.id)" @click="store.addBlock(role.id)">{{ t(role.text) }} <span class="note">{{ role.count }}</span></button>
                     </section>
                 </div>
-                <section v-if="store.agent" class="talk">
+                <section v-if="store.agent && !store.modelless" class="talk">
                     <div ref="stream" class="stream">
                         <div v-for="item in store.talk" :key="item.id" class="said" :class="item.from">
                             <pre v-if="item.description">{{ item.text }}</pre><template v-else>{{ item.text }}</template>

@@ -9,6 +9,7 @@ that started this server. Standard library only, so the Python of ESP-IDF runs i
 
 Usage, as a server in the MCP configuration of a client: python3 tools/boards_mcp.py [--port N] [--project DIR]
 Once, to give it to the agent: python3 tools/boards_mcp.py --install
+With no agent, the page and its solver for the folder it runs in: python3 tools/boards_mcp.py --serve [--project DIR]
 
 The project is the folder the agent works in, or --project: the page may write its files there through this server, by
 the rules of project_writer.py, when the person allows it. It is how the page writes inside VS Code, whose Simple
@@ -373,6 +374,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--port", type=int, default=0, help="0: any free port")
     parser.add_argument("--install", action="store_true", help="give this server to the agent and stop")
+    parser.add_argument("--serve", action="store_true", help="no agent: serve the page and print its link, until Ctrl-C")
     parser.add_argument("--project", type=pathlib.Path, default=pathlib.Path.cwd(), help="the folder the page may write a project into, when the person allows it")
     args = parser.parse_args()
     if args.install:
@@ -384,6 +386,18 @@ def main():
     port = server.server_address[1]
     server.RequestHandlerClass = handler_of(desk, token, port, project_writer.Project(args.project))
     server.daemon_threads = True
+    if args.serve:
+        # no model talks: the page shows no dialog, and the solver and the writes of the project work as with one
+        project = project_writer.Project(args.project)
+        print(f"http://127.0.0.1:{port}/editor/#agent={token}&model=none", flush=True)
+        print(f"The page writes a project into {project.root} when you allow it" if project.mode() else
+              f"{project.root} is neither empty nor a program: the page chooses and does not write there", flush=True)
+        print("Ctrl-C stops the server.", flush=True)
+        try:
+            server.serve_forever()
+        except KeyboardInterrupt:
+            pass
+        return 0
     threading.Thread(target=server.serve_forever, daemon=True).start()
     link = f"http://127.0.0.1:{port}/editor/#agent={token}"
 

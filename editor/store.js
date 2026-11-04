@@ -182,6 +182,7 @@ const useEditor = Pinia.defineStore('editor', {
         current: null, // the headline of the kit idf.py builds when no preset is named
         wanted: null, // selection.json of a folder opened, until the kits it names are counted
         project: null, // the folder tools/boards_mcp.py may write a project into: { path, name, mode, for_ever }
+        modelless: false, // the server came with --serve: no model answers
     }),
     getters: {
         entry(state) {
@@ -273,9 +274,12 @@ const useEditor = Pinia.defineStore('editor', {
     actions: {
         // Beside tools/boards_mcp.py the page tells it what it has, and reads what the model says.
         connect() {
-            this.agent = new URLSearchParams(location.hash.slice(1)).get('agent');
+            const hash = new URLSearchParams(location.hash.slice(1));
+            this.agent = hash.get('agent');
             if (!this.agent) return;
-            this.listen(0);
+            // boards_mcp.py --serve: the server of the page and of the writes, with no model behind it
+            this.modelless = hash.get('model') === 'none';
+            if (!this.modelless) this.listen(0);
             this.agentCall('installed').then((versions) => (this.installed = versions)).catch(() => {});
             // the project of the server, when it has one with a selection.json: the page starts where it was left
             this.agentCall('project').then(async (project) => {
@@ -305,7 +309,7 @@ const useEditor = Pinia.defineStore('editor', {
             this.listen(next);
         },
         tellAgent() {
-            if (!this.agent) return Promise.resolve();
+            if (!this.agent || this.modelless) return Promise.resolve();
             const kits = this.kits.filter((kit) => kit.fits).slice(0, AGENT_KITS).map((kit) => ({ headline: kit.headline, price: kit.price, imported: kit.imported, says: kit.says }));
             // why the boards that do not fit do not, the most common first: what keeps a selection empty
             const why = new Map();

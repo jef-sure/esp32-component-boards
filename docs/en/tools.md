@@ -294,6 +294,15 @@ project keeps as `DESCRIPTION.md`. What the person fixes is theirs: the pin of a
 fixed part for its block and tries only a fixed board.
 The field on top is the theme the model starts from, and the dialog develops it: a changed theme reaches the model with the next answer of `wait_for_person`. The solver stays in the page. A page opened any other way has no dialog and works as before.
 
+With no agent the server still gives the page, its solver and the writes of a project, for the folder it runs in:
+
+```sh
+python3 managed_components/jef-sure__boards/tools/boards_mcp.py --serve   # or --project DIR
+```
+
+It prints the link of the page and serves until Ctrl-C. The link says that no model talks, so the page shows no
+dialog.
+
 The server can write the files of a project for the page, so the page writes inside VS Code too, whose Simple Browser gives a
 page no access to folders. It writes into one folder, the one the agent works in or `--project DIR`: an empty folder for a new
 project, or one with `CMakeLists.txt`, never the component itself. The rules are those of `tools/project_writer.py`:

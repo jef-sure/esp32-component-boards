@@ -441,6 +441,28 @@ def bridge_problems():
     return problems
 
 
+def serve_problems():
+    """boards_mcp.py --serve, with no agent: it prints the link of the page, which says no model talks, and knows its project."""
+    problems = []
+    with tempfile.TemporaryDirectory() as folder:
+        process = subprocess.Popen([sys.executable, str(ROOT / "tools" / "boards_mcp.py"), "--serve", "--project", folder], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                                   text=True, env={**os.environ, "XDG_CONFIG_HOME": folder})
+        try:
+            link = process.stdout.readline().strip()
+            base, token = link.split("/editor/")[0], re.search(r"agent=([^&]+)", link)[1]
+            if not link.endswith("&model=none"):
+                problems.append(f"--serve: the link does not say that no model talks: {link}")
+            with urllib.request.urlopen(urllib.request.Request(f"{base}/agent/project", headers={"Authorization": f"Bearer {token}"}), timeout=5) as answer:
+                if json.loads(answer.read())["mode"] != "create":
+                    problems.append("--serve: the empty folder is no project to create")
+        except (OSError, TypeError, KeyError, ValueError) as error:
+            problems.append(f"--serve: {error!r}")
+        finally:
+            process.terminate()
+            process.wait(timeout=5)
+    return problems
+
+
 def project_problems(base, own, project, config):
     """The writes of a project through the bridge, over its HTTP."""
     def post(path, body, headers=own):
@@ -799,6 +821,7 @@ def main():
     problems += errors_of(JUDGEMENTS, json.loads((ROOT / "catalog" / "judgements.json").read_text()), "judgements")
     problems += roles_problems(json.loads((ROOT / "catalog" / "roles.json").read_text()))
     problems += bridge_problems()
+    problems += serve_problems()
     problems += library_list_problems()
     problems += audit_changes_wrong()
     failed += reports_refused()

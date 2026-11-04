@@ -24,6 +24,7 @@ Checks of the data format. Needs jsonschema and node: the Python of ESP-IDF has 
 """
 import copy
 import json
+import os
 import pathlib
 import random
 import re
@@ -382,8 +383,13 @@ def reports_refused():
 
 
 def bridge_problems():
-    """tools/boards_mcp.py over its real stdio and HTTP: it answers MCP, and it gives out only the page."""
-    process = subprocess.Popen([sys.executable, str(ROOT / "tools" / "boards_mcp.py")], stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
+    """tools/boards_mcp.py over its real stdio and HTTP: it answers MCP, it gives out only the page, and it writes a project only
+    where it was started, when the person allows it, and never over what a person changed."""
+    folder = tempfile.TemporaryDirectory()
+    project, config = pathlib.Path(folder.name) / "garland", pathlib.Path(folder.name) / "config"
+    project.mkdir()
+    process = subprocess.Popen([sys.executable, str(ROOT / "tools" / "boards_mcp.py"), "--project", str(project)], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                               text=True, env={**os.environ, "XDG_CONFIG_HOME": str(config)})
 
     def asked(ident, method, params=None):
         process.stdin.write(json.dumps({"jsonrpc": "2.0", "id": ident, "method": method, "params": params or {}}) + "\n")
@@ -408,8 +414,9 @@ def bridge_problems():
                 problems.append(f"the server of the page: {path} {headers}: not {wanted}")
         # a body of the wrong form is refused, and the tools still answer after it
         token = link.split("agent=")[1]
+        own = {"Authorization": f"Bearer {token}", "Content-Type": "application/json", "Origin": base}
         for path, body in (("/agent/state", b"[1, 2]"), ("/agent/state", b'{"blocks": 7}'), ("/agent/state", b'{"blocks": [3]}'), ("/agent/say", b'{"text": 5}'), ("/agent/state", b"{not json")):
-            request = urllib.request.Request(f"{base}{path}", data=body, method="POST", headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"})
+            request = urllib.request.Request(f"{base}{path}", data=body, method="POST", headers=own)
             try:
                 code = urllib.request.urlopen(request, timeout=5).status
             except urllib.error.HTTPError as error:
@@ -422,9 +429,66 @@ def bridge_problems():
             answer = asked(ident, "tools/call", {"name": name, "arguments": {"why": "a check", "remove": ["x"]}})
             if answer.get("isError") and name == "page_state":
                 problems.append(f"{name} fails after a refused body")
+        problems += project_problems(base, own, project, config)
     finally:
         process.stdin.close()
         process.wait(timeout=5)
+        folder.cleanup()
+    return problems
+
+
+def project_problems(base, own, project, config):
+    """The writes of a project through the bridge, over its HTTP."""
+    def post(path, body, headers=own):
+        request = urllib.request.Request(f"{base}{path}", data=json.dumps(body).encode(), method="POST", headers=headers)
+        try:
+            with urllib.request.urlopen(request, timeout=30) as answer:
+                return answer.status, json.loads(answer.read())
+        except urllib.error.HTTPError as error:
+            return error.code, None
+
+    def got(path):
+        try:
+            with urllib.request.urlopen(urllib.request.Request(f"{base}{path}", headers=own), timeout=5) as answer:
+                return answer.status, json.loads(answer.read())
+        except urllib.error.HTTPError as error:
+            return error.code, None
+
+    problems = []
+    files = {"CMakeLists.txt": "project(garland)\n", "selection.json": json.dumps({"boards": [{"name": "jc4827w543c"}, {"name": "cyd_s028r"}], "current": "cyd_s028r"}),
+             "sdkconfig.defaults.jc4827w543c": "# board_select.py jc4827w543c\n", "sdkconfig.defaults.cyd_s028r": "# board_select.py cyd_s028r\n"}
+    if got("/agent/project")[1] != {"path": str(project.resolve()), "name": "garland", "mode": "create", "for_ever": False}:
+        problems.append(f"the project of the bridge: {got('/agent/project')}")
+    if post("/agent/project/plan", {"files": files}, {**own, "Origin": "http://evil.example"})[0] != 401:
+        problems.append("a plan from another site is not refused")
+    code, plan = post("/agent/project/plan", {"files": files})
+    if code != 200 or "CMakePresets.json" not in plan["made"] or any((project / name).exists() for name in files):
+        problems.append(f"a plan: {code}, it wrote something or made no presets")
+    if post("/agent/project/write", {"files": files})[0] != 403 or (project / "CMakeLists.txt").exists():
+        problems.append("a write the person did not allow is not refused")
+    code, done = post("/agent/project/write", {"files": files, "allow": "once"})
+    if code != 200 or "CMakePresets.json" not in done["written"] or "CONFIG_IDF_TARGET" not in (project / "sdkconfig.defaults.cyd_s028r").read_text():
+        problems.append(f"a write allowed once: {code} {done}")
+    # a file a person changed is replaced only when ticked, and nothing of a refused write lands
+    edited = project / "sdkconfig.defaults.cyd_s028r"
+    edited.write_text(edited.read_text() + "CONFIG_MINE=y\n")
+    code, done = post("/agent/project/write", {"files": {**files, "main/main.c": "void app_main(void) {}\n"}, "allow": "once"})
+    if code != 200 or "sdkconfig.defaults.cyd_s028r" not in done["refused"] or (project / "main" / "main.c").exists() or "CONFIG_MINE" not in edited.read_text():
+        problems.append(f"a change of a person is not kept: {done}")
+    code, done = post("/agent/project/write", {"files": files, "replace": ["sdkconfig.defaults.cyd_s028r"], "allow": "once"})
+    if code != 200 or "CONFIG_MINE" in edited.read_text():
+        problems.append(f"a change ticked to replace is not replaced: {done}")
+    for path in (".git/hooks/pre-commit", "../outside.txt", "build/x.c", "dependencies.lock.cyd_s028r"):
+        code, done = post("/agent/project/write", {"files": {path: "x"}, "allow": "once"})
+        if code != 200 or path not in done["refused"] or done["written"]:
+            problems.append(f"{path} is not refused: {code} {done}")
+    if got("/agent/project/file?path=../outside.txt")[0] != 400 or got("/agent/project/file?path=selection.json")[0] != 200:
+        problems.append("the files of a project are read by another rule than they are written")
+    # for ever: kept for the user, by the path and the name of the project; then no allow is needed
+    if post("/agent/project/write", {"files": files, "allow": "for ever"})[0] != 200 or post("/agent/project/write", {"files": files})[0] != 200:
+        problems.append("a write allowed for ever asks again")
+    if json.loads((config / "jef-sure-boards" / "allowed.json").read_text()) != {str(project.resolve()): "garland"}:
+        problems.append("for ever is not kept by the path and the name of the project")
     return problems
 
 

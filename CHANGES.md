@@ -322,6 +322,14 @@ committed, a program that asks by kind.
 - `board_select.py --again` writes the presets of several boards too, in the order of the boards of `selection.json` and
   with its `current`, else as the presets had them; a file whose first line alone is the command is made in full. So a
   page that writes `selection.json` and such files leaves one command to the person, or none when a bridge runs it.
+- `boards_mcp.py` can write the files of a project for the page, so the page writes inside the Simple Browser of VS Code,
+  by the rules of `tools/project_writer.py` (Anton's, the shape by 7c): into the one folder the server was started for;
+  only when the person allows it, every time or for ever, kept for the user by the path and the name of the project; never
+  over a file a person wrote or changed, by the hashes in `.boards/written.json`, unless ticked; nothing in `.git`, hidden
+  paths, the build or the locks, and no path through a link; all or nothing, by renames. It runs `board_select.py --again`
+  on a copy first and writes what that makes by the same rule, so a project of several boards needs no command. A request
+  that changes anything carries the token in its header and the `Origin` of the page. check_format drives it over HTTP
+  on a project of its own; the page does not use it yet.
 - A level seen on hardware is a note, not a part: `high_seen_mv` of a chip, the lowest high that drove it on hardware,
   with its trial in `checked`, and the judgement `level_seen_on_hardware`. The WS2812B takes 3.5 V by its datasheet;
   the 3.3 V of an ESP32 drove Anton's garland, so a kit of strips says so and adds no level shifter (Anton: "in

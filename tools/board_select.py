@@ -208,7 +208,7 @@ def again(parser, project):
             targets[board] = target
     if len(targets) > 1:
         boards, current = order_of(project, list(targets))
-        command = f"board_select.py --again {project}"
+        command = "board_select.py --again ."  # the same wherever the project lies
         (project / PRESETS).write_text(presets_text(project, boards, [targets[board] for board in boards], current, command))
         print(f"{project / PRESETS}: a preset for each, and default for the current one, {current}")
         seed_locks(project, boards)

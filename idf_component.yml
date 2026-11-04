@@ -78,6 +78,7 @@ files:
     - "tools/board_bom.py"
     - "tools/board_calibration.py"
     - "tools/boards_mcp.py"
+    - "tools/project_writer.py"
     - "tools/boards_gen.py"
     - "tools/resolve.py"
     - "tools/rules.py"

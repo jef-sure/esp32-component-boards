@@ -7,8 +7,12 @@ The solver runs in the page, so the page is served here, on 127.0.0.1, and tells
 reads that with MCP tools over stdio and answers in the page. No key and no model live here: the model is the agent
 that started this server. Standard library only, so the Python of ESP-IDF runs it.
 
-Usage, as a server in the MCP configuration of a client: python3 tools/boards_mcp.py [--port N]
+Usage, as a server in the MCP configuration of a client: python3 tools/boards_mcp.py [--port N] [--project DIR]
 Once, to give it to the agent: python3 tools/boards_mcp.py --install
+
+The project is the folder the agent works in, or --project: the page may write its files there through this server, by
+the rules of project_writer.py, when the person allows it. It is how the page writes inside VS Code, whose Simple
+Browser gives a page no access to folders.
 """
 import argparse
 import http.server
@@ -23,6 +27,8 @@ import subprocess
 import sys
 import threading
 import urllib.parse
+
+import project_writer
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 PROTOCOL = "2025-06-18"
@@ -99,7 +105,7 @@ class Desk:
             return new
 
 
-def handler_of(desk, token, port):
+def handler_of(desk, token, port, project=None):
     class Page(http.server.SimpleHTTPRequestHandler):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, directory=str(ROOT), **kwargs)
@@ -123,6 +129,10 @@ def handler_of(desk, token, port):
         def agent_call(self):
             return self.path.startswith("/agent/") and secrets.compare_digest(self.headers.get("Authorization", ""), f"Bearer {token}")
 
+        def own_origin(self):
+            """A page of another site can send to 127.0.0.1 without reading the answer: what changes anything comes from this one."""
+            return self.headers.get("Origin") == f"http://127.0.0.1:{port}"
+
         def do_GET(self):
             if not self.allowed():
                 return self.answer(403)
@@ -136,6 +146,22 @@ def handler_of(desk, token, port):
                 return self.answer(200, desk.since(int(seen), LONGEST_POLL_S))
             if address.path == "/agent/installed":
                 return self.answer(200, installed()) if self.agent_call() else self.answer(401)
+            if address.path == "/agent/project":
+                if not self.agent_call():
+                    return self.answer(401)
+                if not project:
+                    return self.answer(404, {"error": "no project: the server was started for none"})
+                return self.answer(200, {"path": str(project.root), "name": project.name(), "mode": project.mode(), "for_ever": project.allowed_for_ever()})
+            if address.path == "/agent/project/file":
+                # what lies in the project, for the page to show what a write would change: by the rule of a write
+                if not self.agent_call():
+                    return self.answer(401)
+                rel = urllib.parse.parse_qs(address.query).get("path", [""])[0]
+                problem = project_writer.problem_of(project.root, rel) if project and project.mode() else "no project"
+                if problem:
+                    return self.answer(400, {"error": problem})
+                path = project.root / rel
+                return self.answer(200, {"text": path.read_text(errors="replace")}) if path.is_file() else self.answer(404)
             # the path as it will be read, not as it was sent: /editor/../CLAUDE.md is no file of the page
             clean = posixpath.normpath(urllib.parse.unquote(address.path))
             if not f"{clean}/".startswith(SERVED):
@@ -144,7 +170,7 @@ def handler_of(desk, token, port):
             return super().do_GET()
 
         def do_POST(self):
-            if not self.allowed() or not self.agent_call():
+            if not self.allowed() or not self.agent_call() or not self.own_origin():
                 return self.answer(401)
             length = int(self.headers.get("Content-Length", "0"))
             if length > LONGEST_BODY:
@@ -153,6 +179,8 @@ def handler_of(desk, token, port):
                 body = json.loads(self.rfile.read(length) or "{}")
             except (UnicodeDecodeError, json.JSONDecodeError):
                 return self.answer(400, {"error": "not JSON"})
+            if self.path in ("/agent/project/plan", "/agent/project/write"):
+                return self.project_post(body)
             # only a body of the form the page sends: the tools read the state later, in the thread of MCP
             problem = state_problem(body) if self.path == "/agent/state" else say_problem(body) if self.path == "/agent/say" else None
             if problem:
@@ -164,6 +192,23 @@ def handler_of(desk, token, port):
             else:
                 return self.answer(404)
             return self.answer(200, {})
+
+        def project_post(self, body):
+            """A plan of a write, or the write: files by their paths in the project; what is a person's is replaced only
+            when listed in replace, and nothing is written without allow, once or for ever, unless the person gave it for ever."""
+            if not project or not project.mode():
+                return self.answer(404, {"error": "no project to write: the server was started in no folder of a program"})
+            files, replace = body.get("files") if isinstance(body, dict) else None, body.get("replace", []) if isinstance(body, dict) else None
+            if not isinstance(files, dict) or not isinstance(replace, list):
+                return self.answer(400, {"error": "files by their paths, and replace a list"})
+            if self.path == "/agent/project/plan":
+                return self.answer(200, project.plan(files))
+            if not project.allowed_for_ever():
+                if body.get("allow") not in ("once", "for ever"):
+                    return self.answer(403, {"error": "the person has not allowed it: ask, once or for ever"})
+                if body["allow"] == "for ever":
+                    project.allow_for_ever()
+            return self.answer(200, project.write(files, replace))
 
     return Page
 
@@ -325,6 +370,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--port", type=int, default=0, help="0: any free port")
     parser.add_argument("--install", action="store_true", help="give this server to the agent and stop")
+    parser.add_argument("--project", type=pathlib.Path, default=pathlib.Path.cwd(), help="the folder the page may write a project into, when the person allows it")
     args = parser.parse_args()
     if args.install:
         return install()
@@ -333,7 +379,7 @@ def main():
     token = secrets.token_urlsafe(24)
     server = http.server.ThreadingHTTPServer(("127.0.0.1", args.port), None)
     port = server.server_address[1]
-    server.RequestHandlerClass = handler_of(desk, token, port)
+    server.RequestHandlerClass = handler_of(desk, token, port, project_writer.Project(args.project))
     server.daemon_threads = True
     threading.Thread(target=server.serve_forever, daemon=True).start()
     link = f"http://127.0.0.1:{port}/editor/#agent={token}"

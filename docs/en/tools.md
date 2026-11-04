@@ -294,6 +294,21 @@ project keeps as `DESCRIPTION.md`. What the person fixes is theirs: the pin of a
 fixed part for its block and tries only a fixed board.
 The field on top is the theme the model starts from, and the dialog develops it: a changed theme reaches the model with the next answer of `wait_for_person`. The solver stays in the page. A page opened any other way has no dialog and works as before.
 
+The server can write the files of a project for the page, so the page writes inside VS Code too, whose Simple Browser gives a
+page no access to folders. It writes into one folder, the one the agent works in or `--project DIR`: an empty folder for a new
+project, or one with `CMakeLists.txt`, never the component itself. The rules are those of `tools/project_writer.py`:
+
+- nothing is written unless the person allows it, every time or for ever; for ever is kept for the user, in
+  `$XDG_CONFIG_HOME/jef-sure-boards/allowed.json`, by the path and the name of the project, so a project cannot allow itself;
+- no path outside the folder, through a link or not, and none of `.git`, a hidden path but `.gitignore`, `build*`,
+  `managed_components` or `dependencies.lock*`;
+- `.boards/written.json` of the project keeps the hash of each file the server wrote. A file not in it, or changed since, is
+  the person's and is replaced only when the person ticks it; after a clone the list is empty, so the first write asks;
+- what `board_select.py --again` makes after the files is made on a copy of the project first and goes by the same rule: the
+  defaults, the presets and the glue of a board of the program, so no command is left to the person;
+- a write is all or nothing, each file goes to disk by a rename, the list last;
+- a request that changes anything carries the token in its header and comes from the page of this server (its `Origin`).
+
 ## sync_versions.py
 
 ```sh

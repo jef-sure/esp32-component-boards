@@ -248,6 +248,9 @@ committed, a program that asks by kind.
   `board_sound_start`, `board_sound_source` and their `_at` forms take `ctx`, given back to it at every call, so the mixer
   of a game needs no static. The task takes the source and its context together. The names `board_`, `boards_`,
   `BOARD_` and `CONFIG_BOARD_` are said to be the component's (both found by 7c after the move of dgx-ge was decided).
+- choosing-a-board.md says what stays with the program: its own defaults, read after the board's, keep what it uses
+  on every board, as the tick of FreeRTOS and the virtual screen of DGX of the game of dgx-ge (the audit of
+  2026-11-03, 3.10).
 - A file `board_select.py` writes begins with the command that made it and the version and commit of the component,
   and `board_select.py --again PROJECT_DIR` makes every such file of the project again: the copy of the defaults no
   longer goes stale with no command to renew it (the audit of 2026-11-03, 3.11).

@@ -164,6 +164,23 @@ solving dependencies* in the log) and resolves them again by itself, in the
 same run. One `idf.py build` is enough; the log shows which optional
 dependencies were skipped.
 
+## What stays with the program
+
+The board brings what its hardware needs: the drivers of its panel and, for two displays shown as one,
+`CONFIG_DGX_ENABLE_VSCREEN` and `CONFIG_DGX_ENABLE_VSCREEN_2H`. What the program uses for itself stays in its own
+`sdkconfig.defaults`, read after the board's, and is the same on every board: the tick of FreeRTOS, the optimization,
+a feature of a library it calls. The game of dgx-ge draws into a screen in RAM and steps its loop by milliseconds, so
+its own defaults say
+
+```
+CONFIG_FREERTOS_HZ=1000
+CONFIG_COMPILER_OPTIMIZATION_PERF=y
+CONFIG_DGX_ENABLE_VSCREEN=y
+```
+
+where the board directories of dgx-ge used to repeat `CONFIG_DGX_ENABLE_VSCREEN` for each board. A line of the
+program's file that the board's file also sets wins, as the later one.
+
 ## Without board_select.py
 
 The file it writes is a copy of `catalog/boards/<board>/sdkconfig.defaults`. Any

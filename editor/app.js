@@ -339,7 +339,19 @@ const SelectPage = {
         // a project is written into a folder picked in Chromium, or through tools/boards_mcp.py into its own
         const canWrite = computed(() => host.canOpenFolder || Boolean(store.project?.mode));
         const chosenHas = (kit) => store.chosen.some((item) => item.headline === kit.headline);
-        return { store, host, fit, boards, others, asked, addOutput, money, numberOf, priceLink, MARKS, filter, groups, roleOf, nameOf, outputsQuestion, firstOfRole, said, sendSaid, talking, stream, partsOf, boardTitle, servedBy, install, local, copied, copyInstall, setAsk, shownBoards, BOARDS_SHOWN, canWrite, chosenHas };
+        // what the person has of a chain, its products and their counts in order from the board: the part of the block as a list
+        const chainBlock = (block) => store.asksOf(block).some((question) => question.limit?.measure === 'chain');
+        const haveOf = (block) => (Array.isArray(block.part) ? block.part : []);
+        const addHave = (block) => {
+            if (!Array.isArray(block.part)) block.part = block.part ? [{ part: block.part, count: 1 }] : [];
+            block.part.push({ part: store.partsOf(block)[0].name, count: 1 });
+            block.fixed = true;
+        };
+        const dropHave = (block, at) => {
+            block.part.splice(at, 1);
+            if (!block.part.length) block.part = undefined;
+        };
+        return { store, host, fit, boards, others, asked, addOutput, money, numberOf, priceLink, MARKS, filter, groups, roleOf, nameOf, outputsQuestion, firstOfRole, said, sendSaid, talking, stream, partsOf, boardTitle, servedBy, install, local, copied, copyInstall, setAsk, shownBoards, BOARDS_SHOWN, canWrite, chosenHas, chainBlock, haveOf, addHave, dropHave };
     },
     template: `
         <div class="select" :class="{ talking }">
@@ -387,7 +399,13 @@ const SelectPage = {
                             <select v-model="block.variant"><option :value="undefined">{{ t('any') }}</option>
                                 <option v-for="variant in roleOf(block.role).variants" :key="variant.id" :value="variant.id">{{ t(variant.text) }}</option></select></label>
                         <label>{{ t('Name') }} <input type="text" :value="block.name" :placeholder="block.role" @change="block.name = nameOf($event)"></label>
-                        <label v-if="store.partsOf(block).length">{{ t('Part') }}
+                        <div v-if="chainBlock(block) && store.partsOf(block).length" class="have">{{ t('What you have of it, in order from the board') }}
+                            <p v-for="(item, at) in haveOf(block)" :key="at">
+                                <select v-model="item.part"><option v-for="part in store.partsOf(block)" :key="part.name" :value="part.name">{{ part.title }}</option></select>
+                                <input type="number" min="1" step="1" v-model.number="item.count">
+                                <button class="drop" :title="t('take it out')" @click.prevent="dropHave(block, at)">×</button></p>
+                            <button @click.prevent="addHave(block)">{{ t('add what you have') }}</button></div>
+                        <label v-else-if="store.partsOf(block).length">{{ t('Part') }}
                             <select v-model="block.part" @change="block.fixed = block.fixed || Boolean(block.part)"><option :value="undefined">{{ t('any') }}</option>
                                 <option v-for="part in store.partsOf(block)" :key="part.name" :value="part.name">{{ part.title }}</option></select></label>
                         <template v-if="block.role === 'own_part'">

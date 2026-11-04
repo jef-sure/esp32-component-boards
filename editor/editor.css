@@ -164,3 +164,8 @@ li.unknown .mark, li.do .mark { color: var(--accent); }
 .pin.on { border-color: var(--accent, #4a7bd0); color: var(--accent, #4a7bd0); }
 .fixed-board { display: flex; gap: 6px; align-items: center; margin: 0 0 6px; font-weight: 600; }
 .block label { display: grid; gap: 1px; font-size: 12px; color: var(--muted); }
+/* what the person has of a chain: a row of a product, its count and the cross; a long title does not widen the block */
+.block { min-width: 0; }
+.block .have { display: grid; gap: 3px; font-size: 12px; color: var(--muted); }
+.block .have p { display: grid; grid-template-columns: minmax(0, 1fr) 3.5em auto; gap: 4px; align-items: center; margin: 0; }
+.block .have select { min-width: 0; width: 100%; }

@@ -350,6 +350,9 @@ committed, a program that asks by kind.
   files. Driven in headless Chrome over the bridge: a project of the CYD S028R and the JC4827W543C written and built
   on 6.1 for both with no command, then opened again and given an ESP32 DevKit. `--again` read the order of the boards
   from a field `name` that selection.json does not have: it is `board`.
+- A block of a chain on the page says what the person has: *add what you have* gives a row of a product and its count,
+  in order from the board, which is the `part` of the block as a list. Seen in headless Chrome: the strips of 5 m and
+  1 m in a block of 360 addressable LEDs give the kit "5 m, then 1 m in one chain".
 - A level seen on hardware is a note, not a part: `high_seen_mv` of a chip, the lowest high that drove it on hardware,
   with its trial in `checked`, and the judgement `level_seen_on_hardware`. The WS2812B takes 3.5 V by its datasheet;
   the 3.3 V of an ESP32 drove Anton's garland, so a kit of strips says so and adds no level shifter (Anton: "in

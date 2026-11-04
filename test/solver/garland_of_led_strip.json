@@ -1,0 +1,14 @@
+{
+    "title": "The garland of ~/git/led_strip: 360 WS2812B on one data line, two strips of 300 and 60 in a row, and three buttons on an ESP32. The chain of a way counts its chips, in the project and in the price",
+    "answers": {
+        "board": "esp32_devkit",
+        "blocks": [
+            {"role": "led", "variant": "addressable", "name": "garland", "asks": {"chain_outputs": 360}},
+            {"role": "button", "variant": "on_gpio", "name": "program"},
+            {"role": "button", "variant": "on_gpio", "name": "palette"},
+            {"role": "button", "variant": "on_gpio", "name": "onoff"}
+        ]
+    },
+    "says": "360 x Worldsemi WS2812B in one chain for 360 outputs, on the lines: data",
+    "cost": {"board": "esp32_devkit", "low": 34.9}
+}

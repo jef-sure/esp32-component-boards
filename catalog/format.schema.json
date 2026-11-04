@@ -409,7 +409,7 @@
         "marking": { "type": "string", "minLength": 1, "description": "What the package shows, when the part is not known." },
         "ref": { "type": "string", "minLength": 1, "description": "Its designator on the schematic, as U6." },
         "used": { "const": false, "description": "On the board, its pins taken, and no use of it: no library, no glue, its board_*_init returns false. A project says this of a part of its board it leaves alone." },
-        "count": { "type": "integer", "minimum": 1, "description": "How many of this one product takes, for what has no wiring of its own: screws, cables. 1 when absent." },
+        "count": { "type": "integer", "minimum": 1, "description": "How many of this one product takes: what has no wiring of its own, as screws and cables, or the chips of one chain on the same lines. 1 when absent." },
         "price": { "$ref": "#/$defs/price" },
         "tariff": { "$ref": "#/$defs/tariff" },
         "draw": { "$ref": "#/$defs/draw" },

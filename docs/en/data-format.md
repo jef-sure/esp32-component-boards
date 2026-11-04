@@ -651,7 +651,8 @@ A product of such chips gives `config.count` × `unit` outputs: the four MAX7219
 
 `count` above 1 is refused for a module none of whose parts chains. The driver of the whole chain takes `count` ×
 `config.count`, worked out, not stored. The price and the list of goods count each product. A way that names its
-chip in `part`, as the 74HC595 of LEDs on shift registers, gives the number of chips in the kit. A chain has no length
+chip in `part`, as the 74HC595 of LEDs on shift registers or the WS2812B of addressable LEDs, gives the number of
+chips in the kit, and the project holds them as that chip with its `count`, so the price and the goods count them. A chain has no length
 limit of its own: what limits it is the time an update takes along the whole of it. The bits of an update and the
 speed of the bus join the data when a question asks how often the outputs change.
 

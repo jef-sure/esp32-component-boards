@@ -631,6 +631,13 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
     }
 
     // A project of a board and the modules picked, or {problem} when the pins or the hosts run out.
+    // The chips of the chain of a way: as many as the outputs asked take, one when nothing is asked.
+    function chainCount(pick) {
+        const chip = catalog.devices[pick.way.part];
+        const asked = blockAnswer(pick.need.asks?.[CHAIN_QUESTION]);
+        return chip?.chain && asked !== undefined ? Math.ceil(asked / chip.chain.per) : 1;
+    }
+
     function projectOf(name, board, picks, unused, spread = true) {
         // the pins a part of the person's own is soldered to are out of what the kit hands out
         const soldered = picks.flatMap((pick) => Object.values(pick.way?.fixed ?? {}));
@@ -670,7 +677,10 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
                 const read = pins.filter((pin) => analog.includes(pin)).slice(0, pick.way.adc ?? 0);
                 if (read.length < (pick.way.adc ?? 0)) return { problem: t('pins of ADC1: {0} needed, {1} free on this board', pick.way.adc, read.length) };
                 for (const pin of read) pins.splice(pins.indexOf(pin), 1);
-                devices[pick.use] = { class: 'other', pins: { ...common, ...pick.way.fixed, ...Object.fromEntries(own.map((line, i) => [line, i < read.length ? read[i] : pins.shift()])) } };
+                // a way that names its chip writes the chips of its chain, so that the goods and the price count them
+                const chip = !pick.need.output && !pick.module.own && pick.way.part && catalog.devices[pick.way.part] ? pick.way.part : null;
+                devices[pick.use] = { ...(chip ? { chip, count: chainCount(pick) } : { class: 'other' }), pins: { ...common, ...pick.way.fixed, ...Object.fromEntries(own.map((line, i) => [line, i < read.length ? read[i] : pins.shift()])) } };
+                if (devices[pick.use].count === 1) delete devices[pick.use].count;
                 if (!Object.keys(devices[pick.use].pins).length) delete devices[pick.use].pins;
                 if (pick.way.bus) {
                     const bus = busOf(board, pick.way.bus, pins, buses, undefined, false, kept, false, placed, spread);
@@ -957,7 +967,28 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         const counted = new Map();
         for (const pick of picks.filter((item) => !item.way)) counted.set(pick.module.name, { title: pick.module.title, count: (counted.get(pick.module.name)?.count ?? 0) + (pick.count ?? 1) });
         for (const item of addons) counted.set(item.name, item);
+        // the chips of the chains of ways, by the price of their chip
+        for (const pick of picks.filter((item) => item.way?.part && !item.need.output && !item.module.own && catalog.devices[item.way.part])) {
+            const key = `device ${pick.way.part}`;
+            counted.set(key, { title: catalog.devices[pick.way.part].title, count: (counted.get(key)?.count ?? 0) + chainCount(pick) });
+        }
         for (const [name, { title, count }] of counted) {
+            if (name.startsWith('device ')) {
+                const chip = name.slice('device '.length);
+                const price = catalog.devices[chip].price;
+                const range = rangeOf(price, currency, count);
+                if (range) {
+                    const bought = boughtOf(price, count);
+                    low += range[0] * bought;
+                    high += range[1] * bought;
+                    if (bought > count) packs.push({ title, bought, cost: cents(range[0] * bought) });
+                    known = true;
+                } else {
+                    missing.push(title);
+                    unpriced.push({ title, item: `devices/${chip}` });
+                }
+                continue;
+            }
             const kind = name in (catalog.addons ?? {}) ? 'addons' : 'modules';
             const price = catalog[kind][name].price;
             const range = rangeOf(price, currency, count);

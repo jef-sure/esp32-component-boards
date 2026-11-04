@@ -56,7 +56,9 @@ def lines_of(name):
     for use, device in product["devices"].items():
         if use not in base["devices"] and use not in parts:
             what = device.get("part") or device.get("chip") or use
-            lines.setdefault(f"device {what}", {**line_of(device, what), "count": 0})["count"] += device.get("count", 1)
+            # a price is not a field of the type: a device with none is bought at the price of its chip
+            priced = device if "price" in device or "chip" not in device else {**device, **{k: v for k, v in resolve.load("devices", device["chip"]).items() if k == "price"}}
+            lines.setdefault(f"device {what}", {**line_of(priced, what), "count": 0})["count"] += device.get("count", 1)
     return product, list(lines.values())
 
 

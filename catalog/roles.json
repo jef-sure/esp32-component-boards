@@ -65,7 +65,7 @@
                             "id": "addressable",
                             "text": "Addressable",
                             "words": "neopixel|dotstar|ws28\\d\\d|sk68\\d\\d|apa102",
-                            "way": {"lines": ["data"], "high_min_mv": 3500}
+                            "way": {"lines": ["data"], "high_min_mv": 3500, "part": "ws2812b"}
                         },
                         {
                             "id": "matrix",

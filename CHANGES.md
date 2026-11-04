@@ -296,6 +296,12 @@ committed, a program that asks by kind.
   choose the board: the chip of a build directory is fixed before that file is read. Built on 6.1 by the presets and
   on 5.5.5 by the directories, for hello_board (CYD S028R and JC4827W543C) and multi_board; CI builds multi_board both
   ways. A `CMakePresets.json` the tool did not write is not touched (Anton: several boards, and which one is current).
+- Addressable LEDs are WS2812B chips of one chain, as LEDs on shift registers are 74HC595: Anton's garland
+  (`~/git/led_strip`, 360 WS2812B on one data line of an ESP32, a strip of 5 m and one of 1 m, 60 a metre, in a row)
+  got "no part of the catalog" and the price of the board alone. A way that names its chip now writes it into the
+  project with its `count`, so the page prices the chips by their tiers and `board_bom.py` lists them at the price of
+  their chip. The WS2812B has its draw, 60 mA for white, and the 3.5 V its data input needs at 5 V, from the datasheet
+  of Worldsemi.
 - Two displays as one screen, tried on a board: the DotView clock (two SSD1351 on SPI2 and SPI3, `display_groups`)
   showed one picture across both, read its photoresistor on the pin of the data while the screens lit it, and its button.
   The y of each panel in `test/format/good/dotview_clock.json` is turned: the clock's own program has an older copy

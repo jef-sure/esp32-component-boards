@@ -310,6 +310,9 @@ committed, a program that asks by kind.
   over those asked, so 360 is a strip of 5 m and one of 1 m, not six of 1 m, and 240 one strip of 5 m, not four of
   1 m (7c). How much a joint weighs against what is cut off is the person's: the block asks `joint_outputs`, by default
   the outputs of the shortest product, so 61 is two strips of 1 m, or one of 5 m when a joint weighs more (Anton).
+- api.md says that the symbols of the parts of a board are numbers for `#if`, so a Kconfig of a program writes
+  `depends on BOARD_TOUCH != 0`: a probe of the handwritten clock on the JC1060P470C and the JC8012P4A1C, its display,
+  touch and button through `boards.h`, lost its forecast with `depends on BOARD_TOUCH`.
 - A level seen on hardware is a note, not a part: `high_seen_mv` of a chip, the lowest high that drove it on hardware,
   with its trial in `checked`, and the judgement `level_seen_on_hardware`. The WS2812B takes 3.5 V by its datasheet;
   the 3.3 V of an ESP32 drove Anton's garland, so a kit of strips says so and adds no level shifter (Anton: "in

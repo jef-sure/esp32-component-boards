@@ -258,5 +258,9 @@ includes the adapter's header under the symbol that says the part is there:
 #endif
 ```
 
+These symbols are numbers, 1 or 0, so that C reads them in `#if`. In a Kconfig of the program an option that needs
+the part compares the number: `depends on BOARD_TOUCH != 0`. `depends on BOARD_TOUCH` alone reads a number as no,
+and the option is never shown (the probe of the handwritten clock lost its forecast that way).
+
 A program that always has a display may include these headers unconditionally
 and name `jef-sure/dgx` in its own manifest as well.

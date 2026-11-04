@@ -7,7 +7,7 @@ Usage: board_select.py BOARD [--module MODULE ...] [--reset] PROJECT_DIR
 
 host is the computer: the linux target of ESP-IDF, a window of SDL2 as large as the display of the board named by
 --as (src/board_host.c of the component). It is chosen like a board and built like one: idf.py -D BOARD=host build,
-then the program build-host/<project>.elf runs on the computer.
+then the program build/host/<project>.elf runs on the computer.
 
 BOARD is a board of the catalog, or a board of the program: components/local-boards/boards/BOARD/board.json
 in the project. The glue of a board of the program is made there, beside its data.
@@ -35,19 +35,23 @@ Each file begins with the command that made it and the version of the component;
 changes, board_select.py --again PROJECT_DIR makes every such file of the project again the same way.
 ESP-IDF reads the defaults only into a new sdkconfig, so an sdkconfig made before keeps what it had.
 
-Several boards write PROJECT_DIR/sdkconfig.defaults.<BOARD> each, and each is built in a
-directory of its own, its sdkconfig and its lock of components there:
+Several boards write PROJECT_DIR/sdkconfig.defaults.<BOARD> each, and PROJECT_DIR/CMakePresets.json: a preset
+for each board, in the order named, with its build directory build/<BOARD>, its sdkconfig and its lock of components
+there. ESP-IDF 6 reads the presets: idf.py build builds the first board, the current one, idf.py --preset <BOARD>
+build another, and the extension of ESP-IDF for VS Code chooses one as a project configuration. ESP-IDF 5 does not
+read them:
 
-    idf.py -B build-<BOARD> -D SDKCONFIG=build-<BOARD>/sdkconfig -D BOARD=<BOARD> build
+    idf.py -B build/<BOARD> -D SDKCONFIG=build/<BOARD>/sdkconfig -D BOARD=<BOARD> build
 
-with a CMakeLists.txt that reads sdkconfig.defaults.${BOARD} when BOARD is given, as the
-skeleton of the page does.
+Both need a CMakeLists.txt that reads sdkconfig.defaults.${BOARD} when BOARD is given, as the skeleton of the page
+does. A CMakePresets.json the command did not write is not touched.
 
 The data is found beside this script (the component's catalog/), wherever the component
 lies: a checkout beside the project or managed_components/jef-sure__boards/.
 """
 
 import argparse
+import json
 import pathlib
 import re
 import shlex
@@ -117,6 +121,28 @@ def defaults_text(project, local, board, modules, revision):
 
 HOST = "host"
 RECORD = "# board_select.py "  # the first line of a file it writes: the arguments that make it again
+PRESETS = "CMakePresets.json"
+VENDOR = "jef-sure/boards"  # the vendor map of CMake presets that marks the file as written here
+
+
+def presets_text(project, boards, targets, command):
+    """CMakePresets.json of the boards: one preset each, the first the board idf.py builds with no --preset."""
+    path = project / PRESETS
+    if path.exists() and VENDOR not in json.loads(path.read_text()).get("vendor", {}):
+        raise SystemExit(f"{path}: written by someone else, so it is not touched: add the presets of {', '.join(boards)} to it, "
+                         f"or remove it and run the command again")
+    presets = [{"name": board, "displayName": title_of(board), "binaryDir": f"build/{board}",
+                "cacheVariables": {"BOARD": board, "IDF_TARGET": target, "SDKCONFIG": f"build/{board}/sdkconfig"}} for board, target in zip(boards, targets)]
+    return resolve.dump({"version": 3, "vendor": {VENDOR: {"made by": command}}, "configurePresets": presets}) + "\n"
+
+
+def title_of(board):
+    if board == HOST:
+        return "the computer"
+    try:
+        return resolve.load("boards", board).get("title", board)
+    except resolve.Refused:
+        return board
 
 
 def made_by(board, modules=(), revision=None, shows=None):
@@ -141,7 +167,7 @@ def again(parser, project):
         path.write_text(made_by(board, args.module, args.revision, args.shows) + text)
         print(f"{path}: {board}, {target}, again")
     print("An sdkconfig made before keeps what it had: ESP-IDF reads the defaults only into a new one. To take what changed,\n"
-          "board_select.py BOARD --reset PROJECT_DIR for one board, or remove build-<BOARD>/sdkconfig of several.")
+          "board_select.py BOARD --reset PROJECT_DIR for one board, or remove build/<BOARD>/sdkconfig of several.")
     return 0
 
 
@@ -200,14 +226,24 @@ def main():
     local = resolve.add_project(project)
 
     if len(boards) > 1:
+        if len(set(boards)) != len(boards):
+            raise SystemExit("a board named twice")
+        texts, targets = {}, []
         for board in boards:
             text, target = host_text(local, args.shows) if board == HOST else defaults_text(project, local, board, [], None)
-            out = project / f"sdkconfig.defaults.{board}"
-            out.write_text(made_by(board, shows=args.shows if board == HOST else None) + text)
+            texts[project / f"sdkconfig.defaults.{board}"] = made_by(board, shows=args.shows if board == HOST else None) + text
+            targets.append(target)
+        command = "board_select.py " + " ".join([*boards, *([f"--as {args.shows}"] if args.shows else []), "."])
+        texts[project / PRESETS] = presets_text(project, boards, targets, command)
+        for out, text in texts.items():
+            out.write_text(text)
+        for out, board, target in zip(texts, boards, targets):
             print(f"{out}: {board}, {target}")
-        print("Each board builds in a directory of its own:")
+        print(f"{project / PRESETS}: a preset for each, {boards[0]} first\n"
+              f"ESP-IDF 6: idf.py build builds {boards[0]}, idf.py --preset <board> build another, each in build/<board>.\n"
+              "ESP-IDF 5 does not read the presets:")
         for board in boards:
-            print(f"  idf.py -B build-{board} -D SDKCONFIG=build-{board}/sdkconfig -D BOARD={board} build")
+            print(f"  idf.py -B build/{board} -D SDKCONFIG=build/{board}/sdkconfig -D BOARD={board} build")
         return 0
 
     board = boards[0]
@@ -218,7 +254,7 @@ def main():
         text, _ = host_text(local, args.shows)
         out = project / f"sdkconfig.defaults.{HOST}"
         out.write_text(made_by(HOST, shows=args.shows) + text)
-        print(f"{out}: {HOST}, linux\nNow: idf.py -B build-{HOST} -D SDKCONFIG=build-{HOST}/sdkconfig -D BOARD={HOST} build, then build-{HOST}/<project>.elf")
+        print(f"{out}: {HOST}, linux\nNow: idf.py -B build/{HOST} -D SDKCONFIG=build/{HOST}/sdkconfig -D BOARD={HOST} build, then build/{HOST}/<project>.elf")
         return 0
     sdkconfig = project / "sdkconfig"
     before = chosen(sdkconfig)

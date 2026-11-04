@@ -15,9 +15,11 @@ Checks of the data format. Needs jsonschema and node: the Python of ESP-IDF has 
    the same pins;
 8. the solver of the editor gives what the cases of test/solver/ expect, and catalog/questions.json
    passes the schema;
-9. board_bom.py counts each product of a chain;
+9. board_bom.py counts each product of a chain, and a price of one piece as the page does;
 10. the archive compote packs for the registry holds only files git tracks, none of test/, .github/ or
-   imported/ (when compote of ESP-IDF and git are there).
+   imported/ (when compote of ESP-IDF and git are there);
+11. take_report.py takes a price and a shop from an issue, and every offer names a shop of catalog/shops.json;
+12. board_select.py writes a preset for each board in the order named, and leaves a CMakePresets.json of another alone.
 """
 import copy
 import json
@@ -255,6 +257,27 @@ def goods_wrong():
     if costs != (1, {"EUR": (3, 3, 3, 3)}):
         wrong.append(f"less than 3 costs {costs}")
     print(f"goods: {'0 wrong' if not wrong else '; '.join(wrong)}")
+    return len(wrong)
+
+
+def presets_wrong():
+    """board_select.py writes a preset for each board in the order named, and leaves a CMakePresets.json of another alone."""
+    wrong = []
+    with tempfile.TemporaryDirectory() as folder:
+        project = pathlib.Path(folder)
+        (project / "CMakeLists.txt").write_text("")
+        command = [sys.executable, str(ROOT / "tools" / "board_select.py"), "cyd_s028r", "jc4827w543c", str(project)]
+        subprocess.run(command, capture_output=True, check=True)
+        written = project / "CMakePresets.json"
+        presets = [(item["name"], item["binaryDir"], item["cacheVariables"]["IDF_TARGET"]) for item in json.loads(written.read_text())["configurePresets"]] if written.exists() else None
+        if presets != [("cyd_s028r", "build/cyd_s028r", "esp32"), ("jc4827w543c", "build/jc4827w543c", "esp32s3")]:
+            wrong.append(f"the presets are {presets}")
+        for path in project.glob("sdkconfig.defaults.*"):
+            path.unlink()
+        (project / "CMakePresets.json").write_text('{"version": 3, "configurePresets": []}\n')
+        if not subprocess.run(command, capture_output=True).returncode or list(project.glob("sdkconfig.defaults.*")):
+            wrong.append("a CMakePresets.json of another was replaced, or defaults written beside it")
+    print(f"presets: {'0 wrong' if not wrong else '; '.join(wrong)}")
     return len(wrong)
 
 
@@ -673,6 +696,7 @@ def main():
     problems += audit_changes_wrong()
     failed += reports_refused()
     failed += goods_wrong()
+    failed += presets_wrong()
     failed += package_wrong()
     run = subprocess.run(["node", str(TESTS / "page_cli.js")], capture_output=True, text=True)
     print(run.stdout.strip() + run.stderr.strip()[-300:])

@@ -105,16 +105,35 @@ set-target <цель>`, она чистит сборку и делает нов�
 
 ```sh
 python3 managed_components/jef-sure__boards/tools/board_select.py cyd_s028r jc1060p470c .
-idf.py -B build-cyd_s028r -D SDKCONFIG=build-cyd_s028r/sdkconfig -D BOARD=cyd_s028r build
-idf.py -B build-jc1060p470c -D SDKCONFIG=build-jc1060p470c/sdkconfig -D BOARD=jc1060p470c build
+idf.py build                          # ESP-IDF 6: первая плата, cyd_s028r
+idf.py --preset jc1060p470c build     # другая
 ```
 
 `board_select.py` пишет `sdkconfig.defaults.<плата>` на каждую плату, со строками
-ревизии её чипа, и печатает эти команды. Эти файлы коммитятся: свежий клон читает
-их раньше, чем скачан компонент. У каждого каталога сборки своя цель, свой
+ревизии её чипа, и `CMakePresets.json`: по пресету на плату, в том порядке, в каком
+платы названы, с каталогом сборки `build/<плата>`. Эти файлы коммитятся: свежий клон
+читает их раньше, чем скачан компонент. У каждого каталога сборки своя цель, свой
 `sdkconfig` и свой lock компонентов, поэтому платы друг другу не мешают. Файлы
 каталога напрямую не читаются: строки ревизии есть только в том, что пишет
 `board_select.py`.
+
+ESP-IDF 6 читает пресеты. Первый — текущая плата: `idf.py build`, `flash` и `monitor`
+берут её без лишних слов. Другую берёт `idf.py --preset <плата>` или `IDF_PRESET=<плата>`
+в окружении, а также перестановка её пресета на первое место. Расширение ESP-IDF для
+VS Code показывает пресеты как конфигурации проекта: *ESP-IDF: Select Project
+Configuration* выбирает одну, строка состояния её называет. В одном каталоге сборки
+плата не меняется: чип каталога сборки закреплён в кеше CMake раньше, чем читается
+`CMakeLists.txt`, поэтому строка в нём другой чип выбрать не может.
+
+ESP-IDF 5 пресетов не читает, и каждая плата называется в командной строке:
+
+```sh
+idf.py -B build/cyd_s028r -D SDKCONFIG=build/cyd_s028r/sdkconfig -D BOARD=cyd_s028r build
+idf.py -B build/jc1060p470c -D SDKCONFIG=build/jc1060p470c/sdkconfig -D BOARD=jc1060p470c build
+```
+
+`CMakePresets.json`, который `board_select.py` не писал, не трогается: команда об этом
+говорит, и пресеты добавляются руками.
 
 `-D SDKCONFIG_DEFAULTS=...` в командной строке побеждает оба варианта: фрагмент
 CMake выше задаёт переменную только когда она не задана.
@@ -126,11 +145,11 @@ CMake выше задаёт переменную только когда она 
 
 ```sh
 python3 managed_components/jef-sure__boards/tools/board_select.py host --as jc8012p4a1c .
-idf.py -B build-host -D SDKCONFIG=build-host/sdkconfig -D BOARD=host build
-build-host/<project>.elf
+idf.py -B build/host -D SDKCONFIG=build/host/sdkconfig -D BOARD=host build
+build/host/<project>.elf
 ```
 
-В терминале лог идёт сразу; через трубу он буферизуется, и `stdbuf -o0 build-host/<project>.elf` выдаёт его без
+В терминале лог идёт сразу; через трубу он буферизуется, и `stdbuf -o0 build/host/<project>.elf` выдаёт его без
 задержки.
 
 `board_select.py` пишет `sdkconfig.defaults.host` рядом с файлами плат проекта, а CMake заготовки собирает для компьютера

@@ -1,9 +1,10 @@
-# One program for several boards: board_select.py writes sdkconfig.defaults.<board> for each, and each board
-# builds in a directory of its own with its own sdkconfig and lock of the components:
+# One program for several boards: board_select.py writes sdkconfig.defaults.<board> for each and CMakePresets.json,
+# and each board builds in a directory of its own with its own sdkconfig and lock of the components:
 #
 #     python3 ../../tools/board_select.py cyd_s028r jc8012p4a1c .
-#     idf.py -B build-cyd_s028r -D SDKCONFIG=build-cyd_s028r/sdkconfig -D BOARD=cyd_s028r build
-#     idf.py -B build-jc8012p4a1c -D SDKCONFIG=build-jc8012p4a1c/sdkconfig -D BOARD=jc8012p4a1c build
+#     idf.py build                                 # ESP-IDF 6: the first preset, cyd_s028r
+#     idf.py --preset jc8012p4a1c build            # another
+#     idf.py -B build/cyd_s028r -D SDKCONFIG=build/cyd_s028r/sdkconfig -D BOARD=cyd_s028r build   # ESP-IDF 5
 #
 # Nothing here names a board. A -D SDKCONFIG_DEFAULTS=... on the command line wins over the files.
 cmake_minimum_required(VERSION 3.22)

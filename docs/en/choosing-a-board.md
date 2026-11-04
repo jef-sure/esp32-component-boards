@@ -106,16 +106,36 @@ for each:
 
 ```sh
 python3 managed_components/jef-sure__boards/tools/board_select.py cyd_s028r jc1060p470c .
-idf.py -B build-cyd_s028r -D SDKCONFIG=build-cyd_s028r/sdkconfig -D BOARD=cyd_s028r build
-idf.py -B build-jc1060p470c -D SDKCONFIG=build-jc1060p470c/sdkconfig -D BOARD=jc1060p470c build
+idf.py build                          # ESP-IDF 6: the first board, cyd_s028r
+idf.py --preset jc1060p470c build     # another
 ```
 
 `board_select.py` writes `sdkconfig.defaults.<board>` for each, with the lines of
-the revision of its chip, and prints these commands. Commit those files: a fresh
+the revision of its chip, and `CMakePresets.json`: a preset for each board, in the
+order named, with its build directory `build/<board>`. Commit those files: a fresh
 clone reads them before the component is downloaded. Each build directory has its
 own target, `sdkconfig` and lock of the components, so the boards do not disturb
 each other. The files of the catalog are not read directly: the lines of the
 revision are only in what `board_select.py` writes.
+
+ESP-IDF 6 reads the presets. The first one is the current board: `idf.py build`,
+`flash` and `monitor` take it with no more words. `idf.py --preset <board>` or
+`IDF_PRESET=<board>` in the environment takes another, and so does putting its
+preset first. The extension of ESP-IDF for VS Code shows the presets as project
+configurations: *ESP-IDF: Select Project Configuration* chooses one, and the status
+bar names it. A board does not change in the same build directory: the chip of a
+build directory is fixed in its CMake cache before `CMakeLists.txt` is read, so a
+line there could not choose another chip.
+
+ESP-IDF 5 does not read presets; each board is named on the command line:
+
+```sh
+idf.py -B build/cyd_s028r -D SDKCONFIG=build/cyd_s028r/sdkconfig -D BOARD=cyd_s028r build
+idf.py -B build/jc1060p470c -D SDKCONFIG=build/jc1060p470c/sdkconfig -D BOARD=jc1060p470c build
+```
+
+A `CMakePresets.json` that `board_select.py` did not write is not touched: the
+command says so, and the presets are added by hand.
 
 A `-D SDKCONFIG_DEFAULTS=...` on the command line wins over both: the CMake
 snippet above only sets the variable when none is given.
@@ -127,11 +147,11 @@ as the display of the board it shows.
 
 ```sh
 python3 managed_components/jef-sure__boards/tools/board_select.py host --as jc8012p4a1c .
-idf.py -B build-host -D SDKCONFIG=build-host/sdkconfig -D BOARD=host build
-build-host/<project>.elf
+idf.py -B build/host -D SDKCONFIG=build/host/sdkconfig -D BOARD=host build
+build/host/<project>.elf
 ```
 
-Its log comes as it is written in a terminal; through a pipe it is buffered, and `stdbuf -o0 build-host/<project>.elf`
+Its log comes as it is written in a terminal; through a pipe it is buffered, and `stdbuf -o0 build/host/<project>.elf`
 gives it at once.
 
 `board_select.py` writes `sdkconfig.defaults.host` beside the files of the boards of the project, and the CMake of the

@@ -289,6 +289,13 @@ committed, a program that asks by kind.
   worth its price from 5 pieces, about 0.09 EUR, not that from 1000. The cheapest module of a role was its price divided
   by its pack again, though a price is already of one piece. A low of 0, "less than 3", counts as 3 in the list of goods too, as on the
   page: the list printed EUR 0.00 for the ESP32 DevKit (7c).
+- Several boards in one project have a current one: `board_select.py` writes `CMakePresets.json` beside the defaults, a
+  preset for each board in the order named, built in `build/<board>`. ESP-IDF 6 reads it: `idf.py build` builds the
+  first board, `idf.py --preset <board> build` another, and the extension of ESP-IDF for VS Code chooses one as a
+  project configuration. ESP-IDF 5 is given the directories, now `build/<board>` too. A line in `CMakeLists.txt` cannot
+  choose the board: the chip of a build directory is fixed before that file is read. Built on 6.1 by the presets and
+  on 5.5.5 by the directories, for hello_board (CYD S028R and JC4827W543C) and multi_board; CI builds multi_board both
+  ways. A `CMakePresets.json` the tool did not write is not touched (Anton: several boards, and which one is current).
 - Two displays as one screen, tried on a board: the DotView clock (two SSD1351 on SPI2 and SPI3, `display_groups`)
   showed one picture across both, read its photoresistor on the pin of the data while the screens lit it, and its button.
   The y of each panel in `test/format/good/dotview_clock.json` is turned: the clock's own program has an older copy

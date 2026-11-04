@@ -591,7 +591,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         if (lost) {
             const map = pinMap(board);
             // what holds the pin, in the words of the data
-            const holder = (entry) => !entry ? t('not a GPIO of this chip') : entry.owners.length ? entry.owners.join(', ') : entry.input_only ? t('input only') : entry.notes?.length ? entry.notes.join(', ') : entry.strapping ? t('a strapping pin') : t('does not come out');
+            const holder = (entry) => !entry ? t('not a GPIO of this chip') : entry.owners.length || entry.notes?.length ? [...entry.owners, ...(entry.notes ?? [])].join(', ') : entry.input_only ? t('input only') : entry.strapping ? t('a strapping pin') : t('does not come out');
             const pins = Object.values(lost.way.fixed).filter((pin) => !open.includes(pin)).map((pin) => `GPIO ${pin} (${holder(map[pin])})`);
             return { problem: t('{0} is soldered to {1}, which this board does not leave free', lost.module.title, pins.join(', ')) };
         }

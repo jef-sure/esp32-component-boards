@@ -18,7 +18,7 @@
 /* Every bus of the board, its numbers by name: the kinds the component sets up and the
  * kinds it only keeps for the program, for a program that sets its own hardware up on the
  * board's wiring instead of copying pins. */
-static const struct board_bus_field board_bus_fields[] = {{"led", "data", 10}};
+static const struct board_bus_field board_bus_fields[] = {{"usb", "d_minus", 18}, {"usb", "d_plus", 19}, {"led", "data", 10}};
 const struct board_bus_table board_bus_table = {.fields = board_bus_fields, .count = sizeof(board_bus_fields) / sizeof(board_bus_fields[0])};
 
 const struct board_spi_table board_spi_table = {.count = 0};

@@ -32,6 +32,7 @@
     },
     "devices": {
         "boot": {"class": "button", "ref": "K2", "pins": {"in": {"gpio": 0, "active": "low"}}},
+        "usb": {"class": "usb", "pins": {"d_minus": 19, "d_plus": 20}, "notes": "The USB-C: D- and D+ go to the USB Serial/JTAG of the chip (USB_N on GPIO19, USB_P on GPIO20), the console and the flashing."},
         "led": {
             "class": "led",
             "ref": "U1",

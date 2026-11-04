@@ -15,6 +15,7 @@
     "mcu": {"target": "esp32c3", "flash_mb": 4, "antenna": {"kind": "on_board", "form": "ceramic", "quality": 4}},
     "devices": {
         "boot": {"class": "button", "pins": {"in": {"gpio": 9, "active": "low"}}},
+        "usb": {"class": "usb", "pins": {"d_minus": 18, "d_plus": 19}, "notes": "The USB-C: D- and D+ go to the USB Serial/JTAG of the chip (UD_N on IO18, UD_P on IO19), the console and the flashing."},
         "led": {
             "class": "led",
             "ref": "WS_L1",

@@ -1,5 +1,5 @@
 {
-    "title": "A part of the person's own soldered to GPIO 18, which the ESP32-C3-Zero gives to USB-JTAG: the board is refused, the pin is not handed to the part",
+    "title": "A part of the person's own soldered to GPIO 18, which the ESP32-C3-Zero gives to its USB-C and USB-JTAG: the board is refused, the pin is not handed to the part",
     "answers": {
         "board": "esp32_c3_zero",
         "blocks": [
@@ -10,5 +10,5 @@
             }
         ]
     },
-    "says": "relay is soldered to GPIO 18 (USB-JTAG), which this board does not leave free"
+    "says": "relay is soldered to GPIO 18 (usb.d_minus, USB-JTAG), which this board does not leave free"
 }

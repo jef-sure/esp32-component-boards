@@ -248,6 +248,9 @@ committed, a program that asks by kind.
   `board_sound_start`, `board_sound_source` and their `_at` forms take `ctx`, given back to it at every call, so the mixer
   of a game needs no static. The task takes the source and its context together. The names `board_`, `boards_`,
   `BOARD_` and `CONFIG_BOARD_` are said to be the component's (both found by 7c after the move of dgx-ge was decided).
+- The ESP32-C3-Zero and the ESP32-S3-Zero have their USB-C as a part, `usb` with `d_minus` and `d_plus`, from their
+  schematics: GPIO 18 and 19 on the C3, 19 and 20 on the S3, the USB Serial/JTAG of the chip. A pin a part of the person's
+  own cannot have is named with its owner and the note of the chip, as `usb.d_minus, USB-JTAG`.
 - The diagonal and the shape of a graphics display are asked of each block (`"asked": "block"`, Anton's decision, after
   NFC): a round dial and a panel of 3 inches take two parts. A block with no variant chosen is asked these too. Of two
   displays from modules the first block gives the primary one: both were primary and the kit was refused.

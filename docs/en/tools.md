@@ -306,8 +306,10 @@ in the data of a part with its variant applied, and `limit.fits`, how the value 
 `at_least`, `at_most`, `includes`, `is`), as `co2_up_to` on `provides.air.specified`. The answer lies in `asks` of the block,
 so two temperature blocks, a room and an oven, ask different ranges and are two needs. A part whose data has no such value
 stays, and the kit names it as an unknown. A measured question of a class with `"asked": "block"` is asked of each block too,
-as the reading distance and the cards of a reader: two readers ask their own, and two blocks of one role are always two
-parts. The distance between readers stays one question of the page. The page shows these fields in the block; the model sets them with `edit_blocks`,
+as the reading distance and the cards of a reader, the diagonal and the shape of a graphics display, the outputs of a
+chain: two readers ask their own, and two blocks of one role are always two parts. Its `limit.of` and `limit.variant`
+may be lists, and a block with no variant chosen is asked what any of them is. The distance between readers stays one
+question of the page. Of two displays from modules, the first block gives the primary one. The page shows these fields in the block; the model sets them with `edit_blocks`,
 and `roles` lists them. The platform is asked without a version: a kit names the versions that take its chip and its
 libraries, and a version is fixed only when the person chooses one.
 

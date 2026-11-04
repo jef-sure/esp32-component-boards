@@ -196,7 +196,7 @@ const useEditor = Pinia.defineStore('editor', {
             // the fields of its part, and the questions of its class asked of each block
             const classOf = (block) => library.roles.flatMap((group) => group.roles).find((role) => role.id === block.role)?.needs?.class;
             return (block) => library.questions.filter((question) => (question.limit?.field && question.limit.of === block.role && (!question.limit.variant || question.limit.variant === block.variant))
-                || (question.asked === 'block' && [].concat(question.limit?.of ?? []).includes(classOf(block)) && (!question.limit.variant || [].concat(question.limit.variant).includes(block.variant))));
+                || (question.asked === 'block' && [].concat(question.limit?.of ?? []).includes(classOf(block)) && (!question.limit.variant || !block.variant || [].concat(question.limit.variant).includes(block.variant))));
         },
         // The parts of the catalog a block can have, for the person to fix one.
         partsOf() {

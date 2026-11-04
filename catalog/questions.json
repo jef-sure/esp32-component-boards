@@ -14,17 +14,19 @@
         },
         {
             "id": "diagonal_in",
+            "asked": "block",
             "text": "Its diagonal at least, inches",
             "type": "number",
             "when": {"display": "graphics"},
-            "limit": {"measure": "diagonal_in", "of": "display"}
+            "limit": {"measure": "diagonal_in", "of": "display", "variant": ["tft", "oled", "epaper", "memory", "mono_lcd"]}
         },
         {
             "id": "display_shape",
+            "asked": "block",
             "text": "Its shape",
             "type": "choice",
             "when": {"display": "graphics"},
-            "limit": {"measure": "shape", "of": "display"},
+            "limit": {"measure": "shape", "of": "display", "variant": ["tft", "oled", "epaper", "memory", "mono_lcd"]},
             "choices": [{"value": "any", "text": "any"}, {"value": "round", "text": "round"}, {"value": "rectangular", "text": "rectangular"}]
         },
         {"id": "touch", "text": "A touch panel", "type": "flag", "needs": {"class": "touch"}},

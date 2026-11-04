@@ -279,8 +279,9 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         is: (value, asked) => value === asked,
     };
 
-    // a question of a measure limits this class, and this variant when it names some: of and variant may each be a list
-    const ofClass = (question, cls, variant) => [].concat(question.limit?.of ?? []).includes(cls) && (!question.limit.variant || [].concat(question.limit.variant).includes(variant));
+    // a question of a measure limits this class, and this variant when it names some, or a need of no variant: of and variant
+    // may each be a list
+    const ofClass = (question, cls, variant) => [].concat(question.limit?.of ?? []).includes(cls) && (!question.limit.variant || !variant || [].concat(question.limit.variant).includes(variant));
 
     // an answer of a block that asks something: none for an empty field or "any"
     const blockAnswer = (value) => (value === undefined || value === null || value === '' || value === 'any' ? undefined : value);
@@ -607,6 +608,8 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         const held = {}; // the addresses taken on each I2C bus
         const placed = {}; // the parts of this project on each host
         const shared = {}; // the lines the chains of a need have in common
+        // one display is the primary: the board's, else the first of the blocks
+        let primaryTaken = Object.values(board.devices).some((device) => device.config?.primary);
         for (const pick of picks) {
             if (pick.way) {
                 // lines a chain shares with the others of its need, as the data and clock of shift registers
@@ -656,7 +659,8 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             const needed = Object.fromEntries(lines.map((line) => [line, pins.shift()]));
             const supply = supplyOf(board, pick.module);
             // the board keeps its own display as the primary one
-            const second = pick.module.device.config?.primary && Object.values(board.devices).some((device) => device.config?.primary);
+            const second = pick.module.device.config?.primary && primaryTaken;
+            primaryTaken ||= Boolean(pick.module.device.config?.primary);
             modules[pick.use] = { module: pick.module.name, ...(pick.count > 1 ? { count: pick.count } : {}), on: { [`${pick.transport}.${own}`]: wires }, ...(lines.length ? { pins: needed } : {}), ...(Object.keys(supply).length ? { supply } : {}), ...(second ? { config: { primary: false } } : {}) };
         }
         const sharedPins = Object.fromEntries(Object.entries(shared).filter(([, chain]) => chain.uses.length > 1).flatMap(([id, chain]) => Object.entries(chain.pins).map(([line, pin]) => [`${id}_${line}`, { line: pin, devices: chain.uses }])));

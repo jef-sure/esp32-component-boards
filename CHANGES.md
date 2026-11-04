@@ -248,6 +248,9 @@ committed, a program that asks by kind.
   `board_sound_start`, `board_sound_source` and their `_at` forms take `ctx`, given back to it at every call, so the mixer
   of a game needs no static. The task takes the source and its context together. The names `board_`, `boards_`,
   `BOARD_` and `CONFIG_BOARD_` are said to be the component's (both found by 7c after the move of dgx-ge was decided).
+- The diagonal and the shape of a graphics display are asked of each block (`"asked": "block"`, Anton's decision, after
+  NFC): a round dial and a panel of 3 inches take two parts. A block with no variant chosen is asked these too. Of two
+  displays from modules the first block gives the primary one: both were primary and the kit was refused.
 - Chains of chips: `chain` of a chip entry, `per` outputs by its datasheet and `unit` outputs of one unit of
   `config.count` (MAX7219 64 and 8, WS2812B 1, the new 74HC595 8); `count` of a module of a project, how many of the
   product in one chain on the wires of one, refused for a module that does not chain. A block of LEDs or shift

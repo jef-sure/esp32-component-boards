@@ -81,5 +81,14 @@
             "date": "2026-11-02",
             "notes": "Median RSSI on its pins, face down: -60 dBm at 0 and -64 at 90 degrees; face up, flat on the desk: -64 at 0 degrees."
         }
+    },
+    "price": {
+        "report_3": {
+            "shop": "aliexpress",
+            "currency": "EUR",
+            "range": [3.76, 3.76],
+            "date": "2026-11-04",
+            "source": "Issue 3, as reported"
+        }
     }
 }

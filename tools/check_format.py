@@ -14,7 +14,10 @@ Checks of the data format. Needs jsonschema and node: the Python of ESP-IDF has 
    resolve.py and catalogJson of resolve.js write the same, boards_gen.py and editor/pins.js find
    the same pins;
 8. the solver of the editor gives what the cases of test/solver/ expect, and catalog/questions.json
-   passes the schema.
+   passes the schema;
+9. board_bom.py counts each product of a chain;
+10. the archive compote packs for the registry holds only files git tracks, none of test/, .github/ or
+   imported/ (when compote of ESP-IDF and git are there).
 """
 import copy
 import json
@@ -24,6 +27,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tarfile
 import tempfile
 import urllib.error
 import urllib.request
@@ -196,6 +200,26 @@ def editor_differs(reached):
         if mine != {pin: {**entry, "owners": sorted(entry["owners"])} for pin, entry in theirs["map"].items()} or boards_gen.pin_problems(board) != theirs["problems"]:
             differ.append(f"pins {board['name']}")
     return len(raw), sum(not RAW.is_valid(doc) for doc in raw.values()), differ
+
+
+def package_wrong():
+    """The archive of the registry holds only files git tracks, none of test/, .github/ or imported/: the manager of
+    components does not read .gitignore, and an include it applies after exclude brings back what exclude took."""
+    compote = pathlib.Path(sys.executable).parent / "compote"
+    if not compote.exists() or not (ROOT / ".git").exists():
+        print("package: not checked, compote or git is not here")
+        return False
+    with tempfile.TemporaryDirectory() as out:
+        run = subprocess.run([str(compote), "component", "pack", "--name", "boards", "--dest-dir", out, "--project-dir", str(ROOT)], capture_output=True, text=True)
+        if run.returncode:
+            print(f"package: compote component pack failed: {run.stderr.strip()[-300:]}")
+            return True
+        with tarfile.open(next(pathlib.Path(out).glob("*.tgz"))) as archive:
+            packed = {member.name.removeprefix("./") for member in archive.getmembers() if member.isfile()}
+    tracked = set(subprocess.run(["git", "-C", str(ROOT), "ls-files"], capture_output=True, text=True).stdout.splitlines())
+    wrong = sorted(packed - tracked) + sorted(name for name in packed if name.split("/")[0] in ("test", ".github", "imported", "imported-shops"))
+    print(f"package: {len(packed)} files, {len(wrong)} wrong {wrong[:5]}")
+    return bool(wrong)
 
 
 def goods_wrong():
@@ -572,6 +596,7 @@ def main():
     problems += audit_changes_wrong()
     failed += reports_refused()
     failed += goods_wrong()
+    failed += package_wrong()
     run = subprocess.run(["node", str(TESTS / "page_cli.js")], capture_output=True, text=True)
     print(run.stdout.strip() + run.stderr.strip()[-300:])
     failed += run.returncode != 0

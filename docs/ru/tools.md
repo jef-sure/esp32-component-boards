@@ -138,7 +138,9 @@ python3 tools/check_format.py
 `catalog/` и `test/format/catalog/` по `catalog/format.schema.json`, каждую плату через
 слияние и правила, случаи `test/format/good/` и `test/format/bad/`, а также что
 `tools/rules.py` и `editor/rules.js` находят одно и то же, а `tools/resolve.py` и
-`editor/resolve.js` дают одно и то же для каждого документа, прошедшего схему.
+`editor/resolve.js` дают одно и то же для каждого документа, прошедшего схему. Считает изделия цепочки в списке
+товаров и там, где есть compote из ESP-IDF и git, упаковывает компонент, как это сделал бы реестр, и находит в
+архиве только файлы, которые отслеживает git, ни одного из `test/`, `.github/` или `imported/`.
 
 ## board_pins.py и свободные пины
 

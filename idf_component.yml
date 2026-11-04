@@ -52,6 +52,10 @@ maintainers:
 license: MIT
 
 files:
+  # Only what is listed under include goes into the archive: include is applied after exclude and brings back what
+  # exclude took, so exclude takes everything first. The manager does not read .gitignore.
+  exclude:
+    - "**/*"
   include:
     - "idf_component.yml"
     - "CMakeLists.txt"
@@ -65,31 +69,18 @@ files:
     - "boards/**/*.c"
     - "boards/**/*.cmake"
     - "catalog/**/*.json"
+    - "catalog/**/*.webp"
     - "catalog/**/sdkconfig.defaults"
     - "tools/*.py"
     - "editor/**/*"
-    - "examples/**/*"
+    - "examples/*/CMakeLists.txt"
+    - "examples/*/README.md"
+    - "examples/*/sdkconfig.defaults"
+    - "examples/*/main/*"
+    - "examples/*/components/local-boards/boards/*/board.json"
+    - "examples/*/components/local-boards/modules/*/module.json"
     - "docs/**/*.md"
     - "README.md"
     - "README.ru.md"
     - "CHANGES.md"
     - "LICENSE"
-  exclude:
-    - "build/**"
-    - ".git/**"
-    - ".github/**"
-    - "test/**"
-    - "**/__pycache__/**"
-    - "examples/*/build*/**"
-    - "examples/*/managed_components/**"
-    - "examples/*/sdkconfig"
-    - "examples/*/sdkconfig.defaults.board"
-    - "examples/*/dependencies.lock*"
-    # the manager does not read .gitignore: what stays with the author is named here
-    - "PLAN*"
-    - "PLAN*/**"
-    - "CLAUDE*"
-    - "AGENTS.md"
-    - "GEMINI.md"
-    - ".vscode/**"
-    - ".claude/**"

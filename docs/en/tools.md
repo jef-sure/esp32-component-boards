@@ -135,7 +135,9 @@ file of `catalog/` and `test/format/catalog/` against
 `catalog/format.schema.json`, every board through the merge and the rules, the
 cases of `test/format/good/` and `test/format/bad/`, that `tools/rules.py` and
 `editor/rules.js` find the same, and that `tools/resolve.py` and `editor/resolve.js`
-give the same for every document that passes the schema.
+give the same for every document that passes the schema. It counts the products of a chain in the list of
+goods, and, where compote of ESP-IDF and git are, packs the component as the registry would and finds in the
+archive only files git tracks, none of `test/`, `.github/` or `imported/`.
 
 ## board_pins.py and the free pins
 

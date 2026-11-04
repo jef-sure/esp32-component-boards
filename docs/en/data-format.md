@@ -747,7 +747,7 @@ kit, `selection.json` keeps it, and a case of `test/solver/` checks the `id`, no
 | kind | fields | what it does |
 |---|---|---|
 | `prefer_pins` | `bus`, `pins` (a field of the chip) | a new host of `bus` takes the pins the chip names for it when all are free; those pins go last for anything else |
-| `keep_out` | `what` (`strapping`), `harm`, `unless`, `says_unless` | a strapping pin whose harm is listed, or which has no `boot`, is given to nothing; the others are given with a line. `unless` `{"logic": "none"}`: the lines of a way of a part that holds nothing on them take such a pin all the same, last, with the line `says_unless` |
+| `keep_out` | `what` (`strapping`), `harm`, `unless`, `says_unless` | a strapping pin whose harm is listed, or which has no `boot`, is given to nothing; the others are given with a line. `unless` `{"logic": "none"}`: the lines of a way of a part that holds nothing on them take such a pin all the same, with the line `says_unless`; last, since a free pin asks nothing of reset and such a pin is often one of JTAG, a cost |
 | `note_cost` | `note` | a pin with that note of the docs is given, with a line of what it costs; any other note keeps a pin out |
 | `unnamed_variant` | | a part of the board of no named variant answers nothing for a variant asked when a module of the catalog names it, and stays a line |
 | `resource_limit` | `resource` (`ledc`) | a kit that asks more of the resource than the chip has is refused |

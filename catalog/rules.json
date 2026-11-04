@@ -113,7 +113,7 @@
     { "id": "shared_devices_exist", "kind": "exists", "each": { "path": "shared_pins.*.devices.*" },
       "among": [{ "path": "devices.*", "as": "{1}" }], "message": "shared_pins {1}: no device {value}" },
     { "id": "feeds_exist", "kind": "exists", "each": { "path": "power.*.feeds.*" },
-      "among": [{ "path": "devices.*", "as": "{1}" }, { "path": "power.*.name" }, { "path": "mcu.target", "as": "mcu" }, { "path": "modules.*.mcu.target", "as": "{1}_mcu" }],
+      "among": [{ "path": "devices.*", "as": "{1}" }, { "path": "power.*.name" }, { "path": "mcu.target", "as": "mcu" }, { "path": "modules.*.chain.*.mcu.target", "as": "{1}_mcu" }],
       "message": "power: no device {value}" },
     { "id": "power_name_once", "kind": "unique", "each": { "path": "power.*.name", "owner": "{1}" }, "message": "power: two steps are named {value}" },
     { "id": "power_takes_earlier", "kind": "earlier", "each": { "path": "power.*.inputs.*.name", "let": { "step": "power.{1}.name" } },

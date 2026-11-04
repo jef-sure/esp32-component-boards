@@ -309,7 +309,10 @@ committed, a program that asks by kind.
   named the solver makes the chain of the fewest outputs over those asked, then of the fewest joints (Anton: a penalty
   for each joint), so 360 is a strip of 5 m and one of 1 m, not six of 1 m. The list of goods has a line for each
   product. A program reads the data pin by `board_bus_get("garland_leds", "data")`; a probe of the garland builds on
-  ESP-IDF 6.1.
+  ESP-IDF 6.1. A use of a resolved board is in one form, its title and the chain of its products, one product a
+  chain of one, so a reader of it has one case (7c); a rule reads the chip of a module at `modules.*.chain.*.mcu`.
+  `resolve.py` no longer writes into the document it is given, as `resolve.js` never did: the list of goods resolved
+  one board twice and read its own records back as uses.
 - Two displays as one screen, tried on a board: the DotView clock (two SSD1351 on SPI2 and SPI3, `display_groups`)
   showed one picture across both, read its photoresistor on the pin of the data while the screens lit it, and its button.
   The y of each panel in `test/format/good/dotview_clock.json` is turned: the clock's own program has an older copy

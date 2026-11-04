@@ -50,8 +50,8 @@ def lines_of(name):
     lines = {"": {**line_of(base, base["title"]), **({"price": product["price"]} if "price" in product else {})}}  # a layer may add an offer
     parts = set()
     for use, module in product["modules"].items():
-        # a chain of several products: the first brings the parts of the use, each member is a line
-        members = module.get("chain") or [module]
+        # the first product of the chain of a use brings its parts, each product is a line
+        members = module["chain"]
         parts |= parts_of(use, members[0])
         if use not in base["modules"]:
             for member in members:

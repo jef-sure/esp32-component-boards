@@ -223,7 +223,7 @@ function boardResolver(catalog) {
         if (chips.size > 1) throw new Refused(`${name}: a chain passes the data of one chip, and its members chain ${[...chips].sort().join(', ')}`);
         const [first, ...rest] = use.chain;
         const { chain: _, ...wiring } = use;
-        const members = [useModule(doc, name, { ...wiring, ...first })];
+        const members = [memberOf(doc, name, { ...wiring, ...first })];
         for (const member of rest) {
             const module = chain(load('modules', member.module));
             members.push({ module: member.module, title: module.title, ...picked(member, ['count']), ...picked(module, MODULE_FACTS) });
@@ -231,8 +231,15 @@ function boardResolver(catalog) {
         return { title: members.map((member) => member.title).join(', then '), chain: members };
     }
 
+    // The record of a use, in one form: its title and the chain of its products, one product a chain of one.
     function useModule(doc, name, use) {
         if (has(use, 'chain')) return useChain(doc, name, use);
+        const member = memberOf(doc, name, use);
+        return { title: member.title, chain: [member] };
+    }
+
+    // A product wired as the use: its parts join the board as <use>_<part>. Returns its record.
+    function memberOf(doc, name, use) {
         const module = chain(load('modules', use.module));
         addModules(module);
         const parts = module.devices;

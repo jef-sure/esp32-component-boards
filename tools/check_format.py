@@ -626,7 +626,7 @@ def main():
             print(f"{device['chip']}: {field} is not {expected}")
             failed += 1
     module = reached["good_physical_module_power.json"]
-    if module["modules"]["reader"].get("revision") != "V2" or [step.get("name") for step in module["power"]][-1] != "reader_3V3" or "reader_chip" not in module["power"][-1]["feeds"]:
+    if module["modules"]["reader"]["chain"][0].get("revision") != "V2" or [step.get("name") for step in module["power"]][-1] != "reader_3V3" or "reader_chip" not in module["power"][-1]["feeds"]:
         print("a module on a board lost its revision or the names of its power")
         failed += 1
 

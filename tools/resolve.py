@@ -260,7 +260,7 @@ def use_chain(doc, name, use):
     if len(chips) > 1:
         raise Refused(f"{name}: a chain passes the data of one chip, and its members chain {', '.join(sorted(chips))}")
     first, *rest = use["chain"]
-    members = [use_module(doc, name, {**{key: value for key, value in use.items() if key != "chain"}, **first})]
+    members = [member_of(doc, name, {**{key: value for key, value in use.items() if key != "chain"}, **first})]
     for member in rest:
         module = chain(load("modules", member["module"]))
         members.append({"module": member["module"], "title": module["title"], **({"count": member["count"]} if "count" in member else {}),
@@ -269,8 +269,15 @@ def use_chain(doc, name, use):
 
 
 def use_module(doc, name, use):
+    """The record of a use, in one form: its title and the chain of its products, one product a chain of one."""
     if "chain" in use:
         return use_chain(doc, name, use)
+    member = member_of(doc, name, use)
+    return {"title": member["title"], "chain": [member]}
+
+
+def member_of(doc, name, use):
+    """A product wired as the use: its parts join the board as <use>_<part>. Returns its record."""
     module = chain(load("modules", use["module"]))
     add_modules(module)
     parts = module["devices"]
@@ -333,7 +340,7 @@ def connector_of(name, connector):
 
 
 def resolve(doc, overlays=()):
-    out = chain(doc)
+    out = chain(copy.deepcopy(doc))  # the document given stays as it was, as in resolve.js
     for layer in overlays:
         out = merge(out, {key: value for key, value in layer.items() if key not in ("kind", "name", "title", "extends")})
     if out.get("kind") == "project":

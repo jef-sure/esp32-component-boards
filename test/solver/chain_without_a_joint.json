@@ -1,0 +1,17 @@
+{
+    "title": "240 addressable LEDs with nothing named: one strip of 5 m, cut, and no joint, not four strips of 1 m with three joints",
+    "answers": {
+        "board": "esp32_devkit",
+        "blocks": [
+            {
+                "role": "led",
+                "variant": "addressable",
+                "name": "garland",
+                "asks": {
+                    "chain_outputs": 240
+                }
+            }
+        ]
+    },
+    "says": "WS2812B strip, 5 m, 60 a metre on GPIO"
+}

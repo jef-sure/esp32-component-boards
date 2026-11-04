@@ -667,9 +667,9 @@ before; the products chain one chip. A chain of one product keeps `module` and `
 A block says what the person already has with `part`: a name of a module, or for a chain a list of products and
 their counts in order, `[{"part": "ws2812b_strip_5m_60", "count": 1}, {"part": "ws2812b_strip_1m_60"}]`. The kit
 takes the list, and what the outputs asked take more of the first product. With nothing named, the solver makes the
-chain of the products of the catalog that chain the same chip: the fewest outputs over those asked, then the fewest
-pieces, since each joint of two products is one more to solder. 360 WS2812B are a strip of 5 m and one of 1 m, not six
-of 1 m.
+chain of the products of the catalog that chain the same chip: the fewest pieces, since each joint of two products is
+one more to solder, then the fewest outputs over those asked. 360 WS2812B are a strip of 5 m and one of 1 m, not six of
+1 m; 240 are one strip of 5 m, cut, not four of 1 m.
 
 ## Frequency sources
 

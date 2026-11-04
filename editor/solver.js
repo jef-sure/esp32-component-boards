@@ -782,8 +782,8 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
     }
 
     // With no list, the products of the catalog that chain the chip of the module chosen make the chain: the fewest
-    // outputs over those asked, then the fewest pieces, since each joint of two products is one more to solder (Anton,
-    // 2026-11-04). The longest go first from the board. Null when no product of the catalog chains that chip with another.
+    // pieces, since each joint of two products is one more to solder (Anton, 2026-11-04), then the fewest outputs over
+    // those asked. The longest go first from the board. Null when no product of the catalog chains that chip with another.
     function mixOf(need, module) {
         const asked = blockAnswer(need.asks?.[CHAIN_QUESTION]);
         const chip = module.device?.chip;
@@ -799,7 +799,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
                 if (before && (!fewest[total] || before.length + 1 < fewest[total].length)) fewest[total] = [...before, kind];
             }
         }
-        const pieces = fewest.slice(asked).find(Boolean);
+        const pieces = fewest.slice(asked).filter(Boolean).reduce((best, made) => (!best || made.length < best.length ? made : best), null);
         if (!pieces) return null;
         const counts = new Map();
         for (const kind of [...pieces].sort((a, b) => b.outputs - a.outputs)) counts.set(kind.module.name, { module: kind.module, count: (counts.get(kind.module.name)?.count ?? 0) + 1 });

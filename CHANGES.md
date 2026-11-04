@@ -306,8 +306,9 @@ committed, a program that asks by kind.
 - A chain of several products: `chain` of a use of a project, products and counts in order from the board, wired as
   the first (7c). Anton's two strips are modules, `ws2812b_strip_5m_60` and `ws2812b_strip_1m_60`, and the WS2812B has
   the way of its data line. A block says what the person already has with `part`, a list for a chain; with nothing
-  named the solver makes the chain of the fewest outputs over those asked, then of the fewest joints (Anton: a penalty
-  for each joint), so 360 is a strip of 5 m and one of 1 m, not six of 1 m. The list of goods has a line for each
+  named the solver makes the chain of the fewest joints (Anton: a penalty for each joint), then of the fewest outputs
+  over those asked, so 360 is a strip of 5 m and one of 1 m, not six of 1 m, and 240 one strip of 5 m, not four of
+  1 m (7c). The list of goods has a line for each
   product. A program reads the data pin by `board_bus_get("garland_leds", "data")`; a probe of the garland builds on
   ESP-IDF 6.1. A use of a resolved board is in one form, its title and the chain of its products, one product a
   chain of one, so a reader of it has one case (7c); a rule reads the chip of a module at `modules.*.chain.*.mcu`.

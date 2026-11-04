@@ -84,7 +84,8 @@ def offers_for(line, units, shop):
         for offer in (item for item in tier if item.get("seller")):
             if offer["seller"] not in newest or offer["date"] > newest[offer["seller"]]["date"]:
                 newest[offer["seller"]] = offer
-        reports = [offer["range"] for offer in tier if not offer.get("seller")] + [offer["range"] for offer in newest.values()]
+        # a low of 0 is a bound, "less than 3": it counts as that bound, as on the page
+        reports = [[offer["range"][0] or offer["range"][1], offer["range"][1]] for offer in [*(item for item in tier if not item.get("seller")), *newest.values()]]
         found.append({"currency": currency, "qty": least, "range": [statistics.median(r[0] for r in reports), statistics.median(r[1] for r in reports)]})
     return bought, found
 

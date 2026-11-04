@@ -250,6 +250,10 @@ def goods_wrong():
     costs = board_bom.costs_of(pack, 2, None)
     if costs != (20, {"EUR": (1, 1, 20, 20)}):
         wrong.append(f"two of a pack of twenty cost {costs}")
+    # a low of 0 is a bound, "less than 3", and counts as 3, as on the page
+    costs = board_bom.costs_of({"title": "the case", "price": {"less": {"shop": "aliexpress", "currency": "EUR", "range": [0, 3], "date": "2026-11-04"}}}, 1, None)
+    if costs != (1, {"EUR": (3, 3, 3, 3)}):
+        wrong.append(f"less than 3 costs {costs}")
     print(f"goods: {'0 wrong' if not wrong else '; '.join(wrong)}")
     return len(wrong)
 

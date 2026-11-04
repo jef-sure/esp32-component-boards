@@ -1,0 +1,17 @@
+{
+    "title": "61 addressable LEDs: a joint weighs, by default, the outputs of the shortest product, 60, so two strips of 1 m and one joint, not a strip of 5 m with 239 to cut off",
+    "answers": {
+        "board": "esp32_devkit",
+        "blocks": [
+            {
+                "role": "led",
+                "variant": "addressable",
+                "name": "garland",
+                "asks": {
+                    "chain_outputs": 61
+                }
+            }
+        ]
+    },
+    "says": "WS2812B strip, 1 m, 60 a metre: 2 in one chain on the wires of one"
+}

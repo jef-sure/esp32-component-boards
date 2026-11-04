@@ -1,0 +1,18 @@
+{
+    "title": "61 addressable LEDs, a joint weighing 1000 outputs: one strip of 5 m, cut, and no joint",
+    "answers": {
+        "board": "esp32_devkit",
+        "blocks": [
+            {
+                "role": "led",
+                "variant": "addressable",
+                "name": "garland",
+                "asks": {
+                    "chain_outputs": 61,
+                    "joint_outputs": 1000
+                }
+            }
+        ]
+    },
+    "says": "WS2812B strip, 5 m, 60 a metre on GPIO"
+}

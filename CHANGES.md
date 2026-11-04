@@ -308,7 +308,8 @@ committed, a program that asks by kind.
   the way of its data line. A block says what the person already has with `part`, a list for a chain; with nothing
   named the solver makes the chain of the fewest joints (Anton: a penalty for each joint), then of the fewest outputs
   over those asked, so 360 is a strip of 5 m and one of 1 m, not six of 1 m, and 240 one strip of 5 m, not four of
-  1 m (7c).
+  1 m (7c). How much a joint weighs against what is cut off is the person's: the block asks `joint_outputs`, by default
+  the outputs of the shortest product, so 61 is two strips of 1 m, or one of 5 m when a joint weighs more (Anton).
 - A level seen on hardware is a note, not a part: `high_seen_mv` of a chip, the lowest high that drove it on hardware,
   with its trial in `checked`, and the judgement `level_seen_on_hardware`. The WS2812B takes 3.5 V by its datasheet;
   the 3.3 V of an ESP32 drove Anton's garland, so a kit of strips says so and adds no level shifter (Anton: "in

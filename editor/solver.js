@@ -7,6 +7,7 @@ const CHIP_HIGH_MV = 3300; // what a pin of an ESP32 gives as high
 const MOST_MODULES = 6; // the parts tried for one need: more make the search longer and the list no clearer
 const OWN_PART = 'own_part'; // the role of a part of the person's own, which the catalog has not
 const CHAIN_QUESTION = 'chain_outputs'; // the outputs a block of chained parts asks, by which a kit counts its products
+const JOINT_QUESTION = 'joint_outputs'; // the weight of a joint of two products of a chain, in outputs to spare
 const MOST_CHOICES = 12; // of modules for one board, tried one by one: five needs on a hundred boards took a minute and a half
 const ROUNDS_OF_CHANGES = 2; // past that, what one change of the best gives, and again from the new best
 // What the solver wires by itself, in the order it tries them. select: a line of its own for each device; alone: a bus
@@ -129,6 +130,9 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
 
     // a chain grows to the outputs asked, so a part that chains always fits; one that does not says nothing of its outputs
     MEASURES.chain = { of: (device) => (device.chain ? (device.config?.count ?? 1) * (device.chain.unit ?? device.chain.per) : null), fits: () => true, short: () => '', unknown: 'how many outputs a part drives without a chain is not in the data' };
+
+    // not a limit but a weight the person sets for a chain: a joint of two products against outputs to spare, read by mixOf
+    MEASURES.joint = { of: () => 0, fits: () => true, short: () => '', unknown: '' };
 
     MEASURES.standard = { of: (device) => device.provides?.nfc?.standards ?? null, fits: (standards, asked) => standards.includes(asked), short: (asked) => t('no reader of {0}', asked), unknown: 'the standards are not in the data' };
 
@@ -781,9 +785,10 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         return members.length > 1 ? members : null;
     }
 
-    // With no list, the products of the catalog that chain the chip of the module chosen make the chain: the fewest
-    // pieces, since each joint of two products is one more to solder (Anton, 2026-11-04), then the fewest outputs over
-    // those asked. The longest go first from the board. Null when no product of the catalog chains that chip with another.
+    // With no list, the products of the catalog that chain the chip of the module chosen make the chain. Each joint of two
+    // products is one more to solder and weighs as many outputs to spare as the block says (joint_outputs), by default the
+    // outputs of the shortest product: the chain of the least joints times that weight and outputs over those asked
+    // (Anton, 2026-11-04). The longest go first from the board. Null when no product chains that chip with another.
     function mixOf(need, module) {
         const asked = blockAnswer(need.asks?.[CHAIN_QUESTION]);
         const chip = module.device?.chip;
@@ -799,7 +804,9 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
                 if (before && (!fewest[total] || before.length + 1 < fewest[total].length)) fewest[total] = [...before, kind];
             }
         }
-        const pieces = fewest.slice(asked).filter(Boolean).reduce((best, made) => (!best || made.length < best.length ? made : best), null);
+        const weight = blockAnswer(need.asks?.[JOINT_QUESTION]) ?? Math.min(...kinds.map((kind) => kind.outputs));
+        const cost = (made) => (made.length - 1) * weight + made.reduce((sum, kind) => sum + kind.outputs, 0) - asked;
+        const pieces = fewest.slice(asked).filter(Boolean).reduce((best, made) => (!best || cost(made) < cost(best) || (cost(made) === cost(best) && made.length < best.length) ? made : best), null);
         if (!pieces) return null;
         const counts = new Map();
         for (const kind of [...pieces].sort((a, b) => b.outputs - a.outputs)) counts.set(kind.module.name, { module: kind.module, count: (counts.get(kind.module.name)?.count ?? 0) + 1 });

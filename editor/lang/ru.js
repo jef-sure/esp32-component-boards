@@ -76,6 +76,7 @@ LANGUAGES.ru = {
         '{0}: {1} x {2} in one chain for {3} outputs, on the lines: {4}': '{0}: {1} x {2} одной цепочкой на {3} выходов, на линиях: {4}',
         'how many outputs a part drives without a chain is not in the data': 'сколько выходов у детали без цепочки, в данных нет',
         'Outputs it drives: a digit has 8 segments, an 8x8 matrix 64 LEDs': 'Сколько выходов: в разряде 8 сегментов, в матрице 8x8 64 светодиода',
+        'A joint of two products in the chain weighs as many outputs to spare (empty: as many as the shortest product has)': 'Стык двух изделий цепочки весит столько лишних выходов (пусто: столько, сколько у самого короткого изделия)',
         'it takes {0} more pins and {1} free ones come out of this board': 'нужно ещё пинов: {0}, а свободных на разъёмах этой платы: {1}',
         '{0} is soldered to {1}, which this board does not leave free': 'деталь {0} припаяна к пинам, которые на этой плате не свободны: {1}',
         'not a GPIO of this chip': 'у этого чипа нет такого GPIO',

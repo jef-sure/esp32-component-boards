@@ -6,9 +6,15 @@
 CONFIG_IDF_TARGET="esp32p4"
 CONFIG_BOARD_SELECT_JC8012P4A1C=y
 
-# 16 MB flash, a Boya chip: its own driver, as ESP-IDF advises at start
+# 16 MB flash, a Boya chip: its own driver, as ESP-IDF advises at start. On four lines at 80 MHz, as Anton's
+# handwritten clock runs on this board (2026-11-04). The bootloader for revision 3 of the chip on four lines takes
+# 24896 bytes of the 24576 before the partition table at 0x8000; with its log at warnings it takes 22160 (ESP-IDF 6.1),
+# and the table stays where programs expect it. A program that wants the boot log at info moves its table itself.
 CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y
 CONFIG_SPI_FLASH_SUPPORT_BOYA_CHIP=y
+CONFIG_ESPTOOLPY_FLASHMODE_QIO=y
+CONFIG_ESPTOOLPY_FLASHFREQ_80M=y
+CONFIG_BOOTLOADER_LOG_LEVEL_WARN=y
 
 # 32 MB PSRAM, hexagonal. Its speed and the CPU follow the revision of the chip: tools/board_select.py
 # writes them, a build for one revision does not start on the other.

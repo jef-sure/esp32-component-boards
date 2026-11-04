@@ -333,6 +333,12 @@ committed, a program that asks by kind.
   digest the plan showed, so a file changed again since is refused; the boards whose locks are seeded are those of the
   files `board_select.py` wrote, not ESP-IDF's own `sdkconfig.defaults.<target>`; a new file has the mode 0666 under the
   umask, a replaced one keeps its own; a folder of only hidden entries, as the `.vscode` VS Code makes, is empty.
+- The JC8012P4A1C reads its flash on four lines at 80 MHz, as Anton's clock does on it (Anton). With it the bootloader
+  for revision 3 of the chip took 24896 bytes of the 24576 before the partition table at 0x8000, so every build of the
+  board failed; its log at warnings brings it to 22160 bytes (ESP-IDF 6.1), and the table stays at 0x8000, where the
+  tables of programs expect it. Measured: without the support of XMC flash it is 24576, exactly the limit; without the
+  timestamps of its log, no smaller. hello_board builds on 6.1 and 5.5.5 and runs on the board ("flash io: qio"), and so
+  does the clock, its settings in NVS kept.
 - A level seen on hardware is a note, not a part: `high_seen_mv` of a chip, the lowest high that drove it on hardware,
   with its trial in `checked`, and the judgement `level_seen_on_hardware`. The WS2812B takes 3.5 V by its datasheet;
   the 3.3 V of an ESP32 drove Anton's garland, so a kit of strips says so and adds no level shifter (Anton: "in

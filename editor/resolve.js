@@ -5,7 +5,7 @@
 
 function boardResolver(catalog) {
     const NOT_LINES = new Set(['hz', 'lanes', 'lane_mbps', 'phy_ldo_chan', 'phy_ldo_mv', 'baud', 'data']);
-    const TYPE_FIELDS = ['class', 'maker', 'part', 'compat', 'draw', 'pins', 'config', 'controls', 'provides', 'start', 'firmware', 'ways', 'high_min_mv'];
+    const TYPE_FIELDS = ['class', 'maker', 'part', 'compat', 'draw', 'pins', 'config', 'controls', 'provides', 'start', 'firmware', 'ways', 'chain', 'high_min_mv'];
     const LIBRARY_HISTORY = ['license', 'chips', 'transports', 'interfaces', 'groups', 'values'];
     const FIRMWARE_HISTORY = ['config', 'controls', 'provides'];
     const REFERENCES = new Set(['over', 'via', 'left', 'right', 'after', 'devices', 'feeds', 'from', 'through', 'name', 'logic']); // fields of a module that name its parts
@@ -222,6 +222,10 @@ function boardResolver(catalog) {
         for (const part of Object.keys(use.devices || {})) {
             if (!has(parts, part)) throw new Refused(`${name}: the module ${use.module} has no part ${part}`);
         }
+        // several of a product on the same wires only where its chips go in a chain
+        if ((use.count ?? 1) > 1 && !Object.values(parts).some((part) => part.chip && has(load('devices', part.chip), 'chain'))) {
+            throw new Refused(`${name}: ${use.count} of the module ${use.module} on the same wires, and no part of it goes in a chain`);
+        }
         for (const [part, template] of Object.entries(parts)) {
             const device = joined(renamed(template, names), use.on);
             const wiring = picked(use, ['config', 'pins']);
@@ -236,7 +240,7 @@ function boardResolver(catalog) {
         const supply = new Map(Object.entries(use.supply || {}).map(([step, line]) => [names.get(step) ?? step, line]));
         doc.power = [...(doc.power || []), ...supplied(renamed(module.power || [], names), supply, name)];
         if (!doc.power.length) delete doc.power;
-        return { module: use.module, title: module.title, ...picked(module, MODULE_FACTS) };
+        return { module: use.module, title: module.title, ...picked(use, ['count']), ...picked(module, MODULE_FACTS) };
     }
 
     function addModules(doc) {

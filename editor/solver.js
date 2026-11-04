@@ -6,6 +6,7 @@ const KIT_FORMAT = { format: 'jef-sure/boards', format_version: 2 };
 const CHIP_HIGH_MV = 3300; // what a pin of an ESP32 gives as high
 const MOST_MODULES = 6; // the parts tried for one need: more make the search longer and the list no clearer
 const OWN_PART = 'own_part'; // the role of a part of the person's own, which the catalog has not
+const CHAIN_QUESTION = 'chain_outputs'; // the outputs a block of chained parts asks, by which a kit counts its products
 const MOST_CHOICES = 12; // of modules for one board, tried one by one: five needs on a hundred boards took a minute and a half
 const ROUNDS_OF_CHANGES = 2; // past that, what one change of the best gives, and again from the new best
 // What the solver wires by itself, in the order it tries them. select: a line of its own for each device; alone: a bus
@@ -125,6 +126,9 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
 
     // a panel is round only when its data says so: a GC9A01 drives square glass too
     MEASURES.shape = { of: (device) => (device.config?.panel ? (device.config.panel.round ? 'round' : 'rectangular') : null), fits: (shape, asked) => shape === asked, short: (asked) => t('no {0} display', t(asked)), unknown: 'the shape of the display is not in the data' };
+
+    // a chain grows to the outputs asked, so a part that chains always fits; one that does not says nothing of its outputs
+    MEASURES.chain = { of: (device) => (device.chain ? (device.config?.count ?? 1) * (device.chain.unit ?? device.chain.per) : null), fits: () => true, short: () => '', unknown: 'how many outputs a part drives without a chain is not in the data' };
 
     MEASURES.standard = { of: (device) => device.provides?.nfc?.standards ?? null, fits: (standards, asked) => standards.includes(asked), short: (asked) => t('no reader of {0}', asked), unknown: 'the standards are not in the data' };
 
@@ -275,13 +279,16 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         is: (value, asked) => value === asked,
     };
 
+    // a question of a measure limits this class, and this variant when it names some: of and variant may each be a list
+    const ofClass = (question, cls, variant) => [].concat(question.limit?.of ?? []).includes(cls) && (!question.limit.variant || [].concat(question.limit.variant).includes(variant));
+
     // an answer of a block that asks something: none for an empty field or "any"
     const blockAnswer = (value) => (value === undefined || value === null || value === '' || value === 'any' ? undefined : value);
 
     function limitsOf(need, wanted) {
         // a question asked of each block takes the block's answer first, the one of the page after it (an older answer)
         const answerOf = (item) => (item.asked === 'block' && blockAnswer(need.asks?.[item.id]) !== undefined ? need.asks[item.id] : wanted.limits[item.limit.measure]);
-        const measured = questions.filter((item) => item.limit?.measure && item.limit.of && item.limit.of === need.class && answerOf(item) !== undefined)
+        const measured = questions.filter((item) => item.limit?.measure && ofClass(item, need.class, need.variant) && answerOf(item) !== undefined)
             .map((item) => ({ asked: answerOf(item), fits: (value, asked) => value >= asked, ...MEASURES[item.limit.measure] }));
         // what a block asks of the data of its part: a value not in the data leaves the part in, as an unknown
         const asked = Object.entries(need.asks ?? {}).filter(([, value]) => blockAnswer(value) !== undefined).map(([id, value]) => {
@@ -373,8 +380,9 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
     }
     // a part of a board nobody asked for, in money: its role and variant, its role, its class, or any part
     function worthOf(device) {
-        // a part whose chip has a price by the piece is worth that many of it: a module of its role counts a ring for one LED
-        const many = device.config?.count ?? device.count ?? 1;
+        // a part whose chip has a price by the piece is worth that many of it: a module of its role counts a ring for one LED;
+        // in a chain the units of its driver are not chips, as the digits of a MAX7219, eight to a chip
+        const many = device.chain ? Math.ceil(((device.config?.count ?? 1) * (device.chain.unit ?? device.chain.per)) / device.chain.per) : device.config?.count ?? device.count ?? 1;
         const own = rangeOf(device.price ?? catalog.devices[device.chip]?.price, KIT_CURRENCY);
         if (own && own[0] > 0) return Math.max(LEAST_WORTH, own[0] * many); // the lowest of its offers, as the cheapest of a role is
         const roleKeys = Object.entries(device.provides ?? {}).filter(([role]) => roleOf(role)).flatMap(([role, given]) => [...(given?.variant ? [`${role}/${given.variant}`] : []), role]);
@@ -627,7 +635,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             if (pick.module.device.ways) {
                 const { lines } = pick.module.device.ways[0];
                 if (pins.length < lines.length) return { problem: shortOfPins(lines.length, pins.length) };
-                modules[pick.use] = { module: pick.module.name, pins: Object.fromEntries(lines.map((line) => [line, pins.shift()])) };
+                modules[pick.use] = { module: pick.module.name, ...(pick.count > 1 ? { count: pick.count } : {}), pins: Object.fromEntries(lines.map((line) => [line, pins.shift()])) };
                 continue;
             }
             const alone = isDisplay(pick.module.device) && KIT_BUSES[pick.transport].select;
@@ -649,7 +657,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             const supply = supplyOf(board, pick.module);
             // the board keeps its own display as the primary one
             const second = pick.module.device.config?.primary && Object.values(board.devices).some((device) => device.config?.primary);
-            modules[pick.use] = { module: pick.module.name, on: { [`${pick.transport}.${own}`]: wires }, ...(lines.length ? { pins: needed } : {}), ...(Object.keys(supply).length ? { supply } : {}), ...(second ? { config: { primary: false } } : {}) };
+            modules[pick.use] = { module: pick.module.name, ...(pick.count > 1 ? { count: pick.count } : {}), on: { [`${pick.transport}.${own}`]: wires }, ...(lines.length ? { pins: needed } : {}), ...(Object.keys(supply).length ? { supply } : {}), ...(second ? { config: { primary: false } } : {}) };
         }
         const sharedPins = Object.fromEntries(Object.entries(shared).filter(([, chain]) => chain.uses.length > 1).flatMap(([id, chain]) => Object.entries(chain.pins).map(([line, pin]) => [`${id}_${line}`, { line: pin, devices: chain.uses }])));
         return { ...KIT_FORMAT, kind: 'project', name: 'kit', extends: name, title: `${board.title} with modules`, ...(Object.keys(buses).length ? { buses } : {}), ...(Object.keys(devices).length ? { devices } : {}), ...(Object.keys(sharedPins).length ? { shared_pins: sharedPins } : {}), modules };
@@ -677,10 +685,18 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         return tried.get(chip);
     }
 
+    // How many of a product one block takes on its wires: the outputs it asks over those of one product, when its part chains.
+    function chainOf(need, module) {
+        const asked = blockAnswer(need.asks?.[CHAIN_QUESTION]);
+        const outputs = module.device && MEASURES.chain.of(module.device);
+        return asked === undefined || !outputs ? 1 : Math.max(1, Math.ceil(asked / outputs));
+    }
+
     // The picks of a shortfall, a module for each thing lacking, the same kind of module for one need.
     function picksFor(shortfalls, choice, transports) {
         return shortfalls.flatMap((shortfall, i) => {
             return Array.from({ length: shortfall.count }, (_, n) => ({
+                count: chainOf(shortfall.need, choice[i]),
                 use: shortfall.need.use ?? (shortfall.need.names?.[n] || undefined) ?? (shortfall.count > 1 ? `${shortfall.need.id ?? shortfall.need.class}_${n + 1}` : shortfall.need.id ?? shortfall.need.class),
                 module: choice[i],
                 transport: transports[i],
@@ -884,7 +900,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         let known = Boolean(own);
         const packs = [];
         const counted = new Map();
-        for (const pick of picks.filter((item) => !item.way)) counted.set(pick.module.name, { title: pick.module.title, count: (counted.get(pick.module.name)?.count ?? 0) + 1 });
+        for (const pick of picks.filter((item) => !item.way)) counted.set(pick.module.name, { title: pick.module.title, count: (counted.get(pick.module.name)?.count ?? 0) + (pick.count ?? 1) });
         for (const item of addons) counted.set(item.name, item);
         for (const [name, { title, count }] of counted) {
             const kind = name in (catalog.addons ?? {}) ? 'addons' : 'modules';
@@ -1098,7 +1114,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
 
         function kit(boardName, source, resolved, reasons, project, picks, base) {
             const counted = new Map();
-            for (const pick of picks.filter((item) => !item.way)) counted.set(pick.module.name, { ...pick, count: (counted.get(pick.module.name)?.count ?? 0) + 1 });
+            for (const pick of picks.filter((item) => !item.way)) counted.set(pick.module.name, { ...pick, count: (counted.get(pick.module.name)?.count ?? 0) + (pick.count ?? 1) });
             const pictureOf = (name) => Object.values(catalog.modules[name]?.images ?? {})[0];
             const modules = [...counted.values()].map((pick) => ({ name: pick.module.name, title: pick.module.title, count: pick.count, on: pick.transport,
                 ...(pictureOf(pick.module.name) ? { picture: `modules/${pick.module.name}/${pictureOf(pick.module.name).file}`, credit: pictureOf(pick.module.name).source } : {}) }));
@@ -1106,6 +1122,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             const lines = [...reasons];
             const arduino = platform?.ecosystem === 'arduino';
             for (const item of modules) lines.push({ level: 'yes', text: t('{0} on {1}', named(item), item.on.toUpperCase()) });
+            for (const pick of picks.filter((item) => item.count > 1)) lines.push({ level: 'do', text: t('{0}: {1} in one chain on the wires of one, the output of each into the input of the next', pick.module.title, pick.count) });
             for (const [name, use] of Object.entries(plan?.used ?? {})) {
                 const source = plan.sources[name];
                 if (!use.timers.size) continue;
@@ -1119,7 +1136,14 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             }
             for (const text of switchesOf(picks)) lines.push({ level: 'do', text });
             for (const pick of picks.filter((item) => item.module.own)) lines.push({ level: 'do', text: t('{0}: your own part, not in the catalog: {1}', pick.module.title, [...Object.entries(project.devices[pick.use].pins ?? {}).map(([line, pin]) => `${line} GPIO ${pin}`), ...Object.keys(project.devices[pick.use].on ?? {}).map((bus) => bus.toUpperCase())].join(', ') || t('no lines')) });
-            for (const pick of new Map(picks.filter((item) => item.way && !item.need.output && !item.module.own).map((item) => [item.need.id, item])).values()) lines.push({ level: 'do', text: t('{0}: no part of the catalog, the kit only gives it pins: {1}', pick.module.title, pick.way.lines.join(', ')) });
+            for (const pick of new Map(picks.filter((item) => item.way && !item.need.output && !item.module.own).map((item) => [item.need.id, item])).values()) {
+                // a way that names its chip counts the chips of one chain by the outputs asked
+                const chip = pick.way.part && catalog.devices[pick.way.part];
+                const asked = blockAnswer(pick.need.asks?.[CHAIN_QUESTION]);
+                if (!chip?.chain) lines.push({ level: 'do', text: t('{0}: no part of the catalog, the kit only gives it pins: {1}', pick.module.title, pick.way.lines.join(', ')) });
+                else if (asked === undefined) lines.push({ level: 'do', text: t('{0}: {1} in one chain, {2} outputs each, on the lines: {3}', pick.module.title, chip.title, chip.chain.per, pick.way.lines.join(', ')) });
+                else lines.push({ level: 'do', text: t('{0}: {1} x {2} in one chain for {3} outputs, on the lines: {4}', pick.module.title, Math.ceil(asked / chip.chain.per), chip.title, asked, pick.way.lines.join(', ')) });
+            }
             for (const pick of new Map(picks.filter((item) => item.need.variant && !item.way).map((item) => [item.module.name, item])).values()) {
                 if (!pick.module.device.provides?.[pick.need.id]?.variant) lines.push({ level: 'unknown', text: t('{0}: the data does not say of which variant it is', pick.module.title) });
             }

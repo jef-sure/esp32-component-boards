@@ -50,7 +50,7 @@
                             "id": "shift_register",
                             "text": "LEDs on shift registers",
                             "words": "74hc595|shift register",
-                            "way": {"lines": ["data", "clock", "latch", "oe"], "shared": ["data", "clock"], "ledc": 1}
+                            "way": {"lines": ["data", "clock", "latch", "oe"], "shared": ["data", "clock"], "ledc": 1, "part": "hc595"}
                         }
                     ],
                     "needs": {"class": "display"}

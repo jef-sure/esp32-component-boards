@@ -51,7 +51,7 @@ def lines_of(name):
     for use, module in product["modules"].items():
         parts |= parts_of(use, module)
         if use not in base["modules"]:
-            lines.setdefault(f"module {module['module']}", {**line_of(module, module["title"]), "count": 0})["count"] += 1
+            lines.setdefault(f"module {module['module']}", {**line_of(module, module["title"]), "count": 0})["count"] += module.get("count", 1)
     for use, device in product["devices"].items():
         if use not in base["devices"] and use not in parts:
             what = device.get("part") or device.get("chip") or use

@@ -1,0 +1,9 @@
+{
+    "title": "A matrix of 300 LEDs takes two MAX7219 modules of 256 in one chain: one select, both counted",
+    "answers": {
+        "board": "esp32_devkit",
+        "blocks": [{"role": "led", "variant": "matrix", "name": "face", "asks": {"chain_outputs": 300}}]
+    },
+    "kit": {"name": "esp32_devkit", "modules": {"max7219_4in1": 2}},
+    "says": "MAX7219 matrix, four 8x8 in a row: 2 in one chain on the wires of one"
+}

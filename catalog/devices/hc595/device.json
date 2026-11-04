@@ -1,0 +1,23 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "hc595",
+    "title": "74HC595 shift register",
+    "class": "io_expander",
+    "maker": "ti",
+    "part": "SN74HC595",
+    "chain": {"per": 8},
+    "notes": [
+        "Eight outputs from a serial input: SER, SRCLK and RCLK, with OE for the brightness of all. QH' goes to SER of the next chip, so a chain of any length takes the same lines.",
+        "A high input takes 3.15 V at a supply of 4.5 V and more at 5 V: fed from 3.3 V it takes the outputs of any chip of 3.3 V."
+    ],
+    "checked": {
+        "facts": {
+            "level": "datasheet",
+            "covers": ["chain", "notes"],
+            "source": "TI SN54HC595, SN74HC595, SCLS041J, October 2021: 8-bit serial-in parallel-out, QH' for cascading, VCC 2 to 6 V, VIH 3.15 V at VCC 4.5 V",
+            "date": "2026-11-04"
+        }
+    }
+}

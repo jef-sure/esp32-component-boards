@@ -629,6 +629,32 @@ So each piezo disc takes one pin and one channel, or two of each when a question
 The solver takes the first way that gives what is asked and counts its channels, with those the outputs of the page
 take, against `frequency_sources.ledc.outputs` of the chip (the judgement `ledc_channels`).
 
+## Chains
+
+Chips that go in a chain on the same lines, the output of one into the input of the next, say so in `chain` of
+their entry: `per`, the outputs of one chip by its datasheet, and `unit`, the outputs of one unit of `config.count`
+where that unit is not the chip. A MAX7219 drives 64 LEDs, and its driver counts digits of 8; a WS2812B is one LED;
+a 74HC595 has 8 outputs.
+
+```json
+"chain": {"per": 64, "unit": 8}
+```
+
+A product of such chips gives `config.count` × `unit` outputs: the four MAX7219 of `max7219_4in1` with
+`config.count` 32 give 256. A block of LEDs or of shift registers asks how many outputs it drives
+(`chain_outputs`), and the solver puts as many products in one chain as that takes; a project says it with
+`count` of the module, on the wires of one:
+
+```json
+"modules": { "face": { "module": "max7219_4in1", "count": 2, "on": { "spi.spi2": { "cs": 15 } } } }
+```
+
+`count` above 1 is refused for a module none of whose parts chains. The driver of the whole chain takes `count` ×
+`config.count`, worked out, not stored. The price and the list of goods count each product. A way that names its
+chip in `part`, as the 74HC595 of LEDs on shift registers, gives the number of chips in the kit. A chain has no length
+limit of its own: what limits it is the time an update takes along the whole of it. The bits of an update and the
+speed of the bus join the data when a question asks how often the outputs change.
+
 ## Frequency sources
 
 `frequency_sources` of a chip in `catalog/mcu/` lists where it gets a frequency, in the order to try

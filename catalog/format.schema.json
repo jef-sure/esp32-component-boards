@@ -425,6 +425,7 @@
         "controls": { "$ref": "#/$defs/controls" },
         "provides": { "$ref": "#/$defs/provides" },
         "ways": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/way" } },
+        "chain": { "$ref": "#/$defs/chain" },
         "start": { "$ref": "#/$defs/start" },
         "antenna": { "$ref": "#/$defs/antenna" },
         "notes": { "$ref": "#/$defs/notes" },
@@ -536,6 +537,16 @@
         }
       }
     },
+    "chain": {
+      "description": "Chips of this kind go in a chain on the same lines, the output of one into the input of the next: its length takes no pins. What limits it is the time a whole chain takes to update; the bits of an update and the speed of the bus join the data when a question asks how often.",
+      "type": "object",
+      "required": ["per"],
+      "additionalProperties": false,
+      "properties": {
+        "per": { "type": "integer", "minimum": 1, "description": "The outputs of one chip, by its datasheet: LEDs, segments, pins." },
+        "unit": { "type": "integer", "minimum": 1, "description": "The outputs of one unit of config.count where that unit is not the chip, as a digit of 8 segments of a MAX7219; per when absent." }
+      }
+    },
     "deviceFile": {
       "required": ["class"],
       "properties": {
@@ -559,6 +570,7 @@
         "controls": { "$ref": "#/$defs/controls" },
         "provides": { "$ref": "#/$defs/provides" },
         "ways": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/way" } },
+        "chain": { "$ref": "#/$defs/chain" },
         "start": { "$ref": "#/$defs/start" },
         "notes": { "$ref": "#/$defs/notes" },
         "variants": {
@@ -863,7 +875,8 @@
         "lines": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
         "ledc": { "type": "integer", "minimum": 1, "description": "The LEDC channels one device takes this way." }, "shared": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 }, "description": "Of lines: those that all the devices of one block share, as data and clock of chains of shift registers." }, "adc": { "type": "integer", "minimum": 1, "description": "How many lines, the first of the list, are read by ADC1." },
         "gives": { "type": "object", "additionalProperties": { "type": "number" }, "description": "The figures of this way, as swing_v across a piezo disc." },
-        "do": { "type": "string", "minLength": 1, "description": "What a person does to wire it." }
+        "do": { "type": "string", "minLength": 1, "description": "What a person does to wire it." },
+        "part": { "$ref": "#/$defs/name", "description": "The chip of the catalog this way wires, as the 74HC595 of LEDs on shift registers: a kit counts it by the outputs a block asks." }
       }
     },
     "connectorFile": {
@@ -1132,9 +1145,9 @@
           "oneOf": [{ "required": ["measure"] }, { "required": ["field", "fits", "of"] }],
           "additionalProperties": false,
           "properties": {
-            "measure": { "enum": ["diagonal_in", "range_mm", "gap_mm", "standard", "shape", "price", "platform", "platform_version"] },
-            "of": { "type": "string", "description": "The class it is measured on; with field, the role whose blocks ask it." },
-            "variant": { "type": "string", "description": "With field: only blocks of this variant of the role ask it." },
+            "measure": { "enum": ["diagonal_in", "range_mm", "gap_mm", "standard", "shape", "chain", "price", "platform", "platform_version"] },
+            "of": { "oneOf": [{ "type": "string" }, { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string" } }], "description": "The class it is measured on, or the classes for a question asked of each block; with field, the role whose blocks ask it." },
+            "variant": { "oneOf": [{ "type": "string" }, { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string" } }], "description": "Only blocks of this variant, or of these, ask it." },
             "field": { "type": "string", "description": "The path of the value in the data of a part, its variant applied, as provides.air.specified." },
             "fits": {
               "enum": ["up_to", "down_to", "at_least", "at_most", "includes", "is"],
@@ -1712,6 +1725,7 @@
             "additionalProperties": false,
             "properties": {
               "module": { "$ref": "#/$defs/name" },
+              "count": { "type": "integer", "minimum": 1, "description": "How many of this product in one chain on the same wires; more than 1 only when a part of it has chain. Its price and its lines of the list of goods count each." },
               "on": { "$ref": "#/$defs/on" },
               "config": { "type": "object" },
               "pins": { "$ref": "#/$defs/pins" },

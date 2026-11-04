@@ -1,0 +1,13 @@
+{
+    "expect": "no part of it goes in a chain",
+    "board": {
+        "format": "jef-sure/boards",
+        "format_version": 2,
+        "kind": "project",
+        "name": "count_without_chain",
+        "title": "Two PN532 readers said as one on the same wires",
+        "extends": "esp32_devkit",
+        "buses": {"spi": {"spi2": {"mosi": 23, "miso": 19, "sclk": 18}}},
+        "modules": {"nfc": {"module": "pn532_module", "count": 2, "on": {"spi.spi2": {"cs": 5}}}}
+    }
+}

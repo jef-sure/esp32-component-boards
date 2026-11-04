@@ -25,6 +25,7 @@
     "devices/esp32_dac/device.json",
     "devices/gsl3680/device.json",
     "devices/gt911/device.json",
+    "devices/hc595/device.json",
     "devices/hd44780/device.json",
     "devices/i2s_amp/device.json",
     "devices/ili9341/device.json",

@@ -1,5 +1,5 @@
 {
-    "title": "Two chains of shift registers ask for no part: the kit gives them lines, and they share data and clock",
+    "title": "Two chains of shift registers ask for no module: the kit gives them lines, and they share data and clock; without the outputs asked it names the chip and its outputs",
     "answers": {
         "blocks": [
             {
@@ -14,7 +14,7 @@
             }
         ]
     },
-    "says": "no part of the catalog, the kit only gives it pins: data, clock, latch, oe",
+    "says": "74HC595 shift register in one chain, 8 outputs each, on the lines: data, clock, latch, oe",
     "wiring": {
         "board": "esp32_devkit",
         "use": "matrix",

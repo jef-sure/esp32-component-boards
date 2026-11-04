@@ -32,6 +32,7 @@ import jsonschema
 
 import boards_gen
 import audit
+import board_bom
 import resolve
 import rules
 import take_report
@@ -195,6 +196,23 @@ def editor_differs(reached):
         if mine != {pin: {**entry, "owners": sorted(entry["owners"])} for pin, entry in theirs["map"].items()} or boards_gen.pin_problems(board) != theirs["problems"]:
             differ.append(f"pins {board['name']}")
     return len(raw), sum(not RAW.is_valid(doc) for doc in raw.values()), differ
+
+
+def goods_wrong():
+    """board_bom.py counts each product of a chain: two MAX7219 modules on the same wires are a line of two."""
+    doc = json.loads((TESTS / "good" / "chain_of_modules.json").read_text())
+    with tempfile.TemporaryDirectory() as folder:
+        place = pathlib.Path(folder) / resolve.LOCAL_BOARDS / "boards" / doc["name"]
+        place.mkdir(parents=True)
+        (place / "board.json").write_text(json.dumps(doc))
+        root = resolve.add_project(folder)
+        try:
+            _, lines = board_bom.lines_of(doc["name"])
+        finally:
+            resolve.ROOTS.remove(root)
+    counted = [line["count"] for line in lines if line["title"] == "MAX7219 matrix, four 8x8 in a row"]
+    print(f"goods: {'0 wrong' if counted == [2] else f'the chain of two counts {counted}'}")
+    return counted != [2]
 
 
 def reports_refused():
@@ -553,6 +571,7 @@ def main():
     problems += library_list_problems()
     problems += audit_changes_wrong()
     failed += reports_refused()
+    failed += goods_wrong()
     run = subprocess.run(["node", str(TESTS / "page_cli.js")], capture_output=True, text=True)
     print(run.stdout.strip() + run.stderr.strip()[-300:])
     failed += run.returncode != 0

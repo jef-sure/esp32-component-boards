@@ -17,7 +17,7 @@ LOCAL_BOARDS = "components/local-boards"  # what is a program's own, in the layo
 FILES = {"mcu": "mcu.json", "devices": "device.json", "modules": "module.json", "addons": "addon.json", "platforms": "platform.json", "boards": "board.json", "libraries": "library.json", "connectors": "connector.json"}
 NOT_LINES = {"hz", "lanes", "lane_mbps", "phy_ldo_chan", "phy_ldo_mv", "baud", "data"}
 LINE = 120
-TYPE_FIELDS = ("class", "maker", "part", "compat", "draw", "pins", "config", "controls", "provides", "start", "firmware", "ways", "high_min_mv")
+TYPE_FIELDS = ("class", "maker", "part", "compat", "draw", "pins", "config", "controls", "provides", "start", "firmware", "ways", "chain", "high_min_mv")
 LIBRARY_HISTORY = ("license", "chips", "transports", "interfaces", "groups", "values")
 FIRMWARE_HISTORY = ("config", "controls", "provides")
 REFERENCES = {"over", "via", "left", "right", "after", "devices", "feeds", "from", "through", "name", "logic"}  # fields of a module that name its parts
@@ -254,6 +254,9 @@ def use_module(doc, name, use):
     for part in use.get("devices") or {}:
         if part not in parts:
             raise Refused(f"{name}: the module {use['module']} has no part {part}")
+    # several of a product on the same wires only where its chips go in a chain
+    if use.get("count", 1) > 1 and not any("chain" in load("devices", part["chip"]) for part in parts.values() if part.get("chip")):
+        raise Refused(f"{name}: {use['count']} of the module {use['module']} on the same wires, and no part of it goes in a chain")
     for part, template in parts.items():
         device = joined(renamed(template, names), use.get("on"))
         wiring = {key: use[key] for key in ("config", "pins") if key in use}
@@ -264,7 +267,7 @@ def use_module(doc, name, use):
     doc["power"] = (doc.get("power") or []) + supplied(renamed(module.get("power") or [], names), {names.get(step, step): line for step, line in (use.get("supply") or {}).items()}, name)
     if not doc["power"]:
         del doc["power"]
-    return {"module": use["module"], "title": module["title"], **{key: module[key] for key in MODULE_FACTS if key in module}}
+    return {"module": use["module"], "title": module["title"], **({"count": use["count"]} if "count" in use else {}), **{key: module[key] for key in MODULE_FACTS if key in module}}
 
 
 def add_modules(doc):

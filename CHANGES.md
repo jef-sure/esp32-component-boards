@@ -248,6 +248,13 @@ committed, a program that asks by kind.
   `board_sound_start`, `board_sound_source` and their `_at` forms take `ctx`, given back to it at every call, so the mixer
   of a game needs no static. The task takes the source and its context together. The names `board_`, `boards_`,
   `BOARD_` and `CONFIG_BOARD_` are said to be the component's (both found by 7c after the move of dgx-ge was decided).
+- Chains of chips: `chain` of a chip entry, `per` outputs by its datasheet and `unit` outputs of one unit of
+  `config.count` (MAX7219 64 and 8, WS2812B 1, the new 74HC595 8); `count` of a module of a project, how many of the
+  product in one chain on the wires of one, refused for a module that does not chain. A block of LEDs or shift
+  registers asks `chain_outputs`, and the kit takes that many products in one chain, or names that many 74HC595 for
+  LEDs on shift registers; the price and board_bom.py count each. A chain has no length limit of its own (Anton): the
+  time of an update along it limits it, and data-format.md says which fields join when a question asks it. The worth
+  of an unasked MAX7219 module counts its four chips, not its 32 digits (found by 7c).
 - The glue of a touch panel or a sound is data only: its row names the function of its adapter, from the new `function`
   of the chip in the record of its library, and the data of its kind (`board_touch_gt911`, `board_touch_spi`,
   `board_touch_gsl3680`, `board_sound_es8311`, `board_sound_dac`, the I2S bus). The functions `touchN_start` and

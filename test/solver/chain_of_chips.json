@@ -1,0 +1,8 @@
+{
+    "title": "LEDs on shift registers with 20 outputs take three 74HC595 of 8 in one chain on the same four lines",
+    "answers": {
+        "board": "esp32_devkit",
+        "blocks": [{"role": "display", "variant": "shift_register", "name": "face", "asks": {"chain_outputs": 20}}]
+    },
+    "says": "3 x 74HC595 shift register in one chain for 20 outputs, on the lines: data, clock, latch, oe"
+}

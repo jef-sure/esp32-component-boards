@@ -68,6 +68,11 @@ LANGUAGES.ru = {
         'Power over Ethernet': 'Питание по Ethernet',
         'Budget for one kit': 'Бюджет на комплект',
 
+        '{0}: {1} in one chain on the wires of one, the output of each into the input of the next': '{0}: {1} шт. одной цепочкой на проводах одного, выход каждого во вход следующего',
+        '{0}: {1} in one chain, {2} outputs each, on the lines: {3}': '{0}: {1} одной цепочкой, по {2} выходов на каждый, на линиях: {3}',
+        '{0}: {1} x {2} in one chain for {3} outputs, on the lines: {4}': '{0}: {1} x {2} одной цепочкой на {3} выходов, на линиях: {4}',
+        'how many outputs a part drives without a chain is not in the data': 'сколько выходов у детали без цепочки, в данных нет',
+        'Outputs it drives: a digit has 8 segments, an 8x8 matrix 64 LEDs': 'Сколько выходов: в разряде 8 сегментов, в матрице 8x8 64 светодиода',
         'it takes {0} more pins and {1} free ones come out of this board': 'нужно ещё пинов: {0}, а свободных на разъёмах этой платы: {1}',
         '{0} is soldered to {1}, which this board does not leave free': 'деталь {0} припаяна к пинам, которые на этой плате не свободны: {1}',
         'not a GPIO of this chip': 'у этого чипа нет такого GPIO',

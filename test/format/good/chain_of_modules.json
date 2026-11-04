@@ -1,0 +1,10 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "project",
+    "name": "chain_of_modules",
+    "title": "Two MAX7219 matrices in one chain",
+    "extends": "esp32_devkit",
+    "buses": {"spi": {"spi2": {"mosi": 13, "miso": "nc", "sclk": 14}}},
+    "modules": {"face": {"module": "max7219_4in1", "count": 2, "on": {"spi.spi2": {"cs": 15}}, "supply": {"VCC": "VIN"}}}
+}

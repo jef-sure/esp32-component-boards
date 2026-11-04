@@ -824,8 +824,16 @@
         "xtal_hz": { "type": "integer", "minimum": 1 },
         "min_hz": { "type": "integer", "minimum": 1 },
         "max_hz": { "type": "integer", "minimum": 1 },
+        "multiplier_min_hz": { "type": "integer", "minimum": 1, "description": "The range of the multiplier of the APLL." },
+        "multiplier_max_hz": { "type": "integer", "minimum": 1 },
         "signals": { "type": "array", "items": { "type": "string", "minLength": 1 }, "description": "Clocks of the board it can bring to a pin." }
-      }
+      },
+      "allOf": [
+        { "if": { "properties": { "kind": { "const": "ledc" } } }, "then": { "required": ["counter_bits", "divider_bits", "fraction_bits", "clocks_hz"] } },
+        { "if": { "properties": { "kind": { "const": "ticks" } } }, "then": { "required": ["clock_hz", "ticks_max", "prescale_max"] } },
+        { "if": { "properties": { "kind": { "const": "apll" } } }, "then": { "required": ["xtal_hz", "min_hz", "max_hz", "multiplier_min_hz", "multiplier_max_hz"] } },
+        { "if": { "properties": { "kind": { "const": "clock_out" } } }, "then": { "required": ["signals"] } }
+      ]
     },
     "selection": {
       "description": "selection.json of a project: how its kit was chosen, written by the page and read back when the folder is opened.",

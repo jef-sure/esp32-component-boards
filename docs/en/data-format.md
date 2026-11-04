@@ -625,8 +625,7 @@ the fewest lines first.
 
 So each piezo disc takes one pin and one channel, or two of each when a question asks for more swing.
 The solver takes the first way that gives what is asked and counts its channels, with those the outputs of the page
-take, against `frequency_sources.ledc.outputs` of the chip (the judgement `ledc_channels`). A chip whose frequency
-sources are not in the data, as the C3 and the C6 for now, is not counted.
+take, against `frequency_sources.ledc.outputs` of the chip (the judgement `ledc_channels`).
 
 ## Frequency sources
 
@@ -635,6 +634,14 @@ them. Each has `kind`, which picks the formula of the solver, `timers` (how many
 `outputs` (how many pins), `pairs` (two pins in antiphase) and `can`, what can be changed while it runs:
 `frequency`, `duty`, `phase`, `fade`, `pause`, `dead_time`, `sync`, `carrier`, `loop`, `start_stop`,
 `divider`. A crystal of a board is a device that provides `clock` with `freq_mhz`.
+
+`tools/make_mcu.py` writes them for every chip from ESP-IDF, not by hand: the counts of timers and channels from
+`soc_caps.h` and the low-level headers of LEDC, MCPWM and RMT, the clocks each can count from `clk_tree_defs.h`, the
+dividers and the ranges from the low-level headers and the drivers, the crystal from the Kconfig of the chip. The
+oscillators RC_FAST and RC_SLOW are left out of the clocks: they are not precise. MCPWM counts the clock its driver
+takes by default divided by the prescale of a timer; the prescale of the group stays as the driver leaves it, since it
+is one for all timers of the group. The carrier of RMT counts the clock of the group with no prescale of its own.
+What was tried on a board, as two LEDC pins in antiphase, is in `checked` of the chip at the level `hardware`.
 
 ## Mechanics
 

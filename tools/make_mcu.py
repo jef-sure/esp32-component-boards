@@ -14,23 +14,12 @@ IDF = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else os.path.expanduser("~/.
 PROVIDES = {"SOC_WIFI_SUPPORTED": "wifi", "SOC_BT_SUPPORTED": "bluetooth", "SOC_BT_CLASSIC_SUPPORTED": "bluetooth_classic", "SOC_DAC_SUPPORTED": "dac", "SOC_USB_OTG_SUPPORTED": "usb_otg",
             "SOC_MIPI_DSI_SUPPORTED": "mipi_dsi", "SOC_LCD_RGB_SUPPORTED": "lcd_rgb", "SOC_EMAC_SUPPORTED": "emac",
             "SOC_SDMMC_HOST_SUPPORTED": "sdmmc", "SOC_TOUCH_SENSOR_SUPPORTED": "touch_pads", "SOC_TWAI_SUPPORTED": "twai"}
-# Where a chip can get a frequency, in the order to try them, and what can be changed while it runs. From soc_caps.h, the
-# low-level headers and the drivers of ESP-IDF and the reference manuals. RC_FAST is left out of clocks: it is imprecise.
-LEDC = {"title": "LEDC", "kind": "ledc", "divider_bits": 18, "fraction_bits": 8, "pairs": True, "can": ["frequency", "duty", "phase", "fade", "pause"]}
-MCPWM = {"title": "MCPWM", "kind": "ticks", "timers": 6, "outputs": 12, "clock_hz": 160000000, "ticks_max": 65535, "prescale_max": 65536, "pairs": True, "can": ["frequency", "duty", "phase", "dead_time", "sync"]}
-RMT = {"title": "RMT", "kind": "ticks", "clock_hz": 80000000, "ticks_max": 131070, "prescale_max": 256, "pairs": False, "can": ["carrier", "loop"]}
-APLL = {"title": "I2S with APLL", "kind": "apll", "timers": 1, "xtal_hz": 40000000, "min_hz": 5303031, "max_hz": 125000000, "pairs": False, "can": []}
-FREQUENCY_SOURCES = {
-    "esp32": {"ledc": {**LEDC, "clocks_hz": {"APB": 80000000, "REF_TICK": 1000000}}, "mcpwm": MCPWM, "rmt": {**RMT, "timers": 8, "outputs": 8},
-              "clk_out": {"title": "CLK_OUT", "kind": "clock_out", "timers": 3, "outputs": 3, "signals": [], "pairs": False, "can": ["start_stop"]},
-              "i2s_apll": {**APLL, "outputs": 2},
-              "dac_cosine": {"title": "DAC cosine", "kind": "rc", "timers": 2, "outputs": 2, "pairs": False, "can": []}},
-    "esp32s3": {"ledc": {**LEDC, "clocks_hz": {"XTAL": 40000000, "APB": 80000000}}, "mcpwm": MCPWM, "rmt": {**RMT, "timers": 4, "outputs": 4},
-                "clk_out": {"title": "CLK_OUT", "kind": "clock_out", "timers": 3, "outputs": 3, "signals": [], "pairs": False, "can": ["start_stop"]}},
-    "esp32p4": {"ledc": {**LEDC, "clocks_hz": {"XTAL": 40000000, "PLL_F80M": 80000000}}, "mcpwm": MCPWM, "rmt": {**RMT, "timers": 4, "outputs": 4},
-                "clk_out": {"title": "CLK_OUT", "kind": "clock_out", "timers": 2, "outputs": 2, "signals": ["XTAL32K"], "pairs": False, "can": ["start_stop", "divider"]},
-                "i2s_apll": {**APLL, "outputs": 3}},
-}
+# What the driver of each source can change while it runs: its API, the same on every chip.
+LEDC_CAN = ["frequency", "duty", "phase", "fade", "pause"]
+MCPWM_CAN = ["frequency", "duty", "phase", "dead_time", "sync"]
+RMT_CAN = ["carrier", "loop"]
+# Module clocks that are not precise enough to count a frequency on: RC oscillators.
+IMPRECISE_CLOCKS = {"RC_FAST", "RC_FAST_D256", "RTC_FAST", "RC_SLOW", "RC32K"}
 # What was tried on a chip, not only read: the pair of pins of a source counts as unknown in a kit until it is here.
 FREQUENCY_TRIED = {"esp32": {"ledc_pairs": {"level": "hardware", "covers": ["frequency_sources.ledc.pairs"], "by": "~/freecad/tc-eth-poe/piezo-test: two channels, one timer, hpoint half a period, antiphase read on the pins, four discs heard", "date": "2026-10-15"}},
                    "esp32p4": {"ledc_pairs": {"level": "hardware", "covers": ["frequency_sources.ledc.pairs"], "by": "Anton: tried in the project of the time clock on the ESP32-P4", "date": "2026-11-01", "notes": "The date is that of his word. The project went on on another machine, so the copy here does not have this code."}}}
@@ -90,10 +79,10 @@ BOOT = {
 IOMUX_LINES = {"MOSI": "mosi", "MISO": "miso", "CLK": "sclk", "CS": "cs", "WP": "wp", "HD": "hd"}  # names of spi_pins.h -> of the buses
 
 
-def defines(path):
+def defines(path, names=r"SOC_\w+"):
     found = {}
     for line in path.read_text().splitlines():
-        match = re.match(r"#define\s+(SOC_\w+)\s+(.+?)\s*(/\*.*|//.*)?$", line)
+        match = re.match(rf"#define\s+({names})\s+(.+?)\s*(/\*.*|//.*)?$", line)
         if match:
             found[match[1]] = match[2]
     return found
@@ -104,7 +93,7 @@ def number(text, found, depth=0):
         return None
     text = re.sub(r"\bBIT(\d+)\b", lambda m: f"(1<<{m[1]})", text)
     text = re.sub(r"\b(0[xX][0-9a-fA-F]+|\d+)[UL]+\b", r"\1", text)
-    for name in set(re.findall(r"\bSOC_\w+\b", text)):
+    for name in set(re.findall(r"\b[A-Za-z_]\w*\b", text)):
         value = number(found.get(name), found, depth + 1)
         if value is None:
             return None
@@ -234,6 +223,79 @@ def adc1_of(target_dir):
     return {"adc1": pins} if pins else {}
 
 
+def frequency_sources_of(target, found):
+    """Where a chip gets a frequency, in the order to try them, from the headers and drivers of ESP-IDF."""
+    soc = IDF / f"components/soc/{target}/include/soc"
+    tree = (soc / "clk_tree_defs.h").read_text()
+    freqs = defines(soc / "soc.h", r"(?:APB|REF)_CLK_FREQ")
+    # the crystal the chip is built for by default; none when ESP-IDF finds it at boot (XTAL_FREQ_AUTO)
+    kconfig = "".join(path.read_text() for path in (IDF / f"components/esp_hw_support/port/{target}").glob("Kconfig*"))
+    crystal = re.search(r"choice XTAL_FREQ\b.*?default XTAL_FREQ_(\d+)\b", kconfig, re.S)
+    xtal = int(crystal[1]) * 1000000 if crystal else None
+
+    def hz(clock):
+        if pll := re.fullmatch(r"PLL_F(\d+)M", clock):
+            return int(pll[1]) * 1000000
+        value = {"XTAL": xtal, "APB": number(freqs.get("APB_CLK_FREQ"), freqs), "REF_TICK": number(freqs.get("REF_CLK_FREQ"), freqs)}.get(clock)
+        if value is None and clock != "XTAL":
+            raise SystemExit(f"{target}: the frequency of the module clock {clock} is not known")
+        return value
+
+    def clocks(symbol):
+        """The precise module clocks a peripheral can count, by the list of clk_tree_defs.h."""
+        listed = re.search(rf"#define\s+{symbol}\s+\{{([^}}]*)\}}", tree)
+        names = [name.strip().removeprefix("SOC_MOD_CLK_") for name in listed[1].split(",")] if listed else []
+        return {name: hz(name) for name in names if name not in IMPRECISE_CLOCKS and hz(name)}
+
+    def default(symbol):
+        """The frequency of the clock the driver takes when the program names none."""
+        return hz(re.search(rf"\b{symbol}\s*=\s*SOC_MOD_CLK_(\w+)", tree)[1])
+
+    def low_level(part, names):
+        return defines(IDF / f"components/esp_hal_{part}/{target}/include/hal/{part}_ll.h", names)
+
+    sources = {}
+    if found.get("SOC_LEDC_SUPPORTED"):
+        ll = low_level("ledc", r"LEDC_LL_\w+")
+        divider = defines(IDF / "components/esp_driver_ledc/src/ledc.c", r"LEDC_TIMER_DIV_NUM_MAX")
+        modes = 2 if found.get("SOC_LEDC_SUPPORT_HS_MODE") else 1  # high and low speed, each with its own timers and channels
+        sources["ledc"] = {"title": "LEDC", "kind": "ledc", "timers": modes * number(found["SOC_LEDC_TIMER_NUM"], found), "outputs": modes * number(found["SOC_LEDC_CHANNEL_NUM"], found),
+                           "counter_bits": number(found["SOC_LEDC_TIMER_BIT_WIDTH"], found), "divider_bits": number(divider["LEDC_TIMER_DIV_NUM_MAX"], divider).bit_length(),
+                           "fraction_bits": number(ll["LEDC_LL_FRACTIONAL_BITS"], ll), "clocks_hz": clocks("SOC_LEDC_CLKS"), "pairs": True, "can": LEDC_CAN}
+    if found.get("SOC_MCPWM_SUPPORTED"):
+        ll = low_level("mcpwm", r"MCPWM_LL_\w+")
+        get = lambda name: number(ll[f"MCPWM_LL_{name}"], ll)
+        groups = get("GROUP_NUM")
+        # the prescale of a group is one for its timers (mcpwm_com.c): it stays at the default of the driver as long as
+        # the prescale of each timer fits, so a timer counts the clock divided by that default and by its own
+        private = defines(IDF / "components/esp_driver_mcpwm/src/mcpwm_private.h", r"MCPWM_GROUP_CLOCK_DEFAULT_PRESCALE")
+        sources["mcpwm"] = {"title": "MCPWM", "kind": "ticks", "timers": groups * get("TIMERS_PER_GROUP"), "outputs": groups * get("OPERATORS_PER_GROUP") * get("GENERATORS_PER_OPERATOR"),
+                            "clock_hz": default("MCPWM_TIMER_CLK_SRC_DEFAULT") // number(private["MCPWM_GROUP_CLOCK_DEFAULT_PRESCALE"], private),
+                            "ticks_max": get("MAX_COUNT_VALUE"), "prescale_max": get("MAX_TIMER_PRESCALE"), "pairs": True, "can": MCPWM_CAN}
+    if found.get("SOC_RMT_SUPPORTED"):
+        ll = low_level("rmt", r"RMT_LL_\w+")
+        text = (IDF / f"components/esp_hal_rmt/{target}/include/hal/rmt_ll.h").read_text()
+        carrier = int(re.search(r"rmt_ll_tx_set_carrier_high_low_ticks.*?high_ticks <= (\d+)", text, re.S)[1])
+        channels = number(ll["RMT_LL_INST_NUM"], ll) * number(ll["RMT_LL_TX_CANDIDATES_PER_INST"], ll)
+        # the carrier counts the clock of the group (rmt_tx.c), whose divider, where it has one, is set once for all
+        # channels and stays 1 for a channel resolution down to the clock / 256 (rmt_common.c): no prescale of its own
+        sources["rmt"] = {"title": "RMT", "kind": "ticks", "timers": channels, "outputs": channels, "clock_hz": default("RMT_CLK_SRC_DEFAULT"),
+                          "ticks_max": 2 * carrier, "prescale_max": 1, "pairs": False, "can": RMT_CAN}
+    if channels := number(found.get("SOC_GPIO_CLOCKOUT_CHANNEL_NUM"), found):
+        sources["clk_out"] = {"title": "CLK_OUT", "kind": "clock_out", "timers": channels, "outputs": channels, "signals": ["XTAL32K"] if re.search(r"\bCLKOUT_SIG_XTAL32K\b", tree) else [],
+                              "pairs": False, "can": ["start_stop", *(["divider"] if found.get("SOC_CLOCKOUT_SUPPORT_CHANNEL_DIVIDER") else [])]}
+    if found.get("SOC_I2S_SUPPORTS_APLL"):
+        apll = defines(IDF / f"components/esp_hal_clock/{target}/include/hal/clk_tree_ll.h", r"CLK_LL_APLL_\w+")
+        get = lambda name: number(apll[f"CLK_LL_APLL_{name}"], apll)
+        i2s = low_level("i2s", r"I2S_LL_INST_NUM")
+        sources["i2s_apll"] = {"title": "I2S with APLL", "kind": "apll", "timers": 1, "outputs": number(i2s["I2S_LL_INST_NUM"], i2s), "xtal_hz": xtal,
+                               "min_hz": get("MIN_HZ"), "max_hz": get("MAX_HZ"), "multiplier_min_hz": get("MULTIPLIER_MIN_HZ"), "multiplier_max_hz": get("MULTIPLIER_MAX_HZ"), "pairs": False, "can": []}
+    if found.get("SOC_DAC_SUPPORTED") and re.search(r"#define\s+SOC_DAC_COSINE_CLKS\b", tree):
+        # one generator for the channels (dac_cosine.c), counting an RC oscillator
+        sources["dac_cosine"] = {"title": "DAC cosine", "kind": "rc", "timers": 1, "outputs": number(found["SOC_DAC_CHAN_NUM"], found), "pairs": False, "can": []}
+    return sources
+
+
 def iomux_of(target):
     """The pins of the IO MUX of each SPI host from SPI2 on, from spi_pins.h (in esp_hal_gpspi since ESP-IDF 6, in soc before)."""
     for header in (IDF / f"components/esp_hal_gpspi/{target}/include/soc/spi_pins.h", IDF / f"components/soc/{target}/include/soc/spi_pins.h"):
@@ -268,12 +330,11 @@ def main():
                  "hosts": {key: value for key, value in (("spi", number(found.get("SOC_SPI_PERIPH_NUM"), found)), ("i2c", number(found.get("SOC_HP_I2C_NUM") or found.get("SOC_I2C_NUM"), found)), ("uart", number(found.get("SOC_UART_HP_NUM") or found.get("SOC_UART_NUM"), found))) if value is not None},
                  "provides": {name: {} for symbol, name in PROVIDES.items() if number(found.get(symbol), found) == 1},
                  "checked": {"facts": {"level": "vendor-docs", "source": f"ESP-IDF {IDF.name}, components/soc/{target}, soc_caps.h"}}}
-        if target in FREQUENCY_SOURCES:
-            sources = {name: dict(source) for name, source in FREQUENCY_SOURCES[target].items()}
-            modes = 2 if found.get("SOC_LEDC_SUPPORT_HS_MODE") else 1  # high and low speed, each with its own timers and channels
-            sources["ledc"].update(timers=modes * number(found["SOC_LEDC_TIMER_NUM"], found), outputs=modes * number(found["SOC_LEDC_CHANNEL_NUM"], found), counter_bits=number(found["SOC_LEDC_TIMER_BIT_WIDTH"], found))
+        if sources := frequency_sources_of(target, found):
             entry["frequency_sources"] = sources
-            entry["checked"]["frequency_sources"] = {"level": "vendor-docs", "covers": ["frequency_sources"], "source": f"ESP-IDF {IDF.name}, soc_caps.h, the low-level headers and drivers; the reference manual of the chip"}
+            entry["checked"]["frequency_sources"] = {"level": "vendor-docs", "covers": ["frequency_sources"],
+                                                     "source": f"ESP-IDF {IDF.name}: soc_caps.h, clk_tree_defs.h and soc.h of the chip, the Kconfig of its crystal, "
+                                                               "the low-level headers of LEDC, MCPWM, RMT, I2S and the clock tree, the drivers of LEDC, MCPWM, RMT and the DAC"}
             entry["checked"].update(FREQUENCY_TRIED.get(target, {}))
         if target in GPIO_HIGH_MV_MAX:
             entry["gpio"]["high_mv_max"] = GPIO_HIGH_MV_MAX[target]

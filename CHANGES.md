@@ -248,6 +248,17 @@ committed, a program that asks by kind.
   `board_sound_start`, `board_sound_source` and their `_at` forms take `ctx`, given back to it at every call, so the mixer
   of a game needs no static. The task takes the source and its context together. The names `board_`, `boards_`,
   `BOARD_` and `CONFIG_BOARD_` are said to be the component's (both found by 7c after the move of dgx-ge was decided).
+- The frequency sources of every chip come from ESP-IDF 6.1, not from a table typed by hand for three: `soc_caps.h`,
+  `clk_tree_defs.h`, the Kconfig of the crystal, the low-level headers of LEDC, MCPWM, RMT, I2S and the clock tree, the
+  drivers. The C3, the C6 and the other ten chips get LEDC, RMT, MCPWM where they have it, CLK_OUT, the APLL and the DAC
+  cosine where they have them. The old table differed from the headers: a timer of MCPWM counts up to 65536 ticks, not
+  65535, and its prescale is that of the timer, up to 256, since the prescale of the group is one for its timers; the
+  carrier of RMT counts up to 65536 + 65536 ticks of the clock of the group, with no prescale of its own, not 256; the
+  DAC cosine of the ESP32 has one generator for both channels, not two. The range of the multiplier of the APLL is data,
+  not a number in the solver. Kits on C3 boards now give tones and LEDC ways.
+- A part of the person's own soldered to a pin the board does not leave free (another owner, a note such as USB-JTAG,
+  input only) refuses the board with the pin and what holds it, instead of a kit with a wire on that pin. The C3-Zero
+  showed it once its kits had tones.
 - A fifth judgement, `ledc_channels`, of the kind `resource_limit`: the LEDC channels the ways of the parts take (a chain
   of shift registers, an RGB LED) are counted with those of the outputs against the chip, as data-format.md said and the
   solver did not do. Three RGB LEDs no longer fit an ESP32-S3, which has eight. The C3 and the C6 have no frequency

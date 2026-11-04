@@ -344,7 +344,7 @@
             "covers": [
                 "frequency_sources"
             ],
-            "source": "ESP-IDF esp-idf, soc_caps.h, the low-level headers and drivers; the reference manual of the chip"
+            "source": "ESP-IDF esp-idf: soc_caps.h, clk_tree_defs.h and soc.h of the chip, the Kconfig of its crystal, the low-level headers of LEDC, MCPWM, RMT, I2S and the clock tree, the drivers of LEDC, MCPWM, RMT and the DAC"
         },
         "levels": {
             "level": "datasheet",
@@ -389,8 +389,15 @@
         "ledc": {
             "title": "LEDC",
             "kind": "ledc",
+            "timers": 4,
+            "outputs": 8,
+            "counter_bits": 14,
             "divider_bits": 18,
             "fraction_bits": 8,
+            "clocks_hz": {
+                "XTAL": 40000000,
+                "APB": 80000000
+            },
             "pairs": true,
             "can": [
                 "frequency",
@@ -398,14 +405,7 @@
                 "phase",
                 "fade",
                 "pause"
-            ],
-            "clocks_hz": {
-                "XTAL": 40000000,
-                "APB": 80000000
-            },
-            "timers": 4,
-            "outputs": 8,
-            "counter_bits": 14
+            ]
         },
         "mcpwm": {
             "title": "MCPWM",
@@ -413,8 +413,8 @@
             "timers": 6,
             "outputs": 12,
             "clock_hz": 160000000,
-            "ticks_max": 65535,
-            "prescale_max": 65536,
+            "ticks_max": 65536,
+            "prescale_max": 256,
             "pairs": true,
             "can": [
                 "frequency",
@@ -427,16 +427,16 @@
         "rmt": {
             "title": "RMT",
             "kind": "ticks",
+            "timers": 4,
+            "outputs": 4,
             "clock_hz": 80000000,
-            "ticks_max": 131070,
-            "prescale_max": 256,
+            "ticks_max": 131072,
+            "prescale_max": 1,
             "pairs": false,
             "can": [
                 "carrier",
                 "loop"
-            ],
-            "timers": 4,
-            "outputs": 4
+            ]
         },
         "clk_out": {
             "title": "CLK_OUT",

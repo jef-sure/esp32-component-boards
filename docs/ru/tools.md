@@ -155,7 +155,8 @@ python3 tools/board_pins.py jc1060p470c --json        # каждый GPIO, дл�
 python3 tools/make_mcu.py [каталог ESP-IDF]
 ```
 
-Записывает `catalog/mcu/` из `soc_caps.h` ESP-IDF.
+Записывает `catalog/mcu/` из ESP-IDF: `soc_caps.h`, таблицы GPIO из его документации, дерево тактов и
+низкоуровневые заголовки LEDC, MCPWM, RMT и I2S. Режимы загрузки по strapping-пинам берутся из даташитов Espressif.
 
 ## update_rates.py
 

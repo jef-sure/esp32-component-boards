@@ -152,7 +152,8 @@ first. A line several devices use on purpose says when it is free.
 python3 tools/make_mcu.py [ESP-IDF directory]
 ```
 
-Writes `catalog/mcu/` from `soc_caps.h` of ESP-IDF.
+Writes `catalog/mcu/` from ESP-IDF: `soc_caps.h`, the GPIO tables of its docs, the clock tree and the low-level
+headers of LEDC, MCPWM, RMT and I2S. The boot modes of the strapping pins come from the datasheets of Espressif.
 
 ## update_rates.py
 

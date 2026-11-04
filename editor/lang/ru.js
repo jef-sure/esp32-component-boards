@@ -69,6 +69,11 @@ LANGUAGES.ru = {
         'Budget for one kit': 'Бюджет на комплект',
 
         'it takes {0} more pins and {1} free ones come out of this board': 'нужно ещё пинов: {0}, а свободных на разъёмах этой платы: {1}',
+        '{0} is soldered to {1}, which this board does not leave free': 'деталь {0} припаяна к пинам, которые на этой плате не свободны: {1}',
+        'not a GPIO of this chip': 'у этого чипа нет такого GPIO',
+        'input only': 'только вход',
+        'a strapping pin': 'пин загрузки',
+        'does not come out': 'не выведен на разъём',
         'the display is smaller than {0} inches': 'дисплей меньше {0} дюймов',
         'the size of the display is not in the data': 'размера дисплея нет в данных',
         'no reader that reaches {0} mm': 'нет считывателя на {0} мм',

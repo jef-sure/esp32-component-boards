@@ -201,14 +201,14 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
                 return [{ bits, key: `${prescale}/${ticks}`, hz: source.clock_hz / prescale / ticks, whole: true, note: 'whole ticks, no jitter of their own' }];
             });
         },
-        // xtal x (4 + sdm / 65536) / (2 x (o_div + 2)), then a whole divider of I2S. The multiplier runs from 350 to 500 MHz.
+        // xtal x (4 + sdm / 65536) / (2 x (o_div + 2)), then a whole divider of I2S; the multiplier stays in its range.
         apll(source, output) {
             if (output.bits) return [];
             const settings = [];
             for (let total = Math.ceil(source.min_hz / output.hz); total <= Math.floor(source.max_hz / output.hz) && total <= 1024; total++) {
                 for (let div = 0; div < 32; div++) {
                     const multiplier = output.hz * total * 2 * (div + 2);
-                    if (multiplier < 350e6 || multiplier > 500e6) continue;
+                    if (multiplier < source.multiplier_min_hz || multiplier > source.multiplier_max_hz) continue;
                     const sdm = Math.round((multiplier / source.xtal_hz - 4) * 65536);
                     const hz = (source.xtal_hz * (4 + sdm / 65536)) / (2 * (div + 2)) / total;
                     settings.push({ bits: 1, key: `${div}/${sdm}/${total}`, hz, whole: true, note: 'a whole divider after the audio PLL: low jitter by its purpose, no figure' });
@@ -576,8 +576,17 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
     function projectOf(name, board, picks, unused, spread = true) {
         // the pins a part of the person's own is soldered to are out of what the kit hands out
         const soldered = picks.flatMap((pick) => Object.values(pick.way?.fixed ?? {}));
+        const open = freePins(board);
+        const lost = picks.find((pick) => Object.values(pick.way?.fixed ?? {}).some((pin) => !open.includes(pin)));
+        if (lost) {
+            const map = pinMap(board);
+            // what holds the pin, in the words of the data
+            const holder = (entry) => !entry ? t('not a GPIO of this chip') : entry.owners.length ? entry.owners.join(', ') : entry.input_only ? t('input only') : entry.notes?.length ? entry.notes.join(', ') : entry.strapping ? t('a strapping pin') : t('does not come out');
+            const pins = Object.values(lost.way.fixed).filter((pin) => !open.includes(pin)).map((pin) => `GPIO ${pin} (${holder(map[pin])})`);
+            return { problem: t('{0} is soldered to {1}, which this board does not leave free', lost.module.title, pins.join(', ')) };
+        }
         // the pins a judgement names for a host the board does not wire yet go last, so a new host can take them all
-        const free = freePins(board).filter((pin) => !soldered.includes(pin));
+        const free = open.filter((pin) => !soldered.includes(pin));
         const theirs = new Set(judgementsOf('prefer_pins').flatMap((judgement) => hostNames(board, KIT_BUSES[judgement.bus].host)
             .filter((own) => !Object.values(board.buses ?? {}).some((named) => own in named))
             .flatMap((own) => [...KIT_BUSES[judgement.bus].lines, 'cs'].map((line) => board.mcu.facts[judgement.pins]?.[judgement.bus]?.[own]?.[line]))));

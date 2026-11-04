@@ -322,6 +322,13 @@
             "level": "vendor-docs",
             "source": "ESP-IDF esp-idf, components/soc/esp32s2, soc_caps.h"
         },
+        "frequency_sources": {
+            "level": "vendor-docs",
+            "covers": [
+                "frequency_sources"
+            ],
+            "source": "ESP-IDF esp-idf: soc_caps.h, clk_tree_defs.h and soc.h of the chip, the Kconfig of its crystal, the low-level headers of LEDC, MCPWM, RMT, I2S and the clock tree, the drivers of LEDC, MCPWM, RMT and the DAC"
+        },
         "levels": {
             "level": "datasheet",
             "covers": [
@@ -359,6 +366,76 @@
                 "platforms"
             ],
             "source": "COMPATIBILITY.md of ESP-IDF"
+        }
+    },
+    "frequency_sources": {
+        "ledc": {
+            "title": "LEDC",
+            "kind": "ledc",
+            "timers": 4,
+            "outputs": 8,
+            "counter_bits": 14,
+            "divider_bits": 18,
+            "fraction_bits": 8,
+            "clocks_hz": {
+                "XTAL": 40000000,
+                "APB": 80000000,
+                "REF_TICK": 1000000
+            },
+            "pairs": true,
+            "can": [
+                "frequency",
+                "duty",
+                "phase",
+                "fade",
+                "pause"
+            ]
+        },
+        "rmt": {
+            "title": "RMT",
+            "kind": "ticks",
+            "timers": 4,
+            "outputs": 4,
+            "clock_hz": 80000000,
+            "ticks_max": 131072,
+            "prescale_max": 1,
+            "pairs": false,
+            "can": [
+                "carrier",
+                "loop"
+            ]
+        },
+        "clk_out": {
+            "title": "CLK_OUT",
+            "kind": "clock_out",
+            "timers": 3,
+            "outputs": 3,
+            "signals": [],
+            "pairs": false,
+            "can": [
+                "start_stop"
+            ]
+        },
+        "i2s_apll": {
+            "title": "I2S with APLL",
+            "kind": "apll",
+            "timers": 1,
+            "outputs": 1,
+            "xtal_hz": 40000000,
+            "min_hz": 5303031,
+            "max_hz": 125000000,
+            "multiplier_min_hz": 350000000,
+            "multiplier_max_hz": 500000000,
+            "pairs": false,
+            "can": []
+        },
+        "dac_cosine": {
+            "title": "DAC cosine",
+            "kind": "rc",
+            "timers": 1,
+            "outputs": 2,
+            "pairs": false,
+            "can": []
         }
     },
     "controls": {

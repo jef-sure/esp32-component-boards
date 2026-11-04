@@ -40,7 +40,8 @@ for each board, in the order named, with its build directory build/<BOARD>, its 
 there, and the preset default, a copy of the preset of the current board (--current, else the first). ESP-IDF 6 reads
 the presets: idf.py build builds default, idf.py --preset <BOARD> build another, and the extension of ESP-IDF for VS
 Code chooses one as a project configuration. board_select.py --current BOARD PROJECT_DIR rewrites only default, so
-the boards keep their order. ESP-IDF 5 does not read them:
+the boards keep their order. Each board has its lock of the components beside the project, dependencies.lock.<BOARD>,
+started as a copy of dependencies.lock when the project has one. ESP-IDF 5 does not read the presets:
 
     idf.py -B build/<BOARD> -D SDKCONFIG=build/<BOARD>/sdkconfig -D BOARD=<BOARD> build
 
@@ -56,6 +57,7 @@ import json
 import pathlib
 import re
 import shlex
+import shutil
 import subprocess
 import sys
 
@@ -156,6 +158,17 @@ def presets_text(project, boards, targets, current, command):
     presets = [{"name": board, "displayName": title_of(board), "binaryDir": f"build/{board}",
                 "cacheVariables": {"BOARD": board, "IDF_TARGET": target, "SDKCONFIG": f"build/{board}/sdkconfig"}} for board, target in zip(boards, targets)]
     return with_current({"version": 3, "vendor": {VENDOR: {"made by": command}}, "configurePresets": presets}, current)
+
+
+def seed_locks(project, boards):
+    """The lock of the components of each board, dependencies.lock.<board>, starts as the lock the project had, so its
+    versions carry over; then it is the component manager's file, and the lock of one board is not read any more."""
+    root = project / "dependencies.lock"
+    seeded = [board for board in boards if root.exists() and not (project / f"dependencies.lock.{board}").exists()]
+    for board in seeded:
+        shutil.copyfile(root, project / f"dependencies.lock.{board}")
+    if seeded:
+        print(f"{root}: copied to dependencies.lock.<board> for {', '.join(seeded)}; each board reads its own now, and this one is not read")
 
 
 def title_of(board):
@@ -272,6 +285,7 @@ def main():
             out.write_text(text)
         for out, board, target in zip(texts, boards, targets):
             print(f"{out}: {board}, {target}")
+        seed_locks(project, boards)
         print(f"{project / PRESETS}: a preset for each, and default for the current one, {args.current or boards[0]}\n"
               f"ESP-IDF 6: idf.py build builds {args.current or boards[0]}, idf.py --preset <board> build another, each in build/<board>;\n"
               f"board_select.py --current <board> {project} changes the current one. ESP-IDF 5 does not read the presets:")

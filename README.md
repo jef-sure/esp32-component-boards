@@ -81,7 +81,9 @@ if(NOT SDKCONFIG_DEFAULTS)
     endif()
 endif()
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
-idf_build_set_property(DEPENDENCIES_LOCK ${CMAKE_BINARY_DIR}/dependencies.lock)
+if(BOARD)
+    idf_build_set_property(DEPENDENCIES_LOCK ${CMAKE_CURRENT_LIST_DIR}/dependencies.lock.${BOARD})
+endif()
 ```
 
 Changing the board and building for several boards are in [choosing-a-board.md](docs/en/choosing-a-board.md).

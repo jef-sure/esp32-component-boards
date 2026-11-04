@@ -21,8 +21,8 @@ dependencies:
 ```
 
 In `CMakeLists.txt`, before `project.cmake` is included, read the board's
-defaults before the project's own, and keep the lock of the components in the
-build directory:
+defaults before the project's own, and give each of several boards its own lock of
+the components beside the project:
 
 ```cmake
 cmake_minimum_required(VERSION 3.22)
@@ -38,7 +38,9 @@ if(NOT SDKCONFIG_DEFAULTS)
     endif()
 endif()
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
-idf_build_set_property(DEPENDENCIES_LOCK ${CMAKE_BINARY_DIR}/dependencies.lock)
+if(BOARD)
+    idf_build_set_property(DEPENDENCIES_LOCK ${CMAKE_CURRENT_LIST_DIR}/dependencies.lock.${BOARD})
+endif()
 project(hello)
 ```
 
@@ -115,8 +117,14 @@ the revision of its chip, and `CMakePresets.json`: a preset for each board, in t
 order named, with its build directory `build/<board>`, and the preset `default`, a
 copy of the preset of the current board in the same directory. Commit those files: a fresh
 clone reads them before the component is downloaded. Each build directory has its
-own target, `sdkconfig` and lock of the components, so the boards do not disturb
-each other. The files of the catalog are not read directly: the lines of the
+own target and `sdkconfig`, and each board its lock of the components,
+`dependencies.lock.<board>` beside the project, so the boards do not disturb each
+other. Commit the locks too: the versions of the components stay as they were
+solved. The first time, `board_select.py` copies the `dependencies.lock` of the
+project to each board, so a project that goes over to several boards keeps its
+versions; then each board reads its own, and `dependencies.lock` is not read. One
+lock for two boards would keep the solution of the first: the component manager
+solves again when the manifest changes, not when the board does. The files of the catalog are not read directly: the lines of the
 revision are only in what `board_select.py` writes.
 
 ESP-IDF 6 reads the presets. `default` is the current board, the first named unless

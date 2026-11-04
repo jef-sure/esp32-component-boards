@@ -313,6 +313,12 @@ committed, a program that asks by kind.
 - api.md says that the symbols of the parts of a board are numbers for `#if`, so a Kconfig of a program writes
   `depends on BOARD_TOUCH != 0`: a probe of the handwritten clock on the JC1060P470C and the JC8012P4A1C, its display,
   touch and button through `boards.h`, lost its forecast with `depends on BOARD_TOUCH`.
+- Each of several boards has its lock of the components beside the project, `dependencies.lock.<board>`, to commit; one
+  board keeps `dependencies.lock`. The lock was in the build directory, not committed and solved afresh: the probe of the
+  clock got esp_hosted 3.0.9 where the project had 3.0.10, and the clock, which updates the ESP32-C6 of the JC8012P4A1C
+  when the versions differ, restarted again and again. `board_select.py` copies the lock of the project to each board
+  the first time and says that it is not read after. One lock for two boards would keep the solution of the first: the
+  component manager solves again when the manifest changes (7c, from its source).
 - A level seen on hardware is a note, not a part: `high_seen_mv` of a chip, the lowest high that drove it on hardware,
   with its trial in `checked`, and the judgement `level_seen_on_hardware`. The WS2812B takes 3.5 V by its datasheet;
   the 3.3 V of an ESP32 drove Anton's garland, so a kit of strips says so and adds no level shifter (Anton: "in

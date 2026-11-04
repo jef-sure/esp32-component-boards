@@ -35,6 +35,9 @@ if(BOARD STREQUAL "host")
 endif()
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
-# the lock of the components in the build directory: two boards built side by side keep their own
-idf_build_set_property(DEPENDENCIES_LOCK ${CMAKE_BINARY_DIR}/dependencies.lock)
+# each of several boards has its lock of the components beside the project, to commit: dependencies.lock.<board>; one
+# board keeps dependencies.lock
+if(BOARD)
+    idf_build_set_property(DEPENDENCIES_LOCK ${CMAKE_CURRENT_LIST_DIR}/dependencies.lock.${BOARD})
+endif()
 project(local_boards)

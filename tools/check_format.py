@@ -267,8 +267,14 @@ def presets_wrong():
     with tempfile.TemporaryDirectory() as folder:
         project = pathlib.Path(folder)
         (project / "CMakeLists.txt").write_text("")
+        lock = "dependencies:\n  idf:\n    version: 6.1.0\n"
+        (project / "dependencies.lock").write_text(lock)
         command = [sys.executable, str(ROOT / "tools" / "board_select.py"), "cyd_s028r", "jc4827w543c", str(project)]
         subprocess.run(command, capture_output=True, check=True)
+        # the lock of the project is where the lock of each board starts
+        if any((project / f"dependencies.lock.{board}").read_text() != lock for board in ("cyd_s028r", "jc4827w543c") if (project / f"dependencies.lock.{board}").exists()) \
+                or not all((project / f"dependencies.lock.{board}").exists() for board in ("cyd_s028r", "jc4827w543c")):
+            wrong.append("the lock of a board is not a copy of the lock of the project")
         written = project / "CMakePresets.json"
         presets = [(item["name"], item["binaryDir"], item["cacheVariables"]["IDF_TARGET"]) for item in json.loads(written.read_text())["configurePresets"]] if written.exists() else None
         if presets != [("cyd_s028r", "build/cyd_s028r", "esp32"), ("jc4827w543c", "build/jc4827w543c", "esp32s3"), ("default", "build/cyd_s028r", "esp32")]:

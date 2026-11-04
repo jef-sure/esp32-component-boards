@@ -510,7 +510,9 @@ all the library requires, then more of `frames`, `waiting` and `code_health` at 
 required library nobody read is an unknown. More readings find more defects, so only readings of one kind compare: one
 blind reading of each library, against one version of a rubric. An entry of `checked` at level `hardware` that covers
 `transports.spi` names the buses tried: the solver wires the chip on those first and says so of any other. Stars and downloads play no part. A kit shows the order
-without counts, and what was found goes to the model through the tool `library_audits` of `boards_mcp.py`.
+without counts; the line of the order holds its basis, which the page shows on hover: for each library the version
+read, the defects counted with what it requires, the points of `frames`, `waiting` and `code_health`, the date and
+the file of the audit. What was found goes to the model through the tool `library_audits` of `boards_mcp.py`.
 
 ## Firmware
 

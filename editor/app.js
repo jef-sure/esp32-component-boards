@@ -468,7 +468,7 @@ idf.py reconfigure build flash monitor</pre>
                             <img :src="host.pictureSrc(module.picture)" :alt="module.title"><figcaption>{{ module.title }}</figcaption></figure>
                         <p class="hint credit">{{ t('Pictures of parts: Fritzing, CC BY-SA 3.0. Hold the pointer on one for its author.') }}</p>
                     </div>
-                    <ul><li v-for="line in kit.says" :key="line.text" :class="line.level" :title="line.judgement ? line.judgement + ' (catalog/judgements.json)' : null"><span class="mark">{{ MARKS[line.level] }}</span> {{ line.text }}</li></ul>
+                    <ul><li v-for="line in kit.says" :key="line.text" :class="line.level" :title="line.basis ?? (line.judgement ? line.judgement + ' (catalog/judgements.json)' : null)"><span class="mark">{{ MARKS[line.level] }}</span> {{ line.text }}</li></ul>
                     <p v-if="kit.price.unpriced.length" class="hint">{{ t('Know a price?') }}
                         <a v-for="item in kit.price.unpriced" :key="item.item" target="_blank" rel="noopener" :href="priceLink(item.item)">{{ item.title }}</a></p>
                     <details v-if="kit.wiring.length"><summary>{{ t('the wires') }}</summary>
@@ -490,7 +490,7 @@ idf.py reconfigure build flash monitor</pre>
                 <details v-if="others.length" class="others"><summary>{{ t('What does not fit, and why ({0})', others.length) }}</summary>
                     <article v-for="kit in others" :key="kit.name" class="kit">
                         <h3>{{ kit.title }}</h3>
-                        <ul><li v-for="line in kit.says" :key="line.text" :class="line.level" :title="line.judgement ? line.judgement + ' (catalog/judgements.json)' : null"><span class="mark">{{ MARKS[line.level] }}</span> {{ line.text }}</li></ul>
+                        <ul><li v-for="line in kit.says" :key="line.text" :class="line.level" :title="line.basis ?? (line.judgement ? line.judgement + ' (catalog/judgements.json)' : null)"><span class="mark">{{ MARKS[line.level] }}</span> {{ line.text }}</li></ul>
                     </article>
                 </details>
             </div>

@@ -145,6 +145,12 @@ for (const name of names) {
         if (JSON.stringify(kit?.project.modules[given.fed.use].supply) !== JSON.stringify(given.fed.supply)) say(`fed by ${JSON.stringify(kit?.project.modules[given.fed.use].supply)}`);
     }
     if (given.says && !kits.some((kit) => kit.says.some((line) => line.text.includes(given.says)))) say(`no kit says "${given.says}"`);
+    // an order of audited libraries carries its basis: a row for each library, with the file of its audit
+    for (const line of kits.flatMap((kit) => kit.says).filter((item) => item.text.includes('audited libraries in order: '))) {
+        const named = line.text.split('audited libraries in order: ')[1].split(', ');
+        const rows = line.basis?.split('\n') ?? [];
+        if (rows.length !== named.length || named.some((name, i) => !rows[i].startsWith(`${name} `) || !rows[i].includes('/audit.json)'))) say(`the order ${named.join(', ')} has no basis for each library`);
+    }
     // no line of the kit on these pins, as the strapping pins of a chip
     if (given.keeps_out) {
         const kit = fit.find((item) => item.name === given.keeps_out.board);
@@ -187,7 +193,8 @@ const table = {
 const orderOf = (asked) => auditedOrder(table, { chip: 'chip', platform: 'p', bus: 'spi', ...asked }).map((item) => item.id).join(' ');
 const expected = [[{}, 'b f a c g'], [{ several: true }, 'b f a c'], [{ standard: 'x' }, 'g'], [{ bus: 'uart' }, '']];
 for (const [asked, order] of expected) if (orderOf(asked) !== order) wrong.push(`audited order for ${JSON.stringify(asked)}: ${orderOf(asked)}`);
-if (JSON.stringify(auditedOrder(table, { chip: 'chip', platform: 'p', bus: 'spi' }).find((item) => item.id === 'c')) !== JSON.stringify({ id: 'c', health: 0, high: 1, medium: 2, unread: ['unread'] })) wrong.push('a library does not answer for what it requires');
+const answering = auditedOrder(table, { chip: 'chip', platform: 'p', bus: 'spi' }).find((item) => item.id === 'c');
+if (JSON.stringify([answering.health, answering.high, answering.medium, answering.unread]) !== JSON.stringify([0, 1, 2, ['unread']])) wrong.push('a library does not answer for what it requires');
 // Ranges of manifests against the versions of a platform: a line meets a range when some release of it does.
 for (const [version, range, meets] of [['5.5', '>=5.2.0', true], ['5.5', '>=5.5.2', true], ['5.5', '>=6.0', false], ['6.1', '^5.3', false], ['5.5', '^5.3', true],
     ['5.5', '~5.4', false], ['6.1', '>=5.3,<6.0', false], ['5.5', '>=5.3 <6.0', true], ['5.5', '*', true], ['5.5', 'git+https://x', true], ['5.5', '!=5.5', false], ['6.1', '>=5.0,!=6.0', true], ['6.1', '>=5.0 !=6.1', false]])

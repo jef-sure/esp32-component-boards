@@ -33,8 +33,9 @@ function auditSummary(doc) {
     const last = doc.audits.at(-1);
     const items = Object.entries(last.items);
     const count = (severity) => last.defects.filter((defect) => defect.severity === severity).length;
-    const health = items.filter(([name]) => HEALTH_SECTIONS.includes(name.split('.')[0])).reduce((sum, [, item]) => sum + (HEALTH_POINTS[item.status] ?? 0), 0);
-    return { statuses: Object.fromEntries(items.map(([name, item]) => [name, item.status])), high: count('high'), medium: count('medium'), health };
+    const healthItems = items.filter(([name]) => HEALTH_SECTIONS.includes(name.split('.')[0]));
+    const health = healthItems.reduce((sum, [, item]) => sum + (HEALTH_POINTS[item.status] ?? 0), 0);
+    return { statuses: Object.fromEntries(items.map(([name, item]) => [name, item.status])), high: count('high'), medium: count('medium'), health, health_of: healthItems.length, version: last.version, date: last.date };
 }
 
 // A library with what it requires, all the way down: it answers for those, and what nobody read stays named.
@@ -87,7 +88,7 @@ function auditedOrder(libraries, { chip, platform, bus, several, standard }) {
         const asked = [`transports.${bus}`, ...(several ? ['several.several_readers'] : []), ...(several && bus === 'spi' ? ['several.shared_spi_bus'] : []), ...(standard ? [`cards.${standard}`] : [])];
         return libraries.all[id]?.platforms?.includes(platform) && asked.every((item) => STATUSES_THAT_FIT.includes(libraries.audits[id].statuses[item]));
     };
-    return (libraries.byChip[chip] ?? []).filter((id) => libraries.audits[id] && fits(id)).map((id) => ({ id, health: libraries.audits[id].health, ...withRequired(libraries, id) }))
+    return (libraries.byChip[chip] ?? []).filter((id) => libraries.audits[id] && fits(id)).map((id) => ({ ...libraries.audits[id], id, ...withRequired(libraries, id) }))
         .sort((a, b) => a.high - b.high || a.medium - b.medium || b.health - a.health || a.id.localeCompare(b.id));
 }
 
@@ -790,7 +791,9 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             if (triedBuses(chip).length && !triedBuses(chip).includes(bus)) lines.push({ level: 'unknown', text: t('{0} on {1} was not run on a board', chip, bus.toUpperCase()) });
             const order = auditedOrder(libraries, { chip, platform, bus, several: devices.length > 1, standard });
             const named = (id) => id.split('/').slice(1).join('/');
-            if (order.length) lines.push({ level: 'yes', text: t('{0} on {1}, audited libraries in order: {2}', chip, bus.toUpperCase(), order.map((item) => named(item.id)).join(', ')) });
+            // the basis of the order, for the page to show on demand: what each audit found, and where it lies
+            const basis = order.map((item) => t('{0} {1}: {2} high and {3} medium defects with what it requires, {4} of {5} points of frames, waiting and code_health, read {6} (catalog/libraries/{7}/audit.json)', named(item.id), item.version, item.high, item.medium, item.health, item.health_of, item.date, item.id)).join('\n');
+            if (order.length) lines.push({ level: 'yes', text: t('{0} on {1}, audited libraries in order: {2}', chip, bus.toUpperCase(), order.map((item) => named(item.id)).join(', ')), basis });
             for (const item of order) if (item.unread.length) lines.push({ level: 'unknown', text: t('{0} requires {1}, which nobody read', named(item.id), item.unread.map(named).join(', ')) });
             if (order.length || platform !== 'arduino_esp32') continue;
             // for Arduino a library nobody read is no proposal, so the kit only says how many name the chip

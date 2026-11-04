@@ -248,6 +248,10 @@ committed, a program that asks by kind.
   `board_sound_start`, `board_sound_source` and their `_at` forms take `ctx`, given back to it at every call, so the mixer
   of a game needs no static. The task takes the source and its context together. The names `board_`, `boards_`,
   `BOARD_` and `CONFIG_BOARD_` are said to be the component's (both found by 7c after the move of dgx-ge was decided).
+- The order of audited libraries in a kit holds its basis, shown by the page on hover: for each library the version
+  read, the defects with what it requires, the points of `frames`, `waiting` and `code_health`, the date and the file of
+  the audit (Anton: the audits serve the choice, and the reason of a choice can be looked at, not shown off). They ship
+  in the package as data of the solver.
 - The frequency sources of every chip come from ESP-IDF 6.1, not from a table typed by hand for three: `soc_caps.h`,
   `clk_tree_defs.h`, the Kconfig of the crystal, the low-level headers of LEDC, MCPWM, RMT, I2S and the clock tree, the
   drivers. The C3, the C6 and the other ten chips get LEDC, RMT, MCPWM where they have it, CLK_OUT, the APLL and the DAC

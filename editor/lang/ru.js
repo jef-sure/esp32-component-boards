@@ -224,6 +224,7 @@ LANGUAGES.ru = {
         '{0}: what the board takes for power is not in the data': '{0}: каким разъёмом плата берёт питание, в данных нет',
         port: 'порту',
         '{0} on {1}, audited libraries in order: {2}': '{0} на {1}, библиотеки с аудитом по порядку: {2}',
+        '{0} {1}: {2} high and {3} medium defects with what it requires, {4} of {5} points of frames, waiting and code_health, read {6} (catalog/libraries/{7}/audit.json)': '{0} {1}: дефектов high {2}, medium {3} вместе с тем, что она требует, пунктов frames, waiting и code_health {4} из {5}, прочитана {6} (catalog/libraries/{7}/audit.json)',
         '{0} requires {1}, which nobody read': '{0} требует {1}, а это никто не читал',
         '{0}: the data does not say of which variant it is': '{0}: в данных не сказано, какой это вариант',
         'Monochrome LCD': 'Монохромный ЖК',

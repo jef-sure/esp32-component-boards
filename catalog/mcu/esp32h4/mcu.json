@@ -246,7 +246,7 @@
             "timers": 6,
             "outputs": 12,
             "clock_hz": 96000000,
-            "ticks_max": 65536,
+            "ticks_max": 65535,
             "prescale_max": 256,
             "pairs": true,
             "can": [

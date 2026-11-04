@@ -255,10 +255,12 @@ committed, a program that asks by kind.
 - The frequency sources of every chip come from ESP-IDF 6.1, not from a table typed by hand for three: `soc_caps.h`,
   `clk_tree_defs.h`, the Kconfig of the crystal, the low-level headers of LEDC, MCPWM, RMT, I2S and the clock tree, the
   drivers. The C3, the C6 and the other ten chips get LEDC, RMT, MCPWM where they have it, CLK_OUT, the APLL and the DAC
-  cosine where they have them. The old table differed from the headers: a timer of MCPWM counts up to 65536 ticks, not
-  65535, and its prescale is that of the timer, up to 256, since the prescale of the group is one for its timers; the
-  carrier of RMT counts up to 65536 + 65536 ticks of the clock of the group, with no prescale of its own, not 256; the
-  DAC cosine of the ESP32 has one generator for both channels, not two. The range of the multiplier of the APLL is data,
+  cosine where they have them. The old table differed from the headers and the drivers: the prescale of an MCPWM timer
+  goes up to 256, not 65536, because the prescale of the group is shared by its three timers and stays 1 while the
+  prescale of each timer fits (below that the driver raises it, which the model does not count); the carrier of RMT
+  counts up to 65536 + 65536 ticks of the clock of the group, not 131070, with no prescale of its own, not 256; the DAC
+  cosine of the ESP32 has one generator for both channels, not two. A period of MCPWM stays at most 65535 ticks: the
+  register would hold 65536, the driver takes less (found by 7c). The range of the multiplier of the APLL is data,
   not a number in the solver. Kits on C3 boards now give tones and LEDC ways.
 - A part of the person's own soldered to a pin the board does not leave free (another owner, a note such as USB-JTAG,
   input only) refuses the board with the pin and what holds it, instead of a kit with a wire on that pin. The C3-Zero

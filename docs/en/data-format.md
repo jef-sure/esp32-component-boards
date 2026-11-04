@@ -641,8 +641,12 @@ them. Each has `kind`, which picks the formula of the solver, `timers` (how many
 `soc_caps.h` and the low-level headers of LEDC, MCPWM and RMT, the clocks each can count from `clk_tree_defs.h`, the
 dividers and the ranges from the low-level headers and the drivers, the crystal from the Kconfig of the chip. The
 oscillators RC_FAST and RC_SLOW are left out of the clocks: they are not precise. MCPWM counts the clock its driver
-takes by default divided by the prescale of a timer; the prescale of the group stays as the driver leaves it, since it
-is one for all timers of the group. The carrier of RMT counts the clock of the group with no prescale of its own.
+takes by default divided by the prescale of a timer. The group has a prescale of its own, shared by its three timers:
+the driver leaves it at 1 while the prescale of each timer fits and raises it for a slower timer, which the model does
+not count, so a timer goes down to about 9.5 Hz here. The carrier of RMT counts the clock of the group. The ESP32 and
+the S2 have no divider there; the other chips have one, shared by all channels and chosen by the driver from the
+resolution of the first channel, and the model does not count on it: `prescale_max` is 1. The C5 finds its crystal at
+boot, 40 or 48 MHz, so its XTAL is a fact of the module, not of the chip, and is not among its clocks.
 What was tried on a board, as two LEDC pins in antiphase, is in `checked` of the chip at the level `hardware`.
 
 ## Mechanics

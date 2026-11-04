@@ -266,12 +266,13 @@ def frequency_sources_of(target, found):
         ll = low_level("mcpwm", r"MCPWM_LL_\w+")
         get = lambda name: number(ll[f"MCPWM_LL_{name}"], ll)
         groups = get("GROUP_NUM")
-        # the prescale of a group is one for its timers (mcpwm_com.c): it stays at the default of the driver as long as
-        # the prescale of each timer fits, so a timer counts the clock divided by that default and by its own
+        # the prescale of a group is shared by its timers (mcpwm_com.c): it stays at the default of the driver as long as
+        # the prescale of each timer fits, so a timer counts the clock divided by that default and by its own; the
+        # driver takes a period below MAX_COUNT_VALUE (mcpwm_timer.c), though the register would hold that value too
         private = defines(IDF / "components/esp_driver_mcpwm/src/mcpwm_private.h", r"MCPWM_GROUP_CLOCK_DEFAULT_PRESCALE")
         sources["mcpwm"] = {"title": "MCPWM", "kind": "ticks", "timers": groups * get("TIMERS_PER_GROUP"), "outputs": groups * get("OPERATORS_PER_GROUP") * get("GENERATORS_PER_OPERATOR"),
                             "clock_hz": default("MCPWM_TIMER_CLK_SRC_DEFAULT") // number(private["MCPWM_GROUP_CLOCK_DEFAULT_PRESCALE"], private),
-                            "ticks_max": get("MAX_COUNT_VALUE"), "prescale_max": get("MAX_TIMER_PRESCALE"), "pairs": True, "can": MCPWM_CAN}
+                            "ticks_max": get("MAX_COUNT_VALUE") - 1, "prescale_max": get("MAX_TIMER_PRESCALE"), "pairs": True, "can": MCPWM_CAN}
     if found.get("SOC_RMT_SUPPORTED"):
         ll = low_level("rmt", r"RMT_LL_\w+")
         text = (IDF / f"components/esp_hal_rmt/{target}/include/hal/rmt_ll.h").read_text()

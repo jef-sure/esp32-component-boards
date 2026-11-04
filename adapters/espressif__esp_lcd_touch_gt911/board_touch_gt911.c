@@ -30,3 +30,11 @@ esp_lcd_touch_handle_t board_glue_touch_gt911_new(const struct board_touch_gt911
     }
     return handle;
 }
+
+bool board_glue_touch_gt911_start(int index, const struct board_touch_entry *entry, const struct board_display *display, struct board_touch *out)
+{
+    const struct board_touch_gt911 *gt911 = entry->gt911;
+    if (!board_dgx_screen(display)) return false;
+    esp_lcd_touch_handle_t handle = board_glue_touch_gt911_new(gt911);
+    return handle && board_glue_touch_lcd_attach(gt911->device, index, handle, true, gt911->panel, gt911->calibrated, display, out);
+}

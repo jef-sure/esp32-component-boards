@@ -31,3 +31,11 @@ esp_lcd_touch_handle_t board_glue_touch_spi_new(const struct board_touch_spi *sp
     }
     return handle;
 }
+
+bool board_glue_touch_spi_start(int index, const struct board_touch_entry *entry, const struct board_display *display, struct board_touch *out)
+{
+    const struct board_touch_spi *spi = entry->esp_lcd_touch;
+    if (!board_dgx_screen(display)) return false;
+    esp_lcd_touch_handle_t handle = board_glue_touch_spi_new(spi);
+    return handle && board_glue_touch_lcd_attach(spi->device, index, handle, spi->numbered, spi->panel, spi->calibrated, display, out);
+}

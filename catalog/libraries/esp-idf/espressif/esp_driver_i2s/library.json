@@ -10,7 +10,7 @@
     "license": "Apache-2.0",
     "install": [{"via": "platform"}],
     "described": "6.1",
-    "chips": {"i2s_amp": {"header": "driver/i2s_std.h", "on": ["i2s"], "adapter": {"kind": "i2s"}}},
+    "chips": {"i2s_amp": {"header": "driver/i2s_std.h", "on": ["i2s"], "adapter": {"kind": "i2s", "function": "board_glue_sound_i2s_init"}}},
     "adapter": {
         "symbol": "BOARD_SOUND_I2S",
         "headers": ["board_sound_i2s.h"], "public": "boards_esp_driver_i2s.h",

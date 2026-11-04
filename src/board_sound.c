@@ -47,7 +47,7 @@ static bool sound_ready(int index)
 {
     struct board_sound_stream      *stream = &board_sound_table.streams[index];
     const struct board_sound_entry *entry  = &board_sound_table.entries[index];
-    if (!stream->output && !entry->init(index)) return false;
+    if (!stream->output && !entry->init(index, entry)) return false;
     stream->rate = entry->rate;
     return stream->output != NULL;
 }

@@ -22,9 +22,12 @@ static esp_err_t dac_write(int16_t *samples, size_t count)
 
 static const struct board_sound_output output = {"dac_continuous_write", dac_write};
 
-bool board_glue_sound_dac_init(int index, int out, int pa, uint32_t rate)
+bool board_glue_sound_dac_init(int index, const struct board_sound_entry *entry)
 {
     if (dac) return true;
+    const int      out  = entry->dac->out;
+    const int      pa   = entry->dac->pa;
+    const uint32_t rate = entry->rate;
     const dac_continuous_config_t config = {.chan_mask = out == DAC_CH0_GPIO ? DAC_CHANNEL_MASK_CH0 : DAC_CHANNEL_MASK_CH1,
                                             .desc_num  = DAC_DESCRIPTORS,
                                             .buf_size  = BOARD_SOUND_FRAMES,

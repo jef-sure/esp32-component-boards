@@ -56,11 +56,22 @@ struct board_touch_panel {
     int fingers;
 };
 
-/* The touch panels of the board: the glue gives the table, src/board_touch.c starts them on demand. */
+/* The data of each kind of touch panel, defined by its adapter. */
+struct board_touch_gt911;
+struct board_touch_spi;
+struct board_touch_gsl3680;
+
+/*
+ * The touch panels of the board: the glue gives the table, src/board_touch.c starts them on demand. start is
+ * the function of the adapter of the panel's kind, and of the fields below it reads the one of that kind.
+ */
 struct board_touch_entry {
     const char *name;
     const char *over; /* the display it covers */
-    bool (*start)(int index, const struct board_display *display, struct board_touch *out);
+    bool (*start)(int index, const struct board_touch_entry *entry, const struct board_display *display, struct board_touch *out);
+    const struct board_touch_gt911   *gt911;
+    const struct board_touch_spi     *esp_lcd_touch;
+    const struct board_touch_gsl3680 *gsl3680;
 };
 struct board_touch_table {
     const struct board_touch_entry *entries;
@@ -101,11 +112,22 @@ struct board_sound_output {
 /* Called by an adapter when the hardware of a sound is set up: the task, if the program starts it, writes through output. */
 void board_glue_sound_ready(int index, const struct board_sound_output *output);
 
-/* The sound outputs of the board: the glue gives the table, src/board_sound.c sets each up and runs its task on demand. */
+/* The data of each kind of sound, defined by its adapter. */
+struct board_sound_es8311;
+struct board_sound_dac;
+
+/*
+ * The sound outputs of the board: the glue gives the table, src/board_sound.c sets each up and runs its task on
+ * demand. init is the function of the adapter of the output's kind: it sets the hardware up from the field of its
+ * kind and calls board_glue_sound_ready.
+ */
 struct board_sound_entry {
     const char *name;
     uint32_t    rate;
-    bool (*init)(int index); /* sets the hardware up and calls board_glue_sound_ready */
+    bool (*init)(int index, const struct board_sound_entry *entry);
+    const struct board_sound_es8311 *es8311;
+    const struct board_i2s_bus      *i2s; /* an amplifier on I2S */
+    const struct board_sound_dac    *dac;
 };
 struct board_sound_stream {
     const struct board_sound_output *output; /* NULL until the hardware is set up */

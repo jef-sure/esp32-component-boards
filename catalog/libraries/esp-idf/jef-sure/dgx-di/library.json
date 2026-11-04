@@ -36,7 +36,7 @@
                 }
             ],
             "limits": {"fingers": 10},
-            "adapter": {"kind": "gsl3680", "symbols": ["BOARD_TOUCH_GSL3680"], "headers": ["board_touch_gsl3680.h"]},
+            "adapter": {"kind": "gsl3680", "function": "board_glue_touch_gsl3680_start", "symbols": ["BOARD_TOUCH_GSL3680"], "headers": ["board_touch_gsl3680.h"]},
             "notes": "The chip keeps no firmware: init writes it from the data the program gives."
         }
     },

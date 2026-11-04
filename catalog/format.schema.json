@@ -1429,6 +1429,7 @@
           "additionalProperties": false,
           "properties": {
             "kind": { "type": "string" },
+            "function": { "type": "string", "pattern": "^[a-z_][a-z0-9_]*$", "description": "The function of the adapter a table of the glue names for this chip: the start of a touch panel, the init of a sound." },
             "symbols": { "type": "array", "uniqueItems": true, "items": { "type": "string" } },
             "headers": { "type": "array", "uniqueItems": true, "items": { "type": "string" }, "description": "What the glue includes for this chip." }
           }

@@ -78,15 +78,16 @@ static bool sound_channel(const struct board_i2s_bus *bus, uint32_t rate)
     return true;
 }
 
-bool board_glue_sound_es8311_init(int index, const struct board_sound_es8311 *codec)
+bool board_glue_sound_es8311_init(int index, const struct board_sound_entry *entry)
 {
     if (speaker) return true;
+    const struct board_sound_es8311 *codec = entry->es8311;
     i2c_master_bus_handle_t i2c = board_glue_i2c(codec->i2c_port);
     if (!i2c) {
         ESP_LOGE(TAG, "board_glue_i2c: no I2C bus on port %d for the codec", codec->i2c_port);
         return false;
     }
-    if (!sound_channel(codec->i2s, codec->rate)) return false;
+    if (!sound_channel(codec->i2s, entry->rate)) return false;
     sound_data = audio_codec_new_i2s_data(&(audio_codec_i2s_cfg_t){.port = codec->i2s->port, .tx_handle = sound_tx});
     if (!sound_data) {
         ESP_LOGE(TAG, "audio_codec_new_i2s_data: NULL");
@@ -121,7 +122,7 @@ bool board_glue_sound_es8311_init(int index, const struct board_sound_es8311 *co
         sound_release();
         return false;
     }
-    esp_codec_dev_sample_info_t format = {.sample_rate = codec->rate, .channel = SOUND_CHANNELS, .bits_per_sample = SOUND_BITS};
+    esp_codec_dev_sample_info_t format = {.sample_rate = entry->rate, .channel = SOUND_CHANNELS, .bits_per_sample = SOUND_BITS};
     int                         ret    = esp_codec_dev_open(speaker, &format);
     if (ret != ESP_CODEC_DEV_OK) {
         ESP_LOGE(TAG, "esp_codec_dev_open: %d", ret);
@@ -132,7 +133,7 @@ bool board_glue_sound_es8311_init(int index, const struct board_sound_es8311 *co
     if (ret != ESP_CODEC_DEV_OK) ESP_LOGW(TAG, "esp_codec_dev_set_out_vol: %d, the volume stays the codec's own", ret);
     speaker_index = index;
     board_glue_sound_ready(index, &output);
-    ESP_LOGI(TAG, "ES8311 at %lu Hz", (unsigned long)codec->rate);
+    ESP_LOGI(TAG, "ES8311 at %lu Hz", (unsigned long)entry->rate);
     return true;
 }
 

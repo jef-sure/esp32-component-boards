@@ -60,33 +60,21 @@ const struct board_display_table board_display_table = {.panels = display_panels
 static const dgx_di_aim_t touch0_aims[] = {{.meant_x = 48, .meant_y = 48, .x = 58, .y = 67}, {.meant_x = 975, .meant_y = 48, .x = 976, .y = 60}, {.meant_x = 48, .meant_y = 551, .x = 56, .y = 560}, {.meant_x = 975, .meant_y = 551, .x = 974, .y = 553}, {.meant_x = 512, .meant_y = 48, .x = 517, .y = 63}, {.meant_x = 512, .meant_y = 551, .x = 516, .y = 556}, {.meant_x = 48, .meant_y = 300, .x = 57, .y = 311}, {.meant_x = 975, .meant_y = 300, .x = 975, .y = 304}, {.meant_x = 512, .meant_y = 300, .x = 517, .y = 307}};
 static const struct board_touch_calibration touch0_calibrated = {.aims = touch0_aims, .count = 9, .width = 1024, .height = 600, .blink_ms = 0, .gap_ms = 0, .placeholder = false};
 static const struct board_touch_panel touch0_panel = {.x_max = 1024, .y_max = 600, .rst = GPIO_NUM_22, .irq = GPIO_NUM_21, .i2c_port = I2C_NUM_0, .fingers = 5};
-static const uint8_t touch0_addresses[] = {0x5d, 0x14};
-static const struct board_touch_gt911 touch0_driver = {.panel = &touch0_panel, .addresses = touch0_addresses, .address_count = 2, .i2c_hz = 400000};
 static dgx_di_esp_lcd_touch_t touch0_device;
+static const uint8_t touch0_addresses[] = {0x5d, 0x14};
+static const struct board_touch_gt911 touch0_driver = {.panel = &touch0_panel, .calibrated = &touch0_calibrated, .device = &touch0_device, .addresses = touch0_addresses, .address_count = 2, .i2c_hz = 400000};
 
-static bool touch0_start(int index, const struct board_display *display, struct board_touch *out)
-{
-    if (!board_dgx_screen(display)) return false;
-    esp_lcd_touch_handle_t handle = board_glue_touch_gt911_new(&touch0_driver);
-    return handle && board_glue_touch_lcd_attach(&touch0_device, index, handle, true, &touch0_panel, &touch0_calibrated, display, out);
-}
-
-static const struct board_touch_entry touch_entries[] = {{.name = "touch", .over = "lcd", .start = touch0_start}};
+static const struct board_touch_entry touch_entries[] = {{.name = "touch", .over = "lcd", .start = board_glue_touch_gt911_start, .gt911 = &touch0_driver}};
 static struct board_touch touches_started[1];
 static struct board_touch_slot touch_slots[1];
 const struct board_touch_slots board_touch_slots = {.slots = touch_slots, .count = 1};
 const struct board_touch_table board_touch_table = {.entries = touch_entries, .started = touches_started, .count = 1};
 
 /* sound: es8311 at 22050 Hz. */
-static const struct board_sound_es8311 sound0_codec = {.i2s = &board_i2s_i2s0, .i2c_port = I2C_NUM_0, .address = 0x18, .pa = GPIO_NUM_11,
-                                                     .pa_voltage = 5.0f, .codec_dac_voltage = 3.3f, .volume = 25, .rate = 22050};
+static const struct board_sound_es8311 sound0_es8311 = {.i2s = &board_i2s_i2s0, .i2c_port = I2C_NUM_0, .address = 0x18, .pa = GPIO_NUM_11,
+                                                      .pa_voltage = 5.0f, .codec_dac_voltage = 3.3f, .volume = 25};
 
-static bool sound0_init(int index)
-{
-    return board_glue_sound_es8311_init(index, &sound0_codec);
-}
-
-static const struct board_sound_entry sound_entries[] = {{.name = "sound", .rate = 22050, .init = sound0_init}};
+static const struct board_sound_entry sound_entries[] = {{.name = "sound", .rate = 22050, .init = board_glue_sound_es8311_init, .es8311 = &sound0_es8311}};
 static struct board_sound_stream sound_streams[1];
 const struct board_sound_table board_sound_table = {.entries = sound_entries, .streams = sound_streams, .count = 1};
 

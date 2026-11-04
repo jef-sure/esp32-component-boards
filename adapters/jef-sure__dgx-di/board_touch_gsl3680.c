@@ -4,9 +4,10 @@
 
 static const char *TAG = "board";
 
-bool board_glue_touch_gsl3680_start(dgx_di_gsl3680_t *device, int index, const struct board_touch_panel *panel, const struct board_touch_calibration *calibrated,
-                                    const struct board_display *display, struct board_touch *out)
+bool board_glue_touch_gsl3680_start(int index, const struct board_touch_entry *entry, const struct board_display *display, struct board_touch *out)
 {
+    const struct board_touch_panel *panel  = entry->gsl3680->panel;
+    dgx_di_gsl3680_t               *device = entry->gsl3680->device;
     if (!board_dgx_screen(display)) return false;
     i2c_master_bus_handle_t bus = board_glue_i2c(panel->i2c_port);
     if (!bus) return false;
@@ -20,5 +21,5 @@ bool board_glue_touch_gsl3680_start(dgx_di_gsl3680_t *device, int index, const s
         ESP_LOGE(TAG, "dgx_di_gsl3680_init: no GSL3680 found");
         return false;
     }
-    return board_glue_touch_attach(index, &device->device, panel, calibrated, display, out);
+    return board_glue_touch_attach(index, &device->device, panel, entry->gsl3680->calibrated, display, out);
 }

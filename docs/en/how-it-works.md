@@ -34,9 +34,12 @@ missing pin, a bus the display references but the board does not wire, pixels
 and millimetres in different orientations) and writes:
 
 - `boards/<board>/<board>.c`: the glue. It gives the data of the board as
-  tables (the numbers of its buses, its SPI and I2C buses, its buttons, touch
-  panels and sounds) and the functions that start the parts it has. The core in
-  `src/` reads the tables, and for a part the board has not a function of `src/`
+  tables: the numbers of its buses, its SPI and I2C buses, its buttons, touch
+  panels and sounds. A row of a touch panel or a sound names the function of its
+  adapter (`function` of the chip in the record of its library) and the data of
+  its kind. Only the bus and the screen of a display and the bus of a character
+  display are functions, each a call filled from the record of the library. The
+  core in `src/` reads the tables, and for a part the board has not a function of `src/`
   returns `false`. So **every** function of `boards.h` exists at link time on
   every board, and a program never needs `#if` on the board's name.
 - `boards/<board>/display.cmake`: the primary display as shown, `BOARD_PIXELS` and
@@ -122,7 +125,8 @@ The code for each library lies in `adapters/<owner>__<name>/`, and every library
 is on the same terms: a record in `catalog/libraries/` and, when this component
 can start it, a directory here. The field `adapter` of the record names what the
 glue includes (`headers`), what a program includes (`public`, in `include/` of the
-directory) and what is compiled by which Kconfig symbol (`sources`). A touch panel
+directory) and what is compiled by which Kconfig symbol (`sources`); `function` of a chip
+names the function of the adapter a table of the glue points to. A touch panel
 goes through two: the driver gives an `esp_lcd_touch_handle_t`, and DGX-DI makes a
 device and a pointer of it.
 

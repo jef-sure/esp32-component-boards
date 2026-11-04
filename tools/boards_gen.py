@@ -733,6 +733,10 @@ def c_gpio(num):
     return "GPIO_NUM_NC" if num is None else f"GPIO_NUM_{num}"
 
 
+# The storage of DGX-DI each kind of touch panel is a device of, defined in the glue.
+TOUCH_DEVICES = {"gt911": "dgx_di_esp_lcd_touch_t", "esp_lcd_touch": "dgx_di_esp_lcd_touch_t", "gsl3680": "dgx_di_gsl3680_t"}
+
+
 def gen_c(board):
     """The C glue of the board: every function of boards.h, by the data or returning false."""
     name = board["name"]
@@ -957,30 +961,21 @@ def gen_c(board):
             kind_of_bus, own_bus = bus_parts(touch["bus"]) if isinstance(touch.get("bus"), str) else (None, None)
             port = f"I2C_NUM_{port_of(own_bus, 'i2c')}" if kind_of_bus == "i2c" else "-1"
             out(f"static const struct board_touch_panel touch{i}_panel = {{.x_max = {touch['x_max'] + 1}, .y_max = {touch['y_max'] + 1}, .rst = {c_gpio(touch.get('rst'))}, .irq = {c_gpio(irq)}, .i2c_port = {port}, .fingers = {touch.get('fingers', 1)}}};")
+            out(f"static {TOUCH_DEVICES[kind]} touch{i}_device;")
+            common = f".panel = &touch{i}_panel, .calibrated = &touch{i}_calibrated, .device = &touch{i}_device"
             if kind == "gt911":
                 addresses = [f"{i2c_address(a):#04x}" for a in (touch.get("address_try") or ["0x5d"])]
                 out(f"static const uint8_t touch{i}_addresses[] = {{{', '.join(addresses)}}};")
-                out(f"static const struct board_touch_gt911 touch{i}_driver = {{.panel = &touch{i}_panel, .addresses = touch{i}_addresses, .address_count = {len(addresses)}, .i2c_hz = {I2C_HZ_DEFAULT}}};")
+                out(f"static const struct board_touch_gt911 touch{i}_driver = {{{common}, .addresses = touch{i}_addresses, .address_count = {len(addresses)}, .i2c_hz = {I2C_HZ_DEFAULT}}};")
             elif kind == "esp_lcd_touch":
                 own = bus_parts(touch["bus"])[1]
-                out(f"static const struct board_touch_spi touch{i}_driver = {{.panel = &touch{i}_panel, .host = {own.upper()}_HOST, .cs = {c_gpio(touch['cs'])}, .hz = {touch.get('hz', touch['entry']['defaults']['hz'])}, "
-                    f".create = {touch['entry']['init'][0]['call']}}};")
-            device_type = "dgx_di_gsl3680_t" if kind == "gsl3680" else "dgx_di_esp_lcd_touch_t"
-            out(f"static {device_type} touch{i}_device;")
-            out("")
-            out(f"static bool touch{i}_start(int index, const struct board_display *display, struct board_touch *out)")
-            out("{")
-            if kind == "gsl3680":
-                out(f"    return board_glue_touch_gsl3680_start(&touch{i}_device, index, &touch{i}_panel, &touch{i}_calibrated, display, out);")
-            else:
-                make = "gt911" if kind == "gt911" else "spi"
                 numbered = "false" if touch.get("resistive") else "true"
-                out("    if (!board_dgx_screen(display)) return false;")
-                out(f"    esp_lcd_touch_handle_t handle = board_glue_touch_{make}_new(&touch{i}_driver);")
-                out(f"    return handle && board_glue_touch_lcd_attach(&touch{i}_device, index, handle, {numbered}, &touch{i}_panel, &touch{i}_calibrated, display, out);")
-            out("}")
+                out(f"static const struct board_touch_spi touch{i}_driver = {{{common}, .host = {own.upper()}_HOST, .cs = {c_gpio(touch['cs'])}, .hz = {touch.get('hz', touch['entry']['defaults']['hz'])}, "
+                    f".numbered = {numbered}, .create = {touch['entry']['init'][0]['call']}}};")
+            else:
+                out(f"static const struct board_touch_gsl3680 touch{i}_driver = {{{common}}};")
             out("")
-            entries.append(f'{{.name = "{touch["name"]}", .over = "{touch["over"]}", .start = touch{i}_start}}')
+            entries.append(f'{{.name = "{touch["name"]}", .over = "{touch["over"]}", .start = {touch["entry"]["adapter"]["function"]}, .{kind} = &touch{i}_driver}}')
         if touches:
             out(f"static const struct board_touch_entry touch_entries[] = {{{', '.join(entries)}}};")
             out(f"static struct board_touch touches_started[{len(touches)}];")
@@ -997,20 +992,16 @@ def gen_c(board):
             iown = bus_parts(sound.get("i2s_bus", ""))[1]
             out(f"/* {sound['name']}: {sound['kind']} at {rate} Hz. */")
             if sound["kind"] == "es8311":
-                out(f"static const struct board_sound_es8311 sound{i}_codec = {{.i2s = &board_i2s_{iown}, .i2c_port = I2C_NUM_{port_of(bus_parts(sound['bus'])[1], 'i2c')}, .address = {i2c_address(sound['address']):#04x}, .pa = {pa},")
-                out(f"                                                     .pa_voltage = {float(sound.get('pa_voltage', 5.0))}f, .codec_dac_voltage = {float(sound.get('codec_dac_voltage', 3.3))}f, .volume = {sound['volume']}, .rate = {rate}}};")
-                out("")
-            out(f"static bool sound{i}_init(int index)")
-            out("{")
-            if sound["kind"] == "es8311":
-                out(f"    return board_glue_sound_es8311_init(index, &sound{i}_codec);")
+                out(f"static const struct board_sound_es8311 sound{i}_es8311 = {{.i2s = &board_i2s_{iown}, .i2c_port = I2C_NUM_{port_of(bus_parts(sound['bus'])[1], 'i2c')}, .address = {i2c_address(sound['address']):#04x}, .pa = {pa},")
+                out(f"                                                      .pa_voltage = {float(sound.get('pa_voltage', 5.0))}f, .codec_dac_voltage = {float(sound.get('codec_dac_voltage', 3.3))}f, .volume = {sound['volume']}}};")
+                data = f".es8311 = &sound{i}_es8311"
             elif sound["kind"] == "i2s":
-                out(f"    return board_glue_sound_i2s_init(index, &board_i2s_{iown}, {rate});")
+                data = f".i2s = &board_i2s_{iown}"
             else:
-                out(f"    return board_glue_sound_dac_init(index, {c_gpio(sound.get('out'))}, {pa}, {rate});")
-            out("}")
+                out(f"static const struct board_sound_dac sound{i}_dac = {{.out = {c_gpio(sound.get('out'))}, .pa = {pa}}};")
+                data = f".dac = &sound{i}_dac"
             out("")
-            entries.append(f'{{.name = "{sound["name"]}", .rate = {rate}, .init = sound{i}_init}}')
+            entries.append(f'{{.name = "{sound["name"]}", .rate = {rate}, .init = {sound["entry"]["adapter"]["function"]}, {data}}}')
         if sounds:
             out(f"static const struct board_sound_entry sound_entries[] = {{{', '.join(entries)}}};")
             out(f"static struct board_sound_stream sound_streams[{len(sounds)}];")

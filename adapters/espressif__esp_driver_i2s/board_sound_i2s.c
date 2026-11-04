@@ -18,9 +18,11 @@ static esp_err_t i2s_write(int16_t *samples, size_t count)
 
 static const struct board_sound_output output = {"i2s_channel_write", i2s_write};
 
-bool board_glue_sound_i2s_init(int index, const struct board_i2s_bus *bus, uint32_t rate)
+bool board_glue_sound_i2s_init(int index, const struct board_sound_entry *entry)
 {
     if (sound_tx) return true;
+    const struct board_i2s_bus *bus  = entry->i2s;
+    const uint32_t              rate = entry->rate;
     i2s_chan_config_t chan = I2S_CHANNEL_DEFAULT_CONFIG(bus->port, I2S_ROLE_MASTER);
     chan.dma_frame_num     = BOARD_SOUND_FRAMES;
     i2s_chan_handle_t tx   = NULL;

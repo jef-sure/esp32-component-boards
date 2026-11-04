@@ -61,29 +61,19 @@ const struct board_display_table board_display_table = {.panels = display_panels
 static const dgx_di_aim_t touch0_aims[] = {{.meant_x = 30, .meant_y = 30, .x = 3432, .y = 439}, {.meant_x = 209, .meant_y = 30, .x = 751, .y = 479}, {.meant_x = 30, .meant_y = 289, .x = 3398, .y = 3346}, {.meant_x = 209, .meant_y = 289, .x = 702, .y = 3328}, {.meant_x = 119, .meant_y = 30, .x = 2064, .y = 464}, {.meant_x = 119, .meant_y = 289, .x = 2037, .y = 3370}, {.meant_x = 30, .meant_y = 160, .x = 3395, .y = 1907}, {.meant_x = 209, .meant_y = 160, .x = 656, .y = 1874}, {.meant_x = 119, .meant_y = 160, .x = 2081, .y = 1902}};
 static const struct board_touch_calibration touch0_calibrated = {.aims = touch0_aims, .count = 9, .width = 240, .height = 320, .blink_ms = 101, .gap_ms = 0, .placeholder = false};
 static const struct board_touch_panel touch0_panel = {.x_max = 4096, .y_max = 4096, .rst = GPIO_NUM_NC, .irq = GPIO_NUM_36, .i2c_port = -1, .fingers = 1};
-static const struct board_touch_spi touch0_driver = {.panel = &touch0_panel, .host = SPI3_HOST, .cs = GPIO_NUM_33, .hz = 1000000, .create = esp_lcd_touch_new_spi_xpt2046};
 static dgx_di_esp_lcd_touch_t touch0_device;
+static const struct board_touch_spi touch0_driver = {.panel = &touch0_panel, .calibrated = &touch0_calibrated, .device = &touch0_device, .host = SPI3_HOST, .cs = GPIO_NUM_33, .hz = 1000000, .numbered = false, .create = esp_lcd_touch_new_spi_xpt2046};
 
-static bool touch0_start(int index, const struct board_display *display, struct board_touch *out)
-{
-    if (!board_dgx_screen(display)) return false;
-    esp_lcd_touch_handle_t handle = board_glue_touch_spi_new(&touch0_driver);
-    return handle && board_glue_touch_lcd_attach(&touch0_device, index, handle, false, &touch0_panel, &touch0_calibrated, display, out);
-}
-
-static const struct board_touch_entry touch_entries[] = {{.name = "touch", .over = "lcd", .start = touch0_start}};
+static const struct board_touch_entry touch_entries[] = {{.name = "touch", .over = "lcd", .start = board_glue_touch_spi_start, .esp_lcd_touch = &touch0_driver}};
 static struct board_touch touches_started[1];
 static struct board_touch_slot touch_slots[1];
 const struct board_touch_slots board_touch_slots = {.slots = touch_slots, .count = 1};
 const struct board_touch_table board_touch_table = {.entries = touch_entries, .started = touches_started, .count = 1};
 
 /* sound: dac at 22050 Hz. */
-static bool sound0_init(int index)
-{
-    return board_glue_sound_dac_init(index, GPIO_NUM_26, GPIO_NUM_NC, 22050);
-}
+static const struct board_sound_dac sound0_dac = {.out = GPIO_NUM_26, .pa = GPIO_NUM_NC};
 
-static const struct board_sound_entry sound_entries[] = {{.name = "sound", .rate = 22050, .init = sound0_init}};
+static const struct board_sound_entry sound_entries[] = {{.name = "sound", .rate = 22050, .init = board_glue_sound_dac_init, .dac = &sound0_dac}};
 static struct board_sound_stream sound_streams[1];
 const struct board_sound_table board_sound_table = {.entries = sound_entries, .streams = sound_streams, .count = 1};
 

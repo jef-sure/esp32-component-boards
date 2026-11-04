@@ -29,7 +29,7 @@
                     "ok": {"equals": "ESP_OK"}
                 }
             ],
-            "adapter": {"kind": "gt911", "headers": ["board_touch_lcd.h"]}
+            "adapter": {"kind": "gt911", "function": "board_glue_touch_gt911_start", "headers": ["board_touch_lcd.h"]}
         }
     },
     "adapter": {

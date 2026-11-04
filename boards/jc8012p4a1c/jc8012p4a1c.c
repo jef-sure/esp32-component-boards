@@ -59,28 +59,19 @@ static const dgx_di_aim_t touch0_aims[] = {{.meant_x = 48, .meant_y = 48, .x = 7
 static const struct board_touch_calibration touch0_calibrated = {.aims = touch0_aims, .count = 9, .width = 800, .height = 1280, .blink_ms = 22, .gap_ms = 0, .placeholder = false};
 static const struct board_touch_panel touch0_panel = {.x_max = 1664, .y_max = 896, .rst = GPIO_NUM_22, .irq = GPIO_NUM_21, .i2c_port = I2C_NUM_0, .fingers = 5};
 static dgx_di_gsl3680_t touch0_device;
+static const struct board_touch_gsl3680 touch0_driver = {.panel = &touch0_panel, .calibrated = &touch0_calibrated, .device = &touch0_device};
 
-static bool touch0_start(int index, const struct board_display *display, struct board_touch *out)
-{
-    return board_glue_touch_gsl3680_start(&touch0_device, index, &touch0_panel, &touch0_calibrated, display, out);
-}
-
-static const struct board_touch_entry touch_entries[] = {{.name = "touch", .over = "lcd", .start = touch0_start}};
+static const struct board_touch_entry touch_entries[] = {{.name = "touch", .over = "lcd", .start = board_glue_touch_gsl3680_start, .gsl3680 = &touch0_driver}};
 static struct board_touch touches_started[1];
 static struct board_touch_slot touch_slots[1];
 const struct board_touch_slots board_touch_slots = {.slots = touch_slots, .count = 1};
 const struct board_touch_table board_touch_table = {.entries = touch_entries, .started = touches_started, .count = 1};
 
 /* sound: es8311 at 22050 Hz. */
-static const struct board_sound_es8311 sound0_codec = {.i2s = &board_i2s_i2s0, .i2c_port = I2C_NUM_0, .address = 0x18, .pa = GPIO_NUM_20,
-                                                     .pa_voltage = 5.0f, .codec_dac_voltage = 3.3f, .volume = 25, .rate = 22050};
+static const struct board_sound_es8311 sound0_es8311 = {.i2s = &board_i2s_i2s0, .i2c_port = I2C_NUM_0, .address = 0x18, .pa = GPIO_NUM_20,
+                                                      .pa_voltage = 5.0f, .codec_dac_voltage = 3.3f, .volume = 25};
 
-static bool sound0_init(int index)
-{
-    return board_glue_sound_es8311_init(index, &sound0_codec);
-}
-
-static const struct board_sound_entry sound_entries[] = {{.name = "sound", .rate = 22050, .init = sound0_init}};
+static const struct board_sound_entry sound_entries[] = {{.name = "sound", .rate = 22050, .init = board_glue_sound_es8311_init, .es8311 = &sound0_es8311}};
 static struct board_sound_stream sound_streams[1];
 const struct board_sound_table board_sound_table = {.entries = sound_entries, .streams = sound_streams, .count = 1};
 

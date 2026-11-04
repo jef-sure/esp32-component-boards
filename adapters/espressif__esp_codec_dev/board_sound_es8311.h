@@ -10,7 +10,7 @@ struct board_sound_es8311 {
     int                         pa;       /* its amplifier's enable; GPIO_NUM_NC when none */
     float                       pa_voltage, codec_dac_voltage;
     int                         volume;   /* 0..100 */
-    uint32_t                    rate;
 };
 
-bool board_glue_sound_es8311_init(int index, const struct board_sound_es8311 *codec);
+/* The init of a board_sound_entry of the kind es8311. */
+bool board_glue_sound_es8311_init(int index, const struct board_sound_entry *entry);

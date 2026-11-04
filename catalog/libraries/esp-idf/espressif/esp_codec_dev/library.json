@@ -33,7 +33,7 @@
                     "ok": {"equals": "ESP_CODEC_DEV_OK"}
                 }
             },
-            "adapter": {"kind": "es8311"}
+            "adapter": {"kind": "es8311", "function": "board_glue_sound_es8311_init"}
         },
         "aw88298": {"header": "esp_codec_dev_defaults.h"},
         "cjc8910": {"header": "esp_codec_dev_defaults.h"},

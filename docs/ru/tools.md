@@ -86,6 +86,10 @@ python3 tools/board_select.py host --as jc8012p4a1c ~/myproject    # the compute
 `sdkconfig.old`, чтобы новые умолчания были прочитаны. См.
 [choosing-a-board.md](choosing-a-board.md).
 
+Каждый записанный файл начинается с команды, которой он сделан, и с версии и коммита компонента. Когда компонент
+меняется, `board_select.py --again ~/myproject` делает все такие файлы проекта заново той же командой; `sdkconfig`,
+сделанный раньше, хранит то, что в нём было, поэтому изменения берёт `--reset`.
+
 ## board_project.py
 
 ```sh

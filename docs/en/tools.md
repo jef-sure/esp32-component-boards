@@ -82,6 +82,10 @@ Writes `~/myproject/sdkconfig.defaults.board`: the board's defaults, then
 each module's. With `--reset` moves an existing `sdkconfig` to `sdkconfig.old`
 so the new defaults are read. See [choosing-a-board.md](choosing-a-board.md).
 
+Each file it writes begins with the command that made it and the version and commit of the component. After
+the component changes, `board_select.py --again ~/myproject` makes every such file of the project again the same
+way; an `sdkconfig` made before keeps what it had, so `--reset` takes what changed.
+
 ## board_project.py
 
 ```sh

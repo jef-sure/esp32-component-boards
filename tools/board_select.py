@@ -31,6 +31,10 @@ writes nothing and fails: a build would give the old board. A build directory ke
 of its chip in its CMake cache, so a change of the chip takes idf.py set-target, which the
 command then names.
 
+Each file begins with the command that made it and the version of the component; when the component
+changes, board_select.py --again PROJECT_DIR makes every such file of the project again the same way.
+ESP-IDF reads the defaults only into a new sdkconfig, so an sdkconfig made before keeps what it had.
+
 Several boards write PROJECT_DIR/sdkconfig.defaults.<BOARD> each, and each is built in a
 directory of its own, its sdkconfig and its lock of components there:
 
@@ -46,6 +50,8 @@ lies: a checkout beside the project or managed_components/jef-sure__boards/.
 import argparse
 import pathlib
 import re
+import shlex
+import subprocess
 import sys
 
 import boards_gen
@@ -110,6 +116,33 @@ def defaults_text(project, local, board, modules, revision):
 
 
 HOST = "host"
+RECORD = "# board_select.py "  # the first line of a file it writes: the arguments that make it again
+
+
+def made_by(board, modules=(), revision=None, shows=None):
+    """The first lines of a file: the command that made it, and the component it was made from."""
+    words = [board, *(f"--module {module}" for module in modules), *([f"--revision {revision}"] if revision else []), *([f"--as {shows}"] if shows else [])]
+    version = re.search(r'^version: "([^"]+)"', (ROOT / "idf_component.yml").read_text(), flags=re.M)
+    commit = subprocess.run(["git", "-C", str(ROOT), "rev-parse", "--short", "HEAD"], capture_output=True, text=True).stdout.strip() if (ROOT / ".git").exists() else ""
+    made = f"jef-sure/boards {version[1] if version else '?'}" + (f", commit {commit}" if commit else "")
+    return f"{RECORD}{' '.join(words)}\n# from {made}: board_select.py --again PROJECT_DIR makes it again when the component changes\n"
+
+
+def again(parser, project):
+    """Every file of the project board_select.py wrote, made again by the command its first line keeps."""
+    local = resolve.add_project(project)
+    files = [path for path in sorted(project.glob("sdkconfig.defaults.*")) if path.read_text().startswith(RECORD)]
+    if not files:
+        raise SystemExit(f"{project}: no sdkconfig.defaults.* there says how it was made: choose the board again")
+    for path in files:
+        args = parser.parse_intermixed_args(shlex.split(path.read_text().splitlines()[0][len(RECORD):]) + [str(project)])
+        board = args.names[0]
+        text, target = host_text(local, args.shows) if board == HOST else defaults_text(project, local, board, args.module, args.revision)
+        path.write_text(made_by(board, args.module, args.revision, args.shows) + text)
+        print(f"{path}: {board}, {target}, again")
+    print("An sdkconfig made before keeps what it had: ESP-IDF reads the defaults only into a new one. To take what changed,\n"
+          "board_select.py BOARD --reset PROJECT_DIR for one board, or remove build-<BOARD>/sdkconfig of several.")
+    return 0
 
 
 def host_text(local, shows):
@@ -150,7 +183,12 @@ def main():
     parser.add_argument("--revision", help="the revision of the chip, when it is not the one the data of the board names: 3.1")
     parser.add_argument("--reset", action="store_true", help="move the project's sdkconfig aside, so the new board's defaults are read")
     parser.add_argument("--as", dest="shows", metavar="BOARD", help="for host: the board whose display the window of the computer has")
+    parser.add_argument("--again", action="store_true", help="make every sdkconfig.defaults.* of the project again, by the command each was made with")
     args = parser.parse_intermixed_args()  # options may stand between the boards and the project, as board_select.py b --reset .
+    if args.again:
+        if len(args.names) != 1 or args.module or args.revision or args.reset or args.shows:
+            parser.error("--again takes only the project's directory")
+        return again(parser, pathlib.Path(args.names[0]))
     if len(args.names) < 2:
         parser.error("name a board and the project's directory")
     *boards, project = args.names
@@ -165,7 +203,7 @@ def main():
         for board in boards:
             text, target = host_text(local, args.shows) if board == HOST else defaults_text(project, local, board, [], None)
             out = project / f"sdkconfig.defaults.{board}"
-            out.write_text(text)
+            out.write_text(made_by(board, shows=args.shows if board == HOST else None) + text)
             print(f"{out}: {board}, {target}")
         print("Each board builds in a directory of its own:")
         for board in boards:
@@ -179,7 +217,7 @@ def main():
             raise SystemExit("the computer carries no module")
         text, _ = host_text(local, args.shows)
         out = project / f"sdkconfig.defaults.{HOST}"
-        out.write_text(text)
+        out.write_text(made_by(HOST, shows=args.shows) + text)
         print(f"{out}: {HOST}, linux\nNow: idf.py -B build-{HOST} -D SDKCONFIG=build-{HOST}/sdkconfig -D BOARD={HOST} build, then build-{HOST}/<project>.elf")
         return 0
     sdkconfig = project / "sdkconfig"
@@ -190,7 +228,7 @@ def main():
                          f"To change the board: board_select.py {board} --reset {project}")
     text, target = defaults_text(project, local, board, args.module, args.revision)
     out = project / "sdkconfig.defaults.board"
-    out.write_text(text)
+    out.write_text(made_by(board, args.module, args.revision) + text)
     print(f"{out}: {board}" + (f" with {', '.join(args.module)}" if args.module else ""))
     if sdkconfig.exists() and args.reset:
         sdkconfig.replace(project / "sdkconfig.old")

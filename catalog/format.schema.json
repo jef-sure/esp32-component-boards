@@ -634,7 +634,14 @@
                   "required": ["what", "harm"],
                   "properties": {
                     "what": { "enum": ["strapping"], "description": "Which pins: the strapping pins of the chip." },
-                    "harm": { "type": "array", "items": { "enum": ["run", "download"] }, "description": "A pin whose boot.harm is one of these is kept out; one with no boot at all too." }
+                    "harm": { "type": "array", "items": { "enum": ["run", "download"] }, "description": "A pin whose boot.harm is one of these is kept out; one with no boot at all too." },
+                    "unless": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "description": "The lines that may have such a pin all the same, by a fact of their part. logic none: the part holds nothing on its lines, so it leaves the level of the pin at reset to the chip.",
+                      "properties": { "logic": { "enum": ["none"] } }
+                    },
+                    "says_unless": { "type": "string", "description": "The line of a kit for a pin given by unless: {0} the pin, {1} what it selects, {2} the part." }
                   }
                 }
               },

@@ -1,0 +1,79 @@
+{
+    "title": "Sixteen piezo discs on an ESP32 DevKit: fifteen pins are free, and the sixteenth disc takes GPIO 12, a strapping pin of the voltage of the flash, because a disc holds no level at reset (strapping_by_harm unless logic none, as 7c weighed it)",
+    "answers": {
+        "board": "esp32_devkit",
+        "blocks": [
+            {
+                "role": "buzzer",
+                "name": "disc_1"
+            },
+            {
+                "role": "buzzer",
+                "name": "disc_2"
+            },
+            {
+                "role": "buzzer",
+                "name": "disc_3"
+            },
+            {
+                "role": "buzzer",
+                "name": "disc_4"
+            },
+            {
+                "role": "buzzer",
+                "name": "disc_5"
+            },
+            {
+                "role": "buzzer",
+                "name": "disc_6"
+            },
+            {
+                "role": "buzzer",
+                "name": "disc_7"
+            },
+            {
+                "role": "buzzer",
+                "name": "disc_8"
+            },
+            {
+                "role": "buzzer",
+                "name": "disc_9"
+            },
+            {
+                "role": "buzzer",
+                "name": "disc_10"
+            },
+            {
+                "role": "buzzer",
+                "name": "disc_11"
+            },
+            {
+                "role": "buzzer",
+                "name": "disc_12"
+            },
+            {
+                "role": "buzzer",
+                "name": "disc_13"
+            },
+            {
+                "role": "buzzer",
+                "name": "disc_14"
+            },
+            {
+                "role": "buzzer",
+                "name": "disc_15"
+            },
+            {
+                "role": "buzzer",
+                "name": "disc_16"
+            }
+        ]
+    },
+    "kit": {
+        "name": "esp32_devkit",
+        "modules": {
+            "piezo_disc": 16
+        }
+    },
+    "says": "GPIO 12 is a strapping pin (it selects flash voltage): Bare piezo disc, 27 mm holds no level on it at reset, so the kit takes it"
+}

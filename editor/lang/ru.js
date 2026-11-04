@@ -262,6 +262,7 @@ LANGUAGES.ru = {
         '{0} share {1}: no free SPI host, or no pins for one, is left for them': '{0} делят {1}: свободного хоста SPI или пинов для него не осталось',
         '{0}: each on an SPI host of its own, so their tasks run apart': '{0}: у каждого свой хост SPI, их задачи работают независимо',
         '{0} on the pins of its IO MUX': '{0} на своих пинах IO MUX',
+        '{0} is a strapping pin ({1}): {2} holds no level on it at reset, so the kit takes it': '{0} — пин загрузки ({1}): {2} не держит на нём уровня при сбросе, поэтому комплект его берёт',
         '{0} is a strapping pin ({1}): nothing on it should hold a level of its own at reset': '{0} — пин загрузки ({1}): ничто на нём не должно держать свой уровень при сбросе',
         'it selects {0}': 'он выбирает {0}',
         'LEDC: {0} channels asked, the chip has {1}': 'LEDC: нужно {0} каналов, у чипа {1}',

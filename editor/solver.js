@@ -441,15 +441,24 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         return harm !== 'unknown' && judgementsOf('keep_out').some((judgement) => judgement.what === 'strapping' && !judgement.harm.includes(harm));
     }
 
-    function freePins(board) {
+    // The pins nobody has that a line can take: free, an output, out of the board, with no note that keeps them out.
+    function openPins(board) {
         const map = pinMap(board);
         const hasOutside = Object.values(map).some((entry) => entry.connectors.length);
         // the note of a strapping pin is keep_out's to weigh, a note that is a cost note_cost's; any other keeps a pin out
         const costs = new Set(judgementsOf('note_cost').map((judgement) => judgement.note));
         const notes = (entry) => (entry.notes || []).filter((note) => !note.startsWith('Strapping pin') && !costs.has(note));
-        return Object.entries(map)
-            .filter(([pin, entry]) => entry.state === 'free' && (!entry.strapping || strappingGiven(board, pin, entry)) && !entry.input_only && !notes(entry).length && (!hasOutside || entry.connectors.length))
-            .map(([pin]) => +pin);
+        return Object.entries(map).filter(([, entry]) => entry.state === 'free' && !entry.input_only && !notes(entry).length && (!hasOutside || entry.connectors.length));
+    }
+
+    function freePins(board) {
+        return openPins(board).filter(([pin, entry]) => !entry.strapping || strappingGiven(board, pin, entry)).map(([pin]) => +pin);
+    }
+
+    // keep_out unless logic none: the strapping pins kept out that the lines of a part holding nothing may have all the same
+    function quietPins(board) {
+        if (!judgementsOf('keep_out').some((judgement) => judgement.what === 'strapping' && judgement.unless?.logic === 'none')) return [];
+        return openPins(board).filter(([pin, entry]) => entry.strapping && !strappingGiven(board, pin, entry) && bootHarm(board, pin, entry) !== 'unknown').map(([pin]) => +pin);
     }
 
     // A board with connectors in its data: a line is of use only if it comes out.
@@ -597,6 +606,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         }
         // the pins a judgement names for a host the board does not wire yet go last, so a new host can take them all
         const free = open.filter((pin) => !soldered.includes(pin));
+        const quiet = quietPins(board).filter((pin) => !soldered.includes(pin));
         const theirs = new Set(judgementsOf('prefer_pins').flatMap((judgement) => hostNames(board, KIT_BUSES[judgement.bus].host)
             .filter((own) => !Object.values(board.buses ?? {}).some((named) => own in named))
             .flatMap((own) => [...KIT_BUSES[judgement.bus].lines, 'cs'].map((line) => board.mcu.facts[judgement.pins]?.[judgement.bus]?.[own]?.[line]))));
@@ -637,8 +647,10 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             // a part with no bus takes the lines of its first way
             if (pick.module.device.ways) {
                 const { lines } = pick.module.device.ways[0];
-                if (pins.length < lines.length) return { problem: shortOfPins(lines.length, pins.length) };
-                modules[pick.use] = { module: pick.module.name, ...(pick.count > 1 ? { count: pick.count } : {}), pins: Object.fromEntries(lines.map((line) => [line, pins.shift()])) };
+                // a part that holds nothing on its lines takes a strapping pin when the free ones run out
+                const extra = pick.module.device.logic === 'none' ? quiet : [];
+                if (pins.length + extra.length < lines.length) return { problem: shortOfPins(lines.length, pins.length + extra.length) };
+                modules[pick.use] = { module: pick.module.name, ...(pick.count > 1 ? { count: pick.count } : {}), pins: Object.fromEntries(lines.map((line) => [line, pins.length ? pins.shift() : extra.shift()])) };
                 continue;
             }
             const alone = isDisplay(pick.module.device) && KIT_BUSES[pick.transport].select;
@@ -1201,7 +1213,13 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
                 const after = pinMap(resolved);
                 for (const judgement of judgementsOf('keep_out').filter((item) => item.what === 'strapping')) {
                     for (const [pin, entry] of Object.entries(after)) {
-                        if (entry.strapping && entry.boot && entry.owners.length && !before[pin]?.owners.length) lines.push({ level: 'note', text: t(judgement.says, `GPIO ${pin}`, entry.boot.footnote ?? t('it selects {0}', entry.boot.selects.join(', '))), judgement: judgement.id, pin: +pin });
+                        if (!entry.strapping || !entry.boot || !entry.owners.length || before[pin]?.owners.length) continue;
+                        const selects = entry.boot.footnote ?? t('it selects {0}', entry.boot.selects.join(', '));
+                        // a pin kept out that a part holding nothing has all the same: said with the part
+                        const owner = resolved.devices[entry.owners[0].split('.')[0]];
+                        const quietOne = judgement.unless?.logic === 'none' && owner?.logic === 'none' && !strappingGiven(base, pin, before[pin] ?? entry);
+                        const part = quietOne && (Object.entries(resolved.modules ?? {}).find(([use]) => entry.owners[0].startsWith(`${use}_`))?.[1].title ?? entry.owners[0]);
+                        lines.push({ level: 'note', text: quietOne ? t(judgement.says_unless, `GPIO ${pin}`, selects, part) : t(judgement.says, `GPIO ${pin}`, selects), judgement: judgement.id, pin: +pin });
                     }
                 }
                 // a pin the kit takes whose note is a cost, with the judgement that weighs it

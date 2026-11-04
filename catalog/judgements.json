@@ -17,8 +17,10 @@
                 "run",
                 "download"
             ],
+            "unless": {"logic": "none"},
             "says": "{0} is a strapping pin ({1}): nothing on it should hold a level of its own at reset",
-            "why": "A strapping pin is sampled at reset. The datasheet gives what it selects and the rows of the table of boot modes (gpio.boot_modes, gpio.pins.*.boot of the chip); the solver reads from them the harm of a level there: run, where the start of the program or the voltage of the flash depends on it, download, where only a download mode does, none otherwise. The kit keeps out the harms listed here and a strapping pin the datasheet does not describe; it may take the others, as GPIO 5 of an ESP32, which the terminal takes for a CS."
+            "says_unless": "{0} is a strapping pin ({1}): {2} holds no level on it at reset, so the kit takes it",
+            "why": "A strapping pin is sampled at reset. The datasheet gives what it selects and the rows of the table of boot modes (gpio.boot_modes, gpio.pins.*.boot of the chip); the solver reads from them the harm of a level there: run, where the start of the program or the voltage of the flash depends on it, download, where only a download mode does, none otherwise. The kit keeps out the harms listed here and a strapping pin the datasheet does not describe; it may take the others, as GPIO 5 of an ESP32, which the terminal takes for a CS. The lines of a part whose logic is none, which holds nothing on them, may have any of them all the same: a pin sampled at reset is harmed by a line that pulls it, and such a line pulls nowhere. The kit gives them those pins last, when the free ones run out, and only on the lines of a way, which no other part shares."
         },
         {
             "id": "jtag_is_a_cost",

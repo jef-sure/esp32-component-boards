@@ -342,26 +342,41 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
     }
 
-    // The offers of one shop at one quantity are reports of its sellers, kept all: the shop counts their median, the low and the
-    // high apart (Anton, 2026-11-04). Then the cheapest shop gives the low and the dearest the high. Counted once for a price
-    // and a currency: nothing changes a price in place, a changed catalog brings new objects.
+    // What is sold by the pack is bought by the pack: at least the smallest quantity of the offers.
+    const boughtOf = (price, count) => Math.max(count, Math.min(...Object.values(price).map((offer) => offer.qty ?? 1)));
+
+    // The price of one piece when count are wanted, as board_bom.py counts it. Each shop gives its offers of the largest
+    // quantity the pieces bought reach: reports of its sellers, kept all, a named seller by the newest report. The shop
+    // counts their median, the low and the high apart (Anton, 2026-11-04); the cheapest shop gives the low, the dearest the
+    // high. Counted once for a price, a currency and a count: nothing changes a price in place, a changed catalog brings
+    // new objects.
     const ranged = new WeakMap();
-    function rangeOf(price, currency) {
-        if (!price) return null;
+    function rangeOf(price, currency, count = 1) {
+        if (!price || !Object.keys(price).length) return null;
         if (!ranged.has(price)) ranged.set(price, new Map());
         const known = ranged.get(price);
-        if (!known.has(currency)) known.set(currency, counted(price, currency));
-        return known.get(currency);
+        const key = `${currency}/${count}`;
+        if (!known.has(key)) known.set(key, counted(price, currency, boughtOf(price, count)));
+        return known.get(key);
     }
 
-    function counted(price, currency) {
-        const reports = new Map();
-        for (const offer of Object.values(price || {})) {
-            const range = converted(offer, currency);
-            const key = `${offer.shop ?? ''}/${offer.qty ?? 1}`;
-            if (range) reports.set(key, [...(reports.get(key) ?? []), range]);
+    function counted(price, currency, bought) {
+        const tiers = new Map();
+        for (const offer of Object.values(price)) {
+            const qty = offer.qty ?? 1;
+            const tier = tiers.get(offer.shop ?? '');
+            if (qty > bought || !converted(offer, currency) || (tier && qty < tier.qty)) continue;
+            if (!tier || qty > tier.qty) tiers.set(offer.shop ?? '', { qty, offers: [offer] });
+            else tier.offers.push(offer);
         }
-        const ranges = [...reports.values()].map((list) => [median(list.map((range) => range[0])), median(list.map((range) => range[1]))]);
+        const ranges = [...tiers.values()].map(({ offers }) => {
+            const newest = new Map();
+            for (const offer of offers.filter((item) => item.seller)) {
+                if (!newest.has(offer.seller) || offer.date > newest.get(offer.seller).date) newest.set(offer.seller, offer);
+            }
+            const reports = [...offers.filter((item) => !item.seller), ...newest.values()].map((offer) => converted(offer, currency));
+            return [median(reports.map((range) => range[0])), median(reports.map((range) => range[1]))];
+        });
         return ranges.length ? [Math.min(...ranges.map((range) => range[0])), Math.max(...ranges.map((range) => range[1]))] : null;
     }
 
@@ -388,7 +403,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         for (const module of Object.values(catalog.modules)) {
             const range = rangeOf(module.price, KIT_CURRENCY);
             if (!range || range[0] <= 0) continue;
-            const each = range[0] / Math.max(1, Math.min(...Object.values(module.price).map((offer) => offer.qty ?? 1)));
+            const each = range[0]; // the price of one piece, of a pack too
             const keys = new Set();
             for (const device of Object.values(module.devices ?? {})) {
                 const type = catalog.devices[device.chip] ?? {};
@@ -945,10 +960,9 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         for (const [name, { title, count }] of counted) {
             const kind = name in (catalog.addons ?? {}) ? 'addons' : 'modules';
             const price = catalog[kind][name].price;
-            const range = rangeOf(price, currency);
+            const range = rangeOf(price, currency, count);
             if (range) {
-                // what is sold by the pack is paid for by the pack
-                const bought = Math.max(count, Math.min(...Object.values(price).map((offer) => offer.qty ?? 1)));
+                const bought = boughtOf(price, count);
                 low += range[0] * bought;
                 high += range[1] * bought;
                 if (bought > count) packs.push({ title, bought, cost: cents(range[0] * bought) });

@@ -1,0 +1,12 @@
+{
+    "title": "A named seller counts once in the median of a shop, by the newest report; reports with no seller count each",
+    "answers": {"wifi": true},
+    "change": {"esp32_devkit": {"price": {
+        "amazon": null,
+        "aliexpress": null,
+        "before": {"shop": "aliexpress", "seller": "Some Store", "currency": "EUR", "range": [10, 10], "date": "2026-10-01", "source": "the case"},
+        "after": {"shop": "aliexpress", "seller": "Some Store", "currency": "EUR", "range": [4, 4], "date": "2026-11-01", "source": "the case"},
+        "unnamed": {"shop": "aliexpress", "currency": "EUR", "range": [6, 6], "date": "2026-10-15", "source": "the case"}
+    }}},
+    "cost": {"board": "esp32_devkit", "low": 5, "high": 5}
+}

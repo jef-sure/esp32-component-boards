@@ -237,12 +237,19 @@ def goods_wrong():
             resolve.ROOTS.remove(root)
     counted = [line["count"] for line in lines if line["title"] == "MAX7219 matrix, four 8x8 in a row"]
     wrong = [f"the chain of two counts {counted}"] if counted != [2] else []
-    # the offers of one shop are reports of its sellers: their median, as test/solver/median_of_reports.json for the page
-    case = json.loads((TESTS.parent / "solver" / "median_of_reports.json").read_text())
-    offers = {key: offer for key, offer in case["change"]["esp32_devkit"]["price"].items() if offer}
-    costs = board_bom.costs_of({"title": "the case", "price": offers}, 1, None)
-    if costs != {"EUR": (case["cost"]["low"], case["cost"]["high"]) * 2}:
-        wrong.append(f"the reports of a shop cost {costs}")
+    # a price of one piece by the cases of the page: the median of the reports of a shop, the tier one piece reaches, the
+    # newest report of a seller
+    for name in ("median_of_reports", "tiers_of_reports", "newest_of_a_seller"):
+        case = json.loads((TESTS.parent / "solver" / f"{name}.json").read_text())
+        offers = {key: offer for key, offer in case["change"]["esp32_devkit"]["price"].items() if offer}
+        costs = board_bom.costs_of({"title": "the case", "price": offers}, 1, None)
+        if costs != (1, {"EUR": (case["cost"]["low"], case["cost"]["high"]) * 2}):
+            wrong.append(f"{name}: one piece costs {costs}")
+    # what is sold by the pack is bought by the pack, as test/solver/pack_price.json for the page: twenty for two
+    pack = json.loads((TESTS.parent / "solver" / "pack_price.json").read_text())["modules"]["pack_reader"]
+    costs = board_bom.costs_of(pack, 2, None)
+    if costs != (20, {"EUR": (1, 1, 20, 20)}):
+        wrong.append(f"two of a pack of twenty cost {costs}")
     print(f"goods: {'0 wrong' if not wrong else '; '.join(wrong)}")
     return len(wrong)
 

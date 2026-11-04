@@ -61,32 +61,42 @@ def lines_of(name):
 
 
 def offers_for(line, units, shop):
-    """Per shop and currency, the offers of the largest quantity that this many units reach, as one: they are reports of
-    the sellers of the shop, so it counts their median, the low and the high apart, as the page does."""
-    best = {}
+    """The pieces bought and, per shop and currency, its price of one piece, as the page counts them. What is sold by the
+    pack is bought by the pack: at least the smallest quantity of the offers. A shop gives its offers of the largest
+    quantity the pieces bought reach: reports of its sellers, a named seller by the newest report, and counts their
+    median, the low and the high apart."""
+    offers = []
     for name, offer in (line.get("price") or {}).items():
-        low, high = offer["range"]
-        if low > high:
+        if offer["range"][0] > offer["range"][1]:
             raise ValueError(f"{line['title']}: price {name}: the range runs down: {offer['range']}")
-        if shop and offer.get("shop") != shop:
+        if not shop or offer.get("shop") == shop:
+            offers.append(offer)
+    bought = max([units] + [min(offer.get("qty", 1) for offer in offers)] if offers else [units])
+    tiers = {}
+    for offer in offers:
+        least, key = offer.get("qty", 1), (offer.get("shop"), offer["currency"])
+        if least > bought or least < tiers.get(key, (0, []))[0]:
             continue
-        least = offer.get("qty", 1)
-        key = (offer.get("shop"), offer["currency"])
-        if least > units or least < best.get(key, (1, []))[0]:
-            continue
-        reports = best[key][1] if key in best and best[key][0] == least else []
-        best[key] = (least, reports + [offer["range"]])
-    return [{"currency": currency, "qty": least, "range": [statistics.median(r[0] for r in ranges), statistics.median(r[1] for r in ranges)]}
-            for (_, currency), (least, ranges) in best.items()]
+        tiers[key] = (least, (tiers[key][1] if key in tiers and tiers[key][0] == least else []) + [offer])
+    found = []
+    for (_, currency), (least, tier) in tiers.items():
+        newest = {}
+        for offer in (item for item in tier if item.get("seller")):
+            if offer["seller"] not in newest or offer["date"] > newest[offer["seller"]]["date"]:
+                newest[offer["seller"]] = offer
+        reports = [offer["range"] for offer in tier if not offer.get("seller")] + [offer["range"] for offer in newest.values()]
+        found.append({"currency": currency, "qty": least, "range": [statistics.median(r[0] for r in reports), statistics.median(r[1] for r in reports)]})
+    return bought, found
 
 
 def costs_of(line, units, shop):
-    """The cost of a line by currency: {currency: (each low, each high, line low, line high)}."""
+    """The pieces bought and the cost of the line by currency: {currency: (each low, each high, line low, line high)}."""
+    bought, offers = offers_for(line, units, shop)
     found = {}
-    for offer in offers_for(line, units, shop):
+    for offer in offers:
         found.setdefault(offer["currency"], []).append(offer["range"])
-    return {
-        currency: (min(r[0] for r in ranges), max(r[1] for r in ranges), min(r[0] for r in ranges) * units, max(r[1] for r in ranges) * units)
+    return bought, {
+        currency: (min(r[0] for r in ranges), max(r[1] for r in ranges), min(r[0] for r in ranges) * bought, max(r[1] for r in ranges) * bought)
         for currency, ranges in found.items()
     }
 
@@ -109,8 +119,7 @@ def report(product, lines, args):
     rows = []
     totals = collections.defaultdict(lambda: [0, 0])
     for line in lines:
-        units = line["count"] * args.units
-        costs = costs_of(line, units, args.shop)
+        units, costs = costs_of(line, line["count"] * args.units, args.shop)
         rows.append({**line, "units": units, "each": costs_text(costs, 0), "cost": costs_text(costs, 2)})
         for currency, (_, _, low, high) in costs.items():
             totals[currency][0] += low

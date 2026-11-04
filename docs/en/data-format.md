@@ -726,8 +726,11 @@ many sellers, and an offer there may name its `seller`; `classifieds` (Kleinanze
 thing, the price by agreement.
 
 The offers of one shop at one quantity are kept all, each report its own: they are prices of different sellers, and
-a seller is rarely remembered. The page and `board_bom.py` count the median of their lows and of their highs as the
-price of that shop; the cheapest shop then gives the low of the item, the dearest its high.
+a seller is rarely remembered. The page and `board_bom.py` count a price the same way. What is sold by the pack is
+bought by the pack, so the pieces bought are at least the smallest `qty` of the offers. Each shop gives its offers of
+the largest `qty` the pieces bought reach, a named seller only by its newest report, and the median of their lows and
+of their highs is the price of one piece there. The cheapest shop then gives the low of the item, the dearest its
+high.
 
 `tariff` is the customs tariff code of the goods, HS or CN, digits only. Duties on small
 parcels are counted by it. `count` on a device says how many of it one product takes, for

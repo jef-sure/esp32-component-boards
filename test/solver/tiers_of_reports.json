@@ -1,0 +1,11 @@
+{
+    "title": "A price from 5 pieces is not the price of one: one piece is bought at the tier of one (found by 7c)",
+    "answers": {"wifi": true},
+    "change": {"esp32_devkit": {"price": {
+        "amazon": null,
+        "aliexpress": null,
+        "one": {"shop": "aliexpress", "currency": "EUR", "range": [4.09, 4.09], "date": "2026-11-04", "source": "the case"},
+        "five": {"shop": "aliexpress", "currency": "EUR", "range": [3.69, 3.69], "qty": 5, "date": "2026-11-04", "source": "the case"}
+    }}},
+    "cost": {"board": "esp32_devkit", "low": 4.09, "high": 4.09}
+}

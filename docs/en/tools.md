@@ -121,7 +121,8 @@ over its base board.
 
 Prices are ranges, so a total is a range. A line with no price is named, and the total then
 reads "at least". Currencies are not converted. For a quantity the tool takes, per shop, the
-offers of the largest `qty` that the quantity reaches, and of several the median, as the page does. `--shop` takes a shop of `catalog/shops.json` by its name, its
+offers of the largest `qty` that the quantity reaches, and of several the median, as the page does; a line sold only by
+the pack is a pack. `--shop` takes a shop of `catalog/shops.json` by its name, its
 title or its address, as a report does.
 
 Delivery and duty depend on the order, so they are not in the data. `--duty` adds an amount per

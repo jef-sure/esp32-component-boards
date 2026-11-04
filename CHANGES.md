@@ -283,6 +283,11 @@ committed, a program that asks by kind.
 - The offers of one shop at one quantity are reports of its sellers, kept all: the page and `board_bom.py` count their
   median, the low and the high apart, then the cheapest shop and the dearest. Before, the lowest of all offers was the
   price, so one cheap report moved it, and each report made the range wider (Anton). The page counts a price once.
+- One rule of a price for the page and `board_bom.py`: the pieces bought are at least the smallest pack, each shop gives
+  the tier they reach, a named seller its newest report. The page took a price "from 5 pieces" for one piece and
+  `board_bom.py` gave no price to what is sold only by the pack (both found by 7c); one WS2812B nobody asked for is now
+  worth its price from 5 pieces, about 0.09 EUR, not that from 1000. The cheapest module of a role was its price divided
+  by its pack again, though a price is already of one piece.
 - Two displays as one screen, tried on a board: the DotView clock (two SSD1351 on SPI2 and SPI3, `display_groups`)
   showed one picture across both, read its photoresistor on the pin of the data while the screens lit it, and its button.
   The y of each panel in `test/format/good/dotview_clock.json` is turned: the clock's own program has an older copy

@@ -37,7 +37,7 @@
             "covers": ["display_groups.wide", "devices.left", "devices.right", "devices.light", "devices.config"],
             "by": "Anton and a probe of the group",
             "date": "2026-11-04",
-            "notes": "The y of each panel is the opposite of main.c of dotview-clock: its copy of DGX scanned the SSD1351 from COM0, DGX 0.10 starts upright as Adafruit_SSD1351. A picture across the group, the light read while the screens lit it, the button pressed."
+            "notes": "The y of each panel is the opposite of main.c of dotview-clock: its copy of DGX scanned the SSD1351 from COM0, DGX 0.10 starts upright as Adafruit_SSD1351. A picture across the group, the light read while the screens lit it, the button pressed. The lit area of each panel measured 27 x 27 mm."
         }
     }
 }

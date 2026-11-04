@@ -19,7 +19,8 @@ esp_lcd_touch_handle_t board_glue_touch_gt911_new(const struct board_touch_gt911
         esp_lcd_panel_io_i2c_config_t io_config = ESP_LCD_TOUCH_IO_I2C_GT911_CONFIG();
         io_config.dev_addr                      = gt911->addresses[i];
         io_config.scl_speed_hz                  = gt911->i2c_hz;
-        /* RST and INT are wired: the driver holds INT at the level of this address during reset */
+        /* RST and INT are wired: the driver holds INT at the level of this address during reset, then makes it an
+         * input, and ESP-IDF warns once "conflict found for GPIO[n]" for INT: the pin was an output before */
         esp_lcd_touch_io_gt911_config_t address = {.dev_addr = gt911->addresses[i]};
         if (choose_address) config.driver_data = &address;
         if (esp_lcd_new_panel_io_i2c(bus, &io_config, &io) != ESP_OK) continue;

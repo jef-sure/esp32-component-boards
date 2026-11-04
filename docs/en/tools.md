@@ -6,6 +6,11 @@ the page; the importers need `jsonschema`, and `import_pictures.py` Chrome and
 ImageMagick. Run them from the root of the repository (or of
 `managed_components/jef-sure__boards/`).
 
+The package of the registry carries the tools a program uses: `board_select.py`, `board_project.py`,
+`board_pins.py`, `board_bom.py`, `board_calibration.py`, `boards_mcp.py`, and `boards_gen.py`, `resolve.py` and
+`rules.py`, which they import. The checks, the importers, `audit.py`, `make_mcu.py`, `update_rates.py`,
+`take_report.py` and `sync_versions.py` are for the repository: they need `test/`, ESP-IDF or the network.
+
 ## boards_gen.py
 
 ```sh

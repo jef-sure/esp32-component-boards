@@ -6,6 +6,11 @@ JavaScript страницы; импортёрам нужен `jsonschema`, а `i
 Chrome и ImageMagick. Запускайте их из корня репозитория (или из
 `managed_components/jef-sure__boards/`).
 
+Пакет реестра несёт инструменты, которыми пользуется программа: `board_select.py`, `board_project.py`,
+`board_pins.py`, `board_bom.py`, `board_calibration.py`, `boards_mcp.py`, а также `boards_gen.py`, `resolve.py` и
+`rules.py`, которые они импортируют. Проверки, импортёры, `audit.py`, `make_mcu.py`, `update_rates.py`,
+`take_report.py` и `sync_versions.py` — для репозитория: им нужны `test/`, ESP-IDF или сеть.
+
 ## boards_gen.py
 
 ```sh

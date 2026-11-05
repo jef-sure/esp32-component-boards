@@ -331,6 +331,13 @@ def presets_wrong():
         select("--again")
         if presets("name", "binaryDir")[-1] != ("default", "build/jc4827w543c"):
             wrong.append(f"--again undid the current board of --current: {presets('name', 'binaryDir')}")
+        # presets with no record of the page keep their default
+        doc = json.loads((project / "CMakePresets.json").read_text())
+        doc["vendor"]["jef-sure/boards"].pop("follows", None)
+        (project / "CMakePresets.json").write_text(json.dumps(doc))
+        select("--again")
+        if presets("name", "binaryDir")[-1] != ("default", "build/jc4827w543c"):
+            wrong.append(f"--again took the current board of selection.json over presets with no record: {presets('name', 'binaryDir')}")
         select("--current", "cyd_s028r")
         (project / "selection.json").write_text(json.dumps({**page, "current": "jc4827w543c"}))
         select("--again")

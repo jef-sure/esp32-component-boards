@@ -46,6 +46,8 @@ LANGUAGES.ru = {
         'Nothing is asked yet, so every board fits.': 'Пока ничего не спрошено, поэтому подходят все платы.',
         'Project name': 'Имя проекта',
         'The name of the program: its boards are named after it.': 'Имя программы: по нему названы её платы.',
+        'does not fit the answers now': 'не подходит под нынешние ответы',
+        '{0}: its kit does not fit the answers now; it stays in the project': '{0}: её комплект не подходит под нынешние ответы; она остаётся в проекте',
         'An empty folder gets a whole project. A folder with a program gets only its board.': 'Пустая папка получит весь проект, папка с программой — только плату.',
         'the wires': 'провода',
         'Know a price?': 'Знаешь цену?',

@@ -400,6 +400,13 @@ committed, a program that asks by kind.
   there, so the bridge does not take the presets a command changed for a person's; a write refused for a file left
   unticked says so. Seen in headless Chrome: a current board chosen by command shown on the page, one chosen on the page
   written into the presets, and one chosen by command again kept by `--again`.
+  Presets with no record, made before it, keep their default on the page and in `--again`, and `--current` records
+  the `current` of `selection.json` too (found by 7c).
+- The kits of the project on the page are counted again with every answer, so a write pairs the answers with the kits
+  as they are now; one that no longer fits is marked and not written, and a board of `selection.json` whose kit does
+  not fit the answers now is named as staying in the project (found by 7c: it dropped out silently). The kits chosen
+  are no longer among `others` of `selection.json`: the page keeps copies, and they were compared as objects. With a
+  budget the price comes right after the unknowns, as the documents say; it came after the worth of what nobody asked.
 - A level seen on hardware is a note, not a part: `high_seen_mv` of a chip, the lowest high that drove it on hardware,
   with its trial in `checked`, and the judgement `level_seen_on_hardware`. The WS2812B takes 3.5 V by its datasheet;
   the 3.3 V of an ESP32 drove Anton's garland, so a kit of strips says so and adds no level shifter (Anton: "in

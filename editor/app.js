@@ -483,10 +483,12 @@ idf.py build flash monitor</pre>
                         <p class="hint">{{ t('idf.py builds {0}; idf.py --preset <board> builds another, and in VS Code ESP-IDF: Select Project Configuration chooses it.', store.plan.current) }}</p>
                     </div>
                 </section>
-                <section v-if="store.chosen.length" class="chosen">
+                <section v-if="store.chosen.length || store.kept.length" class="chosen">
                     <h3>{{ t('The boards of the project') }}</h3>
+                    <p v-for="board in store.kept" :key="board" class="hint">{{ t('{0}: its kit does not fit the answers now; it stays in the project', board) }}</p>
                     <p v-for="item in store.chosen" :key="item.headline">
                         <label :title="t('the current board: idf.py builds it when no preset is named')"><input type="radio" :value="item.headline" v-model="store.current"> {{ item.kit.headline }}</label>
+                        <span v-if="item.gone" class="hint">{{ t('does not fit the answers now') }}</span>
                         <button class="drop" :title="t('take it out of the project')" @click="store.chooseKit(item.kit)">×</button></p>
                     <button v-if="canWrite" @click="store.planProject()">{{ t('make the project of these boards…') }}</button>
                 </section>

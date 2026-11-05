@@ -1425,7 +1425,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         // a sum without the price of a part is no price: it would make a board with none look the cheapest
         const spent = (kit) => (kit.price?.known && !kit.price.missing.length ? kit.price.low : Infinity);
         return boards.flatMap((name) => kitsOfBoard(name, wanted)).sort(
-            (a, b) => b.fits - a.fits || unknowns(a) - unknowns(b) || (a.unaskedWorth ?? 0) - (b.unaskedWorth ?? 0) || (budget && spent(a) - spent(b)) || a.modules.length + (a.addons?.length ?? 0) - b.modules.length - (b.addons?.length ?? 0) || a.wires.length - b.wires.length || (!budget && spent(a) - spent(b)) || a.name.localeCompare(b.name)
+            (a, b) => b.fits - a.fits || unknowns(a) - unknowns(b) || (budget && spent(a) - spent(b)) || (a.unaskedWorth ?? 0) - (b.unaskedWorth ?? 0) || a.modules.length + (a.addons?.length ?? 0) - b.modules.length - (b.addons?.length ?? 0) || a.wires.length - b.wires.length || (!budget && spent(a) - spent(b)) || a.name.localeCompare(b.name)
         );
     }
 
@@ -1433,8 +1433,9 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
     // selection.json of a project: the kits chosen, each by the name board_select.py takes, in the order they were added,
     // and the current one apart, so the order stays as it is when another becomes current.
     function selectionOf(chosen, current, kits, answers, currency, name) {
-        const kitsChosen = new Set(chosen.map((item) => item.kit));
-        const others = kits.filter((item) => !kitsChosen.has(item));
+        // the page keeps copies of the kits it chose: they are the same kits by their headline
+        const kitsChosen = new Set(chosen.map((item) => item.kit.headline));
+        const others = kits.filter((item) => !kitsChosen.has(item.headline));
         return {
             format: KIT_FORMAT.format,
             format_version: SELECTION_VERSION,

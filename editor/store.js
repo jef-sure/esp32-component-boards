@@ -48,7 +48,8 @@ function presetsOrder(presets, wanted) {
     const names = doc.configurePresets.map((preset) => preset.name).filter((name) => name !== 'default');
     const at = (entry) => (names.includes(entry.board) ? names.indexOf(entry.board) : names.length);
     const built = doc.configurePresets.find((preset) => preset.name === 'default')?.cacheVariables?.BOARD;
-    const current = wanted.current && wanted.current !== made.follows ? wanted.current : built;
+    // presets with no record are older than it: their default stands
+    const current = wanted.current && made.follows && wanted.current !== made.follows ? wanted.current : built;
     return { boards: [...wanted.boards].sort((a, b) => at(a) - at(b)), ...(wanted.boards.some((entry) => entry.board === current) ? { current } : {}) };
 }
 const kitKey = (board, modules) => `${board}+${modules.map((item) => `${item.name}x${item.count ?? 1}`).sort().join(',')}`;
@@ -204,6 +205,7 @@ const useEditor = Pinia.defineStore('editor', {
         chosen: [], // the kits of the project, in the order they were added: [{ headline, kit }]
         current: null, // the headline of the kit idf.py builds when no preset is named
         wanted: null, // selection.json of a folder opened, until the kits it names are counted
+        kept: [], // the boards of selection.json whose kits do not fit the answers now: they stay in the project
         project: null, // the folder tools/boards_mcp.py may write a project into: { path, name, mode, for_ever }
         modelless: false, // the server came with --serve: no model answers
     }),
@@ -389,6 +391,7 @@ const useEditor = Pinia.defineStore('editor', {
                 this.kits = data.kits;
                 this.solving = false;
                 this.restoreChosen();
+                this.recountChosen();
                 this.tellAgent();
             };
             library.worker.onerror = () => {
@@ -407,6 +410,7 @@ const useEditor = Pinia.defineStore('editor', {
             if (!library.worker) {
                 this.kits = library.solver.solve(answers);
                 this.restoreChosen();
+                this.recountChosen();
                 return;
             }
             const message = { id: ++library.asked, answers, language: this.language };
@@ -423,6 +427,7 @@ const useEditor = Pinia.defineStore('editor', {
                 this.solving = false;
                 this.kits = library.solver.solve(answers);
                 this.restoreChosen();
+                this.recountChosen();
             }
         },
         // A kit added to the project, or taken out of it; the first one added is current until another is made so.
@@ -439,8 +444,20 @@ const useEditor = Pinia.defineStore('editor', {
             const counted = new Map(this.kits.filter((kit) => kit.fits).map((kit) => [kitKey(kit.name, kit.modules), kit]));
             const found = this.wanted.boards.map((entry) => ({ entry, kit: counted.get(kitKey(entry.base ?? entry.board, entry.modules)) })).filter((item) => item.kit);
             this.chosen = found.map(({ kit }) => ({ headline: kit.headline, kit: copied(kit) }));
+            this.kept = this.wanted.boards.filter((entry) => !found.some((item) => item.entry === entry)).map((entry) => entry.board);
             this.current = found.find(({ entry }) => entry.board === this.wanted.current)?.kit.headline ?? this.chosen[0]?.headline ?? null;
             this.wanted = null;
+        },
+        // The kits of the project are counted again with every answer: the same board and modules as they are now, so a
+        // write pairs the answers with their kits. One that no longer fits stays in the list, marked, and is not written.
+        recountChosen() {
+            const counted = new Map(this.kits.filter((kit) => kit.fits).map((kit) => [kitKey(kit.name, kit.modules), kit]));
+            const at = this.chosen.findIndex((item) => item.headline === this.current);
+            this.chosen = this.chosen.map((item) => {
+                const now = counted.get(kitKey(item.kit.name, item.kit.modules));
+                return now ? { headline: now.headline, kit: copied(now) } : { ...item, gone: true };
+            });
+            if (at >= 0) this.current = this.chosen[at].headline;
         },
         async start() {
             this.startWorker();
@@ -585,7 +602,10 @@ const useEditor = Pinia.defineStore('editor', {
                 const joins = single && savedBoards.length && !this.chosen.some((item) => item.headline === single.headline);
                 if (joins) this.chosen.push({ headline: single.headline, kit: copied(single) });
                 if (single && savedBoards.length) this.current = single.headline;
-                const kits = single && !savedBoards.length ? [single] : this.chosen.map((item) => item.kit);
+                const alone = single && !savedBoards.length;
+                const gone = alone ? [] : this.chosen.filter((item) => item.gone);
+                if (gone.length) throw new Error(`${gone.map((item) => item.headline).join(', ')}: does not fit the answers now: take it out of the project, or change the answers`);
+                const kits = alone ? [single] : this.chosen.map((item) => item.kit);
                 if (!kits.length) throw new Error('no kit in the project: add one from its card');
                 // a kit the project has keeps the name of its board; a new one takes none the project has
                 const taken = new Set(savedBoards.map((entry) => entry.board));

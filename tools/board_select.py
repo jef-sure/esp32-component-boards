@@ -239,7 +239,9 @@ def order_of(project, boards, named=()):
         made = doc["configurePresets"]
         listed = [preset["name"] for preset in made if preset["name"] != DEFAULT] + listed
         default = next((preset["cacheVariables"]["BOARD"] for preset in made if preset["name"] == DEFAULT), None)
-        current = picked if picked and picked != doc["vendor"][VENDOR].get("follows") else default
+        # presets with no record are older than it: their default stands
+        followed = doc["vendor"][VENDOR].get("follows")
+        current = picked if picked and followed and picked != followed else default
     order = list(dict.fromkeys(board for board in listed if board in boards))
     order += [board for board in named if board in boards and board not in order]
     order += sorted(board for board in boards if board not in order)
@@ -290,6 +292,10 @@ def main():
         doc = our_presets(project, [args.current])
         if doc is None:
             raise SystemExit(f"{project}: no {PRESETS} there: name the boards, board_select.py BOARD ... --current {args.current} {project}")
+        # what the page names now is followed: a later change of it on the page is the page's
+        _, _, follows = order_of(project, [args.current])
+        if follows:
+            doc["vendor"][VENDOR]["follows"] = follows
         (project / PRESETS).write_text(with_current(doc, args.current))
         project_writer.keep_ours(project, [project / PRESETS])
         print(f"{project / PRESETS}: {args.current} is the current board, idf.py build builds it")

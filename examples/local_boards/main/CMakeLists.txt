@@ -3,7 +3,7 @@
 #
 # No REQUIRES here: the example takes the component by its directory (EXTRA_COMPONENT_DIRS), so
 # its name in the build is the directory's, whatever the checkout is called; main names nothing
-# and depends on every component of the build, as ESP-IDF's main does when it names none. A
-# project of its own, with the component from the registry (managed_components/jef-sure__boards),
-# writes PRIV_REQUIRES jef-sure__boards.
+# and depends on every component of the build, as ESP-IDF's main does when it names none. In a
+# project of its own the component manager makes the component of main/idf_component.yml a
+# requirement of main, so main names nothing for it either.
 idf_component_register(SRCS "main.c")

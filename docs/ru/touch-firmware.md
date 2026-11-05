@@ -28,7 +28,6 @@ python3 managed_components/jef-sure__dgx-di/tools/gsl_firmware.py \
 
 ```cmake
 idf_component_register(SRCS "main.c"
-                       PRIV_REQUIRES jef-sure__boards
                        EMBED_FILES "jc8012p4a1c_touch.fw")
 ```
 

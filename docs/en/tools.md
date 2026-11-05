@@ -1,14 +1,14 @@
 # The tools
 
-All in `tools/`, Python 3.8 or later. Most need only the standard library:
+All in `tools/`, Python 3.9 or later, as ESP-IDF 5.5 has. Most need only the standard library:
 `check_format.py` needs `jsonschema` and Node.js, which runs the JavaScript of
 the page; the importers need `jsonschema`, and `import_pictures.py` Chrome and
 ImageMagick. Run them from the root of the repository (or of
 `managed_components/jef-sure__boards/`).
 
 The package of the registry carries the tools a program uses: `board_select.py`, `board_project.py`,
-`board_pins.py`, `board_bom.py`, `board_calibration.py`, `boards_mcp.py`, and `boards_gen.py`, `resolve.py` and
-`rules.py`, which they import. The checks, the importers, `audit.py`, `make_mcu.py`, `update_rates.py`,
+`board_pins.py`, `board_bom.py`, `board_calibration.py`, `boards_mcp.py`, and `boards_gen.py`, `project_writer.py`,
+`resolve.py` and `rules.py`, which they import. The checks, the importers, `audit.py`, `make_mcu.py`, `update_rates.py`,
 `take_report.py` and `sync_versions.py` are for the repository: they need `test/`, ESP-IDF or the network.
 
 ## boards_gen.py
@@ -16,6 +16,7 @@ The package of the registry carries the tools a program uses: `board_select.py`,
 ```sh
 python3 tools/boards_gen.py --all          # everything, from every board and module
 python3 tools/boards_gen.py cyd_s028r      # one board's glue and board.cmake only
+python3 tools/boards_gen.py my_board --data DIR --out DIR  # a board of a directory of its own, its glue into another
 ```
 
 Reads `catalog/boards/*/board.json` and `catalog/modules/*/module.json`, merges
@@ -29,7 +30,9 @@ them with the catalog, applies `catalog/rules.json`, refuses what it cannot make
 - the `dependencies:` of `idf_component.yml`, between `# boards: dependencies
   generated` and `# boards: end of generated`;
 - the table of boards in `README.md` and `README.ru.md`, between
-  `<!-- boards:table -->` and `<!-- boards:end -->`.
+  `<!-- boards:table -->` and `<!-- boards:end -->`;
+- `catalog/index.json`, the list of the files of the catalog the page reads;
+- the list of boards of the matrix of `.github/workflows/build.yml`, between its marks.
 
 It writes a file only when its content changes. The tables at its top are
 the knowledge it has beyond the data: which DGX header and `DGX_ENABLE_*`
@@ -65,6 +68,7 @@ python3 tools/board_pins.py cyd_s028r           # GPIO -> owner, conflicts marke
 python3 tools/board_pins.py cyd_s028r --tree    # chip -> buses -> devices -> pins
 python3 tools/board_pins.py --all               # every board's conflicts, for CI
 python3 tools/board_pins.py jc1060p470c --display  # 1024x600 154x86: pixels and mm, as shown
+python3 tools/board_pins.py my_board --project ~/myproject --free  # a board of a program: the pins left
 ```
 
 `--display` prints what `BOARD_PIXELS` and `BOARD_MM` hold, for a Makefile that has no
@@ -105,6 +109,7 @@ has stays the page's: its new hash goes into the list. An `sdkconfig` made befor
 python3 tools/board_project.py ~/my_game --board jc8012p4a1c
 python3 tools/board_project.py ~/terminal --board jc1060p470c --module lcd2004_pcf8574
 python3 tools/board_project.py ~/again --selection ~/old/selection.json
+python3 tools/board_project.py ~/clock-2 --board cyd_s028r --name clock_two  # a folder whose name is no name of a project
 ```
 
 A new project on a board chosen by hand, without the page: the files the page writes for a new folder
@@ -186,6 +191,10 @@ Writes `catalog/rates.json` from the reference rates of the European Central Ban
 any currency compare on the page. It needs the network and nothing else; the page only reads the file.
 
 ## take_report.py
+
+```sh
+python3 tools/take_report.py body.md --issue 3    # the text of issue 3, into the catalog of this repository
+```
 
 Takes a price from an issue of the form `price.yml` and adds it to the file of its item as an offer. The text of an
 issue comes from anyone, so it is only read as fields, and `.github/workflows/reports.yml` gives it through a file. The
@@ -309,7 +318,7 @@ The field on top is the theme the model starts from, and the dialog develops it:
 With no agent the server still gives the page, its solver and the writes of a project, for the folder it runs in:
 
 ```sh
-python3 managed_components/jef-sure__boards/tools/boards_mcp.py --serve   # or --project DIR
+python3 managed_components/jef-sure__boards/tools/boards_mcp.py --serve   # or --project DIR, --port N
 ```
 
 It prints the link of the page and serves until Ctrl-C. The link says that no model talks, so the page shows no
@@ -454,8 +463,9 @@ shape of what the glue calls.
 
 ## The CI workflow
 
-`.github/workflows/build.yml`: `check_boards.py --host-syntax` and
+`.github/workflows/build.yml`: `check_boards.py --host-syntax`, `check_format.py` and
 `board_pins.py --all`, then `examples/hello_board` for every board and
 `examples/hello_lvgl` for every board with a graphics display, under two
-versions of ESP-IDF, plus one build of
-`hello_board` with the 2004 module, each in its own job. Add a board to the matrix when you add it to the data.
+versions of ESP-IDF, plus one build of `hello_board` with the 2004 module, a project that leaves parts alone,
+`examples/local_boards`, `examples/multi_board`, and a new project made as the README says, each in its own job.
+The list of boards of the matrix is written by `boards_gen.py --all` from the data, between its marks.

@@ -166,6 +166,7 @@ Three layers, from fast to real:
    mirror the shape of the real ones. Catches a wrong argument type in seconds,
    without ESP-IDF.
 3. CI (`.github/workflows/build.yml`): `examples/hello_board` is built for
-   every board, with and without the module, under two versions of ESP-IDF,
-   and `examples/hello_lvgl` for every board with a graphics display.
+   every board under two versions of ESP-IDF, and once with the module on the
+   JC1060P470C under 6.1, and `examples/hello_lvgl` for every board with a
+   graphics display.
    Only this one proves the glue links.

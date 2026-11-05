@@ -52,7 +52,7 @@ two keeps its own. `board_touch_start` takes the display the touch covers and
 returns `false` for another one.
 
 `board_display_init` brings the panel up with the light on, oriented as the
-board shows it (the data's `original_orientation`), and fills `*out`. The
+board shows it (`controls.orientation.start` of the display in the data), and fills `*out`. The
 handles of DGX are in `boards_dgx.h`:
 
 ```c

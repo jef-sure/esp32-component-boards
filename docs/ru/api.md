@@ -53,7 +53,7 @@ bool board_display_orientation(board_display_t *display, int dir_x, int dir_y, b
 и возвращает `false` для другого.
 
 `board_display_init` поднимает панель с включённой подсветкой, ориентированную
-так, как показывает плата (`original_orientation` из данных), и заполняет
+так, как показывает плата (`controls.orientation.start` дисплея в данных), и заполняет
 `*out`. Дескрипторы DGX лежат в `boards_dgx.h`:
 
 ```c

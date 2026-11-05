@@ -64,7 +64,10 @@ else draw meanwhile.
 ### Keeping it
 
 Save the log and give it to the tool, which writes the numbers into the board and
-drops `measured`: `python3 tools/board_calibration.py <board> < log.txt`. Then run
+drops `measured`: `python3 tools/board_calibration.py <board> < log.txt`. After the board come
+the name of its touch panel in the data, `touch` when none is given, and the versions it was measured
+with, which go into `measured_with`:
+`python3 tools/board_calibration.py <board> touch esp-idf/jef-sure/dgx-di=0.1.4 < log.txt`. Then run
 `tools/boards_gen.py --all` and build.
 `off_tenths` and `left_tenths` of the entry say how far off the touches were without and with the
 calibration, in tenths of a pixel, as the measurement found them.
@@ -88,15 +91,18 @@ through the processor, and how much room to leave before the panel's scan, by
 numbers that depend on the chip, its PSRAM and the panel. The bus starts with
 the numbers of the board DGX was written on; `dgx_dsi_bench()` measures the
 board at hand in a fraction of a second, `dgx_dsi_tune()` gives the result to
-the bus. The component exposes the bus as `board_display.bus` for exactly
-this. A program measures once and keeps the numbers in NVS:
+the bus. `board_dgx_bus()` of `boards_dgx.h` gives the bus for exactly this. A
+program measures once and keeps the numbers in NVS, as the handwritten clock does:
 
 ```c
+#include "boards_dgx.h"
 #include "bus/dgx_dsi_esp32.h"
-if (display.bus && display.bus->bus_type == DGX_BUS_DSI) {
+
+dgx_bus_protocols_t *bus = board_dgx_bus(&display);
+if (bus && bus->bus_type == DGX_BUS_DSI) {
     dgx_dsi_tuning_t tuning;
     /* read it from NVS; if there is none or dgx_dsi_tune() refuses it: */
-    if (dgx_dsi_bench(display.bus, &tuning) && dgx_dsi_tune(display.bus, &tuning)) { /* write it to NVS */ }
+    if (dgx_dsi_bench(bus, &tuning) && dgx_dsi_tune(bus, &tuning)) { /* write it to NVS */ }
 }
 ```
 

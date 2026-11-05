@@ -43,7 +43,7 @@
             "id": "level_seen_on_hardware",
             "kind": "seen_level",
             "says": "{0}: it takes {1} V as high by its datasheet, and {2} V drove it on hardware: a level shifter on its line is the sure way",
-            "why": "A datasheet gives the least high an input takes, and a chip of 3.3 V gives less than some ask: the WS2812B takes 0.7 VDD, 3.5 V at 5 V. Where a trial on hardware drove it with less (high_seen_mv of the chip, with its checked entry), the kit says so and adds no level shifter: the garland of Anton runs 360 WS2812B from a GPIO of an ESP32. A chip with no such trial gets the shifter, and a margin nobody measured is not assumed."
+            "why": "A datasheet gives the least high an input takes, and a chip of 3.3 V gives less than some ask: the WS2812B takes 0.7 VDD, 3.5 V at 5 V. Where a trial on hardware drove it with less (high_seen_mv of the chip, with its checked entry), the kit says so and adds no level shifter: a garland of 360 WS2812B runs from a GPIO of an ESP32. A chip with no such trial gets the shifter, and a margin nobody measured is not assumed."
         }
     ]
 }

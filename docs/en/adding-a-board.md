@@ -69,8 +69,9 @@ python3 tools/board_select.py myboard examples/hello_board
 cd examples/hello_board && idf.py build flash monitor
 ```
 
-The example prints what it found and draws a frame. Add the board to the
-matrix in `.github/workflows/build.yml` so CI builds it from now on.
+The example prints what it found and draws a frame. `tools/boards_gen.py --all` has put the board into the
+matrix of `.github/workflows/build.yml`, between its marks, so CI builds it from now on; `check_boards.py`
+fails when the matrix differs from the data.
 
 ## 4. Measure the touch
 

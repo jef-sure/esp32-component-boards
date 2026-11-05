@@ -45,7 +45,8 @@ endif()
 project(hello)
 ```
 
-In `main/CMakeLists.txt`, `PRIV_REQUIRES jef-sure__boards`: the component's
+`main/CMakeLists.txt` names nothing for the component: the component manager makes
+what `main/idf_component.yml` names a requirement of `main`, `jef-sure__boards` by its
 directory under `managed_components/`. (A checkout of the component taken by
 `override_path` or `EXTRA_COMPONENT_DIRS` is named after its own directory
 instead, and the component manager matches a dependency to a local component

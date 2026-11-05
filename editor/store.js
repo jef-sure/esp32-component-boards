@@ -656,12 +656,10 @@ const useEditor = Pinia.defineStore('editor', {
                 const manifest = mode === 'update' ? await read('main/idf_component.yml') : null;
                 // a program of its own also needs the CMake that reads the boards and main naming the component: shown, not written
                 const project = mode === 'update' ? await read('CMakeLists.txt') : null;
-                const main = mode === 'update' ? await read('main/CMakeLists.txt') : null;
                 const cmakeLines = mode === 'update' && !project?.includes('sdkconfig.defaults.${BOARD}') ? await cmakeSnippet() : null;
-                const requiresLine = mode === 'update' && main && !main.includes('jef-sure__boards') ? 'PRIV_REQUIRES jef-sure__boards' : null;
                 const own = [...new Map(kits.flatMap((kit) => kit.libraries.filter((item) => item.own)).map((item) => [item.name, item])).values()];
                 this.plan = { folder: folder && Vue.markRaw(folder), bridge: Boolean(bridge), folderName: bridge ? bridge.path : folder.name, mode, rows, files, current, boards: chosen.map(([, board]) => board), written: null,
-                    allow: bridge && !bridge.for_ever ? 'once' : null, cmakeLines, requiresLine,
+                    allow: bridge && !bridge.for_ever ? 'once' : null, cmakeLines,
                     manifestLines: mode === 'update' ? [...(manifest?.includes(COMPONENT_NAME) ? [] : [COMPONENT_LINES(this.installed?.component)]), ...own.filter((item) => !manifest?.includes(item.name)).map(dependencyOf)] : [] };
             });
         },

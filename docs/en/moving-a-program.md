@@ -43,7 +43,7 @@ this way was built and runs on the Guition JC1060P470C and the JC8012P4A1C, with
    endif()
    ```
 
-   When `main/CMakeLists.txt` names its requirements, it names `jef-sure__boards` among them.
+   `main/CMakeLists.txt` names nothing for it: the component manager makes the component a requirement of `main`.
 
 3. The boards are named once:
 

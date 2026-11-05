@@ -64,8 +64,11 @@ if (dgx_di_calibrate_measure(board_dgx_di_device(&touch), board_dgx_screen(&disp
 ### Сохранение
 
 Сохраните лог и отдайте его инструменту: он запишет числа в данные платы и уберёт
-`measured`: `python3 tools/board_calibration.py <board> < log.txt`. Затем запустите
-`tools/boards_gen.py --all` и соберите.
+`measured`: `python3 tools/board_calibration.py <board> < log.txt`. После платы идут имя её
+сенсорной панели в данных, `touch`, если не названо, и версии, с которыми её измеряли, — они
+попадают в `measured_with`:
+`python3 tools/board_calibration.py <board> touch esp-idf/jef-sure/dgx-di=0.1.4 < log.txt`. Затем
+запустите `tools/boards_gen.py --all` и соберите.
 `off_tenths` и `left_tenths` в записи говорят, насколько касания отклонялись без калибровки и с ней,
 в десятых долях пикселя, по данным измерения.
 
@@ -87,16 +90,19 @@ if (dgx_di_calibrate_measure(board_dgx_di_device(&touch), board_dgx_screen(&disp
 процессор, и сколько запаса оставлять перед развёрткой панели, по числам,
 которые зависят от чипа, его PSRAM и панели. Шина начинает с чисел той платы,
 на которой писался DGX; `dgx_dsi_bench()` измеряет плату под рукой за доли
-секунды, `dgx_dsi_tune()` отдаёт результат шине. Компонент открывает шину как
-`board_display.bus` именно для этого. Программа измеряет один раз и хранит
-числа в NVS:
+секунды, `dgx_dsi_tune()` отдаёт результат шине. Шину для этого даёт
+`board_dgx_bus()` из `boards_dgx.h`. Программа измеряет один раз и хранит
+числа в NVS, как это делают рукописные часы:
 
 ```c
+#include "boards_dgx.h"
 #include "bus/dgx_dsi_esp32.h"
-if (display.bus && display.bus->bus_type == DGX_BUS_DSI) {
+
+dgx_bus_protocols_t *bus = board_dgx_bus(&display);
+if (bus && bus->bus_type == DGX_BUS_DSI) {
     dgx_dsi_tuning_t tuning;
     /* read it from NVS; if there is none or dgx_dsi_tune() refuses it: */
-    if (dgx_dsi_bench(display.bus, &tuning) && dgx_dsi_tune(display.bus, &tuning)) { /* write it to NVS */ }
+    if (dgx_dsi_bench(bus, &tuning) && dgx_dsi_tune(bus, &tuning)) { /* write it to NVS */ }
 }
 ```
 

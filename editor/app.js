@@ -477,7 +477,6 @@ const SelectPage = {
                     </fieldset>
                     <div v-if="store.plan.cmakeLines" class="locked">{{ t('Put these into CMakeLists.txt yourself, the include of project.cmake among them: they read the board.') }}
                         <pre>{{ store.plan.cmakeLines }}</pre></div>
-                    <div v-if="store.plan.requiresLine" class="locked">{{ t('In main/CMakeLists.txt, in idf_component_register: {0}', store.plan.requiresLine) }}</div>
                     <div v-if="store.plan.manifestLines.length" class="locked">{{ t('Add these to main/idf_component.yml yourself: the file stays as it is.') }}
                         <pre>{{ store.plan.manifestLines.join('\\n') }}</pre></div>
                     <p v-if="!store.plan.written"><button @click="store.writeProject()">{{ t('write') }}</button> <button @click="store.plan = null">{{ t('cancel') }}</button></p>

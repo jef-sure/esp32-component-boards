@@ -67,8 +67,9 @@ python3 tools/board_select.py myboard examples/hello_board
 cd examples/hello_board && idf.py build flash monitor
 ```
 
-Пример печатает, что он нашёл, и рисует кадр. Добавьте плату в матрицу в
-`.github/workflows/build.yml`, чтобы CI с этого момента её собирал.
+Пример печатает, что он нашёл, и рисует кадр. `tools/boards_gen.py --all` уже вписал плату в матрицу
+`.github/workflows/build.yml` между её метками, так что CI с этого момента её собирает; `check_boards.py`
+падает, если матрица расходится с данными.
 
 ## 4. Измерьте тач
 

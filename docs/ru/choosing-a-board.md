@@ -46,8 +46,9 @@ endif()
 project(hello)
 ```
 
-В `main/CMakeLists.txt` — `PRIV_REQUIRES jef-sure__boards`: каталог компонента
-под `managed_components/`. (Checkout компонента, взятый через `override_path`
+`main/CMakeLists.txt` ничего не называет для компонента: менеджер компонентов делает
+то, что названо в `main/idf_component.yml`, зависимостью `main` — `jef-sure__boards` по
+каталогу под `managed_components/`. (Checkout компонента, взятый через `override_path`
 или `EXTRA_COMPONENT_DIRS`, называется по имени своего каталога, а менеджер
 компонентов сопоставляет зависимость с локальным компонентом, только если тот
 каталог называется `boards` или `jef-sure__boards`. Поэтому пример внутри

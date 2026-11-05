@@ -1,13 +1,13 @@
 # Инструменты
 
-Все в `tools/`, Python 3.8 или новее. Большинству хватает стандартной
+Все в `tools/`, Python 3.9 или новее, как у ESP-IDF 5.5. Большинству хватает стандартной
 библиотеки: `check_format.py` нужны `jsonschema` и Node.js, на котором идёт
 JavaScript страницы; импортёрам нужен `jsonschema`, а `import_pictures.py` —
 Chrome и ImageMagick. Запускайте их из корня репозитория (или из
 `managed_components/jef-sure__boards/`).
 
 Пакет реестра несёт инструменты, которыми пользуется программа: `board_select.py`, `board_project.py`,
-`board_pins.py`, `board_bom.py`, `board_calibration.py`, `boards_mcp.py`, а также `boards_gen.py`, `resolve.py` и
+`board_pins.py`, `board_bom.py`, `board_calibration.py`, `boards_mcp.py`, а также `boards_gen.py`, `project_writer.py`, `resolve.py` и
 `rules.py`, которые они импортируют. Проверки, импортёры, `audit.py`, `make_mcu.py`, `update_rates.py`,
 `take_report.py` и `sync_versions.py` — для репозитория: им нужны `test/`, ESP-IDF или сеть.
 
@@ -16,6 +16,7 @@ Chrome и ImageMagick. Запускайте их из корня репозит�
 ```sh
 python3 tools/boards_gen.py --all          # everything, from every board and module
 python3 tools/boards_gen.py cyd_s028r      # one board's glue and board.cmake only
+python3 tools/boards_gen.py my_board --data DIR --out DIR  # плата из своего каталога, её клей в другой
 ```
 
 Читает `catalog/boards/*/board.json` и `catalog/modules/*/module.json`, накладывает
@@ -29,7 +30,9 @@ python3 tools/boards_gen.py cyd_s028r      # one board's glue and board.cmake on
 - `dependencies:` в `idf_component.yml`, между `# boards: dependencies
   generated` и `# boards: end of generated`;
 - таблицу плат в `README.md` и `README.ru.md`, между
-  `<!-- boards:table -->` и `<!-- boards:end -->`.
+  `<!-- boards:table -->` и `<!-- boards:end -->`;
+- `catalog/index.json`, список файлов каталога, который читает страница;
+- список плат матрицы `.github/workflows/build.yml`, между его метками.
 
 Он записывает файл только когда его содержимое меняется. Таблицы в его начале
 — это знание, которое у него есть сверх данных: какой заголовок DGX и какие
@@ -66,6 +69,7 @@ python3 tools/board_pins.py cyd_s028r           # GPIO -> owner, conflicts marke
 python3 tools/board_pins.py cyd_s028r --tree    # chip -> buses -> devices -> pins
 python3 tools/board_pins.py --all               # every board's conflicts, for CI
 python3 tools/board_pins.py jc1060p470c --display  # 1024x600 154x86: pixels and mm, as shown
+python3 tools/board_pins.py my_board --project ~/myproject --free  # плата программы: свободные пины
 ```
 
 `--display` печатает то же, что содержат `BOARD_PIXELS` и `BOARD_MM`, для Makefile без
@@ -108,6 +112,7 @@ python3 tools/board_select.py host --as jc8012p4a1c ~/myproject    # компь�
 python3 tools/board_project.py ~/my_game --board jc8012p4a1c
 python3 tools/board_project.py ~/terminal --board jc1060p470c --module lcd2004_pcf8574
 python3 tools/board_project.py ~/again --selection ~/old/selection.json
+python3 tools/board_project.py ~/clock-2 --board cyd_s028r --name clock_two  # папка, чьё имя не годится в имя проекта
 ```
 
 Новый проект на плате, выбранной вручную, без страницы: те же файлы, что страница пишет в новую папку (их
@@ -188,6 +193,10 @@ python3 tools/make_mcu.py [каталог ESP-IDF]
 сравнивались на странице. Нужна только сеть; страница лишь читает готовый файл.
 
 ## take_report.py
+
+```sh
+python3 tools/take_report.py body.md --issue 3    # текст issue 3 — в каталог этого репозитория
+```
 
 Берёт цену из issue по форме `price.yml` и добавляет её предложением в файл позиции. Текст issue может написать кто
 угодно, поэтому он читается только как поля, а `.github/workflows/reports.yml` передаёт его через файл. Действие
@@ -311,7 +320,7 @@ python3 tools/boards_mcp.py --install
 Без агента сервер всё равно даёт страницу, её решатель и запись проекта — для папки, в которой запущен:
 
 ```sh
-python3 managed_components/jef-sure__boards/tools/boards_mcp.py --serve   # или --project DIR
+python3 managed_components/jef-sure__boards/tools/boards_mcp.py --serve   # или --project DIR, --port N
 ```
 
 Он печатает ссылку на страницу и работает до Ctrl-C. Ссылка говорит, что модели нет, и страница не показывает диалог.
@@ -458,8 +467,9 @@ include в сгенерированном клее нужна заглушка �
 
 ## Workflow CI
 
-`.github/workflows/build.yml`: `check_boards.py --host-syntax` и
+`.github/workflows/build.yml`: `check_boards.py --host-syntax`, `check_format.py` и
 `board_pins.py --all`, затем `examples/hello_board` для каждой платы и
 `examples/hello_lvgl` для каждой платы с графическим дисплеем под двумя
-версиями ESP-IDF, плюс одна сборка
-`hello_board` с модулем 2004, каждая в своём job. Добавляйте плату в матрицу, когда добавляете её в данные.
+версиями ESP-IDF, плюс одна сборка `hello_board` с модулем 2004, проект, который оставляет части без дела,
+`examples/local_boards`, `examples/multi_board` и новый проект по README, каждая в своём job. Список плат матрицы
+пишет `boards_gen.py --all` из данных, между его метками.

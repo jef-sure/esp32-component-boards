@@ -307,7 +307,6 @@ LANGUAGES.ru = {
         '{0}: {1} more parts were not tried; pin a part in the block to choose one': '{0}: ещё {1} деталей не пробовались; чтобы выбрать одну, закрепи деталь в блоке',
         '{0} more boards': 'ещё плат: {0}',
         'Put these into CMakeLists.txt yourself, the include of project.cmake among them: they read the board.': 'Впиши это в CMakeLists.txt сам, вместе со строкой include project.cmake: так читается плата.',
-        'In main/CMakeLists.txt, in idf_component_register: {0}': 'В main/CMakeLists.txt, в idf_component_register: {0}',
         'Measures up to, ppm': 'Мерит до, ppm',
         'RTD, PT100 or PT1000': 'Терморезистор, PT100 или PT1000',
         'Infrared, without contact': 'Инфракрасный, без контакта',

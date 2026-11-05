@@ -149,13 +149,18 @@ tools/boards_gen.py                    data -> glue, Kconfig, lists, manifest ru
 tools/check_format.py                  the schema, the rules and their cases in test/format/
 tools/check_boards.py                  the generated is what the data says; pins do not collide; the API holds
 tools/board_pins.py                    the map of a board's pins and its tree
-tools/board_select.py                  choose the board for a project
+tools/board_select.py                  choose the boards of a project: their defaults, presets and locks
+tools/board_project.py                 a new project without the page, or a kit of the page taken back
+tools/boards_mcp.py, project_writer.py the page beside an agent over MCP, or alone with --serve, and its writes
 tools/board_bom.py                     what to buy for a product, with prices as ranges
+tools/take_report.py                   a price from a GitHub issue, into the catalog
 tools/update_rates.py                  the exchange rates of the catalog, from the ECB
 editor/                                the page: what to build, a kit, a project; and the editor. Any static server from the root, then /editor/
 examples/hello_board/                  the smallest program, built for every board in CI
 examples/hello_lvgl/                   LVGL through DGX-LVGL, built in CI for every board with a graphics display
 examples/local_boards/                 a board and a module of the program itself, in components/local-boards/
+examples/multi_board/                  one program built for two boards of different chips, by presets
+examples/board_report/                 the report of a new board, for its first entry in the catalog
 docs/en/, docs/ru/                     the documentation
 ```
 
@@ -203,9 +208,10 @@ the matrix of `.github/workflows/build.yml`. `examples/hello_board` and
 under ESP-IDF 6.1: the display, the touch and the sound start without errors in
 the log. Touch coordinates were checked by finger on all three and are correct.
 On the JC1060P470C the picture was checked too, colors and orientation. The 2004
-module shows its text on an ESP32 dev board. On the JC8012P4A1C, flashed too, the display starts and the sound of
-`hello_board` was heard. Its touch needs the firmware the program embeds: with it the log is clean,
-and nobody has tried it by finger.
+module showed its text on an ESP32 dev board, as a board of a program that wires its I2C: `esp32_devkit` of the
+catalog opens no bus to a module. On the JC8012P4A1C, flashed too, the display starts and the sound of
+`hello_board` was heard. Its touch needs the firmware the program embeds: with it the handwritten clock, moved onto
+the component, was worked by finger on this board and on the JC1060P470C.
 
 The display module `tft153_st77916` ran on `esp32s3_devkit` as a board of a program, and its picture
 was seen. On those pins ESP-IDF 6.1 needs DGX 0.10.3: the SPI driver of 6.1 takes a quad bus for an

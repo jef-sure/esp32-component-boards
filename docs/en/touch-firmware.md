@@ -27,7 +27,6 @@ In the program's `main/CMakeLists.txt`:
 
 ```cmake
 idf_component_register(SRCS "main.c"
-                       PRIV_REQUIRES jef-sure__boards
                        EMBED_FILES "jc8012p4a1c_touch.fw")
 ```
 

@@ -159,7 +159,7 @@ Any other kind (`sdio`, `sdspi`) is kept as data. The program reads it with
 | `used` | `false`: a project leaves this part of its board alone: its pins stay taken, no library comes for it, its `board_*_init` returns false |
 | `maker`, `part`, `marking`, `ref`, `draw` | what it physically is, see [What is on the board](#what-is-on-the-board) |
 | `price`, `tariff`, `count` | for what is bought apart, see [Price](#price) |
-| `class` | a role or a list of roles: `display`, `touch`, `audio`, `storage`, `radio`, `network`, `nfc`, `sensor`, `io_expander`, `pmic`, `battery_adc`, `adc`, `camera`, `imu`, `rtc`, `button`, `encoder`, `keyboard`, `gamepad`, `led`, `usb`, `gps`, `motor`, `i2c_mux`, `fuel_gauge`, `other` |
+| `class` | a role or a list of roles: `display`, `touch`, `audio`, `storage`, `radio`, `network`, `nfc`, `sensor`, `io_expander`, `pmic`, `battery_adc`, `adc`, `camera`, `imu`, `rtc`, `button`, `encoder`, `keyboard`, `gamepad`, `led`, `buzzer`, `usb`, `gps`, `motor`, `i2c_mux`, `fuel_gauge`, `other` |
 | `on` | the buses of the device, each with what belongs to that connection: `address`, `address_try`, `cs`, `hz`, `mode`, `role`; `format` of an I2S bus (`std`, `tdm`, `pdm`; the two directions of a port can differ); `sio` of an SPI bus with data both ways on MOSI |
 | `pins` | its other lines: `dc`, `rst`, `backlight`, `int`, `te` |
 | `config` | facts that do not change |
@@ -334,7 +334,8 @@ module follow those of the board, named `<use>_<name>`.
 }
 ```
 
-`how` says what sets it, from a closed list; for what a program can set, it is
+`how` says what sets it, from a closed list (`backlight_on_off`, `backlight_pwm`, `pmic_rail`, `panel_command`,
+`codec_volume`, `wifi_tx_power`, `driver`, `switch`, `solder`, `derived`); for what a program can set, it is
 one C function in the adapter of the library. `switch`, `solder` and `derived` are for a person or
 for the tools. `read` says how the value can be known: `command`, `probe` or
 `none`. `start` is the value of the board. A value a person wants lies in a later
@@ -778,6 +779,19 @@ when absent, `pending` for what is still to be tried, `refuted` for a source tha
 disagrees. `unit` says which piece of the board was tried. A variant inherits the entries of its base marked `on_board`, because
 they were earned on another board.
 
+## Questions
+
+`catalog/questions.json` holds what the page asks. A question has an `id`, a `text` and a `type`: `choice` (its
+`choices`, each a `value` and a `text`), `flag`, `count` (with `max`), `number`, `text`, `outputs` (tones and PWM)
+or `version` (of a platform). `top` puts it in the top row of the page. `when` asks it only after other answers, by
+their ids: `true` for any answer but `none`, `{"at_least": n}` for a count. An answer asks a board for something by
+`needs`, of the question or of the choice taken: a device of a `class`, with `where` the fields it must have, what the
+board `provides`, what its `chip` provides, or an `external` antenna. A question with `limit` limits the parts instead:
+a `measure` of the solver (`diagonal_in`, `range_mm`, `shape`, `chain` and others), or a `field` of the data of a part
+with how it `fits` the answer, `of` a class or a role, and only for blocks of a `variant` when it names some.
+`"asked": "block"` asks it of each block, the answer in `asks` of the block; `"any_variant": false` of its `limit`
+keeps a block of any variant from asking it.
+
 ## Judgements of the solver
 
 `catalog/judgements.json` holds how the solver chooses where the data leaves a choice open. A judgement has an `id`, a
@@ -793,6 +807,7 @@ kit, `selection.json` keeps it, and a case of `test/solver/` checks the `id`, no
 | `note_cost` | `note` | a pin with that note of the docs is given, with a line of what it costs; any other note keeps a pin out |
 | `unnamed_variant` | | a part of the board of no named variant answers nothing for a variant asked when a module of the catalog names it, and stays a line |
 | `resource_limit` | `resource` (`ledc`) | a kit that asks more of the resource than the chip has is refused |
+| `seen_level` | | a chip whose least high is above what the pins give, and that a trial on hardware drove with less (`high_seen_mv` with its `checked`), gets a line instead of a level shifter |
 
 The strapping pins of a chip are copied from its datasheet, not judged: `gpio.boot_modes` holds the rows of its table
 of boot modes (the level of each pin, or `any`, for `spi_boot` and for each download mode), and each strapping pin has

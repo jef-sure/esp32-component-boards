@@ -1,3 +1,2 @@
-# No REQUIRES: see main/CMakeLists.txt of hello_board. A project of its own, with the component
-# from the registry, writes PRIV_REQUIRES jef-sure__boards.
+# No REQUIRES: see main/CMakeLists.txt of hello_board.
 idf_component_register(SRCS "main.c")

@@ -297,7 +297,7 @@ const SelectPage = {
             store.plan = null;
             localStorage.setItem(PREFERENCES.answers, JSON.stringify(answers));
         }, { deep: true });
-        const money = (price) => (!price ? '' : !price.known ? translate(store.language, 'price not known') : `${price.low === price.high ? price.low : `${price.low}–${price.high}`} ${price.currency}${price.missing.length ? ' + ?' : ''}`);
+        const money = (price) => priceText(price, (text, ...values) => translate(store.language, text, ...values));
         const priceLink = (item) => reportLink({ template: 'price.yml', item, currency: store.currency });
         const filter = Vue.ref('');
         const said = Vue.ref('');

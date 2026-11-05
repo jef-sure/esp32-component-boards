@@ -27,6 +27,8 @@ const LEAST_WORTH = 0.01; // the least a part of a board weighs, in KIT_CURRENCY
 const PRESCALES_TRIED = 8; // the smallest prescalers that fit: a larger one only loses resolution
 const MM_IN_INCH = 25.4;
 const cents = (value) => Math.round(value * 100) / 100;
+// a range of a price as the page writes it: one number when both ends are the same
+const spread = ([low, high]) => (cents(low) === cents(high) ? `${cents(low)}` : `${cents(low)}–${cents(high)}`);
 
 const STATUSES_THAT_FIT = ['yes', 'partly'];
 const HEALTH_SECTIONS = ['frames', 'waiting', 'code_health'];
@@ -1037,6 +1039,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
     // What is bought: what the person has already costs nothing, the board and as many of a module as they have.
     function priceOf(doc, picks, currency, addons = [], have = new Map()) {
         const had = have.get(doc.name) > 0;
+        let owned = had; // something the person has took off the price: the price without it goes beside
         const own = had ? [0, 0] : rangeOf(doc.price, currency);
         const missing = own ? [] : [doc.title ?? doc.name];
         const unpriced = own ? [] : [{ title: doc.title ?? doc.name, item: `boards/${doc.name}` }];
@@ -1054,6 +1057,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         }
         for (const [name, { title, count: wanted }] of counted) {
             const count = wanted - Math.min(wanted, have.get(name) ?? 0);
+            owned ||= count < wanted;
             if (!count) continue;
             if (name.startsWith('device ')) {
                 const chip = name.slice('device '.length);
@@ -1085,7 +1089,8 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
                 unpriced.push({ title, item: `${kind}/${name}` });
             }
         }
-        return { low: cents(low), high: cents(high), currency, missing, unpriced, known, packs };
+        const plain = owned ? priceOf(doc, picks, currency, addons) : null;
+        return { low: cents(low), high: cents(high), currency, missing, unpriced, known, packs, ...(plain?.known ? { normal: { low: plain.low, high: plain.high } } : {}) };
     }
 
     function kitsOfBoard(name, wanted) {
@@ -1346,7 +1351,9 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             const price = priceOf({ ...source, price: board.price }, picks, wanted.currency, addons, wanted.have);
             // a board the person has: its price and the worth of what nobody asked for on it are spent already
             const had = wanted.have.get(boardName) > 0;
-            if (had) lines.push({ level: 'yes', text: t('{0}: you have it, so its price and what nobody asked for on it count nothing', source.title ?? boardName) });
+            const usual = rangeOf(board.price, wanted.currency);
+            if (had) lines.push({ level: 'yes', text: t('{0}: you have it, so its price ({1}) and what nobody asked for on it count nothing', source.title ?? boardName,
+                usual ? `${spread(usual)} ${wanted.currency}` : t('price not known')) });
             for (const item of modules.filter((module) => wanted.have.get(module.name) > 0)) {
                 lines.push({ level: 'yes', text: t('{0}: you have {1} of the {2} it takes', item.title, Math.min(wanted.have.get(item.name), item.count ?? 1), item.count ?? 1) });
             }

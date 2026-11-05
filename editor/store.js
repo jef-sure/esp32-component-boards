@@ -148,17 +148,18 @@ async function cmakeSnippet() {
 }
 
 // The section of the README of a project for one of its kits: the board, what it takes, its wires and its libraries.
-// The price of a kit as a card and a README write it, and beside it the price without what the person has.
-function priceText(price, say = (text, ...values) => values.reduce((out, value, i) => out.replace(`{${i}}`, value), text)) {
+// The price of a kit as a card and a README write it: to buy now, what the person has at nothing, and in full when that
+// differs, everything bought, as the cost of making the thing again.
+function priceText(price, cost, say = (text, ...values) => values.reduce((out, value, i) => out.replace(`{${i}}`, value), text)) {
     if (!price) return '';
-    if (!price.known) return say('price not known');
-    const text = `${spread([price.low, price.high])} ${price.currency}${price.missing.length ? ' + ?' : ''}`;
-    return price.normal ? `${text} (${say('counting what you have; normally {0}', `${spread([price.normal.low, price.normal.high])} ${price.currency}`)})` : text;
+    const text = (range) => (range.known ? `${spread([range.low, range.high])} ${price.currency}${range.missing.length ? ' + ?' : ''}` : say('price not known'));
+    if (!cost || (cost.low === price.low && cost.high === price.high && cost.known === price.known)) return text(price);
+    return say('to buy now: {0} · in full: {1}', text(price), text(cost));
 }
 
 function kitSection(kit, board) {
     const parts = [`- ${kit.title}`, ...kit.modules.map((item) => `- ${item.count} x ${item.title}, on ${item.on.toUpperCase()}`),
-        ...(kit.price?.known ? [`- The price: ${priceText(kit.price)}`] : [])];
+        ...(kit.price?.known ? [`- The price: ${priceText(kit.price, kit.cost)}`] : [])];
     const notes = kit.says.filter((line) => line.level === 'do').map((line) => `- ${line.text}`);
     return [`## ${kit.title}: \`${board}\``, '', '### What it takes', '', ...parts, ...notes, '', '### The wires', '', wiresText(kit), '', '### The libraries', '', librariesText(kit)].join('\n');
 }

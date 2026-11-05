@@ -58,7 +58,7 @@ LANGUAGES.ru = {
         'Boards': 'Платы',
         'Modules': 'Модули',
         '{0}: you have it, so its price ({1}) and what nobody asked for on it count nothing': '{0}: она у вас есть, поэтому её цена ({1}) и то, что на ней не просили, ничего не стоят',
-        'counting what you have; normally {0}': 'с учётом того, что у вас есть; обычная цена {0}',
+        'to buy now: {0} · in full: {1}': 'купить сейчас: {0} · целиком: {1}',
         '{0}: you have {1} of the {2} it takes': '{0}: у вас есть {1} из {2} нужных',
         'The component comes from git at the commit {0}.': 'Компонент берётся из git на коммите {0}.',
         'The component comes from the registry, {0}: it resolves once that version is published.': 'Компонент берётся из реестра, {0}: это сработает, когда версия будет опубликована.',

@@ -134,7 +134,8 @@ python3 tools/board_bom.py my_board --project . --csv my_board.csv      # the li
 A line is what is bought as one: the board a project stands on, then the modules and devices
 the project adds, the same goods on one line. The chips of a bought board are not lines, and a
 board with `extends` is a variant, one purchase. So a product is written as `kind: project`
-over its base board.
+over its base board. The list counts everything, what the person has already among it: a product is bought whole, so
+its total is the cost in full of the page.
 
 Prices are ranges, so a total is a range. A line with no price is named, and the total then
 reads "at least". Currencies are not converted. For a quantity the tool takes, per shop, the
@@ -402,8 +403,10 @@ board is worth the lowest price of its chip by the piece, from `price` of its en
 class or of all, by the piece. A price of nothing is no price, and a part weighs at least a cent: nothing is free. The priced
 modules of `imported-shops/` stay out of the repository, so only a chip with a price gives the same order everywhere. A budget makes the price a criterion: it then comes right after the unknowns, and a
 missing price counts as an unknown. What the person has already, boards and modules named under *What you have
-already* (`have` of the answers), costs nothing in a kit, and on a board they have what nobody asked for weighs nothing:
-a board one has comes before a dev board and a module that would do. `tools/check_format.py` gives the kits of
+already* (`have` of the answers), costs nothing in the price to buy now, and on a board they have what nobody asked
+for weighs nothing: a board one has comes before a dev board and a module that would do. Beside it the card shows the
+cost in full, everything bought, as for making the thing again; `selection.json` keeps both, `price` and `cost` of
+each board, and the order and a budget go by the price to buy now. `tools/check_format.py` gives the kits of
 `test/solver/` to the generator as well.
 
 The cards wait for the first block on the canvas: with nothing asked every board fits. `make a project…` on a card, while

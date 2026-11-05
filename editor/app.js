@@ -297,7 +297,7 @@ const SelectPage = {
             store.plan = null;
             localStorage.setItem(PREFERENCES.answers, JSON.stringify(answers));
         }, { deep: true });
-        const money = (price) => priceText(price, (text, ...values) => translate(store.language, text, ...values));
+        const money = (price, cost) => priceText(price, cost, (text, ...values) => translate(store.language, text, ...values));
         const priceLink = (item) => reportLink({ template: 'price.yml', item, currency: store.currency });
         const filter = Vue.ref('');
         const said = Vue.ref('');
@@ -539,7 +539,7 @@ idf.py build flash monitor</pre>
                     <img v-if="kit.picture" class="picture" :src="host.pictureSrc(kit.picture)" :alt="kit.title">
                     <h3>{{ kit.title }}</h3>
                     <p v-if="kit.modules.length || kit.addons?.length" class="added">+ {{ partsOf(kit) }}</p>
-                    <p class="note">{{ money(kit.price) }}<template v-if="kit.modules.length || kit.addons?.length"> · {{ t('Parts bought one by one: the solver put them together.') }}</template></p>
+                    <p class="note">{{ money(kit.price, kit.cost) }}<template v-if="kit.modules.length || kit.addons?.length"> · {{ t('Parts bought one by one: the solver put them together.') }}</template></p>
                     <div v-if="kit.modules.some((module) => module.picture)" class="parts">
                         <figure v-for="module in kit.modules.filter((item) => item.picture)" :key="module.name" :title="module.credit">
                             <img :src="host.pictureSrc(module.picture)" :alt="module.title"><figcaption>{{ module.title }}</figcaption></figure>
@@ -562,7 +562,7 @@ idf.py build flash monitor</pre>
                     <span v-else-if="!kit.writable" class="hint">{{ t('The page writes projects for ESP-IDF only for now.') }}</span>
                     <span v-else-if="!canWrite" class="hint">{{ t('Writing a project into a folder takes Chromium, or the page opened from tools/boards_mcp.py.') }}</span>
                     <details v-if="rest.length" class="more"><summary>{{ t('{0} more on this board', rest.length) }}</summary>
-                        <p v-for="other in rest" :key="other.headline">+ {{ partsOf(other) || t('nothing more') }} <span class="note">{{ money(other.price) }}</span>
+                        <p v-for="other in rest" :key="other.headline">+ {{ partsOf(other) || t('nothing more') }} <span class="note">{{ money(other.price, other.cost) }}</span>
                             <button v-if="other.writable" :class="{ on: chosenHas(other) }" @click="store.chooseKit(other)">{{ t(chosenHas(other) ? 'in the project' : 'add to the project') }}</button>
                             <button v-if="canWrite && other.writable && !store.chosen.length" @click="store.planProject(other)">{{ t('make a project…') }}</button></p>
                     </details>

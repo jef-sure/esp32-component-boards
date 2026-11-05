@@ -1089,8 +1089,10 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
                 unpriced.push({ title, item: `${kind}/${name}` });
             }
         }
-        const plain = owned ? priceOf(doc, picks, currency, addons) : null;
-        return { low: cents(low), high: cents(high), currency, missing, unpriced, known, packs, ...(plain?.known ? { normal: { low: plain.low, high: plain.high } } : {}) };
+        const price = { low: cents(low), high: cents(high), currency, missing, unpriced, known, packs };
+        // the price in full, everything bought: the cost of the thing, as for making it again
+        const full = owned ? priceOf(doc, picks, currency, addons) : price;
+        return { ...price, full: { low: full.low, high: full.high, known: full.known, missing: full.missing } };
     }
 
     function kitsOfBoard(name, wanted) {
@@ -1433,7 +1435,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             const headline = [title, ...modules.map(named), ...addons.map(named)].join(' + ');
             const pictures = Object.values(board.images || {});
             const picture = pictures.find((item) => item.shows === 'front') ?? pictures[0];
-            return { name: boardName, title, headline, libraries, addons, unasked: unasked.length, unaskedWorth: had ? 0 : cents(unasked.reduce((sum, [, device]) => sum + worthOf(device), 0)), imported: Boolean(doc.origin), writable: !doc.origin && platform?.writes_projects !== false, picture: picture ? `boards/${boardName}/${picture.file}` : null, fits, says: lines, modules, wires: project ? wiresOf(base, project, picks) : [], wiring: project ? wiringOf(base, project, picks) : [], price, project, free: freePins(resolved).length };
+            return { name: boardName, title, headline, libraries, addons, cost: { ...price.full, currency: price.currency }, unasked: unasked.length, unaskedWorth: had ? 0 : cents(unasked.reduce((sum, [, device]) => sum + worthOf(device), 0)), imported: Boolean(doc.origin), writable: !doc.origin && platform?.writes_projects !== false, picture: picture ? `boards/${boardName}/${picture.file}` : null, fits, says: lines, modules, wires: project ? wiresOf(base, project, picks) : [], wiring: project ? wiringOf(base, project, picks) : [], price, project, free: freePins(resolved).length };
         }
     }
 
@@ -1475,6 +1477,9 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
                 modules: kit.modules.map(({ name, count, on }) => ({ name, count, on })),
                 libraries: kit.libraries.map(({ name, version }) => ({ name, version })),
                 says: kit.says.map(({ level, text, judgement }) => ({ level, text, ...(judgement ? { judgement } : {}) })),
+                // to buy now, what the person has at nothing, and in full, everything bought
+                ...(kit.price?.known ? { price: [kit.price.low, kit.price.high] } : {}),
+                ...(kit.cost?.known ? { cost: [kit.cost.low, kit.cost.high] } : {}),
             })),
             current,
             others: others.filter((item) => item.fits).slice(0, OTHERS_KEPT).map((item) => item.headline),

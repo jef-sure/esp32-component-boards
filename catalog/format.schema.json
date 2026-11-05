@@ -914,7 +914,9 @@
               "base": { "$ref": "#/$defs/name", "description": "The board of the catalog a board of the program extends." },
               "modules": { "type": "array", "items": { "type": "object" } },
               "libraries": { "type": "array", "items": { "type": "object" } },
-              "says": { "type": "array", "items": { "type": "object" }, "description": "What the kit said, as it was shown." }
+              "says": { "type": "array", "items": { "type": "object" }, "description": "What the kit said, as it was shown." },
+              "price": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "number", "minimum": 0 }, "description": "What it cost to buy then, in the currency of the selection: what the person had at nothing." },
+              "cost": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "number", "minimum": 0 }, "description": "What it costs in full, everything bought: the cost of making it again." }
             }
           }
         },

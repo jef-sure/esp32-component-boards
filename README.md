@@ -77,9 +77,10 @@ no `menuconfig`. ESP-IDF 5 does not read the presets; there the board is named o
 
 What the board needs comes with the choice: the DGX drivers of its panel as `select`s, the other parts (a touch
 driver, a codec, hd44780) by rules in the component's `idf_component.yml`, so a build for the CYD S028R downloads the
-XPT2046 driver and nothing of the GT911 or of the codec. Every dependency of the component but ESP-IDF is conditional
-in this way. The list of dependencies on the page of the registry cannot tell a conditional one from one that always
-comes and shows them all: it is what the whole catalog may need, not what one build downloads, see
+XPT2046 driver and nothing of the GT911 or of the codec. **Every dependency of the component but ESP-IDF is
+conditional in this way: a build downloads only what the chosen board needs. The list of dependencies on the page of
+the registry cannot tell a conditional one from one that always comes and shows them all: it is what the whole catalog
+may need, not what one build downloads.** See
 [what comes with the choice](docs/en/choosing-a-board.md#what-comes-with-the-choice). Changing the board and building
 for several boards are in [choosing-a-board.md](docs/en/choosing-a-board.md).
 

@@ -118,9 +118,17 @@ python3 managed_components/jef-sure__boards/tools/board_select.py jc4827w543c .
 idf.py build flash monitor
 ```
 
-Та же программа: дисплей теперь 480 x 272, тач — GT911. Плата, названная последней, становится текущей;
-`idf.py --preset cyd_s028r build` собирает другую, каждую в своём `build/<плата>`. См.
-[choosing-a-board.md](choosing-a-board.md).
+Та же программа на прошитой так JC4827W543C:
+
+```
+the board: Guition JC4827W543C (jc4827w543c), esp32s3
+the display: 480 x 272 pixels, 95 x 54 mm
+the touch: 5 fingers
+the button: free
+```
+
+Плата, названная последней, становится текущей; `idf.py --preset cyd_s028r build` собирает другую, каждую в своём
+`build/<плата>`. См. [choosing-a-board.md](choosing-a-board.md).
 
 ## Без правки файлов: одна команда или страница
 

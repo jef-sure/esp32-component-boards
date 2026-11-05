@@ -118,9 +118,17 @@ python3 managed_components/jef-sure__boards/tools/board_select.py jc4827w543c .
 idf.py build flash monitor
 ```
 
-The same program: the display is 480 x 272 now, the touch a GT911. The board named last is the current one;
-`idf.py --preset cyd_s028r build` builds the other, each in its own `build/<board>`. See
-[choosing-a-board.md](choosing-a-board.md).
+The same program, on a JC4827W543C flashed so:
+
+```
+the board: Guition JC4827W543C (jc4827w543c), esp32s3
+the display: 480 x 272 pixels, 95 x 54 mm
+the touch: 5 fingers
+the button: free
+```
+
+The board named last is the current one; `idf.py --preset cyd_s028r build` builds the other, each in its own
+`build/<board>`. See [choosing-a-board.md](choosing-a-board.md).
 
 ## Without editing a file: one command, or the page
 

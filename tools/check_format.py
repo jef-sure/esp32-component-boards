@@ -23,7 +23,8 @@ Checks of the data format. Needs jsonschema and node: the Python of ESP-IDF has 
    for the current one; a board named again becomes current, --current changes only default, --again makes them again by
    selection.json, and a CMakePresets.json or a file of defaults of another is left alone;
 13. the lines of CMake that read the defaults of the board and its lock are the same in editor/skeleton/, the examples, the
-   READMEs and choosing-a-board.md.
+   READMEs and choosing-a-board.md;
+14. board_project.py --selection takes back a kit the page wired, with its board of the program under the new name.
 """
 import copy
 import hashlib
@@ -350,6 +351,45 @@ def presets_wrong():
         if list(project.glob("sdkconfig.defaults.*")) or presets("name"):
             wrong.append("a CMakePresets.json of another was replaced, or defaults written beside it")
     print(f"presets: {'0 wrong' if not wrong else '; '.join(wrong)}")
+    return len(wrong)
+
+
+def taken_back_wrong():
+    """board_project.py --selection takes back a kit the page wired: its board of the program under the new name, the stub of
+    its defaults, the library the program calls in the manifest, and the wires in the README."""
+    wrong = []
+    board = {"format": "jef-sure/boards", "format_version": 2, "kind": "project", "name": "old_esp32_devkit", "extends": "esp32_devkit",
+             "title": "ESP32 DevKit, 4 MB with Round 1.53-inch TFT on an ST77916, PN532 module",
+             "buses": {"qspi": {"spi2": {"sclk": 4, "d0": 21, "d1": 22, "d2": 25, "d3": 26, "hz": 40000000}}, "spi": {"spi3": {"mosi": 23, "miso": 19, "sclk": 18}}},
+             "devices": {"led": {"used": False}},
+             "modules": {"display": {"module": "tft153_st77916", "on": {"qspi.spi2": {"cs": 27}}, "pins": {"rst": 32, "backlight": 33}, "supply": {"VCC": "3V3"}},
+                         "nfc": {"module": "pn532_module", "on": {"spi.spi3": {"cs": 5}}, "supply": {"VCC": "3V3"}}}}
+    entry = {"board": "old_esp32_devkit", "base": "esp32_devkit", "modules": [{"name": "tft153_st77916", "count": 1, "on": "qspi"}, {"name": "pn532_module", "count": 1, "on": "spi"}],
+             "libraries": [{"name": "jef-sure/dgx", "version": "0.10.3"}, {"name": "jef-sure/pn532", "version": "0.8.1"}], "says": []}
+    with tempfile.TemporaryDirectory() as folder:
+        old, new = pathlib.Path(folder) / "old", pathlib.Path(folder) / "new"
+        (old / "components" / "local-boards" / "boards" / "old_esp32_devkit").mkdir(parents=True)
+        (old / "components" / "local-boards" / "boards" / "old_esp32_devkit" / "board.json").write_text(json.dumps(board))
+        (old / "selection.json").write_text(json.dumps({"format": "jef-sure/boards", "format_version": 3, "name": "old", "currency": "EUR", "answers": {"blocks": []},
+                                                        "boards": [entry], "current": "old_esp32_devkit", "others": [], "rejected": []}))
+        done = subprocess.run([sys.executable, str(ROOT / "tools" / "board_project.py"), str(new), "--selection", str(old / "selection.json"), "--name", "fresh"], capture_output=True, text=True)
+        if done.returncode:
+            wrong.append(f"board_project.py --selection: {(done.stderr.strip().splitlines() or [''])[-1]}")
+        else:
+            local = new / "components" / "local-boards" / "boards" / "fresh_esp32_devkit" / "board.json"
+            if not local.exists() or json.loads(local.read_text())["name"] != "fresh_esp32_devkit" or "nfc" not in json.loads(local.read_text())["modules"]:
+                wrong.append("the board of the program is not taken under the new name")
+            if not (new / "sdkconfig.defaults.fresh_esp32_devkit").read_text().startswith("# board_select.py fresh_esp32_devkit\n"):
+                wrong.append("the stub of the defaults does not name the board of the program")
+            manifest = (new / "main" / "idf_component.yml").read_text()
+            if 'jef-sure/pn532: "^0.8.1"' not in manifest or "jef-sure/dgx" in manifest:
+                wrong.append("the manifest does not name the library the program calls, or names one the board starts")
+            if "| PN532 module | CS | GPIO 5 of spi.spi3 |" not in (new / "README.md").read_text():
+                wrong.append("the README has not the wires of the board of the program")
+            selection = json.loads((new / "selection.json").read_text())
+            if (selection["name"], selection["current"]) != ("fresh", "fresh_esp32_devkit"):
+                wrong.append(f"selection.json names {selection['name']}, {selection['current']}")
+    print(f"taken back: {'0 wrong' if not wrong else '; '.join(wrong)}")
     return len(wrong)
 
 
@@ -914,6 +954,7 @@ def main():
     failed += reports_refused()
     failed += goods_wrong()
     failed += presets_wrong()
+    failed += taken_back_wrong()
     failed += package_wrong()
     run = subprocess.run(["node", str(TESTS / "page_cli.js")], capture_output=True, text=True)
     print(run.stdout.strip() + run.stderr.strip()[-300:])

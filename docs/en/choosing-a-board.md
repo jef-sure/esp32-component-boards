@@ -6,11 +6,10 @@ The board is named once, on one command line. Everything else follows.
 
 ```sh
 idf.py create-project hello && cd hello
+idf.py add-dependency "jef-sure/boards^0.0.1"
 ```
 
-The component is not in the registry yet: take it from git, at a commit, so that
-a build gives the same tomorrow. Once it is published, `idf.py add-dependency
-"jef-sure/boards^0.0.1"` will take its place.
+A commit not published yet is taken from git, at that commit, so that a build gives the same tomorrow:
 
 ```yaml
 # main/idf_component.yml

@@ -51,7 +51,7 @@ by kind, never by the name of a board.
   generated glue and the checks of the data.
 - CI builds every board under ESP-IDF 5.5 and 6.1, with LVGL, a board of a program with a display and a 2004, two boards in one
   project, and a new project made as the README says.
-- Documentation in English and Russian.
+- Documentation in English and Russian, starting with a quick start: a program on a board from an empty folder.
 
 ### Known
 

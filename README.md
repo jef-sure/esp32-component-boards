@@ -2,11 +2,10 @@
 
 *[По-русски: README.ru.md](README.ru.md)*
 
-An ESP-IDF component that describes the boards a program runs on **once, as
-data**, and sets their hardware up for the program. A directory per board in
-`catalog/boards/` holds its pins, buses and peripherals in one `board.json`; the
-component turns that into C glue and the program asks for what it needs **by
-kind**, never by the board's name:
+An ESP-IDF component for two questions about a device: what to build it on, and how its program gets to the
+hardware. A board is described **once, as data**: its pins, buses and parts, each fact with where it comes from.
+The component sets the hardware of the chosen board up, and the program asks for what it needs **by kind**, never by
+the board's name:
 
 ```c
 #include "boards.h"
@@ -55,56 +54,31 @@ is one peripheral among others. What a board can have today:
   set up itself (the SDIO of a radio, the pins of an SD slot), kept as data the
   program can read.
 
-## Choosing a board
-
-The board is named once, on one command line. The component's
-`tools/board_select.py` writes two files into the project: `sdkconfig.defaults.<board>`,
-the board's chip, memory and flash settings and the line that chooses it in the
-menu of the configuration; and `CMakePresets.json`, whose preset builds the board
-in `build/<board>`.
+## Quick start
 
 ```sh
-idf.py reconfigure    # fetches the component, named in main/idf_component.yml
+idf.py create-project hello && cd hello
+idf.py add-dependency "jef-sure/boards^0.0.1"
+# the lines of the quick start into CMakeLists.txt, then:
+idf.py reconfigure
 python3 managed_components/jef-sure__boards/tools/board_select.py cyd_s028r .
 idf.py build flash monitor
 ```
 
-The `build/` and `sdkconfig` the first `reconfigure` leaves are not read after it.
-ESP-IDF 5 does not read the presets; there the board is named on the command line:
+The whole path, with the lines of CMake and a program to flash, is in [the quick start](docs/en/quick-start.md).
+
+## Choosing a board
+
+The board is named once, on one command line. The component's `tools/board_select.py` writes two files into the
+project: `sdkconfig.defaults.<board>`, the board's chip, memory and flash settings and the line that chooses it in the
+menu of the configuration; and `CMakePresets.json`, whose preset builds the board in `build/<board>`. No `set-target`,
+no `menuconfig`. ESP-IDF 5 does not read the presets; there the board is named on the command line:
 `idf.py -B build/cyd_s028r -D SDKCONFIG=build/cyd_s028r/sdkconfig -D BOARD=cyd_s028r build flash monitor`.
 
-The component is not in the registry yet: `main/idf_component.yml` takes it from git at a
-commit (`git: https://github.com/jef-sure/esp32-component-boards.git`, `version: <a commit>`);
-once it is published, `jef-sure/boards: "^0.0.1"`. The project's `CMakeLists.txt` reads the
-file of the board the preset names, before its own defaults:
-
-```cmake
-# BOARD=<board>, which the preset of a board sets, builds with sdkconfig.defaults.<board> that board_select.py writes,
-# then with the program's own sdkconfig.defaults when it has one. A -D SDKCONFIG_DEFAULTS=... on the command line wins.
-set(BOARD "" CACHE STRING "a board of this project: its file sdkconfig.defaults.<board>")
-if(NOT SDKCONFIG_DEFAULTS AND BOARD)
-    if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/sdkconfig.defaults.${BOARD})
-        message(FATAL_ERROR "no sdkconfig.defaults.${BOARD} here: run board_select.py ${BOARD} . of jef-sure/boards")
-    endif()
-    set(SDKCONFIG_DEFAULTS "sdkconfig.defaults.${BOARD}")
-    if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/sdkconfig.defaults)
-        list(APPEND SDKCONFIG_DEFAULTS "sdkconfig.defaults")
-    endif()
-endif()
-include($ENV{IDF_PATH}/tools/cmake/project.cmake)
-if(BOARD)
-    idf_build_set_property(DEPENDENCIES_LOCK ${CMAKE_CURRENT_LIST_DIR}/dependencies.lock.${BOARD})
-endif()
-```
-
-Changing the board and building for several boards are in [choosing-a-board.md](docs/en/choosing-a-board.md).
-
-No `set-target`, no `menuconfig`. The menu (*Boards → Board the program runs
-on*) follows the file; it is there to look at and to override. What the board
-needs comes with the choice: the DGX drivers of its panel as `select`s, the
-other parts (a touch driver, a codec, hd44780) by rules in the component's
-`idf_component.yml`, so a build for the CYD S028R downloads no GT911 driver and no
-codec library. See [docs/en/choosing-a-board.md](docs/en/choosing-a-board.md).
+What the board needs comes with the choice: the DGX drivers of its panel as `select`s, the other parts (a touch
+driver, a codec, hd44780) by rules in the component's `idf_component.yml`, so a build for the CYD S028R downloads no
+GT911 driver and no codec library. Changing the board and building for several boards are in
+[choosing-a-board.md](docs/en/choosing-a-board.md).
 
 ## The boards
 
@@ -133,7 +107,56 @@ licence to redistribute: the program embeds it, see
 [docs/en/touch-firmware.md](docs/en/touch-firmware.md); without it the board
 builds and runs with its touch off.
 
-## What is in the repository
+## The page
+
+The page chooses a board and the parts for a device: the roles it needs (a display, a reader, a sensor), the kits that
+fit with their wires, levels and prices, and what is not known; then it writes the project. From a clone of the
+repository, `python3 tools/boards_mcp.py --serve --project <folder>` prints its link; given to an agent over MCP
+(`boards_mcp.py --install`), the page has a dialog with the model too. See [tools.md](docs/en/tools.md#the-page).
+
+## Documentation
+
+[The quick start](docs/en/quick-start.md), [choosing a board](docs/en/choosing-a-board.md),
+[moving a program with boards of its own](docs/en/moving-a-program.md), [the API](docs/en/api.md),
+[modules](docs/en/modules.md), [the touch firmware](docs/en/touch-firmware.md), [calibration](docs/en/calibration.md),
+[the tools](docs/en/tools.md), [the data format](docs/en/data-format.md), [how it works](docs/en/how-it-works.md),
+[adding a board](docs/en/adding-a-board.md). In Russian: [docs/ru/](docs/ru/).
+
+## How it differs from esp-bsp and esp_board_manager
+
+[espressif/esp-bsp](https://github.com/espressif/esp-bsp) describes Espressif's own boards around LVGL: every manifest
+pulls `lvgl` and `esp_lvgl_port`, and the display comes as an LVGL object.
+[espressif/esp_board_manager](https://github.com/espressif/esp_board_manager) describes boards in YAML and generates
+initialisation code into the project, with a board selected by `idf.py bmgr`. This component is meant for any board
+and any library; it differs in how it works. A board is data a script checks: pins, buses, devices, a calibration
+measured on the board, and where each fact comes from; a board of a program is described the same way, beside the
+program. The display is one peripheral among others. A library is described by chip in `catalog/libraries/`, what it
+does with each chip and what its versions require, so DGX, LVGL through DGX-LVGL and other libraries come in through
+adapters on the same terms. The page and its solver choose a board and the parts for a task from those facts. Today the
+catalog holds the ten boards of the table above, and the page also offers boards imported from other descriptions,
+marked as such. What it takes from esp-bsp is the mechanism of `components/bsp_selector`: one Kconfig
+choice, hidden symbols beside it, manifest rules on them.
+
+## Status
+
+0.0.1. Builds for every board under ESP-IDF 5.5 and 6.1, and a board of a program with a display and a
+2004: the jobs of `.github/workflows/build.yml`. `examples/hello_board` and
+`examples/hello_lvgl` were flashed on a CYD S028R, a JC4827W543C and a JC1060P470C
+under ESP-IDF 6.1: the display, the touch and the sound start without errors in
+the log. Touch coordinates were checked by finger on all three and are correct.
+On the JC1060P470C the picture was checked too, colors and orientation. The 2004
+module showed its text on an ESP32 dev board, as a board of a program that wires its I2C: `esp32_devkit` of the
+catalog opens no bus to a module. On the JC8012P4A1C, flashed too, the display starts and the sound of
+`hello_board` was heard. Its touch needs the firmware the program embeds: with it the handwritten clock, moved onto
+the component, was worked by finger on this board and on the JC1060P470C.
+
+The display module `tft153_st77916` ran on `esp32s3_devkit` as a board of a program, and its picture
+was seen. On those pins ESP-IDF 6.1 needs DGX 0.10.3: the SPI driver of 6.1 takes a quad bus for an
+octal one. `esp32_devkit` ran as the base of a board of a program.
+
+## How the repository is built
+
+For those who change the component, not for a program that uses it.
 
 ```
 catalog/boards/<board>/board.json         the board: the only source of truth
@@ -164,19 +187,11 @@ examples/board_report/                 the report of a new board, for its first 
 docs/en/, docs/ru/                     the documentation
 ```
 
-The generated files are committed, so a program that takes the component from
-the registry builds without running any tool of this repository.
-`tools/check_boards.py` fails in CI when they differ from the data.
+The glue, the Kconfig and the rules of the manifest are made from the data and lie in the component: whoever takes it
+from the registry makes nothing. The generator and the checks are for whoever changes the data of the boards:
+`tools/check_boards.py` fails in CI when what lies in the component differs from the data.
 
-Documentation, in English: [how it works](docs/en/how-it-works.md),
-[the data format](docs/en/data-format.md), [the API](docs/en/api.md),
-[choosing a board](docs/en/choosing-a-board.md),
-[moving a program with boards of its own](docs/en/moving-a-program.md),
-[adding a board](docs/en/adding-a-board.md), [the tools](docs/en/tools.md),
-[calibration](docs/en/calibration.md), [the touch firmware](docs/en/touch-firmware.md),
-[modules](docs/en/modules.md). In Russian: [docs/ru/](docs/ru/).
-
-## Adding a board
+### Adding a board
 
 Copy the nearest `catalog/boards/<board>/`, edit `board.json`, write its
 `sdkconfig.defaults` with the reasons in comments, run
@@ -185,36 +200,5 @@ Copy the nearest `catalog/boards/<board>/`, edit `board.json`, write its
 without touching any of them. Measure the touch on the board
 (`dgx_di_calibrate_measure` of DGX-DI) and give the log to `tools/board_calibration.py`.
 See [docs/en/adding-a-board.md](docs/en/adding-a-board.md).
-
-## How it differs from esp-bsp and esp_board_manager
-
-[espressif/esp-bsp](https://github.com/espressif/esp-bsp) describes Espressif's
-own boards around LVGL: every manifest pulls `lvgl` and `esp_lvgl_port`, and
-the display comes as an LVGL object.
-[espressif/esp_board_manager](https://github.com/espressif/esp_board_manager)
-describes boards in YAML and generates initialisation code into the project,
-with a board selected by `idf.py bmgr`. This component is for boards of one's
-own (the Guition line and the CYD first), knows no widget library, keeps the
-display one peripheral among others, and keeps the data small enough to be
-read and checked by a script: pins, buses, devices, measured calibration. What
-it takes from esp-bsp is the mechanism of `components/bsp_selector`: one Kconfig
-choice, hidden symbols beside it, manifest rules on them.
-
-## Status
-
-0.0.1. Builds for every board under ESP-IDF 5.5 and 6.1, and a board of a program with a display and a
-2004: the jobs of `.github/workflows/build.yml`. `examples/hello_board` and
-`examples/hello_lvgl` were flashed on a CYD S028R, a JC4827W543C and a JC1060P470C
-under ESP-IDF 6.1: the display, the touch and the sound start without errors in
-the log. Touch coordinates were checked by finger on all three and are correct.
-On the JC1060P470C the picture was checked too, colors and orientation. The 2004
-module showed its text on an ESP32 dev board, as a board of a program that wires its I2C: `esp32_devkit` of the
-catalog opens no bus to a module. On the JC8012P4A1C, flashed too, the display starts and the sound of
-`hello_board` was heard. Its touch needs the firmware the program embeds: with it the handwritten clock, moved onto
-the component, was worked by finger on this board and on the JC1060P470C.
-
-The display module `tft153_st77916` ran on `esp32s3_devkit` as a board of a program, and its picture
-was seen. On those pins ESP-IDF 6.1 needs DGX 0.10.3: the SPI driver of 6.1 takes a quad bus for an
-octal one. `esp32_devkit` ran as the base of a board of a program.
 
 License: MIT.

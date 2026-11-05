@@ -20,13 +20,10 @@ this way was built and runs on the Guition JC1060P470C and the JC8012P4A1C, with
 
 ## The steps
 
-1. The component goes into `main/idf_component.yml` beside what the program uses itself. Until it is published, take
-   it from git at a commit:
+1. The component goes into `main/idf_component.yml` beside what the program uses itself:
 
-   ```yaml
-   jef-sure/boards:
-     git: https://github.com/jef-sure/esp32-component-boards.git
-     version: <a commit>
+   ```sh
+   idf.py add-dependency "jef-sure/boards^0.0.1"
    ```
 
    The rule that brought the touch driver of one board goes away: the component brings the parts of the board chosen.

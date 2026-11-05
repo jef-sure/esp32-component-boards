@@ -23,7 +23,7 @@ Checks of the data format. Needs jsonschema and node: the Python of ESP-IDF has 
    for the current one; a board named again becomes current, --current changes only default, --again makes them again by
    selection.json, and a CMakePresets.json or a file of defaults of another is left alone;
 13. the lines of CMake that read the defaults of the board and its lock are the same in editor/skeleton/, the examples, the
-   READMEs and choosing-a-board.md;
+   quick start and choosing-a-board.md;
 14. board_project.py --selection takes back a kit the page wired, with its board of the program under the new name;
 15. the documents of the catalog and shops.json lie in the form resolve.dump writes; --fix writes them so.
 """
@@ -422,7 +422,7 @@ def snippets_differ():
     start = text.index("# BOARD=<board>")
     defaults = text[start:text.index("\nendif()\n", start) + len("\nendif()\n")]
     lock = re.search(r"^if\(BOARD\)\n    idf_build_set_property\(DEPENDENCIES_LOCK [^\n]*\nendif\(\)\n", text, flags=re.M)[0]
-    copies = ["README.md", "README.ru.md", "docs/en/choosing-a-board.md", "docs/ru/choosing-a-board.md", "examples/hello_board/CMakeLists.txt",
+    copies = ["docs/en/quick-start.md", "docs/ru/quick-start.md", "docs/en/choosing-a-board.md", "docs/ru/choosing-a-board.md", "examples/hello_board/CMakeLists.txt",
               "examples/hello_lvgl/CMakeLists.txt", "examples/local_boards/CMakeLists.txt", "examples/multi_board/CMakeLists.txt"]
     return [f"{name}: the lines that read the defaults of the board differ from editor/skeleton/CMakeLists.txt" for name in copies
             if defaults not in (ROOT / name).read_text() or lock not in (ROOT / name).read_text()]

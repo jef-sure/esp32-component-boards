@@ -136,13 +136,13 @@ jobs:
           command: ${{ matrix.second }}
 
   readme:
-    name: a new project by the README on ESP-IDF v6.1
+    name: a new project by the quick start on ESP-IDF v6.1
     needs: check
     if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: make the project as the README says, for a board of another chip than the first reconfigure
+      - name: make the project as the quick start says, for a board of another chip than the first reconfigure
         uses: espressif/esp-idf-ci-action@v1
         with:
           esp_idf_version: v6.1

@@ -7,11 +7,10 @@
 
 ```sh
 idf.py create-project hello && cd hello
+idf.py add-dependency "jef-sure/boards^0.0.1"
 ```
 
-Компонента пока нет в реестре: берите его из git на определённом коммите, чтобы
-завтра сборка дала то же самое. После публикации его место займёт `idf.py
-add-dependency "jef-sure/boards^0.0.1"`.
+Коммит, который ещё не опубликован, берётся из git на этом коммите, чтобы завтра сборка дала то же самое:
 
 ```yaml
 # main/idf_component.yml

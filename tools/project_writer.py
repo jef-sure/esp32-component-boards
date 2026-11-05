@@ -114,7 +114,8 @@ def component_source():
             version = re.search(r"^    version: '?([^'\s]+)'?$", entry[1], re.M) if entry else None
             if version:
                 return {"git": version[1]} if re.search(r"^      type: git$", entry[1], re.M) else {"registry": version[1]}
-    manifest = re.search(r'^version: "([^"]+)"', (ROOT / "idf_component.yml").read_text(), re.M)
+    # quoted in the repository, bare in the manifest the registry ships
+    manifest = re.search(r"""^version:\s*["']?([^"'\s#]+)""", (ROOT / "idf_component.yml").read_text(), re.M)
     return {"registry": manifest[1]} if manifest else None
 
 

@@ -179,7 +179,8 @@ def title_of(board):
 def made_by(board, modules=(), revision=None, shows=None):
     """The first lines of a file: the command that made it, and the component it was made from."""
     words = [board, *(f"--module {module}" for module in modules), *([f"--revision {revision}"] if revision else []), *([f"--as {shows}"] if shows else [])]
-    version = re.search(r'^version: "([^"]+)"', (ROOT / "idf_component.yml").read_text(), flags=re.M)
+    # quoted in the repository, bare in the manifest the registry ships
+    version = re.search(r"""^version:\s*["']?([^"'\s#]+)""", (ROOT / "idf_component.yml").read_text(), flags=re.M)
     commit = subprocess.run(["git", "-C", str(ROOT), "rev-parse", "--short", "HEAD"], capture_output=True, text=True).stdout.strip() if (ROOT / ".git").exists() else ""
     made = f"jef-sure/boards {version[1] if version else '?'}" + (f", commit {commit}" if commit else "")
     return f"{RECORD}{' '.join(words)}\n# from {made}: board_select.py --again PROJECT_DIR makes it again when the component changes\n"

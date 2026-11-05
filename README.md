@@ -164,6 +164,7 @@ the registry builds without running any tool of this repository.
 Documentation, in English: [how it works](docs/en/how-it-works.md),
 [the data format](docs/en/data-format.md), [the API](docs/en/api.md),
 [choosing a board](docs/en/choosing-a-board.md),
+[moving a program with boards of its own](docs/en/moving-a-program.md),
 [adding a board](docs/en/adding-a-board.md), [the tools](docs/en/tools.md),
 [calibration](docs/en/calibration.md), [the touch firmware](docs/en/touch-firmware.md),
 [modules](docs/en/modules.md). In Russian: [docs/ru/](docs/ru/).

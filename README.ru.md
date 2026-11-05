@@ -165,6 +165,7 @@ docs/en/, docs/ru/                     документация
 Документация, по-русски: [как это работает](docs/ru/how-it-works.md),
 [формат данных](docs/ru/data-format.md), [API](docs/ru/api.md),
 [выбор платы](docs/ru/choosing-a-board.md),
+[переезд программы со своими платами](docs/ru/moving-a-program.md),
 [добавление платы](docs/ru/adding-a-board.md), [инструменты](docs/ru/tools.md),
 [калибровка](docs/ru/calibration.md), [прошивка тача](docs/ru/touch-firmware.md),
 [модули](docs/ru/modules.md). По-английски: [docs/en/](docs/en/).

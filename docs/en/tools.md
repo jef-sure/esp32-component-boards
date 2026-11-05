@@ -398,7 +398,8 @@ generator as well.
 
 - an empty folder, or one with only `.git`, a README, a licence and `.gitignore`, gets a whole
   project. What already lies there stays;
-- a folder with a `CMakeLists.txt` is a program, and gets only its board in `components/local-boards/`;
+- a folder with a `CMakeLists.txt` is a program, and gets only its board in `components/local-boards/`; a program with
+  boards of its own moves as [moving-a-program.md](moving-a-program.md) says;
 - any other folder is refused.
 
 A program with a `selection.json` keeps its name and its boards. The name of the project is the one there, and from
@@ -407,8 +408,9 @@ the program has and becomes the current one, and the boards not on the page stay
 
 The list of what would happen comes first and nothing is written before `write`. A board file that
 differs is replaced only when ticked, and nothing is ever removed. If a file changed after the list
-was made, nothing is written at all. A kit that needs no module gets no
-board file: the project names the board of the catalog. The page does not talk to GitHub: the result
+was made, nothing is written at all. A kit with no module, and with nothing of its board left unused, gets no
+board file: the project names the board of the catalog. A part of the board the project leaves unused (`used: false`)
+takes a board of the program, as a module does. The page does not talk to GitHub: the result
 is a folder, for git or for nothing.
 
 The board is chosen before the first build, because the dependencies follow from what it has:

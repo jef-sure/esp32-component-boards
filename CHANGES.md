@@ -420,6 +420,9 @@ committed, a program that asks by kind.
   `check_format.py` checks the form and `--fix` writes it; `make_mcu.py` writes by `dump` and gives the same files. The
   data did not change, nor anything generated from it. The schema, the rules, the questions and the roles are written by
   hand and keep their form.
+- `docs/en/moving-a-program.md` and its Russian twin: how a program with boards of its own moves onto the component,
+  with the handwritten clock as the example (the audit of 2026-11-05, 5). `tools.md` says when a kit with no module
+  takes a board of the program: a part of the board left unused takes one.
 - A level seen on hardware is a note, not a part: `high_seen_mv` of a chip, the lowest high that drove it on hardware,
   with its trial in `checked`, and the judgement `level_seen_on_hardware`. The WS2812B takes 3.5 V by its datasheet;
   the 3.3 V of an ESP32 drove Anton's garland, so a kit of strips says so and adds no level shifter (Anton: "in

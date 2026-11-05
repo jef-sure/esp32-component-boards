@@ -422,10 +422,14 @@ def snippets_differ():
     start = text.index("# BOARD=<board>")
     defaults = text[start:text.index("\nendif()\n", start) + len("\nendif()\n")]
     lock = re.search(r"^if\(BOARD\)\n    idf_build_set_property\(DEPENDENCIES_LOCK [^\n]*\nendif\(\)\n", text, flags=re.M)[0]
-    copies = ["docs/en/quick-start.md", "docs/ru/quick-start.md", "docs/en/choosing-a-board.md", "docs/ru/choosing-a-board.md", "examples/hello_board/CMakeLists.txt",
+    copies = ["docs/en/quick-start.md", "docs/ru/quick-start.md", "docs/en/choosing-a-board.md", "docs/ru/choosing-a-board.md", "examples/hello/CMakeLists.txt", "examples/hello_board/CMakeLists.txt",
               "examples/hello_lvgl/CMakeLists.txt", "examples/local_boards/CMakeLists.txt", "examples/multi_board/CMakeLists.txt"]
-    return [f"{name}: the lines that read the defaults of the board differ from editor/skeleton/CMakeLists.txt" for name in copies
-            if defaults not in (ROOT / name).read_text() or lock not in (ROOT / name).read_text()]
+    wrong = [f"{name}: the lines that read the defaults of the board differ from editor/skeleton/CMakeLists.txt" for name in copies
+             if defaults not in (ROOT / name).read_text() or lock not in (ROOT / name).read_text()]
+    # the program of the quick start is the example the registry hands out, which a new project of the page takes
+    program = (ROOT / "examples" / "hello" / "main" / "hello.c").read_text()
+    return wrong + [f"{guide}: its program is not examples/hello/main/hello.c" for guide in ("docs/en/quick-start.md", "docs/ru/quick-start.md")
+                    if re.search(r"```c\n(.*?)```", (ROOT / guide).read_text(), flags=re.S)[1] != program]
 
 
 def shop_problems():
@@ -554,7 +558,7 @@ def bridge_problems():
         base = link.split("/editor/")[0]
         for path, headers, wanted in (("/editor/index.html", {}, 200), ("/agent/messages?seen=0", {}, 401), ("/editor/index.html", {"Host": "evil.example"}, 403), ("/CLAUDE.md", {}, 404),
                                       ("/.git/config", {}, 404), ("/editor/../CLAUDE.md", {}, 404), ("/editor/%2e%2e/CLAUDE.md", {}, 404), ("/tools/boards_mcp.py", {}, 404),
-                                      ("/examples/hello_board/main/main.c", {}, 200), ("/examples/hello_board/CMakeLists.txt", {}, 404),
+                                      ("/examples/hello/main/hello.c", {}, 200), ("/examples/hello/CMakeLists.txt", {}, 404),
                                       ("/imported-shops/index.json", {}, 200)):
             if status(path, **headers) != wanted:
                 problems.append(f"the server of the page: {path} {headers}: not {wanted}")

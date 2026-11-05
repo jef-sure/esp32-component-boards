@@ -6,7 +6,6 @@
         ["skeleton/README.md", "README.md"],
         ["skeleton/main/CMakeLists.txt", "main/CMakeLists.txt"],
         ["skeleton/main/idf_component.yml", "main/idf_component.yml"],
-        ["../examples/hello_board/main/main.c", "main/main.c"],
-        ["../examples/hello_board/sdkconfig.defaults", "sdkconfig.defaults"]
+        ["../examples/hello/main/hello.c", "main/main.c"]
     ]
 }

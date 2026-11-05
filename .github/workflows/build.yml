@@ -135,22 +135,22 @@ jobs:
           path: examples/multi_board
           command: ${{ matrix.second }}
 
-  readme:
-    name: a new project by the quick start on ESP-IDF v6.1
+  example:
+    name: the example the registry hands out, on ESP-IDF v6.1
     needs: check
     if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: make the project as the quick start says, for a board of another chip than the first reconfigure
+      - name: pack the component, take its example from the archive with the component at this commit, build it for a board of another chip than the first reconfigure
         uses: espressif/esp-idf-ci-action@v1
         with:
           esp_idf_version: v6.1
           command: >-
             unset IDF_TARGET &&
-            idf.py create-project --path readme-project hello &&
-            python3 test/readme_project.py readme-project ${{ github.event.pull_request.head.sha || github.sha }} &&
-            cd readme-project &&
+            compote component pack --name boards &&
+            python3 test/registry_example.py dist hello ${{ github.event.pull_request.head.sha || github.sha }} &&
+            cd hello &&
             idf.py reconfigure &&
             python3 managed_components/jef-sure__boards/tools/board_select.py jc4827w543c . &&
             idf.py build

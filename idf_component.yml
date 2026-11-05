@@ -1,6 +1,6 @@
 ## IDF Component Manager Manifest File
 version: "0.0.1"
-description: "Boards of ESP-IDF programs described once as data: pins, buses, display, touch, sound, button. The board is chosen once; the component sets its hardware up and the program asks by kind, never by the board's name. A graphics display through DGX, a character LCD through hd44780, a touch panel as a device of DGX-DI with the calibration measured on the board."
+description: "Boards of ESP-IDF programs described once as data: pins, buses, display, touch, sound, button. The board is chosen once; the component sets its hardware up and the program asks by kind, never by the board's name. A graphics display through DGX, a character LCD through hd44780, a touch panel as a device of DGX-DI with the calibration measured on the board. Its dependencies are conditional: a build downloads only what the chosen board needs."
 url: https://github.com/jef-sure/esp32-component-boards
 repository: https://github.com/jef-sure/esp32-component-boards.git
 documentation: https://github.com/jef-sure/esp32-component-boards/blob/main/README.md
@@ -83,12 +83,11 @@ files:
     - "tools/resolve.py"
     - "tools/rules.py"
     - "editor/**/*"
-    - "examples/*/CMakeLists.txt"
-    - "examples/*/README.md"
-    - "examples/*/sdkconfig.defaults"
-    - "examples/*/main/*"
-    - "examples/*/components/local-boards/boards/*/board.json"
-    - "examples/*/components/local-boards/modules/*/module.json"
+    # the one example the registry hands out, as it builds from there; the others take the component by the path of a
+    # clone, for CI, and stay out
+    - "examples/hello/CMakeLists.txt"
+    - "examples/hello/README.md"
+    - "examples/hello/main/*"
     - "docs/**/*.md"
     - "README.md"
     - "README.ru.md"

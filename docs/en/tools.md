@@ -472,5 +472,6 @@ shape of what the glue calls.
 `board_pins.py --all`, then `examples/hello_board` for every board and
 `examples/hello_lvgl` for every board with a graphics display, under two
 versions of ESP-IDF, plus one build of `hello_board` with the 2004 module, a project that leaves parts alone,
-`examples/local_boards`, `examples/multi_board`, and a new project made as the README says, each in its own job.
+`examples/local_boards`, `examples/multi_board`, and `examples/hello` as the registry hands it out (taken from the
+archive compote packs, the component at the commit), each in its own job.
 The list of boards of the matrix is written by `boards_gen.py --all` from the data, between its marks.

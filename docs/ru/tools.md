@@ -476,5 +476,6 @@ include в сгенерированном клее нужна заглушка �
 `board_pins.py --all`, затем `examples/hello_board` для каждой платы и
 `examples/hello_lvgl` для каждой платы с графическим дисплеем под двумя
 версиями ESP-IDF, плюс одна сборка `hello_board` с модулем 2004, проект, который оставляет части без дела,
-`examples/local_boards`, `examples/multi_board` и новый проект по README, каждая в своём job. Список плат матрицы
+`examples/local_boards`, `examples/multi_board` и `examples/hello` в том виде, в каком его отдаёт реестр (из архива,
+который пакует compote, с компонентом на проверяемом коммите), каждая в своём job. Список плат матрицы
 пишет `boards_gen.py --all` из данных, между его метками.

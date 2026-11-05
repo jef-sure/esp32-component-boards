@@ -32,6 +32,8 @@ const COMPONENT_NAME = 'jef-sure/boards';
 const COMPONENT_LINES = (version) => `  ${COMPONENT_NAME}:\n    git: https://github.com/jef-sure/esp32-component-boards.git\n    version: ${version}`;
 const PREFERENCES = { language: 'boards.language', currency: 'boards.currency', answers: 'boards.answers', project: 'boards.project' }; // keys of localStorage
 // a kit and an entry of selection.json are the same when the board and the modules with their counts are
+// a block of a role the palette does not have would stop the solver and the canvas
+const knownRole = (role) => (library.roles ?? []).some((group) => group.roles.some((item) => item.id === role));
 const kitKey = (board, modules) => `${board}+${modules.map((item) => `${item.name}x${item.count ?? 1}`).sort().join(',')}`;
 const SELECTION = 'selection.json';
 const ISSUES = 'https://github.com/jef-sure/esp32-component-boards/issues/new';
@@ -347,8 +349,7 @@ const useEditor = Pinia.defineStore('editor', {
                 const block = named(change.name);
                 if (block) Object.assign(block, { variant: change.variant ?? block.variant, part: change.part ?? block.part, asks: change.asks ?? block.asks, by: 'model' });
             }
-            const known = (role) => this.palette.some((group) => group.roles.some((item) => item.id === role));
-            for (const block of (message.edits.add ?? []).filter((item) => known(item.role))) {
+            for (const block of (message.edits.add ?? []).filter((item) => knownRole(item.role))) {
                 if (!this.answers.blocks.some((other) => other.fixed && (other.name || other.role) === (block.name || block.role)))
                     this.answers.blocks.push({ role: block.role, variant: block.variant, name: block.name ?? '', part: block.part, asks: block.asks, by: 'model' });
             }
@@ -356,7 +357,7 @@ const useEditor = Pinia.defineStore('editor', {
             localStorage.setItem(stored, String(message.id));
         },
         addBlock(role) {
-            this.answers.blocks.push({ role, variant: undefined, name: '', by: 'person' });
+            if (knownRole(role)) this.answers.blocks.push({ role, variant: undefined, name: '', by: 'person' });
         },
         // The worker answers the last question only; a page it cannot start on answers by itself.
         startWorker() {
@@ -437,11 +438,29 @@ const useEditor = Pinia.defineStore('editor', {
         async openPicked(list) {
             await this.run(async () => this.take(await host.readPicked(list)));
         },
-        // selection.json of a project: its answers, and its kits when they are counted again
+        // selection.json of a project: its answers, and its kits when they are counted again. It is checked by the schema
+        // first, so it is taken when the catalog is read.
         takeSelection(selection) {
-            const saved = JSON.parse(selection);
-            this.answers = { outputs: [], ...saved.answers };
-            this.currency = saved.currency;
+            if (!library.reader) {
+                library.pendingSelection = selection;
+                return;
+            }
+            let saved;
+            try {
+                saved = JSON.parse(selection);
+            } catch (error) {
+                this.error = `selection.json: ${error.message}`;
+                return;
+            }
+            // a selection.json before format 3 had one kit at its top, and another form
+            const wrong = saved?.format_version === SELECTION_VERSION ? library.reader.errors({ $ref: '#/$defs/selection' }, saved) : [];
+            if (wrong.length) {
+                this.error = `selection.json: ${wrong[0].path.join('.') || 'the file'}: ${wrong[0].message}: not taken`;
+                return;
+            }
+            // board_project.py writes no blocks: no answers were given
+            this.answers = { outputs: [], ...saved.answers, blocks: (saved.answers?.blocks ?? []).filter((block) => knownRole(block.role)) };
+            if (saved.currency) this.currency = saved.currency;
             if (saved.name) this.projectName = saved.name;
             this.page = 'select';
             // a selection.json before format 3 had one kit at its top
@@ -473,12 +492,19 @@ const useEditor = Pinia.defineStore('editor', {
         load(files) {
             readCatalog(files);
             if (library.localFiles) readTree(library.localFiles, true);
+            // blocks kept by the page from before may name a role the catalog no longer has
+            this.answers.blocks = (this.answers.blocks ?? []).filter((block) => knownRole(block.role));
             this.loaded = true;
             this.key = null;
             this.doc = null;
             this.stamp++;
             const first = Object.values(library.entries).find((entry) => entry.group === 'boards');
             if (first) this.open(first.key);
+            if (library.pendingSelection) {
+                const selection = library.pendingSelection;
+                library.pendingSelection = null;
+                this.takeSelection(selection);
+            }
         },
         open(key) {
             this.key = key;

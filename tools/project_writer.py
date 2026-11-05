@@ -142,7 +142,10 @@ class Project:
                 shutil.copyfile(path, copy / path.name)
             if (self.root / "components" / "local-boards").is_dir():
                 shutil.copytree(self.root / "components" / "local-boards", copy / "components" / "local-boards", symlinks=True)
+            # only a path the project may get goes into the copy: ../x would land beside it, /x anywhere
             for rel, text in files.items():
+                if problem_of(self.root, rel) or not isinstance(text, str) or not (copy / rel).resolve().is_relative_to(copy.resolve()):
+                    continue
                 (copy / rel).parent.mkdir(parents=True, exist_ok=True)
                 (copy / rel).write_text(text)
             before = {path: path.read_text(errors="replace") for path in copy.rglob("*") if path.is_file()}

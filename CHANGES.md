@@ -372,6 +372,15 @@ committed, a program that asks by kind.
   project starts with a letter, as a name of the schema. Driven in headless Chrome over the bridge: two boards written,
   the page reloaded, the name and both boards back, the plan of them all `same`, a third kit from its card added; the
   same steps on the code before gave `my_project`, two new boards and a list of one.
+- The plan of a write through the bridge put each path it was given into the copy of the project it runs `--again` on,
+  before the path was checked: `../x` and an absolute path landed outside the project, though the answer said
+  `refused` (found by 7c). Now only a path the project may get goes into the copy; `check_format.py` asks a plan for
+  three such paths and finds none of them on disk, and with the old code it found all three.
+- A `selection.json` of `board_project.py` has no blocks, and the page opened on it was blank (found by 7c). The page
+  checks a `selection.json` of format 3 by the schema before it takes it, says why when it does not, takes no currency
+  it does not name, and drops a block of a role the palette does not have, from the file, from the page's own memory
+  and from a drop on the canvas. Seen in headless Chrome: the project of `board_project.py` opens with its board, a
+  spoiled one gives its reason, a dropped text adds no block.
 - A level seen on hardware is a note, not a part: `high_seen_mv` of a chip, the lowest high that drove it on hardware,
   with its trial in `checked`, and the judgement `level_seen_on_hardware`. The WS2812B takes 3.5 V by its datasheet;
   the 3.3 V of an ESP32 drove Anton's garland, so a kit of strips says so and adds no level shifter (Anton: "in

@@ -563,6 +563,14 @@ def project_problems(base, own, project, config):
     code, done = post("/agent/project/write", {"files": files, "replace": {"sdkconfig.defaults.cyd_s028r": shown}, "allow": "once"})
     if code != 200 or "CONFIG_MINE" in edited.read_text():
         problems.append(f"a change ticked to replace is not replaced: {done}")
+    # a plan puts nothing outside the project, not even through the copy it runs --again on, which lies in the temp folder
+    outside = [pathlib.Path(tempfile.gettempdir()) / f"boards-escape-{os.getpid()}.txt", config / "escape-absolute.txt", config / "escape-deep.txt"]
+    tried = {f"../{outside[0].name}": "x", str(outside[1]): "x", "../" * 32 + str(outside[2]).lstrip("/"): "x"}
+    code, plan = post("/agent/project/plan", {"files": {**files, **tried}})
+    if code != 200 or any(path.exists() for path in outside) or any(plan["files"][rel]["state"] != "refused" for rel in tried):
+        problems.append(f"a plan wrote outside the project: {code}, {[str(path) for path in outside if path.exists()]}")
+    for path in outside:
+        path.unlink(missing_ok=True)
     for path in (".git/hooks/pre-commit", "../outside.txt", "build/x.c", "dependencies.lock.cyd_s028r"):
         code, done = post("/agent/project/write", {"files": {path: "x"}, "allow": "once"})
         if code != 200 or path not in done["refused"] or done["written"]:

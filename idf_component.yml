@@ -1,6 +1,6 @@
 ## IDF Component Manager Manifest File
 version: "0.0.2"
-description: "Boards of ESP-IDF programs described once as data: pins, buses, display, touch, sound, button. The board is chosen once; the component sets its hardware up and the program asks by kind, never by the board's name. A graphics display through DGX, a character LCD through hd44780, a touch panel as a device of DGX-DI with the calibration measured on the board. Its dependencies are conditional: a build downloads only what the chosen board needs."
+description: "Boards of ESP-IDF programs described once as data: pins, buses and parts, each fact with where it comes from. The board is chosen once; the component sets its hardware up through the library of each part, and the program asks for what it needs by kind, never by the board's name. A build downloads only the libraries the chosen board needs."
 url: https://github.com/jef-sure/esp32-component-boards
 repository: https://github.com/jef-sure/esp32-component-boards.git
 documentation: https://github.com/jef-sure/esp32-component-boards/blob/main/README.md

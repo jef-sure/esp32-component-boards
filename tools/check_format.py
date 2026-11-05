@@ -2,7 +2,7 @@
 """
 Checks of the data format. Needs jsonschema and node: the Python of ESP-IDF has the first.
 
-    python3 tools/check_format.py
+    python3 tools/check_format.py [--fix]
 
 1. every file of catalog/ and of test/format/catalog/ passes the schema;
 2. every board of the catalog passes the schema, the merge, the schema of the result and the rules;
@@ -24,7 +24,8 @@ Checks of the data format. Needs jsonschema and node: the Python of ESP-IDF has 
    selection.json, and a CMakePresets.json or a file of defaults of another is left alone;
 13. the lines of CMake that read the defaults of the board and its lock are the same in editor/skeleton/, the examples, the
    READMEs and choosing-a-board.md;
-14. board_project.py --selection takes back a kit the page wired, with its board of the program under the new name.
+14. board_project.py --selection takes back a kit the page wired, with its board of the program under the new name;
+15. the documents of the catalog and shops.json lie in the form resolve.dump writes; --fix writes them so.
 """
 import copy
 import hashlib
@@ -396,6 +397,22 @@ def taken_back_wrong():
                 wrong.append(f"selection.json names {selection['name']}, {selection['current']}")
     print(f"taken back: {'0 wrong' if not wrong else '; '.join(wrong)}")
     return len(wrong)
+
+
+def canonical_wrong(fix):
+    """The documents of the catalog lie in the form resolve.dump writes, as the page and the tools write them: one in
+    another form shows on the page as edited, and a tool that writes into it changes every line. --fix writes them so.
+    The schema, the rules, the questions and the roles are written by hand and read only."""
+    off = []
+    for path in [*documents_under(ROOT / "catalog"), ROOT / "catalog" / "shops.json"]:
+        text = path.read_text()
+        made = resolve.dump(json.loads(text)) + "\n"
+        if text != made:
+            if fix:
+                path.write_text(made)
+            else:
+                off.append(str(path.relative_to(ROOT)))
+    return [f"{name}: not in the form resolve.dump writes: check_format.py --fix" for name in off]
 
 
 def snippets_differ():
@@ -969,6 +986,7 @@ def main():
     problems += errors_of(JUDGEMENTS, json.loads((ROOT / "catalog" / "judgements.json").read_text()), "judgements")
     problems += roles_problems(json.loads((ROOT / "catalog" / "roles.json").read_text()))
     problems += snippets_differ()
+    problems += canonical_wrong("--fix" in sys.argv)
     problems += bridge_problems()
     problems += serve_problems()
     problems += library_list_problems()

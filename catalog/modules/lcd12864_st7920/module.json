@@ -7,12 +7,7 @@
     "part": "12864B-V2.3",
     "description": "A 128x64 monochrome LCD in serial mode: E is the clock, R/W the data, RS the chip select, PSB to ground",
     "price": {
-        "anton": {
-            "currency": "EUR",
-            "range": [6.5, 6.5],
-            "date": "2026-11-01",
-            "source": "Anton: about 6.5 euro"
-        }
+        "anton": {"currency": "EUR", "range": [6.5, 6.5], "date": "2026-11-01", "source": "Anton: about 6.5 euro"}
     },
     "mechanics": {
         "outline_mm": [93, 70],
@@ -30,18 +25,41 @@
     "connectors": {
         "J1": {
             "type": "20 contacts in a row, 2.54 mm",
-            "pins": ["GND", "VCC", "V0", "RS", "R/W", "E", "DB0", "DB1", "DB2", "DB3", "DB4", "DB5", "DB6", "DB7", "PSB", "NC", "RST", "VOUT", "A", "K"]
+            "pins": [
+                "GND",
+                "VCC",
+                "V0",
+                "RS",
+                "R/W",
+                "E",
+                "DB0",
+                "DB1",
+                "DB2",
+                "DB3",
+                "DB4",
+                "DB5",
+                "DB6",
+                "DB7",
+                "PSB",
+                "NC",
+                "RST",
+                "VOUT",
+                "A",
+                "K"
+            ]
         }
     },
-    "power": [
-        {"name": "VCC", "source": "connector", "volts": [4.5, 5.5], "feeds": ["lcd"]}
-    ],
+    "power": [{"name": "VCC", "source": "connector", "volts": [4.5, 5.5], "feeds": ["lcd"]}],
     "devices": {
         "lcd": {
             "chip": "st7920",
             "on": {"spi": {"hz": 1000000}},
             "logic": "none",
-            "config": {"primary": true, "panel": {"width": 128, "height": 64, "window_mm": [79.6, 52.2]}, "depth_bits": 1},
+            "config": {
+                "primary": true,
+                "panel": {"width": 128, "height": 64, "window_mm": [79.6, 52.2]},
+                "depth_bits": 1
+            },
             "controls": {"orientation": {"start": {"x": "left-right", "y": "top-bottom", "swap": false}}},
             "notes": "V0 on the module sets the contrast. The viewing angle of the blue negative is poor from below."
         }

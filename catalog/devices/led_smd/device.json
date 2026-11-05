@@ -26,6 +26,11 @@
         }
     },
     "checked": {
-        "price": {"level": "unchecked", "covers": ["price"], "source": "search results of lcsc.com, not the live page", "date": "2026-11-02"}
+        "price": {
+            "level": "unchecked",
+            "covers": ["price"],
+            "source": "search results of lcsc.com, not the live page",
+            "date": "2026-11-02"
+        }
     }
 }

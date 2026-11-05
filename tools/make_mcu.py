@@ -9,6 +9,8 @@ import pathlib
 import re
 import sys
 
+import resolve
+
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 IDF = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else os.path.expanduser("~/.espressif/v6.1/esp-idf"))
 PROVIDES = {"SOC_WIFI_SUPPORTED": "wifi", "SOC_BT_SUPPORTED": "bluetooth", "SOC_BT_CLASSIC_SUPPORTED": "bluetooth_classic", "SOC_DAC_SUPPORTED": "dac", "SOC_USB_OTG_SUPPORTED": "usb_otg",
@@ -386,7 +388,7 @@ def main():
             entry["checked"]["platforms"] = {"level": "vendor-docs", "covers": ["platforms"], "source": "COMPATIBILITY.md of ESP-IDF"}
         path = ROOT / "catalog/mcu" / target / "mcu.json"
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(entry, indent=4) + "\n")
+        path.write_text(resolve.dump(entry) + "\n")  # as the page and the other tools write a document
         made.append(target)
     print("mcu:", " ".join(made))
 

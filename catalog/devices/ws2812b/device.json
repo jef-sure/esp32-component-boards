@@ -46,6 +46,11 @@
             "covers": ["high_seen_mv"],
             "source": "The garland of ~/git/led_strip: 360 WS2812B on two strips, the data line straight from GPIO 14 of an ESP32, the strips fed with 5 V of their own"
         },
-        "price": {"level": "unchecked", "covers": ["price"], "source": "search results of lcsc.com, not the live page", "date": "2026-11-02"}
+        "price": {
+            "level": "unchecked",
+            "covers": ["price"],
+            "source": "search results of lcsc.com, not the live page",
+            "date": "2026-11-02"
+        }
     }
 }

@@ -21,17 +21,14 @@
         "psram_mb": 2,
         "antenna": {"kind": "on_board", "form": "ceramic", "quality": 4}
     },
-    "price": {
-        "anton": {
-            "currency": "EUR",
-            "range": [5, 5],
-            "date": "2026-11-02",
-            "source": "Anton: about 5 EUR now"
-        }
-    },
+    "price": {"anton": {"currency": "EUR", "range": [5, 5], "date": "2026-11-02", "source": "Anton: about 5 EUR now"}},
     "devices": {
         "boot": {"class": "button", "ref": "K2", "pins": {"in": {"gpio": 0, "active": "low"}}},
-        "usb": {"class": "usb", "pins": {"d_minus": 19, "d_plus": 20}, "notes": "The USB-C: D- and D+ go to the USB Serial/JTAG of the chip (USB_N on GPIO19, USB_P on GPIO20), the console and the flashing."},
+        "usb": {
+            "class": "usb",
+            "pins": {"d_minus": 19, "d_plus": 20},
+            "notes": "The USB-C: D- and D+ go to the USB Serial/JTAG of the chip (USB_N on GPIO19, USB_P on GPIO20), the console and the flashing."
+        },
         "led": {
             "class": "led",
             "ref": "U1",

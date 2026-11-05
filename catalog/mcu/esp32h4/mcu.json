@@ -49,122 +49,32 @@
             39
         ],
         "input_only": [],
-        "adc1": [
-            28,
-            29,
-            30,
-            31,
-            32
-        ],
-        "strapping": [
-            17,
-            36,
-            37
-        ],
+        "adc1": [28, 29, 30, 31, 32],
+        "strapping": [17, 36, 37],
         "pins": {
-            "0": {
-                "low_power": "LP_GPIO0"
-            },
-            "1": {
-                "low_power": "LP_GPIO1"
-            },
-            "2": {
-                "low_power": "LP_GPIO2"
-            },
-            "3": {
-                "low_power": "LP_GPIO3"
-            },
-            "4": {
-                "low_power": "LP_GPIO4"
-            },
-            "5": {
-                "low_power": "LP_GPIO5"
-            },
-            "6": {
-                "notes": [
-                    "SPI0/1"
-                ]
-            },
-            "7": {
-                "notes": [
-                    "SPI0/1"
-                ]
-            },
-            "8": {
-                "notes": [
-                    "SPI0/1"
-                ]
-            },
-            "9": {
-                "notes": [
-                    "SPI0/1"
-                ]
-            },
-            "10": {
-                "notes": [
-                    "SPI0/1"
-                ]
-            },
-            "11": {
-                "notes": [
-                    "SPI0/1"
-                ]
-            },
-            "12": {
-                "notes": [
-                    "SPI0/1"
-                ]
-            },
-            "13": {
-                "notes": [
-                    "USB-JTAG"
-                ]
-            },
-            "14": {
-                "notes": [
-                    "USB-JTAG"
-                ]
-            },
-            "17": {
-                "notes": [
-                    "Strapping pin"
-                ]
-            },
-            "28": {
-                "analog": [
-                    "ADC1_CH0"
-                ]
-            },
-            "29": {
-                "analog": [
-                    "ADC1_CH1"
-                ]
-            },
-            "30": {
-                "analog": [
-                    "ADC1_CH2"
-                ]
-            },
-            "31": {
-                "analog": [
-                    "ADC1_CH3"
-                ]
-            },
-            "32": {
-                "analog": [
-                    "ADC1_CH4"
-                ]
-            },
-            "36": {
-                "notes": [
-                    "Strapping pin"
-                ]
-            },
-            "37": {
-                "notes": [
-                    "Strapping pin"
-                ]
-            }
+            "0": {"low_power": "LP_GPIO0"},
+            "1": {"low_power": "LP_GPIO1"},
+            "2": {"low_power": "LP_GPIO2"},
+            "3": {"low_power": "LP_GPIO3"},
+            "4": {"low_power": "LP_GPIO4"},
+            "5": {"low_power": "LP_GPIO5"},
+            "6": {"notes": ["SPI0/1"]},
+            "7": {"notes": ["SPI0/1"]},
+            "8": {"notes": ["SPI0/1"]},
+            "9": {"notes": ["SPI0/1"]},
+            "10": {"notes": ["SPI0/1"]},
+            "11": {"notes": ["SPI0/1"]},
+            "12": {"notes": ["SPI0/1"]},
+            "13": {"notes": ["USB-JTAG"]},
+            "14": {"notes": ["USB-JTAG"]},
+            "17": {"notes": ["Strapping pin"]},
+            "28": {"analog": ["ADC1_CH0"]},
+            "29": {"analog": ["ADC1_CH1"]},
+            "30": {"analog": ["ADC1_CH2"]},
+            "31": {"analog": ["ADC1_CH3"]},
+            "32": {"analog": ["ADC1_CH4"]},
+            "36": {"notes": ["Strapping pin"]},
+            "37": {"notes": ["Strapping pin"]}
         },
         "notes": [
             "Strapping pin: GPIO17, GPIO36, and GPIO37 are strapping pins. For more information, please refer to datasheet.",
@@ -172,51 +82,22 @@
             "USB-JTAG: GPIO13 and GPIO14 are used by USB-JTAG by default. If they are reconfigured to operate as normal GPIOs, USB-JTAG functionality will be disabled."
         ]
     },
-    "hosts": {
-        "spi": 3,
-        "i2c": 2,
-        "uart": 2
-    },
-    "provides": {
-        "bluetooth": {},
-        "usb_otg": {},
-        "touch_pads": {},
-        "twai": {}
-    },
+    "hosts": {"spi": 3, "i2c": 2, "uart": 2},
+    "provides": {"bluetooth": {}, "usb_otg": {}, "touch_pads": {}, "twai": {}},
     "checked": {
-        "facts": {
-            "level": "vendor-docs",
-            "source": "ESP-IDF esp-idf, components/soc/esp32h4, soc_caps.h"
-        },
+        "facts": {"level": "vendor-docs", "source": "ESP-IDF esp-idf, components/soc/esp32h4, soc_caps.h"},
         "frequency_sources": {
             "level": "vendor-docs",
-            "covers": [
-                "frequency_sources"
-            ],
+            "covers": ["frequency_sources"],
             "source": "ESP-IDF esp-idf: soc_caps.h, clk_tree_defs.h and soc.h of the chip, the Kconfig of its crystal, the low-level headers of LEDC, MCPWM, RMT, I2S and the clock tree, the drivers of LEDC, MCPWM, RMT and the DAC"
         },
         "pins": {
             "level": "vendor-docs",
-            "covers": [
-                "gpio.pins",
-                "gpio.strapping"
-            ],
+            "covers": ["gpio.pins", "gpio.strapping"],
             "source": "ESP-IDF esp-idf, docs/en/api-reference/peripherals/gpio/esp32h4.inc"
         },
-        "iomux": {
-            "level": "vendor-docs",
-            "covers": [
-                "iomux"
-            ],
-            "source": "ESP-IDF esp-idf, spi_pins.h of esp32h4"
-        },
-        "platforms": {
-            "level": "vendor-docs",
-            "covers": [
-                "platforms"
-            ],
-            "source": "COMPATIBILITY.md of ESP-IDF"
-        }
+        "iomux": {"level": "vendor-docs", "covers": ["iomux"], "source": "ESP-IDF esp-idf, spi_pins.h of esp32h4"},
+        "platforms": {"level": "vendor-docs", "covers": ["platforms"], "source": "COMPATIBILITY.md of ESP-IDF"}
     },
     "frequency_sources": {
         "ledc": {
@@ -227,18 +108,9 @@
             "counter_bits": 20,
             "divider_bits": 18,
             "fraction_bits": 8,
-            "clocks_hz": {
-                "XTAL": 32000000,
-                "PLL_F96M": 96000000
-            },
+            "clocks_hz": {"XTAL": 32000000, "PLL_F96M": 96000000},
             "pairs": true,
-            "can": [
-                "frequency",
-                "duty",
-                "phase",
-                "fade",
-                "pause"
-            ]
+            "can": ["frequency", "duty", "phase", "fade", "pause"]
         },
         "mcpwm": {
             "title": "MCPWM",
@@ -249,13 +121,7 @@
             "ticks_max": 65535,
             "prescale_max": 256,
             "pairs": true,
-            "can": [
-                "frequency",
-                "duty",
-                "phase",
-                "dead_time",
-                "sync"
-            ]
+            "can": ["frequency", "duty", "phase", "dead_time", "sync"]
         },
         "rmt": {
             "title": "RMT",
@@ -266,43 +132,19 @@
             "ticks_max": 131072,
             "prescale_max": 1,
             "pairs": false,
-            "can": [
-                "carrier",
-                "loop"
-            ]
+            "can": ["carrier", "loop"]
         },
         "clk_out": {
             "title": "CLK_OUT",
             "kind": "clock_out",
             "timers": 3,
             "outputs": 3,
-            "signals": [
-                "XTAL32K"
-            ],
+            "signals": ["XTAL32K"],
             "pairs": false,
-            "can": [
-                "start_stop"
-            ]
+            "can": ["start_stop"]
         }
     },
-    "limits": {
-        "psram_mhz": 64
-    },
-    "iomux": {
-        "spi": {
-            "spi2": {
-                "miso": 15,
-                "hd": 19,
-                "wp": 18,
-                "sclk": 16,
-                "mosi": 17,
-                "cs": 20
-            }
-        }
-    },
-    "platforms": {
-        "esp_idf": {
-            "preview": "6.0"
-        }
-    }
+    "limits": {"psram_mhz": 64},
+    "iomux": {"spi": {"spi2": {"miso": 15, "hd": 19, "wp": 18, "sclk": 16, "mosi": 17, "cs": 20}}},
+    "platforms": {"esp_idf": {"preview": "6.0"}}
 }

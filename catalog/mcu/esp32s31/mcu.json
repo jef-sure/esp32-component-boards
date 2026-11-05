@@ -69,328 +69,73 @@
             61
         ],
         "input_only": [],
-        "adc1": [
-            42,
-            43,
-            44,
-            45,
-            46,
-            47,
-            48,
-            49
-        ],
+        "adc1": [42, 43, 44, 45, 46, 47, 48, 49],
         "high_mv_max": 3600,
-        "strapping": [
-            36,
-            37,
-            38,
-            39,
-            40,
-            60,
-            61
-        ],
+        "strapping": [36, 37, 38, 39, 40, 60, 61],
         "boot_modes": {
-            "spi_boot": {
-                "60": "any",
-                "61": 1
-            },
-            "joint_download_boot": {
-                "60": 1,
-                "61": 0
-            },
-            "invalid_combination": {
-                "60": 0,
-                "61": 0
-            }
+            "spi_boot": {"60": "any", "61": 1},
+            "joint_download_boot": {"60": 1, "61": 0},
+            "invalid_combination": {"60": 0, "61": 0}
         },
         "pins": {
-            "0": {
-                "low_power": "LP_GPIO0"
-            },
-            "1": {
-                "low_power": "LP_GPIO1"
-            },
-            "2": {
-                "low_power": "LP_GPIO2"
-            },
-            "3": {
-                "low_power": "LP_GPIO3"
-            },
-            "4": {
-                "analog": [
-                    "DAC0"
-                ],
-                "low_power": "LP_GPIO4"
-            },
-            "5": {
-                "analog": [
-                    "DAC1"
-                ],
-                "low_power": "LP_GPIO5"
-            },
-            "6": {
-                "analog": [
-                    "TOUCH0"
-                ],
-                "low_power": "LP_GPIO6"
-            },
-            "7": {
-                "analog": [
-                    "TOUCH1"
-                ],
-                "low_power": "LP_GPIO7"
-            },
-            "8": {
-                "analog": [
-                    "TOUCH2"
-                ]
-            },
-            "9": {
-                "analog": [
-                    "TOUCH3"
-                ]
-            },
-            "10": {
-                "analog": [
-                    "TOUCH4"
-                ]
-            },
-            "11": {
-                "analog": [
-                    "TOUCH5"
-                ]
-            },
-            "12": {
-                "analog": [
-                    "TOUCH6"
-                ]
-            },
-            "13": {
-                "analog": [
-                    "TOUCH7"
-                ]
-            },
-            "14": {
-                "analog": [
-                    "TOUCH8"
-                ]
-            },
-            "15": {
-                "analog": [
-                    "TOUCH9"
-                ]
-            },
-            "16": {
-                "analog": [
-                    "TOUCH10"
-                ]
-            },
-            "17": {
-                "analog": [
-                    "TOUCH11"
-                ]
-            },
-            "18": {
-                "analog": [
-                    "TOUCH12"
-                ]
-            },
-            "19": {
-                "analog": [
-                    "TOUCH13"
-                ]
-            },
-            "26": {
-                "notes": [
-                    "SPI0/1"
-                ]
-            },
-            "27": {
-                "notes": [
-                    "SPI0/1"
-                ]
-            },
-            "28": {
-                "notes": [
-                    "SPI0/1"
-                ]
-            },
-            "30": {
-                "notes": [
-                    "SPI0/1"
-                ]
-            },
-            "31": {
-                "notes": [
-                    "SPI0/1"
-                ]
-            },
-            "32": {
-                "notes": [
-                    "SPI0/1"
-                ]
-            },
-            "36": {
-                "notes": [
-                    "Strapping pin"
-                ],
-                "boot": {
-                    "selects": [
-                        "flash voltage"
-                    ],
-                    "pull": null
-                }
-            },
-            "37": {
-                "notes": [
-                    "Strapping pin"
-                ],
-                "boot": {
-                    "selects": [
-                        "jtag source"
-                    ],
-                    "pull": null
-                }
-            },
-            "38": {
-                "notes": [
-                    "Strapping pin"
-                ]
-            },
-            "39": {
-                "notes": [
-                    "Strapping pin"
-                ]
-            },
-            "40": {
-                "notes": [
-                    "Strapping pin"
-                ]
-            },
-            "42": {
-                "analog": [
-                    "ADC1_CH0_N"
-                ]
-            },
-            "43": {
-                "analog": [
-                    "ADC1_CH0_P"
-                ]
-            },
-            "44": {
-                "analog": [
-                    "ADC1_CH1_N"
-                ]
-            },
-            "45": {
-                "analog": [
-                    "ADC1_CH1_P"
-                ]
-            },
-            "46": {
-                "analog": [
-                    "ADC1_CH2_N"
-                ]
-            },
-            "47": {
-                "analog": [
-                    "ADC1_CH2_P"
-                ]
-            },
-            "48": {
-                "analog": [
-                    "ADC1_CH3_N"
-                ]
-            },
-            "49": {
-                "analog": [
-                    "ADC1_CH3_P"
-                ]
-            },
-            "50": {
-                "analog": [
-                    "ADC2_CH0_N"
-                ]
-            },
-            "51": {
-                "analog": [
-                    "ADC2_CH0_P"
-                ]
-            },
-            "52": {
-                "analog": [
-                    "ADC2_CH1_N"
-                ]
-            },
-            "53": {
-                "analog": [
-                    "ADC2_CH1_P"
-                ]
-            },
-            "54": {
-                "analog": [
-                    "ADC2_CH2_N"
-                ]
-            },
-            "55": {
-                "analog": [
-                    "ADC2_CH2_P"
-                ]
-            },
-            "56": {
-                "analog": [
-                    "ADC2_CH3_N"
-                ]
-            },
-            "57": {
-                "analog": [
-                    "ADC2_CH3_P"
-                ]
-            },
-            "58": {
-                "notes": [
-                    "UART0"
-                ]
-            },
-            "59": {
-                "notes": [
-                    "UART0"
-                ]
-            },
-            "60": {
-                "notes": [
-                    "Strapping pin"
-                ],
-                "boot": {
-                    "selects": [
-                        "boot mode",
-                        "rom messages"
-                    ],
-                    "pull": "up"
-                }
-            },
-            "61": {
-                "notes": [
-                    "Strapping pin"
-                ],
-                "boot": {
-                    "selects": [
-                        "boot mode"
-                    ],
-                    "pull": "up"
-                }
-            }
+            "0": {"low_power": "LP_GPIO0"},
+            "1": {"low_power": "LP_GPIO1"},
+            "2": {"low_power": "LP_GPIO2"},
+            "3": {"low_power": "LP_GPIO3"},
+            "4": {"analog": ["DAC0"], "low_power": "LP_GPIO4"},
+            "5": {"analog": ["DAC1"], "low_power": "LP_GPIO5"},
+            "6": {"analog": ["TOUCH0"], "low_power": "LP_GPIO6"},
+            "7": {"analog": ["TOUCH1"], "low_power": "LP_GPIO7"},
+            "8": {"analog": ["TOUCH2"]},
+            "9": {"analog": ["TOUCH3"]},
+            "10": {"analog": ["TOUCH4"]},
+            "11": {"analog": ["TOUCH5"]},
+            "12": {"analog": ["TOUCH6"]},
+            "13": {"analog": ["TOUCH7"]},
+            "14": {"analog": ["TOUCH8"]},
+            "15": {"analog": ["TOUCH9"]},
+            "16": {"analog": ["TOUCH10"]},
+            "17": {"analog": ["TOUCH11"]},
+            "18": {"analog": ["TOUCH12"]},
+            "19": {"analog": ["TOUCH13"]},
+            "26": {"notes": ["SPI0/1"]},
+            "27": {"notes": ["SPI0/1"]},
+            "28": {"notes": ["SPI0/1"]},
+            "30": {"notes": ["SPI0/1"]},
+            "31": {"notes": ["SPI0/1"]},
+            "32": {"notes": ["SPI0/1"]},
+            "36": {"notes": ["Strapping pin"], "boot": {"selects": ["flash voltage"], "pull": null}},
+            "37": {"notes": ["Strapping pin"], "boot": {"selects": ["jtag source"], "pull": null}},
+            "38": {"notes": ["Strapping pin"]},
+            "39": {"notes": ["Strapping pin"]},
+            "40": {"notes": ["Strapping pin"]},
+            "42": {"analog": ["ADC1_CH0_N"]},
+            "43": {"analog": ["ADC1_CH0_P"]},
+            "44": {"analog": ["ADC1_CH1_N"]},
+            "45": {"analog": ["ADC1_CH1_P"]},
+            "46": {"analog": ["ADC1_CH2_N"]},
+            "47": {"analog": ["ADC1_CH2_P"]},
+            "48": {"analog": ["ADC1_CH3_N"]},
+            "49": {"analog": ["ADC1_CH3_P"]},
+            "50": {"analog": ["ADC2_CH0_N"]},
+            "51": {"analog": ["ADC2_CH0_P"]},
+            "52": {"analog": ["ADC2_CH1_N"]},
+            "53": {"analog": ["ADC2_CH1_P"]},
+            "54": {"analog": ["ADC2_CH2_N"]},
+            "55": {"analog": ["ADC2_CH2_P"]},
+            "56": {"analog": ["ADC2_CH3_N"]},
+            "57": {"analog": ["ADC2_CH3_P"]},
+            "58": {"notes": ["UART0"]},
+            "59": {"notes": ["UART0"]},
+            "60": {"notes": ["Strapping pin"], "boot": {"selects": ["boot mode", "rom messages"], "pull": "up"}},
+            "61": {"notes": ["Strapping pin"], "boot": {"selects": ["boot mode"], "pull": "up"}}
         },
         "notes": [
             "Strapping pin: GPIO36 ~ GPIO40, GPIO60 ~ GPIO61 are strapping pins. For more information, please refer to {IDF_TARGET_NAME} datasheet.",
             "SPI0/1: GPIO26 ~ GPIO32 are usually used for SPI flash, they're not recommended for other uses."
         ]
     },
-    "hosts": {
-        "spi": 3,
-        "i2c": 2,
-        "uart": 4
-    },
+    "hosts": {"spi": 3, "i2c": 2, "uart": 4},
     "provides": {
         "wifi": {},
         "bluetooth": {},
@@ -403,48 +148,28 @@
         "twai": {}
     },
     "checked": {
-        "facts": {
-            "level": "vendor-docs",
-            "source": "ESP-IDF esp-idf, components/soc/esp32s31, soc_caps.h"
-        },
+        "facts": {"level": "vendor-docs", "source": "ESP-IDF esp-idf, components/soc/esp32s31, soc_caps.h"},
         "frequency_sources": {
             "level": "vendor-docs",
-            "covers": [
-                "frequency_sources"
-            ],
+            "covers": ["frequency_sources"],
             "source": "ESP-IDF esp-idf: soc_caps.h, clk_tree_defs.h and soc.h of the chip, the Kconfig of its crystal, the low-level headers of LEDC, MCPWM, RMT, I2S and the clock tree, the drivers of LEDC, MCPWM, RMT and the DAC"
         },
         "levels": {
             "level": "datasheet",
-            "covers": [
-                "gpio.high_mv_max"
-            ],
+            "covers": ["gpio.high_mv_max"],
             "source": "Espressif datasheet of the chip, DC characteristics: VIH at most VDD + 0.3 V, at VDD 3.3 V"
         },
         "pins": {
             "level": "vendor-docs",
-            "covers": [
-                "gpio.pins",
-                "gpio.strapping"
-            ],
+            "covers": ["gpio.pins", "gpio.strapping"],
             "source": "ESP-IDF esp-idf, docs/en/api-reference/peripherals/gpio/esp32s31.inc"
         },
         "boot": {
             "level": "datasheet",
-            "covers": [
-                "gpio.boot_modes",
-                "gpio.strapping",
-                "gpio.pins"
-            ],
+            "covers": ["gpio.boot_modes", "gpio.strapping", "gpio.pins"],
             "source": "~/dgx-bench/datasheets-espressif-2026-11-04/esp32s31/esp32-s31_datasheet_en_v0.5.pdf, Tables 3-1 and 3-3"
         },
-        "iomux": {
-            "level": "vendor-docs",
-            "covers": [
-                "iomux"
-            ],
-            "source": "ESP-IDF esp-idf, spi_pins.h of esp32s31"
-        }
+        "iomux": {"level": "vendor-docs", "covers": ["iomux"], "source": "ESP-IDF esp-idf, spi_pins.h of esp32s31"}
     },
     "frequency_sources": {
         "ledc": {
@@ -455,18 +180,9 @@
             "counter_bits": 20,
             "divider_bits": 18,
             "fraction_bits": 8,
-            "clocks_hz": {
-                "XTAL": 40000000,
-                "PLL_F80M": 80000000
-            },
+            "clocks_hz": {"XTAL": 40000000, "PLL_F80M": 80000000},
             "pairs": true,
-            "can": [
-                "frequency",
-                "duty",
-                "phase",
-                "fade",
-                "pause"
-            ]
+            "can": ["frequency", "duty", "phase", "fade", "pause"]
         },
         "mcpwm": {
             "title": "MCPWM",
@@ -477,13 +193,7 @@
             "ticks_max": 65535,
             "prescale_max": 256,
             "pairs": true,
-            "can": [
-                "frequency",
-                "duty",
-                "phase",
-                "dead_time",
-                "sync"
-            ]
+            "can": ["frequency", "duty", "phase", "dead_time", "sync"]
         },
         "rmt": {
             "title": "RMT",
@@ -494,24 +204,16 @@
             "ticks_max": 131072,
             "prescale_max": 1,
             "pairs": false,
-            "can": [
-                "carrier",
-                "loop"
-            ]
+            "can": ["carrier", "loop"]
         },
         "clk_out": {
             "title": "CLK_OUT",
             "kind": "clock_out",
             "timers": 3,
             "outputs": 3,
-            "signals": [
-                "XTAL32K"
-            ],
+            "signals": ["XTAL32K"],
             "pairs": false,
-            "can": [
-                "start_stop",
-                "divider"
-            ]
+            "can": ["start_stop", "divider"]
         },
         "i2s_apll": {
             "title": "I2S with APLL",
@@ -527,29 +229,7 @@
             "can": []
         }
     },
-    "controls": {
-        "wifi_tx_power": {
-            "how": "wifi_tx_power",
-            "min": 8,
-            "max": 84,
-            "unit": "0.25 dBm",
-            "read": "command"
-        }
-    },
-    "limits": {
-        "psram_mhz": 250,
-        "cpu_mhz": 320
-    },
-    "iomux": {
-        "spi": {
-            "spi2": {
-                "sclk": 20,
-                "mosi": 21,
-                "miso": 22,
-                "cs": 23,
-                "hd": 24,
-                "wp": 25
-            }
-        }
-    }
+    "controls": {"wifi_tx_power": {"how": "wifi_tx_power", "min": 8, "max": 84, "unit": "0.25 dBm", "read": "command"}},
+    "limits": {"psram_mhz": 250, "cpu_mhz": 320},
+    "iomux": {"spi": {"spi2": {"sclk": 20, "mosi": 21, "miso": 22, "cs": 23, "hd": 24, "wp": 25}}}
 }

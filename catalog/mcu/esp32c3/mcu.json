@@ -6,167 +6,39 @@
     "title": "ESP32-C3",
     "gpio": {
         "count": 22,
-        "valid": [
-            0,
-            1,
-            2,
-            3,
-            4,
-            5,
-            6,
-            7,
-            8,
-            9,
-            10,
-            11,
-            12,
-            13,
-            14,
-            15,
-            16,
-            17,
-            18,
-            19,
-            20,
-            21
-        ],
+        "valid": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21],
         "input_only": [],
-        "adc1": [
-            0,
-            1,
-            2,
-            3,
-            4
-        ],
+        "adc1": [0, 1, 2, 3, 4],
         "high_mv_max": 3600,
-        "strapping": [
-            2,
-            8,
-            9
-        ],
-        "boot_modes": {
-            "spi_boot": {
-                "2": 1,
-                "8": "any",
-                "9": 1
-            },
-            "joint_download_boot": {
-                "2": 1,
-                "8": 1,
-                "9": 0
-            }
-        },
+        "strapping": [2, 8, 9],
+        "boot_modes": {"spi_boot": {"2": 1, "8": "any", "9": 1}, "joint_download_boot": {"2": 1, "8": 1, "9": 0}},
         "pins": {
-            "0": {
-                "analog": [
-                    "ADC1_CH0"
-                ],
-                "low_power": "RTC"
-            },
-            "1": {
-                "analog": [
-                    "ADC1_CH1"
-                ],
-                "low_power": "RTC"
-            },
+            "0": {"analog": ["ADC1_CH0"], "low_power": "RTC"},
+            "1": {"analog": ["ADC1_CH1"], "low_power": "RTC"},
             "2": {
-                "analog": [
-                    "ADC1_CH2"
-                ],
+                "analog": ["ADC1_CH2"],
                 "low_power": "RTC",
-                "notes": [
-                    "Strapping pin"
-                ],
+                "notes": ["Strapping pin"],
                 "boot": {
-                    "selects": [
-                        "boot mode"
-                    ],
+                    "selects": ["boot mode"],
                     "pull": null,
                     "footnote": "GPIO2 actually does not determine SPI Boot and Joint Download Boot mode, but it is recommended to pull this pin up due to glitches.",
                     "decides": false
                 }
             },
-            "3": {
-                "analog": [
-                    "ADC1_CH3"
-                ],
-                "low_power": "RTC"
-            },
-            "4": {
-                "analog": [
-                    "ADC1_CH4"
-                ],
-                "low_power": "RTC"
-            },
-            "5": {
-                "analog": [
-                    "ADC2_CH0"
-                ],
-                "low_power": "RTC"
-            },
-            "8": {
-                "notes": [
-                    "Strapping pin"
-                ],
-                "boot": {
-                    "selects": [
-                        "boot mode",
-                        "rom messages"
-                    ],
-                    "pull": null
-                }
-            },
-            "9": {
-                "notes": [
-                    "Strapping pin"
-                ],
-                "boot": {
-                    "selects": [
-                        "boot mode"
-                    ],
-                    "pull": "up"
-                }
-            },
-            "12": {
-                "notes": [
-                    "SPI0/1"
-                ]
-            },
-            "13": {
-                "notes": [
-                    "SPI0/1"
-                ]
-            },
-            "14": {
-                "notes": [
-                    "SPI0/1"
-                ]
-            },
-            "15": {
-                "notes": [
-                    "SPI0/1"
-                ]
-            },
-            "16": {
-                "notes": [
-                    "SPI0/1"
-                ]
-            },
-            "17": {
-                "notes": [
-                    "SPI0/1"
-                ]
-            },
-            "18": {
-                "notes": [
-                    "USB-JTAG"
-                ]
-            },
-            "19": {
-                "notes": [
-                    "USB-JTAG"
-                ]
-            }
+            "3": {"analog": ["ADC1_CH3"], "low_power": "RTC"},
+            "4": {"analog": ["ADC1_CH4"], "low_power": "RTC"},
+            "5": {"analog": ["ADC2_CH0"], "low_power": "RTC"},
+            "8": {"notes": ["Strapping pin"], "boot": {"selects": ["boot mode", "rom messages"], "pull": null}},
+            "9": {"notes": ["Strapping pin"], "boot": {"selects": ["boot mode"], "pull": "up"}},
+            "12": {"notes": ["SPI0/1"]},
+            "13": {"notes": ["SPI0/1"]},
+            "14": {"notes": ["SPI0/1"]},
+            "15": {"notes": ["SPI0/1"]},
+            "16": {"notes": ["SPI0/1"]},
+            "17": {"notes": ["SPI0/1"]},
+            "18": {"notes": ["USB-JTAG"]},
+            "19": {"notes": ["USB-JTAG"]}
         },
         "notes": [
             "Strapping pin: GPIO2, GPIO8 and GPIO9 are strapping pins. For more information, please refer to ESP32-C3 Datasheet.",
@@ -175,66 +47,32 @@
             "RTC: GPIO0 ~ GPIO5 can be used to wake up the chip from Deep-sleep mode. Other GPIOs can only wake up the chip from Light-sleep mode. For more information, please refer to Section :ref:Wakeup Sources."
         ]
     },
-    "hosts": {
-        "spi": 2,
-        "i2c": 1,
-        "uart": 2
-    },
-    "provides": {
-        "wifi": {},
-        "bluetooth": {},
-        "twai": {}
-    },
+    "hosts": {"spi": 2, "i2c": 1, "uart": 2},
+    "provides": {"wifi": {}, "bluetooth": {}, "twai": {}},
     "checked": {
-        "facts": {
-            "level": "vendor-docs",
-            "source": "ESP-IDF esp-idf, components/soc/esp32c3, soc_caps.h"
-        },
+        "facts": {"level": "vendor-docs", "source": "ESP-IDF esp-idf, components/soc/esp32c3, soc_caps.h"},
         "frequency_sources": {
             "level": "vendor-docs",
-            "covers": [
-                "frequency_sources"
-            ],
+            "covers": ["frequency_sources"],
             "source": "ESP-IDF esp-idf: soc_caps.h, clk_tree_defs.h and soc.h of the chip, the Kconfig of its crystal, the low-level headers of LEDC, MCPWM, RMT, I2S and the clock tree, the drivers of LEDC, MCPWM, RMT and the DAC"
         },
         "levels": {
             "level": "datasheet",
-            "covers": [
-                "gpio.high_mv_max"
-            ],
+            "covers": ["gpio.high_mv_max"],
             "source": "Espressif datasheet of the chip, DC characteristics: VIH at most VDD + 0.3 V, at VDD 3.3 V"
         },
         "pins": {
             "level": "vendor-docs",
-            "covers": [
-                "gpio.pins",
-                "gpio.strapping"
-            ],
+            "covers": ["gpio.pins", "gpio.strapping"],
             "source": "ESP-IDF esp-idf, docs/en/api-reference/peripherals/gpio/esp32c3.inc"
         },
         "boot": {
             "level": "datasheet",
-            "covers": [
-                "gpio.boot_modes",
-                "gpio.strapping",
-                "gpio.pins"
-            ],
+            "covers": ["gpio.boot_modes", "gpio.strapping", "gpio.pins"],
             "source": "~/dgx-bench/datasheets-espressif-2026-11-04/esp32c3/esp32-c3_datasheet_en_v2.4.pdf, Tables 3-1 and 3-3"
         },
-        "iomux": {
-            "level": "vendor-docs",
-            "covers": [
-                "iomux"
-            ],
-            "source": "ESP-IDF esp-idf, spi_pins.h of esp32c3"
-        },
-        "platforms": {
-            "level": "vendor-docs",
-            "covers": [
-                "platforms"
-            ],
-            "source": "COMPATIBILITY.md of ESP-IDF"
-        }
+        "iomux": {"level": "vendor-docs", "covers": ["iomux"], "source": "ESP-IDF esp-idf, spi_pins.h of esp32c3"},
+        "platforms": {"level": "vendor-docs", "covers": ["platforms"], "source": "COMPATIBILITY.md of ESP-IDF"}
     },
     "frequency_sources": {
         "ledc": {
@@ -245,18 +83,9 @@
             "counter_bits": 14,
             "divider_bits": 18,
             "fraction_bits": 8,
-            "clocks_hz": {
-                "XTAL": 40000000,
-                "APB": 80000000
-            },
+            "clocks_hz": {"XTAL": 40000000, "APB": 80000000},
             "pairs": true,
-            "can": [
-                "frequency",
-                "duty",
-                "phase",
-                "fade",
-                "pause"
-            ]
+            "can": ["frequency", "duty", "phase", "fade", "pause"]
         },
         "rmt": {
             "title": "RMT",
@@ -267,10 +96,7 @@
             "ticks_max": 131072,
             "prescale_max": 1,
             "pairs": false,
-            "can": [
-                "carrier",
-                "loop"
-            ]
+            "can": ["carrier", "loop"]
         },
         "clk_out": {
             "title": "CLK_OUT",
@@ -279,47 +105,18 @@
             "outputs": 3,
             "signals": [],
             "pairs": false,
-            "can": [
-                "start_stop"
-            ]
+            "can": ["start_stop"]
         }
     },
-    "controls": {
-        "wifi_tx_power": {
-            "how": "wifi_tx_power",
-            "min": 8,
-            "max": 84,
-            "unit": "0.25 dBm",
-            "read": "command"
-        }
-    },
-    "limits": {
-        "cpu_mhz": 160
-    },
-    "iomux": {
-        "spi": {
-            "spi2": {
-                "miso": 2,
-                "hd": 4,
-                "wp": 5,
-                "sclk": 6,
-                "mosi": 7,
-                "cs": 10
-            }
-        }
-    },
+    "controls": {"wifi_tx_power": {"how": "wifi_tx_power", "min": 8, "max": 84, "unit": "0.25 dBm", "read": "command"}},
+    "limits": {"cpu_mhz": 160},
+    "iomux": {"spi": {"spi2": {"miso": 2, "hd": 4, "wp": 5, "sclk": 6, "mosi": 7, "cs": 10}}},
     "platforms": {
         "esp_idf": {
             "revisions": {
-                "0.2": {
-                    "since": "4.3"
-                },
-                "0.3": {
-                    "since": "4.3"
-                },
-                "0.4": {
-                    "since": "4.3"
-                },
+                "0.2": {"since": "4.3"},
+                "0.3": {"since": "4.3"},
+                "0.4": {"since": "4.3"},
                 "1.1": {
                     "required": {
                         "4.2": "EOL",

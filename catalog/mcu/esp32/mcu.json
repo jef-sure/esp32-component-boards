@@ -43,275 +43,61 @@
             38,
             39
         ],
-        "input_only": [
-            34,
-            35,
-            36,
-            37,
-            38,
-            39
-        ],
-        "adc1": [
-            32,
-            33,
-            34,
-            35,
-            36,
-            37,
-            38,
-            39
-        ],
+        "input_only": [34, 35, 36, 37, 38, 39],
+        "adc1": [32, 33, 34, 35, 36, 37, 38, 39],
         "high_mv_max": 3600,
-        "strapping": [
-            0,
-            2,
-            5,
-            12,
-            15
-        ],
-        "boot_modes": {
-            "spi_boot": {
-                "0": 1,
-                "2": "any"
-            },
-            "joint_download_boot": {
-                "0": 0,
-                "2": 0
-            }
-        },
+        "strapping": [0, 2, 5, 12, 15],
+        "boot_modes": {"spi_boot": {"0": 1, "2": "any"}, "joint_download_boot": {"0": 0, "2": 0}},
         "pins": {
             "0": {
-                "analog": [
-                    "ADC2_CH1"
-                ],
+                "analog": ["ADC2_CH1"],
                 "low_power": "RTC_GPIO11",
-                "notes": [
-                    "Strapping pin"
-                ],
-                "boot": {
-                    "selects": [
-                        "boot mode"
-                    ],
-                    "pull": "up"
-                }
+                "notes": ["Strapping pin"],
+                "boot": {"selects": ["boot mode"], "pull": "up"}
             },
-            "1": {
-                "notes": [
-                    "TXD"
-                ]
-            },
+            "1": {"notes": ["TXD"]},
             "2": {
-                "analog": [
-                    "ADC2_CH2"
-                ],
+                "analog": ["ADC2_CH2"],
                 "low_power": "RTC_GPIO12",
-                "notes": [
-                    "Strapping pin"
-                ],
-                "boot": {
-                    "selects": [
-                        "boot mode"
-                    ],
-                    "pull": "down"
-                }
+                "notes": ["Strapping pin"],
+                "boot": {"selects": ["boot mode"], "pull": "down"}
             },
-            "3": {
-                "notes": [
-                    "RXD"
-                ]
-            },
-            "4": {
-                "analog": [
-                    "ADC2_CH0"
-                ],
-                "low_power": "RTC_GPIO10"
-            },
-            "5": {
-                "notes": [
-                    "Strapping pin"
-                ],
-                "boot": {
-                    "selects": [
-                        "sdio timing"
-                    ],
-                    "pull": "up"
-                }
-            },
-            "6": {
-                "notes": [
-                    "SPI0/1"
-                ]
-            },
-            "7": {
-                "notes": [
-                    "SPI0/1"
-                ]
-            },
-            "8": {
-                "notes": [
-                    "SPI0/1"
-                ]
-            },
-            "9": {
-                "notes": [
-                    "SPI0/1"
-                ]
-            },
-            "10": {
-                "notes": [
-                    "SPI0/1"
-                ]
-            },
-            "11": {
-                "notes": [
-                    "SPI0/1"
-                ]
-            },
+            "3": {"notes": ["RXD"]},
+            "4": {"analog": ["ADC2_CH0"], "low_power": "RTC_GPIO10"},
+            "5": {"notes": ["Strapping pin"], "boot": {"selects": ["sdio timing"], "pull": "up"}},
+            "6": {"notes": ["SPI0/1"]},
+            "7": {"notes": ["SPI0/1"]},
+            "8": {"notes": ["SPI0/1"]},
+            "9": {"notes": ["SPI0/1"]},
+            "10": {"notes": ["SPI0/1"]},
+            "11": {"notes": ["SPI0/1"]},
             "12": {
-                "analog": [
-                    "ADC2_CH5"
-                ],
+                "analog": ["ADC2_CH5"],
                 "low_power": "RTC_GPIO15",
-                "notes": [
-                    "Strapping pin",
-                    "JTAG"
-                ],
-                "boot": {
-                    "selects": [
-                        "flash voltage"
-                    ],
-                    "pull": "down"
-                }
+                "notes": ["Strapping pin", "JTAG"],
+                "boot": {"selects": ["flash voltage"], "pull": "down"}
             },
-            "13": {
-                "analog": [
-                    "ADC2_CH4"
-                ],
-                "low_power": "RTC_GPIO14",
-                "notes": [
-                    "JTAG"
-                ]
-            },
-            "14": {
-                "analog": [
-                    "ADC2_CH6"
-                ],
-                "low_power": "RTC_GPIO16",
-                "notes": [
-                    "JTAG"
-                ]
-            },
+            "13": {"analog": ["ADC2_CH4"], "low_power": "RTC_GPIO14", "notes": ["JTAG"]},
+            "14": {"analog": ["ADC2_CH6"], "low_power": "RTC_GPIO16", "notes": ["JTAG"]},
             "15": {
-                "analog": [
-                    "ADC2_CH3"
-                ],
+                "analog": ["ADC2_CH3"],
                 "low_power": "RTC_GPIO13",
-                "notes": [
-                    "Strapping pin",
-                    "JTAG"
-                ],
-                "boot": {
-                    "selects": [
-                        "rom messages",
-                        "sdio timing"
-                    ],
-                    "pull": "up"
-                }
+                "notes": ["Strapping pin", "JTAG"],
+                "boot": {"selects": ["rom messages", "sdio timing"], "pull": "up"}
             },
-            "16": {
-                "notes": [
-                    "SPI0/1"
-                ]
-            },
-            "17": {
-                "notes": [
-                    "SPI0/1"
-                ]
-            },
-            "25": {
-                "analog": [
-                    "ADC2_CH8"
-                ],
-                "low_power": "RTC_GPIO6"
-            },
-            "26": {
-                "analog": [
-                    "ADC2_CH9"
-                ],
-                "low_power": "RTC_GPIO7"
-            },
-            "27": {
-                "analog": [
-                    "ADC2_CH7"
-                ],
-                "low_power": "RTC_GPIO17"
-            },
-            "32": {
-                "analog": [
-                    "ADC1_CH4"
-                ],
-                "low_power": "RTC_GPIO9"
-            },
-            "33": {
-                "analog": [
-                    "ADC1_CH5"
-                ],
-                "low_power": "RTC_GPIO8"
-            },
-            "34": {
-                "analog": [
-                    "ADC1_CH6"
-                ],
-                "low_power": "RTC_GPIO4",
-                "notes": [
-                    "GPI"
-                ]
-            },
-            "35": {
-                "analog": [
-                    "ADC1_CH7"
-                ],
-                "low_power": "RTC_GPIO5",
-                "notes": [
-                    "GPI"
-                ]
-            },
-            "36": {
-                "analog": [
-                    "ADC1_CH0"
-                ],
-                "low_power": "RTC_GPIO0",
-                "notes": [
-                    "GPI"
-                ]
-            },
-            "37": {
-                "analog": [
-                    "ADC1_CH1"
-                ],
-                "low_power": "RTC_GPIO1",
-                "notes": [
-                    "GPI"
-                ]
-            },
-            "38": {
-                "analog": [
-                    "ADC1_CH2"
-                ],
-                "low_power": "RTC_GPIO2",
-                "notes": [
-                    "GPI"
-                ]
-            },
-            "39": {
-                "analog": [
-                    "ADC1_CH3"
-                ],
-                "low_power": "RTC_GPIO3",
-                "notes": [
-                    "GPI"
-                ]
-            }
+            "16": {"notes": ["SPI0/1"]},
+            "17": {"notes": ["SPI0/1"]},
+            "25": {"analog": ["ADC2_CH8"], "low_power": "RTC_GPIO6"},
+            "26": {"analog": ["ADC2_CH9"], "low_power": "RTC_GPIO7"},
+            "27": {"analog": ["ADC2_CH7"], "low_power": "RTC_GPIO17"},
+            "32": {"analog": ["ADC1_CH4"], "low_power": "RTC_GPIO9"},
+            "33": {"analog": ["ADC1_CH5"], "low_power": "RTC_GPIO8"},
+            "34": {"analog": ["ADC1_CH6"], "low_power": "RTC_GPIO4", "notes": ["GPI"]},
+            "35": {"analog": ["ADC1_CH7"], "low_power": "RTC_GPIO5", "notes": ["GPI"]},
+            "36": {"analog": ["ADC1_CH0"], "low_power": "RTC_GPIO0", "notes": ["GPI"]},
+            "37": {"analog": ["ADC1_CH1"], "low_power": "RTC_GPIO1", "notes": ["GPI"]},
+            "38": {"analog": ["ADC1_CH2"], "low_power": "RTC_GPIO2", "notes": ["GPI"]},
+            "39": {"analog": ["ADC1_CH3"], "low_power": "RTC_GPIO3", "notes": ["GPI"]}
         },
         "notes": [
             "Strapping pin: GPIO0, GPIO2, GPIO5, GPIO12 (MTDI), and GPIO15 (MTDO) are strapping pins. For more information, please refer to ESP32 datasheet.",
@@ -323,11 +109,7 @@
             "Please do not use the interrupt of GPIO36 and GPIO39 when using ADC or Wi-Fi and Bluetooth with sleep mode enabled. Please refer to ESP32 ECO and Workarounds for Bugs > GPIO-3.11 for the detailed description of the issue."
         ]
     },
-    "hosts": {
-        "spi": 3,
-        "i2c": 2,
-        "uart": 3
-    },
+    "hosts": {"spi": 3, "i2c": 2, "uart": 3},
     "provides": {
         "wifi": {},
         "bluetooth": {},
@@ -339,63 +121,35 @@
         "twai": {}
     },
     "checked": {
-        "facts": {
-            "level": "vendor-docs",
-            "source": "ESP-IDF esp-idf, components/soc/esp32, soc_caps.h"
-        },
+        "facts": {"level": "vendor-docs", "source": "ESP-IDF esp-idf, components/soc/esp32, soc_caps.h"},
         "frequency_sources": {
             "level": "vendor-docs",
-            "covers": [
-                "frequency_sources"
-            ],
+            "covers": ["frequency_sources"],
             "source": "ESP-IDF esp-idf: soc_caps.h, clk_tree_defs.h and soc.h of the chip, the Kconfig of its crystal, the low-level headers of LEDC, MCPWM, RMT, I2S and the clock tree, the drivers of LEDC, MCPWM, RMT and the DAC"
         },
         "ledc_pairs": {
             "level": "hardware",
-            "covers": [
-                "frequency_sources.ledc.pairs"
-            ],
+            "covers": ["frequency_sources.ledc.pairs"],
             "by": "~/freecad/tc-eth-poe/piezo-test: two channels, one timer, hpoint half a period, antiphase read on the pins, four discs heard",
             "date": "2026-10-15"
         },
         "levels": {
             "level": "datasheet",
-            "covers": [
-                "gpio.high_mv_max"
-            ],
+            "covers": ["gpio.high_mv_max"],
             "source": "Espressif datasheet of the chip, DC characteristics: VIH at most VDD + 0.3 V, at VDD 3.3 V"
         },
         "pins": {
             "level": "vendor-docs",
-            "covers": [
-                "gpio.pins",
-                "gpio.strapping"
-            ],
+            "covers": ["gpio.pins", "gpio.strapping"],
             "source": "ESP-IDF esp-idf, docs/en/api-reference/peripherals/gpio/esp32.inc"
         },
         "boot": {
             "level": "datasheet",
-            "covers": [
-                "gpio.boot_modes",
-                "gpio.strapping",
-                "gpio.pins"
-            ],
+            "covers": ["gpio.boot_modes", "gpio.strapping", "gpio.pins"],
             "source": "~/dgx-bench/datasheets-espressif-2026-11-04/esp32/esp32_datasheet_en_v5.3.pdf, Tables 3-1 and 3-3"
         },
-        "iomux": {
-            "level": "vendor-docs",
-            "covers": [
-                "iomux"
-            ],
-            "source": "ESP-IDF esp-idf, spi_pins.h of esp32"
-        },
-        "platforms": {
-            "level": "vendor-docs",
-            "covers": [
-                "platforms"
-            ],
-            "source": "COMPATIBILITY.md of ESP-IDF"
-        }
+        "iomux": {"level": "vendor-docs", "covers": ["iomux"], "source": "ESP-IDF esp-idf, spi_pins.h of esp32"},
+        "platforms": {"level": "vendor-docs", "covers": ["platforms"], "source": "COMPATIBILITY.md of ESP-IDF"}
     },
     "frequency_sources": {
         "ledc": {
@@ -406,18 +160,9 @@
             "counter_bits": 20,
             "divider_bits": 18,
             "fraction_bits": 8,
-            "clocks_hz": {
-                "APB": 80000000,
-                "REF_TICK": 1000000
-            },
+            "clocks_hz": {"APB": 80000000, "REF_TICK": 1000000},
             "pairs": true,
-            "can": [
-                "frequency",
-                "duty",
-                "phase",
-                "fade",
-                "pause"
-            ]
+            "can": ["frequency", "duty", "phase", "fade", "pause"]
         },
         "mcpwm": {
             "title": "MCPWM",
@@ -428,13 +173,7 @@
             "ticks_max": 65535,
             "prescale_max": 256,
             "pairs": true,
-            "can": [
-                "frequency",
-                "duty",
-                "phase",
-                "dead_time",
-                "sync"
-            ]
+            "can": ["frequency", "duty", "phase", "dead_time", "sync"]
         },
         "rmt": {
             "title": "RMT",
@@ -445,10 +184,7 @@
             "ticks_max": 131072,
             "prescale_max": 1,
             "pairs": false,
-            "can": [
-                "carrier",
-                "loop"
-            ]
+            "can": ["carrier", "loop"]
         },
         "clk_out": {
             "title": "CLK_OUT",
@@ -457,9 +193,7 @@
             "outputs": 3,
             "signals": [],
             "pairs": false,
-            "can": [
-                "start_stop"
-            ]
+            "can": ["start_stop"]
         },
         "i2s_apll": {
             "title": "I2S with APLL",
@@ -474,61 +208,19 @@
             "pairs": false,
             "can": []
         },
-        "dac_cosine": {
-            "title": "DAC cosine",
-            "kind": "rc",
-            "timers": 1,
-            "outputs": 2,
-            "pairs": false,
-            "can": []
-        }
+        "dac_cosine": {"title": "DAC cosine", "kind": "rc", "timers": 1, "outputs": 2, "pairs": false, "can": []}
     },
-    "controls": {
-        "wifi_tx_power": {
-            "how": "wifi_tx_power",
-            "min": 8,
-            "max": 84,
-            "unit": "0.25 dBm",
-            "read": "command"
-        }
-    },
-    "limits": {
-        "psram_mhz": 80,
-        "cpu_mhz": 240
-    },
+    "controls": {"wifi_tx_power": {"how": "wifi_tx_power", "min": 8, "max": 84, "unit": "0.25 dBm", "read": "command"}},
+    "limits": {"psram_mhz": 80, "cpu_mhz": 240},
     "iomux": {
         "spi": {
-            "spi2": {
-                "miso": 12,
-                "mosi": 13,
-                "sclk": 14,
-                "cs": 15,
-                "wp": 2,
-                "hd": 4
-            },
-            "spi3": {
-                "miso": 19,
-                "mosi": 23,
-                "sclk": 18,
-                "cs": 5,
-                "wp": 22,
-                "hd": 21
-            }
+            "spi2": {"miso": 12, "mosi": 13, "sclk": 14, "cs": 15, "wp": 2, "hd": 4},
+            "spi3": {"miso": 19, "mosi": 23, "sclk": 18, "cs": 5, "wp": 22, "hd": 21}
         }
     },
     "platforms": {
         "esp_idf": {
-            "revisions": {
-                "0.0": {
-                    "since": "initial"
-                },
-                "1.0": {
-                    "since": "initial"
-                },
-                "3.0": {
-                    "since": "initial"
-                }
-            },
+            "revisions": {"0.0": {"since": "initial"}, "1.0": {"since": "initial"}, "3.0": {"since": "initial"}},
             "since": "initial"
         }
     }

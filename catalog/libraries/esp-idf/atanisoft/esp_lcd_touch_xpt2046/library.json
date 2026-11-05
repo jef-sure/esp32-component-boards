@@ -26,7 +26,12 @@
                     "ok": {"equals": "ESP_OK"}
                 }
             ],
-            "adapter": {"kind": "esp_lcd_touch", "function": "board_glue_touch_spi_start", "symbols": ["BOARD_TOUCH_SPI"], "headers": ["board_touch_lcd.h"]},
+            "adapter": {
+                "kind": "esp_lcd_touch",
+                "function": "board_glue_touch_spi_start",
+                "symbols": ["BOARD_TOUCH_SPI"],
+                "headers": ["board_touch_lcd.h"]
+            },
             "notes": "1 MHz is what the driver recommends for its reads."
         }
     },

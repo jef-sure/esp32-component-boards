@@ -10,11 +10,17 @@
     "license": "Apache-2.0",
     "install": [{"via": "platform"}],
     "described": "6.1",
-    "chips": {"esp32_dac": {"header": "driver/dac_continuous.h", "adapter": {"kind": "dac", "function": "board_glue_sound_dac_init"}}},
+    "chips": {
+        "esp32_dac": {
+            "header": "driver/dac_continuous.h",
+            "adapter": {"kind": "dac", "function": "board_glue_sound_dac_init"}
+        }
+    },
     "adapter": {
         "symbol": "BOARD_SOUND_DAC",
         "requires": ["esp_driver_gpio"],
-        "headers": ["board_sound_dac.h"], "public": "boards_esp_driver_dac.h",
+        "headers": ["board_sound_dac.h"],
+        "public": "boards_esp_driver_dac.h",
         "sources": {"BOARD_SOUND_DAC": ["board_sound_dac.c"]}
     }
 }

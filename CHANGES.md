@@ -415,6 +415,11 @@ committed, a program that asks by kind.
   it has the pins of its board. A write of the bridge puts every file beside its place before it renames any, so a
   file that cannot be written leaves the project as it was, and the page gets the error; the connection was dropped
   and the first file stayed.
+- The documents of the catalog lie in the form `resolve.dump` writes, as the page and the tools write them (the audit of
+  2026-11-05, 4): 39 files were in another, so the page showed them as edited and a report changed every line of one.
+  `check_format.py` checks the form and `--fix` writes it; `make_mcu.py` writes by `dump` and gives the same files. The
+  data did not change, nor anything generated from it. The schema, the rules, the questions and the roles are written by
+  hand and keep their form.
 - A level seen on hardware is a note, not a part: `high_seen_mv` of a chip, the lowest high that drove it on hardware,
   with its trial in `checked`, and the judgement `level_seen_on_hardware`. The WS2812B takes 3.5 V by its datasheet;
   the 3.3 V of an ESP32 drove Anton's garland, so a kit of strips says so and adds no level shifter (Anton: "in

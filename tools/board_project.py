@@ -114,8 +114,8 @@ def main():
             raw, args.module = json.loads(source.read_text()), []
     unwired = [module for module in args.module if not (ROOT / "catalog" / "modules" / module / "sdkconfig.defaults").is_file()]
     if unwired:
-        raise SystemExit(f"{', '.join(unwired)}: the page wires such a module to pins of the board: choose the kit there, or take the project "
-                         "it wrote with --selection DIR/selection.json")
+        raise SystemExit(f"{', '.join(unwired)}: no module of the catalog is set up by defaults of its own; the page wires modules to pins "
+                         "of the board: choose the kit there, or take the project it wrote with --selection DIR/selection.json")
     name = args.name or args.dir.resolve().name
     if not NAME.match(name):
         raise SystemExit(f"{name}: a project name is a lowercase letter, then lowercase letters, digits and _: give one with --name")

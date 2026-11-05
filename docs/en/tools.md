@@ -83,14 +83,15 @@ DRIVEN* and *NOT A GPIO OF THIS CHIP* beside the offenders.
 
 ```sh
 python3 tools/board_select.py cyd_s028r ~/myproject
-python3 tools/board_select.py jc1060p470c --module lcd2004_pcf8574 ~/myproject
+python3 tools/board_select.py my_board ~/myproject    # a board of the program, in its components/local-boards/
 python3 tools/board_select.py cyd_s028r jc8012p4a1c --current jc8012p4a1c ~/myproject
 python3 tools/board_select.py --current cyd_s028r ~/myproject
 python3 tools/board_select.py host --as jc8012p4a1c ~/myproject    # the computer, as large as the 10-inch board
 ```
 
 Writes `~/myproject/sdkconfig.defaults.<board>` for each board named: the board's defaults, the lines of the
-revision of its chip (`--revision`), then each module's. Then `CMakePresets.json`: a preset for each board of the
+revision of its chip (`--revision`), then those of each module of `--module` that has defaults of its own (no module of
+the catalog has them now: the page wires modules into a board of the program). Then `CMakePresets.json`: a preset for each board of the
 project, those it had and those named, each building in `build/<board>`, and `default` for the current one, the first
 named unless `--current` names another. `--current` alone changes only `default`. A board of the project starts its
 lock, `dependencies.lock.<board>`, as a copy of `dependencies.lock`. A file of defaults or a `CMakePresets.json` it did
@@ -107,7 +108,6 @@ has stays the page's: its new hash goes into the list. An `sdkconfig` made befor
 
 ```sh
 python3 tools/board_project.py ~/my_game --board jc8012p4a1c
-python3 tools/board_project.py ~/terminal --board jc1060p470c --module lcd2004_pcf8574
 python3 tools/board_project.py ~/again --selection ~/old/selection.json
 python3 tools/board_project.py ~/clock-2 --board cyd_s028r --name clock_two  # a folder whose name is no name of a project
 ```
@@ -115,8 +115,8 @@ python3 tools/board_project.py ~/clock-2 --board cyd_s028r --name clock_two  # a
 A new project on a board chosen by hand, without the page: the files the page writes for a new folder
 (`editor/skeleton/files.json` lists them, both read the list), filled the same way, and `selection.json` with no
 answers. The component comes as this copy came: from git at its commit, or from the registry at its version, as the
-page writes it. `--module` takes a module that `board_select.py`
-sets up by its own defaults, as the 2004 on the I2C of a board; the page wires the others to pins. `--selection` takes
+page writes it. `--module` takes a module that `board_select.py` sets up by its own defaults; no module of the catalog
+has them now, the page wires modules to pins. `--selection` takes
 the current kit of a `selection.json` with its answers; a kit the page wired has a board of the program, which is taken
 from `components/local-boards/` beside that `selection.json` and named after the new project, with its wires and its
 libraries in the README. The folder is empty or holds only `.git`, `.gitignore`, a README or a LICENSE; nothing in it is

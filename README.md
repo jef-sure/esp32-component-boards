@@ -42,7 +42,7 @@ is one peripheral among others. What a board can have today:
   the way they lie on the board;
 - a **character display** (HD44780, a 2004 on a PCF8574 backpack) through
   [hd44780](https://github.com/jef-sure/esp32-component-hd44780), on the board
-  or as a module on its I2C bus;
+  or as a module of the program on its I2C bus;
 - a **touch panel** as a device of [DGX-DI](https://github.com/jef-sure/esp32-component-dgx-di),
   with the calibration measured on the board kept in the data;
 - **LVGL** through [DGX-LVGL](https://github.com/jef-sure/esp32-component-dgx-lvgl):
@@ -123,9 +123,9 @@ codec library. See [docs/en/choosing-a-board.md](docs/en/choosing-a-board.md).
 | Guition JC8012P4A1C | ESP32-P4 | 1280x800 JD9365, MIPI-DSI, 217x136 mm | GSL3680 (firmware embedded by the program) | ES8311 | yes |
 <!-- boards:end -->
 
-A module is connected to the chosen board by a bus of the board: `board_select.py jc1060p470c --module
-lcd2004_pcf8574 .` adds a 20x4 character LCD on its I2C bus. A board that opens no such bus, as the CYD S028R
-for I2C, does not take the module: the menu does not offer it and `board_select.py` says why.
+A module is wired to a board in a board of the program, in its `components/local-boards/`: the page writes one
+for a kit with modules, and [examples/local_boards](examples/local_boards) has one written by hand, a round display
+on QSPI and a 2004 character LCD on I2C. See [docs/en/modules.md](docs/en/modules.md).
 
 The GSL3680 of the
 10.1-inch board keeps no firmware of its own, and the vendor's array carries no
@@ -202,8 +202,8 @@ choice, hidden symbols beside it, manifest rules on them.
 
 ## Status
 
-0.0.1. Builds for every board, and with the module, under ESP-IDF 5.5 and 6.1:
-the matrix of `.github/workflows/build.yml`. `examples/hello_board` and
+0.0.1. Builds for every board under ESP-IDF 5.5 and 6.1, and a board of a program with a display and a
+2004: the jobs of `.github/workflows/build.yml`. `examples/hello_board` and
 `examples/hello_lvgl` were flashed on a CYD S028R, a JC4827W543C and a JC1060P470C
 under ESP-IDF 6.1: the display, the touch and the sound start without errors in
 the log. Touch coordinates were checked by finger on all three and are correct.

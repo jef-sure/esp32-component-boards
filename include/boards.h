@@ -66,7 +66,7 @@ bool board_display_orientation(board_display_t *display, int dir_x, int dir_y, b
 
 /*
  * A character display (HD44780) the board has or a module on its I2C bus brings (the 2004 on
- * a PCF8574 backpack, CONFIG_BOARD_MODULE_LCD2004_PCF8574): set up, cleared, its light on. false
+ * a PCF8574 backpack, a module of a board of the program): set up, cleared, its light on. false
  * when there is none or it does not respond; *out untouched then.
  */
 typedef struct board_character_display {

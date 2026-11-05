@@ -1,5 +1,6 @@
 {
     "title": "A part fixed for a block it cannot serve: the kit says so instead of taking another",
+    "modules": ["lcd2004_pcf8574"],
     "answers": {"blocks": [{"role": "air", "name": "co2", "variant": "co2", "part": "lcd2004_pcf8574", "fixed": true}]},
     "says": "Air quality: the part you fixed, 2004 LCD on a PCF8574, does not serve it"
 }

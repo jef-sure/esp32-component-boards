@@ -86,14 +86,15 @@ GPIO, который называют данные, кто им владеет �
 
 ```sh
 python3 tools/board_select.py cyd_s028r ~/myproject
-python3 tools/board_select.py jc1060p470c --module lcd2004_pcf8574 ~/myproject
+python3 tools/board_select.py my_board ~/myproject    # плата программы, в её components/local-boards/
 python3 tools/board_select.py cyd_s028r jc8012p4a1c --current jc8012p4a1c ~/myproject
 python3 tools/board_select.py --current cyd_s028r ~/myproject
 python3 tools/board_select.py host --as jc8012p4a1c ~/myproject    # компьютер размером с 10-дюймовую плату
 ```
 
 Записывает `~/myproject/sdkconfig.defaults.<плата>` на каждую названную плату: умолчания платы, строки ревизии её
-чипа (`--revision`), затем умолчания каждого модуля. Затем `CMakePresets.json`: по пресету на каждую плату проекта —
+чипа (`--revision`), затем умолчания каждого модуля `--module`, у которого они свои (сейчас таких модулей в каталоге
+нет: страница подключает модули в плате программы). Затем `CMakePresets.json`: по пресету на каждую плату проекта —
 прежние и названные, каждая собирается в `build/<плата>`, — и `default` для текущей: первой названной, если
 `--current` не назвал другую. `--current` без плат меняет только `default`. Lock платы, `dependencies.lock.<плата>`,
 начинается с копии `dependencies.lock`. Файл умолчаний или `CMakePresets.json`, которые писал не он, не заменяются.
@@ -110,7 +111,6 @@ python3 tools/board_select.py host --as jc8012p4a1c ~/myproject    # компь�
 
 ```sh
 python3 tools/board_project.py ~/my_game --board jc8012p4a1c
-python3 tools/board_project.py ~/terminal --board jc1060p470c --module lcd2004_pcf8574
 python3 tools/board_project.py ~/again --selection ~/old/selection.json
 python3 tools/board_project.py ~/clock-2 --board cyd_s028r --name clock_two  # папка, чьё имя не годится в имя проекта
 ```
@@ -118,7 +118,7 @@ python3 tools/board_project.py ~/clock-2 --board cyd_s028r --name clock_two  # �
 Новый проект на плате, выбранной вручную, без страницы: те же файлы, что страница пишет в новую папку (их
 перечисляет `editor/skeleton/files.json`, оба читают этот список), заполненные так же, и `selection.json` без
 ответов. Компонент берётся так же, как пришла эта копия: из git на её коммите или из реестра в её версии, как пишет страница. `--module` берёт модуль, который `board_select.py` включает
-его собственными умолчаниями, как 2004 на I2C платы; остальные страница подключает к пинам. `--selection` берёт текущий
+его собственными умолчаниями; сейчас таких модулей в каталоге нет, страница подключает модули к пинам. `--selection` берёт текущий
 комплект `selection.json` вместе с ответами; у комплекта, подключённого страницей, есть плата программы — она берётся
 из `components/local-boards/` рядом с этим `selection.json` и получает имя нового проекта, а README — её провода и
 библиотеки.

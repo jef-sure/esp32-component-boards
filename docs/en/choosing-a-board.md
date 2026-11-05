@@ -84,13 +84,12 @@ a fresh clone reads them before the component is downloaded.
 
 ## A module
 
-```sh
-python3 managed_components/jef-sure__boards/tools/board_select.py jc1060p470c --module lcd2004_pcf8574 .
-```
-
-The module's defaults are appended after the board's: they turn its option on
-in the menu (`CONFIG_BOARD_MODULE_LCD2004_PCF8574=y`), which brings hd44780 in
-and compiles the module's glue beside the board's. See [modules.md](modules.md).
+A module wired to a board makes a board of the program: `components/local-boards/boards/<board>/board.json`
+names the board it stands on and its modules with their buses and pins. The page writes it for a kit with
+modules; `examples/local_boards` has one written by hand. `board_select.py <board> .` takes it as a board of
+the catalog and makes its glue beside its data. A board of the program changed later to need another library
+takes it once its `dependencies.lock.<board>` and `build/<board>` are removed: the component manager solves a
+lock again when the manifest changes, not when the board does. See [modules.md](modules.md).
 
 ## Another board
 

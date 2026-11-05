@@ -600,7 +600,9 @@ On lines, `channels` says how many lines one of them takes, and `both_ways` that
 A kit adds one by itself where a level needs it: a device or a way names `high_min_mv`, the lowest high level it reads, and
 a chip drives 3.3 V. A chip whose `high_seen_mv`, the lowest high that drove it on hardware with its trial in `checked`, is
 3.3 V or less gets a note instead (the judgement `level_seen_on_hardware`): the WS2812B takes 3.5 V by its datasheet, and
-the 3.3 V of an ESP32 drove the 360 of Anton's garland.
+the 3.3 V of an ESP32 drove the 360 LEDs of a garland. The other way, a device whose lines go above what the pins of the
+chip take, as a module with pull-ups to 5 V, gets a level shifter both ways; with `logic_seen_mv`, the highest level its
+lines put on the pins of a chip that ran with them on hardware, a note instead (`logic_seen_on_hardware`).
 
 On a port, `needs` names what a board must provide, and `gives` what the board then has: `provides`, and the `plug`, `mv` and
 `ma` it hands over. A step of `power` names the `plug` it takes, so a PoE splitter comes with the plug of the board. A board
@@ -807,7 +809,7 @@ kit, `selection.json` keeps it, and a case of `test/solver/` checks the `id`, no
 | `note_cost` | `note` | a pin with that note of the docs is given, with a line of what it costs; any other note keeps a pin out |
 | `unnamed_variant` | | a part of the board of no named variant answers nothing for a variant asked when a module of the catalog names it, and stays a line |
 | `resource_limit` | `resource` (`ledc`) | a kit that asks more of the resource than the chip has is refused |
-| `seen_level` | | a chip whose least high is above what the pins give, and that a trial on hardware drove with less (`high_seen_mv` with its `checked`), gets a line instead of a level shifter |
+| `seen_level` | `field` (`high_seen_mv`, `logic_seen_mv`) | a device whose level is beyond what the pins give or take, and that a trial on hardware ran with all the same (the `field` with its `checked`), gets a line instead of a level shifter |
 
 The strapping pins of a chip are copied from its datasheet, not judged: `gpio.boot_modes` holds the rows of its table
 of boot modes (the level of each pin, or `any`, for `spi_boot` and for each download mode), and each strapping pin has

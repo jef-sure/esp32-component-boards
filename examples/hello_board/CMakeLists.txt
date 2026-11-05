@@ -5,7 +5,6 @@
 # chooses it in the menu) and CMakePresets.json, whose preset builds the board in build/<board>:
 #
 #     python3 ../../tools/board_select.py cyd_s028r .    # or jc1060p470c, jc8012p4a1c, jc4827w543c
-#     python3 ../../tools/board_select.py jc1060p470c --module lcd2004_pcf8574 .
 #     idf.py build flash monitor
 #
 # Nothing here names a board.

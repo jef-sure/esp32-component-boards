@@ -423,6 +423,7 @@
         "on": { "$ref": "#/$defs/on" },
         "pins": { "$ref": "#/$defs/pins" },
         "logic": { "type": "string", "minLength": 1, "description": "The step of power a high level on the lines of this device reaches: where its pull-ups go, or what its outputs drive. none: it puts nothing on them, as a display with no line back." },
+        "logic_seen_mv": { "type": "integer", "minimum": 1, "description": "The highest level its lines put on the pins of a chip that ran with them on hardware, above what those pins take by the datasheet of the chip; the trial goes in checked." },
         "config": { "type": "object" },
         "controls": { "$ref": "#/$defs/controls" },
         "provides": { "$ref": "#/$defs/provides" },
@@ -653,6 +654,13 @@
                 "then": {
                   "required": ["note"],
                   "properties": { "note": { "type": "string", "minLength": 1, "description": "A note of gpio.pins of the chip that costs something rather than keeps a pin out." } }
+                }
+              },
+              {
+                "if": { "properties": { "kind": { "const": "seen_level" } } },
+                "then": {
+                  "required": ["field"],
+                  "properties": { "field": { "enum": ["high_seen_mv", "logic_seen_mv"], "description": "The field of a device that holds the level seen on hardware: the lowest high that drove its inputs, or the highest level its lines put on the pins of a chip." } }
                 }
               },
               {

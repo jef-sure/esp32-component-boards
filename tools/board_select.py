@@ -63,12 +63,12 @@ DATA = ROOT / "catalog"
 def defaults_of(name, what):
     kind, file = ("boards", "board.json") if what == "board" else ("modules", "module.json")
     # a module --module takes is one set up by its own defaults; the page wires the others to pins of a board of the program
-    known = ", ".join(sorted(p.parent.name for p in (DATA / kind).glob("*/sdkconfig.defaults")))
+    known = ", ".join(sorted(p.parent.name for p in (DATA / kind).glob("*/sdkconfig.defaults"))) or "none of the catalog"
     if not (DATA / kind / name / file).exists():
-        raise SystemExit(f"{name}: no such {what} in {DATA / kind} ({known})")
+        raise SystemExit(f"{name}: no such {what} in {DATA / kind} (--{what} takes {known})")
     defaults = DATA / kind / name / "sdkconfig.defaults"
     if not defaults.exists():
-        raise SystemExit(f"{name}: --module takes {known}; this {what} is wired to pins of the board by the page, as a board of the "
+        raise SystemExit(f"{name}: --module takes {known}; this {what} is wired to pins of a board by the page, in a board of the "
                          f"program in components/local-boards/ that names it in modules")
     return defaults.read_text()
 

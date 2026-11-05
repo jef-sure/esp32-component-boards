@@ -23,7 +23,7 @@ jobs:
       - run: python3 tools/board_pins.py --all
 
   build:
-    name: ${{ matrix.board }}${{ matrix.module && format(' + {0}', matrix.module) || '' }} on ESP-IDF ${{ matrix.idf }}
+    name: ${{ matrix.board }} on ESP-IDF ${{ matrix.idf }}
     needs: check
     if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
@@ -34,16 +34,11 @@ jobs:
         board: [cyd_s028r, esp32_c3_zero, esp32_devkit, esp32_p4_eth, esp32_p4_poe_eth, esp32_s3_zero, esp32s3_devkit, jc1060p470c, jc4827w543c, jc8012p4a1c]
         # boards: end of generated
         idf: [release-v5.5, v6.1]
-        module: [""]
-        include:
-          - board: jc1060p470c
-            idf: v6.1
-            module: lcd2004_pcf8574
     steps:
       - uses: actions/checkout@v4
       - name: choose the board
         run: |
-          python3 tools/board_select.py ${{ matrix.board }} ${{ matrix.module && format('--module {0}', matrix.module) || '' }} examples/hello_board
+          python3 tools/board_select.py ${{ matrix.board }} examples/hello_board
           python3 tools/board_select.py ${{ matrix.board }} examples/hello_lvgl
           python3 -c "import sys; sys.path.insert(0, 'tools'); import resolve; board = resolve.resolve(resolve.load('boards', '${{ matrix.board }}')); print('target=' + board['mcu']['target']); print('graphics=' + str(any((device.get('config') or {}).get('kind') == 'graphics' for device in board['devices'].values())).lower())" >> "$GITHUB_OUTPUT"
         id: board
@@ -55,7 +50,7 @@ jobs:
           path: examples/hello_board
           command: ${{ matrix.idf == 'v6.1' && 'idf.py build' || format('idf.py -B build/{0} -D SDKCONFIG=build/{0}/sdkconfig -D BOARD={0} build', matrix.board) }}
       - name: build hello_lvgl
-        if: ${{ !matrix.module && steps.board.outputs.graphics == 'true' }}
+        if: ${{ steps.board.outputs.graphics == 'true' }}
         uses: espressif/esp-idf-ci-action@v1
         with:
           esp_idf_version: ${{ matrix.idf }}
@@ -87,7 +82,7 @@ jobs:
           command: ${{ matrix.idf == 'v6.1' && 'idf.py build' || 'idf.py -B build/project_unused -D SDKCONFIG=build/project_unused/sdkconfig -D BOARD=project_unused build' }}
 
   local-boards:
-    name: a board of the program on ESP-IDF ${{ matrix.idf }}
+    name: a board of the program with a display and a 2004 on ESP-IDF ${{ matrix.idf }}
     needs: check
     runs-on: ubuntu-latest
     strategy:

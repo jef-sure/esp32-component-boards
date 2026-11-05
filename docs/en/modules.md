@@ -1,86 +1,21 @@
 # Modules
 
-A module is a device that is not a board of its own but is connected to a bus of
-whichever board is chosen. Today there is one: the 2004 character LCD on a
-PCF8574 I2C backpack, the common 20x4 display with four pins (VCC, GND, SDA,
-SCL).
+A module is a part connected to a board by wires: a display, a reader, a sensor, a strip of LEDs. It is
+not a board of its own: a board of a program names it in `modules`, with the bus it joins and its pins.
+The page writes such a board for a kit with modules. `examples/local_boards` has one written by hand: a
+round QSPI display and a 2004 character LCD on a PCF8574 I2C backpack, both modules of the program.
 
-## Turning it on
-
-```sh
-python3 tools/board_select.py jc1060p470c --module lcd2004_pcf8574 .
-```
-
-The module's `sdkconfig.defaults` is appended to the board's and sets
-`CONFIG_BOARD_MODULE_LCD2004_PCF8574=y`. That option is also in the menu,
-under *Boards*, below the choice of the board. With it on, the component
-brings `jef-sure/hd44780` in by a manifest rule and compiles the module's glue
-beside the board's.
-
-## Using it
-
-```c
-board_character_display_t lcd;
-if (board_character_display_init(&lcd)) {
-    lcd_set_cursor(board_hd44780(&lcd), 0, 0);
-    lcd_write_str(board_hd44780(&lcd), "hello");
-}
-```
-
-`lcd_write_str` writes on through the memory of the HD44780, where row 0 of a 20x4 runs into row 2, so
-a text longer than a row goes row by row, with `lcd_set_cursor` for each.
-
-The display comes up cleared with its backlight on; `lcd.cols` and `lcd.rows`
-are its geometry. The rest is hd44780's API (`hd44780.h`). The module uses the
-board's I2C master, shared with the board's touch panel and codec; the
-backpack's address is in the module's data (`0x27`; a backpack with its
-address jumpers set differently needs the data changed).
-
-On a board without the module, `board_character_display_init` returns
-`false`: the same program runs with and without the LCD.
-
-## How it is described
-
-`catalog/modules/lcd2004_pcf8574/module.json` has no chip and no buses. Its `on`
-names only the kind of bus: the wiring is the project's, and the glue today puts
-it on the I2C bus of the board.
+## On a board of a program
 
 ```json
-{
-    "format": "jef-sure/boards", "format_version": 2, "kind": "module",
-    "name": "lcd2004_pcf8574",
-    "title": "2004 character LCD on a PCF8574 backpack",
-    "description": "...",
-    "devices": {
-        "lcd": { "chip": "hd44780", "on": { "i2c": { "address": "0x27" } }, "config": { "primary": true, "geometry": "20x4" } }
-    }
-}
-```
-
-Its glue defines only the function of its kind,
-`board_character_display_init`. `src/board_display_none.c` has that function
-too, returning `false`, but under `#if !CONFIG_BOARD_DISPLAY_HD44780`, so when
-the module is on, the module's function is the one that links. A board that has an HD44780 soldered on (on I2C or on GPIOs)
-describes it in its own `display` and defines the real function itself; then
-no module is needed.
-
-## Adding a module
-
-Another character display on a backpack is another directory with its
-geometry and address. A module of another kind (a sensor, a radio) is data: its
-devices are named in the module, a kit names the library of its chip, and the
-program starts it. The glue starts only displays, touch panels, sound and
-buttons; another kind it starts needs a kind in `boards.h` and a branch in the
-generator.
-
-## On a board
-
-A module is a board used as a part of another, with the same fields, and it may have a chip of its
-own: a C6 on the SDIO of a P4 is a module with `mcu`. A board that always has a module names it:
-
-```json
+"buses": { "i2c": { "i2c0": { "sda": 4, "scl": 5 } } },
 "modules": {
-    "screen": { "module": "lcd2004_pcf8574", "on": { "i2c.i2c0": {} } },
+    "text": {
+        "module": "lcd2004_pcf8574",
+        "on": { "i2c.i2c0": {} },
+        "supply": { "VCC": "5V" },
+        "devices": { "lcd": { "config": { "primary": false } } }
+    },
     "tft": {
         "module": "tft_with_touch",
         "on": { "spi.spi2": {} },
@@ -93,6 +28,58 @@ own: a C6 on the SDIO of a P4 is a module with `mcu`. A board that always has a 
 ```
 
 `on` says which bus each kind of bus of the module joins. `pins` and `config` beside it are for a
-module of one part; a module of several takes its wiring by part, in `devices`. A part is named
-`<use>_<part>` on the board, `screen_lcd`, however many parts the module has, and what its parts
-say of each other (`over`, `after`) follows the new names.
+module of one part; a module of several takes its wiring by part, in `devices`, and so does a change of
+one part, as the 2004 above that is not the primary display beside another. A part is named
+`<use>_<part>` on the board, `text_lcd`, however many parts the module has, and what its parts say of
+each other (`over`, `after`) follows the new names. A module is a board used as a part of another, with
+the same fields, and it may have a chip of its own: a C6 on the SDIO of a P4 is a module with `mcu`.
+
+## A character display
+
+```c
+board_character_display_t lcd;
+if (board_character_display_init(&lcd)) {
+    lcd_set_cursor(board_hd44780(&lcd), 0, 0);
+    lcd_write_str(board_hd44780(&lcd), "hello");
+}
+```
+
+`lcd_write_str` writes on through the memory of the HD44780, where row 0 of a 20x4 runs into row 2, so
+a text longer than a row goes row by row, with `lcd_set_cursor` for each.
+
+The display comes up cleared with its backlight on; `lcd.cols` and `lcd.rows` are its geometry. The
+rest is hd44780's API (`hd44780.h`), brought in by a rule of the manifest when the board has such a
+display. It uses the board's I2C master, shared with the board's touch panel and codec; the backpack's
+address is in the module's data (`0x27`; a backpack with its address jumpers set differently needs the
+data changed). On a board without it, `board_character_display_init` returns `false`: the same program
+runs with and without the LCD.
+
+## How a module is described
+
+The 2004 of the example, `components/local-boards/modules/lcd2004_pcf8574/module.json`, has no chip and
+no buses. Its `on` names only the kind of bus: the wiring is the board's.
+
+```json
+{
+    "format": "jef-sure/boards", "format_version": 2, "kind": "module",
+    "name": "lcd2004_pcf8574",
+    "title": "2004 LCD on a PCF8574",
+    "description": "...",
+    "power": [{ "name": "VCC", "source": "connector", "volts": [4.5, 5.5], "feeds": ["lcd"] }],
+    "devices": {
+        "lcd": { "chip": "hd44780", "on": { "i2c": { "address": "0x27" } }, "logic": "VCC", "config": { "primary": true, "geometry": "20x4" } }
+    }
+}
+```
+
+The glue of the board defines `board_character_display_init` for it. `src/board_display_none.c` has
+that function too, returning `false`, but under `#if !CONFIG_BOARD_DISPLAY_HD44780`, so on a board
+with such a display the glue's function is the one that links.
+
+## The catalog and the program
+
+The modules of `catalog/modules/` are products the page offers in kits. A module of the program's own,
+as a part its author wired from pieces, lies in `components/local-boards/modules/` of the program, in
+the layout of `catalog/`, as the 2004 of the example does. The glue starts displays, touch panels,
+sound and buttons; a module of another kind (a sensor, a radio) is data: a kit names the library of its
+chip, and the program starts it.

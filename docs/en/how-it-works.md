@@ -143,11 +143,10 @@ the board, nothing more. The one convenience beyond that is
 
 ## Modules
 
-A module is a device any board's bus can carry: today the 2004 character LCD
-on a PCF8574 backpack. It is described as a board without a chip
-(`"kind": "module"`), has an option of its own in the menu
-(`CONFIG_BOARD_MODULE_LCD2004_PCF8574`), and its `sdkconfig.defaults` turns
-that option on. Its glue gives the table of its kind, `board_character_panel`;
+A module is a part a board of a program carries on a bus, as the 2004 character LCD on a
+PCF8574 backpack of `examples/local_boards`. It is described as a board without a chip
+(`"kind": "module"`), and the board that names it in `modules` takes its devices as its
+own. For the 2004 the glue of that board gives the table of its kind, `board_character_panel`;
 the adapter of hd44780 defines `board_character_display_init` from it, and the one
 of `src/board_display_none.c` that returns `false` is left out while a character
 display is there (`#if !CONFIG_BOARD_DISPLAY_HD44780`).
@@ -166,7 +165,7 @@ Three layers, from fast to real:
    mirror the shape of the real ones. Catches a wrong argument type in seconds,
    without ESP-IDF.
 3. CI (`.github/workflows/build.yml`): `examples/hello_board` is built for
-   every board under two versions of ESP-IDF, and once with the module on the
-   JC1060P470C under 6.1, and `examples/hello_lvgl` for every board with a
-   graphics display.
+   every board under two versions of ESP-IDF, `examples/hello_lvgl` for every
+   board with a graphics display, and `examples/local_boards`, a board of a
+   program with a display and a 2004 on I2C.
    Only this one proves the glue links.

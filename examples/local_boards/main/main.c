@@ -1,14 +1,29 @@
 /* A board of the program: the program asks for its parts by kind, as on a board of the catalog. */
 #include <stdio.h>
+#include <string.h>
 
 #include "boards.h"
 #include "boards_dgx.h"
 #include "dgx_draw.h"
+#include "sdkconfig.h"
+#if CONFIG_BOARD_DISPLAY_HD44780
+#include "boards_hd44780.h"
+#endif
 
 void app_main(void)
 {
     const board_info_t *board = board_info();
     printf("the board: %s (%s), %s\n", board->title, board->name, board->target);
+
+    board_character_display_t lcd;
+    if (board_character_display_init(&lcd)) {
+        printf("the character display: %d x %d\n", lcd.cols, lcd.rows);
+#if CONFIG_BOARD_DISPLAY_HD44780
+        /* the name of the board on its first row */
+        lcd_set_cursor(board_hd44780(&lcd), 0, 0);
+        lcd_write_strn(board_hd44780(&lcd), board->name, strnlen(board->name, (size_t)lcd.cols));
+#endif
+    }
 
     board_display_t display = {0};
     if (!board_display_init(&display)) {

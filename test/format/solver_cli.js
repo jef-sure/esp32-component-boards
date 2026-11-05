@@ -73,6 +73,9 @@ function holdsForEvery(kits, say) {
     }
 }
 
+// the modules a case adds: written in it, or named, from the modules of the program of examples/local_boards
+const PROGRAM_MODULES = path.join(__dirname, '../../examples/local_boards/components/local-boards/modules');
+const modulesOf = (given) => (Array.isArray(given.modules) ? Object.fromEntries(given.modules.map((name) => [name, read(path.join(PROGRAM_MODULES, name, 'module.json'))])) : given.modules || {});
 const names = fs.readdirSync(CASES).sort();
 for (const name of names) {
     const given = read(path.join(CASES, name));
@@ -80,7 +83,8 @@ for (const name of names) {
     for (const [board, range] of Object.entries(given.prices || {})) catalog.boards[board].price = { shop: { shop: 'test', currency: 'EUR', range, date: '2026-11-01', source: 'the case' } };
     const kept = Object.keys(given.change || {}).map((board) => [board, catalog.boards[board]]);
     for (const [board, patch] of Object.entries(given.change || {})) catalog.boards[board] = loader.merge(structuredClone(catalog.boards[board]), patch);
-    Object.assign(catalog.modules, given.modules || {});
+    const added = modulesOf(given);
+    Object.assign(catalog.modules, added);
     const keptRates = { ...rates };
     Object.assign(rates, given.rates || {});
     const kits = (given.imported ? widerSolver : solver).solve(given.answers);
@@ -136,7 +140,7 @@ for (const name of names) {
             if (!catalog.mcu[catalog.boards[given.adc.board].mcu?.target ?? 'esp32'].gpio.adc1.includes(pin)) say(`${given.adc.use}.${line} is on GPIO ${pin}, not on ADC1`);
         }
     }
-    if (given.without && fit.some((kit) => kit.modules.some((module) => module.name === given.without))) say(`a kit with ${given.without} fits`);
+    if (given.without && fit.some((kit) => [...kit.modules, ...(kit.addons ?? [])].some((module) => module.name === given.without))) say(`a kit with ${given.without} fits`);
     if (given.same_worth) {
         const worth = given.same_worth.map((board) => fit.find((kit) => kit.name === board)?.unaskedWorth);
         if (worth.some((value) => value === undefined) || new Set(worth).size > 1) say(`what nobody asked for weighs ${worth.join(' and ')} on ${given.same_worth.join(' and ')}`);
@@ -180,7 +184,7 @@ for (const name of names) {
     const selection = fit[0] && JSON.parse(JSON.stringify(solver.selectionOf([{ kit: JSON.parse(JSON.stringify(fit[0])), board: fit[0].name }], fit[0].name, kits, given.answers, 'EUR', 'case_project')));
     if (selection) for (const error of selections.errors({ $ref: '#/$defs/selection' }, selection)) say(`selection: ${error.path.join('.')}: ${error.message}`);
     if (selection?.others.includes(fit[0].headline)) say('selection: the kit chosen is among the others');
-    for (const module of Object.keys(given.modules || {})) delete catalog.modules[module];
+    for (const module of Object.keys(added)) delete catalog.modules[module];
     Object.assign(rates, keptRates);
     for (const [board, price] of prices) catalog.boards[board].price = price;
     for (const [board, doc] of kept) catalog.boards[board] = doc;

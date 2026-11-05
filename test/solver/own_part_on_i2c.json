@@ -1,5 +1,6 @@
 {
     "title": "A part of the person's own on I2C at 0x27 beside a 2004 LCD at 0x27: the checks name both owners of the address",
+    "modules": ["lcd2004_pcf8574"],
     "answers": {"display": "character", "blocks": [{"role": "own_part", "name": "expander", "bus": "i2c", "address": "0x27"}, {"role": "display", "name": "lcd", "variant": "character"}]},
     "says": "two devices would have one address, 0x27"
 }

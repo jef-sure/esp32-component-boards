@@ -1,5 +1,6 @@
 {
     "title": "A character display is a variant of a display, and it takes the module of that kind",
+    "modules": ["lcd2004_pcf8574"],
     "answers": {"blocks": [{"role": "display", "variant": "character"}]},
     "kit": {"name": "esp32_devkit", "modules": {"lcd2004_pcf8574": 1}}
 }

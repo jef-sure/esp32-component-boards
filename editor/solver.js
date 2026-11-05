@@ -981,8 +981,9 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         const limit = resolved.mcu.facts.gpio.high_mv_max;
         for (const pick of new Map(picks.filter((item) => !item.way).map((item) => [item.module.name, item])).values()) {
             const low = pick.module.device.high_min_mv ?? pick.module.device.ways?.[0]?.high_min_mv;
-            // seen_level: a high a trial on hardware drove it with is a note, not a part
-            const seen = judgementsOf('seen_level')[0];
+            // seen_level: a level a trial on hardware ran it with is a note, not a part
+            const seen = judgementsOf('seen_level').find((judgement) => judgement.field === 'high_seen_mv');
+            const seenLines = judgementsOf('seen_level').find((judgement) => judgement.field === 'logic_seen_mv');
             if (low > CHIP_HIGH_MV && seen && pick.module.device.high_seen_mv <= CHIP_HIGH_MV) {
                 lines.push({ level: 'note', text: t(seen.says, pick.module.title, low / 1000, pick.module.device.high_seen_mv / 1000), judgement: seen.id });
                 continue;
@@ -996,7 +997,9 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             if (logic === 'none') continue;
             const mv = logic ? lineMv(resolved, logic) : null;
             if (mv === null || limit === undefined) lines.push({ level: 'unknown', text: t('{0}: the level of its lines against this chip is not in the data', pick.module.title) });
-            else if (mv > limit) {
+            else if (mv > limit && seenLines && pick.module.device.logic_seen_mv >= mv) {
+                lines.push({ level: 'note', text: t(seenLines.says, pick.module.title, mv / 1000, limit / 1000), judgement: seenLines.id });
+            } else if (mv > limit) {
                 lines.push({ level: 'do', text: t('{0}: its lines go up to {1} V and the pins of this chip take {2} V: put a level shifter on them', pick.module.title, mv / 1000, limit / 1000) });
                 shifted.push({ both: true, lines: wired(pick) });
             }

@@ -10,8 +10,9 @@ by kind, never by the name of a board.
 - Ten boards: the CYD S028R (ESP32-2432S028R), Guition JC1060P470C, JC4827W543C and JC8012P4A1C, Waveshare
   ESP32-C3-Zero, ESP32-S3-Zero, ESP32-P4-ETH and ESP32-P4-POE-ETH, an ESP32 DevKit and an ESP32-S3 DevKit. A part
   says in `checked` how it is known: from a schematic, from the code of its maker, or measured on the board.
-- Seventeen modules. The 2004 character LCD on a PCF8574 is set up by its own defaults on the I2C bus of any board;
-  the page wires the others (displays, NFC readers, LED strips, sensors) into a board of the program.
+- Sixteen modules (displays, NFC readers, LED strips, sensors), which the page wires to a board in a board of the
+  program. A module of the program's own lies in its `components/local-boards/modules/`: `examples/local_boards` has a
+  2004 character LCD on a PCF8574 there.
 - A board of a program lies in its `components/local-boards/`, in the layout of `catalog/`, and is read before it.
 
 ### The program
@@ -47,7 +48,7 @@ by kind, never by the name of a board.
   issue adds one, by `tools/take_report.py`.
 - `tools/board_pins.py`, `tools/boards_gen.py`, `tools/check_boards.py`, `tools/check_format.py`: the map of pins, the
   generated glue and the checks of the data.
-- CI builds every board under ESP-IDF 5.5 and 6.1, with a module, LVGL, a board of a program, two boards in one
+- CI builds every board under ESP-IDF 5.5 and 6.1, with LVGL, a board of a program with a display and a 2004, two boards in one
   project, and a new project made as the README says.
 - Documentation in English and Russian.
 

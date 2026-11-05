@@ -1,0 +1,76 @@
+{
+    "title": "A 2004 at 5 V whose lines ran straight on the pins of an ESP32 on hardware: a note, and no level shifter",
+    "modules": {
+        "lcd2004_seen": {
+            "format": "jef-sure/boards",
+            "format_version": 2,
+            "kind": "module",
+            "name": "lcd2004_seen",
+            "title": "2004 LCD on a PCF8574",
+            "description": "A 20x4 HD44780 on the common I2C backpack (P0 RS, P1 RW, P2 E, P3 backlight, P4-P7 D4-D7): not a board of its own, a display any board's I2C bus can carry",
+            "power": [
+                {
+                    "name": "VCC",
+                    "source": "connector",
+                    "volts": [
+                        4.5,
+                        5.5
+                    ],
+                    "feeds": [
+                        "lcd"
+                    ]
+                }
+            ],
+            "devices": {
+                "lcd": {
+                    "chip": "hd44780",
+                    "on": {
+                        "i2c": {
+                            "address": "0x27"
+                        }
+                    },
+                    "logic": "VCC",
+                    "config": {
+                        "primary": true,
+                        "geometry": "20x4"
+                    },
+                    "logic_seen_mv": 5000
+                }
+            },
+            "price": {
+                "ebay": {
+                    "shop": "ebay",
+                    "currency": "EUR",
+                    "range": [
+                        7,
+                        12
+                    ],
+                    "date": "2026-11-01",
+                    "source": "Listings found by a search on ebay.de, not a purchase"
+                }
+            },
+            "checked": {
+                "levels": {
+                    "level": "unchecked",
+                    "covers": [
+                        "power",
+                        "devices.lcd.logic"
+                    ],
+                    "source": "The usual backpack: the LCD takes 5 V, SDA and SCL are pulled up to VCC on the module. Not measured on a module.",
+                    "date": "2026-11-01"
+                }
+            }
+        }
+    },
+    "answers": {
+        "board": "esp32_devkit",
+        "display": "character"
+    },
+    "judged": {
+        "board": "esp32_devkit",
+        "ids": [
+            "logic_seen_on_hardware"
+        ]
+    },
+    "without": "level_shifter_bss138"
+}

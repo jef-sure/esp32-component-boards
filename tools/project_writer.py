@@ -100,6 +100,31 @@ def keep_ours(root, paths):
         put(listed, json.dumps({**written, **kept}, indent=2, sort_keys=True) + "\n")
 
 
+def component_source():
+    """Where a project takes the component from, as this copy came: git at its commit for a checkout, or what the lock of
+    the project says for one in its managed_components/, git at a commit or the registry at a version. A copy of neither
+    names the registry at the version of its manifest, the form of a published component."""
+    head = subprocess.run(["git", "-C", str(ROOT), "rev-parse", "HEAD"], capture_output=True, text=True) if shutil.which("git") and (ROOT / ".git").exists() else None
+    if head and head.returncode == 0:
+        return {"git": head.stdout.strip()}
+    if ROOT.parent.name == "managed_components":
+        for lock in sorted(ROOT.parent.parent.glob("dependencies.lock*")):
+            # the entry of the component in the lock, up to the next one: a version and the type of its source
+            entry = re.search(r"^  jef-sure/boards:\n((?:    .*\n|      .*\n)*)", lock.read_text(), re.M)
+            version = re.search(r"^    version: '?([^'\s]+)'?$", entry[1], re.M) if entry else None
+            if version:
+                return {"git": version[1]} if re.search(r"^      type: git$", entry[1], re.M) else {"registry": version[1]}
+    manifest = re.search(r'^version: "([^"]+)"', (ROOT / "idf_component.yml").read_text(), re.M)
+    return {"registry": manifest[1]} if manifest else None
+
+
+def component_lines(source):
+    """The entry of the component in main/idf_component.yml, as the page writes it (COMPONENT_LINES of store.js)."""
+    if source and "registry" in source:
+        return f'  jef-sure/boards: "^{source["registry"]}"'
+    return f"  jef-sure/boards:\n    git: https://github.com/jef-sure/esp32-component-boards.git\n    version: {(source or {}).get('git', 'main')}"
+
+
 def config_dir():
     return pathlib.Path(os.environ.get("XDG_CONFIG_HOME") or pathlib.Path.home() / ".config") / "jef-sure-boards"
 

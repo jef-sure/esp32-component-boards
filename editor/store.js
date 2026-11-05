@@ -29,7 +29,9 @@ const isCollection = (v) => (isPlain(v) || Array.isArray(v)) && Object.keys(v).l
 const COMPONENT_NAME = 'jef-sure/boards';
 // until the component is in the registry it comes from git, at the commit of the catalog the page used when the server of the
 // model told it, so that a build gives the same tomorrow; main when nothing told it
-const COMPONENT_LINES = (version) => `  ${COMPONENT_NAME}:\n    git: https://github.com/jef-sure/esp32-component-boards.git\n    version: ${version}`;
+// the component as the copy beside the page came: from git at a commit, or from the registry at a version
+const COMPONENT_LINES = (source) => (source?.registry ? `  ${COMPONENT_NAME}: "^${source.registry}"`
+    : `  ${COMPONENT_NAME}:\n    git: https://github.com/jef-sure/esp32-component-boards.git\n    version: ${source?.git ?? 'main'}`);
 const PREFERENCES = { language: 'boards.language', currency: 'boards.currency', answers: 'boards.answers', project: 'boards.project' }; // keys of localStorage
 // a kit and an entry of selection.json are the same when the board and the modules with their counts are
 // a block of a role the palette does not have would stop the solver and the canvas
@@ -154,7 +156,7 @@ function kitSection(kit, board) {
 
 // The files of a new project for its kits, each [kit, board], board the name board_select.py takes: the templates of the
 // page, and the smallest program of the component.
-async function skeletonOf(chosen, current, name, version) {
+async function skeletonOf(chosen, current, name, source) {
     const fill = {
         '@NAME@': name,
         '@TITLE@': name,
@@ -162,7 +164,7 @@ async function skeletonOf(chosen, current, name, version) {
         '@CURRENT@': current,
         // what the kits take that the program names itself, once
         '@DEPENDENCIES@': [...new Map(chosen.flatMap(([kit]) => kit.libraries.filter((library) => library.own)).map((library) => [library.name, dependencyOf(library)])).values()].join('\n'),
-        '@COMPONENT_VERSION@': version,
+        '@COMPONENT@': COMPONENT_LINES(source),
     };
     const files = {};
     const list = await fetch(SKELETON);
@@ -627,7 +629,7 @@ const useEditor = Pinia.defineStore('editor', {
                     if (kit.project) files[LOCAL_BOARD(board)] = `${catalogJson({ ...kit.project, name: board, title: kit.modules.length ? `${kit.title} with ${kit.modules.map((item) => item.title).join(', ')}` : kit.title })}\n`;
                     files[`sdkconfig.defaults.${board}`] = `${STUB(board)}\n# The page wrote this line only: board_select.py --again . makes the defaults of the board.\n`;
                 }
-                if (mode === 'create') Object.assign(files, await skeletonOf(chosen, current, name, this.installed?.component ?? 'main'));
+                if (mode === 'create') Object.assign(files, await skeletonOf(chosen, current, name, this.installed?.component));
                 if (this.description) files[DESCRIPTION] = `${this.description.trim()}\n`;
                 const selection = library.solver.selectionOf(chosen.map(([kit, board]) => ({ kit, board })), current, this.kits, copied(this.answers), this.currency, name);
                 // the boards the project had stay where they were, those planned now in their place, the new ones after them
@@ -660,7 +662,7 @@ const useEditor = Pinia.defineStore('editor', {
                 const own = [...new Map(kits.flatMap((kit) => kit.libraries.filter((item) => item.own)).map((item) => [item.name, item])).values()];
                 this.plan = { folder: folder && Vue.markRaw(folder), bridge: Boolean(bridge), folderName: bridge ? bridge.path : folder.name, mode, rows, files, current, boards: chosen.map(([, board]) => board), written: null,
                     allow: bridge && !bridge.for_ever ? 'once' : null, cmakeLines, requiresLine,
-                    manifestLines: mode === 'update' ? [...(manifest?.includes(COMPONENT_NAME) ? [] : [COMPONENT_LINES(this.installed?.component ?? 'main')]), ...own.filter((item) => !manifest?.includes(item.name)).map(dependencyOf)] : [] };
+                    manifestLines: mode === 'update' ? [...(manifest?.includes(COMPONENT_NAME) ? [] : [COMPONENT_LINES(this.installed?.component)]), ...own.filter((item) => !manifest?.includes(item.name)).map(dependencyOf)] : [] };
             });
         },
         // Writes what is new and what was ticked. Nothing else is touched and nothing is removed.

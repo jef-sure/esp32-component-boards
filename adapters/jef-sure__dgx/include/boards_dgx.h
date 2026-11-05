@@ -1,6 +1,10 @@
 #pragma once
 
 /* A display of boards.h as DGX has it. Compiled in when the board has a graphics display (CONFIG_BOARD_DISPLAY_GRAPHICS). */
+#include "sdkconfig.h"
+#if !CONFIG_BOARD_DISPLAY_GRAPHICS
+#error "boards_dgx.h: the board chosen has no graphics display; a program for such boards too includes it under #if CONFIG_BOARD_DISPLAY_GRAPHICS"
+#endif
 #include "boards.h"
 #include "dgx_screen.h"
 

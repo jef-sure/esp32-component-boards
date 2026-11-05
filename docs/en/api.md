@@ -7,7 +7,11 @@ for a part the board does not have returns `false` (or `NULL`) and leaves its
 output untouched; the program needs no `#if` on the board. `boards.h` names no
 library: it gives sizes, millimetres and orientation. The handles of a library
 come from the header of its adapter, and from there the program uses that library
-directly: `boards_dgx.h`, `boards_dgx_di.h`, `boards_hd44780.h`. Every public
+directly: `boards_dgx.h`, `boards_dgx_di.h`, `boards_hd44780.h`. Such a header is for a
+board that has the part: a program built for boards without it too includes `boards_dgx.h`
+under `#if CONFIG_BOARD_DISPLAY_GRAPHICS` and `boards_dgx_di.h` under `#if CONFIG_BOARD_TOUCH`,
+as `examples/hello_board` does, and on a board without the part the header stops the build
+and says so. Every public
 structure has a typedef ending in `_t`, as `board_display_t`; its tag stays, so a
 header of the program can declare it ahead (`struct board_display;`).
 

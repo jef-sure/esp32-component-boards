@@ -378,10 +378,8 @@ def installed():
                 idf.add(f"{parts['MAJOR']}.{parts['MINOR']}.{parts['PATCH']}")
     arduino = {folder.name for folder in home.glob(".arduino15/packages/esp32/hardware/esp32/*") if re.fullmatch(r"\d+\.\d+\.\d+", folder.name)}
     newest = lambda versions: sorted(versions, key=lambda text: [int(part) for part in text.split(".")], reverse=True)
-    # the commit of the catalog the page reads, for a project to take the component at it
-    head = subprocess.run(["git", "-C", str(ROOT), "rev-parse", "HEAD"], capture_output=True, text=True) if shutil.which("git") and (ROOT / ".git").exists() else None
-    component = head.stdout.strip() if head and head.returncode == 0 else None
-    return {"esp_idf": newest(idf), "arduino_esp32": newest(arduino), "component": component}
+    return {"esp_idf": newest(idf), "arduino_esp32": newest(arduino), "component": project_writer.component_source()}
+
 
 
 def install():

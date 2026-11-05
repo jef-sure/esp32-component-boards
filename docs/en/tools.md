@@ -109,7 +109,8 @@ python3 tools/board_project.py ~/again --selection ~/old/selection.json
 
 A new project on a board chosen by hand, without the page: the files the page writes for a new folder
 (`editor/skeleton/files.json` lists them, both read the list), filled the same way, and `selection.json` with no
-answers. The component comes from git at the commit of this checkout. `--module` takes a module that `board_select.py`
+answers. The component comes as this copy came: from git at its commit, or from the registry at its version, as the
+page writes it. `--module` takes a module that `board_select.py`
 sets up by its own defaults, as the 2004 on the I2C of a board; the page wires the others to pins. `--selection` takes
 the current kit of a `selection.json` with its answers; a kit the page wired has a board of the program, which is taken
 from `components/local-boards/` beside that `selection.json` and named after the new project, with its wires and its

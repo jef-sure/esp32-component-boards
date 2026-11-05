@@ -29,7 +29,9 @@ if (board_touch_start(&display, &touch)) {
 
 Every function of `boards.h` exists on every board. One the board does not have
 returns `false`, and the program goes on without it. `boards.h` names no library:
-the handles of DGX, DGX-DI or hd44780 come from the headers of their adapters. The same `main.c` builds
+the handles of DGX, DGX-DI or hd44780 come from the headers of their adapters, each for a board that has the part:
+a program for boards without it includes it under `#if CONFIG_BOARD_DISPLAY_GRAPHICS` or `#if CONFIG_BOARD_TOUCH`,
+as [examples/hello_board](examples/hello_board) does, and the header stops the build where the part is missing. The same `main.c` builds
 and runs on the 2.8-inch CYD S028R and on the 10.1-inch Guition.
 
 The component knows no display by itself: a board may have none, and a display

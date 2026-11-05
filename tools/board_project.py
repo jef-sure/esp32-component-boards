@@ -6,7 +6,7 @@ Usage: board_project.py DIR --board BOARD [--module MODULE ...] [--name NAME]
 
 DIR is empty or holds only what a repository starts with (.git, .gitignore, README, LICENSE); nothing in it is
 replaced. The files are those of editor/skeleton/files.json, filled as the page fills them, and selection.json.
-The component comes from git at the commit of this checkout. No solver runs: --module takes a module that
+The component comes as this copy came: from git at its commit, or from the registry at its version. No solver runs: --module takes a module that
 board_select.py sets up by its defaults, as the 2004 on its I2C. A kit the page chose is taken back with --selection,
 its answers too; a kit wired to pins by the page has a board of the program, which is taken from the folder of that
 selection.json under the name of the new project. Then, in DIR, as its README says:
@@ -20,12 +20,12 @@ import argparse
 import json
 import pathlib
 import re
-import subprocess
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "tools"))
 import boards_gen  # noqa: E402
+import project_writer  # noqa: E402
 import resolve  # noqa: E402
 
 EDITOR = ROOT / "editor"
@@ -33,12 +33,6 @@ NAME = re.compile(r"^[a-z][a-z0-9_]*$")  # as a name of the schema: a board of t
 REPOSITORY_ONLY = re.compile(r"^(\.git|\.gitignore|\.gitattributes|README.*|LICENSE.*)$", re.IGNORECASE)
 SELECTION = "selection.json"
 BY_HAND = "chosen by hand with tools/board_project.py: no solver ran"
-
-
-def commit():
-    """The commit of this checkout, as the server of the model reports it to the page; main without git."""
-    result = subprocess.run(["git", "-C", str(ROOT), "rev-parse", "HEAD"], capture_output=True, text=True)
-    return result.stdout.strip() if result.returncode == 0 else "main"
 
 
 def wires(board, modules):
@@ -161,7 +155,7 @@ def main():
         "@KITS@": section,
         "@CURRENT@": named,
         "@DEPENDENCIES@": dependencies,
-        "@COMPONENT_VERSION@": commit(),
+        "@COMPONENT@": project_writer.component_lines(project_writer.component_source()),
     }
     files = {}
     for source, target in json.loads((EDITOR / "skeleton" / "files.json").read_text())["files"]:

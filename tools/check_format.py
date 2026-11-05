@@ -26,6 +26,7 @@ Checks of the data format. Needs jsonschema and node: the Python of ESP-IDF has 
    READMEs and choosing-a-board.md.
 """
 import copy
+import hashlib
 import json
 import os
 import pathlib
@@ -315,14 +316,26 @@ def presets_wrong():
         if own.read_text() != 'CONFIG_IDF_TARGET="esp32"\n':
             wrong.append("a file of defaults written by hand was replaced")
         own.unlink()
-        # the files a page writes, the command in their first line and the order in selection.json: --again makes the rest
+        # the files a page writes first, the command in their first line and the order in selection.json: --again makes the rest
         for path in project.glob("sdkconfig.defaults.*"):
             path.write_text(f"# board_select.py {path.name.split('.')[-1]}\n")
-        (project / "selection.json").write_text('{"boards": [{"board": "jc4827w543c"}, {"board": "cyd_s028r"}], "current": "cyd_s028r"}')
+        (project / "CMakePresets.json").unlink()
+        page = {"boards": [{"board": "jc4827w543c"}, {"board": "cyd_s028r"}], "current": "cyd_s028r"}
+        (project / "selection.json").write_text(json.dumps(page))
         select("--again")
         made = presets("name", "binaryDir")
         if made != [("jc4827w543c", "build/jc4827w543c"), ("cyd_s028r", "build/cyd_s028r"), ("default", "build/cyd_s028r")] or "CONFIG_IDF_TARGET" not in (project / "sdkconfig.defaults.cyd_s028r").read_text():
             wrong.append(f"--again from the files of a page made the presets {made}")
+        # a current board a command chose stays through --again; one the page changes since is taken
+        select("--current", "jc4827w543c")
+        select("--again")
+        if presets("name", "binaryDir")[-1] != ("default", "build/jc4827w543c"):
+            wrong.append(f"--again undid the current board of --current: {presets('name', 'binaryDir')}")
+        select("--current", "cyd_s028r")
+        (project / "selection.json").write_text(json.dumps({**page, "current": "jc4827w543c"}))
+        select("--again")
+        if presets("name", "binaryDir") != [("jc4827w543c", "build/jc4827w543c"), ("cyd_s028r", "build/cyd_s028r"), ("default", "build/jc4827w543c")]:
+            wrong.append(f"--again did not take the current board the page changed: {presets('name', 'binaryDir')}")
         for path in project.glob("sdkconfig.defaults.*"):
             path.unlink()
         (project / "CMakePresets.json").write_text('{"version": 3, "configurePresets": []}\n')
@@ -592,6 +605,11 @@ def project_problems(base, own, project, config):
         problems.append("a write allowed for ever asks again")
     if json.loads((config / "jef-sure-boards" / "allowed.json").read_text()) != {str(project.resolve()): "garland"}:
         problems.append("for ever is not kept by the path and the name of the project")
+    # what board_select.py makes again stays the page's: a command that changes the presets records them in the list
+    subprocess.run([sys.executable, str(ROOT / "tools" / "board_select.py"), "--current", "jc4827w543c", str(project)], capture_output=True)
+    listed = json.loads((project / ".boards" / "written.json").read_text()).get("CMakePresets.json")
+    if listed != hashlib.sha256((project / "CMakePresets.json").read_text().encode()).hexdigest():
+        problems.append("presets changed by board_select.py are a person's for the bridge")
     # a file of ESP-IDF for a target is no board: the locks are seeded for the two boards only
     if sorted(path.name for path in project.glob("dependencies.lock.*")) != ["dependencies.lock.cyd_s028r", "dependencies.lock.jc4827w543c"]:
         problems.append(f"locks seeded: {sorted(path.name for path in project.glob('dependencies.lock.*'))}")

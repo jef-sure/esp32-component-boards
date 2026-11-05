@@ -149,9 +149,12 @@ builds at once; it also starts from the `selection.json` of the project, to add 
 
 A `CMakePresets.json` that `board_select.py` did not write is not touched: the
 command says so, and the presets are added by hand. `board_select.py --again .` makes
-every file again by the command in its first line, and the presets, in the order of the
-boards of `selection.json` and with its `current`. ESP-IDF reads the defaults only into
-a new `sdkconfig`: to take what changed, remove `build/<board>/sdkconfig`.
+every file again by the command in its first line, and the presets, in their order and with
+their current board: the first time, as `selection.json` has them. The presets record the
+`current` of `selection.json` they followed, so a current board the page changes since is taken,
+and one a command chose stays. The page opens a project with the order and the current board of
+its presets. ESP-IDF reads the defaults only into a new `sdkconfig`: to take what changed,
+remove `build/<board>/sdkconfig`.
 
 A `-D SDKCONFIG_DEFAULTS=...` on the command line wins over both: the CMake
 snippet above only sets the variable when none is given.

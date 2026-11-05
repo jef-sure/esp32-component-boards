@@ -78,6 +78,19 @@ def put(path, text):
     os.replace(beside, path)
 
 
+def keep_ours(root, paths):
+    """Files the component made again, as board_select.py does, stay the page's when its list has them: their new digests
+    go into the list. A file the list does not have stays a person's."""
+    root = pathlib.Path(root).resolve()
+    listed = root / WRITTEN
+    if not listed.is_file():
+        return
+    written = json.loads(listed.read_text())
+    kept = {rel: digest((root / rel).read_text()) for rel in (pathlib.Path(path).resolve().relative_to(root).as_posix() for path in paths) if rel in written}
+    if kept:
+        put(listed, json.dumps({**written, **kept}, indent=2, sort_keys=True) + "\n")
+
+
 def config_dir():
     return pathlib.Path(os.environ.get("XDG_CONFIG_HOME") or pathlib.Path.home() / ".config") / "jef-sure-boards"
 

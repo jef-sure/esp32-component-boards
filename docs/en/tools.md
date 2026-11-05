@@ -94,8 +94,10 @@ not write is not replaced. See [choosing-a-board.md](choosing-a-board.md).
 
 Each file it writes begins with the command that made it and the version and commit of the component. After
 the component changes, `board_select.py --again ~/myproject` makes every such file of the project again the same
-way, and the presets in the order and with the current board of `selection.json`. An `sdkconfig` made before keeps
-what it had: remove `build/<board>/sdkconfig` to take what changed.
+way, and the presets in their order with their current board, unless the page changed the `current` of
+`selection.json` since (see [choosing-a-board.md](choosing-a-board.md)). A file it writes that the list of the bridge
+has stays the page's: its new hash goes into the list. An `sdkconfig` made before keeps what it had: remove
+`build/<board>/sdkconfig` to take what changed.
 
 ## board_project.py
 

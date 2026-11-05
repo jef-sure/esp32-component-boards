@@ -34,6 +34,23 @@ const PREFERENCES = { language: 'boards.language', currency: 'boards.currency', 
 // a kit and an entry of selection.json are the same when the board and the modules with their counts are
 // a block of a role the palette does not have would stop the solver and the canvas
 const knownRole = (role) => (library.roles ?? []).some((group) => group.roles.some((item) => item.id === role));
+// The order and the current board of a project, as board_select.py --again takes them: its presets once it has them, and
+// the current board of selection.json only when the page changed it since the presets followed it.
+function presetsOrder(presets, wanted) {
+    let doc = null;
+    try {
+        doc = presets ? JSON.parse(presets) : null;
+    } catch {
+        return {};
+    }
+    const made = doc?.vendor?.[COMPONENT_NAME];
+    if (!made || !Array.isArray(doc.configurePresets)) return {};
+    const names = doc.configurePresets.map((preset) => preset.name).filter((name) => name !== 'default');
+    const at = (entry) => (names.includes(entry.board) ? names.indexOf(entry.board) : names.length);
+    const built = doc.configurePresets.find((preset) => preset.name === 'default')?.cacheVariables?.BOARD;
+    const current = wanted.current && wanted.current !== made.follows ? wanted.current : built;
+    return { boards: [...wanted.boards].sort((a, b) => at(a) - at(b)), ...(wanted.boards.some((entry) => entry.board === current) ? { current } : {}) };
+}
 const kitKey = (board, modules) => `${board}+${modules.map((item) => `${item.name}x${item.count ?? 1}`).sort().join(',')}`;
 const SELECTION = 'selection.json';
 const ISSUES = 'https://github.com/jef-sure/esp32-component-boards/issues/new';
@@ -295,7 +312,8 @@ const useEditor = Pinia.defineStore('editor', {
                 if (project.mode !== 'update') return;
                 this.projectName = nameOf(project.name);
                 const saved = await this.agentCall('project/file?path=selection.json').catch(() => null);
-                if (saved?.text) this.takeSelection(saved.text);
+                const presets = await this.agentCall('project/file?path=CMakePresets.json').catch(() => null);
+                if (saved?.text) this.takeSelection(saved.text, presets?.text);
             }).catch(() => {});
         },
         async agentCall(path, options = {}) {
@@ -440,9 +458,9 @@ const useEditor = Pinia.defineStore('editor', {
         },
         // selection.json of a project: its answers, and its kits when they are counted again. It is checked by the schema
         // first, so it is taken when the catalog is read.
-        takeSelection(selection) {
+        takeSelection(selection, presets = null) {
             if (!library.reader) {
-                library.pendingSelection = selection;
+                library.pendingSelection = [selection, presets];
                 return;
             }
             let saved;
@@ -464,11 +482,12 @@ const useEditor = Pinia.defineStore('editor', {
             if (saved.name) this.projectName = saved.name;
             this.page = 'select';
             // a selection.json before format 3 had one kit at its top
-            this.wanted = saved.boards ? { boards: saved.boards, current: saved.current } : { boards: [{ board: saved.board, modules: saved.modules ?? [] }], current: saved.board };
+            const wanted = saved.boards ? { boards: saved.boards, current: saved.current } : { boards: [{ board: saved.board, modules: saved.modules ?? [] }], current: saved.board };
+            this.wanted = { ...wanted, ...presetsOrder(presets, wanted) };
             this.askKits();
         },
-        take({ local, files, selection }) {
-            if (selection) this.takeSelection(selection);
+        take({ local, files, selection, presets }) {
+            if (selection) this.takeSelection(selection, presets);
             if (!local) {
                 this.load(files);
                 return;
@@ -501,9 +520,9 @@ const useEditor = Pinia.defineStore('editor', {
             const first = Object.values(library.entries).find((entry) => entry.group === 'boards');
             if (first) this.open(first.key);
             if (library.pendingSelection) {
-                const selection = library.pendingSelection;
+                const [selection, presets] = library.pendingSelection;
                 library.pendingSelection = null;
-                this.takeSelection(selection);
+                this.takeSelection(selection, presets);
             }
         },
         open(key) {
@@ -633,7 +652,11 @@ const useEditor = Pinia.defineStore('editor', {
                     const done = await this.agentCall('project/write', { method: 'POST', body: JSON.stringify({ files: plan.files, replace, ...(plan.allow ? { allow: plan.allow } : {}) }) });
                     if (done.failed) throw new Error(`board_select.py --again: ${done.failed}`);
                     const refused = Object.keys(done.refused ?? {});
-                    if (refused.length) throw new Error(`nothing is written: ${refused.join(', ')} changed after the list was made or may not be written; make the list again`);
+                    if (refused.length) {
+                        const unticked = refused.filter((path) => plan.rows.some((row) => row.path === path && row.state === 'changed' && !row.replace));
+                        throw new Error(unticked.length ? `nothing is written: ${unticked.join(', ')} changed since the page wrote it; tick it to replace it`
+                            : `nothing is written: ${refused.join(', ')} changed after the list was made or may not be written; make the list again`);
+                    }
                     if (plan.allow === 'for ever') this.project.for_ever = true;
                     plan.written = done.written;
                     return;

@@ -96,7 +96,7 @@ const host = {
         if (local) await readFolder(local, '', files);
         this.localFolder = local;
         this.localProgram = local ? null : picked;
-        return { local: true, files, selection: await this.readIn(picked, 'selection.json') };
+        return { local: true, files, selection: await this.readIn(picked, 'selection.json'), presets: await this.readIn(picked, 'CMakePresets.json') };
     },
 
     // What an <input webkitdirectory> gives: the paths start at the folder picked.

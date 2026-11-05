@@ -392,6 +392,14 @@ committed, a program that asks by kind.
   those the program calls, and the answers come along. A project taken back from a page project of three boards
   built on 6.1. `--module` of `board_project.py` and of `board_select.py` names the modules it takes, the one that
   has its own defaults, and says the page wires the others.
+- One current board for the page and the commands (7c's rule, with a record): once a project has presets, their order
+  and their default are its own. The presets record the `current` of `selection.json` they followed, so `--again` takes
+  the current board the page changed since and keeps one that `board_select.py --current` or a board named chose;
+  before, `--again` put back the current board of `selection.json`. The page opens a project with the order and the
+  current board of its presets. A file `board_select.py` writes that the list of the bridge has gets its new hash
+  there, so the bridge does not take the presets a command changed for a person's; a write refused for a file left
+  unticked says so. Seen in headless Chrome: a current board chosen by command shown on the page, one chosen on the page
+  written into the presets, and one chosen by command again kept by `--again`.
 - A level seen on hardware is a note, not a part: `high_seen_mv` of a chip, the lowest high that drove it on hardware,
   with its trial in `checked`, and the judgement `level_seen_on_hardware`. The WS2812B takes 3.5 V by its datasheet;
   the 3.3 V of an ESP32 drove Anton's garland, so a kit of strips says so and adds no level shifter (Anton: "in

@@ -381,6 +381,11 @@ committed, a program that asks by kind.
   it does not name, and drops a block of a role the palette does not have, from the file, from the page's own memory
   and from a drop on the canvas. Seen in headless Chrome: the project of `board_project.py` opens with its board, a
   spoiled one gives its reason, a dropped text adds no block.
+- `boards_mcp.py` over stdio answers a row that is not JSON with -32700 and one that is not an object with -32600, and
+  goes on; it stopped there before, and the page was left without its agent (the audit of 2026-11-05, 3). A call of a
+  tool it does not have, or with arguments its `inputSchema` does not take, is answered -32602 in words, as
+  "arguments.add[0] has no role", not with a `KeyError`. `--project` of a folder that is not there stops with a
+  message before the server starts. `check_format.py` sends the server such rows; the server before stopped on the first.
 - A level seen on hardware is a note, not a part: `high_seen_mv` of a chip, the lowest high that drove it on hardware,
   with its trial in `checked`, and the judgement `level_seen_on_hardware`. The WS2812B takes 3.5 V by its datasheet;
   the 3.3 V of an ESP32 drove Anton's garland, so a kit of strips says so and adds no level shifter (Anton: "in

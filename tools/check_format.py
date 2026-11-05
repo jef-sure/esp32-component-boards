@@ -452,6 +452,16 @@ def bridge_problems():
     try:
         if asked(1, "initialize")["serverInfo"]["name"] != "boards" or not asked(2, "tools/list")["tools"]:
             problems.append("no tools")
+        # a row that is no request, or a call the tools do not take, is answered with an error, and the server goes on
+        for row, code in (("this is not json", -32700), ("[1, 2, 3]", -32600), ('{"jsonrpc": "2.0", "id": 9, "method": "tools/call", "params": {"name": "nosuch"}}', -32602),
+                          ('{"jsonrpc": "2.0", "id": 9, "method": "tools/call", "params": {"name": "say", "arguments": {"text": 5}}}', -32602)):
+            process.stdin.write(row + "\n")
+            process.stdin.flush()
+            answer = process.stdout.readline()
+            if not answer:
+                return problems + [f"the server of MCP stopped on {row}"]
+            if json.loads(answer).get("error", {}).get("code") != code:
+                problems.append(f"the server of MCP on {row}: not the error {code}")
         link = json.loads(asked(3, "tools/call", {"name": "page_link"})["content"][0]["text"])["link"]
         base = link.split("/editor/")[0]
         for path, headers, wanted in (("/editor/index.html", {}, 200), ("/agent/messages?seen=0", {}, 401), ("/editor/index.html", {"Host": "evil.example"}, 403), ("/CLAUDE.md", {}, 404),

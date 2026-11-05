@@ -305,8 +305,31 @@ def call(desk, link, name, arguments):
     raise KeyError(name)
 
 
+KINDS = {"object": dict, "array": list, "string": str, "integer": int, "number": (int, float)}
+
+
+def argument_problem(schema, value, at="arguments"):
+    """What in the arguments of a tool its inputSchema does not take, in words, or None."""
+    kind = schema.get("type")
+    if kind and (not isinstance(value, KINDS[kind]) or (kind in ("integer", "number") and isinstance(value, bool))):
+        return f"{at} is not {'an' if kind[0] in 'aeiou' else 'a'} {kind}"
+    if kind in ("integer", "number") and not schema.get("minimum", value) <= value <= schema.get("maximum", value):
+        return f"{at} is out of {schema.get('minimum', '…')}..{schema.get('maximum', '…')}"
+    if kind == "object":
+        missing = [name for name in schema.get("required", []) if name not in value]
+        if missing:
+            return f"{at} has no {', '.join(missing)}"
+        return next((found for name, part in schema.get("properties", {}).items() if name in value
+                     for found in [argument_problem(part, value[name], f"{at}.{name}")] if found), None)
+    if kind == "array" and "items" in schema:
+        return next((found for i, item in enumerate(value) for found in [argument_problem(schema["items"], item, f"{at}[{i}]")] if found), None)
+    return None
+
+
 def answer_of(desk, link, request):
     """The answer to a request of MCP, or None for a notification."""
+    if not isinstance(request, dict):
+        return {"jsonrpc": "2.0", "id": None, "error": {"code": -32600, "message": "a request is an object"}}
     method, ident = request.get("method"), request.get("id")
     if ident is None:
         return None
@@ -317,12 +340,17 @@ def answer_of(desk, link, request):
     elif method == "tools/list":
         result = {"tools": TOOLS}
     elif method == "tools/call":
-        params = request.get("params") or {}
+        params = request.get("params")
+        tool = next((item for item in TOOLS if isinstance(params, dict) and item["name"] == params.get("name")), None)
+        arguments = (params.get("arguments") or {}) if tool else None
+        problem = ("tools/call takes params with the name of a tool of tools/list" if not tool else argument_problem(tool["inputSchema"], arguments))
+        if problem:
+            return {"jsonrpc": "2.0", "id": ident, "error": {"code": -32602, "message": problem}}
         try:
-            value = call(desk, link, params.get("name"), params.get("arguments") or {})
+            value = call(desk, link, tool["name"], arguments)
             result = {"content": [{"type": "text", "text": json.dumps(value, ensure_ascii=False)}]}
         except Exception as error:  # a tool that fails answers with an error: the conversation goes on
-            result = {"content": [{"type": "text", "text": f"{params.get('name')}: {error!r}"}], "isError": True}
+            result = {"content": [{"type": "text", "text": f"{tool['name']} failed: {error}"}], "isError": True}
     else:
         return {"jsonrpc": "2.0", "id": ident, "error": {"code": -32601, "message": f"no method {method}"}}
     return {"jsonrpc": "2.0", "id": ident, "result": result}
@@ -379,6 +407,8 @@ def main():
     args = parser.parse_args()
     if args.install:
         return install()
+    if not args.project.is_dir():
+        parser.error(f"--project {args.project}: no such folder")
 
     desk = Desk()
     token = secrets.token_urlsafe(24)
@@ -403,7 +433,12 @@ def main():
 
     for row in sys.stdin:
         if row.strip():
-            answer = answer_of(desk, link, json.loads(row))
+            try:
+                request = json.loads(row)
+            except json.JSONDecodeError as error:
+                request = error
+            answer = answer_of(desk, link, request) if not isinstance(request, json.JSONDecodeError) else \
+                {"jsonrpc": "2.0", "id": None, "error": {"code": -32700, "message": f"not JSON: {request.msg} at {request.pos}"}}
             if answer:
                 sys.stdout.write(json.dumps(answer, ensure_ascii=False) + "\n")
                 sys.stdout.flush()

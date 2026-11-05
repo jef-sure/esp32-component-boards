@@ -65,17 +65,26 @@ def digest(text):
     return hashlib.sha256(text.encode()).hexdigest()
 
 
-def put(path, text):
-    """A file written whole or not at all: beside it first, then renamed over it. A new file is readable as any file
-    the person makes (0666 under the umask), one that is replaced keeps its mode."""
+def beside(path, text):
+    """The text in a hidden file beside path, to be renamed over it. A new file is readable as any file the person makes
+    (0666 under the umask), one that is replaced keeps its mode."""
     path.parent.mkdir(parents=True, exist_ok=True)
-    beside = path.parent / f".{path.name}.{secrets.token_hex(4)}"
-    descriptor = os.open(beside, os.O_WRONLY | os.O_CREAT | os.O_EXCL, NEW_FILE_MODE)
-    with os.fdopen(descriptor, "w") as file:
-        file.write(text)
-    if path.exists():
-        os.chmod(beside, stat.S_IMODE(path.stat().st_mode))
-    os.replace(beside, path)
+    near = path.parent / f".{path.name}.{secrets.token_hex(4)}"
+    descriptor = os.open(near, os.O_WRONLY | os.O_CREAT | os.O_EXCL, NEW_FILE_MODE)
+    try:
+        with os.fdopen(descriptor, "w") as file:
+            file.write(text)
+        if path.exists():
+            os.chmod(near, stat.S_IMODE(path.stat().st_mode))
+    except OSError:
+        near.unlink(missing_ok=True)
+        raise
+    return near
+
+
+def put(path, text):
+    """A file written whole or not at all: beside it first, then renamed over it."""
+    os.replace(beside(path, text), path)
 
 
 def keep_ours(root, paths):
@@ -193,12 +202,19 @@ class Project:
         if refused:
             return {"written": [], "refused": refused}
         written = self.written()
-        done = []
-        for rel, text in every.items():
-            if states[rel]["state"] != "same":
-                put(self.root / rel, text)
-                done.append(rel)
-            written[rel] = digest(text)
+        done = [rel for rel in every if states[rel]["state"] != "same"]
+        # every file beside its place first: when one cannot be written, no file of the project changes
+        ready = []
+        try:
+            for rel in done:
+                ready.append((beside(self.root / rel, every[rel]), self.root / rel))
+        except OSError:
+            for near, _ in ready:
+                near.unlink(missing_ok=True)
+            raise
+        for near, path in ready:
+            os.replace(near, path)
+        written.update({rel: digest(text) for rel, text in every.items()})
         put(self.root / WRITTEN, json.dumps(written, indent=2, sort_keys=True) + "\n")
         # each board's lock starts as the project's, once: a file of the component manager, neither hashed nor replaced here
         sys.path.insert(0, str(ROOT / "tools"))

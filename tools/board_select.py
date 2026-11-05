@@ -206,6 +206,10 @@ def again(parser, project):
     for path in files:
         args = parser.parse_intermixed_args(shlex.split(path.read_text().splitlines()[0][len(RECORD):]) + [str(project)])
         board = args.names[0]
+        named = path.name.split(".", 2)[2]
+        if named not in (board, "board"):
+            # a copy of the file of another board would build that board under this name
+            raise SystemExit(f"{path}: its first line makes {board}, its name says {named}: make it with board_select.py {named} {project}")
         text, target = host_text(local, args.shows) if board == HOST else defaults_text(project, local, board, args.module, args.revision)
         path.write_text(made_by(board, args.module, args.revision, args.shows) + text)
         print(f"{path}: {board}, {target}, again")

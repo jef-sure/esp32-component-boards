@@ -700,6 +700,16 @@ def module_symbol(board):
 BUS_REQUIRES = {"i2c": "esp_driver_i2c", "i2s": "esp_driver_i2s", "spi": "esp_driver_spi", "qspi": "esp_driver_spi", "gpio": "esp_driver_gpio"}
 
 
+def quoted(text):
+    """A text of the data between the quotes of C or of Kconfig: a title may hold a quote or a backslash."""
+    return text.replace("\\", "\\\\").replace('"', '\\"')
+
+
+def commented(text):
+    """A text of the data inside a comment of C, which */ would end."""
+    return text.replace("*/", "* /")
+
+
 def sentence(text):
     """A text of the data as a sentence: its own full stop, or one."""
     return text if text.rstrip().endswith((".", "!", "?")) else f"{text}."
@@ -800,7 +810,7 @@ def gen_c(board):
     for header in sorted(set(headers)):
         out(f"#include <{header}>" if header in ("stdlib.h", "string.h") else f"#include \"{header}\"")
     out("")
-    out(f"/* {board['title']}: {sentence(board['description'])} */")
+    out(f"/* {commented(board['title'])}: {commented(sentence(board['description']))} */")
     out("")
 
     # ---- the pins of the board, each named by the part it serves ----
@@ -1019,7 +1029,7 @@ def gen_c(board):
     if not is_module:
         target = board.get("mcu", {}).get("target", "any")
         out("/* What the board is, for board_info(). */")
-        out(f"const struct board_data board_data = {{.name = \"{name}\", .title = \"{board['title']}\", .target = \"{target}\"}};")
+        out(f"const struct board_data board_data = {{.name = \"{name}\", .title = \"{quoted(board['title'])}\", .target = \"{target}\"}};")
     return "\n".join(L) + "\n"
 
 
@@ -1103,7 +1113,7 @@ def kconfig_help(text, indent="        "):
 
 def kconfig_board(board):
     """The entry of a board in the choice."""
-    L = [f"config {choice_symbol(board)}", f"    bool \"{menu_text(board)}\"", f"    depends on IDF_TARGET_{board['mcu']['target'].upper()}"]
+    L = [f"config {choice_symbol(board)}", f"    bool \"{quoted(menu_text(board))}\"", f"    depends on IDF_TARGET_{board['mcu']['target'].upper()}"]
     selects = [symbol for shown in board.get("displays") or [] if is_pixel(shown) for symbol in transport_of(shown)["select"] + shown["entry"]["select"]]
     for group in (board.get("display_groups") or {}).values():
         selects += resolve.library(board["display"]["library"])["groups"][group["how"]]["select"]
@@ -1214,7 +1224,7 @@ def gen_kconfig(boards, modules):
         out("# its glue comes in beside the board's (its sdkconfig.defaults turns it on, read after the board's).")
         for module in modules:
             out(f"config {module_symbol(module)}")
-            out(f"    bool \"{menu_text(module)}\"")
+            out(f"    bool \"{quoted(menu_text(module))}\"")
             out("    depends on " + " && ".join(["!BOARD_SELECT_NONE", *(bus_symbol(kind) for kind in bus_kinds(module))]))
             out("    help")
             out(kconfig_help(sentence(module["description"])))

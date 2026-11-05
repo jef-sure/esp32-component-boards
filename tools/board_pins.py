@@ -122,7 +122,10 @@ def main():
         return 0
     if not args.board:
         parser.error("a board, or --all")
-    for board in boards + modules:
+    if any(module["name"] == args.board for module in modules) or (ROOT / "catalog" / "modules" / args.board / "module.json").is_file():
+        print(f"{args.board} is a module: its pins are those of the board it is on, name that board (a board of a program with --project)", file=sys.stderr)
+        return 1
+    for board in boards:
         if board["name"] == args.board:
             if args.display:
                 primary = boards_gen.primary_shown(board)

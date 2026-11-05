@@ -24,6 +24,7 @@ import pathlib
 import re
 import subprocess
 import sys
+import tempfile
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "tools"))
@@ -104,14 +105,14 @@ def adapter_files(record):
     return adapter_sources(record) + [folder / name for name in adapter.get("headers", ())] + public
 
 
-def host_syntax(source):
+def host_syntax(source, name=None):
     """A source compiles against test/fake with -fsyntax-only: the shape of every call is right."""
     cmd = ["gcc", "-std=gnu11", "-fsyntax-only", "-Wall", "-Wextra", "-Werror", "-Wno-unused-parameter", "-Wno-unused-function",
            f"-I{ROOT / 'include'}", f"-I{ROOT / 'src'}", *(f"-I{path}" for path in sorted((ROOT / "adapters").glob("*"))),
            *(f"-I{path}" for path in sorted((ROOT / "adapters").glob("*/include"))), f"-I{ROOT / 'test' / 'fake'}", str(source)]
     result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode != 0:
-        return error(f"{source.relative_to(ROOT)} does not compile against test/fake:\n{result.stderr}")
+        return error(f"{name or source.relative_to(ROOT)} does not compile against test/fake:\n{result.stderr}")
     return 0
 
 
@@ -155,6 +156,15 @@ def main():
         if syntax and glue.exists():
             errors += host_syntax(glue)
     if syntax:
+        # a title with a quote and a backslash, and a description that would end a comment, as a page may write them
+        spoiled = {**boards[0], "title": 'A "quoted" \\ title */', "description": "a comment ends */ here"}
+        with tempfile.TemporaryDirectory() as folder:
+            source = pathlib.Path(folder) / f"{spoiled['name']}.c"
+            source.write_text(boards_gen.gen_c(spoiled))
+            errors += host_syntax(source, f"the glue of {spoiled['name']} with a spoiled title")
+        prompt = boards_gen.kconfig_board(spoiled)[1]
+        if not re.fullmatch(r'    bool "(?:[^"\\]|\\.)*"', prompt):
+            errors += error(f"the Kconfig prompt of a spoiled title is not one string: {prompt}")
         for source in sorted((ROOT / "src").glob("*.c")) + sorted((ROOT / "adapters").glob("*/*.c")):
             if source.name != HOST:  # SDL2 and the linux target: CI builds it for the computer
                 errors += host_syntax(source)

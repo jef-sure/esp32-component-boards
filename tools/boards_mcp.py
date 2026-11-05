@@ -205,14 +205,18 @@ def handler_of(desk, token, port, project=None):
             files, replace = body.get("files") if isinstance(body, dict) else None, body.get("replace", {}) if isinstance(body, dict) else None
             if not isinstance(files, dict) or not isinstance(replace, dict):
                 return self.answer(400, {"error": "files by their paths, and replace the digests the plan showed by the paths"})
-            if self.path == "/agent/project/plan":
-                return self.answer(200, project.plan(files))
-            if not project.allowed_for_ever():
-                if body.get("allow") not in ("once", "for ever"):
-                    return self.answer(403, {"error": "the person has not allowed it: ask, once or for ever"})
-                if body["allow"] == "for ever":
-                    project.allow_for_ever()
-            return self.answer(200, project.write(files, replace))
+            try:
+                if self.path == "/agent/project/plan":
+                    return self.answer(200, project.plan(files))
+                if not project.allowed_for_ever():
+                    if body.get("allow") not in ("once", "for ever"):
+                        return self.answer(403, {"error": "the person has not allowed it: ask, once or for ever"})
+                    if body["allow"] == "for ever":
+                        project.allow_for_ever()
+                return self.answer(200, project.write(files, replace))
+            except OSError as error:
+                # a folder that may not be written, a full disk: the page is told, and the server goes on
+                return self.answer(500, {"error": f"{error.filename or 'the project'}: {error.strerror or error}"})
 
     return Page
 

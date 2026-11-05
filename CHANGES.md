@@ -407,6 +407,14 @@ committed, a program that asks by kind.
   not fit the answers now is named as staying in the project (found by 7c: it dropped out silently). The kits chosen
   are no longer among `others` of `selection.json`: the page keeps copies, and they were compared as objects. With a
   budget the price comes right after the unknowns, as the documents say; it came after the worth of what nobody asked.
+- Found by 7c, the audit of 2026-11-05, 17: the generator puts a title in C and in Kconfig between quotes with its
+  quotes and backslashes escaped, and a `*/` of a description no longer ends the comment of the glue (the page writes
+  titles of its own; `check_boards.py --host-syntax` compiles a glue of a spoiled title). `--again` refuses a file of
+  defaults whose name and first line name different boards: a copy built the first board under the second name. An
+  issue taken again replaces its `report_N` where it stands; it was written twice. `board_pins.py` on a module says
+  it has the pins of its board. A write of the bridge puts every file beside its place before it renames any, so a
+  file that cannot be written leaves the project as it was, and the page gets the error; the connection was dropped
+  and the first file stayed.
 - A level seen on hardware is a note, not a part: `high_seen_mv` of a chip, the lowest high that drove it on hardware,
   with its trial in `checked`, and the judgement `level_seen_on_hardware`. The WS2812B takes 3.5 V by its datasheet;
   the 3.3 V of an ESP32 drove Anton's garland, so a kit of strips says so and adds no level shifter (Anton: "in

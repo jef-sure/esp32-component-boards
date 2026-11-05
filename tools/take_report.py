@@ -167,7 +167,11 @@ def with_offer(text, key, offer, doc):
     whole file anew (resolve.dump) when the text is not in a shape that takes one."""
     line = f'        "{key}": {resolve.dump(offer, 8, len(key) + 4)}'
     found = re.search(r'^    "price": \{', text, re.M)
-    if found:
+    had = re.search(rf'^        "{re.escape(key)}": ', text, re.M)
+    if had:
+        # a report taken again, as after an edit of its issue, replaces its offer where it stands
+        made = text[:had.start()] + line + text[closing(text, had.end()) + 1:]
+    elif found:
         end = closing(text, found.end() - 1)
         before = text[:end].rstrip()
         made = f"{before}{'' if before.endswith('{') else ','}\n{line}\n    " + text[end:]

@@ -28,6 +28,7 @@ Checks of the data format. Needs jsonschema and node: the Python of ESP-IDF has 
 """
 import copy
 import hashlib
+import http.client
 import json
 import os
 import pathlib
@@ -317,6 +318,10 @@ def presets_wrong():
         if own.read_text() != 'CONFIG_IDF_TARGET="esp32"\n':
             wrong.append("a file of defaults written by hand was replaced")
         own.unlink()
+        # a copy of the file of one board under the name of another would build the first under that name
+        own.write_text((project / "sdkconfig.defaults.cyd_s028r").read_text())
+        select("--again", fails=True)
+        own.unlink()
         # the files a page writes first, the command in their first line and the order in selection.json: --again makes the rest
         for path in project.glob("sdkconfig.defaults.*"):
             path.write_text(f"# board_select.py {path.name.split('.')[-1]}\n")
@@ -441,6 +446,12 @@ def reports_refused():
         offer = json.loads((catalog / "modules" / "pn532_module" / "module.json").read_text())["price"]["report_9"]
         if offer["range"] != [3.76, 3.76] or offer["shop"] != "aliexpress":
             print(f"take_report.py took 3,76 of aliexpress as {offer['range']} of {offer['shop']}")
+            wrong += 1
+        # an issue edited is taken again: its offer is replaced where it stands, not written twice
+        take_report.take(body.format(**{**fine, "price": "4,10", "shop": "aliexpress"}), 9, catalog, "2026-11-02")
+        text = (catalog / "modules" / "pn532_module" / "module.json").read_text()
+        if text.count('"report_9"') != 1 or json.loads(text)["price"]["report_9"]["range"] != [4.1, 4.1]:
+            print(f"take_report.py took issue 9 again as {text.count(chr(34) + 'report_9' + chr(34))} offers")
             wrong += 1
         # prices as they are written in one country or another
         for text, currency, value in (("1.234,56", "EUR", [1234.56] * 2), ("1,234.56", "USD", [1234.56] * 2), ("1 234,56", "EUR", [1234.56] * 2),
@@ -585,6 +596,8 @@ def project_problems(base, own, project, config):
                 return answer.status, json.loads(answer.read())
         except urllib.error.HTTPError as error:
             return error.code, None
+        except (urllib.error.URLError, ConnectionError, http.client.HTTPException):
+            return None, None  # the server dropped the connection with no answer
 
     def got(path):
         try:
@@ -652,6 +665,15 @@ def project_problems(base, own, project, config):
         problems.append("a write allowed for ever asks again")
     if json.loads((config / "jef-sure-boards" / "allowed.json").read_text()) != {str(project.resolve()): "garland"}:
         problems.append("for ever is not kept by the path and the name of the project")
+    # a file that cannot be written leaves the others unwritten, and the page gets an answer
+    (project / "main").mkdir(exist_ok=True)
+    os.chmod(project / "main", 0o555)
+    try:
+        code, done = post("/agent/project/write", {"files": {"NOTES.md": "x\n", "main/new.c": "x\n"}, "allow": "once"})
+    finally:
+        os.chmod(project / "main", 0o755)
+    if os.geteuid() and (code != 500 or (project / "NOTES.md").exists() or any(path.name.startswith(".NOTES") for path in project.iterdir())):
+        problems.append(f"a write that failed on its second file: {code}, the first is there: {(project / 'NOTES.md').exists()}")
     # what board_select.py makes again stays the page's: a command that changes the presets records them in the list
     subprocess.run([sys.executable, str(ROOT / "tools" / "board_select.py"), "--current", "jc4827w543c", str(project)], capture_output=True)
     listed = json.loads((project / ".boards" / "written.json").read_text()).get("CMakePresets.json")

@@ -934,6 +934,7 @@
         "ledc": { "type": "integer", "minimum": 1, "description": "The LEDC channels one device takes this way." }, "shared": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 }, "description": "Of lines: those that all the devices of one block share, as data and clock of chains of shift registers." }, "adc": { "type": "integer", "minimum": 1, "description": "How many lines, the first of the list, are read by ADC1." },
         "gives": { "type": "object", "additionalProperties": { "type": "number" }, "description": "The figures of this way, as swing_v across a piezo disc." },
         "do": { "type": "string", "minLength": 1, "description": "What a person does to wire it." },
+        "active": { "type": "object", "additionalProperties": { "enum": ["low", "high"] }, "description": "By line: the level that means on, as low for a button to ground held up by the pull-up of the pin, which the glue then turns on." },
         "part": { "$ref": "#/$defs/name", "description": "The chip of the catalog this way wires, as the 74HC595 of LEDs on shift registers: a kit counts it by the outputs a block asks." }
       }
     },

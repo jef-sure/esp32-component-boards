@@ -1020,6 +1020,10 @@ def main():
                     problems.append(f"the generator refuses a kit over {project['extends']}: {error}")
                     continue
                 unused = {part for part, device in (project.get("devices") or {}).items() if device.get("used") is False}
+                # a button a kit wires is a button of its glue, which board_button_count() sees and pulls up
+                pressed = {part for part, device in (project.get("devices") or {}).items() if device.get("class") == "button"}
+                if pressed - {button["name"] for button in board["buttons"]}:
+                    problems.append(f"the glue of a kit over {project['extends']} has no button for {', '.join(sorted(pressed - {button['name'] for button in board['buttons']}))}")
                 if unused & {part["name"] for part in (*(board.get("displays") or ()), *board["touches"], *board["sounds"])}:
                     problems.append(f"the glue of a kit over {project['extends']} starts what the kit leaves alone")
         print(f"the solver: {found['cases']} cases, {len(found['projects'])} kits, {len(problems)} wrong")

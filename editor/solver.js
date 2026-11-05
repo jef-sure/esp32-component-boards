@@ -698,7 +698,10 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
                 for (const pin of read) pins.splice(pins.indexOf(pin), 1);
                 // a way that names its chip writes the chips of its chain, so that the goods and the price count them
                 const chip = !pick.need.output && !pick.module.own && pick.way.part && catalog.devices[pick.way.part] ? pick.way.part : null;
-                devices[pick.use] = { ...(chip ? { chip, count: chainCount(pick) } : { class: 'other' }), pins: { ...common, ...pick.way.fixed, ...Object.fromEntries(own.map((line, i) => [line, i < read.length ? read[i] : pins.shift()])) } };
+                // the part takes the class of its role, and a line its level that means on, so the glue starts it as such
+                const placedPin = (line, pin) => (pick.way.active?.[line] ? { gpio: pin, active: pick.way.active[line] } : pin);
+                devices[pick.use] = { ...(chip ? { chip, count: chainCount(pick) } : { class: roleOf(pick.need.id)?.class ?? 'other' }),
+                    pins: { ...common, ...pick.way.fixed, ...Object.fromEntries(own.map((line, i) => [line, placedPin(line, i < read.length ? read[i] : pins.shift())])) } };
                 if (devices[pick.use].count === 1) delete devices[pick.use].count;
                 if (!Object.keys(devices[pick.use].pins).length) delete devices[pick.use].pins;
                 if (pick.way.bus) {
@@ -910,7 +913,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         }
         for (const pick of picks) {
             const { on, pins } = project.modules[pick.use] ?? project.devices[pick.use];
-            for (const wires of [...Object.values(on || {}), pins || {}]) for (const [line, pin] of Object.entries(wires)) rows.push({ what: pick.use, line, pin });
+            for (const wires of [...Object.values(on || {}), pins || {}]) for (const [line, pin] of Object.entries(wires)) rows.push({ what: pick.use, line, pin: pin?.gpio ?? pin });
         }
         return rows;
     }
@@ -968,7 +971,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
                 }
                 for (const [line, pin] of Object.entries(wires).filter(([, value]) => typeof value === 'number')) lines.push({ line, to: `GPIO ${pin}` }); // an address is no wire
             }
-            for (const [line, pin] of Object.entries(pins || {})) lines.push({ line, to: `GPIO ${pin}` });
+            for (const [line, pin] of Object.entries(pins || {})) lines.push({ line, to: `GPIO ${pin?.gpio ?? pin}` });
             for (const [line, from] of Object.entries(supply || {})) lines.push({ line, to: from });
             if (Object.keys(supply || {}).length) lines.push({ line: 'GND', to: 'GND' });
             const number = pick.use.match(/_(\d+)$/)?.[1];
@@ -1303,7 +1306,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
                 });
             }
             for (const text of switchesOf(picks)) lines.push({ level: 'do', text });
-            for (const pick of picks.filter((item) => item.module.own)) lines.push({ level: 'do', text: t('{0}: your own part, not in the catalog: {1}', pick.module.title, [...Object.entries(project.devices[pick.use].pins ?? {}).map(([line, pin]) => `${line} GPIO ${pin}`), ...Object.keys(project.devices[pick.use].on ?? {}).map((bus) => bus.toUpperCase())].join(', ') || t('no lines')) });
+            for (const pick of picks.filter((item) => item.module.own)) lines.push({ level: 'do', text: t('{0}: your own part, not in the catalog: {1}', pick.module.title, [...Object.entries(project.devices[pick.use].pins ?? {}).map(([line, pin]) => `${line} GPIO ${pin?.gpio ?? pin}`), ...Object.keys(project.devices[pick.use].on ?? {}).map((bus) => bus.toUpperCase())].join(', ') || t('no lines')) });
             for (const pick of new Map(picks.filter((item) => item.way && !item.need.output && !item.module.own).map((item) => [item.need.id, item])).values()) {
                 // a way that names its chip counts the chips of one chain by the outputs asked
                 const chip = pick.way.part && catalog.devices[pick.way.part];

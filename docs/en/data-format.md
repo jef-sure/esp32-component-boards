@@ -634,6 +634,11 @@ So each piezo disc takes one pin and one channel, or two of each when a question
 The solver takes the first way that gives what is asked and counts its channels, with those the outputs of the page
 take, against `frequency_sources.ledc.outputs` of the chip (the judgement `ledc_channels`).
 
+A variant of a role in `catalog/roles.json` may have a way too, as buttons on GPIOs: `{"lines": ["in"], "active":
+{"in": "low"}}`. The part a kit writes for it takes the class of its role and, for a line with `active`, the level that
+means on: `"program": {"class": "button", "pins": {"in": {"gpio": 4, "active": "low"}}}`. The glue then counts it among
+the buttons, by its name, and turns the pull-up of its pin on.
+
 ## Chains
 
 Chips that go in a chain on the same lines, the output of one into the input of the next, say so in `chain` of

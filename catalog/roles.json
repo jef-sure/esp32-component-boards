@@ -145,7 +145,7 @@
                     "class": "other",
                     "words": "cap1188|mpr121|at42qt\\d+|touch sensor|capacitive touch sensor|touch pad"
                 },
-                {"id": "button", "text": "Buttons", "class": "button", "words": "\\bbutton|neokey|tactile", "variants": [{"id": "on_gpio", "text": "On a GPIO", "way": {"lines": ["in"]}}]},
+                {"id": "button", "text": "Buttons", "class": "button", "words": "\\bbutton|neokey|tactile", "variants": [{"id": "on_gpio", "text": "On a GPIO", "way": {"lines": ["in"], "active": {"in": "low"}}}]},
                 {
                     "id": "encoder",
                     "text": "Rotary encoder",

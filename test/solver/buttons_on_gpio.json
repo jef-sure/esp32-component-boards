@@ -1,0 +1,50 @@
+{
+    "title": "Three buttons on GPIOs, as on a garland: each a button of the board, active low, so the glue counts them beside BOOT and pulls them up",
+    "answers": {
+        "board": "esp32_devkit",
+        "blocks": [
+            {
+                "role": "button",
+                "variant": "on_gpio",
+                "name": "program"
+            },
+            {
+                "role": "button",
+                "variant": "on_gpio",
+                "name": "palette"
+            },
+            {
+                "role": "button",
+                "variant": "on_gpio",
+                "name": "onoff"
+            }
+        ]
+    },
+    "kit": {
+        "name": "esp32_devkit",
+        "modules": {}
+    },
+    "parts": {
+        "board": "esp32_devkit",
+        "devices": {
+            "program": {
+                "class": "button",
+                "active": {
+                    "in": "low"
+                }
+            },
+            "palette": {
+                "class": "button",
+                "active": {
+                    "in": "low"
+                }
+            },
+            "onoff": {
+                "class": "button",
+                "active": {
+                    "in": "low"
+                }
+            }
+        }
+    }
+}

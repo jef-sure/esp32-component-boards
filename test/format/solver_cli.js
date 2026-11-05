@@ -150,6 +150,14 @@ for (const name of names) {
         if (JSON.stringify(kit?.project.modules[given.fed.use].supply) !== JSON.stringify(given.fed.supply)) say(`fed by ${JSON.stringify(kit?.project.modules[given.fed.use].supply)}`);
     }
     if (given.says && !kits.some((kit) => kit.says.some((line) => line.text.includes(given.says)))) say(`no kit says "${given.says}"`);
+    // the parts of a kit as the project writes them: the class of each, and the level that means on of a line
+    if (given.parts) {
+        const kit = fit.find((item) => item.name === given.parts.board);
+        for (const [use, want] of Object.entries(given.parts.devices)) {
+            const device = kit?.project?.devices?.[use];
+            if (device?.class !== want.class || Object.entries(want.active ?? {}).some(([line, level]) => device?.pins?.[line]?.active !== level)) say(`${use} of ${given.parts.board} is ${JSON.stringify(device)}`);
+        }
+    }
     // an order of audited libraries carries its basis: a row for each library, with the file of its audit
     for (const line of kits.flatMap((kit) => kit.says).filter((item) => item.text.includes('audited libraries in order: '))) {
         const named = line.text.split('audited libraries in order: ')[1].split(', ');

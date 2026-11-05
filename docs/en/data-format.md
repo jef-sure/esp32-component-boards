@@ -644,7 +644,8 @@ a 74HC595 has 8 outputs.
 
 A product of such chips gives `config.count` × `unit` outputs: the four MAX7219 of `max7219_4in1` with
 `config.count` 32 give 256. A block of LEDs or of shift registers asks how many outputs it drives
-(`chain_outputs`), and the solver puts as many products in one chain as that takes; a project says it with
+(`chain_outputs`; `"any_variant": false` of its `limit` keeps a block of any variant from asking it, as a display of
+any kind), and the solver puts as many products in one chain as that takes; a project says it with
 `count` of the module, on the wires of one:
 
 ```json

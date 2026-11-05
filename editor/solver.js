@@ -4,6 +4,7 @@
 
 const KIT_FORMAT = { format: 'jef-sure/boards', format_version: 2 };
 const SELECTION_VERSION = 3; // selection.json with the kits of several boards and the current one
+const OTHERS_KEPT = 20; // the kits that fit too, the best first, that selection.json names: the rest come again from its answers
 const CHIP_HIGH_MV = 3300; // what a pin of an ESP32 gives as high
 const MOST_MODULES = 6; // the parts tried for one need: more make the search longer and the list no clearer
 const OWN_PART = 'own_part'; // the role of a part of the person's own, which the catalog has not
@@ -1450,7 +1451,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
                 says: kit.says.map(({ level, text, judgement }) => ({ level, text, ...(judgement ? { judgement } : {}) })),
             })),
             current,
-            others: others.filter((item) => item.fits).map((item) => item.headline),
+            others: others.filter((item) => item.fits).slice(0, OTHERS_KEPT).map((item) => item.headline),
             rejected: others.filter((item) => !item.fits).map((item) => ({ board: item.name, why: item.says.filter((line) => line.level === 'no').map((line) => line.text) })),
         };
     }

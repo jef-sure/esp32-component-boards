@@ -89,6 +89,7 @@ header .views { position: static; padding: 0; border: 0; background: none; }
 .summary { margin: 0 0 8px; }
 .kit .hint a { margin-left: 8px; }
 .summary b { margin-right: 8px; }
+.summary .hint { margin-right: 0.4em; }
 .wiring { margin-bottom: 6px; }
 .wiring b { display: block; }
 .wiring span { display: inline-block; margin-right: 12px; }
@@ -169,3 +170,19 @@ li.unknown .mark, li.do .mark { color: var(--accent); }
 .block .have { display: grid; gap: 3px; font-size: 12px; color: var(--muted); }
 .block .have p { display: grid; grid-template-columns: minmax(0, 1fr) 3.5em auto; gap: 4px; align-items: center; margin: 0; }
 .block .have select { min-width: 0; width: 100%; }
+
+/* Before the first block: the kits wait, and the palette is where to start. */
+.first { max-width: 420px; padding: 24px 8px; font-size: 16px; color: var(--muted); }
+.first button { font-size: 14px; }
+.select.waiting .palette { box-shadow: inset -3px 0 0 var(--accent); }
+.kit .later summary { color: var(--muted); font-size: 13px; }
+
+/* A narrow window, as the Simple Browser of VS Code beside the code: the kits go under the canvas, the header wraps. */
+@media (max-width: 1100px) {
+    header.bar { flex-wrap: wrap; height: auto; min-height: 44px; padding: 6px 12px; }
+    .top { flex-wrap: wrap; }
+    .select, .select.talking { grid-template-columns: 210px minmax(0, 1fr); height: auto; }
+    .select > .palette { grid-row: span 2; }
+    .select > .kits { grid-column: 2; border-top: 1px solid var(--line); }
+    .select > * { overflow: visible; }
+}

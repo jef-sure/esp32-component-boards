@@ -339,6 +339,13 @@ const SelectPage = {
         // a project is written into a folder picked in Chromium, or through tools/boards_mcp.py into its own
         const canWrite = computed(() => host.canOpenFolder || Boolean(store.project?.mode));
         const chosenHas = (kit) => store.chosen.some((item) => item.headline === kit.headline);
+        // the cards wait for what the device needs: with nothing asked every board fits, and a hundred cards say nothing
+        const showAll = ref(false);
+        const showKits = computed(() => asked.value || store.chosen.length > 0 || Boolean(store.answers.board) || showAll.value);
+        // a card says first what fits and what is not known; the steps and the notes wait behind it
+        const FIRST_LEVELS = ['yes', 'no', 'unknown'];
+        const firstSays = (kit) => kit.says.filter((line) => FIRST_LEVELS.includes(line.level));
+        const laterSays = (kit) => kit.says.filter((line) => !FIRST_LEVELS.includes(line.level));
         // what the person has of a chain, its products and their counts in order from the board: the part of the block as a list
         const chainBlock = (block) => store.asksOf(block).some((question) => question.limit?.measure === 'chain');
         const haveOf = (block) => (Array.isArray(block.part) ? block.part : []);
@@ -351,10 +358,10 @@ const SelectPage = {
             block.part.splice(at, 1);
             if (!block.part.length) block.part = undefined;
         };
-        return { store, host, fit, boards, others, asked, addOutput, money, numberOf, priceLink, MARKS, filter, groups, roleOf, nameOf, outputsQuestion, firstOfRole, said, sendSaid, talking, stream, partsOf, boardTitle, servedBy, install, local, copied, copyInstall, setAsk, shownBoards, BOARDS_SHOWN, canWrite, chosenHas, chainBlock, haveOf, addHave, dropHave };
+        return { store, host, fit, boards, others, asked, showAll, showKits, firstSays, laterSays, addOutput, money, numberOf, priceLink, MARKS, filter, groups, roleOf, nameOf, outputsQuestion, firstOfRole, said, sendSaid, talking, stream, partsOf, boardTitle, servedBy, install, local, copied, copyInstall, setAsk, shownBoards, BOARDS_SHOWN, canWrite, chosenHas, chainBlock, haveOf, addHave, dropHave };
     },
     template: `
-        <div class="select" :class="{ talking }">
+        <div class="select" :class="{ talking, waiting: !showKits }">
             <aside class="palette">
                 <details v-if="!store.agent || store.modelless" class="agent-hint"><summary>{{ t('Talk with a model') }}</summary>
                     <p class="hint">{{ t(local ? 'Once, in the folder you started this page from:' : 'Once, in any folder:') }}</p>
@@ -494,11 +501,18 @@ idf.py build flash monitor</pre>
                 </section>
                 <p v-if="store.answers.board" class="fixed-board">{{ t('Board pinned: {0}', boardTitle(store.answers.board)) }}
                     <button class="drop" :title="t('free the board')" @click="store.answers.board = undefined">×</button></p>
-                <p class="summary"><b>{{ t(fit.length === 1 ? '{0} set of parts fits' : '{0} sets of parts fit', fit.length) }}</b>
+                <div v-if="!showKits" class="first">
+                    <p>{{ t('Put on the canvas what the device needs: click a role on the left, or drag it. The boards that fit it come here.') }}</p>
+                    <button @click="showAll = true">{{ t('show every board anyway') }}</button>
+                </div>
+                <template v-else>
+                <p class="summary"><b>{{ t(boards.length === 1 ? '{0} board fits' : '{0} boards fit', boards.length) }}</b>
                     <span v-if="store.solving" class="hint">{{ t('counting…') }}</span>
+                    <span class="hint">{{ t('{0} sets of parts in all: the others of a board are in its card.', fit.length) }}</span>
                     <span class="hint">{{ t(asked ? 'The fewest unknowns first, then the least worth of what you did not ask for, the fewest modules and the fewest wires; the price counts last, or after the unknowns with a budget.' : 'Nothing is asked yet, so every board fits.') }}</span></p>
-                <p class="hint">{{ t('An empty folder gets a whole project. A folder with a program gets only its board.') }}</p>
-                <p v-if="boards.length > shownBoards" class="hint">{{ t('{0} boards fit. To narrow: a budget or a platform above, pin a part in a block, or pin a board.', boards.length) }}</p>
+                <p v-if="store.project?.mode" class="hint">{{ t(store.project.mode === 'create' ? 'The project: {0}, a new one.' : 'The project: {0}, a program: it gets only its boards.', store.project.path) }}</p>
+                <p v-else class="hint">{{ t('An empty folder gets a whole project. A folder with a program gets only its board.') }}</p>
+                <p v-if="boards.length > shownBoards" class="hint">{{ t('To narrow: a budget or a platform above, pin a part in a block, or pin a board.') }}</p>
                 <article v-for="{ first: kit, rest } in boards.slice(0, shownBoards)" :key="kit.name" class="kit">
                     <img v-if="kit.picture" class="picture" :src="host.pictureSrc(kit.picture)" :alt="kit.title">
                     <h3>{{ kit.title }}</h3>
@@ -509,7 +523,10 @@ idf.py build flash monitor</pre>
                             <img :src="host.pictureSrc(module.picture)" :alt="module.title"><figcaption>{{ module.title }}</figcaption></figure>
                         <p class="hint credit">{{ t('Pictures of parts: Fritzing, CC BY-SA 3.0. Hold the pointer on one for its author.') }}</p>
                     </div>
-                    <ul><li v-for="line in kit.says" :key="line.text" :class="line.level" :title="line.basis ?? (line.judgement ? line.judgement + ' (catalog/judgements.json)' : null)"><span class="mark">{{ MARKS[line.level] }}</span> {{ line.text }}</li></ul>
+                    <ul><li v-for="line in firstSays(kit)" :key="line.text" :class="line.level" :title="line.basis ?? (line.judgement ? line.judgement + ' (catalog/judgements.json)' : null)"><span class="mark">{{ MARKS[line.level] }}</span> {{ line.text }}</li></ul>
+                    <details v-if="laterSays(kit).length" class="later"><summary>{{ t('steps and notes ({0})', laterSays(kit).length) }}</summary>
+                        <ul><li v-for="line in laterSays(kit)" :key="line.text" :class="line.level" :title="line.basis ?? (line.judgement ? line.judgement + ' (catalog/judgements.json)' : null)"><span class="mark">{{ MARKS[line.level] }}</span> {{ line.text }}</li></ul>
+                    </details>
                     <p v-if="kit.price.unpriced.length" class="hint">{{ t('Know a price?') }}
                         <a v-for="item in kit.price.unpriced" :key="item.item" target="_blank" rel="noopener" :href="priceLink(item.item)">{{ item.title }}</a></p>
                     <details v-if="kit.wiring.length"><summary>{{ t('the wires') }}</summary>
@@ -517,7 +534,7 @@ idf.py build flash monitor</pre>
                             <span v-for="wire in module.lines" :key="wire.line"><code>{{ wire.line }}</code> → {{ wire.to }}</span></div>
                     </details>
                     <button v-if="kit.writable" :class="{ on: chosenHas(kit) }" :title="t('A board the program is built for: a project may have several.')" @click="store.chooseKit(kit)">{{ t(chosenHas(kit) ? 'in the project' : 'add to the project') }}</button>
-                    <button v-if="canWrite && kit.writable" @click="store.planProject(kit)">{{ t('make a project…') }}</button>
+                    <button v-if="canWrite && kit.writable && !store.chosen.length" @click="store.planProject(kit)">{{ t('make a project…') }}</button>
                     <button v-if="store.answers.board !== kit.name" :title="t('Pin this board: the solver and the model try no other.')" @click="store.answers.board = kit.name">{{ t('pin this board') }}</button>
                     <span v-if="kit.imported" class="hint">{{ t('imported: no project until this board is in the catalog') }}</span>
                     <span v-else-if="!kit.writable" class="hint">{{ t('The page writes projects for ESP-IDF only for now.') }}</span>
@@ -525,7 +542,7 @@ idf.py build flash monitor</pre>
                     <details v-if="rest.length" class="more"><summary>{{ t('{0} more on this board', rest.length) }}</summary>
                         <p v-for="other in rest" :key="other.headline">+ {{ partsOf(other) || t('nothing more') }} <span class="note">{{ money(other.price) }}</span>
                             <button v-if="other.writable" :class="{ on: chosenHas(other) }" @click="store.chooseKit(other)">{{ t(chosenHas(other) ? 'in the project' : 'add to the project') }}</button>
-                            <button v-if="canWrite && other.writable" @click="store.planProject(other)">{{ t('make a project…') }}</button></p>
+                            <button v-if="canWrite && other.writable && !store.chosen.length" @click="store.planProject(other)">{{ t('make a project…') }}</button></p>
                     </details>
                 </article>
                 <button v-if="boards.length > shownBoards" @click="shownBoards += BOARDS_SHOWN">{{ t('{0} more boards', Math.min(BOARDS_SHOWN, boards.length - shownBoards)) }}</button>
@@ -536,6 +553,7 @@ idf.py build flash monitor</pre>
                         <ul><li v-for="line in kit.says" :key="line.text" :class="line.level" :title="line.basis ?? (line.judgement ? line.judgement + ' (catalog/judgements.json)' : null)"><span class="mark">{{ MARKS[line.level] }}</span> {{ line.text }}</li></ul>
                     </article>
                 </details>
+                </template>
             </div>
         </div>
     `,
@@ -558,7 +576,7 @@ const app = createApp({
         return { store, host, VIEWS, jsonOf, numberOf, LANGUAGES };
     },
     template: `
-        <header>
+        <header class="bar">
             <h1>boards</h1>
             <span class="views">
                 <button :class="{ here: store.page === 'select' }" @click="store.page = 'select'">{{ t('select') }}</button>

@@ -394,7 +394,8 @@ modules of `imported-shops/` stay out of the repository, so only a chip with a p
 missing price counts as an unknown. `tools/check_format.py` gives the kits of `test/solver/` to the
 generator as well.
 
-`make a project…` asks for a folder, and the folder decides what happens:
+The cards wait for the first block on the canvas: with nothing asked every board fits. `make a project…` on a card, while
+the project has no boards, or *make the project of these boards…* asks for a folder, and the folder decides what happens:
 
 - an empty folder, or one with only `.git`, a README, a licence and `.gitignore`, gets a whole
   project. What already lies there stays;

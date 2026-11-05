@@ -19,7 +19,7 @@
         ]
     },
     "do": [
-        "a board of 93 x 70 mm: it takes a frame of its own, 110 x 80 mm in the time clock, on four M2 screws",
+        "a board of 93 x 70 mm, on four M2 screws",
         "serial mode: PSB and K to GND, A to VCC, so the backlight is always on; RS is the select, R/W the data, E the clock"
     ],
     "connectors": {

@@ -554,7 +554,8 @@ def bridge_problems():
         base = link.split("/editor/")[0]
         for path, headers, wanted in (("/editor/index.html", {}, 200), ("/agent/messages?seen=0", {}, 401), ("/editor/index.html", {"Host": "evil.example"}, 403), ("/CLAUDE.md", {}, 404),
                                       ("/.git/config", {}, 404), ("/editor/../CLAUDE.md", {}, 404), ("/editor/%2e%2e/CLAUDE.md", {}, 404), ("/tools/boards_mcp.py", {}, 404),
-                                      ("/examples/hello_board/main/main.c", {}, 200), ("/examples/hello_board/CMakeLists.txt", {}, 404)):
+                                      ("/examples/hello_board/main/main.c", {}, 200), ("/examples/hello_board/CMakeLists.txt", {}, 404),
+                                      ("/imported-shops/index.json", {}, 200)):
             if status(path, **headers) != wanted:
                 problems.append(f"the server of the page: {path} {headers}: not {wanted}")
         # a body of the wrong form is refused, and the tools still answer after it

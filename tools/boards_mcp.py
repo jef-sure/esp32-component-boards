@@ -36,6 +36,7 @@ PROTOCOL = "2025-06-18"
 NAME = "boards"
 VERSION = "0.0.1"
 SERVED = ("/editor/", "/catalog/", "/imported/", "/imported-shops/")
+IMPORTED_INDEXES = ("/imported/index.json", "/imported-shops/index.json")
 # the files a new project takes from outside editor/, as editor/skeleton/files.json names them: those and no others of their folders
 SKELETON_FILES = {posixpath.normpath(f"/editor/{source}") for source, _ in json.loads((ROOT / "editor" / "skeleton" / "files.json").read_text())["files"]}
 LONGEST_BODY = 4 * 1024 * 1024
@@ -169,6 +170,9 @@ def handler_of(desk, token, port, project=None):
             clean = posixpath.normpath(urllib.parse.unquote(address.path))
             if not f"{clean}/".startswith(SERVED) and clean not in SKELETON_FILES:
                 return self.answer(404)
+            # a tree of imported data this copy does not have is an empty one, as imported-shops/ of the package
+            if clean in IMPORTED_INDEXES and not (ROOT / clean.lstrip("/")).is_file():
+                return self.answer(200, [])
             self.path = clean + ("/" if address.path.endswith("/") else "")
             return super().do_GET()
 

@@ -660,6 +660,8 @@ const useEditor = Pinia.defineStore('editor', {
                 const own = [...new Map(kits.flatMap((kit) => kit.libraries.filter((item) => item.own)).map((item) => [item.name, item])).values()];
                 this.plan = { folder: folder && Vue.markRaw(folder), bridge: Boolean(bridge), folderName: bridge ? bridge.path : folder.name, mode, rows, files, current, boards: chosen.map(([, board]) => board), written: null,
                     allow: bridge && !bridge.for_ever ? 'once' : null, cmakeLines,
+                    // how the component is taken, so a first reconfigure that fails says why
+                    source: this.installed?.component ?? null,
                     manifestLines: mode === 'update' ? [...(manifest?.includes(COMPONENT_NAME) ? [] : [COMPONENT_LINES(this.installed?.component)]), ...own.filter((item) => !manifest?.includes(item.name)).map(dependencyOf)] : [] };
             });
         },

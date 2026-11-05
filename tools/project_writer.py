@@ -122,7 +122,7 @@ def component_source():
 def component_lines(source):
     """The entry of the component in main/idf_component.yml, as the page writes it (COMPONENT_LINES of store.js)."""
     if source and "registry" in source:
-        return f'  jef-sure/boards: "^{source["registry"]}"'
+        return f'  jef-sure/boards: ">={source["registry"]}"'  # a caret on 0.0.x would take that version alone
     return f"  jef-sure/boards:\n    git: https://github.com/jef-sure/esp32-component-boards.git\n    version: {(source or {}).get('git', 'main')}"
 
 

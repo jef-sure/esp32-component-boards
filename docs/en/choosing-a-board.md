@@ -6,10 +6,10 @@ The board is named once, on one command line. Everything else follows.
 
 ```sh
 idf.py create-project hello && cd hello
-idf.py add-dependency "jef-sure/boards>=0.0.2"
+idf.py add-dependency "jef-sure/boards>=0.0.3"
 ```
 
-`>=0.0.2`, not `^0.0.2`: the component manager reads a caret on a version 0.0.x as that version alone, and a later
+`>=0.0.3`, not `^0.0.3`: the component manager reads a caret on a version 0.0.x as that version alone, and a later
 one would not be taken. What a build took stays in the lock of each board. A commit not published yet is taken from
 git, at that commit, so that a build gives the same tomorrow:
 
@@ -162,7 +162,7 @@ snippet above only sets the variable when none is given.
 
 ## The computer
 
-A program runs on the computer as on a board: the board `host`, the linux target of ESP-IDF, a window of SDL2 as large
+A program runs on the computer as on a board: the board `host`, the linux target of ESP-IDF, a window of DGX as large
 as the display of the board it shows.
 
 ```sh
@@ -176,9 +176,14 @@ gives it at once.
 
 `board_select.py` writes `sdkconfig.defaults.host` beside the files of the boards of the project, and the CMake of the
 skeleton builds only `main` and what it asks for the computer. `BOARD_PIXELS` and `BOARD_MM` are those of the board
-shown. The computer has the sound, by SDL; a window that is closed ends the program. The window stays black and there is
-no touch until DGX and DGX-DI build for the linux target. It takes SDL2 and libbsd of the computer (`libsdl2-dev`,
-`libbsd-dev`) and runs on Linux; Windows is not a target of ESP-IDF.
+shown. The window is a host screen of DGX (`dgx_host_screen_init`, DGX 0.10.8 and later): `board_dgx_screen()` draws
+on it as on the panel of the board, and its title tells how long the bytes sent would take on an SPI bus of 40 MHz and
+how much memory the program and DGX hold. The task that starts the display shows the window in its waits (`vTaskDelay`), so the
+display is started from `app_main` or from a task with 48 KB of stack left; `sdkconfig.defaults.host` gives `app_main`
+128 KB (`CONFIG_ESP_MAIN_TASK_STACK_SIZE=16384`, in words of 8 bytes). After `app_main` returns the window stays until
+it is closed; a window that is closed ends the program. The computer has the sound, by SDL. There is no touch until
+DGX-DI builds for the linux target. It takes SDL2 and libbsd of the computer (`libsdl2-dev`, `libbsd-dev`) and runs on
+Linux; Windows is not a target of ESP-IDF.
 
 ## What comes with the choice
 

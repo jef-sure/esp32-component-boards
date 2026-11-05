@@ -1,6 +1,7 @@
 # The boards built, every one: the data checked, every glue compiled against test/fake on the
 # host, then examples/hello_board built for every board under two versions of ESP-IDF, the
-# oldest the manifest promises and the newest. A board that does not build does not merge.
+# oldest the manifest promises and the newest, and for the computer, where it runs and its window
+# is checked as a picture. A board that does not build does not merge.
 # The checks run on every branch, so a working branch is not left without them; the builds on
 # main and on pull requests.
 name: build
@@ -100,6 +101,30 @@ jobs:
           target: esp32s3
           path: examples/local_boards
           command: ${{ matrix.idf == 'v6.1' && 'idf.py build' || 'idf.py -B build/my_board -D SDKCONFIG=build/my_board/sdkconfig -D BOARD=my_board build' }}
+
+  host:
+    name: the computer as the JC4827W543C on ESP-IDF ${{ matrix.idf }}
+    needs: check
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        idf: [release-v5.5, v6.1]
+    steps:
+      - uses: actions/checkout@v4
+      - name: choose the computer
+        run: python3 tools/board_select.py host --as jc4827w543c examples/hello_board
+      - name: build hello_board for the linux target, run it with no screen and check the picture of its window
+        uses: espressif/esp-idf-ci-action@v1
+        with:
+          esp_idf_version: ${{ matrix.idf }}
+          target: linux
+          path: examples/hello_board
+          command: >-
+            apt-get update -qq && apt-get install -y -qq --no-install-recommends pkg-config libsdl2-dev libbsd-dev > /dev/null &&
+            ${{ matrix.idf == 'v6.1' && 'idf.py build' || 'idf.py -B build/host -D SDKCONFIG=build/host/sdkconfig -D BOARD=host build' }} &&
+            SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy DGX_HOST_QUIT_MS=1000 DGX_HOST_SHOT=build/host/shot.ppm timeout 60 build/host/hello_board.elf &&
+            python3 ../../test/host_shot.py build/host/shot.ppm
 
   multi-board:
     name: one program for two boards on ESP-IDF ${{ matrix.idf }}

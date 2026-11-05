@@ -1,37 +1,33 @@
 /*
- * The board host: the program on the computer, built for the linux target of ESP-IDF, boards.h over SDL2. The window is
- * as large as the board it shows (CONFIG_BOARD_HOST_*, written by tools/board_select.py host --as <board>), and the
- * sound goes to the speakers of the computer. What needs a library on the computer too (a screen of DGX in the window,
- * the mouse as a finger of DGX-DI) waits for those libraries to build for the linux target; until then the window is
- * black, the board has no touch panel, and every part it has not returns false as on a board.
+ * The board host: the program on the computer, built for the linux target of ESP-IDF, boards.h over SDL2. The display
+ * is a window of DGX (dgx_host_screen_init, DGX 0.10.8 and later) as large as the display of the board it shows
+ * (CONFIG_BOARD_HOST_*, written by tools/board_select.py host --as <board>), and the sound goes to the speakers of the
+ * computer. The task that starts the display shows the window in its waits and needs 48 KB of stack left, as
+ * CONFIG_ESP_MAIN_TASK_STACK_SIZE=16384 gives app_main. The mouse as a finger of DGX-DI waits for DGX-DI to build for the
+ * linux target: until then the board has no touch panel, and every part it has not returns false as on a board.
  */
-#include "boards.h"
-
-#include <SDL.h>
-#include <stdlib.h>
-#include <time.h>
-
-#include "esp_log.h"
-#include "esp_timer.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
 #include "sdkconfig.h"
 
 #if !CONFIG_BOARD_SELECT_HOST
 #error "the linux target is the board host, a window of the computer: choose it with board_select.py host --as <board> ."
 #endif
 
+#include "boards.h"
+#include "boards_dgx.h"
+
+#include <SDL.h>
+
+#include "dgx_host_screen.h"
+#include "drivers/dgx_panel.h"
+#include "esp_log.h"
+
 static const char *TAG = "board";
 
-enum { WINDOW_TASK_STACK = 8192, WINDOW_TASK_PRIORITY = 5, EVENTS_MS = 16, SOUND_RATE = 22050, SOUND_FRAMES = 256 };
+enum { COLOR_BITS = 16, SOUND_RATE = 22050, SOUND_FRAMES = 256 };
 
-/* esp_timer of ESP-IDF is only a header on the linux target: the board gives its time */
-int64_t esp_timer_get_time(void)
-{
-    struct timespec now;
-    clock_gettime(CLOCK_MONOTONIC, &now);
-    return (int64_t)now.tv_sec * 1000000 + now.tv_nsec / 1000;
-}
+_Static_assert((int)DgxScreenLeftRight == BOARD_DIR_FORWARD && (int)DgxScreenTopBottom == BOARD_DIR_FORWARD && (int)DgxScreenRightLeft == BOARD_DIR_BACKWARD &&
+                   (int)DgxScreenBottomTop == BOARD_DIR_BACKWARD,
+               "dir_x and dir_y of boards.h are passed to DGX as they are");
 
 const board_info_t *board_info(void)
 {
@@ -39,36 +35,10 @@ const board_info_t *board_info(void)
     return &info;
 }
 
-/* ---- the window: made by a task of its own, which reads the events of SDL as long as it is there ---- */
+/* ---- the display: a window of DGX, its glass the display of the board as shown ---- */
 
-static board_display_t   shown;
-static volatile int      window_state; /* 0 none yet, 1 made, -1 failed */
-static SDL_Window       *window;
-
-static void window_task(void *arg)
-{
-    (void)arg;
-    if (SDL_InitSubSystem(SDL_INIT_VIDEO) != 0) {
-        ESP_LOGE(TAG, "SDL_InitSubSystem: %s", SDL_GetError());
-        window_state = -1;
-        vTaskDelete(NULL);
-        return;
-    }
-    window = SDL_CreateWindow(board_info()->title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, CONFIG_BOARD_HOST_WIDTH, CONFIG_BOARD_HOST_HEIGHT, 0);
-    if (!window) {
-        ESP_LOGE(TAG, "SDL_CreateWindow: %s", SDL_GetError());
-        window_state = -1;
-        vTaskDelete(NULL);
-        return;
-    }
-    window_state = 1;
-    for (;;) {
-        SDL_Event event;
-        while (SDL_PollEvent(&event))
-            if (event.type == SDL_QUIT) exit(0); /* the window closed: the program ends, as a board switched off */
-        vTaskDelay(pdMS_TO_TICKS(EVENTS_MS));
-    }
-}
+static board_display_t shown;
+static dgx_screen_t   *screen;
 
 int board_display_count(void)
 {
@@ -78,14 +48,16 @@ int board_display_count(void)
 bool board_display_init_at(int index, board_display_t *out)
 {
     if (index != 0) return false;
-    if (!window_state && xTaskCreate(window_task, "window", WINDOW_TASK_STACK, NULL, WINDOW_TASK_PRIORITY, NULL) != pdPASS) {
-        ESP_LOGE(TAG, "xTaskCreate: window");
-        return false;
+    if (!screen) {
+        const dgx_host_screen_options_t options = {.title = board_info()->title};
+        screen = dgx_host_screen_init(CONFIG_BOARD_HOST_WIDTH, CONFIG_BOARD_HOST_HEIGHT, COLOR_BITS, &options);
+        if (!screen) {
+            ESP_LOGE(TAG, "dgx_host_screen_init: %dx%d", CONFIG_BOARD_HOST_WIDTH, CONFIG_BOARD_HOST_HEIGHT);
+            return false;
+        }
+        shown = (board_display_t){.width = CONFIG_BOARD_HOST_WIDTH, .height = CONFIG_BOARD_HOST_HEIGHT, .mm_w = CONFIG_BOARD_HOST_MM_W, .mm_h = CONFIG_BOARD_HOST_MM_H,
+                                  .dir_x = BOARD_DIR_FORWARD, .dir_y = BOARD_DIR_FORWARD, .swap_xy = false, .name = "window", .index = 0};
     }
-    while (!window_state) vTaskDelay(1);
-    if (window_state < 0) return false;
-    shown = (board_display_t){.width = CONFIG_BOARD_HOST_WIDTH, .height = CONFIG_BOARD_HOST_HEIGHT, .mm_w = CONFIG_BOARD_HOST_MM_W, .mm_h = CONFIG_BOARD_HOST_MM_H,
-                              .dir_x = BOARD_DIR_FORWARD, .dir_y = BOARD_DIR_FORWARD, .swap_xy = false, .name = "window", .index = 0};
     if (out) *out = shown;
     return true;
 }
@@ -97,19 +69,28 @@ bool board_display_init(board_display_t *out)
 
 bool board_display_orientation(board_display_t *display, int dir_x, int dir_y, bool swap_xy)
 {
-    if (!display || window_state <= 0) return false;
-    if (swap_xy != display->swap_xy) {
-        int width   = display->width;
-        int mm_w    = display->mm_w;
-        display->width  = display->height;
-        display->height = width;
-        display->mm_w   = display->mm_h;
-        display->mm_h   = mm_w;
-    }
+    if (!display || !screen) return false;
+    dgx_panel_orientation(screen, (dgx_orientation_t)dir_x, (dgx_orientation_t)dir_y, swap_xy);
     display->dir_x   = dir_x;
     display->dir_y   = dir_y;
     display->swap_xy = swap_xy;
+    display->width   = swap_xy ? CONFIG_BOARD_HOST_HEIGHT : CONFIG_BOARD_HOST_WIDTH;
+    display->height  = swap_xy ? CONFIG_BOARD_HOST_WIDTH : CONFIG_BOARD_HOST_HEIGHT;
+    display->mm_w    = swap_xy ? CONFIG_BOARD_HOST_MM_H : CONFIG_BOARD_HOST_MM_W;
+    display->mm_h    = swap_xy ? CONFIG_BOARD_HOST_MM_W : CONFIG_BOARD_HOST_MM_H;
+    shown            = *display;
     return true;
+}
+
+dgx_screen_t *board_dgx_screen(const board_display_t *display)
+{
+    return display && display->index == 0 ? screen : NULL;
+}
+
+dgx_bus_protocols_t *board_dgx_bus(const board_display_t *display)
+{
+    (void)display;
+    return NULL; /* the bus of the window has nothing to tune */
 }
 
 bool board_character_display_init(board_character_display_t *out)

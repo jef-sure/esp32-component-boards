@@ -72,6 +72,7 @@ RULES = json.loads((ROOT / "catalog" / "rules.json").read_text())
 I2C_HZ_DEFAULT = 400000
 INPUT_LINES = ("in", "int", "irq", "te", "busy")  # lines of a device that only come in
 STARTED_CLASSES = {"display", "touch", "audio", "button"}  # the rest is kept as data
+HOST_FEATURES = ("BOARD_DISPLAY_GRAPHICS",)  # the window of the computer is a host screen of DGX (src/board_host.c)
 
 MANIFEST_BEGIN = "  # boards: dependencies generated"
 MANIFEST_END = "  # boards: end of generated"
@@ -1196,7 +1197,8 @@ def gen_kconfig(boards, modules):
     out("    depends on IDF_TARGET_LINUX")
     out("    help")
     out(kconfig_help("The linux target of ESP-IDF: the program runs on the computer, src/board_host.c gives boards.h over "
-                     "SDL2. tools/board_select.py host --as <board> writes the size of the board shown."))
+                     "SDL2. The display is a window of DGX as large as the display of the board shown; the sound goes to the "
+                     "speakers of the computer. tools/board_select.py host --as <board> writes the size of the board shown."))
     out("")
     out("endchoice")
     out("")
@@ -1247,7 +1249,7 @@ def gen_kconfig(boards, modules):
     out("# What the chosen board and the modules have, as the rules need it: a graphics display")
     out("# brings DGX, a touch brings DGX-DI and its driver, sound with an ES8311 brings esp_codec_dev,")
     out("# a character display brings hd44780. Derived from the data, so the data of a board and the")
-    out("# rules cannot drift apart.")
+    out("# rules cannot drift apart. The computer has a graphics display: its window is a screen of DGX.")
     all_features = {}
     for board in boards:
         for feature in features_of(board):
@@ -1255,6 +1257,8 @@ def gen_kconfig(boards, modules):
     for module in modules:
         for feature in features_of(module):
             all_features.setdefault(feature, []).append(module_symbol(module))
+    for feature in HOST_FEATURES:
+        all_features.setdefault(feature, []).append("BOARD_SELECT_HOST")
     for symbol, _, _ in feature_deps():
         all_features.setdefault(symbol, [])
     all_features.setdefault("BOARD_DISPLAY_GROUP", [])  # #if in the adapter of DGX: defined, 0, on a board with no group

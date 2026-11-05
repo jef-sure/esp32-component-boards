@@ -63,7 +63,8 @@ dgx_bus_protocols_t *board_dgx_bus(const board_display_t *display);
 The screen is what `dgx_draw.h` draws on. The bus is for what only the bus knows:
 on MIPI-DSI, `dgx_dsi_frame_us()` to pace drawing by the panel's frames and
 `dgx_dsi_bench()` / `dgx_dsi_tune()` to measure the board once and keep the numbers
-(see [calibration.md](calibration.md)).
+(see [calibration.md](calibration.md)). For displays shown as one screen and for the
+window of the computer `board_dgx_bus` returns `NULL`.
 
 `board_display_orientation` turns the display: it calls the panel driver's own
 orientation function with these values and updates `width`, `height`, `mm_w`,

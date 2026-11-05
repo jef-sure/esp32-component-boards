@@ -64,7 +64,8 @@ dgx_bus_protocols_t *board_dgx_bus(const board_display_t *display);
 На экране рисует `dgx_draw.h`. Шина нужна для того, что знает только она: на
 MIPI-DSI это `dgx_dsi_frame_us()`, чтобы задавать темп рисования по кадрам панели, и
 `dgx_dsi_bench()` / `dgx_dsi_tune()`, чтобы измерить плату один раз и сохранить числа
-(см. [calibration.md](calibration.md)).
+(см. [calibration.md](calibration.md)). Для дисплеев, показанных одним экраном, и для окна
+компьютера `board_dgx_bus` возвращает `NULL`.
 
 `board_display_orientation` поворачивает дисплей: вызывает собственную функцию
 ориентации драйвера панели с этими значениями и обновляет `width`, `height`,

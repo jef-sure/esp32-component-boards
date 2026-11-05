@@ -15,7 +15,7 @@ extern "C" {
 /* The screen to draw on; NULL for a display not started. */
 dgx_screen_t *board_dgx_screen(const board_display_t *display);
 
-/* The bus of the panel, for tuning (dgx_dsi_tune) and its pace (dgx_dsi_frame_us); NULL for displays shown as one screen. */
+/* The bus of the panel, for tuning (dgx_dsi_tune) and its pace (dgx_dsi_frame_us); NULL for displays shown as one screen and for the window of the computer. */
 dgx_bus_protocols_t *board_dgx_bus(const board_display_t *display);
 
 #ifdef __cplusplus

@@ -1,5 +1,17 @@
 # CHANGES
 
+## 0.0.3 (2026-11-05)
+
+- On the computer, the board `host`, the display is a window of DGX: the program draws on it through
+  `board_dgx_screen()` as on the board it shows. This takes DGX 0.10.8, the first version that builds for the linux
+  target, and the boards take that version too. The display is started from `app_main` or from a task with 48 KB of
+  stack left; `board_select.py host` gives `app_main` 128 KB. The computer has no touch until DGX-DI builds for the
+  linux target.
+- CI builds `hello_board` for the computer under ESP-IDF 5.5 and 6.1, runs it with no screen and checks the picture of
+  its window.
+- The description of the component names no libraries, and the README puts the note on conditional dependencies in bold.
+- The recipes take the component as `>=0.0.3`.
+
 ## 0.0.2 (2026-11-05)
 
 - One example comes with the component from the registry, `hello`, the program of the quick start, and it builds as

@@ -117,6 +117,7 @@ def defaults_text(project, local, board, modules, revision):
 
 
 HOST = "host"
+HOST_MAIN_STACK_WORDS = 16384  # 128 KB on the computer, as DGX asks of the task that makes its window
 RECORD = "# board_select.py "  # the first line of a file it writes: the arguments that make it again
 PRESETS = "CMakePresets.json"
 VENDOR = "jef-sure/boards"  # the vendor map of CMake presets that marks the file as written here
@@ -268,7 +269,9 @@ def host_text(local, shows):
     return (f"# The computer, chosen by tools/board_select.py of jef-sure/boards: a window as large as {shows}\n"
             "# Read before the project's own sdkconfig.defaults. Made from the data of the component: do not edit.\n"
             f'CONFIG_IDF_TARGET="linux"\nCONFIG_BOARD_SELECT_HOST=y\nCONFIG_BOARD_HOST_SHOWS="{shows}"\n'
-            f"CONFIG_BOARD_HOST_WIDTH={width}\nCONFIG_BOARD_HOST_HEIGHT={height}\nCONFIG_BOARD_HOST_MM_W={mm_w}\nCONFIG_BOARD_HOST_MM_H={mm_h}\n"), "linux"
+            f"CONFIG_BOARD_HOST_WIDTH={width}\nCONFIG_BOARD_HOST_HEIGHT={height}\nCONFIG_BOARD_HOST_MM_W={mm_w}\nCONFIG_BOARD_HOST_MM_H={mm_h}\n"
+            "# the window of DGX needs 48 KB of stack left in the task that starts the display: app_main's, in words of 8 bytes here\n"
+            f"CONFIG_ESP_MAIN_TASK_STACK_SIZE={HOST_MAIN_STACK_WORDS}\n"), "linux"
 
 
 def target_of(path):

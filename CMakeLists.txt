@@ -5,9 +5,13 @@
 # the menu follows); what it needs comes as manifest rules (dependencies) and the Kconfig of
 # the boards (selects). Kconfig and boards/boards.cmake are made by tools/boards_gen.py --all
 # from the data, as the glue is.
-# The computer (the linux target of ESP-IDF, the board host): nothing of a chip is there, and one file gives boards.h over SDL2.
+# The computer (the linux target of ESP-IDF, the board host): nothing of a chip is there, and one file gives boards.h over SDL2,
+# its display a window of DGX, which the manifest brings by BOARD_DISPLAY_GRAPHICS as for a board.
 if(IDF_TARGET STREQUAL "linux")
-    idf_component_register(SRCS "src/board_host.c" INCLUDE_DIRS "include" REQUIRES esp_timer freertos)
+    idf_component_register(SRCS "src/board_host.c" INCLUDE_DIRS "include" "adapters/jef-sure__dgx/include" REQUIRES freertos)
+    if(CONFIG_BOARD_DISPLAY_GRAPHICS)
+        idf_component_optional_requires(PUBLIC jef-sure__dgx)
+    endif()
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(BOARDS_SDL2 REQUIRED IMPORTED_TARGET sdl2)
     target_link_libraries(${COMPONENT_LIB} PUBLIC PkgConfig::BOARDS_SDL2 m) # libm, which a chip's program always has

@@ -365,6 +365,13 @@ committed, a program that asks by kind.
   `check_format.py` checks that the skeleton, the examples, the READMEs and choosing-a-board.md have the same lines.
   CI builds by the preset on 6.1 and by `-B build/<board>` on 5.5, and makes a new project as the README says, from
   `idf.py create-project` to `idf.py build`, for a board of another chip than the first `reconfigure`.
+- The page in a program keeps its name and its boards (the audit of 2026-11-05, 2). `selection.json` has `name`, the
+  name of the project; the page takes it when it opens the project, and through `boards_mcp.py` the field is locked. A
+  kit the project has keeps the name of its board, a kit made from its card joins the boards and becomes current, and a
+  board not on the page stays in `selection.json`. A new project keeps the name typed for its folder. The name of a
+  project starts with a letter, as a name of the schema. Driven in headless Chrome over the bridge: two boards written,
+  the page reloaded, the name and both boards back, the plan of them all `same`, a third kit from its card added; the
+  same steps on the code before gave `my_project`, two new boards and a list of one.
 - A level seen on hardware is a note, not a part: `high_seen_mv` of a chip, the lowest high that drove it on hardware,
   with its trial in `checked`, and the judgement `level_seen_on_hardware`. The WS2812B takes 3.5 V by its datasheet;
   the 3.3 V of an ESP32 drove Anton's garland, so a kit of strips says so and adds no level shifter (Anton: "in

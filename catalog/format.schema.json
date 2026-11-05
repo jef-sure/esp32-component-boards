@@ -890,6 +890,7 @@
       "properties": {
         "format": { "const": "jef-sure/boards" },
         "format_version": { "const": 3 },
+        "name": { "$ref": "#/$defs/name", "description": "The name of the project: a board of the program is <name>_<board>, so the page opened again names its boards the same." },
         "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
         "answers": { "type": "object", "description": "By the id of the question." },
         "boards": {

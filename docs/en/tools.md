@@ -396,6 +396,10 @@ generator as well.
 - a folder with a `CMakeLists.txt` is a program, and gets only its board in `components/local-boards/`;
 - any other folder is refused.
 
+A program with a `selection.json` keeps its name and its boards. The name of the project is the one there, and from
+`boards_mcp.py` the field is locked; a kit it has keeps the name of its board; a kit made from its card joins the boards
+the program has and becomes the current one, and the boards not on the page stay in `selection.json` as they were.
+
 The list of what would happen comes first and nothing is written before `write`. A board file that
 differs is replaced only when ticked, and nothing is ever removed. If a file changed after the list
 was made, nothing is written at all. A kit that needs no module gets no

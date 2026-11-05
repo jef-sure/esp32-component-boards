@@ -141,7 +141,7 @@ Configuration* chooses one, and the status bar names it.
 
 The page does the same from its kits: *add to the project* on a card puts a kit among the boards of the project, the
 radio beside each makes one current, and *make the project of these boards…* writes them. It writes `selection.json`,
-whose `boards` keep the order they were added and `current` the current one, a board of the program
+whose `boards` keep the order they were added, `current` the current one and `name` the name of the project, a board of the program
 `<project>_<board>` for a kit with a project of its own, and `sdkconfig.defaults.<board>` of each with the command
 that makes it in its first line: `board_select.py --again .` makes the rest, the defaults, the presets and the glue.
 Opened from `tools/boards_mcp.py`, the page writes through it and the server runs `--again` itself, so the project

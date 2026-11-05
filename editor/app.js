@@ -386,7 +386,8 @@ const SelectPage = {
             </aside>
             <form class="canvas" @submit.prevent @dragover.prevent @drop.prevent="store.addBlock($event.dataTransfer.getData('text/plain'))">
                 <h2>{{ t("Let's build something great!") }}</h2>
-                <label class="project">{{ t('Project name') }} <input type="text" v-model="store.projectName"></label>
+                <label class="project">{{ t('Project name') }} <input type="text" v-model="store.projectName" :readonly="store.project?.mode === 'update'"
+                    :title="store.project?.mode === 'update' ? t('The name of the program: its boards are named after it.') : ''"></label>
                 <textarea class="task" rows="3" v-model="store.answers.task" :placeholder="t('What the device does, who uses it and where it stands')"></textarea>
                 <p v-if="!store.answers.blocks.length" class="hint">{{ t('Put here what the device needs: click a role or drag it.') }}</p>
                 <div class="blocks">
@@ -549,6 +550,8 @@ const app = createApp({
             document.documentElement.lang = language;
         }, { immediate: true });
         Vue.watch(() => store.currency, (currency) => localStorage.setItem(PREFERENCES.currency, currency));
+        // the name typed for a new project, by its folder: a reload of the page keeps it
+        Vue.watch(() => store.projectName, (name) => store.project?.mode === 'create' && localStorage.setItem(`${PREFERENCES.project}:${store.project.path}`, name));
         const jsonOf = computed(() => (store.jsonResolved ? JSON.stringify(store.checks.resolved, null, 2) : store.saved));
         return { store, host, VIEWS, jsonOf, numberOf, LANGUAGES };
     },

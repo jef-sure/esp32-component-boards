@@ -1432,12 +1432,13 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
     // What a project keeps of how it was chosen, so that the choice can be read and made again.
     // selection.json of a project: the kits chosen, each by the name board_select.py takes, in the order they were added,
     // and the current one apart, so the order stays as it is when another becomes current.
-    function selectionOf(chosen, current, kits, answers, currency) {
+    function selectionOf(chosen, current, kits, answers, currency, name) {
         const kitsChosen = new Set(chosen.map((item) => item.kit));
         const others = kits.filter((item) => !kitsChosen.has(item));
         return {
             format: KIT_FORMAT.format,
             format_version: SELECTION_VERSION,
+            ...(name ? { name } : {}),
             currency,
             answers,
             boards: chosen.map(({ kit, board }) => ({

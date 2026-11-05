@@ -27,7 +27,7 @@ import boards_gen  # noqa: E402
 import resolve  # noqa: E402
 
 EDITOR = ROOT / "editor"
-NAME = re.compile(r"^[a-z0-9_]+$")
+NAME = re.compile(r"^[a-z][a-z0-9_]*$")  # as a name of the schema: a board of the program is <project>_<board>
 REPOSITORY_ONLY = re.compile(r"^(\.git|\.gitignore|\.gitattributes|README.*|LICENSE.*)$", re.IGNORECASE)
 SELECTION = "selection.json"
 BY_HAND = "chosen by hand with tools/board_project.py: no solver ran"
@@ -86,7 +86,7 @@ def main():
         args.board, args.module = kit.get("base", kit["board"]), [module["name"] for module in kit.get("modules") or ()]
     name = args.name or args.dir.resolve().name
     if not NAME.match(name):
-        raise SystemExit(f"{name}: a project name is lowercase letters, digits and _: give one with --name")
+        raise SystemExit(f"{name}: a project name is a lowercase letter, then lowercase letters, digits and _: give one with --name")
     if args.dir.exists() and not all(REPOSITORY_ONLY.match(path.name) for path in args.dir.iterdir()):
         raise SystemExit(f"{args.dir}: not empty: nothing is written there")
     try:
@@ -113,7 +113,7 @@ def main():
         for mark, value in fill.items():
             text = text.replace(mark, value)
         files[target] = text
-    selection = {"format": "jef-sure/boards", "format_version": 3, "currency": "EUR", "answers": {},
+    selection = {"format": "jef-sure/boards", "format_version": 3, "name": name, "currency": "EUR", "answers": {},
                  "boards": [{"board": args.board,
                              "modules": [{"name": module["name"], "count": 1, "on": ", ".join(boards_gen.bus_kinds(module))} for module in modules],
                              "libraries": [{"name": item["name"], "version": item["version"]} for item in started],

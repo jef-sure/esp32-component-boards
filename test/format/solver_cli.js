@@ -176,7 +176,7 @@ for (const name of names) {
     for (const kit of fit) if (kit.project && (given.imported ? widerChecks : checksOf)(kit.project).problems.length) say(`${kit.name}: its project does not pass the checks`);
     if (given.imported && !kits.some((kit) => kit.imported && kit.fits)) say('no imported board fits');
     if (!given.imported) holdsForEvery(kits, say);
-    if (fit[0]) for (const error of selections.errors({ $ref: '#/$defs/selection' }, JSON.parse(JSON.stringify(solver.selectionOf([{ kit: fit[0], board: fit[0].name }], fit[0].name, kits, given.answers, 'EUR'))))) say(`selection: ${error.path.join('.')}: ${error.message}`);
+    if (fit[0]) for (const error of selections.errors({ $ref: '#/$defs/selection' }, JSON.parse(JSON.stringify(solver.selectionOf([{ kit: fit[0], board: fit[0].name }], fit[0].name, kits, given.answers, 'EUR', 'case_project'))))) say(`selection: ${error.path.join('.')}: ${error.message}`);
     for (const module of Object.keys(given.modules || {})) delete catalog.modules[module];
     Object.assign(rates, keptRates);
     for (const [board, price] of prices) catalog.boards[board].price = price;

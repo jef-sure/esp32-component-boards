@@ -11,7 +11,9 @@ const READ_ONLY_GROUPS = new Set(['mcu']); // written by tools/make_mcu.py
 const LOADED = ['facts', 'classes', 'libraries', 'inputs']; // what the loader adds, not a field to edit
 const ROOT_FIELDS = new Set(['format', 'format_version', 'kind', 'name', 'title', 'description', 'extends', 'notes', 'images', 'origin', 'provides']);
 const FORMAT = { format: 'jef-sure/boards', format_version: 2 };
-const NAME = /^[a-z0-9_]+$/;
+const NAME = /^[a-z][a-z0-9_]*$/; // as a name of the schema: a board of the program is <project>_<board>
+// a name of the page from what a project calls itself: handwritten-clock is handwritten_clock
+const nameOf = (text) => text.toLowerCase().replace(/[^a-z0-9_]+/g, '_').replace(/^[^a-z]+/, '') || 'my_project';
 const REPOSITORY_ONLY = /^(\.git|\.gitignore|\.gitattributes|README.*|LICENSE.*)$/i; // a folder with only these is still empty for a new project
 const LOCAL_BOARD = (name) => `components/local-boards/boards/${name}/board.json`;
 const STUB = (board) => `# board_select.py ${board}`; // the first line of the defaults of a board: the command that makes them
@@ -28,7 +30,9 @@ const COMPONENT_NAME = 'jef-sure/boards';
 // until the component is in the registry it comes from git, at the commit of the catalog the page used when the server of the
 // model told it, so that a build gives the same tomorrow; main when nothing told it
 const COMPONENT_LINES = (version) => `  ${COMPONENT_NAME}:\n    git: https://github.com/jef-sure/esp32-component-boards.git\n    version: ${version}`;
-const PREFERENCES = { language: 'boards.language', currency: 'boards.currency', answers: 'boards.answers' }; // keys of localStorage
+const PREFERENCES = { language: 'boards.language', currency: 'boards.currency', answers: 'boards.answers', project: 'boards.project' }; // keys of localStorage
+// a kit and an entry of selection.json are the same when the board and the modules with their counts are
+const kitKey = (board, modules) => `${board}+${modules.map((item) => `${item.name}x${item.count ?? 1}`).sort().join(',')}`;
 const SELECTION = 'selection.json';
 const ISSUES = 'https://github.com/jef-sure/esp32-component-boards/issues/new';
 
@@ -284,7 +288,10 @@ const useEditor = Pinia.defineStore('editor', {
             // the project of the server, when it has one with a selection.json: the page starts where it was left
             this.agentCall('project').then(async (project) => {
                 this.project = project;
+                // a new project keeps the name typed for its folder; a program has its own, and selection.json the one its boards took
+                if (project.mode === 'create') this.projectName = localStorage.getItem(`${PREFERENCES.project}:${project.path}`) || nameOf(project.name);
                 if (project.mode !== 'update') return;
+                this.projectName = nameOf(project.name);
                 const saved = await this.agentCall('project/file?path=selection.json').catch(() => null);
                 if (saved?.text) this.takeSelection(saved.text);
             }).catch(() => {});
@@ -410,9 +417,8 @@ const useEditor = Pinia.defineStore('editor', {
         // with their counts, so two kits that differ in the count of a module stay two.
         restoreChosen() {
             if (!this.wanted) return;
-            const key = (board, modules) => `${board}+${modules.map((item) => `${item.name}x${item.count ?? 1}`).sort().join(',')}`;
-            const counted = new Map(this.kits.filter((kit) => kit.fits).map((kit) => [key(kit.name, kit.modules), kit]));
-            const found = this.wanted.boards.map((entry) => ({ entry, kit: counted.get(key(entry.base ?? entry.board, entry.modules)) })).filter((item) => item.kit);
+            const counted = new Map(this.kits.filter((kit) => kit.fits).map((kit) => [kitKey(kit.name, kit.modules), kit]));
+            const found = this.wanted.boards.map((entry) => ({ entry, kit: counted.get(kitKey(entry.base ?? entry.board, entry.modules)) })).filter((item) => item.kit);
             this.chosen = found.map(({ kit }) => ({ headline: kit.headline, kit: copied(kit) }));
             this.current = found.find(({ entry }) => entry.board === this.wanted.current)?.kit.headline ?? this.chosen[0]?.headline ?? null;
             this.wanted = null;
@@ -436,6 +442,7 @@ const useEditor = Pinia.defineStore('editor', {
             const saved = JSON.parse(selection);
             this.answers = { outputs: [], ...saved.answers };
             this.currency = saved.currency;
+            if (saved.name) this.projectName = saved.name;
             this.page = 'select';
             // a selection.json before format 3 had one kit at its top
             this.wanted = saved.boards ? { boards: saved.boards, current: saved.current } : { boards: [{ board: saved.board, modules: saved.modules ?? [] }], current: saved.board };
@@ -510,24 +517,10 @@ const useEditor = Pinia.defineStore('editor', {
         },
         // What a project gets: the folder decides. Nothing is written here. The kits are one taken from its card, or those
         // added to the project; each gets the name board_select.py takes, a board of the catalog as it is, a kit with modules a
-        // board of the program <project>_<board>, and a file of defaults whose first line is the command that makes it.
+        // board of the program <project>_<board>, and a file of defaults whose first line is the command that makes it. A
+        // program with a selection.json keeps its name and its boards: a kit from a card joins them and becomes current.
         async planProject(single) {
             await this.run(async () => {
-                const name = this.projectName;
-                if (!NAME.test(name)) throw new Error('a project name is lowercase letters, digits and _');
-                const kits = single ? [single] : this.chosen.map((item) => item.kit);
-                if (!kits.length) throw new Error('no kit in the project: add one from its card');
-                const taken = new Set();
-                const chosen = kits.map((kit) => {
-                    const base = kit.project ? `${name}_${kit.name}` : kit.name;
-                    let board = base;
-                    for (let n = 2; taken.has(board); ++n) board = `${base}_${n}`;
-                    taken.add(board);
-                    if (kit.project && library.catalog.boards[board]) throw new Error(`the catalog has a board ${board}: give the project another name`);
-                    return [kit, board];
-                });
-                const currentKit = single ?? this.chosen.find((item) => item.headline === this.current)?.kit ?? kits[0];
-                const current = chosen.find(([kit]) => kit === currentKit)?.[1] ?? chosen[0][1];
                 // through tools/boards_mcp.py into its folder, or into one picked here
                 const bridge = this.project?.mode ? this.project : null;
                 let folder = null;
@@ -539,6 +532,30 @@ const useEditor = Pinia.defineStore('editor', {
                     if (!mode) throw new Error(`${folder.name}: not empty and not a program: nothing is written there`);
                 }
                 const read = async (path) => (bridge ? (await this.agentCall(`project/file?path=${encodeURIComponent(path)}`).catch(() => null))?.text ?? null : host.readIn(folder, path));
+                const saved = mode === 'update' ? JSON.parse((await read(SELECTION)) ?? 'null') : null;
+                // a selection.json before format 3 had one kit at its top
+                const savedBoards = saved?.boards ?? (saved?.board ? [{ board: saved.board, modules: saved.modules ?? [], libraries: saved.libraries ?? [], says: saved.says ?? [] }] : []);
+                const name = saved?.name ?? this.projectName;
+                if (!NAME.test(name)) throw new Error('a project name is a lowercase letter, then lowercase letters, digits and _');
+                const joins = single && savedBoards.length && !this.chosen.some((item) => item.headline === single.headline);
+                if (joins) this.chosen.push({ headline: single.headline, kit: copied(single) });
+                if (single && savedBoards.length) this.current = single.headline;
+                const kits = single && !savedBoards.length ? [single] : this.chosen.map((item) => item.kit);
+                if (!kits.length) throw new Error('no kit in the project: add one from its card');
+                // a kit the project has keeps the name of its board; a new one takes none the project has
+                const taken = new Set(savedBoards.map((entry) => entry.board));
+                const chosen = kits.map((kit) => {
+                    const had = savedBoards.find((entry) => kitKey(entry.base ?? entry.board, entry.modules) === kitKey(kit.name, kit.modules));
+                    if (had) return [kit, had.board];
+                    const base = kit.project ? `${name}_${kit.name}` : kit.name;
+                    let board = base;
+                    for (let n = 2; taken.has(board); ++n) board = `${base}_${n}`;
+                    taken.add(board);
+                    if (kit.project && library.catalog.boards[board]) throw new Error(`the catalog has a board ${board}: give the project another name`);
+                    return [kit, board];
+                });
+                const currentKit = (savedBoards.length ? null : single) ?? this.chosen.find((item) => item.headline === this.current)?.kit ?? kits[0];
+                const current = chosen.find(([kit]) => kit === currentKit)?.[1] ?? chosen[0][1];
                 const files = {};
                 for (const [kit, board] of chosen) {
                     if (kit.project) files[LOCAL_BOARD(board)] = `${catalogJson({ ...kit.project, name: board, title: kit.modules.length ? `${kit.title} with ${kit.modules.map((item) => item.title).join(', ')}` : kit.title })}\n`;
@@ -546,7 +563,11 @@ const useEditor = Pinia.defineStore('editor', {
                 }
                 if (mode === 'create') Object.assign(files, await skeletonOf(chosen, current, name, this.installed?.component ?? 'main'));
                 if (this.description) files[DESCRIPTION] = `${this.description.trim()}\n`;
-                files[SELECTION] = `${JSON.stringify(library.solver.selectionOf(chosen.map(([kit, board]) => ({ kit, board })), current, this.kits, copied(this.answers), this.currency), null, 4)}\n`;
+                const selection = library.solver.selectionOf(chosen.map(([kit, board]) => ({ kit, board })), current, this.kits, copied(this.answers), this.currency, name);
+                // the boards the project had stay where they were, those planned now in their place, the new ones after them
+                const fresh = new Map(selection.boards.map((entry) => [entry.board, entry]));
+                selection.boards = [...savedBoards.map((entry) => fresh.get(entry.board) ?? entry), ...selection.boards.filter((entry) => !savedBoards.some((had) => had.board === entry.board))];
+                files[SELECTION] = `${JSON.stringify(selection, null, 4)}\n`;
                 const rows = [];
                 if (bridge) {
                     // the server says what lies there and what board_select.py --again makes after these files

@@ -45,6 +45,7 @@ LANGUAGES.ru = {
         'The fewest unknowns first, then the least worth of what you did not ask for, the fewest modules and the fewest wires; the price counts last, or after the unknowns with a budget.': 'Сначала меньше неизвестного, затем дешевле то, о чём не просили, меньше модулей и проводов; цена идёт последней, а при бюджете сразу за неизвестным.',
         'Nothing is asked yet, so every board fits.': 'Пока ничего не спрошено, поэтому подходят все платы.',
         'Project name': 'Имя проекта',
+        'The name of the program: its boards are named after it.': 'Имя программы: по нему названы её платы.',
         'An empty folder gets a whole project. A folder with a program gets only its board.': 'Пустая папка получит весь проект, папка с программой — только плату.',
         'the wires': 'провода',
         'Know a price?': 'Знаешь цену?',

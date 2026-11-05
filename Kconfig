@@ -142,6 +142,15 @@ config BOARD_MODULE_LCD2004_PCF8574
         backlight, P4-P7 D4-D7): not a board of its own, a display any board's
         I2C bus can carry.
 
+config BOARD_SOUND_TASK_STACK
+    int "Stack of the task of the sound, bytes"
+    default 3072
+    range 2048 65536
+    help
+        The task board_sound_start runs calls the source of the program on this
+        stack: a source that logs, formats floats or keeps a buffer of its own
+        needs more.
+
 # Hidden symbols the rules of idf_component.yml and CMakeLists.txt look at: the board chosen,
 # as a number (a number is easier for a rule to compare).
 config BOARD_CYD_S028R

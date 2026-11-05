@@ -1229,6 +1229,13 @@ def gen_kconfig(boards, modules):
             out("    help")
             out(kconfig_help(sentence(module["description"])))
             out("")
+    out("config BOARD_SOUND_TASK_STACK")
+    out("    int \"Stack of the task of the sound, bytes\"")
+    out("    default 3072")
+    out("    range 2048 65536")
+    out("    help")
+    out(kconfig_help("The task board_sound_start runs calls the source of the program on this stack: a source that logs, formats floats or keeps a buffer of its own needs more."))
+    out("")
     out("# Hidden symbols the rules of idf_component.yml and CMakeLists.txt look at: the board chosen,")
     out("# as a number (a number is easier for a rule to compare).")
     for board in boards:

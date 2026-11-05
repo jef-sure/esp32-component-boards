@@ -129,12 +129,14 @@ struct board_sound_entry {
     const struct board_i2s_bus      *i2s; /* an amplifier on I2S */
     const struct board_sound_dac    *dac;
 };
+struct QueueDefinition; /* the tag of SemaphoreHandle_t of FreeRTOS */
 struct board_sound_stream {
     const struct board_sound_output *output; /* NULL until the hardware is set up */
     board_sound_source_t             source;
     void                            *ctx; /* given back to source */
     uint32_t                         rate;
     bool                             running; /* its task started */
+    struct QueueDefinition          *busy;    /* held by the task while it is in source: a SemaphoreHandle_t */
     int16_t                          samples[BOARD_SOUND_FRAMES];
 };
 struct board_sound_table {

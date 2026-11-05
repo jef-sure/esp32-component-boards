@@ -128,10 +128,10 @@ for (;;) {
 }
 ```
 
-The warnings in the log: *the calibration is not this board's* means the
-calibration in the data was measured on another display size or panel range;
-*a placeholder, not measured* means the data has `"measured": false`. The
-touch works in both cases, only not straight.
+The warnings in the log name the call that refused the calibration of the data: the panel range is
+not the one of the data, `dgx_di_calibration_make` finds aims that do not span the display, or
+`dgx_di_pointer_calibrate` finds it measured on another display size; *a placeholder, not measured*
+means the data has `"measured": false`. The touch works in each case, only not straight.
 
 ```c
 void board_touch_firmware_set(const uint8_t *start, size_t size);
@@ -168,10 +168,13 @@ mixer of its own writes there itself and does not call `board_sound_start`.
 next `count` samples, 16-bit mono at `*rate_out`, and sends them; `ctx` comes back to
 `source` with every call, as the mixer of the program it fills from; the writes block
 on the hardware, which sets the pace. `source` may be `NULL` for silence and set
-later with `board_sound_source`. The task runs until the firmware stops. A second
-call of either returns the same sound, from any task. A mixer, a format other than
-16-bit mono are the program's business: this is the hardware and its pacing,
-nothing more.
+later with `board_sound_source`, which returns when the task is out of the previous
+source: its context may be freed then, and a source may change itself. The task runs
+until the firmware stops, on a stack of `CONFIG_BOARD_SOUND_TASK_STACK` bytes (3072 by
+default; *Boards → Stack of the task of the sound*): a source that logs or keeps a buffer
+of its own takes more. A second call of either returns the same sound, from any task. A
+mixer and a format other than 16-bit mono are for the program: this is the hardware and
+its pacing, nothing more.
 
 ## Buses
 

@@ -17,6 +17,10 @@
 #include "freertos/task.h"
 #include "sdkconfig.h"
 
+#if !CONFIG_BOARD_SELECT_HOST
+#error "the linux target is the board host, a window of the computer: choose it with board_select.py host --as <board> ."
+#endif
+
 static const char *TAG = "board";
 
 enum { WINDOW_TASK_STACK = 8192, WINDOW_TASK_PRIORITY = 5, EVENTS_MS = 16, SOUND_RATE = 22050, SOUND_FRAMES = 256 };

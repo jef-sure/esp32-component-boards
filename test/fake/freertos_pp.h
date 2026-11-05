@@ -1,5 +1,8 @@
 #pragma once
-typedef void *SemaphoreHandle_t;
+typedef struct QueueDefinition *SemaphoreHandle_t; /* as semphr.h and queue.h of FreeRTOS have it */
+SemaphoreHandle_t xSemaphoreCreateRecursiveMutex(void);
+int xSemaphoreTakeRecursive(SemaphoreHandle_t mutex, int ticks);
+int xSemaphoreGiveRecursive(SemaphoreHandle_t mutex);
 #define pdMS_TO_TICKS(ms) (ms)
 #define pdPASS 1
 #define portMAX_DELAY 0x7fffffff

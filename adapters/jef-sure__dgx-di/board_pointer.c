@@ -5,13 +5,22 @@
 
 static const char *TAG = "board";
 
-/* dgx_di_calibration_make takes the range from the device, so the range of the data is compared here. */
-static bool calibrate(struct board_touch_slot *slot, const dgx_di_device_t *device, const struct board_touch_panel *panel, const struct board_touch_calibration *calibrated)
+/* dgx_di_calibration_make takes the range from the device, so the range of the data is compared here. Each failure says
+ * its own cause: the touch works without a calibration, only not as straight. */
+static void calibrate(struct board_touch_slot *slot, const dgx_di_device_t *device, const struct board_touch_panel *panel, const struct board_touch_calibration *calibrated)
 {
-    if (device->x_max != panel->x_max - 1 || device->y_max != panel->y_max - 1) return false;
-    if (!dgx_di_calibration_make(&slot->calibration, device, calibrated->width, calibrated->height, calibrated->aims, calibrated->count)) return false;
+    if (device->x_max != panel->x_max - 1 || device->y_max != panel->y_max - 1) {
+        ESP_LOGW(TAG, "board_touch_start: the panel range %dx%d is not the %dx%d of the data: the calibration is another board's", device->x_max + 1,
+                 device->y_max + 1, panel->x_max, panel->y_max);
+        return;
+    }
+    if (!dgx_di_calibration_make(&slot->calibration, device, calibrated->width, calibrated->height, calibrated->aims, calibrated->count)) {
+        ESP_LOGW(TAG, "dgx_di_calibration_make: the %d aims of the data do not span the display", calibrated->count);
+        return;
+    }
     dgx_di_calibration_steady(&slot->calibration, calibrated->blink_ms, calibrated->gap_ms);
-    return dgx_di_pointer_calibrate(&slot->pointer, &slot->calibration);
+    if (!dgx_di_pointer_calibrate(&slot->pointer, &slot->calibration))
+        ESP_LOGW(TAG, "dgx_di_pointer_calibrate: the calibration is not for this pointer: measured on another display size");
 }
 
 bool board_glue_touch_attach(int index, dgx_di_device_t *device, const struct board_touch_panel *panel,
@@ -19,8 +28,7 @@ bool board_glue_touch_attach(int index, dgx_di_device_t *device, const struct bo
 {
     struct board_touch_slot *slot = &board_touch_slots.slots[index];
     dgx_di_pointer_init(&slot->pointer, device, 0, board_dgx_screen(display));
-    if (!calibrate(slot, device, panel, calibrated))
-        ESP_LOGW(TAG, "board_touch_start: the calibration is not this board's: the touch works, only not as straight");
+    calibrate(slot, device, panel, calibrated);
     if (calibrated->placeholder) ESP_LOGW(TAG, "the touch calibration of this board is a placeholder, not measured: measure the board and put the numbers in the data");
     slot->device = device;
     *out         = (struct board_touch){.fingers = panel->fingers, .x_max = panel->x_max - 1, .y_max = panel->y_max - 1};

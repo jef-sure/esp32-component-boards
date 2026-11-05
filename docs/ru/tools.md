@@ -82,18 +82,23 @@ GPIO, который называют данные, кто им владеет �
 
 ```sh
 python3 tools/board_select.py cyd_s028r ~/myproject
-python3 tools/board_select.py jc1060p470c --module lcd2004_pcf8574 --reset ~/myproject
-python3 tools/board_select.py host --as jc8012p4a1c ~/myproject    # the computer, as large as the 10-inch board
+python3 tools/board_select.py jc1060p470c --module lcd2004_pcf8574 ~/myproject
+python3 tools/board_select.py cyd_s028r jc8012p4a1c --current jc8012p4a1c ~/myproject
+python3 tools/board_select.py --current cyd_s028r ~/myproject
+python3 tools/board_select.py host --as jc8012p4a1c ~/myproject    # компьютер размером с 10-дюймовую плату
 ```
 
-Записывает `~/myproject/sdkconfig.defaults.board`: умолчания платы, затем
-каждого модуля. С `--reset` переносит существующий `sdkconfig` в
-`sdkconfig.old`, чтобы новые умолчания были прочитаны. См.
-[choosing-a-board.md](choosing-a-board.md).
+Записывает `~/myproject/sdkconfig.defaults.<плата>` на каждую названную плату: умолчания платы, строки ревизии её
+чипа (`--revision`), затем умолчания каждого модуля. Затем `CMakePresets.json`: по пресету на каждую плату проекта —
+прежние и названные, каждая собирается в `build/<плата>`, — и `default` для текущей: первой названной, если
+`--current` не назвал другую. `--current` без плат меняет только `default`. Lock платы, `dependencies.lock.<плата>`,
+начинается с копии `dependencies.lock`. Файл умолчаний или `CMakePresets.json`, которые писал не он, не заменяются.
+См. [choosing-a-board.md](choosing-a-board.md).
 
 Каждый записанный файл начинается с команды, которой он сделан, и с версии и коммита компонента. Когда компонент
-меняется, `board_select.py --again ~/myproject` делает все такие файлы проекта заново той же командой; `sdkconfig`,
-сделанный раньше, хранит то, что в нём было, поэтому изменения берёт `--reset`.
+меняется, `board_select.py --again ~/myproject` делает все такие файлы проекта заново той же командой, а пресеты — в
+порядке и с текущей платой `selection.json`. `sdkconfig`, сделанный раньше, хранит то, что в нём было: чтобы взять
+изменённое, удалите `build/<плата>/sdkconfig`.
 
 ## board_project.py
 
@@ -402,8 +407,8 @@ I2S с APLL. Частота принадлежит таймеру, поэтом�
 — папка, а дальше git или ничего.
 
 Плата выбирается до первой сборки, потому что зависимости определяются тем, что на ней есть:
-`board_select.py`, затем `idf.py build`. В проекте, собранном для другой платы, нужен
-`idf.py reconfigure build`; `board_select.py` об этом скажет.
+`board_select.py`, затем `idf.py build`. Каждая плата собирается в своём каталоге, поэтому другой плате больше
+ничего не нужно.
 
 ### edit
 

@@ -53,7 +53,7 @@ jobs:
           esp_idf_version: ${{ matrix.idf }}
           target: ${{ steps.board.outputs.target }}
           path: examples/hello_board
-          command: idf.py build
+          command: ${{ matrix.idf == 'v6.1' && 'idf.py build' || format('idf.py -B build/{0} -D SDKCONFIG=build/{0}/sdkconfig -D BOARD={0} build', matrix.board) }}
       - name: build hello_lvgl
         if: ${{ !matrix.module && steps.board.outputs.graphics == 'true' }}
         uses: espressif/esp-idf-ci-action@v1
@@ -61,7 +61,7 @@ jobs:
           esp_idf_version: ${{ matrix.idf }}
           target: ${{ steps.board.outputs.target }}
           path: examples/hello_lvgl
-          command: idf.py build
+          command: ${{ matrix.idf == 'v6.1' && 'idf.py build' || format('idf.py -B build/{0} -D SDKCONFIG=build/{0}/sdkconfig -D BOARD={0} build', matrix.board) }}
 
   parts-left-alone:
     name: a project that leaves parts alone on ESP-IDF ${{ matrix.idf }}
@@ -84,7 +84,7 @@ jobs:
           esp_idf_version: ${{ matrix.idf }}
           target: esp32s3
           path: examples/hello_board
-          command: idf.py build
+          command: ${{ matrix.idf == 'v6.1' && 'idf.py build' || 'idf.py -B build/project_unused -D SDKCONFIG=build/project_unused/sdkconfig -D BOARD=project_unused build' }}
 
   local-boards:
     name: a board of the program on ESP-IDF ${{ matrix.idf }}
@@ -104,7 +104,7 @@ jobs:
           esp_idf_version: ${{ matrix.idf }}
           target: esp32s3
           path: examples/local_boards
-          command: idf.py build
+          command: ${{ matrix.idf == 'v6.1' && 'idf.py build' || 'idf.py -B build/my_board -D SDKCONFIG=build/my_board/sdkconfig -D BOARD=my_board build' }}
 
   multi-board:
     name: one program for two boards on ESP-IDF ${{ matrix.idf }}
@@ -139,3 +139,23 @@ jobs:
           target: esp32p4
           path: examples/multi_board
           command: ${{ matrix.second }}
+
+  readme:
+    name: a new project by the README on ESP-IDF v6.1
+    needs: check
+    if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: make the project as the README says, for a board of another chip than the first reconfigure
+        uses: espressif/esp-idf-ci-action@v1
+        with:
+          esp_idf_version: v6.1
+          command: >-
+            unset IDF_TARGET &&
+            idf.py create-project --path readme-project hello &&
+            python3 test/readme_project.py readme-project ${{ github.event.pull_request.head.sha || github.sha }} &&
+            cd readme-project &&
+            idf.py reconfigure &&
+            python3 managed_components/jef-sure__boards/tools/board_select.py jc4827w543c . &&
+            idf.py build

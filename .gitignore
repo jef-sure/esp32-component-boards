@@ -5,9 +5,8 @@ dist/
 examples/*/build*/
 examples/*/sdkconfig
 examples/*/sdkconfig.old
-examples/*/sdkconfig.defaults.board
-examples/multi_board/sdkconfig.defaults.*
-examples/multi_board/CMakePresets.json
+examples/*/sdkconfig.defaults.*
+examples/*/CMakePresets.json
 examples/*/managed_components/
 examples/*/dependencies.lock*
 examples/*/components/local-boards/CMakeLists.txt

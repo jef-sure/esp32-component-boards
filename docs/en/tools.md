@@ -79,17 +79,23 @@ DRIVEN* and *NOT A GPIO OF THIS CHIP* beside the offenders.
 
 ```sh
 python3 tools/board_select.py cyd_s028r ~/myproject
-python3 tools/board_select.py jc1060p470c --module lcd2004_pcf8574 --reset ~/myproject
+python3 tools/board_select.py jc1060p470c --module lcd2004_pcf8574 ~/myproject
+python3 tools/board_select.py cyd_s028r jc8012p4a1c --current jc8012p4a1c ~/myproject
+python3 tools/board_select.py --current cyd_s028r ~/myproject
 python3 tools/board_select.py host --as jc8012p4a1c ~/myproject    # the computer, as large as the 10-inch board
 ```
 
-Writes `~/myproject/sdkconfig.defaults.board`: the board's defaults, then
-each module's. With `--reset` moves an existing `sdkconfig` to `sdkconfig.old`
-so the new defaults are read. See [choosing-a-board.md](choosing-a-board.md).
+Writes `~/myproject/sdkconfig.defaults.<board>` for each board named: the board's defaults, the lines of the
+revision of its chip (`--revision`), then each module's. Then `CMakePresets.json`: a preset for each board of the
+project, those it had and those named, each building in `build/<board>`, and `default` for the current one, the first
+named unless `--current` names another. `--current` alone changes only `default`. A board of the project starts its
+lock, `dependencies.lock.<board>`, as a copy of `dependencies.lock`. A file of defaults or a `CMakePresets.json` it did
+not write is not replaced. See [choosing-a-board.md](choosing-a-board.md).
 
 Each file it writes begins with the command that made it and the version and commit of the component. After
 the component changes, `board_select.py --again ~/myproject` makes every such file of the project again the same
-way; an `sdkconfig` made before keeps what it had, so `--reset` takes what changed.
+way, and the presets in the order and with the current board of `selection.json`. An `sdkconfig` made before keeps
+what it had: remove `build/<board>/sdkconfig` to take what changed.
 
 ## board_project.py
 
@@ -397,8 +403,8 @@ board file: the project names the board of the catalog. The page does not talk t
 is a folder, for git or for nothing.
 
 The board is chosen before the first build, because the dependencies follow from what it has:
-`board_select.py`, then `idf.py build`. In a project built for another board run
-`idf.py reconfigure build`; `board_select.py` says so.
+`board_select.py`, then `idf.py build`. Each board builds in a directory of its own, so another board needs
+nothing more.
 
 ### edit
 

@@ -56,9 +56,10 @@ is one peripheral among others. What a board can have today:
 ## Choosing a board
 
 The board is named once, on one command line. The component's
-`tools/board_select.py` writes `sdkconfig.defaults.board` into the project: the
-board's chip, memory and flash settings, and the line that chooses it in the
-menu of the configuration.
+`tools/board_select.py` writes two files into the project: `sdkconfig.defaults.<board>`,
+the board's chip, memory and flash settings and the line that chooses it in the
+menu of the configuration; and `CMakePresets.json`, whose preset builds the board
+in `build/<board>`.
 
 ```sh
 idf.py reconfigure    # fetches the component, named in main/idf_component.yml
@@ -66,18 +67,26 @@ python3 managed_components/jef-sure__boards/tools/board_select.py cyd_s028r .
 idf.py build flash monitor
 ```
 
+The `build/` and `sdkconfig` the first `reconfigure` leaves are not read after it.
+ESP-IDF 5 does not read the presets; there the board is named on the command line:
+`idf.py -B build/cyd_s028r -D SDKCONFIG=build/cyd_s028r/sdkconfig -D BOARD=cyd_s028r build flash monitor`.
+
 The component is not in the registry yet: `main/idf_component.yml` takes it from git at a
 commit (`git: https://github.com/jef-sure/esp32-component-boards.git`, `version: <a commit>`);
 once it is published, `jef-sure/boards: "^0.0.1"`. The project's `CMakeLists.txt` reads the
-file of the board before its own defaults, and with `-D BOARD=<board>` one of several:
+file of the board the preset names, before its own defaults:
 
 ```cmake
+# BOARD=<board>, which the preset of a board sets, builds with sdkconfig.defaults.<board> that board_select.py writes,
+# then with the program's own sdkconfig.defaults when it has one. A -D SDKCONFIG_DEFAULTS=... on the command line wins.
 set(BOARD "" CACHE STRING "a board of this project: its file sdkconfig.defaults.<board>")
-if(NOT SDKCONFIG_DEFAULTS)
-    if(BOARD)
-        set(SDKCONFIG_DEFAULTS "sdkconfig.defaults.${BOARD};sdkconfig.defaults")
-    elseif(EXISTS ${CMAKE_CURRENT_LIST_DIR}/sdkconfig.defaults.board)
-        set(SDKCONFIG_DEFAULTS "sdkconfig.defaults.board;sdkconfig.defaults")
+if(NOT SDKCONFIG_DEFAULTS AND BOARD)
+    if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/sdkconfig.defaults.${BOARD})
+        message(FATAL_ERROR "no sdkconfig.defaults.${BOARD} here: run board_select.py ${BOARD} . of jef-sure/boards")
+    endif()
+    set(SDKCONFIG_DEFAULTS "sdkconfig.defaults.${BOARD}")
+    if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/sdkconfig.defaults)
+        list(APPEND SDKCONFIG_DEFAULTS "sdkconfig.defaults")
     endif()
 endif()
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)

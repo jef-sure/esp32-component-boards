@@ -357,6 +357,14 @@ committed, a program that asks by kind.
   and the writes of a project for the folder it runs in, or `--project DIR`; it prints the link and serves until
   Ctrl-C. The link ends in `model=none`, so the page shows no dialog and asks no model. Seen in headless Chrome: no
   dialog, a project of two boards written.
+- One path for one board and several (the audit of 2026-11-05, 1): `board_select.py BOARD .` writes
+  `sdkconfig.defaults.<board>`, `CMakePresets.json` with its preset and `default`, and its lock, as for several; a
+  board named later joins the boards of the project and becomes the current one. `sdkconfig.defaults.board`, the root
+  `build/` and `--reset` are gone: the one-board path did not build from scratch. The CMake lines read
+  `sdkconfig.defaults.<board>` only for a `BOARD`, and stop with the command when its file is not there;
+  `check_format.py` checks that the skeleton, the examples, the READMEs and choosing-a-board.md have the same lines.
+  CI builds by the preset on 6.1 and by `-B build/<board>` on 5.5, and makes a new project as the README says, from
+  `idf.py create-project` to `idf.py build`, for a board of another chip than the first `reconfigure`.
 - A level seen on hardware is a note, not a part: `high_seen_mv` of a chip, the lowest high that drove it on hardware,
   with its trial in `checked`, and the judgement `level_seen_on_hardware`. The WS2812B takes 3.5 V by its datasheet;
   the 3.3 V of an ESP32 drove Anton's garland, so a kit of strips says so and adds no level shifter (Anton: "in

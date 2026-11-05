@@ -20,21 +20,22 @@ dependencies:
     version: <a commit>
 ```
 
-In `CMakeLists.txt`, before `project.cmake` is included, read the board's
-defaults before the project's own, and give each of several boards its own lock of
-the components beside the project:
+In `CMakeLists.txt`, before `project.cmake` is included, read the defaults of the
+board the preset names before the project's own, and give each board its own lock
+of the components beside the project:
 
 ```cmake
 cmake_minimum_required(VERSION 3.22)
+# BOARD=<board>, which the preset of a board sets, builds with sdkconfig.defaults.<board> that board_select.py writes,
+# then with the program's own sdkconfig.defaults when it has one. A -D SDKCONFIG_DEFAULTS=... on the command line wins.
 set(BOARD "" CACHE STRING "a board of this project: its file sdkconfig.defaults.<board>")
-if(NOT SDKCONFIG_DEFAULTS)
-    if(BOARD)
-        if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/sdkconfig.defaults.${BOARD})
-            message(FATAL_ERROR "no sdkconfig.defaults.${BOARD} here: run board_select.py ${BOARD} ... . of jef-sure/boards")
-        endif()
-        set(SDKCONFIG_DEFAULTS "sdkconfig.defaults.${BOARD};sdkconfig.defaults")
-    elseif(EXISTS ${CMAKE_CURRENT_LIST_DIR}/sdkconfig.defaults.board)
-        set(SDKCONFIG_DEFAULTS "sdkconfig.defaults.board;sdkconfig.defaults")
+if(NOT SDKCONFIG_DEFAULTS AND BOARD)
+    if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/sdkconfig.defaults.${BOARD})
+        message(FATAL_ERROR "no sdkconfig.defaults.${BOARD} here: run board_select.py ${BOARD} . of jef-sure/boards")
+    endif()
+    set(SDKCONFIG_DEFAULTS "sdkconfig.defaults.${BOARD}")
+    if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/sdkconfig.defaults)
+        list(APPEND SDKCONFIG_DEFAULTS "sdkconfig.defaults")
     endif()
 endif()
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
@@ -43,9 +44,6 @@ if(BOARD)
 endif()
 project(hello)
 ```
-
-`BOARD` chooses among several boards (see below); with none, the one file
-`sdkconfig.defaults.board` is read.
 
 In `main/CMakeLists.txt`, `PRIV_REQUIRES jef-sure__boards`: the component's
 directory under `managed_components/`. (A checkout of the component taken by
@@ -63,16 +61,25 @@ python3 managed_components/jef-sure__boards/tools/board_select.py cyd_s028r .
 idf.py build flash monitor
 ```
 
-`board_select.py` writes `sdkconfig.defaults.board`: the board's
-`sdkconfig.defaults` from the component's data. Its first lines are
+`board_select.py` writes `sdkconfig.defaults.cyd_s028r`: the command that made it,
+then the board's `sdkconfig.defaults` from the component's data. Its first settings are
 `CONFIG_IDF_TARGET="esp32"` and `CONFIG_BOARD_SELECT_CYD_S028R=y`; the rest is what
 the chip, the memory and the flash need. ESP-IDF takes the target from the
 first file of `SDKCONFIG_DEFAULTS` that names one, so no `idf.py set-target`
 is needed, and the menu *Boards → Board the program runs on* shows the board
-chosen.
+chosen. It writes `CMakePresets.json` too: the preset `cyd_s028r`, which sets `BOARD`
+and builds in `build/cyd_s028r` with its `sdkconfig` there, and the preset `default`,
+a copy of it, which `idf.py` takes when no preset is named. The `build/` and
+`sdkconfig` the first `reconfigure` leaves are not read after it.
 
-Commit `sdkconfig.defaults.board` when the project is for one board; a project for
-several keeps `sdkconfig.defaults.<board>` instead (see below).
+ESP-IDF 5 does not read presets; the board is named on the command line:
+
+```sh
+idf.py -B build/cyd_s028r -D SDKCONFIG=build/cyd_s028r/sdkconfig -D BOARD=cyd_s028r build
+```
+
+Commit `sdkconfig.defaults.<board>`, `CMakePresets.json` and `dependencies.lock.<board>`:
+a fresh clone reads them before the component is downloaded.
 
 ## A module
 
@@ -84,27 +91,27 @@ The module's defaults are appended after the board's: they turn its option on
 in the menu (`CONFIG_BOARD_MODULE_LCD2004_PCF8574=y`), which brings hd44780 in
 and compiles the module's glue beside the board's. See [modules.md](modules.md).
 
-## Changing the board
+## Another board
 
-ESP-IDF reads `sdkconfig.defaults*` only when it creates a new `sdkconfig`. To
-move a project to another board:
+Another board named joins the boards of the project and becomes the current one:
 
 ```sh
-python3 managed_components/jef-sure__boards/tools/board_select.py jc4827w543c --reset .
+python3 managed_components/jef-sure__boards/tools/board_select.py jc4827w543c .
+idf.py build flash monitor            # jc4827w543c, in build/jc4827w543c
+idf.py --preset cyd_s028r build       # the board before it, still there
 ```
 
-`--reset` moves the old `sdkconfig` to `sdkconfig.old` and names the next
-command. A build directory keeps the target of its chip in its CMake cache, which
-is read before any defaults: when the new board has another chip, the command is
-`idf.py set-target <target>`, which cleans the build and makes a new `sdkconfig`
-from the defaults, then `idf.py build`; with the same chip it is `idf.py
-reconfigure build`. Without `--reset`, `board_select.py` writes nothing and fails
-when the `sdkconfig` is made for another board: a build would give that board.
+Each board builds in a directory of its own, with its own target and `sdkconfig`, so
+a board of another chip needs no `set-target` and nothing is cleaned. A board does not
+change in the same build directory: the chip of a build directory is fixed in its
+CMake cache before `CMakeLists.txt` is read, so a line there could not choose another
+chip. A board is taken out by removing its `sdkconfig.defaults.<board>`, then
+`board_select.py --again .` writes the presets of the rest; its `build/<board>` and
+`dependencies.lock.<board>` are not read any more.
 
 ## Several boards
 
-A project built for several boards keeps a file of defaults and a build directory
-for each:
+Several boards are named at once too:
 
 ```sh
 python3 managed_components/jef-sure__boards/tools/board_select.py cyd_s028r jc1060p470c .
@@ -113,29 +120,24 @@ idf.py --preset jc1060p470c build     # another
 ```
 
 `board_select.py` writes `sdkconfig.defaults.<board>` for each, with the lines of
-the revision of its chip, and `CMakePresets.json`: a preset for each board, in the
-order named, with its build directory `build/<board>`, and the preset `default`, a
-copy of the preset of the current board in the same directory. Commit those files: a fresh
-clone reads them before the component is downloaded. Each build directory has its
-own target and `sdkconfig`, and each board its lock of the components,
+the revision of its chip, and the presets of every board of the project: those it had,
+then those named, in the order named. Each board has its lock of the components,
 `dependencies.lock.<board>` beside the project, so the boards do not disturb each
-other. Commit the locks too: the versions of the components stay as they were
-solved. The first time, `board_select.py` copies the `dependencies.lock` of the
-project to each board, so a project that goes over to several boards keeps its
-versions; then each board reads its own, and `dependencies.lock` is not read. One
-lock for two boards would keep the solution of the first: the component manager
-solves again when the manifest changes, not when the board does. The files of the catalog are not read directly: the lines of the
-revision are only in what `board_select.py` writes.
+other; the versions of the components stay as they were solved. The first time,
+`board_select.py` copies the `dependencies.lock` of the project to each board, so a
+project made before keeps its versions; then each board reads its own, and
+`dependencies.lock` is not read. One lock for two boards would keep the solution of the
+first: the component manager solves again when the manifest changes, not when the
+board does. The files of the catalog are not read directly: the lines of the revision
+are only in what `board_select.py` writes.
 
-ESP-IDF 6 reads the presets. `default` is the current board, the first named unless
-`--current <board>` says another: `idf.py build`, `flash` and `monitor` take it with
-no more words. `idf.py --preset <board>` or `IDF_PRESET=<board>` in the environment
-takes another for one command; `board_select.py --current <board> .` makes another
-current and changes nothing but `default`, so the boards keep their order. The extension of ESP-IDF for VS Code shows the presets as project
-configurations: *ESP-IDF: Select Project Configuration* chooses one, and the status
-bar names it. A board does not change in the same build directory: the chip of a
-build directory is fixed in its CMake cache before `CMakeLists.txt` is read, so a
-line there could not choose another chip.
+`default` is the current board, the first named unless `--current <board>` says
+another: `idf.py build`, `flash` and `monitor` take it with no more words.
+`idf.py --preset <board>` or `IDF_PRESET=<board>` in the environment takes another for
+one command; `board_select.py --current <board> .` makes another current and changes
+nothing but `default`, so the boards keep their order. The extension of ESP-IDF for
+VS Code shows the presets as project configurations: *ESP-IDF: Select Project
+Configuration* chooses one, and the status bar names it.
 
 The page does the same from its kits: *add to the project* on a card puts a kit among the boards of the project, the
 radio beside each makes one current, and *make the project of these boards…* writes them. It writes `selection.json`,
@@ -145,17 +147,11 @@ that makes it in its first line: `board_select.py --again .` makes the rest, the
 Opened from `tools/boards_mcp.py`, the page writes through it and the server runs `--again` itself, so the project
 builds at once; it also starts from the `selection.json` of the project, to add a board.
 
-ESP-IDF 5 does not read presets; each board is named on the command line:
-
-```sh
-idf.py -B build/cyd_s028r -D SDKCONFIG=build/cyd_s028r/sdkconfig -D BOARD=cyd_s028r build
-idf.py -B build/jc1060p470c -D SDKCONFIG=build/jc1060p470c/sdkconfig -D BOARD=jc1060p470c build
-```
-
 A `CMakePresets.json` that `board_select.py` did not write is not touched: the
 command says so, and the presets are added by hand. `board_select.py --again .` makes
-every file again by the command in its first line; with several boards it writes the
-presets too, in the order of the boards of `selection.json` and with its `current`.
+every file again by the command in its first line, and the presets, in the order of the
+boards of `selection.json` and with its `current`. ESP-IDF reads the defaults only into
+a new `sdkconfig`: to take what changed, remove `build/<board>/sdkconfig`.
 
 A `-D SDKCONFIG_DEFAULTS=...` on the command line wins over both: the CMake
 snippet above only sets the variable when none is given.
@@ -223,13 +219,13 @@ program's file that the board's file also sets wins, as the later one.
 
 ## Without board_select.py
 
-The file it writes is a copy of `catalog/boards/<board>/sdkconfig.defaults`. Any
-other way of getting that file into `SDKCONFIG_DEFAULTS` works: a path into
-`managed_components/` or into a checkout of the component beside the project,
-or copying the lines into the project's own `sdkconfig.defaults`. And the
-menu works as a menu: `idf.py menuconfig`, *Boards*, choose; but then the
-chip's settings (PSRAM mode, flash size, chip revision) are yours to set too,
-which is what the defaults file saves you from.
+The file it writes is `catalog/boards/<board>/sdkconfig.defaults` with the lines of the
+revision of its chip and those of each module. Any other way of getting those lines into
+`SDKCONFIG_DEFAULTS` works: a path into `managed_components/` or into a checkout of the
+component beside the project, or copying the lines into the project's own
+`sdkconfig.defaults`. And the menu works as a menu: `idf.py menuconfig`, *Boards*,
+choose; but then the chip's settings (PSRAM mode, flash size, chip revision) are yours
+to set too, which is what the defaults file saves you from.
 
 ## Chip revisions
 

@@ -10,7 +10,7 @@ idf.py build flash monitor
 ```
 
 The program draws one button in the middle of the screen and counts presses.
-To change the board: `board_select.py` again with `--reset`, then `idf.py build`.
+Another board named becomes the current one and builds in `build/<board>`.
 
 DGX-LVGL supports 16-bit screens only. The 10.1-inch JC8012P4A1C has no touch
 unless the program embeds the firmware of its panel, see

@@ -4,17 +4,16 @@
 #     idf.py build flash monitor
 #
 cmake_minimum_required(VERSION 3.22)
-# BOARD=<board> builds with sdkconfig.defaults.<board>, which board_select.py writes for several boards; one board
-# is sdkconfig.defaults.board. A -D SDKCONFIG_DEFAULTS=... on the command line wins over both.
+# BOARD=<board>, which the preset of a board sets, builds with sdkconfig.defaults.<board> that board_select.py writes,
+# then with the program's own sdkconfig.defaults when it has one. A -D SDKCONFIG_DEFAULTS=... on the command line wins.
 set(BOARD "" CACHE STRING "a board of this project: its file sdkconfig.defaults.<board>")
-if(NOT SDKCONFIG_DEFAULTS)
-    if(BOARD)
-        if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/sdkconfig.defaults.${BOARD})
-            message(FATAL_ERROR "no sdkconfig.defaults.${BOARD} here: run board_select.py ${BOARD} ... . of jef-sure/boards")
-        endif()
-        set(SDKCONFIG_DEFAULTS "sdkconfig.defaults.${BOARD};sdkconfig.defaults")
-    elseif(EXISTS ${CMAKE_CURRENT_LIST_DIR}/sdkconfig.defaults.board)
-        set(SDKCONFIG_DEFAULTS "sdkconfig.defaults.board;sdkconfig.defaults")
+if(NOT SDKCONFIG_DEFAULTS AND BOARD)
+    if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/sdkconfig.defaults.${BOARD})
+        message(FATAL_ERROR "no sdkconfig.defaults.${BOARD} here: run board_select.py ${BOARD} . of jef-sure/boards")
+    endif()
+    set(SDKCONFIG_DEFAULTS "sdkconfig.defaults.${BOARD}")
+    if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/sdkconfig.defaults)
+        list(APPEND SDKCONFIG_DEFAULTS "sdkconfig.defaults")
     endif()
 endif()
 
@@ -35,8 +34,7 @@ if(BOARD STREQUAL "host")
 endif()
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
-# each of several boards has its lock of the components beside the project, to commit: dependencies.lock.<board>; one
-# board keeps dependencies.lock
+# each board has its lock of the components beside the project, to commit: dependencies.lock.<board>
 if(BOARD)
     idf_build_set_property(DEPENDENCIES_LOCK ${CMAKE_CURRENT_LIST_DIR}/dependencies.lock.${BOARD})
 endif()

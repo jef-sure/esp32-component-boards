@@ -19,8 +19,11 @@ Checks of the data format. Needs jsonschema and node: the Python of ESP-IDF has 
 10. the archive compote packs for the registry holds only files git tracks, none of test/, .github/ or
    imported/ (when compote of ESP-IDF and git are there);
 11. take_report.py takes a price and a shop from an issue, and every offer names a shop of catalog/shops.json;
-12. board_select.py writes a preset for each board in the order named and default for the current one, changes only default
-   with --current, makes them again by selection.json with --again, and leaves a CMakePresets.json of another alone.
+12. board_select.py writes for one board what it writes for several, a preset for each board in the order named and default
+   for the current one; a board named again becomes current, --current changes only default, --again makes them again by
+   selection.json, and a CMakePresets.json or a file of defaults of another is left alone;
+13. the lines of CMake that read the defaults of the board and its lock are the same in editor/skeleton/, the examples, the
+   READMEs and choosing-a-board.md.
 """
 import copy
 import json
@@ -264,43 +267,83 @@ def goods_wrong():
 
 
 def presets_wrong():
-    """board_select.py writes a preset for each board in the order named, and leaves a CMakePresets.json of another alone."""
+    """board_select.py writes for one board what it writes for several, a preset for each in the order named, and leaves a
+    CMakePresets.json or a file of defaults of another alone."""
     wrong = []
+
+    def select(*words, fails=False):
+        """board_select.py with these words on the project; a result it should not give is one of the wrong."""
+        done = subprocess.run([sys.executable, str(ROOT / "tools" / "board_select.py"), *words, str(project)], capture_output=True, text=True)
+        if bool(done.returncode) != fails:
+            wrong.append(f"board_select.py {' '.join(words)}: exit {done.returncode}: {(done.stderr.strip().splitlines() or [''])[-1]}")
+        return done.returncode
+
+    def presets(*fields):
+        written = project / "CMakePresets.json"
+        return [tuple(item[field] if field in item else item["cacheVariables"][field] for field in fields)
+                for item in json.loads(written.read_text())["configurePresets"]] if written.exists() else None
+
     with tempfile.TemporaryDirectory() as folder:
         project = pathlib.Path(folder)
         (project / "CMakeLists.txt").write_text("")
         lock = "dependencies:\n  idf:\n    version: 6.1.0\n"
         (project / "dependencies.lock").write_text(lock)
-        command = [sys.executable, str(ROOT / "tools" / "board_select.py"), "cyd_s028r", "jc4827w543c", str(project)]
-        subprocess.run(command, capture_output=True, check=True)
+        # one board gets what several get: its file of defaults and its preset
+        select("cyd_s028r")
+        files = sorted(path.name for path in project.glob("sdkconfig.defaults*"))
+        if presets("name", "binaryDir") != [("cyd_s028r", "build/cyd_s028r"), ("default", "build/cyd_s028r")] or files != ["sdkconfig.defaults.cyd_s028r"]:
+            wrong.append(f"one board made the presets {presets('name', 'binaryDir')} and {files}")
+        select("cyd_s028r", "jc4827w543c")
         # the lock of the project is where the lock of each board starts
-        if any((project / f"dependencies.lock.{board}").read_text() != lock for board in ("cyd_s028r", "jc4827w543c") if (project / f"dependencies.lock.{board}").exists()) \
-                or not all((project / f"dependencies.lock.{board}").exists() for board in ("cyd_s028r", "jc4827w543c")):
+        if not all((project / f"dependencies.lock.{board}").exists() and (project / f"dependencies.lock.{board}").read_text() == lock for board in ("cyd_s028r", "jc4827w543c")):
             wrong.append("the lock of a board is not a copy of the lock of the project")
-        written = project / "CMakePresets.json"
-        presets = [(item["name"], item["binaryDir"], item["cacheVariables"]["IDF_TARGET"]) for item in json.loads(written.read_text())["configurePresets"]] if written.exists() else None
-        if presets != [("cyd_s028r", "build/cyd_s028r", "esp32"), ("jc4827w543c", "build/jc4827w543c", "esp32s3"), ("default", "build/cyd_s028r", "esp32")]:
-            wrong.append(f"the presets are {presets}")
+        made = presets("name", "binaryDir", "IDF_TARGET")
+        if made != [("cyd_s028r", "build/cyd_s028r", "esp32"), ("jc4827w543c", "build/jc4827w543c", "esp32s3"), ("default", "build/cyd_s028r", "esp32")]:
+            wrong.append(f"the presets are {made}")
         # another current board changes default only
-        subprocess.run([sys.executable, str(ROOT / "tools" / "board_select.py"), "--current", "jc4827w543c", str(project)], capture_output=True, check=True)
-        names = [(item["name"], item["binaryDir"]) for item in json.loads(written.read_text())["configurePresets"]]
-        if names != [("cyd_s028r", "build/cyd_s028r"), ("jc4827w543c", "build/jc4827w543c"), ("default", "build/jc4827w543c")]:
-            wrong.append(f"after --current the presets are {names}")
+        select("--current", "jc4827w543c")
+        if presets("name", "binaryDir") != [("cyd_s028r", "build/cyd_s028r"), ("jc4827w543c", "build/jc4827w543c"), ("default", "build/jc4827w543c")]:
+            wrong.append(f"after --current the presets are {presets('name', 'binaryDir')}")
+        # a board named alone again becomes the current one, and the boards keep their order
+        select("cyd_s028r")
+        if presets("name", "binaryDir") != [("cyd_s028r", "build/cyd_s028r"), ("jc4827w543c", "build/jc4827w543c"), ("default", "build/cyd_s028r")]:
+            wrong.append(f"a board named again made the presets {presets('name', 'binaryDir')}")
+        # a file of defaults it did not write is not replaced
+        own = project / "sdkconfig.defaults.esp32_devkit"
+        own.write_text('CONFIG_IDF_TARGET="esp32"\n')
+        select("esp32_devkit", fails=True)
+        if own.read_text() != 'CONFIG_IDF_TARGET="esp32"\n':
+            wrong.append("a file of defaults written by hand was replaced")
+        own.unlink()
         # the files a page writes, the command in their first line and the order in selection.json: --again makes the rest
         for path in project.glob("sdkconfig.defaults.*"):
             path.write_text(f"# board_select.py {path.name.split('.')[-1]}\n")
         (project / "selection.json").write_text('{"boards": [{"board": "jc4827w543c"}, {"board": "cyd_s028r"}], "current": "cyd_s028r"}')
-        subprocess.run([sys.executable, str(ROOT / "tools" / "board_select.py"), "--again", str(project)], capture_output=True, check=True)
-        names = [(item["name"], item["binaryDir"]) for item in json.loads(written.read_text())["configurePresets"]]
-        if names != [("jc4827w543c", "build/jc4827w543c"), ("cyd_s028r", "build/cyd_s028r"), ("default", "build/cyd_s028r")] or "CONFIG_IDF_TARGET" not in (project / "sdkconfig.defaults.cyd_s028r").read_text():
-            wrong.append(f"--again from the files of a page made the presets {names}")
+        select("--again")
+        made = presets("name", "binaryDir")
+        if made != [("jc4827w543c", "build/jc4827w543c"), ("cyd_s028r", "build/cyd_s028r"), ("default", "build/cyd_s028r")] or "CONFIG_IDF_TARGET" not in (project / "sdkconfig.defaults.cyd_s028r").read_text():
+            wrong.append(f"--again from the files of a page made the presets {made}")
         for path in project.glob("sdkconfig.defaults.*"):
             path.unlink()
         (project / "CMakePresets.json").write_text('{"version": 3, "configurePresets": []}\n')
-        if not subprocess.run(command, capture_output=True).returncode or list(project.glob("sdkconfig.defaults.*")):
+        select("cyd_s028r", "jc4827w543c", fails=True)
+        if list(project.glob("sdkconfig.defaults.*")) or presets("name"):
             wrong.append("a CMakePresets.json of another was replaced, or defaults written beside it")
     print(f"presets: {'0 wrong' if not wrong else '; '.join(wrong)}")
     return len(wrong)
+
+
+def snippets_differ():
+    """The lines of editor/skeleton/CMakeLists.txt that read the defaults of the board and set its lock, word for word in
+    the examples and in the documents a person copies them from."""
+    text = (ROOT / "editor" / "skeleton" / "CMakeLists.txt").read_text()
+    start = text.index("# BOARD=<board>")
+    defaults = text[start:text.index("\nendif()\n", start) + len("\nendif()\n")]
+    lock = re.search(r"^if\(BOARD\)\n    idf_build_set_property\(DEPENDENCIES_LOCK [^\n]*\nendif\(\)\n", text, flags=re.M)[0]
+    copies = ["README.md", "README.ru.md", "docs/en/choosing-a-board.md", "docs/ru/choosing-a-board.md", "examples/hello_board/CMakeLists.txt",
+              "examples/hello_lvgl/CMakeLists.txt", "examples/local_boards/CMakeLists.txt", "examples/multi_board/CMakeLists.txt"]
+    return [f"{name}: the lines that read the defaults of the board differ from editor/skeleton/CMakeLists.txt" for name in copies
+            if defaults not in (ROOT / name).read_text() or lock not in (ROOT / name).read_text()]
 
 
 def shop_problems():
@@ -820,6 +863,7 @@ def main():
     problems += shop_problems()
     problems += errors_of(JUDGEMENTS, json.loads((ROOT / "catalog" / "judgements.json").read_text()), "judgements")
     problems += roles_problems(json.loads((ROOT / "catalog" / "roles.json").read_text()))
+    problems += snippets_differ()
     problems += bridge_problems()
     problems += serve_problems()
     problems += library_list_problems()

@@ -21,21 +21,22 @@ dependencies:
     version: <коммит>
 ```
 
-В `CMakeLists.txt`, до подключения `project.cmake`, прочитайте умолчания платы
-перед собственными умолчаниями проекта и дайте каждой из нескольких плат свой lock
-компонентов рядом с проектом:
+В `CMakeLists.txt`, до подключения `project.cmake`, прочитайте умолчания платы,
+которую называет пресет, перед собственными умолчаниями проекта и дайте каждой
+плате свой lock компонентов рядом с проектом:
 
 ```cmake
 cmake_minimum_required(VERSION 3.22)
+# BOARD=<board>, which the preset of a board sets, builds with sdkconfig.defaults.<board> that board_select.py writes,
+# then with the program's own sdkconfig.defaults when it has one. A -D SDKCONFIG_DEFAULTS=... on the command line wins.
 set(BOARD "" CACHE STRING "a board of this project: its file sdkconfig.defaults.<board>")
-if(NOT SDKCONFIG_DEFAULTS)
-    if(BOARD)
-        if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/sdkconfig.defaults.${BOARD})
-            message(FATAL_ERROR "no sdkconfig.defaults.${BOARD} here: run board_select.py ${BOARD} ... . of jef-sure/boards")
-        endif()
-        set(SDKCONFIG_DEFAULTS "sdkconfig.defaults.${BOARD};sdkconfig.defaults")
-    elseif(EXISTS ${CMAKE_CURRENT_LIST_DIR}/sdkconfig.defaults.board)
-        set(SDKCONFIG_DEFAULTS "sdkconfig.defaults.board;sdkconfig.defaults")
+if(NOT SDKCONFIG_DEFAULTS AND BOARD)
+    if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/sdkconfig.defaults.${BOARD})
+        message(FATAL_ERROR "no sdkconfig.defaults.${BOARD} here: run board_select.py ${BOARD} . of jef-sure/boards")
+    endif()
+    set(SDKCONFIG_DEFAULTS "sdkconfig.defaults.${BOARD}")
+    if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/sdkconfig.defaults)
+        list(APPEND SDKCONFIG_DEFAULTS "sdkconfig.defaults")
     endif()
 endif()
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
@@ -44,9 +45,6 @@ if(BOARD)
 endif()
 project(hello)
 ```
-
-`BOARD` выбирает одну из нескольких плат (см. ниже); без него читается один файл
-`sdkconfig.defaults.board`.
 
 В `main/CMakeLists.txt` — `PRIV_REQUIRES jef-sure__boards`: каталог компонента
 под `managed_components/`. (Checkout компонента, взятый через `override_path`
@@ -59,20 +57,29 @@ project(hello)
 соберите:
 
 ```sh
-idf.py reconfigure            # once: downloads the component into managed_components/
+idf.py reconfigure            # один раз: скачивает компонент в managed_components/
 python3 managed_components/jef-sure__boards/tools/board_select.py cyd_s028r .
 idf.py build flash monitor
 ```
 
-`board_select.py` записывает `sdkconfig.defaults.board`: `sdkconfig.defaults`
-платы из данных компонента. Его первые строки — `CONFIG_IDF_TARGET="esp32"` и
-`CONFIG_BOARD_SELECT_CYD_S028R=y`; остальное — что нужно чипу, памяти и флешу.
-ESP-IDF берёт target из первого файла в `SDKCONFIG_DEFAULTS`, который его
-называет, поэтому `idf.py set-target` не нужен, а меню *Boards → Board the
-program runs on* показывает выбранную плату.
+`board_select.py` записывает `sdkconfig.defaults.cyd_s028r`: команду, которая его
+сделала, затем `sdkconfig.defaults` платы из данных компонента. Его первые настройки —
+`CONFIG_IDF_TARGET="esp32"` и `CONFIG_BOARD_SELECT_CYD_S028R=y`; остальное — что нужно
+чипу, памяти и флешу. ESP-IDF берёт target из первого файла в `SDKCONFIG_DEFAULTS`,
+который его называет, поэтому `idf.py set-target` не нужен, а меню *Boards → Board the
+program runs on* показывает выбранную плату. Ещё он пишет `CMakePresets.json`: пресет
+`cyd_s028r`, который задаёт `BOARD` и собирает в `build/cyd_s028r` со своим `sdkconfig`
+там же, и пресет `default` — его копию, которую `idf.py` берёт, когда пресет не назван.
+`build/` и `sdkconfig`, которые оставляет первый `reconfigure`, дальше не читаются.
 
-Закоммитьте `sdkconfig.defaults.board`, если проект для одной платы; проект для
-нескольких держит вместо него `sdkconfig.defaults.<плата>` (см. ниже).
+ESP-IDF 5 пресетов не читает; плата называется в командной строке:
+
+```sh
+idf.py -B build/cyd_s028r -D SDKCONFIG=build/cyd_s028r/sdkconfig -D BOARD=cyd_s028r build
+```
+
+Закоммитьте `sdkconfig.defaults.<плата>`, `CMakePresets.json` и
+`dependencies.lock.<плата>`: свежий клон читает их раньше, чем скачан компонент.
 
 ## Модуль
 
@@ -84,26 +91,27 @@ python3 managed_components/jef-sure__boards/tools/board_select.py jc1060p470c --
 меню (`CONFIG_BOARD_MODULE_LCD2004_PCF8574=y`), что подтягивает hd44780 и
 компилирует клей модуля рядом с клеем платы. См. [modules.md](modules.md).
 
-## Смена платы
+## Другая плата
 
-ESP-IDF читает `sdkconfig.defaults*` только когда создаёт новый `sdkconfig`.
-Чтобы перевести проект на другую плату:
+Названная другая плата добавляется к платам проекта и становится текущей:
 
 ```sh
-python3 managed_components/jef-sure__boards/tools/board_select.py jc4827w543c --reset .
+python3 managed_components/jef-sure__boards/tools/board_select.py jc4827w543c .
+idf.py build flash monitor            # jc4827w543c, в build/jc4827w543c
+idf.py --preset cyd_s028r build       # прежняя плата никуда не делась
 ```
 
-`--reset` переносит старый `sdkconfig` в `sdkconfig.old` и называет следующую
-команду. Каталог сборки хранит цель своего чипа в кеше CMake, а кеш читается
-раньше любых умолчаний: если у новой платы другой чип, команда — `idf.py
-set-target <цель>`, она чистит сборку и делает новый `sdkconfig` из умолчаний,
-затем `idf.py build`; с тем же чипом — `idf.py reconfigure build`. Без `--reset`
-`board_select.py` ничего не пишет и выходит с ошибкой, если `sdkconfig` сделан для
-другой платы: сборка дала бы ту плату.
+Каждая плата собирается в своём каталоге, со своей целью и своим `sdkconfig`, поэтому
+плате с другим чипом не нужен `set-target` и ничего не чистится. В одном каталоге
+сборки плата не меняется: чип каталога сборки закреплён в кеше CMake раньше, чем
+читается `CMakeLists.txt`, поэтому строка в нём другой чип выбрать не может. Плата
+убирается удалением её `sdkconfig.defaults.<плата>`, затем `board_select.py --again .`
+пишет пресеты остальных; её `build/<плата>` и `dependencies.lock.<плата>` больше не
+читаются.
 
 ## Несколько плат
 
-Проект для нескольких плат держит на каждую файл умолчаний и каталог сборки:
+Несколько плат можно назвать и сразу:
 
 ```sh
 python3 managed_components/jef-sure__boards/tools/board_select.py cyd_s028r jc1060p470c .
@@ -112,29 +120,23 @@ idf.py --preset jc1060p470c build     # другая
 ```
 
 `board_select.py` пишет `sdkconfig.defaults.<плата>` на каждую плату, со строками
-ревизии её чипа, и `CMakePresets.json`: по пресету на плату, в том порядке, в каком
-платы названы, с каталогом сборки `build/<плата>`, и пресет `default` — копию пресета
-текущей платы с тем же каталогом. Эти файлы коммитятся: свежий клон
-читает их раньше, чем скачан компонент. У каждого каталога сборки своя цель и свой
-`sdkconfig`, у каждой платы свой lock компонентов, `dependencies.lock.<плата>` рядом
-с проектом, поэтому платы друг другу не мешают. Lock-файлы тоже коммитятся: версии
-компонентов остаются такими, какими их выбрали. В первый раз `board_select.py`
-копирует `dependencies.lock` проекта каждой плате, так что проект, переходящий на
-несколько плат, сохраняет свои версии; дальше каждая плата читает свой, а
-`dependencies.lock` больше не читается. Один lock на две платы держал бы решение
-первой: менеджер компонентов решает заново, когда меняется манифест, а не плата. Файлы
-каталога напрямую не читаются: строки ревизии есть только в том, что пишет
-`board_select.py`.
+ревизии её чипа, и пресеты всех плат проекта: сначала те, что были, затем названные, в
+том порядке, в каком названы. У каждой платы свой lock компонентов,
+`dependencies.lock.<плата>` рядом с проектом, поэтому платы друг другу не мешают;
+версии компонентов остаются такими, какими их выбрали. В первый раз `board_select.py`
+копирует `dependencies.lock` проекта каждой плате, так что проект, сделанный раньше,
+сохраняет свои версии; дальше каждая плата читает свой, а `dependencies.lock` больше не
+читается. Один lock на две платы держал бы решение первой: менеджер компонентов решает
+заново, когда меняется манифест, а не плата. Файлы каталога напрямую не читаются:
+строки ревизии есть только в том, что пишет `board_select.py`.
 
-ESP-IDF 6 читает пресеты. `default` — текущая плата, первая названная, если
-`--current <плата>` не назвал другую: `idf.py build`, `flash` и `monitor` берут её без
-лишних слов. Другую на одну команду берёт `idf.py --preset <плата>` или
-`IDF_PRESET=<плата>` в окружении; `board_select.py --current <плата> .` делает текущей
-другую и меняет только `default`, так что платы остаются в своём порядке. Расширение ESP-IDF для
-VS Code показывает пресеты как конфигурации проекта: *ESP-IDF: Select Project
-Configuration* выбирает одну, строка состояния её называет. В одном каталоге сборки
-плата не меняется: чип каталога сборки закреплён в кеше CMake раньше, чем читается
-`CMakeLists.txt`, поэтому строка в нём другой чип выбрать не может.
+`default` — текущая плата, первая названная, если `--current <плата>` не назвал другую:
+`idf.py build`, `flash` и `monitor` берут её без лишних слов. Другую на одну команду
+берёт `idf.py --preset <плата>` или `IDF_PRESET=<плата>` в окружении;
+`board_select.py --current <плата> .` делает текущей другую и меняет только `default`,
+так что платы остаются в своём порядке. Расширение ESP-IDF для VS Code показывает
+пресеты как конфигурации проекта: *ESP-IDF: Select Project Configuration* выбирает
+одну, строка состояния её называет.
 
 Страница делает то же из своих комплектов: *add to the project* на карточке добавляет комплект в платы проекта,
 переключатель рядом с каждой делает одну текущей, а *make the project of these boards…* их записывает. Она пишет
@@ -144,17 +146,11 @@ Configuration* выбирает одну, строка состояния её �
 `tools/boards_mcp.py`, страница пишет через него, а сервер сам запускает `--again`, и проект сразу собирается; она же
 начинает с `selection.json` проекта, чтобы добавить плату.
 
-ESP-IDF 5 пресетов не читает, и каждая плата называется в командной строке:
-
-```sh
-idf.py -B build/cyd_s028r -D SDKCONFIG=build/cyd_s028r/sdkconfig -D BOARD=cyd_s028r build
-idf.py -B build/jc1060p470c -D SDKCONFIG=build/jc1060p470c/sdkconfig -D BOARD=jc1060p470c build
-```
-
 `CMakePresets.json`, который `board_select.py` не писал, не трогается: команда об этом
 говорит, и пресеты добавляются руками. `board_select.py --again .` делает каждый файл
-заново по команде в его первой строке; при нескольких платах он пишет и пресеты, в
-порядке плат `selection.json` и с его `current`.
+заново по команде в его первой строке, и пресеты — в порядке плат `selection.json` и с
+его `current`. ESP-IDF читает умолчания только в новый `sdkconfig`: чтобы взять
+изменённое, удалите `build/<плата>/sdkconfig`.
 
 `-D SDKCONFIG_DEFAULTS=...` в командной строке побеждает оба варианта: фрагмент
 CMake выше задаёт переменную только когда она не задана.
@@ -220,13 +216,15 @@ CONFIG_DGX_ENABLE_VSCREEN=y
 там, где каталоги плат dgx-ge повторяли `CONFIG_DGX_ENABLE_VSCREEN` для каждой платы. Строка файла программы, которую
 задаёт и файл платы, побеждает как более поздняя.
 
-Файл, который он записывает, — копия `catalog/boards/<board>/sdkconfig.defaults`.
-Любой другой способ попасть этому файлу в `SDKCONFIG_DEFAULTS` работает: путь
-внутрь `managed_components/` или в чекаут компонента рядом с проектом, или
-копирование строк в собственный `sdkconfig.defaults` проекта. И меню работает
-как меню: `idf.py menuconfig`, *Boards*, выбрать; но тогда настройки чипа
-(режим PSRAM, размер флеша, ревизия чипа) тоже придётся задавать вам самим —
-именно от этого и избавляет файл умолчаний.
+## Без board_select.py
+
+Файл, который он записывает, — `catalog/boards/<board>/sdkconfig.defaults` со строками
+ревизии чипа платы и строками каждого модуля. Любой другой способ попасть этим строкам в
+`SDKCONFIG_DEFAULTS` работает: путь внутрь `managed_components/` или в чекаут
+компонента рядом с проектом, или копирование строк в собственный `sdkconfig.defaults`
+проекта. И меню работает как меню: `idf.py menuconfig`, *Boards*, выбрать; но тогда
+настройки чипа (режим PSRAM, размер флеша, ревизия чипа) тоже придётся задавать вам
+самим — именно от этого и избавляет файл умолчаний.
 
 ## Ревизии чипа
 

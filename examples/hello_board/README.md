@@ -7,8 +7,9 @@ name on a character LCD if one is there, and sounds a second of a tone. Build
 it for one board, it runs on another with the same `main.c`.
 
 The board is chosen once, by the component's `tools/board_select.py`, which
-writes `sdkconfig.defaults.board` here: the board's chip, its memory and its
-flash, and the line that chooses it in the menu of the configuration. No
+writes `sdkconfig.defaults.<board>` here (the board's chip, its memory and its
+flash, and the line that chooses it in the menu of the configuration) and
+`CMakePresets.json`, whose preset builds the board in `build/<board>`. No
 `set-target`, no `menuconfig`:
 
 ```sh
@@ -17,8 +18,9 @@ python3 ../../tools/board_select.py jc1060p470c --module lcd2004_pcf8574 .  # a 
 idf.py build flash monitor
 ```
 
-To change the board: `board_select.py` again with `--reset` (ESP-IDF reads the
-defaults only into a new `sdkconfig`), then `idf.py build`.
+Another board named becomes the current one and builds in a directory of its
+own. ESP-IDF 5 does not read the presets:
+`idf.py -B build/cyd_s028r -D SDKCONFIG=build/cyd_s028r/sdkconfig -D BOARD=cyd_s028r build`.
 
 The 10.1-inch Guition JC8012P4A1C builds without the firmware of its touch
 panel (the vendor's array has no licence to give away): the touch of that

@@ -1,0 +1,23 @@
+{
+    "title": "A board the person has costs nothing and its unasked parts weigh nothing: the CYD comes first for a TFT, which a dev board and a module beat otherwise",
+    "answers": {
+        "blocks": [
+            {
+                "role": "display",
+                "variant": "tft",
+                "name": ""
+            }
+        ],
+        "have": [
+            {
+                "part": "cyd_s028r",
+                "count": 1
+            }
+        ]
+    },
+    "first": {
+        "name": "cyd_s028r",
+        "modules": {}
+    },
+    "says": "you have it, so its price and what nobody asked for on it count nothing"
+}

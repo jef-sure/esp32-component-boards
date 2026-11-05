@@ -401,8 +401,10 @@ board is worth the lowest price of its chip by the piece, from `price` of its en
 `led_smd`, `led_rgb_5050` and `ws2812b`; with none of those, the cheapest module of its role and variant, else of its role, its
 class or of all, by the piece. A price of nothing is no price, and a part weighs at least a cent: nothing is free. The priced
 modules of `imported-shops/` stay out of the repository, so only a chip with a price gives the same order everywhere. A budget makes the price a criterion: it then comes right after the unknowns, and a
-missing price counts as an unknown. `tools/check_format.py` gives the kits of `test/solver/` to the
-generator as well.
+missing price counts as an unknown. What the person has already, boards and modules named under *What you have
+already* (`have` of the answers), costs nothing in a kit, and on a board they have what nobody asked for weighs nothing:
+a board one has comes before a dev board and a module that would do. `tools/check_format.py` gives the kits of
+`test/solver/` to the generator as well.
 
 The cards wait for the first block on the canvas: with nothing asked every board fits. `make a project…` on a card, while
 the project has no boards, or *make the project of these boards…* asks for a folder, and the folder decides what happens:

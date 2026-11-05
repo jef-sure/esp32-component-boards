@@ -283,6 +283,14 @@ const SelectPage = {
         const shownBoards = ref(BOARDS_SHOWN);
         const asked = computed(() => Object.values(store.answers).some((answer) => (Array.isArray(answer) ? answer.length : answer && answer !== 'none')));
         const addOutput = () => store.answers.outputs.push({ kind: 'tone', hz: undefined, ppm: undefined, jitter: 'any', bits: 8, pins: 1, live: false });
+        // what the person has already, boards and modules of the catalog: it costs nothing in a kit
+        const ownable = computed(() => {
+            store.stamp;
+            const listed = (group) => Object.entries(library.catalog?.[group] ?? {}).filter(([, doc]) => !doc.origin && doc.kind !== 'project').map(([name, doc]) => ({ name, title: doc.title ?? name }))
+                .sort((a, b) => a.title.localeCompare(b.title));
+            return { boards: listed('boards'), modules: listed('modules') };
+        });
+        const addOwned = () => (store.answers.have ??= []).push({ part: ownable.value.boards[0]?.name, count: 1 });
         Vue.watch(() => [store.loaded, store.stamp, store.language, store.currency, store.answers, store.installed], () => store.askKits(), { deep: true, immediate: true });
         // a plan belongs to the answers it was made for
         Vue.watch(() => store.answers, (answers) => {
@@ -358,7 +366,7 @@ const SelectPage = {
             block.part.splice(at, 1);
             if (!block.part.length) block.part = undefined;
         };
-        return { store, host, fit, boards, others, asked, showAll, showKits, firstSays, laterSays, addOutput, money, numberOf, priceLink, MARKS, filter, groups, roleOf, nameOf, outputsQuestion, firstOfRole, said, sendSaid, talking, stream, partsOf, boardTitle, servedBy, install, local, copied, copyInstall, setAsk, shownBoards, BOARDS_SHOWN, canWrite, chosenHas, chainBlock, haveOf, addHave, dropHave };
+        return { store, host, fit, boards, others, asked, showAll, showKits, firstSays, laterSays, addOutput, ownable, addOwned, money, numberOf, priceLink, MARKS, filter, groups, roleOf, nameOf, outputsQuestion, firstOfRole, said, sendSaid, talking, stream, partsOf, boardTitle, servedBy, install, local, copied, copyInstall, setAsk, shownBoards, BOARDS_SHOWN, canWrite, chosenHas, chainBlock, haveOf, addHave, dropHave };
     },
     template: `
         <div class="select" :class="{ talking, waiting: !showKits }">
@@ -450,6 +458,18 @@ const SelectPage = {
                         <button @click.prevent="addOutput">{{ t('add an output') }}</button>
                         <div v-if="store.answers.outputs.length" class="hint">{{ t('Frequencies are calculated, not measured.') }}</div>
                     </template>
+                </div>
+                <div class="question">
+                    <label>{{ t('What you have already: in a kit it costs nothing') }}</label>
+                    <div v-for="(item, i) in store.answers.have ?? []" :key="i" class="output">
+                        <select v-model="item.part">
+                            <optgroup :label="t('Boards')"><option v-for="part in ownable.boards" :key="part.name" :value="part.name">{{ part.title }}</option></optgroup>
+                            <optgroup :label="t('Modules')"><option v-for="part in ownable.modules" :key="part.name" :value="part.name">{{ part.title }}</option></optgroup>
+                        </select>
+                        <input type="number" min="1" step="1" v-model.number="item.count">
+                        <button class="drop" :title="t('take it out')" @click.prevent="store.answers.have.splice(i, 1)">×</button>
+                    </div>
+                    <button @click.prevent="addOwned">{{ t('add what you have') }}</button>
                 </div>
             </form>
             <div class="kits">

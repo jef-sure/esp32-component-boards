@@ -333,7 +333,10 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         }
         const outputs = (answers.outputs || []).filter((output) => output.hz > 0).map((output) => ({ ...output, ppm: output.ppm === '' ? undefined : output.ppm, bits: output.kind === 'pwm' ? output.bits : undefined }));
         const unanswered = questions.filter((question) => MEASURES[question.limit?.measure]?.unanswered && holds(question, answers) && limits[question.limit.measure] === undefined);
-        return { needs, limits, unanswered, outputs, currency: answers.currency || KIT_CURRENCY, installed: answers.installed ?? null };
+        // what the person has already: a board or a module of the catalog by its name, with how many
+        const have = new Map();
+        for (const item of answers.have ?? []) if (item?.part) have.set(item.part, (have.get(item.part) ?? 0) + Math.max(1, Math.floor(item.count ?? 1)));
+        return { needs, limits, unanswered, outputs, currency: answers.currency || KIT_CURRENCY, installed: answers.installed ?? null, have };
     }
 
     const rateOf = (currency) => (currency === KIT_CURRENCY ? 1 : rates[currency]);
@@ -1028,8 +1031,10 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         });
     }
 
-    function priceOf(doc, picks, currency, addons = []) {
-        const own = rangeOf(doc.price, currency);
+    // What is bought: what the person has already costs nothing, the board and as many of a module as they have.
+    function priceOf(doc, picks, currency, addons = [], have = new Map()) {
+        const had = have.get(doc.name) > 0;
+        const own = had ? [0, 0] : rangeOf(doc.price, currency);
         const missing = own ? [] : [doc.title ?? doc.name];
         const unpriced = own ? [] : [{ title: doc.title ?? doc.name, item: `boards/${doc.name}` }];
         let low = own ? own[0] : 0;
@@ -1044,7 +1049,9 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             const key = `device ${pick.way.part}`;
             counted.set(key, { title: catalog.devices[pick.way.part].title, count: (counted.get(key)?.count ?? 0) + chainCount(pick) });
         }
-        for (const [name, { title, count }] of counted) {
+        for (const [name, { title, count: wanted }] of counted) {
+            const count = wanted - Math.min(wanted, have.get(name) ?? 0);
+            if (!count) continue;
             if (name.startsWith('device ')) {
                 const chip = name.slice('device '.length);
                 const price = catalog.devices[chip].price;
@@ -1333,7 +1340,13 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
                 lines.push({ level: 'do', text: t('{0}: a ribbon to the {1} connector', pick.module.title, pick.transport.toUpperCase()) });
                 lines.push({ level: 'unknown', text: t('{0}: its timings are measured on a board, and not on this one', pick.module.title) });
             }
-            const price = priceOf({ ...source, price: board.price }, picks, wanted.currency, addons);
+            const price = priceOf({ ...source, price: board.price }, picks, wanted.currency, addons, wanted.have);
+            // a board the person has: its price and the worth of what nobody asked for on it are spent already
+            const had = wanted.have.get(boardName) > 0;
+            if (had) lines.push({ level: 'yes', text: t('{0}: you have it, so its price and what nobody asked for on it count nothing', source.title ?? boardName) });
+            for (const item of modules.filter((module) => wanted.have.get(module.name) > 0)) {
+                lines.push({ level: 'yes', text: t('{0}: you have {1} of the {2} it takes', item.title, Math.min(wanted.have.get(item.name), item.count ?? 1), item.count ?? 1) });
+            }
             for (const pack of price.packs) lines.push({ level: 'do', text: t('{0}: sold by {1}, {2} {3} the pack', pack.title, pack.bought, pack.cost, price.currency) });
             if (project && loader.trust(resolved, 'connectors', levels)[0].endsWith('unchecked')) lines.push({ level: 'do', text: t('{0}: its connectors are from memory: check them against the board before wiring', source.title ?? boardName) });
             for (const pick of new Map(picks.filter((item) => !item.way).map((item) => [item.module.name, item])).values()) {
@@ -1402,7 +1415,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             const started = arduino ? [] : libraries.filter((library) => !library.own);
             if (started.length) lines.push({ level: 'yes', text: t('the board starts: {0}', started.map((item) => `${item.name} ${item.version}`).join(', ')) });
             if (unasked.length) lines.push({ level: 'note', text: t('on the board and not asked: {0}. The project leaves them unused and their pins stay taken', unasked.map(([name, device]) => device.chip ?? name).join(', ')) });
-            if (unasked.length) lines.push({ level: 'note', text: t('what nobody asked for is worth about {0} {1}: a part by the price of its chip, or by the cheapest of its role', cents(unasked.reduce((sum, [, device]) => sum + worthOf(device), 0)), KIT_CURRENCY) });
+            if (unasked.length && !had) lines.push({ level: 'note', text: t('what nobody asked for is worth about {0} {1}: a part by the price of its chip, or by the cheapest of its role', cents(unasked.reduce((sum, [, device]) => sum + worthOf(device), 0)), KIT_CURRENCY) });
             for (const title of price.missing) lines.push({ level: 'unknown', text: t('no price for {0}', title) });
             const fits = !none && (wanted.limits.price === undefined || !price.known || price.low <= wanted.limits.price);
             if (!fits) lines.push({ level: 'no', text: t('it costs at least {0} {1}', price.low, price.currency) });
@@ -1410,7 +1423,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             const headline = [title, ...modules.map(named), ...addons.map(named)].join(' + ');
             const pictures = Object.values(board.images || {});
             const picture = pictures.find((item) => item.shows === 'front') ?? pictures[0];
-            return { name: boardName, title, headline, libraries, addons, unasked: unasked.length, unaskedWorth: cents(unasked.reduce((sum, [, device]) => sum + worthOf(device), 0)), imported: Boolean(doc.origin), writable: !doc.origin && platform?.writes_projects !== false, picture: picture ? `boards/${boardName}/${picture.file}` : null, fits, says: lines, modules, wires: project ? wiresOf(base, project, picks) : [], wiring: project ? wiringOf(base, project, picks) : [], price, project, free: freePins(resolved).length };
+            return { name: boardName, title, headline, libraries, addons, unasked: unasked.length, unaskedWorth: had ? 0 : cents(unasked.reduce((sum, [, device]) => sum + worthOf(device), 0)), imported: Boolean(doc.origin), writable: !doc.origin && platform?.writes_projects !== false, picture: picture ? `boards/${boardName}/${picture.file}` : null, fits, says: lines, modules, wires: project ? wiresOf(base, project, picks) : [], wiring: project ? wiringOf(base, project, picks) : [], price, project, free: freePins(resolved).length };
         }
     }
 

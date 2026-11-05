@@ -38,7 +38,8 @@ by kind, never by the name of a board.
 
 - `editor/index.html`: the roles a device needs, and the kits that fit, each a board and the modules it lacks, with
   the wires, the levels, the price as a range and what is not known. A budget, a pinned board or part, tones and PWM,
-  chains of LEDs or modules. Several kits make the boards of one project, one of them current. The page writes a new
+  chains of LEDs or modules, and what the person has already, which costs nothing. Several kits make the boards of one
+  project, one of them current. The page writes a new
   project, or a board of an existing program, into a folder.
 - `tools/boards_mcp.py`: the page beside an agent of the person over MCP, or alone with `--serve`. It writes a project
   only into its folder, when the person allows it once or for ever, and not over a file a person changed unless that

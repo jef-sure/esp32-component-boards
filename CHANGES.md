@@ -386,6 +386,12 @@ committed, a program that asks by kind.
   tool it does not have, or with arguments its `inputSchema` does not take, is answered -32602 in words, as
   "arguments.add[0] has no role", not with a `KeyError`. `--project` of a folder that is not there stops with a
   message before the server starts. `check_format.py` sends the server such rows; the server before stopped on the first.
+- `board_project.py --selection` takes back a kit the page wired to pins (found by 7c: 16 modules of 17 failed with "a
+  module is a character display for now"): the board of the program beside that `selection.json` is copied under the
+  name of the new project, the README lists its wires from its data and its libraries, `main/idf_component.yml` names
+  those the program calls, and the answers come along. A project taken back from a page project of three boards
+  built on 6.1. `--module` of `board_project.py` and of `board_select.py` names the modules it takes, the one that
+  has its own defaults, and says the page wires the others.
 - A level seen on hardware is a note, not a part: `high_seen_mv` of a chip, the lowest high that drove it on hardware,
   with its trial in `checked`, and the judgement `level_seen_on_hardware`. The WS2812B takes 3.5 V by its datasheet;
   the 3.3 V of an ESP32 drove Anton's garland, so a kit of strips says so and adds no level shifter (Anton: "in

@@ -5,9 +5,14 @@
 - A graphics display can be on I2C: the glue puts it on the board's bus with `dgx_i2c_init_on_bus`, and the master of
   the bus comes from `board_glue_i2c`, so other parts can share it. A driver with no orientation call starts its panel
   as it is, and the generator refuses another orientation for it.
-- SSD1306 is in the catalog and starts through DGX. The library entries of SSD1306, SH1106 and SSD1309 name their
-  resolution as `SSD1306_{width}X{height}` and the like; `config.external_vcc` says when the high voltage of an OLED
-  comes from outside.
+- The boards take DGX 0.10.12, which turns the SSD1306, SSD1309 and SH1106. The catalog describes DGX 0.10.12: SSD1322
+  came in 0.10.6, and the ST7789 of 76x284 and 284x76.
+- SSD1306 is in the catalog and starts through DGX. `config.external_vcc` says when the high voltage of an OLED comes
+  from outside.
+- A library lists the glasses it takes for a chip in `panels`, by size and by the name it gives each; several can share
+  a size, as the SSD1322 256x64 of Newhaven and of ZJY. A display names its own in `config.libraries`, the page offers
+  those of its chip and size, and with none named it gets the first of its size. The DGX entries of SSD1306, SH1106,
+  SSD1309, SSD1322 and ST7789 have them; the init calls take `{panel}`, and `supports.resolution` is gone.
 - `board_display.mm_w` and `mm_h` and `BOARD_MM` are whole millimetres, rounded, where the data has fractions.
 - New boards: the ESP32 DevKit with USB-C and a CH340 (`esp32_devkit_usb_c`, a variant of `esp32_devkit`), and the
   ESP32-C3 with a 0.42-inch 72x40 OLED (`esp32_c3_oled_042`).

@@ -189,6 +189,9 @@ def display_part(name, device, module):
     key, connection = next(iter(device["on"].items()))
     pins, config = device.get("pins", {}), device["config"]
     part = {"name": name, "driver": device["chip"], "kind": config["kind"], "bus": {"bus": MODULE_BUS if module else key}, "primary": bool(config.get("primary")), **started_by(device)}
+    chosen = ((config.get("libraries") or {}).get(part["library"]) or {}).get("panel")
+    if chosen:
+        part["panel_choice"] = chosen
     for field in ("cs", "address", "hz"):
         if field in connection:
             part["bus"][field] = number(connection[field])
@@ -485,9 +488,17 @@ def read_board(path):
             if "orientation" not in display["entry"].get("controls", {}) and \
                (orientation["x"], orientation["y"], orientation.get("swap", False)) != ("left-right", "top-bottom", False):
                 raise ValueError(f"the driver {driver} cannot turn its panel: the display starts left-right, top-bottom, not swapped")
-            resolutions = display["entry"]["supports"].get("resolution")
-            if resolutions and f"{panel['width']}x{panel['height']}" not in resolutions:
-                raise ValueError(f'{panel["width"]}x{panel["height"]} is not a resolution the driver {driver} takes ({", ".join(resolutions)})')
+            panels = display["entry"].get("panels")
+            if panels is not None:
+                sizes = [f"{row['width']}x{row['height']}" for row in panels]
+                size = f"{panel['width']}x{panel['height']}"
+                names = [row["value"] for row, of in zip(panels, sizes) if of == size]
+                if not names:
+                    raise ValueError(f"{size} is not a panel the driver {driver} takes ({', '.join(dict.fromkeys(sizes))})")
+                chosen = display.get("panel_choice")
+                if chosen is not None and chosen not in names:
+                    raise ValueError(f'{chosen} is not a panel of {driver} for {size}: {", ".join(names)}')
+                display["panel_value"] = chosen or names[0]  # the first of the size when the board names none
             kind = bus_parts(bus_name)[0]
             if kind == "dsi":
                 for key in ("lane_mbps", "phy_ldo_chan", "phy_ldo_mv"):
@@ -956,7 +967,7 @@ def gen_c(board):
             order = "bgr" if shown.get("color_order") == "bgr" else "rgb"
             values = {"bus": "bus", "rst": c_gpio(shown.get("rst")), "cs": c_gpio(db.get("cs")), "backlight": backlight, "depth": shown.get("depth_bits", 16),
                       "color": library["values"]["color_order"][order], "width": panel["width"], "height": panel["height"],
-                      "external_vcc": "true" if shown.get("external_vcc") else "false"}
+                      "external_vcc": "true" if shown.get("external_vcc") else "false", "panel": shown.get("panel_value")}
             out(f"static dgx_screen_t *display{i}_screen(dgx_bus_protocols_t *bus)")
             out("{")
             out(f"    return {fill_call(entry['init'][0], values)};")

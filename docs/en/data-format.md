@@ -207,6 +207,16 @@ outside, not from the charge pump of its controller. When the library entry of a
 has no orientation call, the panel stays as the driver starts it, and the generator
 refuses any other `start`.
 
+A library that takes one chip for several glasses lists them in `panels` of its entry for
+the chip: size, the name it gives each, and its notes. Several can share a size, as the
+256x64 SSD1322 of Newhaven and of ZJY, wired differently. A display names the one it has in
+`config.libraries`, by library, and the page offers those of its chip and size to try; with
+none named it gets the first of its size:
+
+```json
+"config": { "panel": { "width": 256, "height": 64 }, "libraries": { "esp-idf/jef-sure/dgx": { "panel": "SSD1322_256X64_ZJY" } } }
+```
+
 `config.timing` is for a panel fed without pause, RGB or MIPI-DSI video:
 `pclk_hz`, `hsync_pulse`, `hsync_back`, `hsync_front`, `vsync_pulse`, `vsync_back`,
 `vsync_front`, and optionally `pclk_edge`, `hsync_active`, `vsync_active`,

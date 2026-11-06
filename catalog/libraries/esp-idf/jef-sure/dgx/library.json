@@ -12,7 +12,7 @@
         {"via": "registry"},
         {"via": "git", "url": "https://github.com/jef-sure/esp32-component-dgx.git", "ref": "{version}"}
     ],
-    "described": "0.10.3",
+    "described": "0.10.12",
     "description": "Graphics on displays of SPI, QSPI, 8-bit parallel, MIPI-DSI and I2C, with its own panel drivers.",
     "values": {
         "color_order": {"rgb": "DgxScreenRGB", "bgr": "DgxScreenBGR"},
@@ -251,12 +251,24 @@
             "init": [
                 {
                     "call": "dgx_sh1106_init",
-                    "args": ["{bus}", "SH1106_{width}X{height}", "{rst}"],
+                    "args": ["{bus}", "{panel}", "{rst}"],
                     "returns": "screen",
                     "ok": {"not": "NULL"}
                 }
             ],
-            "supports": {"depth_bits": [1], "resolution": ["128x64", "64x32"]}
+            "supports": {"depth_bits": [1]},
+            "controls": {
+                "orientation": {
+                    "call": "dgx_sh1106_orientation",
+                    "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
+                    "ok": "none"
+                }
+            },
+            "setup": [{"control": "orientation"}],
+            "panels": [
+                {"width": 128, "height": 64, "value": "SH1106_128X64"},
+                {"width": 64, "height": 32, "value": "SH1106_64X32"}
+            ]
         },
         "ssd1306": {
             "header": "drivers/ssd1306.h",
@@ -265,13 +277,28 @@
             "init": [
                 {
                     "call": "dgx_ssd1306_init",
-                    "args": ["{bus}", "SSD1306_{width}X{height}", "{external_vcc}", "{rst}"],
+                    "args": ["{bus}", "{panel}", "{external_vcc}", "{rst}"],
                     "returns": "screen",
                     "ok": {"not": "NULL"}
                 }
             ],
-            "supports": {"depth_bits": [1], "resolution": ["128x32", "128x64", "96x16", "64x48", "72x40"]},
-            "adapter": {"kind": "panel"}
+            "supports": {"depth_bits": [1]},
+            "adapter": {"kind": "panel"},
+            "controls": {
+                "orientation": {
+                    "call": "dgx_ssd1306_orientation",
+                    "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
+                    "ok": "none"
+                }
+            },
+            "setup": [{"control": "orientation"}],
+            "panels": [
+                {"width": 128, "height": 32, "value": "SSD1306_128X32"},
+                {"width": 128, "height": 64, "value": "SSD1306_128X64"},
+                {"width": 96, "height": 16, "value": "SSD1306_96X16"},
+                {"width": 64, "height": 48, "value": "SSD1306_64X48"},
+                {"width": 72, "height": 40, "value": "SSD1306_72X40"}
+            ]
         },
         "ssd1309": {
             "header": "drivers/ssd1309.h",
@@ -280,12 +307,24 @@
             "init": [
                 {
                     "call": "dgx_ssd1309_init",
-                    "args": ["{bus}", "SSD1309_{width}X{height}", "{rst}"],
+                    "args": ["{bus}", "{panel}", "{rst}"],
                     "returns": "screen",
                     "ok": {"not": "NULL"}
                 }
             ],
-            "supports": {"depth_bits": [1], "resolution": ["128x64", "128x32"]}
+            "supports": {"depth_bits": [1]},
+            "controls": {
+                "orientation": {
+                    "call": "dgx_ssd1309_orientation",
+                    "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
+                    "ok": "none"
+                }
+            },
+            "setup": [{"control": "orientation"}],
+            "panels": [
+                {"width": 128, "height": 64, "value": "SSD1309_128X64"},
+                {"width": 128, "height": 32, "value": "SSD1309_128X32"}
+            ]
         },
         "ssd1351": {
             "header": "drivers/ssd1351.h",
@@ -354,12 +393,12 @@
             "init": [
                 {
                     "call": "dgx_st7789_init",
-                    "args": ["{bus}", "{rst}", "{depth}", "{color}", "ST7789_RESOLUTION_{width}x{height}"],
+                    "args": ["{bus}", "{rst}", "{depth}", "{color}", "{panel}"],
                     "returns": "screen",
                     "ok": {"not": "NULL"}
                 }
             ],
-            "supports": {"depth_bits": [12, 16, 18], "resolution": ["240x240", "240x320", "320x240"]},
+            "supports": {"depth_bits": [12, 16, 18]},
             "controls": {
                 "orientation": {
                     "call": "dgx_st7789_orientation",
@@ -371,7 +410,24 @@
                 {"control": "orientation"},
                 {"line": "backlight", "notes": "After the first frame: the driver does not light it."}
             ],
-            "adapter": {"kind": "panel"}
+            "adapter": {"kind": "panel"},
+            "panels": [
+                {"width": 240, "height": 240, "value": "ST7789_RESOLUTION_240x240"},
+                {"width": 240, "height": 320, "value": "ST7789_RESOLUTION_240x320"},
+                {
+                    "width": 320,
+                    "height": 240,
+                    "value": "ST7789_RESOLUTION_320x240",
+                    "notes": "240x320 turned by dgx_st7789_orientation(scr, DgxScreenRightLeft, DgxScreenTopBottom, true)"
+                },
+                {"width": 76, "height": 284, "value": "ST7789_RESOLUTION_76x284", "notes": "the 2.25-inch bar, upright"},
+                {
+                    "width": 284,
+                    "height": 76,
+                    "value": "ST7789_RESOLUTION_284x76",
+                    "notes": "the 2.25-inch bar turned as 320x240 is"
+                }
+            ]
         },
         "st77916": {
             "header": "drivers/st77916.h",
@@ -418,13 +474,53 @@
             },
             "setup": [{"control": "orientation"}],
             "adapter": {"kind": "panel"}
+        },
+        "ssd1322": {
+            "header": "drivers/ssd1322.h",
+            "on": ["spi", "p8"],
+            "select": ["DGX_ENABLE_SSD1322"],
+            "init": [
+                {
+                    "call": "dgx_ssd1322_init",
+                    "args": ["{bus}", "{panel}", "{rst}"],
+                    "returns": "screen",
+                    "ok": {"not": "NULL"}
+                }
+            ],
+            "supports": {"depth_bits": [4]},
+            "controls": {
+                "orientation": {
+                    "call": "dgx_ssd1322_orientation",
+                    "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
+                    "ok": "none"
+                }
+            },
+            "setup": [{"control": "orientation"}],
+            "notes": "16 levels of gray.",
+            "panels": [
+                {
+                    "width": 256,
+                    "height": 64,
+                    "value": "SSD1322_256X64",
+                    "notes": "Newhaven NHD-3.12-25664 and the 3.12-inch clones"
+                },
+                {"width": 256, "height": 64, "value": "SSD1322_256X64_ZJY", "notes": "by ZJY, its glass from column 24"},
+                {"width": 240, "height": 128, "value": "SSD1322_240X128", "notes": "dual COM"},
+                {"width": 240, "height": 128, "value": "SSD1322_240X128_TOPWIN", "notes": "by Topwin, single COM"},
+                {
+                    "width": 128,
+                    "height": 64,
+                    "value": "SSD1322_128X64",
+                    "notes": "Newhaven NHD-2.7-12864WDW3, two segments a pixel"
+                }
+            ]
         }
     },
     "adapter": {
-        "version": "^0.10.11",
+        "version": "^0.10.12",
         "symbol": "BOARD_DISPLAY_GRAPHICS",
         "requires": ["esp_driver_gpio"],
-        "notes": "0.10.0 is not in the registry. 0.10.8 is the first that builds for the linux target of ESP-IDF: the window of the board host; 0.10.9 turns its glass as the board is held, 0.10.10 gives its mouse, 0.10.11 its keys and a window on no bus.",
+        "notes": "0.10.0 is not in the registry. 0.10.8 is the first that builds for the linux target of ESP-IDF: the window of the board host; 0.10.9 turns its glass as the board is held, 0.10.10 gives its mouse, 0.10.11 its keys and a window on no bus. 0.10.12 turns the SSD1306, SSD1309 and SH1106.",
         "headers": ["board_display.h"],
         "public": "boards_dgx.h",
         "sources": {"BOARD_DISPLAY_GRAPHICS": ["board_display.c"]}
@@ -432,17 +528,44 @@
     "checked": {
         "api": {
             "level": "vendor-code",
-            "source": "include/drivers/, include/bus/ and Kconfig of esp32-component-dgx 0.10.2",
-            "date": "2026-10-31"
+            "source": "include/drivers/, include/bus/ and Kconfig of esp32-component-dgx 0.10.12",
+            "date": "2026-11-06"
         },
         "history": {
             "level": "vendor-code",
             "covers": ["history"],
-            "source": "headers of include/ at every tag of esp32-component-dgx: the chips, the buses and the arguments of their init; before tag 0.1.0 nothing is known",
+            "source": "headers of include/ at every tag of esp32-component-dgx: the chips, the buses and the arguments of their init; before tag 0.1.0 nothing is known; 0.10.3 to 0.10.12 by the same headers at each tag on 2026-11-06",
             "date": "2026-10-31"
         }
     },
     "history": [
+        {
+            "before": "0.10.12",
+            "chips": {
+                "ssd1306": {"controls": null, "setup": null},
+                "sh1106": {"controls": null, "setup": null},
+                "ssd1309": {"controls": null, "setup": null}
+            },
+            "notes": "The monochrome OLED drivers could not turn the screen."
+        },
+        {
+            "before": "0.10.6",
+            "chips": {
+                "ssd1322": null,
+                "st7789": {
+                    "panels": [
+                        {"width": 240, "height": 240, "value": "ST7789_RESOLUTION_240x240"},
+                        {"width": 240, "height": 320, "value": "ST7789_RESOLUTION_240x320"},
+                        {
+                            "width": 320,
+                            "height": 240,
+                            "value": "ST7789_RESOLUTION_320x240",
+                            "notes": "240x320 turned by dgx_st7789_orientation(scr, DgxScreenRightLeft, DgxScreenTopBottom, true)"
+                        }
+                    ]
+                }
+            }
+        },
         {"before": "0.9.3", "chips": {"st77916": null}},
         {
             "before": "0.9.0",
@@ -456,7 +579,7 @@
                             "ok": {"not": "NULL"}
                         }
                     ],
-                    "supports": {"resolution": null}
+                    "panels": null
                 }
             },
             "notes": "dgx_st7789_init had no resolution."
@@ -484,6 +607,16 @@
         {"before": "0.5.0", "chips": {"jd9165": null}, "transports": {"dsi": null}}
     ],
     "versions": {
+        "0.10.12": {"platforms": {"esp_idf": ">=5.2.0"}},
+        "0.10.11": {"platforms": {"esp_idf": ">=5.2.0"}},
+        "0.10.10": {"platforms": {"esp_idf": ">=5.2.0"}},
+        "0.10.9": {"platforms": {"esp_idf": ">=5.2.0"}},
+        "0.10.8": {"platforms": {"esp_idf": ">=5.2.0"}},
+        "0.10.7": {"platforms": {"esp_idf": ">=5.2.0"}},
+        "0.10.6": {"platforms": {"esp_idf": ">=5.2.0"}},
+        "0.10.5": {"platforms": {"esp_idf": ">=5.2.0"}},
+        "0.10.4": {"platforms": {"esp_idf": ">=5.2.0"}},
+        "0.10.3": {"platforms": {"esp_idf": ">=5.2.0"}},
         "0.10.2": {"platforms": {"esp_idf": ">=5.2.0"}},
         "0.10.1": {"platforms": {"esp_idf": ">=5.2.0"}},
         "0.10.0": {"via": ["git"]},

@@ -1113,6 +1113,18 @@
         "depth_bits": { "enum": [1, 2, 4, 8, 12, 16, 18, 24] },
         "color_order": { "enum": ["rgb", "bgr"] },
         "external_vcc": { "type": "boolean", "description": "The high voltage of an OLED comes from outside, not from the charge pump of its controller. false when absent." },
+        "libraries": {
+          "description": "What only one library uses, by library.",
+          "type": "object",
+          "propertyNames": { "$ref": "#/$defs/libraryId" },
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "panel": { "type": "string", "minLength": 1, "description": "The panel as the library names it, one of panels of its entry for the chip and this size; the first of the size when absent." }
+            }
+          }
+        },
         "invert": { "type": "boolean" },
         "refresh": { "enum": ["continuous", "partial", "full"], "description": "How the picture changes: full and partial are e-paper." },
         "read_hz": { "$ref": "#/$defs/hz" },
@@ -1495,6 +1507,21 @@
         "standards": { "type": "array", "uniqueItems": true, "items": { "type": "string" } },
         "modes": { "type": "array", "uniqueItems": true, "items": { "type": "string" } },
         "supports": { "type": "object", "additionalProperties": { "type": "array" } },
+        "panels": {
+          "description": "The panels the library takes for this chip, each by the name it gives it. A board names one in config.libraries of its display; the first of its size when it names none.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["width", "height", "value"],
+            "additionalProperties": false,
+            "properties": {
+              "width": { "type": "integer", "minimum": 1 },
+              "height": { "type": "integer", "minimum": 1 },
+              "value": { "type": "string", "minLength": 1, "description": "What the init call takes for {panel}." },
+              "notes": { "type": "string", "description": "Which glass it is for, as the library says." }
+            }
+          }
+        },
         "limits": { "type": "object", "additionalProperties": { "type": "number" } },
         "defaults": { "type": "object" },
         "notes": { "$ref": "#/$defs/notes" },

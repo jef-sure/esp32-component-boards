@@ -18,8 +18,21 @@ const FieldValue = {
         const own = computed(() => valueAt(store.doc, props.path));
         const shown = computed(() => own.value ?? valueAt(store.shown, props.path));
         const shape = computed(() => library.reader.shape(props.schemas));
+        // config.libraries.<library>.panel of a display: the panels that library names for the chip and the size, to try one
+        const offered = computed(() => {
+            const path = props.path;
+            const n = path.length;
+            if (n < 5 || path[n - 1] !== 'panel' || path[n - 3] !== 'libraries' || path[n - 4] !== 'config') return null;
+            const device = valueAt(store.shown, path.slice(0, n - 4));
+            const panel = device?.config?.panel;
+            const rows = (library.catalog.libraries[path[n - 2]]?.chips?.[device?.chip]?.panels ?? []).filter(
+                (row) => !panel || (row.width === panel.width && row.height === panel.height),
+            );
+            return rows.length ? rows : null;
+        });
         const kind = computed(() => {
             const { values, types } = shape.value;
+            if (offered.value) return 'offered';
             if (values) return 'choice';
             if (types.length === 1 && types[0] === 'boolean') return 'flag';
             if (types.length === 1 && (types[0] === 'integer' || types[0] === 'number')) return 'number';
@@ -39,12 +52,16 @@ const FieldValue = {
                 failed.value = true;
             }
         }
-        return { own, shown, shape, kind, failed, text, set, setJson };
+        return { own, shown, shape, offered, kind, failed, text, set, setJson };
     },
     template: `
         <select v-if="kind === 'choice'" :value="shown" :disabled="locked" :class="{ inherited: own === undefined }" @change="set(JSON.parse($event.target.selectedOptions[0].dataset.value))">
             <option v-if="shown === undefined" :value="undefined"></option>
             <option v-for="choice in shape.values" :key="choice" :value="choice" :data-value="JSON.stringify(choice)">{{ choice }}</option>
+        </select>
+        <select v-else-if="kind === 'offered'" :value="shown ?? ''" :disabled="locked" :class="{ inherited: own === undefined }" @change="set($event.target.value)">
+            <option value="">{{ offered[0].value }} (the first of the size)</option>
+            <option v-for="row in offered" :key="row.value" :value="row.value" :title="row.notes">{{ row.notes ? row.value + ': ' + row.notes : row.value }}</option>
         </select>
         <input v-else-if="kind === 'flag'" type="checkbox" :checked="shown === true" :disabled="locked" @change="set($event.target.checked)">
         <input v-else-if="kind === 'number'" type="number" step="any" :value="shown" :disabled="locked" :class="{ inherited: own === undefined }"

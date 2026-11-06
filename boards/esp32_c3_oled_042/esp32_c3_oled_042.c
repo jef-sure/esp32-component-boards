@@ -44,7 +44,7 @@ static dgx_screen_t *display0_screen(dgx_bus_protocols_t *bus)
 }
 
 static const struct board_display_panel display_panels[] = {
-    {.name = "oled", .glass_w = 72, .glass_h = 40, .mm_w = 9, .mm_h = 5, .dir_x = DgxScreenLeftRight, .dir_y = DgxScreenTopBottom, .swap_xy = false, .backlight = GPIO_NUM_NC, .backlight_on = 1, .i2c_port = I2C_NUM_0, .on_i2c = display0_bus, .screen = display0_screen, .orientation = NULL},
+    {.name = "oled", .glass_w = 72, .glass_h = 40, .mm_w = 9, .mm_h = 5, .dir_x = DgxScreenLeftRight, .dir_y = DgxScreenTopBottom, .swap_xy = false, .backlight = GPIO_NUM_NC, .backlight_on = 1, .i2c_port = I2C_NUM_0, .on_i2c = display0_bus, .screen = display0_screen, .orientation = dgx_ssd1306_orientation},
 };
 static struct board_display_started displays_started[1];
 const struct board_display_table board_display_table = {.panels = display_panels, .started = displays_started, .count = 1};

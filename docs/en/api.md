@@ -244,12 +244,32 @@ the data names, including the kinds the component does not set up.
 ```c
 int         board_button_count(void);
 const char *board_button_name(int index);
+int         board_button_find(const char *name);
 bool        board_button(bool *pressed);
 bool        board_button_at(int index, bool *pressed);
 ```
 
 `false` when the board has none; else the pin is set up at the first call and
 `*pressed` is its state now. Debouncing and holds are the program's.
+
+A button has the name its data gives it. A button that controls a program has a name of
+a gamepad: `up`, `down`, `left`, `right`, `a`, `b`, `start`, `select`, and the program asks
+for it by the name: `board_button_find("left")` is its index, -1 on a board with no such
+button, where the program takes another way, as the touch. On the computer the buttons are
+keys: those of the board shown first, a button named as one of a gamepad on its keys and
+another on the key of its first letter (`boot` on B), then the buttons of the gamepad:
+
+| name | keys on the computer |
+|---|---|
+| `up` | W, the up arrow |
+| `left` | A, the left arrow |
+| `down` | S, the down arrow |
+| `right` | D, the right arrow |
+| `a` | Space, J |
+| `b` | K, Backspace |
+| `start` | Enter |
+| `select` | Tab |
+
 
 ## What to include, what to link
 

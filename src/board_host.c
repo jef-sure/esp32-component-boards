@@ -19,6 +19,7 @@
 #include "board_volume.h"
 
 #include <SDL.h>
+#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -85,8 +86,12 @@ bool board_display_init_at(int index, board_display_t *out)
 {
     if (index != 0) return false;
     if (!screen) {
-        const dgx_host_screen_options_t options = {
-            .title = board_info()->title, .bus_hz = CONFIG_BOARD_HOST_BUS_HZ, .bus_lines = CONFIG_BOARD_HOST_BUS_LINES, .turn = CONFIG_BOARD_HOST_TURN};
+        /* a display not on SPI or QSPI has no bus the window counts */
+        const dgx_host_screen_options_t options = {.title     = board_info()->title,
+                                                   .bus_hz    = CONFIG_BOARD_HOST_BUS_HZ,
+                                                   .bus_lines = CONFIG_BOARD_HOST_BUS_LINES,
+                                                   .turn      = CONFIG_BOARD_HOST_TURN,
+                                                   .no_bus    = CONFIG_BOARD_HOST_BUS_HZ == 0};
         screen = dgx_host_screen_init(GLASS_W, GLASS_H, CONFIG_BOARD_HOST_COLOR_BITS, &options);
         if (!screen) {
             ESP_LOGE(TAG, "dgx_host_screen_init: %dx%d", GLASS_W, GLASS_H);
@@ -339,7 +344,7 @@ __attribute__((constructor)) static void flash_kept(void)
 }
 #endif
 
-/* ---- what the computer has not: buses of a chip, buttons ---- */
+/* ---- what the computer has not: buses of a chip ---- */
 
 const board_spi_bus_t *board_spi_bus(int host)
 {
@@ -373,26 +378,67 @@ bool board_bus_get(const char *bus, const char *field, long *out)
     return false;
 }
 
+/* ---- the buttons: those of the board shown and those of a gamepad, keys of the computer ---- */
+
+/* The keys come from the window of DGX (dgx_host_keys, DGX 0.10.11), a stand-in until input has a place of its own: asked
+ * here alone. A button of the board shown named as one of a gamepad is on its keys, another on the key of its first
+ * letter (boot on B); then come the buttons of the gamepad the board has not. */
+enum { BUTTONS_MAX = 16, BUTTON_KEYS = 2, KEYS_HELD_MAX = 16 };
+struct host_button {
+    const char *name;
+    uint16_t    keys[BUTTON_KEYS]; /* SDL_Scancode, the numbers of USB HID; 0 for none */
+};
+static const struct host_button gamepad[] = {
+    {"up", {SDL_SCANCODE_W, SDL_SCANCODE_UP}},     {"left", {SDL_SCANCODE_A, SDL_SCANCODE_LEFT}},     {"down", {SDL_SCANCODE_S, SDL_SCANCODE_DOWN}},
+    {"right", {SDL_SCANCODE_D, SDL_SCANCODE_RIGHT}}, {"a", {SDL_SCANCODE_SPACE, SDL_SCANCODE_J}},     {"b", {SDL_SCANCODE_K, SDL_SCANCODE_BACKSPACE}},
+    {"start", {SDL_SCANCODE_RETURN}},             {"select", {SDL_SCANCODE_TAB}},
+};
+enum { GAMEPAD_BUTTONS = sizeof(gamepad) / sizeof(gamepad[0]) };
+static struct host_button buttons[BUTTONS_MAX];
+static char               button_names[] = CONFIG_BOARD_HOST_BUTTONS; /* cut into names by commas, once */
+static int                button_count;
+
+static const struct host_button *gamepad_button(const char *name)
+{
+    for (int i = 0; i < GAMEPAD_BUTTONS; ++i)
+        if (strcmp(gamepad[i].name, name) == 0) return &gamepad[i];
+    return NULL;
+}
+
+/* made before the program starts: any task may ask */
+__attribute__((constructor)) static void buttons_made(void)
+{
+    for (char *name = strtok(button_names, ","); name && button_count < BUTTONS_MAX; name = strtok(NULL, ",")) {
+        const struct host_button *pad   = gamepad_button(name);
+        const int                 first = tolower((unsigned char)name[0]);
+        buttons[button_count++] = pad ? *pad : (struct host_button){.name = name, .keys = {first >= 'a' && first <= 'z' ? SDL_SCANCODE_A + (first - 'a') : 0}};
+    }
+    for (int i = 0; i < GAMEPAD_BUTTONS && button_count < BUTTONS_MAX; ++i)
+        if (board_button_find(gamepad[i].name) < 0) buttons[button_count++] = gamepad[i];
+}
+
 int board_button_count(void)
 {
-    return 0;
+    return button_count;
 }
 
 const char *board_button_name(int index)
 {
-    (void)index;
-    return NULL;
-}
-
-bool board_button(bool *pressed)
-{
-    (void)pressed;
-    return false;
+    return index >= 0 && index < button_count ? buttons[index].name : NULL;
 }
 
 bool board_button_at(int index, bool *pressed)
 {
-    (void)index;
-    (void)pressed;
-    return false;
+    if (!pressed || index < 0 || index >= button_count) return false;
+    uint16_t  held[KEYS_HELD_MAX];
+    const int count = dgx_host_keys(held, KEYS_HELD_MAX);
+    *pressed        = false;
+    for (int k = 0; k < count && !*pressed; ++k)
+        for (int j = 0; j < BUTTON_KEYS; ++j) *pressed |= buttons[index].keys[j] && held[k] == buttons[index].keys[j];
+    return true;
+}
+
+bool board_button(bool *pressed)
+{
+    return board_button_at(0, pressed);
 }

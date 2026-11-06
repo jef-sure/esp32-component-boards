@@ -1223,6 +1223,8 @@ def gen_kconfig(boards, modules):
         out(f"config BOARD_HOST_{symbol}")
         out(f"    int \"{prompt}\"")
         out(f"    default {value}")
+    out("config BOARD_HOST_BUTTONS")
+    out("    string \"The names of its buttons, by commas\"")
     out("endif")
     out("")
     if modules:

@@ -1,0 +1,7 @@
+# the boot button of the board, then the gamepad's up and a
+200 key down B
+400 key up B
+600 key down Up
+800 key up Up
+1000 key down Space
+1200 key up Space

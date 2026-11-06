@@ -124,7 +124,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: choose the computer
-        run: python3 tools/board_select.py host --as ${{ matrix.shows }} examples/hello_board
+        run: |
+          python3 tools/board_select.py host --as ${{ matrix.shows }} examples/hello_board
+          python3 tools/board_select.py host --as ${{ matrix.shows }} test/host_buttons
       - name: build hello_board for the linux target, run it with no screen, check the picture of its window and its touch, the mouse
         uses: espressif/esp-idf-ci-action@v1
         with:
@@ -137,6 +139,16 @@ jobs:
             { SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy DGX_HOST_QUIT_MS=1000 DGX_HOST_SHOT=build/host/shot.ppm timeout 60 build/host/hello_board.elf > build/host/run.log || { cat build/host/run.log; false; }; } &&
             cat build/host/run.log && grep -q "^the touch: 1 fingers" build/host/run.log &&
             python3 ../../test/host_shot.py build/host/shot.ppm
+      - name: build test/host_buttons and press its buttons by a script of keys
+        uses: espressif/esp-idf-ci-action@v1
+        with:
+          esp_idf_version: ${{ matrix.idf }}
+          target: linux
+          path: test/host_buttons
+          command: >-
+            apt-get update -qq && apt-get install -y -qq --no-install-recommends pkg-config libsdl2-dev libbsd-dev > /dev/null &&
+            ${{ matrix.idf == 'v6.1' && 'idf.py build' || 'idf.py -B build/host -D SDKCONFIG=build/host/sdkconfig -D BOARD=host build' }} &&
+            SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy DGX_HOST_SCRIPT=buttons.script timeout 60 build/host/host_buttons.elf
 
   multi-board:
     name: one program for two boards on ESP-IDF ${{ matrix.idf }}

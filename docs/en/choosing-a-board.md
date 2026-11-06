@@ -192,7 +192,9 @@ it is closed; a window that is closed ends the program. The touch panel is the m
 finger on the glass (`dgx_di_host.h`, DGX-DI 0.1.5 and later), read through `board_dgx_di_pointer()` as on a board, with
 no calibration, and it turns with the display. The sound goes to the speakers of the computer: a task asks the
 source, as on a board. The flash of a program that has partitions (NVS, a file system) is kept between runs in
-`build/host/flash.bin` while the partition table of the build is the one it has; removing the file erases it. It takes SDL2 and libbsd of the computer (`libsdl2-dev`, `libbsd-dev`) and runs on
+`build/host/flash.bin` while the partition table of the build is the one it has; removing the file erases it. The
+buttons are keys: those of the board shown, `boot` on B, and those of a gamepad, WASD and the arrows among them (see
+the buttons in [api.md](api.md)); `DGX_HOST_SCRIPT` of DGX presses them, and the mouse, with nobody at the computer. It takes SDL2 and libbsd of the computer (`libsdl2-dev`, `libbsd-dev`) and runs on
 Linux; Windows is not a target of ESP-IDF.
 
 ## What comes with the choice

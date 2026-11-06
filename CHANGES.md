@@ -17,6 +17,10 @@
 - The level the person chose last is kept in NVS by `board_sound_volume_keep`, and `board_sound_init` gives it at the
   next start before the level of the data: how loud is right depends on the room. The component sets NVS up when the
   program has not.
+- A program finds a button by its name, `board_button_find`. A button that controls a program has a name of a gamepad,
+  `up`, `down`, `left`, `right`, `a`, `b`, `start`, `select`. On the computer the buttons of the board shown and those
+  of a gamepad are keys (DGX 0.10.11), WASD and the arrows among them; CI presses them by a script of keys.
+- On the computer a display that is not on SPI or QSPI has no bus counted in the title of its window.
 
 ## 0.0.4 (2026-11-06)
 

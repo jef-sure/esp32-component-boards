@@ -642,7 +642,8 @@ take, against `frequency_sources.ledc.outputs` of the chip (the judgement `ledc_
 A variant of a role in `catalog/roles.json` may have a way too, as buttons on GPIOs: `{"lines": ["in"], "active":
 {"in": "low"}}`. The part a kit writes for it takes the class of its role and, for a line with `active`, the level that
 means on: `"program": {"class": "button", "pins": {"in": {"gpio": 4, "active": "low"}}}`. The glue then counts it among
-the buttons, by its name, and turns the pull-up of its pin on.
+the buttons, by its name, and turns the pull-up of its pin on. A button that controls a program takes a name of a
+gamepad, `up`, `down`, `left`, `right`, `a`, `b`, `start` or `select`: a program finds it by the name.
 
 ## Chains
 

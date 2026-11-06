@@ -9,6 +9,13 @@ examples/*/sdkconfig.defaults.*
 examples/*/CMakePresets.json
 examples/*/managed_components/
 examples/*/dependencies.lock*
+test/host_buttons/build*/
+test/host_buttons/sdkconfig
+test/host_buttons/sdkconfig.old
+test/host_buttons/sdkconfig.defaults.*
+test/host_buttons/CMakePresets.json
+test/host_buttons/managed_components/
+test/host_buttons/dependencies.lock*
 examples/*/components/local-boards/CMakeLists.txt
 examples/*/components/local-boards/Kconfig.projbuild
 examples/*/components/local-boards/boards/*/*.c

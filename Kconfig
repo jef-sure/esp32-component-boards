@@ -150,6 +150,8 @@ config BOARD_HOST_BUS_LINES
 config BOARD_HOST_COLOR_BITS
     int "Its depth of color, 16 or 18"
     default 16
+config BOARD_HOST_BUTTONS
+    string "The names of its buttons, by commas"
 endif
 
 config BOARD_SOUND_TASK_STACK

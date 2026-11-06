@@ -172,10 +172,14 @@ bool board_bus_get(const char *bus, const char *field, long *out);
 
 /*
  * The buttons of the board: false when there is no such button, else *pressed as it is now. A
- * pin is set up at its first call. board_button is the first one.
+ * pin is set up at its first call. board_button is the first one. A button that controls a program
+ * has a name of a gamepad, up, down, left, right, a, b, start or select, and board_button_find gives
+ * its index by the name, -1 when the board has none of that name. On the computer the buttons of the
+ * board shown and those of a gamepad are keys.
  */
 int         board_button_count(void);
 const char *board_button_name(int index); /* NULL when there is no such button */
+int         board_button_find(const char *name);
 bool        board_button(bool *pressed);
 bool        board_button_at(int index, bool *pressed);
 

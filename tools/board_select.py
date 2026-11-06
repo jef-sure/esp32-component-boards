@@ -294,6 +294,7 @@ def host_text(local, shows):
             f'CONFIG_IDF_TARGET="linux"\nCONFIG_BOARD_SELECT_HOST=y\nCONFIG_BOARD_HOST_SHOWS="{shows}"\n'
             f"CONFIG_BOARD_HOST_WIDTH={width}\nCONFIG_BOARD_HOST_HEIGHT={height}\nCONFIG_BOARD_HOST_MM_W={mm_w}\nCONFIG_BOARD_HOST_MM_H={mm_h}\n"
             + host_window(board)
+            + f'CONFIG_BOARD_HOST_BUTTONS="{",".join(button["name"] for button in board.get("buttons") or [])}"\n'
             + "# the window of DGX needs 48 KB of stack left in the task that starts the display: app_main's, in words of 8 bytes here\n"
             f"CONFIG_ESP_MAIN_TASK_STACK_SIZE={HOST_MAIN_STACK_WORDS}\n"), "linux"
 

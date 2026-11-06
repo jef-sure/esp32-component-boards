@@ -17,6 +17,7 @@
     "boards/jc1060p470c/board.json",
     "boards/jc4827w543c/board.json",
     "boards/jc8012p4a1c/board.json",
+    "boards/nodemcu_esp32s/board.json",
     "connectors/grove_i2c/connector.json",
     "connectors/micro_usb/connector.json",
     "connectors/qwiic/connector.json",

@@ -100,6 +100,7 @@ idf.py build flash monitor
 | Guition JC1060P470C | ESP32-P4 | 1024x600 JD9165, MIPI-DSI, 154x86 mm | GT911 | ES8311 | да |
 | Guition JC4827W543C | ESP32-S3 | 480x272 NV3041A, QSPI, 95x54 mm | GT911 | усилитель I2S | да |
 | Guition JC8012P4A1C | ESP32-P4 | 1280x800 JD9365, MIPI-DSI, 217x136 mm | GSL3680 (прошивку встраивает программа) | ES8311 | да |
+| NodeMCU ESP-32S V1.1, 38 pins | ESP32 | нет | нет | нет | да |
 <!-- boards:end -->
 
 Модуль подключается к плате в плате программы, в её `components/local-boards/`: страница пишет такую плату для

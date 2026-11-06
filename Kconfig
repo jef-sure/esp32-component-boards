@@ -128,6 +128,14 @@ config BOARD_SELECT_JC8012P4A1C
         10.1-inch 800x1280 JD9365 on MIPI-DSI (shown 1280x800), GSL3680 touch
         (firmware written into it at start), ES8311 sound.
 
+config BOARD_SELECT_NODEMCU_ESP32S
+    bool "NodeMCU ESP-32S V1.1, 38 pins"
+    depends on IDF_TARGET_ESP32
+    help
+        An ESP32 board in the layout of the ESP32-DevKitC: 38 pins, an
+        ESP-WROOM-32, a CP2102 USB bridge on micro-USB, a power LED, a blue LED
+        on GPIO 2, EN and BOOT buttons.
+
 config BOARD_SELECT_HOST
     bool "The computer: a window of SDL2 as large as the board it shows"
     depends on IDF_TARGET_LINUX
@@ -255,6 +263,11 @@ config BOARD_JC4827W543C
 config BOARD_JC8012P4A1C
     int
     default 1 if BOARD_SELECT_JC8012P4A1C
+    default 0
+
+config BOARD_NODEMCU_ESP32S
+    int
+    default 1 if BOARD_SELECT_NODEMCU_ESP32S
     default 0
 
 # What the chosen board and the modules have, as the rules need it: a graphics display

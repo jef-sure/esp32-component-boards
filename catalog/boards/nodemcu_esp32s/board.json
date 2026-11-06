@@ -1,0 +1,75 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "nodemcu_esp32s",
+    "title": "NodeMCU ESP-32S V1.1, 38 pins",
+    "description": "An ESP32 board in the layout of the ESP32-DevKitC: 38 pins, an ESP-WROOM-32, a CP2102 USB bridge on micro-USB, a power LED, a blue LED on GPIO 2, EN and BOOT buttons",
+    "notes": [
+        "NodeMCU ESP-32S V1.1 on the back. Its contacts are those of Espressif's ESP32-DevKitC V4, whose schematic is read. It differs from that board: a CP2102, not a CP2102N, and a blue LED on GPIO 2 the original does not have.",
+        "SD2, SD3, CMD, CLK, SD0 and SD1 on the headers are the lines of the flash."
+    ],
+    "mcu": {"target": "esp32", "part": "ESP32-D0WDQ6", "flash_mb": 4},
+    "devices": {
+        "led": {
+            "class": "led",
+            "provides": {"led": {"variant": "single"}},
+            "pins": {"out": {"gpio": 2, "active": "high"}},
+            "notes": "Blue."
+        },
+        "boot": {"class": "button", "pins": {"in": {"gpio": 0, "active": "low"}}},
+        "usb_serial": {"class": "other", "part": "CP2102"}
+    },
+    "power": [
+        {
+            "name": "5V",
+            "source": "usb",
+            "mv": 5000,
+            "plug": "micro_usb",
+            "why": "The contact 5V; on Espressif's original the micro-USB feeds it through a diode."
+        },
+        {"name": "3V3", "from": "5V", "regulator": "ldo", "mv": 3300, "feeds": ["mcu"]}
+    ],
+    "connectors": {
+        "J2": {
+            "type": "2.54 mm header, 19 pins",
+            "pins": ["3V3", "EN", 36, 39, 34, 35, 32, 33, 25, 26, 27, 14, 12, "GND", 13, 9, 10, 11, "5V"]
+        },
+        "J3": {
+            "type": "2.54 mm header, 19 pins",
+            "pins": ["GND", 23, 22, 1, 3, 21, "GND", 19, 18, 5, 17, 16, 4, 0, 2, 15, 8, 7, 6]
+        }
+    },
+    "images": {
+        "front": {"file": "front.webp", "source": "a photo by Anton of his board, 2026-11-06", "shows": "front"},
+        "back": {"file": "back.webp", "source": "a photo by Anton of his board, 2026-11-06", "shows": "back"}
+    },
+    "checked": {
+        "pins": {
+            "level": "schematic",
+            "covers": ["connectors", "devices.boot", "power"],
+            "source": "esp32_devkitc_v4-sch.pdf of dl.espressif.com, ESP32_DevKitC_V4 of 2017-12-06, fetched 2026-11-06",
+            "date": "2026-11-06"
+        },
+        "photo": {
+            "level": "hardware",
+            "covers": ["connectors"],
+            "source": "a photo by Anton of the back of his board, 2026-11-06",
+            "notes": "The silkscreen from the antenna end: 3V3 EN SVP SVN P34 P35 P32 P33 P25 P26 P27 P14 P12 GND P13 SD2 SD3 CMD 5V on one side, GND P23 P22 TX RX P21 GND P19 P18 P5 P17 P16 P4 P0 P2 P15 SD1 SD0 CLK on the other, as J2 and J3 of the schematic.",
+            "date": "2026-11-06"
+        },
+        "led": {
+            "level": "hardware",
+            "covers": ["devices.led"],
+            "by": "Anton, by eye",
+            "date": "2026-11-06",
+            "notes": "On two of his boards, with GPIO 2 high for 3 s and low for 1 s the blue LED is on for 3 s and off for 1 s."
+        },
+        "chip": {
+            "level": "hardware",
+            "covers": ["mcu", "devices.usb_serial"],
+            "source": "esptool on two of Anton's boards: ESP32-D0WDQ6 rev 1.0, 4 MB flash of maker 0x20 on one and 0x5e on the other; the port is a CP2102, USB 10c4:ea60",
+            "date": "2026-11-06"
+        }
+    }
+}

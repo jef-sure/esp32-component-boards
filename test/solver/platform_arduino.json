@@ -1,5 +1,5 @@
 {
     "title": "Arduino takes the chips of its list, and the page writes no project for it yet",
     "answers": {"platform": "arduino_esp32"},
-    "fit": ["cyd_s028r", "esp32_c3_oled_042", "esp32_c3_zero", "esp32_devkit", "esp32_devkit_usb_c", "esp32_oled_096", "esp32_p4_eth", "esp32_p4_poe_eth", "esp32_s3_zero", "esp32s3_devkit", "jc1060p470c", "jc4827w543c", "jc8012p4a1c"]
+    "fit": ["cyd_s028r", "esp32_c3_oled_042", "esp32_c3_zero", "esp32_devkit", "esp32_devkit_usb_c", "esp32_oled_096", "esp32_p4_eth", "esp32_p4_poe_eth", "esp32_s3_zero", "esp32s3_devkit", "jc1060p470c", "jc4827w543c", "jc8012p4a1c", "nodemcu_esp32s"]
 }

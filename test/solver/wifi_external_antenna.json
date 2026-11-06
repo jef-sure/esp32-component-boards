@@ -1,6 +1,6 @@
 {
     "title": "Wi-Fi with an antenna outside the board: a radio on a connector fits, a board with only a ceramic antenna does not, and an antenna not in the data stays open",
     "answers": {"blocks": [{"role": "wifi", "name": "net", "variant": "external_antenna"}]},
-    "fit": ["cyd_s028r", "esp32_devkit", "esp32_devkit_usb_c", "esp32_oled_096", "esp32s3_devkit", "jc1060p470c", "jc4827w543c", "jc8012p4a1c"],
+    "fit": ["cyd_s028r", "esp32_devkit", "esp32_devkit_usb_c", "esp32_oled_096", "esp32s3_devkit", "jc1060p470c", "jc4827w543c", "jc8012p4a1c", "nodemcu_esp32s"],
     "says": "Wi-Fi: its antenna is outside the board, on a connector"
 }

@@ -16,16 +16,16 @@ static const char *TAG = "board";
 enum { VOLUME_MIN = 1, VOLUME_MAX = 100, KEY_MAX = 16 };
 #define VOLUME_NAMESPACE "boards"
 
-/* NVS set up once; false when it cannot be, said once */
+/* NVS set up; tried again after a failure, as the program may have erased and set it up since, the failure said once */
 static bool volume_store(void)
 {
-    static int ready; /* 0 not tried, 1 ready, -1 not */
-    if (!ready) {
-        esp_err_t err = nvs_flash_init();
-        ready         = err == ESP_OK ? 1 : -1;
-        if (err != ESP_OK) ESP_LOGW(TAG, "nvs_flash_init: %s: the level of the sound is not kept", esp_err_to_name(err));
-    }
-    return ready > 0;
+    static bool ready, told;
+    if (ready) return true;
+    const esp_err_t err = nvs_flash_init();
+    ready               = err == ESP_OK;
+    if (!ready && !told) ESP_LOGW(TAG, "nvs_flash_init: %s: the level of the sound is not kept", esp_err_to_name(err));
+    told |= !ready;
+    return ready;
 }
 
 /* the key of a sound by its place: a board has few, and a key of NVS is 15 letters at most */
@@ -57,9 +57,13 @@ bool board_sound_volume_keep_at(int index, int percent)
         ESP_LOGE(TAG, "nvs_open: %s", esp_err_to_name(err));
         return false;
     }
-    if ((err = nvs_set_u8(nvs, key, (uint8_t)percent)) == ESP_OK) err = nvs_commit(nvs);
+    const char *call = "nvs_set_u8";
+    if ((err = nvs_set_u8(nvs, key, (uint8_t)percent)) == ESP_OK) {
+        call = "nvs_commit";
+        err  = nvs_commit(nvs);
+    }
     nvs_close(nvs);
-    if (err != ESP_OK) ESP_LOGE(TAG, "nvs_set_u8: %s", esp_err_to_name(err));
+    if (err != ESP_OK) ESP_LOGE(TAG, "%s: %s", call, esp_err_to_name(err));
     return err == ESP_OK;
 }
 

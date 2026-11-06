@@ -1,0 +1,29 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "ssd1306",
+    "title": "SSD1306 OLED",
+    "maker": "solomon-systech",
+    "part": "SSD1306",
+    "class": "display",
+    "provides": {"display": {"variant": "oled"}},
+    "on": {"i2c": {"address_try": ["0x3C", "0x3D"]}, "spi": {}},
+    "config": {"kind": "graphics", "depth_bits": 1},
+    "controls": {
+        "orientation": {"how": "driver", "read": "none"},
+        "brightness": {"how": "panel_command", "min": 0, "max": 255, "read": "none"}
+    },
+    "notes": "A monochrome OLED controller with 128x64 of memory; a smaller panel shows a window of it. On I2C the address is 0x3C, or 0x3D with SA0 high.",
+    "checked": {
+        "facts": {
+            "level": "vendor-code",
+            "source": "include/drivers/ssd1306.h of DGX 0.10.11: SPI or I2C, contrast 0 to 255"
+        },
+        "i2c": {
+            "level": "hardware",
+            "covers": ["on"],
+            "source": "esp32_c3_oled_042 on 2026-11-06: the panel answered at 0x3C and DGX drew on it at 400 kHz"
+        }
+    }
+}

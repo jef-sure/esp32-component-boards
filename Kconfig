@@ -31,6 +31,16 @@ config BOARD_SELECT_CYD_S028R
         to pins no host is left for (spi3 is the touch's): kept as data for the
         program.
 
+config BOARD_SELECT_ESP32_C3_OLED_042
+    bool "ESP32-C3 with a 0.42-inch OLED: 72x40 SSD1306"
+    depends on IDF_TARGET_ESP32C3
+    select DGX_ENABLE_I2C
+    select DGX_ENABLE_SSD1306
+    help
+        A small ESP32-C3 board with a 72x40 SSD1306 OLED on I2C: 4 MB flash in
+        the chip, USB-C to the chip, a power LED, a blue LED, BOOT and RST
+        buttons, a ceramic antenna.
+
 config BOARD_SELECT_ESP32_C3_ZERO
     bool "Waveshare ESP32-C3-Zero"
     depends on IDF_TARGET_ESP32C3
@@ -177,6 +187,11 @@ config BOARD_CYD_S028R
     default 1 if BOARD_SELECT_CYD_S028R
     default 0
 
+config BOARD_ESP32_C3_OLED_042
+    int
+    default 1 if BOARD_SELECT_ESP32_C3_OLED_042
+    default 0
+
 config BOARD_ESP32_C3_ZERO
     int
     default 1 if BOARD_SELECT_ESP32_C3_ZERO
@@ -234,7 +249,7 @@ config BOARD_JC8012P4A1C
 # touch, the mouse over it as DGX-DI reads it.
 config BOARD_DISPLAY_GRAPHICS
     int
-    default 1 if BOARD_SELECT_CYD_S028R || BOARD_SELECT_JC1060P470C || BOARD_SELECT_JC4827W543C || BOARD_SELECT_JC8012P4A1C || BOARD_SELECT_HOST
+    default 1 if BOARD_SELECT_CYD_S028R || BOARD_SELECT_ESP32_C3_OLED_042 || BOARD_SELECT_JC1060P470C || BOARD_SELECT_JC4827W543C || BOARD_SELECT_JC8012P4A1C || BOARD_SELECT_HOST
     default 0
 
 config BOARD_DISPLAY_GROUP

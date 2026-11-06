@@ -28,14 +28,24 @@ static void keep_orientation(const struct board_display_panel *panel, struct boa
 static bool start_panel(const struct board_display_panel *panel, struct board_display_started *d)
 {
     if (panel->host && !board_glue_spi_host(panel->host)) return false;
-    dgx_bus_protocols_t *bus = panel->bus();
+    dgx_bus_protocols_t *bus;
+    if (panel->on_i2c) {
+        i2c_master_bus_handle_t i2c = board_glue_i2c(panel->i2c_port);
+        if (!i2c) {
+            ESP_LOGE(TAG, "board_glue_i2c: no I2C bus on port %d for %s", panel->i2c_port, panel->name);
+            return false;
+        }
+        bus = panel->on_i2c(i2c);
+    } else {
+        bus = panel->bus();
+    }
     if (!bus) return false;
     dgx_screen_t *screen = panel->screen(bus);
     if (!screen) {
         bus->dispose(bus);
         return false;
     }
-    panel->orientation(screen, (dgx_orientation_t)panel->dir_x, (dgx_orientation_t)panel->dir_y, panel->swap_xy);
+    if (panel->orientation) panel->orientation(screen, (dgx_orientation_t)panel->dir_x, (dgx_orientation_t)panel->dir_y, panel->swap_xy);
     if (panel->backlight != GPIO_NUM_NC) {
         /* the light goes on over a black frame buffer, not over what the panel had before */
         gpio_set_direction((gpio_num_t)panel->backlight, GPIO_MODE_OUTPUT);

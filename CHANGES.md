@@ -1,5 +1,18 @@
 # CHANGES
 
+## 0.0.6 (not released yet)
+
+- A graphics display can be on I2C: the glue puts it on the board's bus with `dgx_i2c_init_on_bus`, and the master of
+  the bus comes from `board_glue_i2c`, so other parts can share it. A driver with no orientation call starts its panel
+  as it is, and the generator refuses another orientation for it.
+- SSD1306 is in the catalog and starts through DGX. The library entries of SSD1306, SH1106 and SSD1309 name their
+  resolution as `SSD1306_{width}X{height}` and the like; `config.external_vcc` says when the high voltage of an OLED
+  comes from outside.
+- `board_display.mm_w` and `mm_h` and `BOARD_MM` are whole millimetres, rounded, where the data has fractions.
+- New boards: the ESP32 DevKit with USB-C and a CH340 (`esp32_devkit_usb_c`, a variant of `esp32_devkit`), and the
+  ESP32-C3 with a 0.42-inch 72x40 OLED (`esp32_c3_oled_042`).
+- Photos of the S3 DevKit, the front of the C3-Zero and the three Guition boards.
+
 ## 0.0.5 (2026-11-06)
 
 - On the computer the window is the glass of the display of the board shown, turned as the board is held, with the

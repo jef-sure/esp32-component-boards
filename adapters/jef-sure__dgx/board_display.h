@@ -12,8 +12,10 @@ struct board_display_panel {
     int         backlight, backlight_on;      /* lit here after the driver starts; GPIO_NUM_NC when the driver does it */
     const struct board_spi_bus *host;         /* an SPI host it shares with other parts, set up here first; NULL when it has its own */
     dgx_bus_protocols_t *(*bus)(void);
+    int i2c_port;                                                /* the port of its I2C bus, when on_i2c is set */
+    dgx_bus_protocols_t *(*on_i2c)(i2c_master_bus_handle_t i2c); /* a display on the board's I2C bus, instead of bus */
     dgx_screen_t *(*screen)(dgx_bus_protocols_t *bus);
-    void (*orientation)(dgx_screen_t *scr, dgx_orientation_t dir_x, dgx_orientation_t dir_y, bool swap_xy);
+    void (*orientation)(dgx_screen_t *scr, dgx_orientation_t dir_x, dgx_orientation_t dir_y, bool swap_xy); /* NULL when the driver cannot turn it */
     bool group;       /* two entries of this table shown as one screen, dgx_vscreen_2h_init(left, right) */
     int  left, right;
 };

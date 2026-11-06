@@ -198,6 +198,15 @@ same direction. The millimetres are optional, but go together: without them
 display's x runs along the glass's columns. `primary` marks the main display.
 A character display has `config.geometry`, such as `"20x4"`.
 
+A display on I2C, such as an SSD1306 OLED, is on the board's bus at its address:
+`"on": { "i2c.i2c0": { "address": "0x3C" } }`. The glue takes the bus from
+`board_glue_i2c`, so other parts can share it. `panel.memory_width`, `memory_height`,
+`offset_x` and `offset_y` give the window of the controller's memory that the glass
+shows. `config.external_vcc` is true when the high voltage of an OLED comes from
+outside, not from the charge pump of its controller. When the library entry of a chip
+has no orientation call, the panel stays as the driver starts it, and the generator
+refuses any other `start`.
+
 `config.timing` is for a panel fed without pause, RGB or MIPI-DSI video:
 `pclk_hz`, `hsync_pulse`, `hsync_back`, `hsync_front`, `vsync_pulse`, `vsync_back`,
 `vsync_front`, and optionally `pclk_edge`, `hsync_active`, `vsync_active`,

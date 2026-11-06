@@ -3,6 +3,13 @@
     "answers": {
         "display": "graphics"
     },
+    "change": {
+        "esp32_c3_oled_042": {
+            "devices": {
+                "oled": null
+            }
+        }
+    },
     "first": {
         "name": "esp32_devkit",
         "modules": {

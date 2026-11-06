@@ -205,7 +205,7 @@ def display_part(name, device, module):
         part["bus"]["pins"] = {line: number(value) for line, value in pins.items()}
     else:
         part["panel"] = config["panel"]
-        part.update({field: config[field] for field in ("depth_bits", "color_order") if field in config})
+        part.update({field: config[field] for field in ("depth_bits", "color_order", "external_vcc") if field in config})
         part["original_orientation"] = device["controls"]["orientation"]["start"]
     return part
 
@@ -288,6 +288,11 @@ def parts_of(resolved):
     if "connectors" in resolved:
         board["connectors"] = {name: {**connector, "pins": [number(line) for line in connector["pins"]]} for name, connector in resolved["connectors"].items()}
     return board
+
+
+def whole_mm(value):
+    """Millimetres as boards.h gives them: a whole number, rounded half up."""
+    return int(value + 0.5)
 
 
 def shown(display):
@@ -455,7 +460,7 @@ def read_board(path):
         elif is_pixel(display):
             bus_name = display.get("bus", {}).get("bus")
             if not bus_name or bus_parts(bus_name)[0] not in display["entry"]["on"]:
-                raise ValueError('the display\'s bus is a name from buses: "spi.spi2", "qspi.spi2", "dsi.dsi0", "p8.i80"')
+                raise ValueError('the display\'s bus is a name from buses: "spi.spi2", "qspi.spi2", "dsi.dsi0", "p8.i80", "i2c.i2c0"')
             if bus_of(data, bus_name) is None:
                 raise ValueError(f'the display\'s bus "{bus_name}" is not among the board\'s buses')
             panel = display.get("panel")
@@ -477,12 +482,20 @@ def read_board(path):
             names = resolve.library(display["library"])["values"]
             if not orientation or orientation.get("x") not in names["dir_x"] or orientation.get("y") not in names["dir_y"]:
                 raise ValueError("the original_orientation of the display is not left-right/right-left x top-bottom/bottom-top")
+            if "orientation" not in display["entry"].get("controls", {}) and \
+               (orientation["x"], orientation["y"], orientation.get("swap", False)) != ("left-right", "top-bottom", False):
+                raise ValueError(f"the driver {driver} cannot turn its panel: the display starts left-right, top-bottom, not swapped")
+            resolutions = display["entry"]["supports"].get("resolution")
+            if resolutions and f"{panel['width']}x{panel['height']}" not in resolutions:
+                raise ValueError(f'{panel["width"]}x{panel["height"]} is not a resolution the driver {driver} takes ({", ".join(resolutions)})')
             kind = bus_parts(bus_name)[0]
             if kind == "dsi":
                 for key in ("lane_mbps", "phy_ldo_chan", "phy_ldo_mv"):
                     if not isinstance(bus_of(data, bus_name).get(key), int):
                         raise ValueError(f'the bus {bus_name} of a panel lacks its "{key}"')
-            for line in display["entry"]["supports"].get("lines") or {"spi": ("cs", "dc"), "qspi": ("cs",), "p8": ("cs",), "dsi": ()}[kind]:
+            if kind == "i2c" and i2c_address(display["bus"].get("address")) is None:
+                raise ValueError('a display on I2C needs its 7-bit address, e.g. "0x3C"')
+            for line in display["entry"]["supports"].get("lines") or {"spi": ("cs", "dc"), "qspi": ("cs",), "p8": ("cs",), "dsi": (), "i2c": ()}[kind]:
                 if line not in display["bus"]:
                     raise ValueError(f'the display lacks its "{line}" line')
         else:
@@ -919,29 +932,40 @@ def gen_c(board):
             library = resolve.library(shown["library"])
             transport = transport_of(shown)
             out(f"/* {shown['name']}: a {panel['width']}x{panel['height']} {driver} on {bus_name}. */")
-            out(f"static dgx_bus_protocols_t *display{i}_bus(void)")
-            out("{")
-            values = {**transport.get("defaults", {}), **{key: value if key in resolve.NOT_LINES else c_gpio(value) for key, value in bus.items()}, "host": f"{(own or '').upper()}_HOST"}
-            own_select = "{cs}" in entry["init"][0]["args"]  # the driver of such a chip holds its select itself, so the bus has none
-            values.update({"dc": "GPIO_NUM_NC", **{line: c_gpio(db[line]) for line in ("cs", "dc") if line in db and not (own_select and line == "cs")}})
-            values.update({"hz": db["hz"]} if "hz" in db else {})  # the speed of a device goes before that of its bus
-            values.setdefault("cs", "GPIO_NUM_NC")
-            out(f"    return {fill_call(transport['shared' if bus_name in shared else 'init'], values)};")
+            if kind == "i2c":
+                # a display on I2C joins the board's bus, which board_glue_i2c makes, so other parts can share it
+                out(f"static dgx_bus_protocols_t *display{i}_bus(i2c_master_bus_handle_t i2c)")
+                out("{")
+                values = {**transport.get("defaults", {}), "i2c_bus": "i2c", "address": format(i2c_address(db["address"]), "#04x")}
+                values.update({"hz": db["hz"]} if "hz" in db else {})
+                out(f"    return {fill_call(transport['shared'], values)};")
+                bus_field = f".i2c_port = I2C_NUM_{port_of(own, 'i2c')}, .on_i2c = display{i}_bus"
+            else:
+                out(f"static dgx_bus_protocols_t *display{i}_bus(void)")
+                out("{")
+                values = {**transport.get("defaults", {}), **{key: value if key in resolve.NOT_LINES else c_gpio(value) for key, value in bus.items()}, "host": f"{(own or '').upper()}_HOST"}
+                own_select = "{cs}" in entry["init"][0]["args"]  # the driver of such a chip holds its select itself, so the bus has none
+                values.update({"dc": "GPIO_NUM_NC", **{line: c_gpio(db[line]) for line in ("cs", "dc") if line in db and not (own_select and line == "cs")}})
+                values.update({"hz": db["hz"]} if "hz" in db else {})  # the speed of a device goes before that of its bus
+                values.setdefault("cs", "GPIO_NUM_NC")
+                out(f"    return {fill_call(transport['shared' if bus_name in shared else 'init'], values)};")
+                bus_field = f".bus = display{i}_bus"
             out("}")
             out("")
             backlight = c_gpio(shown.get("backlight"))
             order = "bgr" if shown.get("color_order") == "bgr" else "rgb"
             values = {"bus": "bus", "rst": c_gpio(shown.get("rst")), "cs": c_gpio(db.get("cs")), "backlight": backlight, "depth": shown.get("depth_bits", 16),
-                      "color": library["values"]["color_order"][order], "width": panel["width"], "height": panel["height"]}
+                      "color": library["values"]["color_order"][order], "width": panel["width"], "height": panel["height"],
+                      "external_vcc": "true" if shown.get("external_vcc") else "false"}
             out(f"static dgx_screen_t *display{i}_screen(dgx_bus_protocols_t *bus)")
             out("{")
             out(f"    return {fill_call(entry['init'][0], values)};")
             out("}")
             out("")
             light = backlight if any(step.get("line") == "backlight" for step in entry.get("setup", ())) else "GPIO_NUM_NC"
-            rows.append(f"    {{.name = \"{shown['name']}\", .glass_w = {panel['width']}, .glass_h = {panel['height']}, .mm_w = {panel.get('mm_w', 0)}, .mm_h = {panel.get('mm_h', 0)}, "
+            rows.append(f"    {{.name = \"{shown['name']}\", .glass_w = {panel['width']}, .glass_h = {panel['height']}, .mm_w = {whole_mm(panel.get('mm_w', 0))}, .mm_h = {whole_mm(panel.get('mm_h', 0))}, "
                         f".dir_x = {library['values']['dir_x'][orientation['x']]}, .dir_y = {library['values']['dir_y'][orientation['y']]}, .swap_xy = {'true' if orientation.get('swap', False) else 'false'}, "
-                        f".backlight = {light}, .backlight_on = {1 if shown.get('backlight_on_high', True) else 0}, {f'.host = &board_spi_{own}, ' if bus_name in shared else ''}.bus = display{i}_bus, .screen = display{i}_screen, .orientation = {entry['controls']['orientation']['call']}}},")
+                        f".backlight = {light}, .backlight_on = {1 if shown.get('backlight_on_high', True) else 0}, {f'.host = &board_spi_{own}, ' if bus_name in shared else ''}{bus_field}, .screen = display{i}_screen, .orientation = {entry.get('controls', {}).get('orientation', {}).get('call', 'NULL')}}},")
         grouped = [f"    {{.name = \"{name}\", .group = true, .left = {place[group['left']]}, .right = {place[group['right']]}}}," for name, group in group_rows]
         table = grouped + rows if first else rows + grouped
         out("static const struct board_display_panel display_panels[] = {")
@@ -1064,7 +1088,7 @@ def gen_display_cmake(board):
          "# do not edit by hand. project_include.cmake of the component includes it when the board is chosen."]
     if primary:
         width, height, mm_w, mm_h = primary
-        L += [f"set(BOARD_PIXELS {width} {height})", f"set(BOARD_MM {mm_w} {mm_h}) # 0 0 when the data has no size"]
+        L += [f"set(BOARD_PIXELS {width} {height})", f"set(BOARD_MM {whole_mm(mm_w)} {whole_mm(mm_h)}) # 0 0 when the data has no size"]
     else:
         L.append("# no pixel display: BOARD_PIXELS and BOARD_MM stay empty")
     return "\n".join(L) + "\n"
@@ -1329,7 +1353,7 @@ def gen_table(boards, lang="en"):
         if is_pixel(display):
             w, h, mm_w, mm_h = shown(display)
             bus = bus_parts(display["bus"]["bus"])[0]
-            bus_name = {"dsi": "MIPI-DSI", "qspi": "QSPI", "spi": "SPI", "p8": "i80"}[bus]
+            bus_name = {"dsi": "MIPI-DSI", "qspi": "QSPI", "spi": "SPI", "p8": "i80", "i2c": "I2C"}[bus]
             disp = f"{w}x{h} {display['driver'].upper()}, {bus_name}" + (f", {mm_w}x{mm_h} mm" if mm_w else "")
         elif is_character(display):
             disp = f"{display['geometry']} {display['driver'].upper()}"

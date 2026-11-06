@@ -1,0 +1,7 @@
+# The ESP32-C3 with a 0.42-inch OLED: what its chip and its memory need, read before the program's own
+# defaults. The first two lines are the choice of the board.
+CONFIG_IDF_TARGET="esp32c3"
+CONFIG_BOARD_SELECT_ESP32_C3_OLED_042=y
+
+CONFIG_ESPTOOLPY_FLASHSIZE_4MB=y
+CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_160=y

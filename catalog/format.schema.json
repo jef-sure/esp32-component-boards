@@ -1112,6 +1112,7 @@
         },
         "depth_bits": { "enum": [1, 2, 4, 8, 12, 16, 18, 24] },
         "color_order": { "enum": ["rgb", "bgr"] },
+        "external_vcc": { "type": "boolean", "description": "The high voltage of an OLED comes from outside, not from the charge pump of its controller. false when absent." },
         "invert": { "type": "boolean" },
         "refresh": { "enum": ["continuous", "partial", "full"], "description": "How the picture changes: full and partial are e-paper." },
         "read_hz": { "$ref": "#/$defs/hz" },

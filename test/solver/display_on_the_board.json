@@ -1,0 +1,10 @@
+{
+    "title": "A graphics display asked for: a board that has one and nothing else nobody asked for but an LED goes before a module on a plain board",
+    "answers": {
+        "display": "graphics"
+    },
+    "first": {
+        "name": "esp32_c3_oled_042",
+        "modules": {}
+    }
+}

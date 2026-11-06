@@ -104,7 +104,8 @@
                 "args": ["{i2c_bus}", "{address}", "{hz}"],
                 "returns": "bus",
                 "ok": {"not": "NULL"}
-            }
+            },
+            "defaults": {"hz": 400000}
         }
     },
     "groups": {
@@ -250,7 +251,7 @@
             "init": [
                 {
                     "call": "dgx_sh1106_init",
-                    "args": ["{bus}", "{resolution}", "{rst}"],
+                    "args": ["{bus}", "SH1106_{width}X{height}", "{rst}"],
                     "returns": "screen",
                     "ok": {"not": "NULL"}
                 }
@@ -264,12 +265,13 @@
             "init": [
                 {
                     "call": "dgx_ssd1306_init",
-                    "args": ["{bus}", "{resolution}", "{is_ext_vcc}", "{rst}"],
+                    "args": ["{bus}", "SSD1306_{width}X{height}", "{external_vcc}", "{rst}"],
                     "returns": "screen",
                     "ok": {"not": "NULL"}
                 }
             ],
-            "supports": {"depth_bits": [1], "resolution": ["128x32", "128x64", "96x16", "64x48", "72x40"]}
+            "supports": {"depth_bits": [1], "resolution": ["128x32", "128x64", "96x16", "64x48", "72x40"]},
+            "adapter": {"kind": "panel"}
         },
         "ssd1309": {
             "header": "drivers/ssd1309.h",
@@ -278,7 +280,7 @@
             "init": [
                 {
                     "call": "dgx_ssd1309_init",
-                    "args": ["{bus}", "{resolution}", "{rst}"],
+                    "args": ["{bus}", "SSD1309_{width}X{height}", "{rst}"],
                     "returns": "screen",
                     "ok": {"not": "NULL"}
                 }

@@ -52,10 +52,16 @@ typedef struct esp_lcd_touch_t *esp_lcd_touch_handle_t;
 #define ESP_LCD_TOUCH_IO_I2C_GT911_ADDRESS_BACKUP 0x14
 int esp_lcd_touch_new_i2c_gt911(esp_lcd_panel_io_handle_t io, const esp_lcd_touch_config_t *c, esp_lcd_touch_handle_t *h);
 
-/* log */
-#define ESP_LOGE(tag, ...) ((void)0)
-#define ESP_LOGW(tag, ...) ((void)0)
-#define ESP_LOGI(tag, ...) ((void)0)
+/* log: the arguments read and the format checked, as by the macros of ESP-IDF */
+static inline void fake_log(const char *tag, const char *format, ...) __attribute__((format(printf, 2, 3)));
+static inline void fake_log(const char *tag, const char *format, ...)
+{
+    (void)tag;
+    (void)format;
+}
+#define ESP_LOGE(tag, ...) fake_log(tag, __VA_ARGS__)
+#define ESP_LOGW(tag, ...) fake_log(tag, __VA_ARGS__)
+#define ESP_LOGI(tag, ...) fake_log(tag, __VA_ARGS__)
 
 /* hd44780: the bus of a character LCD */
 typedef struct lcd_bus_hd44780_s lcd_bus_hd44780_t;

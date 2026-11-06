@@ -115,10 +115,9 @@ int board_touch_count(void)
 
 bool board_touch_start_at(int index, const board_display_t *display, board_touch_t *out)
 {
-    if (index != 0) return false;
+    if (index != 0 || !screen) return false; /* a finger on the glass of the window: the display first */
     if (display && display->name && strcmp(display->name, shown.name) != 0) return false; /* the display it covers */
     if (!touched.name) {
-        if (!screen) return false; /* a finger on the glass of the window: the display first */
         dgx_di_host_touch_init(&mouse, screen);
         dgx_di_pointer_init(&pointer, &mouse.device, 0, screen); /* the mouse lies by flags 0 and needs no calibration */
         touched = (board_touch_t){.fingers = mouse.device.fingers, .x_max = mouse.device.x_max, .y_max = mouse.device.y_max, .name = "mouse", .index = 0};

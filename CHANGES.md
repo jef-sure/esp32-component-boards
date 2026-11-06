@@ -2,6 +2,9 @@
 
 ## 0.0.4 (not released yet)
 
+- A build whose configuration did not choose the board `BOARD` names stops at the configure with a message: on ESP-IDF
+  6 the form `-B ... -D BOARD=<board>` took the chip of the preset `default` and built no board with no error, and so
+  did an `sdkconfig` of another board in the build directory. CI checks it.
 - On the computer the touch panel is the mouse: pressed on the window it is a finger on the glass, read through
   `board_dgx_di_pointer()` as on a board, with no calibration, and it turns with the display. This takes DGX-DI 0.1.5,
   the first version that builds for the linux target, and the boards take that version too. CI checks that the touch

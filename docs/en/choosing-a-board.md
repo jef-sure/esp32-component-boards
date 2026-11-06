@@ -157,7 +157,9 @@ their current board: the first time, as `selection.json` has them. The presets r
 current board they were made with, and each command that changes it writes it into the `current` of `selection.json`
 too, so a current board the page changes since is taken, and one a command chose stays. The page opens a project with the order and the current board of
 its presets. ESP-IDF reads the defaults only into a new `sdkconfig`: to take what changed,
-remove `build/<board>/sdkconfig`.
+remove `build/<board>/sdkconfig`. A build whose configuration did not choose the board `BOARD` names stops at the
+configure and says which board it chose and for which chip: on ESP-IDF 6 the form `-B ... -D BOARD=<board>` takes the
+chip of the preset `default`, and an `sdkconfig` of another board in the build directory keeps its board.
 
 A `-D SDKCONFIG_DEFAULTS=...` on the command line wins over both: the CMake
 snippet above only sets the variable when none is given.

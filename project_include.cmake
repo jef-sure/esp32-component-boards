@@ -25,3 +25,27 @@ unset(_boards_display)
 unset(_boards_dir)
 unset(_boards_name)
 unset(_boards_upper)
+
+# BOARD names the board a build is for (the CMake of a project board_select.py serves, its presets): the configuration
+# must have chosen it. A preset of another chip under ESP-IDF 6, an sdkconfig of another board in the build directory
+# would otherwise build another board, or none, with no error.
+if(BOARD AND DEFINED CONFIG_IDF_TARGET AND EXISTS "${PROJECT_DIR}/sdkconfig.defaults.${BOARD}")
+    file(STRINGS "${PROJECT_DIR}/sdkconfig.defaults.${BOARD}" _boards_record LIMIT_COUNT 1)
+    string(TOUPPER "${BOARD}" _boards_upper)
+    if(_boards_record MATCHES "^# board_select.py " AND NOT CONFIG_BOARD_SELECT_${_boards_upper})
+        set(_boards_chosen "none")
+        get_cmake_property(_boards_variables VARIABLES)
+        foreach(_boards_variable ${_boards_variables})
+            if(_boards_variable MATCHES "^CONFIG_BOARD_SELECT_(.+)$" AND "${${_boards_variable}}")
+                string(TOLOWER "${CMAKE_MATCH_1}" _boards_chosen)
+            endif()
+        endforeach()
+        file(STRINGS "${PROJECT_DIR}/sdkconfig.defaults.${BOARD}" _boards_target REGEX "^CONFIG_IDF_TARGET=")
+        message(FATAL_ERROR "the board ${BOARD} was asked for, but the configuration chose ${_boards_chosen}: this build is for "
+                            "${CONFIG_IDF_TARGET}, sdkconfig.defaults.${BOARD} has ${_boards_target}. On ESP-IDF 6 a board builds by its "
+                            "preset, idf.py --preset ${BOARD} build; on ESP-IDF 5 by idf.py -B build/${BOARD} -D SDKCONFIG=build/${BOARD}/sdkconfig "
+                            "-D BOARD=${BOARD} build. An sdkconfig of another board in the build directory does the same: remove it.")
+    endif()
+endif()
+unset(_boards_record)
+unset(_boards_upper)

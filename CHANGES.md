@@ -17,7 +17,7 @@
 - New boards: the ESP32 DevKit with USB-C and a CH340 (`esp32_devkit_usb_c`, a variant of `esp32_devkit`), and the
   ESP32-C3 with a 0.42-inch 72x40 OLED (`esp32_c3_oled_042`), and the ESP32 with a 0.96-inch 128x64 OLED, yellow on its
   top 16 rows (`esp32_oled_096`), and the NodeMCU ESP-32S V1.1 of 38 pins in the layout of the ESP32-DevKitC
-  (`nodemcu_esp32s`).
+  (`nodemcu_esp32s`), and the ESP32-C6 Super Mini with its charger for a cell (`esp32_c6_supermini`).
 - Photos of the S3 DevKit, the front of the C3-Zero and the three Guition boards.
 
 ## 0.0.5 (2026-11-06)

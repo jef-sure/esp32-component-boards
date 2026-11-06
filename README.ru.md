@@ -90,6 +90,7 @@ idf.py build flash monitor
 | CYD (ESP32-2432S028R) | ESP32 | 320x240 ILI9341, SPI, 58x43 mm | XPT2046 (резистивный) | DAC, GPIO26 | да |
 | ESP32-C3 with a 0.42-inch OLED | ESP32-C3 | 72x40 SSD1306, I2C, 9.196x5.18 mm | нет | нет | да |
 | Waveshare ESP32-C3-Zero | ESP32-C3 | нет | нет | нет | да |
+| ESP32-C6 Super Mini | ESP32-C6 | нет | нет | нет | да |
 | ESP32 DevKit, 4 MB | ESP32 | нет | нет | нет | да |
 | ESP32 DevKit, 4 MB, USB-C | ESP32 | нет | нет | нет | да |
 | ESP32 with a 0.96-inch OLED | ESP32 | 128x64 SSD1306, I2C, 22x11.2 mm | нет | нет | да |

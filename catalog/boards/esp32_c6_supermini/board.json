@@ -1,0 +1,116 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "esp32_c6_supermini",
+    "title": "ESP32-C6 Super Mini",
+    "description": "A small ESP32-C6 board: 4 MB flash in the chip, USB-C to the chip, a blue LED and a WS2812, BOOT and RST buttons, a TP4054 charger for a cell on pads, a ceramic antenna",
+    "notes": [
+        "Sold by many shops with no maker on the board; Super Mini ESP32-C6 on the back. The schematic read names no maker; Anton's board agrees with it on every pin tried.",
+        "GPIO 12 and 13 are the USB of the chip, also on holes inside the board."
+    ],
+    "mcu": {
+        "target": "esp32c6",
+        "part": "ESP32-C6FH4",
+        "flash_mb": 4,
+        "antenna": {"kind": "on_board", "form": "ceramic", "quality": 4}
+    },
+    "devices": {
+        "usb": {
+            "class": "usb",
+            "pins": {"d_minus": 12, "d_plus": 13},
+            "notes": "The USB-C goes to the USB Serial/JTAG of the chip through 22 Ω, the console and the flashing. CC1 and CC2 have 5.1 kΩ to GND."
+        },
+        "led": {
+            "class": "led",
+            "provides": {"led": {"variant": "single"}},
+            "pins": {"out": {"gpio": 15, "active": "high"}},
+            "notes": "Blue, to GND through 1 kΩ. GPIO 15 is a strapping pin."
+        },
+        "rgb": {
+            "class": "led",
+            "ref": "LED1",
+            "chip": "ws2812b",
+            "provides": {"led": {"variant": "addressable"}},
+            "pins": {"data": 8},
+            "config": {"kind": "ws2812", "count": 1},
+            "notes": "On 3V3. GPIO 8 is a strapping pin."
+        },
+        "boot": {
+            "class": "button",
+            "pins": {"in": {"gpio": 9, "active": "low"}},
+            "notes": "BOOT; R5 holds GPIO 9 high."
+        },
+        "charger": {
+            "class": "other",
+            "ref": "TP1",
+            "part": "TP4054",
+            "notes": "Charges a cell on BAT from VBUS. Its green LED on CHRG, BAT on the board, lights while it charges. PROG has 10 kΩ."
+        },
+        "d_vbus": {"class": "other", "ref": "PD1", "notes": "From VBUS to VCC."},
+        "d_bat": {"class": "other", "notes": "From BAT to VCC; the schematic names it PD2, as the blue LED."},
+        "reg_3v3": {
+            "class": "other",
+            "ref": "U2",
+            "notes": "An LDO from VCC to 3V3; the schematic gives no part number."
+        }
+    },
+    "power": [
+        {
+            "name": "VBUS",
+            "source": "usb",
+            "mv": 5000,
+            "plug": "usb_c",
+            "why": "VBUS of the USB-C, also contact 1 of H2 (5V on the board)."
+        },
+        {"name": "BAT", "source": "battery", "why": "The pad B+ on the back; B- is GND."},
+        {"name": "VCC", "from": [{"name": "VBUS", "through": "d_vbus"}, {"name": "BAT", "through": "d_bat"}]},
+        {
+            "name": "3V3",
+            "from": "VCC",
+            "through": "reg_3v3",
+            "regulator": "ldo",
+            "mv": 3300,
+            "feeds": ["mcu", "rgb"],
+            "why": "Contact 3 of H2."
+        }
+    ],
+    "connectors": {
+        "H1": {"type": "castellated holes, 2.54 mm, 10", "pins": [7, 6, 5, 4, 3, 2, 1, 0, 17, 16]},
+        "H2": {"type": "castellated holes, 2.54 mm, 10", "pins": ["VBUS", "GND", "3V3", 20, 19, 18, 15, 14, 9, 8]},
+        "pads": {"type": "holes inside the board", "pins": [12, 13, 21, 22, 23]},
+        "battery": {"type": "pads on the back, B+ and B-", "pins": ["BAT", "GND"]}
+    },
+    "images": {
+        "front": {"file": "front.webp", "source": "a photo by Anton of his board, 2026-11-06", "shows": "front"},
+        "back": {"file": "back.webp", "source": "a photo by Anton of his board, 2026-11-06", "shows": "back"}
+    },
+    "checked": {
+        "pins": {
+            "level": "schematic",
+            "covers": ["devices", "power", "connectors"],
+            "source": "the schematic of the board, Altium, no maker named, as esp32-c6-supermini-board-schematic.pdf linked from mischianti.org/esp32-c6-supermini-high-resolution-pinout-datasheet-schema-and-specs/, fetched 2026-11-06",
+            "date": "2026-11-06"
+        },
+        "photo": {
+            "level": "hardware",
+            "covers": ["connectors"],
+            "source": "a photo by Anton of his board, 2026-11-06",
+            "notes": "The silkscreen: 5V GND 3V3 20 19 18 15 14 9 8 on one row, TX RX 0 1 2 3 4 5 6 7 on the other (16 and 17 on the back), holes 12 13 21 22 23, B+ and B- on the back.",
+            "date": "2026-11-06"
+        },
+        "bench": {
+            "level": "hardware",
+            "covers": ["devices.led", "devices.rgb"],
+            "by": "Anton, by eye",
+            "date": "2026-11-06",
+            "notes": "With GPIO 15 high for 3 s and low for 1 s the blue LED is on for 3 s. The WS2812 sent red for 3 s, then green, blue and dark for 1 s each, shows red for 3 s: the usual order of colours."
+        },
+        "chip": {
+            "level": "hardware",
+            "covers": ["mcu"],
+            "source": "esptool on Anton's board: ESP32-C6FH4 (QFN32) rev 0.2, 4 MB flash in the chip",
+            "date": "2026-11-06"
+        }
+    }
+}

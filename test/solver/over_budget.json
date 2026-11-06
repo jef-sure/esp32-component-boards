@@ -3,5 +3,5 @@
     "answers": {"budget": 10, "wifi": true},
     "prices": {"esp32_devkit": [20, 25]},
     "says": "it costs at least 20 EUR",
-    "fit": ["esp32_c3_oled_042", "esp32_c3_zero", "esp32_oled_096", "esp32_s3_zero", "esp32s3_devkit", "nodemcu_esp32s"]
+    "fit": ["esp32_c3_oled_042", "esp32_c3_zero", "esp32_c6_supermini", "esp32_oled_096", "esp32_s3_zero", "esp32s3_devkit", "nodemcu_esp32s"]
 }

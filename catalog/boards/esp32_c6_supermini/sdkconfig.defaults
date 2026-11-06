@@ -1,0 +1,6 @@
+# The ESP32-C6 Super Mini: what its chip and its memory need, read before the program's own
+# defaults. The first two lines are the choice of the board.
+CONFIG_IDF_TARGET="esp32c6"
+CONFIG_BOARD_SELECT_ESP32_C6_SUPERMINI=y
+
+CONFIG_ESPTOOLPY_FLASHSIZE_4MB=y

@@ -48,6 +48,14 @@ config BOARD_SELECT_ESP32_C3_ZERO
         A small ESP32-C3 board: 4 MB flash in the chip, castellated holes, USB-C
         to the chip, a WS2812B, BOOT and RESET buttons, a ceramic antenna.
 
+config BOARD_SELECT_ESP32_C6_SUPERMINI
+    bool "ESP32-C6 Super Mini"
+    depends on IDF_TARGET_ESP32C6
+    help
+        A small ESP32-C6 board: 4 MB flash in the chip, USB-C to the chip, a
+        blue LED and a WS2812, BOOT and RST buttons, a TP4054 charger for a cell
+        on pads, a ceramic antenna.
+
 config BOARD_SELECT_ESP32_DEVKIT
     bool "ESP32 DevKit, 4 MB"
     depends on IDF_TARGET_ESP32
@@ -213,6 +221,11 @@ config BOARD_ESP32_C3_OLED_042
 config BOARD_ESP32_C3_ZERO
     int
     default 1 if BOARD_SELECT_ESP32_C3_ZERO
+    default 0
+
+config BOARD_ESP32_C6_SUPERMINI
+    int
+    default 1 if BOARD_SELECT_ESP32_C6_SUPERMINI
     default 0
 
 config BOARD_ESP32_DEVKIT

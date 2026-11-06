@@ -1,6 +1,6 @@
 # CHANGES
 
-## 0.0.4 (not released yet)
+## 0.0.4 (2026-11-06)
 
 - A build whose configuration did not choose the board `BOARD` names stops at the configure with a message: on ESP-IDF
   6 the form `-B ... -D BOARD=<board>` took the chip of the preset `default` and built no board with no error, and so
@@ -16,6 +16,7 @@
 - `board_select.py` writes the current board it chooses into `selection.json` too, and records it in the presets: a
   current board chosen on the page is taken in a project made by command, and one a command chose can be changed back
   on the page.
+- The recipes take the component as `>=0.0.4`.
 
 ## 0.0.3 (2026-11-05)
 

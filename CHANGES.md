@@ -10,6 +10,9 @@
 - On the computer the flash of a program that has partitions is kept in `build/host/flash.bin` between runs, while the
   partition table of the build is the one it has: NVS keeps what it was given. ESP-IDF made a new file in `/tmp` at
   each run and left it there.
+- A sound may have `mixer_volume` in its data, the level of samples in percent of full scale heard comfortable on the
+  speaker of the board, and `board_sound_t` gives it to the program (0 when the data has none).
+  `examples/sound_level` plays a tone at levels from 5 to 100 percent to hear it.
 
 ## 0.0.4 (2026-11-06)
 

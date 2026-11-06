@@ -147,6 +147,11 @@ Any other kind (`sdio`, `sdspi`) is kept as data. The program reads it with
 "boot": { "class": "button", "pins": { "in": { "gpio": 35, "active": "low" } } }
 ```
 
+The `config` of a sound may have `mixer_volume`: the level of the samples, in percent of full scale, at which the
+speaker of the board sounds comfortable with its hardware as the component sets it up (a codec at the `start` of its
+`volume`). It is heard on the board, with `examples/sound_level`, and the trial goes in `checked` at the level
+`hardware`; a program's mixer starts there (`board_sound_t.mixer_volume`).
+
 | field | meaning |
 |---|---|
 | `chip` | a directory of `catalog/devices/`. A part with no entry, such as a button, gives `class` itself |

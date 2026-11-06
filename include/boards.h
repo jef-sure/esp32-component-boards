@@ -116,9 +116,10 @@ void board_touch_firmware_set(const uint8_t *start, size_t size);
  * the hardware of the board and the pacing of the output, nothing of a mixer.
  */
 typedef struct board_sound {
-    uint32_t    rate;  /* samples a second, 16 bits each, mono */
-    const char *name;  /* its name in the data, for the log */
-    int         index; /* its place among the sounds of the board */
+    uint32_t    rate;         /* samples a second, 16 bits each, mono */
+    int         mixer_volume; /* the level of samples, percent of full scale, heard comfortable on its speaker; 0: not known */
+    const char *name;         /* its name in the data, for the log */
+    int         index;        /* its place among the sounds of the board */
 } board_sound_t;
 typedef void (*board_sound_source_t)(void *ctx, int16_t *samples, size_t count); /* ctx: as given to start or source */
 int  board_sound_count(void);

@@ -145,7 +145,7 @@ Without it the touch of that board is off. See [touch-firmware.md](touch-firmwar
 ## Sound
 
 ```c
-typedef struct board_sound { uint32_t rate; const char *name; int index; } board_sound_t;
+typedef struct board_sound { uint32_t rate; int mixer_volume; const char *name; int index; } board_sound_t;
 typedef void (*board_sound_source_t)(void *ctx, int16_t *samples, size_t count);
 int  board_sound_count(void);
 bool board_sound_init(board_sound_t *out);
@@ -157,7 +157,9 @@ void board_sound_source_at(int index, board_sound_source_t source, void *ctx);
 ```
 
 The functions without `_at` are for the first output. `board_sound_init` sets the
-codec, the amplifier or the DAC up and returns its rate, and the header of its
+codec, the amplifier or the DAC up and returns its rate and `mixer_volume`, the level
+of samples in percent of full scale heard comfortable on the speaker of the board (0
+when the data has none, and on the computer), and the header of its
 adapter gives the handle of the library: `board_esp_codec_dev()` in
 `boards_esp_codec_dev.h` (an ES8311: write with `esp_codec_dev_write`, set the
 volume with `esp_codec_dev_set_out_vol`), `board_i2s_channel()` in

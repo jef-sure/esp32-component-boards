@@ -1365,7 +1365,7 @@
             "direction": { "enum": ["out", "in", "both"] },
             "sample_rate": { "type": "integer", "minimum": 1 },
             "clock": { "enum": ["mclk", "bclk"], "description": "What the codec takes its clock from. mclk when absent." },
-            "mixer_volume": { "type": "integer", "minimum": 0 },
+            "mixer_volume": { "type": "integer", "minimum": 1, "maximum": 100, "description": "The level of the samples, in percent of full scale, at which the speaker of the board sounds comfortable with its hardware as the component sets it up (the start volume of a codec): a program's mixer starts there. Heard on the board; the trial goes in checked." },
             "pa_voltage": { "type": "number" },
             "codec_dac_voltage": { "type": "number" }
           }

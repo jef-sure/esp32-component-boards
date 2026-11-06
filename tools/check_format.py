@@ -427,7 +427,7 @@ def snippets_differ():
     defaults = text[start:text.index("\nendif()\n", start) + len("\nendif()\n")]
     lock = re.search(r"^if\(BOARD\)\n    idf_build_set_property\(DEPENDENCIES_LOCK [^\n]*\nendif\(\)\n", text, flags=re.M)[0]
     copies = ["docs/en/quick-start.md", "docs/ru/quick-start.md", "docs/en/choosing-a-board.md", "docs/ru/choosing-a-board.md", "examples/hello/CMakeLists.txt", "examples/hello_board/CMakeLists.txt",
-              "examples/hello_lvgl/CMakeLists.txt", "examples/local_boards/CMakeLists.txt", "examples/multi_board/CMakeLists.txt"]
+              "examples/hello_lvgl/CMakeLists.txt", "examples/local_boards/CMakeLists.txt", "examples/multi_board/CMakeLists.txt", "examples/sound_level/CMakeLists.txt"]
     wrong = [f"{name}: the lines that read the defaults of the board differ from editor/skeleton/CMakeLists.txt" for name in copies
              if defaults not in (ROOT / name).read_text() or lock not in (ROOT / name).read_text()]
     # the program of the quick start is the example the registry hands out, which a new project of the page takes

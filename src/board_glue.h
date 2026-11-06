@@ -124,6 +124,7 @@ struct board_sound_dac;
 struct board_sound_entry {
     const char *name;
     uint32_t    rate;
+    int         mixer_volume; /* percent of full scale, heard comfortable on the board; 0 when the data has none */
     bool (*init)(int index, const struct board_sound_entry *entry);
     const struct board_sound_es8311 *es8311;
     const struct board_i2s_bus      *i2s; /* an amplifier on I2S */

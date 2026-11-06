@@ -228,7 +228,8 @@ def touch_part(name, device):
 def sound_part(name, device):
     pins, config = device.get("pins", {}), device["config"]
     started = started_by(device)
-    part = {"name": name, "kind": started["entry"]["adapter"]["kind"], **started, **{key: config[key] for key in ("sample_rate", "pa_voltage", "codec_dac_voltage") if key in config}}
+    part = {"name": name, "kind": started["entry"]["adapter"]["kind"], **started,
+            **{key: config[key] for key in ("sample_rate", "pa_voltage", "codec_dac_voltage", "mixer_volume") if key in config}}
     if part["kind"] == "dac":
         part.update({"out": number(pins["out"]), "pa": number(pins["pa"])})
     elif part["kind"] == "i2s":
@@ -527,6 +528,8 @@ def read_board(path):
             raise ValueError(f'sound of a kind not known: "{sound.get("kind")}"')
         if not isinstance(sound.get("sample_rate"), int):
             raise ValueError("the sound lacks its sample_rate")
+        if "mixer_volume" in sound and not (isinstance(sound["mixer_volume"], int) and 1 <= sound["mixer_volume"] <= 100):
+            raise ValueError("the mixer_volume of a sound is a percent of full scale, 1 to 100")
         if sound["kind"] == "dac":
             if target != "esp32":
                 raise ValueError("the DAC kind of sound is the ESP32's own: no other chip here has one")
@@ -1011,7 +1014,8 @@ def gen_c(board):
                 out(f"static const struct board_sound_dac sound{i}_dac = {{.out = {c_gpio(sound.get('out'))}, .pa = {pa}}};")
                 data = f".dac = &sound{i}_dac"
             out("")
-            entries.append(f'{{.name = "{sound["name"]}", .rate = {rate}, .init = {sound["entry"]["adapter"]["function"]}, {data}}}')
+            volume = f", .mixer_volume = {sound['mixer_volume']}" if "mixer_volume" in sound else ""
+            entries.append(f'{{.name = "{sound["name"]}", .rate = {rate}{volume}, .init = {sound["entry"]["adapter"]["function"]}, {data}}}')
         if sounds:
             out(f"static const struct board_sound_entry sound_entries[] = {{{', '.join(entries)}}};")
             out(f"static struct board_sound_stream sound_streams[{len(sounds)}];")

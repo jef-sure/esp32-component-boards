@@ -70,7 +70,7 @@ bool board_sound_init_at(int index, board_sound_t *out)
     _lock_release(&sound_lock);
     if (!ready) return false;
     const struct board_sound_entry *entry = &board_sound_table.entries[index];
-    if (out) *out = (board_sound_t){.rate = entry->rate, .name = entry->name, .index = index};
+    if (out) *out = (board_sound_t){.rate = entry->rate, .mixer_volume = entry->mixer_volume, .name = entry->name, .index = index};
     return true;
 }
 

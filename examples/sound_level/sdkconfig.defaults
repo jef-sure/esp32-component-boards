@@ -1,0 +1,3 @@
+# The program's own defaults, read after the board's (sdkconfig.defaults.board, written by
+# tools/board_select.py). Nothing here names a board or a chip: both come from that file.
+CONFIG_COMPILER_OPTIMIZATION_PERF=y

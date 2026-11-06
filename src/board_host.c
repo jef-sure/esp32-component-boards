@@ -240,7 +240,7 @@ bool board_sound_init_at(int index, board_sound_t *out)
     }
     const bool ready = speaker != 0;
     xSemaphoreGiveRecursive(sound_busy);
-    if (ready && out) *out = (board_sound_t){.rate = SOUND_RATE, .name = "speakers", .index = 0};
+    if (ready && out) *out = (board_sound_t){.rate = SOUND_RATE, .mixer_volume = 0, .name = "speakers", .index = 0}; /* the computer's: not known */
     return ready;
 }
 

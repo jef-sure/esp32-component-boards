@@ -146,7 +146,7 @@ void board_touch_firmware_set(const uint8_t *start, size_t size);
 ## Звук
 
 ```c
-typedef struct board_sound { uint32_t rate; const char *name; int index; } board_sound_t;
+typedef struct board_sound { uint32_t rate; int mixer_volume; const char *name; int index; } board_sound_t;
 typedef void (*board_sound_source_t)(void *ctx, int16_t *samples, size_t count);
 int  board_sound_count(void);
 bool board_sound_init(board_sound_t *out);
@@ -159,7 +159,9 @@ void board_sound_source_at(int index, board_sound_source_t source, void *ctx);
 
 Функции без `_at` относятся к первому выходу.
 
-`board_sound_init` настраивает кодек, усилитель или ЦАП и возвращает частоту, а
+`board_sound_init` настраивает кодек, усилитель или ЦАП и возвращает частоту и
+`mixer_volume` — уровень сэмплов в процентах от полной шкалы, при котором динамик платы
+звучит удобно на слух (0, если в данных его нет, и на компьютере), а
 заголовок адаптера даёт дескриптор библиотеки: `board_esp_codec_dev()` в
 `boards_esp_codec_dev.h` (ES8311: запись через `esp_codec_dev_write`, громкость
 через `esp_codec_dev_set_out_vol`), `board_i2s_channel()` в

@@ -92,6 +92,7 @@ for several boards are in [choosing-a-board.md](docs/en/choosing-a-board.md).
 | CYD (ESP32-2432S028R) | ESP32 | 320x240 ILI9341, SPI, 58x43 mm | XPT2046 (resistive) | DAC, GPIO26 | yes |
 | Waveshare ESP32-C3-Zero | ESP32-C3 | none | none | none | yes |
 | ESP32 DevKit, 4 MB | ESP32 | none | none | none | yes |
+| ESP32 DevKit, 4 MB, USB-C | ESP32 | none | none | none | yes |
 | Waveshare ESP32-P4-ETH | ESP32-P4 | none | none | ES8311 | yes |
 | Waveshare ESP32-P4-POE-ETH | ESP32-P4 | none | none | ES8311 | yes |
 | Waveshare ESP32-S3-Zero | ESP32-S3 | none | none | none | yes |

@@ -45,6 +45,13 @@ config BOARD_SELECT_ESP32_DEVKIT
         A standard ESP32 dev board with a CP210x USB bridge, a power LED, a
         second LED and a BOOT button.
 
+config BOARD_SELECT_ESP32_DEVKIT_USB_C
+    bool "ESP32 DevKit, 4 MB, USB-C"
+    depends on IDF_TARGET_ESP32
+    help
+        The 30-pin ESP32 dev board with USB-C and a CH340 USB bridge, a power
+        LED, a second LED and a BOOT button.
+
 config BOARD_SELECT_ESP32_P4_ETH
     bool "Waveshare ESP32-P4-ETH: ES8311 sound"
     depends on IDF_TARGET_ESP32P4
@@ -178,6 +185,11 @@ config BOARD_ESP32_C3_ZERO
 config BOARD_ESP32_DEVKIT
     int
     default 1 if BOARD_SELECT_ESP32_DEVKIT
+    default 0
+
+config BOARD_ESP32_DEVKIT_USB_C
+    int
+    default 1 if BOARD_SELECT_ESP32_DEVKIT_USB_C
     default 0
 
 config BOARD_ESP32_P4_ETH

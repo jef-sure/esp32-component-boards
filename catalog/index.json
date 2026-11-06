@@ -7,6 +7,7 @@
     "boards/cyd_s028r/board.json",
     "boards/esp32_c3_zero/board.json",
     "boards/esp32_devkit/board.json",
+    "boards/esp32_devkit_usb_c/board.json",
     "boards/esp32_p4_eth/board.json",
     "boards/esp32_p4_poe_eth/board.json",
     "boards/esp32_s3_zero/board.json",

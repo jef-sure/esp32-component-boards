@@ -1,0 +1,47 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "esp32_devkit_usb_c",
+    "extends": "esp32_devkit",
+    "title": "ESP32 DevKit, 4 MB, USB-C",
+    "description": "The 30-pin ESP32 dev board with USB-C and a CH340 USB bridge, a power LED, a second LED and a BOOT button",
+    "notes": [
+        "A board sold by many makers, so no maker is written and no schematic was read.",
+        "The same board as esp32_devkit with another USB connector and bridge (Anton): the silkscreen names the same contacts in the same order."
+    ],
+    "devices": {"led": {"pins": {"out": {"gpio": 2, "active": "high"}}}, "usb_serial": {"part": "CH340"}},
+    "power": [
+        {
+            "name": "VIN",
+            "source": "vin",
+            "mv": 5000,
+            "plug": "usb_c",
+            "why": "5 V from the USB-C, or from this contact."
+        },
+        {"name": "3V3", "from": "VIN", "regulator": "ldo", "mv": 3300, "feeds": ["mcu"]}
+    ],
+    "images": {"front": {"file": "front.webp", "source": "a photo by Anton of his board, 2026-11-06", "shows": "front"}},
+    "checked": {
+        "photo": {
+            "level": "hardware",
+            "covers": ["connectors"],
+            "source": "a photo by Anton of his board, 2026-11-06",
+            "notes": "The silkscreen: VIN GND D13 D12 D14 D27 D26 D25 D33 D32 D35 D34 VN VP EN on one side, 3V3 GND D15 D2 D4 D16 D17 D5 D18 D19 D21 RX0 TX0 D22 D23 on the other, as the connectors of esp32_devkit; a USB-C connector.",
+            "date": "2026-11-06"
+        },
+        "led": {
+            "level": "hardware",
+            "covers": ["devices.led"],
+            "by": "Anton, by eye",
+            "date": "2026-11-06",
+            "notes": "With GPIO 2 high for 3 s and low for 1 s the blue LED is on for 3 s and off for 1 s."
+        },
+        "chip": {
+            "level": "hardware",
+            "covers": ["mcu", "devices.usb_serial"],
+            "source": "esptool on Anton's board: ESP32-D0WD-V3 rev 3.1, 4 MB flash of maker 0x68; the port is a CH340, USB 1a86:7523",
+            "date": "2026-11-06"
+        }
+    }
+}

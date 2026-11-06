@@ -1,0 +1,4 @@
+# ESP32 DevKit with USB-C: what its chip and its flash need, read before the program's own
+CONFIG_IDF_TARGET="esp32"
+CONFIG_BOARD_SELECT_ESP32_DEVKIT_USB_C=y
+CONFIG_ESPTOOLPY_FLASHSIZE_4MB=y

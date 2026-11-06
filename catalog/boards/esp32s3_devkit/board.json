@@ -44,6 +44,7 @@
             "source": "Listings of N16R8 boards found by a search on ebay.de, before delivery, not a purchase"
         }
     },
+    "images": {"front": {"file": "front.webp", "source": "a photo by Anton of his board, 2026-11-06", "shows": "front"}},
     "checked": {
         "power": {
             "level": "unchecked",

@@ -44,7 +44,10 @@
             "pins": [21, 20, 19, 18, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, "3V3", "GND", "5V"]
         }
     },
-    "images": {"back": {"file": "back.webp", "source": "a photo by Anton of his board, 2026-11-02", "shows": "back"}},
+    "images": {
+        "front": {"file": "front.webp", "source": "a photo by Anton of his board, 2026-11-06", "shows": "front"},
+        "back": {"file": "back.webp", "source": "a photo by Anton of his board, 2026-11-02", "shows": "back"}
+    },
     "checked": {
         "pins": {
             "level": "schematic",

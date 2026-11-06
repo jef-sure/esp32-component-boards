@@ -28,6 +28,19 @@
             "source": "Anton: an approximate AliExpress price for Germany"
         }
     },
+    "images": {
+        "front": {
+            "file": "front.webp",
+            "source": "a photo by Anton of his board, 2026-11-06, reflections on the glass removed",
+            "shows": "front"
+        },
+        "back": {"file": "back.webp", "source": "a photo by Anton of his board, 2026-11-06", "shows": "back"},
+        "board": {
+            "file": "board.webp",
+            "source": "a photo by Anton of his board, 2026-11-06, the back cover taken off",
+            "shows": "back"
+        }
+    },
     "checked": {
         "pins": {"level": "schematic", "source": "JC8012P4A1.pdf, vendor archive", "date": "2026-10-28"},
         "sound": {

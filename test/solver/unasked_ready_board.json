@@ -8,6 +8,11 @@
             "devices": {
                 "oled": null
             }
+        },
+        "esp32_oled_096": {
+            "devices": {
+                "oled": null
+            }
         }
     },
     "first": {

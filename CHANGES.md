@@ -15,7 +15,8 @@
   SSD1309, SSD1322 and ST7789 have them; the init calls take `{panel}`, and `supports.resolution` is gone.
 - `board_display.mm_w` and `mm_h` and `BOARD_MM` are whole millimetres, rounded, where the data has fractions.
 - New boards: the ESP32 DevKit with USB-C and a CH340 (`esp32_devkit_usb_c`, a variant of `esp32_devkit`), and the
-  ESP32-C3 with a 0.42-inch 72x40 OLED (`esp32_c3_oled_042`).
+  ESP32-C3 with a 0.42-inch 72x40 OLED (`esp32_c3_oled_042`), and the ESP32 with a 0.96-inch 128x64 OLED, yellow on its
+  top 16 rows (`esp32_oled_096`).
 - Photos of the S3 DevKit, the front of the C3-Zero and the three Guition boards.
 
 ## 0.0.5 (2026-11-06)

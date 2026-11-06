@@ -94,6 +94,7 @@ for several boards are in [choosing-a-board.md](docs/en/choosing-a-board.md).
 | Waveshare ESP32-C3-Zero | ESP32-C3 | none | none | none | yes |
 | ESP32 DevKit, 4 MB | ESP32 | none | none | none | yes |
 | ESP32 DevKit, 4 MB, USB-C | ESP32 | none | none | none | yes |
+| ESP32 with a 0.96-inch OLED | ESP32 | 128x64 SSD1306, I2C, 22x11.2 mm | none | none | yes |
 | Waveshare ESP32-P4-ETH | ESP32-P4 | none | none | ES8311 | yes |
 | Waveshare ESP32-P4-POE-ETH | ESP32-P4 | none | none | ES8311 | yes |
 | Waveshare ESP32-S3-Zero | ESP32-S3 | none | none | none | yes |

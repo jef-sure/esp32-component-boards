@@ -1,0 +1,99 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "esp32_oled_096",
+    "title": "ESP32 with a 0.96-inch OLED",
+    "description": "An ESP32 board with a 128x64 SSD1306 OLED on I2C, yellow on the top rows and blue below: a CP2102 USB bridge on micro-USB, EN and Boot buttons, no LEDs",
+    "notes": [
+        "Sold by many makers with no name on the board, so no maker is written and no schematic was read. The module says ESP-32 and no more.",
+        "GPIO 4 and 5 carry the I2C of the OLED and come out on the header too."
+    ],
+    "mcu": {"target": "esp32", "part": "ESP32-D0WD-V3", "flash_mb": 4},
+    "buses": {"i2c": {"i2c0": {"sda": 5, "scl": 4}}},
+    "devices": {
+        "oled": {
+            "class": "display",
+            "chip": "ssd1306",
+            "on": {"i2c.i2c0": {"address": "0x3C"}},
+            "config": {
+                "primary": true,
+                "panel": {"width": 128, "height": 64, "mm_w": 22, "mm_h": 11.2},
+                "depth_bits": 1
+            },
+            "controls": {"orientation": {"start": {"x": "left-right", "y": "top-bottom", "swap": false}}},
+            "notes": "Two colours: rows 0 to 15 of the controller are yellow, the rest blue, with a dark strip of 0.2 mm between them. It answered with no reset driven; whether its RES reaches a GPIO is not known."
+        },
+        "boot": {"class": "button", "pins": {"in": {"gpio": 0, "active": "low"}}, "notes": "Boot on the board."},
+        "usb_serial": {"class": "other", "part": "CP2102"},
+        "reg_3v3": {"class": "other", "notes": "An LDO in SOT-223 marked 1117C."}
+    },
+    "power": [
+        {
+            "name": "5V",
+            "source": "usb",
+            "mv": 5000,
+            "plug": "micro_usb",
+            "why": "From the micro-USB, or from the contacts 5V."
+        },
+        {
+            "name": "3V3",
+            "from": "5V",
+            "through": "reg_3v3",
+            "regulator": "ldo",
+            "mv": 3300,
+            "feeds": ["mcu", "oled"],
+            "why": "On the contacts 3V3, written 3V on the short row."
+        }
+    ],
+    "connectors": {
+        "left": {
+            "type": "2.54 mm holes, 10, from the antenna end",
+            "pins": [36, 25, 26, 8, 11, 7, 6, "3V3", "GND", "5V"]
+        },
+        "right": {
+            "type": "2.54 mm holes, 16, from the antenna end",
+            "pins": [39, 16, 5, 4, 0, 2, 14, 12, 13, 15, 3, 1, "3V3", "GND", "GND", "5V"]
+        }
+    },
+    "images": {
+        "front": {"file": "front.webp", "source": "a photo by Anton of his board, 2026-11-06", "shows": "front"},
+        "back": {"file": "back.webp", "source": "a photo by Anton of his board, 2026-11-06", "shows": "back"}
+    },
+    "checked": {
+        "photo": {
+            "level": "hardware",
+            "covers": ["connectors", "devices.usb_serial", "devices.boot", "devices.reg_3v3"],
+            "source": "a photo by Anton of his board, 2026-11-06",
+            "notes": "The silkscreen, from the antenna end: SVP 25 26 S1 CM S0 CL 3V GND 5V on one side, SVN 16 5 4 0 2 14 12 13 15 RX TX 3V3 GND GND 5V on the other; S1, CM, S0 and CL are the flash lines SD1, CMD, SD0 and CLK. SILABS CP2102 on the back, a micro-USB, buttons EN and Boot.",
+            "date": "2026-11-06"
+        },
+        "bench": {
+            "level": "hardware",
+            "covers": ["buses", "devices.oled"],
+            "by": "Anton, by eye, and the logs",
+            "date": "2026-11-06",
+            "notes": "An I2C scan of every pair of the output pins at 0x3C and 0x3D found one device, 0x3C on SDA 5 and SCL 4, with no reset driven. DGX 0.10.12 with SSD1306_128X64 filled rows 0 to 15, which are yellow, and drew a line on row 16 and a frame below, which are blue."
+        },
+        "chip": {
+            "level": "hardware",
+            "covers": ["mcu"],
+            "source": "esptool on Anton's board: ESP32-D0WD-V3 rev 3.1, 4 MB flash of maker 0x68; the port is a CP2102, USB 10c4:ea60",
+            "date": "2026-11-06"
+        },
+        "leds": {
+            "level": "hardware",
+            "covers": ["devices"],
+            "by": "Anton, by eye",
+            "date": "2026-11-06",
+            "notes": "No LED on the board: nothing lights, and none is seen on either side."
+        },
+        "size": {
+            "level": "hardware",
+            "covers": ["devices.oled.config.panel"],
+            "by": "Anton, with a ruler",
+            "date": "2026-11-06",
+            "notes": "The lit area of 128x64 is 22 x 11.2 mm, the strip of 0.2 mm between the colours in it."
+        }
+    }
+}

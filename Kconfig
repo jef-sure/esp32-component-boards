@@ -62,6 +62,16 @@ config BOARD_SELECT_ESP32_DEVKIT_USB_C
         The 30-pin ESP32 dev board with USB-C and a CH340 USB bridge, a power
         LED, a second LED and a BOOT button.
 
+config BOARD_SELECT_ESP32_OLED_096
+    bool "ESP32 with a 0.96-inch OLED: 128x64 SSD1306"
+    depends on IDF_TARGET_ESP32
+    select DGX_ENABLE_I2C
+    select DGX_ENABLE_SSD1306
+    help
+        An ESP32 board with a 128x64 SSD1306 OLED on I2C, yellow on the top rows
+        and blue below: a CP2102 USB bridge on micro-USB, EN and Boot buttons,
+        no LEDs.
+
 config BOARD_SELECT_ESP32_P4_ETH
     bool "Waveshare ESP32-P4-ETH: ES8311 sound"
     depends on IDF_TARGET_ESP32P4
@@ -207,6 +217,11 @@ config BOARD_ESP32_DEVKIT_USB_C
     default 1 if BOARD_SELECT_ESP32_DEVKIT_USB_C
     default 0
 
+config BOARD_ESP32_OLED_096
+    int
+    default 1 if BOARD_SELECT_ESP32_OLED_096
+    default 0
+
 config BOARD_ESP32_P4_ETH
     int
     default 1 if BOARD_SELECT_ESP32_P4_ETH
@@ -249,7 +264,7 @@ config BOARD_JC8012P4A1C
 # touch, the mouse over it as DGX-DI reads it.
 config BOARD_DISPLAY_GRAPHICS
     int
-    default 1 if BOARD_SELECT_CYD_S028R || BOARD_SELECT_ESP32_C3_OLED_042 || BOARD_SELECT_JC1060P470C || BOARD_SELECT_JC4827W543C || BOARD_SELECT_JC8012P4A1C || BOARD_SELECT_HOST
+    default 1 if BOARD_SELECT_CYD_S028R || BOARD_SELECT_ESP32_C3_OLED_042 || BOARD_SELECT_ESP32_OLED_096 || BOARD_SELECT_JC1060P470C || BOARD_SELECT_JC4827W543C || BOARD_SELECT_JC8012P4A1C || BOARD_SELECT_HOST
     default 0
 
 config BOARD_DISPLAY_GROUP

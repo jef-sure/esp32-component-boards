@@ -42,7 +42,11 @@
     },
     "images": {
         "front": {"file": "front.webp", "source": "a photo by Anton of his board, 2026-11-06", "shows": "front"},
-        "back": {"file": "back.webp", "source": "a photo by Anton of his board, 2026-11-06", "shows": "back"}
+        "back": {
+            "file": "back.webp",
+            "source": "a photo by Anton of his board, 2026-11-06, its blue background replaced by grey",
+            "shows": "back"
+        }
     },
     "checked": {
         "pins": {

@@ -17,7 +17,7 @@ if(NOT SDKCONFIG_DEFAULTS AND BOARD)
 endif()
 
 # The component this example lies in. A project of its own takes it from the registry instead
-# (main/idf_component.yml: jef-sure/boards: ">=0.0.4"). BOARDS_COMPONENT_DIR points elsewhere
+# (main/idf_component.yml: jef-sure/boards: ">=0.0.5"). BOARDS_COMPONENT_DIR points elsewhere
 # when the example is copied out of the checkout.
 if(NOT DEFINED BOARDS_COMPONENT_DIR)
     get_filename_component(BOARDS_COMPONENT_DIR "${CMAKE_CURRENT_LIST_DIR}/../.." ABSOLUTE)

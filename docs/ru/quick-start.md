@@ -11,7 +11,7 @@
 
 ```sh
 idf.py create-project hello && cd hello
-idf.py add-dependency "jef-sure/boards>=0.0.4"
+idf.py add-dependency "jef-sure/boards>=0.0.5"
 ```
 
 ## 2. CMake, который читает плату

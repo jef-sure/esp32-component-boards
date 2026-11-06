@@ -1,6 +1,6 @@
 # CHANGES
 
-## 0.0.5 (not released yet)
+## 0.0.5 (2026-11-06)
 
 - On the computer the window is the glass of the display of the board shown, turned as the board is held, with the
   screen at the orientation the board starts with: `board_display_init` gives the width, the height and the
@@ -21,6 +21,7 @@
 - A program finds a button by its name, `board_button_find`. A button that controls a program has a name of a gamepad,
   `up`, `down`, `left`, `right`, `a`, `b`, `start`, `select`. On the computer the buttons of the board shown and those
   of a gamepad are keys, WASD and the arrows among them; CI presses them by a script of keys.
+- The recipes take the component as `>=0.0.5`.
 
 ## 0.0.4 (2026-11-06)
 

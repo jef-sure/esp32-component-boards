@@ -96,7 +96,8 @@ python3 tools/board_select.py host --as jc8012p4a1c ~/myproject    # компь�
 чипа (`--revision`), затем умолчания каждого модуля `--module`, у которого они свои (сейчас таких модулей в каталоге
 нет: страница подключает модули в плате программы). Затем `CMakePresets.json`: по пресету на каждую плату проекта —
 прежние и названные, каждая собирается в `build/<плата>`, — и `default` для текущей: первой названной, если
-`--current` не назвал другую. `--current` без плат меняет только `default`. Lock платы, `dependencies.lock.<плата>`,
+`--current` не назвал другую; она же пишется в `current` файла `selection.json`, если он в проекте есть. `--current`
+без плат меняет только `default` и этот `current`. Lock платы, `dependencies.lock.<плата>`,
 начинается с копии `dependencies.lock`. Файл умолчаний или `CMakePresets.json`, которые писал не он, не заменяются.
 См. [choosing-a-board.md](choosing-a-board.md).
 

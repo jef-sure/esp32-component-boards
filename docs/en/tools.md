@@ -93,7 +93,8 @@ Writes `~/myproject/sdkconfig.defaults.<board>` for each board named: the board'
 revision of its chip (`--revision`), then those of each module of `--module` that has defaults of its own (no module of
 the catalog has them now: the page wires modules into a board of the program). Then `CMakePresets.json`: a preset for each board of the
 project, those it had and those named, each building in `build/<board>`, and `default` for the current one, the first
-named unless `--current` names another. `--current` alone changes only `default`. A board of the project starts its
+named unless `--current` names another, which goes into the `current` of `selection.json` too when the project has
+one. `--current` alone changes only `default` and that `current`. A board of the project starts its
 lock, `dependencies.lock.<board>`, as a copy of `dependencies.lock`. A file of defaults or a `CMakePresets.json` it did
 not write is not replaced. See [choosing-a-board.md](choosing-a-board.md).
 

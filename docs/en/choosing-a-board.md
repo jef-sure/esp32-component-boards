@@ -136,7 +136,7 @@ are only in what `board_select.py` writes.
 another: `idf.py build`, `flash` and `monitor` take it with no more words.
 `idf.py --preset <board>` or `IDF_PRESET=<board>` in the environment takes another for
 one command; `board_select.py --current <board> .` makes another current and changes
-nothing but `default`, so the boards keep their order. The extension of ESP-IDF for
+nothing but `default`, so the boards keep their order, and the `current` of `selection.json` when the project has one. The extension of ESP-IDF for
 VS Code shows the presets as project configurations: *ESP-IDF: Select Project
 Configuration* chooses one, and the status bar names it.
 
@@ -146,14 +146,16 @@ whose `boards` keep the order they were added, `current` the current one and `na
 `<project>_<board>` for a kit with a project of its own, and `sdkconfig.defaults.<board>` of each with the command
 that makes it in its first line: `board_select.py --again .` makes the rest, the defaults, the presets and the glue.
 Opened from `tools/boards_mcp.py`, the page writes through it and the server runs `--again` itself, so the project
-builds at once; it also starts from the `selection.json` of the project, to add a board.
+builds at once; it also starts from the `selection.json` of the project, to add a board. A board of the presets that
+the page has no kit for, one a command named or one whose kit does not fit the answers now, is listed among the boards
+of the project with its radio and stays in the project.
 
 A `CMakePresets.json` that `board_select.py` did not write is not touched: the
 command says so, and the presets are added by hand. `board_select.py --again .` makes
 every file again by the command in its first line, and the presets, in their order and with
 their current board: the first time, as `selection.json` has them. The presets record the
-`current` of `selection.json` they followed, so a current board the page changes since is taken,
-and one a command chose stays. The page opens a project with the order and the current board of
+current board they were made with, and each command that changes it writes it into the `current` of `selection.json`
+too, so a current board the page changes since is taken, and one a command chose stays. The page opens a project with the order and the current board of
 its presets. ESP-IDF reads the defaults only into a new `sdkconfig`: to take what changed,
 remove `build/<board>/sdkconfig`.
 

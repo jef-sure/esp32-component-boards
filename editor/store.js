@@ -37,7 +37,7 @@ const PREFERENCES = { language: 'boards.language', currency: 'boards.currency', 
 // a block of a role the palette does not have would stop the solver and the canvas
 const knownRole = (role) => (library.roles ?? []).some((group) => group.roles.some((item) => item.id === role));
 // The order and the current board of a project, as board_select.py --again takes them: its presets once it has them, and
-// the current board of selection.json only when the page changed it since the presets followed it.
+// the current board of selection.json only when the page changed it since the presets were made with theirs.
 function presetsOrder(presets, wanted) {
     let doc = null;
     try {
@@ -50,9 +50,13 @@ function presetsOrder(presets, wanted) {
     const names = doc.configurePresets.map((preset) => preset.name).filter((name) => name !== 'default');
     const at = (entry) => (names.includes(entry.board) ? names.indexOf(entry.board) : names.length);
     const built = doc.configurePresets.find((preset) => preset.name === 'default')?.cacheVariables?.BOARD;
-    // presets with no record are older than it: their default stands
-    const current = wanted.current && made.follows && wanted.current !== made.follows ? wanted.current : built;
-    return { boards: [...wanted.boards].sort((a, b) => at(a) - at(b)), ...(wanted.boards.some((entry) => entry.board === current) ? { current } : {}) };
+    // presets with no record were made with no selection.json: the page wrote its current board since
+    const current = wanted.current && wanted.current !== made.follows ? wanted.current : built;
+    // the boards a command named, which selection.json has no kit for
+    const bare = doc.configurePresets.filter((preset) => preset.name !== 'default' && !wanted.boards.some((entry) => entry.board === preset.name))
+        .map((preset) => ({ board: preset.name, title: preset.displayName ?? preset.name }));
+    const known = [...wanted.boards.map((entry) => entry.board), ...bare.map((item) => item.board)];
+    return { boards: [...wanted.boards].sort((a, b) => at(a) - at(b)), bare, ...(known.includes(current) ? { current } : {}) };
 }
 const kitKey = (board, modules) => `${board}+${modules.map((item) => `${item.name}x${item.count ?? 1}`).sort().join(',')}`;
 const SELECTION = 'selection.json';
@@ -148,13 +152,15 @@ async function cmakeSnippet() {
 }
 
 // The section of the README of a project for one of its kits: the board, what it takes, its wires and its libraries.
-// The price of a kit as a card and a README write it: to buy now, what the person has at nothing, and in full when that
-// differs, everything bought, as the cost of making the thing again.
+// The price of a kit as a card and a README write it: to buy now, what the person has at nothing, with what of it is the
+// board and what the parts when it has parts, and in full when that differs, everything bought, as the cost of making the
+// thing again.
 function priceText(price, cost, say = (text, ...values) => values.reduce((out, value, i) => out.replace(`{${i}}`, value), text)) {
     if (!price) return '';
     const text = (range) => (range.known ? `${spread([range.low, range.high])} ${price.currency}${range.missing.length ? ' + ?' : ''}` : say('price not known'));
-    if (!cost || (cost.low === price.low && cost.high === price.high && cost.known === price.known)) return text(price);
-    return say('to buy now: {0} · in full: {1}', text(price), text(cost));
+    const now = price.parts ? say('{0} (the board {1}, the parts {2})', text(price), text(price.board), text(price.parts)) : text(price);
+    if (!cost || (cost.low === price.low && cost.high === price.high && cost.known === price.known)) return now;
+    return say('to buy now: {0} · in full: {1}', now, text(cost));
 }
 
 function kitSection(kit, board) {
@@ -215,9 +221,10 @@ const useEditor = Pinia.defineStore('editor', {
         installed: null, // the versions of the platforms on the computer, from the server of the model
         description: '', // what the model wrote in the end: a project gets it
         chosen: [], // the kits of the project, in the order they were added: [{ headline, kit }]
-        current: null, // the headline of the kit idf.py builds when no preset is named
+        current: null, // what idf.py builds when no preset is named: the headline of a kit, or the name of a board with no kit
         wanted: null, // selection.json of a folder opened, until the kits it names are counted
         kept: [], // the boards of selection.json whose kits do not fit the answers now: they stay in the project
+        bare: [], // the boards of the presets a command made, with no kit in selection.json: [{ board, title }]
         project: null, // the folder tools/boards_mcp.py may write a project into: { path, name, mode, for_ever }
         modelless: false, // the server came with --serve: no model answers
     }),
@@ -329,6 +336,7 @@ const useEditor = Pinia.defineStore('editor', {
                 const saved = await this.agentCall('project/file?path=selection.json').catch(() => null);
                 const presets = await this.agentCall('project/file?path=CMakePresets.json').catch(() => null);
                 if (saved?.text) this.takeSelection(saved.text, presets?.text);
+                else this.takePresets(presets?.text);
             }).catch(() => {});
         },
         async agentCall(path, options = {}) {
@@ -448,7 +456,16 @@ const useEditor = Pinia.defineStore('editor', {
             const at = this.chosen.findIndex((item) => item.headline === kit.headline);
             if (at >= 0) this.chosen.splice(at, 1);
             else this.chosen.push({ headline: kit.headline, kit: copied(kit) });
-            if (!this.chosen.some((item) => item.headline === this.current)) this.current = this.chosen[0]?.headline ?? null;
+            if (!this.chosen.some((item) => item.headline === this.current) && !this.isWithoutKit(this.current)) this.current = this.chosen[0]?.headline ?? null;
+        },
+        // The boards of the project the page has no kit for: those of selection.json whose kits do not fit the answers now,
+        // and those a command made; a kit of the same board takes its place. Its radio is its board's name.
+        withoutKit() {
+            const taken = new Set(this.chosen.filter((item) => !item.kit.project).map((item) => item.kit.name));
+            return [...this.kept.map((board) => ({ board, kept: true })), ...this.bare].filter((item) => !taken.has(item.board));
+        },
+        isWithoutKit(current) {
+            return this.withoutKit().some((item) => item.board === current);
         },
         // The kits selection.json of a folder names, found among those counted for its answers: by the board and the modules
         // with their counts, so two kits that differ in the count of a module stay two.
@@ -458,7 +475,9 @@ const useEditor = Pinia.defineStore('editor', {
             const found = this.wanted.boards.map((entry) => ({ entry, kit: counted.get(kitKey(entry.base ?? entry.board, entry.modules)) })).filter((item) => item.kit);
             this.chosen = found.map(({ kit }) => ({ headline: kit.headline, kit: copied(kit) }));
             this.kept = this.wanted.boards.filter((entry) => !found.some((item) => item.entry === entry)).map((entry) => entry.board);
-            this.current = found.find(({ entry }) => entry.board === this.wanted.current)?.kit.headline ?? this.chosen[0]?.headline ?? null;
+            this.bare = this.wanted.bare ?? [];
+            const named = found.find(({ entry }) => entry.board === this.wanted.current)?.kit.headline ?? (this.isWithoutKit(this.wanted.current) ? this.wanted.current : null);
+            this.current = named ?? this.chosen[0]?.headline ?? null;
             this.wanted = null;
         },
         // The kits of the project are counted again with every answer: the same board and modules as they are now, so a
@@ -516,8 +535,16 @@ const useEditor = Pinia.defineStore('editor', {
             this.wanted = { ...wanted, ...presetsOrder(presets, wanted) };
             this.askKits();
         },
+        // CMakePresets.json of a project with no selection.json: the boards a command made, and its current board
+        takePresets(presets) {
+            const order = presetsOrder(presets, { boards: [], current: null });
+            this.kept = [];
+            this.bare = order.bare ?? [];
+            if (order.current) this.current = order.current;
+        },
         take({ local, files, selection, presets }) {
             if (selection) this.takeSelection(selection, presets);
+            else if (presets) this.takePresets(presets);
             if (!local) {
                 this.load(files);
                 return;
@@ -633,7 +660,9 @@ const useEditor = Pinia.defineStore('editor', {
                     return [kit, board];
                 });
                 const currentKit = (savedBoards.length ? null : single) ?? this.chosen.find((item) => item.headline === this.current)?.kit ?? kits[0];
-                const current = chosen.find(([kit]) => kit === currentKit)?.[1] ?? chosen[0][1];
+                // a board with no kit here stays current when the radio names it
+                const named = !alone && !this.chosen.some((item) => item.headline === this.current) && this.isWithoutKit(this.current) ? this.current : null;
+                const current = named ?? chosen.find(([kit]) => kit === currentKit)?.[1] ?? chosen[0][1];
                 const files = {};
                 for (const [kit, board] of chosen) {
                     if (kit.project) files[LOCAL_BOARD(board)] = `${catalogJson({ ...kit.project, name: board, title: kit.modules.length ? `${kit.title} with ${kit.modules.map((item) => item.title).join(', ')}` : kit.title })}\n`;

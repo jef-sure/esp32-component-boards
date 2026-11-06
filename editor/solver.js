@@ -1047,6 +1047,8 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         let high = own ? own[1] : 0;
         let known = Boolean(own);
         const packs = [];
+        // what of the price is the parts beside the board: the modules, the small parts and the chips of chains
+        const parts = { low: 0, high: 0, known: false, missing: [], bought: 0 };
         const counted = new Map();
         for (const { module, count } of picks.filter((item) => !item.way).flatMap(boughtBy)) counted.set(module.name, { title: module.title, count: (counted.get(module.name)?.count ?? 0) + count });
         for (const item of addons) counted.set(item.name, item);
@@ -1055,41 +1057,42 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             const key = `device ${pick.way.part}`;
             counted.set(key, { title: catalog.devices[pick.way.part].title, count: (counted.get(key)?.count ?? 0) + chainCount(pick) });
         }
+        const addPart = (price, title, count, item) => {
+            const range = rangeOf(price, currency, count);
+            parts.bought += count;
+            if (!range) {
+                missing.push(title);
+                unpriced.push({ title, item });
+                parts.missing.push(title);
+                return;
+            }
+            const bought = boughtOf(price, count);
+            low += range[0] * bought;
+            high += range[1] * bought;
+            parts.low += range[0] * bought;
+            parts.high += range[1] * bought;
+            if (bought > count) packs.push({ title, bought, cost: cents(range[0] * bought) });
+            known = true;
+            parts.known = true;
+        };
         for (const [name, { title, count: wanted }] of counted) {
             const count = wanted - Math.min(wanted, have.get(name) ?? 0);
             owned ||= count < wanted;
             if (!count) continue;
             if (name.startsWith('device ')) {
                 const chip = name.slice('device '.length);
-                const price = catalog.devices[chip].price;
-                const range = rangeOf(price, currency, count);
-                if (range) {
-                    const bought = boughtOf(price, count);
-                    low += range[0] * bought;
-                    high += range[1] * bought;
-                    if (bought > count) packs.push({ title, bought, cost: cents(range[0] * bought) });
-                    known = true;
-                } else {
-                    missing.push(title);
-                    unpriced.push({ title, item: `devices/${chip}` });
-                }
+                addPart(catalog.devices[chip].price, title, count, `devices/${chip}`);
                 continue;
             }
             const kind = name in (catalog.addons ?? {}) ? 'addons' : 'modules';
-            const price = catalog[kind][name].price;
-            const range = rangeOf(price, currency, count);
-            if (range) {
-                const bought = boughtOf(price, count);
-                low += range[0] * bought;
-                high += range[1] * bought;
-                if (bought > count) packs.push({ title, bought, cost: cents(range[0] * bought) });
-                known = true;
-            } else {
-                missing.push(title);
-                unpriced.push({ title, item: `${kind}/${name}` });
-            }
+            addPart(catalog[kind][name].price, title, count, `${kind}/${name}`);
         }
-        const price = { low: cents(low), high: cents(high), currency, missing, unpriced, known, packs };
+        const price = {
+            low: cents(low), high: cents(high), currency, missing, unpriced, known, packs,
+            board: { low: cents(own ? own[0] : 0), high: cents(own ? own[1] : 0), known: Boolean(own), missing: own ? [] : [doc.title ?? doc.name] },
+            // a part the person has is not bought: parts all had cost nothing
+            ...(counted.size ? { parts: { low: cents(parts.low), high: cents(parts.high), known: parts.known || !parts.bought, missing: parts.missing } } : {}),
+        };
         // the price in full, everything bought: the cost of the thing, as for making it again
         const full = owned ? priceOf(doc, picks, currency, addons) : price;
         return { ...price, full: { low: full.low, high: full.high, known: full.known, missing: full.missing } };

@@ -106,6 +106,11 @@ for (const name of names) {
         const kit = fit.find((item) => item.name === given.cost.board && (!given.cost.module || item.modules.some((module) => module.name === given.cost.module)));
         if (kit?.price.low !== given.cost.low) say(`${given.cost.board} costs at least ${kit?.price.low}`);
         if (given.cost.high !== undefined && kit?.price.high !== given.cost.high) say(`${given.cost.board} costs at most ${kit?.price.high}`);
+        // what of the price is the board and what the parts, as the card says it
+        for (const share of ['board', 'parts'].filter((key) => given.cost[`of_${key}`])) {
+            const range = kit?.price[share];
+            if (JSON.stringify(range && [range.low, range.high]) !== JSON.stringify(given.cost[`of_${share}`])) say(`${given.cost.board}: the ${share} cost ${range && [range.low, range.high]}`);
+        }
     }
     if (given.wiring) {
         const kit = fit.find((item) => item.name === given.wiring.board);

@@ -333,23 +333,27 @@ def presets_wrong():
         made = presets("name", "binaryDir")
         if made != [("jc4827w543c", "build/jc4827w543c"), ("cyd_s028r", "build/cyd_s028r"), ("default", "build/cyd_s028r")] or "CONFIG_IDF_TARGET" not in (project / "sdkconfig.defaults.cyd_s028r").read_text():
             wrong.append(f"--again from the files of a page made the presets {made}")
-        # a current board a command chose stays through --again; one the page changes since is taken
+        # a current board a command chose stays through --again, and selection.json names it, so the page shows it
         select("--current", "jc4827w543c")
         select("--again")
         if presets("name", "binaryDir")[-1] != ("default", "build/jc4827w543c"):
             wrong.append(f"--again undid the current board of --current: {presets('name', 'binaryDir')}")
-        # presets with no record of the page keep their default
+        if json.loads((project / "selection.json").read_text()).get("current") != "jc4827w543c":
+            wrong.append("--current left another current board in selection.json")
+        # the board current before a command, named on the page again, is taken
+        (project / "selection.json").write_text(json.dumps({**page, "current": "cyd_s028r"}))
+        select("--again")
+        if presets("name", "binaryDir")[-1] != ("default", "build/cyd_s028r"):
+            wrong.append(f"--again did not take back the current board the page named: {presets('name', 'binaryDir')}")
+        # presets with no record were made with no selection.json: the current board the page wrote since is taken
+        select("--current", "cyd_s028r")
         doc = json.loads((project / "CMakePresets.json").read_text())
         doc["vendor"]["jef-sure/boards"].pop("follows", None)
         (project / "CMakePresets.json").write_text(json.dumps(doc))
-        select("--again")
-        if presets("name", "binaryDir")[-1] != ("default", "build/jc4827w543c"):
-            wrong.append(f"--again took the current board of selection.json over presets with no record: {presets('name', 'binaryDir')}")
-        select("--current", "cyd_s028r")
         (project / "selection.json").write_text(json.dumps({**page, "current": "jc4827w543c"}))
         select("--again")
         if presets("name", "binaryDir") != [("jc4827w543c", "build/jc4827w543c"), ("cyd_s028r", "build/cyd_s028r"), ("default", "build/jc4827w543c")]:
-            wrong.append(f"--again did not take the current board the page changed: {presets('name', 'binaryDir')}")
+            wrong.append(f"--again did not take the current board the page wrote over presets with no record: {presets('name', 'binaryDir')}")
         for path in project.glob("sdkconfig.defaults.*"):
             path.unlink()
         (project / "CMakePresets.json").write_text('{"version": 3, "configurePresets": []}\n')

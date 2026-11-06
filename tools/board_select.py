@@ -24,8 +24,8 @@ project has one.
 ESP-IDF 6 reads the presets: idf.py build builds the current board, idf.py --preset <BOARD> build another, and the
 extension of ESP-IDF for VS Code chooses one as a project configuration. Each board builds in a directory of its own,
 so a new board is a new sdkconfig made from its defaults: no set-target, no menuconfig.
-board_select.py --current BOARD PROJECT_DIR rewrites only default, so the boards keep their order. ESP-IDF 5 does not
-read the presets:
+board_select.py --current BOARD PROJECT_DIR rewrites only default, so the boards keep their order, and the current board
+of selection.json, so the page shows it. ESP-IDF 5 does not read the presets:
 
     idf.py -B build/<BOARD> -D SDKCONFIG=build/<BOARD>/sdkconfig -D BOARD=<BOARD> build
 
@@ -34,9 +34,10 @@ does. A CMakePresets.json or a file of defaults this command did not write is no
 
 Each file begins with the command that made it and the version of the component; when the component changes,
 board_select.py --again PROJECT_DIR makes every such file of the project again the same way, and the presets in their
-order with their current board. The presets record the current board of selection.json of the page, so --again takes
-it from there only when the page has changed it since; the first time, the order of selection.json too. A file whose first line alone is the
-command, as the page writes it, is made in full. ESP-IDF reads the defaults only into a new sdkconfig, so an
+order with their current board. The presets record the current board they were made with, and selection.json of the page
+gets it too, so --again takes the current board of selection.json only when the page has changed it since; the first
+time, the order of selection.json too. A file whose first line alone is the command, as the page writes it, is made in
+full. ESP-IDF reads the defaults only into a new sdkconfig, so an
 sdkconfig made before keeps what it had.
 
 The data is found beside this script (the component's catalog/), wherever the component lies: a checkout beside the
@@ -149,7 +150,7 @@ def with_current(doc, current):
 
 def presets_text(project, boards, targets, current, command, follows=None):
     """CMakePresets.json of the boards: one preset each in the order named, and default for the current one. follows is
-    the current board of selection.json then: a page that names another later has changed it."""
+    the current board they are made with, which selection.json gets too: a page that names another later has changed it."""
     our_presets(project, boards)
     presets = [{"name": board, "displayName": title_of(board), "binaryDir": f"build/{board}",
                 "cacheVariables": {"BOARD": board, "IDF_TARGET": target, "SDKCONFIG": f"build/{board}/sdkconfig"}} for board, target in zip(boards, targets)]
@@ -218,23 +219,25 @@ def again(parser, project):
         if path.name != "sdkconfig.defaults.board":
             targets[board] = target
     # a file named by its board is one of the boards of the presets, one of them alone too, as the page writes it
+    presets = []
     if targets:
-        boards, current, follows = order_of(project, list(targets))
+        boards, current = order_of(project, list(targets))
         command = "board_select.py --again ."  # the same wherever the project lies
-        (project / PRESETS).write_text(presets_text(project, boards, [targets[board] for board in boards], current, command, follows))
+        (project / PRESETS).write_text(presets_text(project, boards, [targets[board] for board in boards], current, command, current))
+        presets = [project / PRESETS, *current_taken(project, current)]
         print(f"{project / PRESETS}: a preset for each, and default for the current one, {current}")
         seed_locks(project, boards)
-    project_writer.keep_ours(project, [*files, *([project / PRESETS] if targets else [])])
+    project_writer.keep_ours(project, [*files, *presets])
     print("An sdkconfig made before keeps what it had: ESP-IDF reads the defaults only into a new one. To take what changed,\n"
           "remove build/<BOARD>/sdkconfig of the board.")
     return 0
 
 
 def order_of(project, boards, named=()):
-    """The order of the boards of a project, the current one, and the current one of selection.json for the presets to
-    follow. The presets this command wrote are the project's: their order and default stand, unless the page names
-    another current board than the one they followed. Without them, selection.json of the page orders. Then the boards of
-    selection.json the presets lack, those just named in the order named, and the rest by name."""
+    """The order of the boards of a project and the current one. The presets this command wrote are the project's: their
+    order and default stand, unless selection.json of the page names another current board than the one they were made
+    with. Without them, selection.json of the page orders. Then the boards of selection.json the presets lack, those just
+    named in the order named, and the rest by name."""
     chosen = project / "selection.json"
     saved = json.loads(chosen.read_text()) if chosen.exists() else {}
     listed = [entry.get("board") for entry in saved.get("boards", [])]
@@ -245,13 +248,27 @@ def order_of(project, boards, named=()):
         made = doc["configurePresets"]
         listed = [preset["name"] for preset in made if preset["name"] != DEFAULT] + listed
         default = next((preset["cacheVariables"]["BOARD"] for preset in made if preset["name"] == DEFAULT), None)
-        # presets with no record are older than it: their default stands
+        # presets with no record were made with no selection.json: the page wrote its current board since
         followed = doc["vendor"][VENDOR].get("follows")
-        current = picked if picked and followed and picked != followed else default
+        current = picked if picked and picked != followed else default
     order = list(dict.fromkeys(board for board in listed if board in boards))
     order += [board for board in named if board in boards and board not in order]
     order += sorted(board for board in boards if board not in order)
-    return order, current if current in order else order[0], picked
+    return order, current if current in order else order[0]
+
+
+def current_taken(project, current):
+    """selection.json of the page names the current board the presets are made with, so the page shows it and a change
+    there is the page's. Returns the file when it changed: as the page writes it, by four spaces."""
+    chosen = project / "selection.json"
+    try:
+        saved = json.loads(chosen.read_text()) if chosen.is_file() else None
+    except ValueError:
+        return []
+    if not isinstance(saved, dict) or saved.get("current") == current:
+        return []
+    chosen.write_text(json.dumps({**saved, "current": current}, indent=4, ensure_ascii=False) + "\n")
+    return [chosen]
 
 
 def host_text(local, shows):
@@ -300,12 +317,10 @@ def main():
         doc = our_presets(project, [args.current])
         if doc is None:
             raise SystemExit(f"{project}: no {PRESETS} there: name the boards, board_select.py BOARD ... --current {args.current} {project}")
-        # what the page names now is followed: a later change of it on the page is the page's
-        _, _, follows = order_of(project, [args.current])
-        if follows:
-            doc["vendor"][VENDOR]["follows"] = follows
+        # the page shows it as current: a later change of it on the page is the page's
+        doc["vendor"][VENDOR]["follows"] = args.current
         (project / PRESETS).write_text(with_current(doc, args.current))
-        project_writer.keep_ours(project, [project / PRESETS])
+        project_writer.keep_ours(project, [project / PRESETS, *current_taken(project, args.current)])
         print(f"{project / PRESETS}: {args.current} is the current board, idf.py build builds it")
         return 0
     if len(args.names) < 2:
@@ -335,11 +350,11 @@ def main():
     for out, text in texts.items():
         out.write_text(text)
         print(f"{out}: {out.name.split('.', 2)[2]}, {target_of(out)}")
-    every, _, follows = order_of(project, boards_of(project), boards)
+    every, _ = order_of(project, boards_of(project), boards)
     current = args.current or boards[0]
     command = "board_select.py --again ."
-    (project / PRESETS).write_text(presets_text(project, every, [target_of(project / f"sdkconfig.defaults.{board}") for board in every], current, command, follows))
-    project_writer.keep_ours(project, [*texts, project / PRESETS])
+    (project / PRESETS).write_text(presets_text(project, every, [target_of(project / f"sdkconfig.defaults.{board}") for board in every], current, command, current))
+    project_writer.keep_ours(project, [*texts, project / PRESETS, *current_taken(project, current)])
     seed_locks(project, every)
     if (project / "sdkconfig.defaults.board").exists():
         print(f"{project / 'sdkconfig.defaults.board'}: the file of one board as it was before the presets; the CMakeLists.txt of the "

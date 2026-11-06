@@ -920,7 +920,7 @@
             }
           }
         },
-        "current": { "$ref": "#/$defs/name", "description": "The board idf.py builds when no preset is named, one of boards: a field of its own, so the boards keep their order." },
+        "current": { "$ref": "#/$defs/name", "description": "The board idf.py builds when no preset is named: one of boards, or a board of CMakePresets.json a command made with no kit here. A field of its own, so the boards keep their order; board_select.py writes it when it changes the current board." },
         "others": { "type": "array", "items": { "type": "string" }, "description": "The best of the kits that fit too, at most 20: the rest come again from the answers." },
         "rejected": { "type": "array", "items": { "type": "object" }, "description": "The boards that did not fit, and why." }
       }

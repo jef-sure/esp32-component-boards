@@ -154,12 +154,18 @@ bool board_sound_start(board_sound_source_t source, void *ctx, uint32_t *rate_ou
 bool board_sound_start_at(int index, board_sound_source_t source, void *ctx, uint32_t *rate_out);
 void board_sound_source(board_sound_source_t source, void *ctx);
 void board_sound_source_at(int index, board_sound_source_t source, void *ctx);
+bool board_sound_volume_keep(int percent);
+bool board_sound_volume_keep_at(int index, int percent);
 ```
 
 The functions without `_at` are for the first output. `board_sound_init` sets the
 codec, the amplifier or the DAC up and returns its rate and `mixer_volume`, the level
-of samples in percent of full scale heard comfortable on the speaker of the board (0
-when the data has none, and on the computer), and the header of its
+of samples in percent of full scale a program's mixer starts at: the one the person
+chose last, which `board_sound_volume_keep` keeps in NVS (1 to 100; false when NVS
+cannot be set up), else the level heard comfortable on the speaker of the board in its
+data, else 0. How loud is right depends on the room and on who is near, so the data
+gives only the first. The component sets NVS up when the program has not, and leaves
+a partition NVS cannot take as it is for the program to erase. The header of its
 adapter gives the handle of the library: `board_esp_codec_dev()` in
 `boards_esp_codec_dev.h` (an ES8311: write with `esp_codec_dev_write`, set the
 volume with `esp_codec_dev_set_out_vol`), `board_i2s_channel()` in

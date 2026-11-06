@@ -14,6 +14,9 @@
   speaker of the board, and `board_sound_t` gives it to the program (0 when the data has none).
   `examples/sound_level` plays a tone at levels from 5 to 100 percent to hear it.
 - The JC8012P4A1C has its level, 50 percent, heard on the board.
+- The level the person chose last is kept in NVS by `board_sound_volume_keep`, and `board_sound_init` gives it at the
+  next start before the level of the data: how loud is right depends on the room. The component sets NVS up when the
+  program has not.
 
 ## 0.0.4 (2026-11-06)
 

@@ -9,8 +9,8 @@
 # its display a window of DGX and its touch the mouse as DGX-DI reads it, which the manifest brings by BOARD_DISPLAY_GRAPHICS
 # and BOARD_TOUCH as for a board.
 if(IDF_TARGET STREQUAL "linux")
-    idf_component_register(SRCS "src/board_host.c" INCLUDE_DIRS "include" "adapters/jef-sure__dgx/include" "adapters/jef-sure__dgx-di/include"
-                           REQUIRES freertos)
+    idf_component_register(SRCS "src/board_host.c" "src/board_volume.c" INCLUDE_DIRS "include" "adapters/jef-sure__dgx/include" "adapters/jef-sure__dgx-di/include"
+                           PRIV_INCLUDE_DIRS "src" REQUIRES freertos PRIV_REQUIRES nvs_flash)
     if(CONFIG_BOARD_DISPLAY_GRAPHICS)
         idf_component_optional_requires(PUBLIC jef-sure__dgx)
     endif()
@@ -32,10 +32,10 @@ if(IDF_TARGET STREQUAL "linux")
 endif()
 include("${CMAKE_CURRENT_LIST_DIR}/boards/boards.cmake")
 idf_component_register(SRCS "src/boards.c" "src/board_bus.c" "src/board_i2c.c" "src/board_spi.c" "src/board_button.c" "src/board_sound.c" "src/board_touch.c"
-                            "src/board_touch_fw.c" "src/board_display_none.c"
+                            "src/board_touch_fw.c" "src/board_display_none.c" "src/board_volume.c"
                        INCLUDE_DIRS "include" ${BOARDS_ADAPTER_INCLUDES}
                        PRIV_INCLUDE_DIRS "src" ${BOARDS_ADAPTER_DIRS}
-                       PRIV_REQUIRES esp_driver_i2c esp_driver_gpio esp_driver_spi)
+                       PRIV_REQUIRES esp_driver_i2c esp_driver_gpio esp_driver_spi nvs_flash)
 
 # The glue of the boards and the modules, beside the core: only the chosen board's is compiled,
 # by the symbol its data owns (CONFIG_BOARD_<BOARD>, 1 when chosen), and a module's by its

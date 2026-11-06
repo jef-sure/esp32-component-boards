@@ -7,6 +7,7 @@
 #include <sys/lock.h>
 
 #include "board_glue.h"
+#include "board_volume.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
@@ -70,7 +71,7 @@ bool board_sound_init_at(int index, board_sound_t *out)
     _lock_release(&sound_lock);
     if (!ready) return false;
     const struct board_sound_entry *entry = &board_sound_table.entries[index];
-    if (out) *out = (board_sound_t){.rate = entry->rate, .mixer_volume = entry->mixer_volume, .name = entry->name, .index = index};
+    if (out) *out = (board_sound_t){.rate = entry->rate, .mixer_volume = board_volume_kept(index, entry->mixer_volume), .name = entry->name, .index = index};
     return true;
 }
 

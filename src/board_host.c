@@ -16,6 +16,7 @@
 #include "boards.h"
 #include "boards_dgx.h"
 #include "boards_dgx_di.h"
+#include "board_volume.h"
 
 #include <SDL.h>
 #include <stdlib.h>
@@ -240,7 +241,8 @@ bool board_sound_init_at(int index, board_sound_t *out)
     }
     const bool ready = speaker != 0;
     xSemaphoreGiveRecursive(sound_busy);
-    if (ready && out) *out = (board_sound_t){.rate = SOUND_RATE, .mixer_volume = 0, .name = "speakers", .index = 0}; /* the computer's: not known */
+    /* the data has no level for the speakers of the computer: only one kept */
+    if (ready && out) *out = (board_sound_t){.rate = SOUND_RATE, .mixer_volume = board_volume_kept(0, 0), .name = "speakers", .index = 0};
     return ready;
 }
 

@@ -155,13 +155,20 @@ bool board_sound_start(board_sound_source_t source, void *ctx, uint32_t *rate_ou
 bool board_sound_start_at(int index, board_sound_source_t source, void *ctx, uint32_t *rate_out);
 void board_sound_source(board_sound_source_t source, void *ctx);
 void board_sound_source_at(int index, board_sound_source_t source, void *ctx);
+bool board_sound_volume_keep(int percent);
+bool board_sound_volume_keep_at(int index, int percent);
 ```
 
 Функции без `_at` относятся к первому выходу.
 
 `board_sound_init` настраивает кодек, усилитель или ЦАП и возвращает частоту и
-`mixer_volume` — уровень сэмплов в процентах от полной шкалы, при котором динамик платы
-звучит удобно на слух (0, если в данных его нет, и на компьютере), а
+`mixer_volume` — уровень сэмплов в процентах от полной шкалы, с которого начинает микшер
+программы. Это уровень, выбранный человеком последним: его хранит в NVS
+`board_sound_volume_keep` (от 1 до 100; false, если NVS не поднимается). Если такого нет —
+уровень из данных платы, при котором её динамик звучит удобно на слух, иначе 0. Насколько
+громко — зависит от помещения и от того, кто рядом, поэтому данные дают только первый.
+Компонент сам поднимает NVS, если программа этого не сделала, а раздел, который NVS не
+может взять как есть, оставляет программе стереть. А
 заголовок адаптера даёт дескриптор библиотеки: `board_esp_codec_dev()` в
 `boards_esp_codec_dev.h` (ES8311: запись через `esp_codec_dev_write`, громкость
 через `esp_codec_dev_set_out_vol`), `board_i2s_channel()` в

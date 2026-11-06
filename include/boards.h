@@ -117,7 +117,7 @@ void board_touch_firmware_set(const uint8_t *start, size_t size);
  */
 typedef struct board_sound {
     uint32_t    rate;         /* samples a second, 16 bits each, mono */
-    int         mixer_volume; /* the level of samples, percent of full scale, heard comfortable on its speaker; 0: not known */
+    int         mixer_volume; /* the level of samples, percent of full scale: the one kept last, else the data's; 0: none */
     const char *name;         /* its name in the data, for the log */
     int         index;        /* its place among the sounds of the board */
 } board_sound_t;
@@ -129,6 +129,9 @@ bool board_sound_start(board_sound_source_t source, void *ctx, uint32_t *rate_ou
 bool board_sound_start_at(int index, board_sound_source_t source, void *ctx, uint32_t *rate_out);
 void board_sound_source(board_sound_source_t source, void *ctx);
 void board_sound_source_at(int index, board_sound_source_t source, void *ctx);
+/* The level the person chose, 1..100 percent, kept in NVS for mixer_volume of the next start; false when it cannot be kept. */
+bool board_sound_volume_keep(int percent); /* the first one */
+bool board_sound_volume_keep_at(int index, int percent);
 
 /*
  * The board's SPI buses, as its data names them (the name is the host: "spi2" is the chip's

@@ -5,8 +5,8 @@
 - On the computer the window is the glass of the display of the board shown, turned as the board is held, with the
   screen at the orientation the board starts with: `board_display_init` gives the width, the height and the
   orientation it gives on the board. The title of the window tells the time on the bus of that board when it is SPI or
-  QSPI, and none is counted for another. The boards take DGX 0.10.11, the first version with the turn of the window,
-  its keys and a window on no bus.
+  QSPI, and none is counted for another. The boards take DGX 0.10.11: the turn of the window came in 0.10.9, its keys
+  and a window on no bus in 0.10.11.
 - On the computer a task asks the source of the sound, as on a board; the audio thread of SDL asked it before.
 - On the computer the flash of a program that has partitions is kept in `build/host/flash.bin` between runs, while the
   partition table of the build is the one it has: NVS keeps what it was given. ESP-IDF made a new file in `/tmp` at

@@ -72,7 +72,8 @@ RULES = json.loads((ROOT / "catalog" / "rules.json").read_text())
 I2C_HZ_DEFAULT = 400000
 INPUT_LINES = ("in", "int", "irq", "te", "busy")  # lines of a device that only come in
 STARTED_CLASSES = {"display", "touch", "audio", "button"}  # the rest is kept as data
-HOST_FEATURES = ("BOARD_DISPLAY_GRAPHICS",)  # the window of the computer is a host screen of DGX (src/board_host.c)
+# the window of the computer is a host screen of DGX, and its mouse a finger of DGX-DI (src/board_host.c)
+HOST_FEATURES = ("BOARD_DISPLAY_GRAPHICS", "BOARD_TOUCH")
 
 MANIFEST_BEGIN = "  # boards: dependencies generated"
 MANIFEST_END = "  # boards: end of generated"
@@ -1197,8 +1198,9 @@ def gen_kconfig(boards, modules):
     out("    depends on IDF_TARGET_LINUX")
     out("    help")
     out(kconfig_help("The linux target of ESP-IDF: the program runs on the computer, src/board_host.c gives boards.h over "
-                     "SDL2. The display is a window of DGX as large as the display of the board shown; the sound goes to the "
-                     "speakers of the computer. tools/board_select.py host --as <board> writes the size of the board shown."))
+                     "SDL2. The display is a window of DGX as large as the display of the board shown, its touch the mouse "
+                     "as DGX-DI reads it; the sound goes to the speakers of the computer. tools/board_select.py host --as "
+                     "<board> writes the size of the board shown."))
     out("")
     out("endchoice")
     out("")
@@ -1249,7 +1251,8 @@ def gen_kconfig(boards, modules):
     out("# What the chosen board and the modules have, as the rules need it: a graphics display")
     out("# brings DGX, a touch brings DGX-DI and its driver, sound with an ES8311 brings esp_codec_dev,")
     out("# a character display brings hd44780. Derived from the data, so the data of a board and the")
-    out("# rules cannot drift apart. The computer has a graphics display: its window is a screen of DGX.")
+    out("# rules cannot drift apart. The computer has a graphics display, its window a screen of DGX, and a")
+    out("# touch, the mouse over it as DGX-DI reads it.")
     all_features = {}
     for board in boards:
         for feature in features_of(board):

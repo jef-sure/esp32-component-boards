@@ -46,9 +46,9 @@
         }
     },
     "adapter": {
-        "version": "^0.1.4",
+        "version": "^0.1.5",
         "symbol": "BOARD_TOUCH",
-        "notes": "0.1.4 has the struct tag of dgx_di_pointer_t.",
+        "notes": "0.1.4 has the struct tag of dgx_di_pointer_t. 0.1.5 builds for the linux target of ESP-IDF and has dgx_di_host.h: the mouse over a window of DGX as a finger, the touch of the board host.",
         "headers": ["board_touch.h"],
         "public": "boards_dgx_di.h",
         "sources": {

@@ -1,5 +1,19 @@
 # CHANGES
 
+## 0.0.4 (not released yet)
+
+- On the computer the touch panel is the mouse: pressed on the window it is a finger on the glass, read through
+  `board_dgx_di_pointer()` as on a board, with no calibration, and it turns with the display. This takes DGX-DI 0.1.5,
+  the first version that builds for the linux target, and the boards take that version too. CI checks that the touch
+  of `hello_board` starts on the computer.
+- The page says what of the price of a kit is the board and what the parts, on the card and in the README of a
+  project.
+- The page lists the boards of the presets it has no kit for, those a command named and those whose kit does not fit
+  the answers now, each with its radio, and opens a project with the current board its presets have.
+- `board_select.py` writes the current board it chooses into `selection.json` too, and records it in the presets: a
+  current board chosen on the page is taken in a project made by command, and one a command chose can be changed back
+  on the page.
+
 ## 0.0.3 (2026-11-05)
 
 - On the computer, the board `host`, the display is a window of DGX: the program draws on it through

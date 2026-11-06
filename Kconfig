@@ -107,9 +107,10 @@ config BOARD_SELECT_HOST
     help
         The linux target of ESP-IDF: the program runs on the computer,
         src/board_host.c gives boards.h over SDL2. The display is a window of
-        DGX as large as the display of the board shown; the sound goes to the
-        speakers of the computer. tools/board_select.py host --as <board> writes
-        the size of the board shown.
+        DGX as large as the display of the board shown, its touch the mouse as
+        DGX-DI reads it; the sound goes to the speakers of the computer.
+        tools/board_select.py host --as <board> writes the size of the board
+        shown.
 
 endchoice
 
@@ -194,7 +195,8 @@ config BOARD_JC8012P4A1C
 # What the chosen board and the modules have, as the rules need it: a graphics display
 # brings DGX, a touch brings DGX-DI and its driver, sound with an ES8311 brings esp_codec_dev,
 # a character display brings hd44780. Derived from the data, so the data of a board and the
-# rules cannot drift apart. The computer has a graphics display: its window is a screen of DGX.
+# rules cannot drift apart. The computer has a graphics display, its window a screen of DGX, and a
+# touch, the mouse over it as DGX-DI reads it.
 config BOARD_DISPLAY_GRAPHICS
     int
     default 1 if BOARD_SELECT_CYD_S028R || BOARD_SELECT_JC1060P470C || BOARD_SELECT_JC4827W543C || BOARD_SELECT_JC8012P4A1C || BOARD_SELECT_HOST
@@ -225,7 +227,7 @@ config BOARD_SOUND_I2S
 
 config BOARD_TOUCH
     int
-    default 1 if BOARD_SELECT_CYD_S028R || BOARD_SELECT_JC1060P470C || BOARD_SELECT_JC4827W543C || BOARD_SELECT_JC8012P4A1C
+    default 1 if BOARD_SELECT_CYD_S028R || BOARD_SELECT_JC1060P470C || BOARD_SELECT_JC4827W543C || BOARD_SELECT_JC8012P4A1C || BOARD_SELECT_HOST
     default 0
 
 config BOARD_TOUCH_ESP_LCD

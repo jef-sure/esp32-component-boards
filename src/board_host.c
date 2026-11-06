@@ -3,8 +3,8 @@
  * is a window of DGX (dgx_host_screen_init, DGX 0.10.8 and later) as large as the display of the board it shows
  * (CONFIG_BOARD_HOST_*, written by tools/board_select.py host --as <board>), and the sound goes to the speakers of the
  * computer. The task that starts the display shows the window in its waits and needs 48 KB of stack left, as
- * CONFIG_ESP_MAIN_TASK_STACK_SIZE=16384 gives app_main. The mouse as a finger of DGX-DI waits for DGX-DI to build for the
- * linux target: until then the board has no touch panel, and every part it has not returns false as on a board.
+ * CONFIG_ESP_MAIN_TASK_STACK_SIZE=16384 gives app_main. The touch panel is the mouse over the window, a finger of DGX-DI
+ * (dgx_di_host.h, DGX-DI 0.1.5 and later); every part the computer has not returns false as on a board.
  */
 #include "sdkconfig.h"
 
@@ -14,9 +14,12 @@
 
 #include "boards.h"
 #include "boards_dgx.h"
+#include "boards_dgx_di.h"
 
 #include <SDL.h>
+#include <string.h>
 
+#include "dgx_di_host.h"
 #include "dgx_host_screen.h"
 #include "drivers/dgx_panel.h"
 #include "esp_log.h"
@@ -99,26 +102,44 @@ bool board_character_display_init(board_character_display_t *out)
     return false;
 }
 
-/* ---- the touch panel: the mouse as a finger once DGX-DI builds for the computer ---- */
+/* ---- the touch panel: the mouse over the window, a finger on its glass as DGX-DI reads it ---- */
+
+static board_touch_t       touched;
+static dgx_di_host_touch_t mouse;
+static dgx_di_pointer_t    pointer;
 
 int board_touch_count(void)
 {
-    return 0;
-}
-
-bool board_touch_start(const board_display_t *display, board_touch_t *out)
-{
-    (void)display;
-    (void)out;
-    return false;
+    return 1;
 }
 
 bool board_touch_start_at(int index, const board_display_t *display, board_touch_t *out)
 {
-    (void)index;
-    (void)display;
-    (void)out;
-    return false;
+    if (index != 0) return false;
+    if (display && display->name && strcmp(display->name, shown.name) != 0) return false; /* the display it covers */
+    if (!touched.name) {
+        if (!screen) return false; /* a finger on the glass of the window: the display first */
+        dgx_di_host_touch_init(&mouse, screen);
+        dgx_di_pointer_init(&pointer, &mouse.device, 0, screen); /* the mouse lies by flags 0 and needs no calibration */
+        touched = (board_touch_t){.fingers = mouse.device.fingers, .x_max = mouse.device.x_max, .y_max = mouse.device.y_max, .name = "mouse", .index = 0};
+    }
+    if (out) *out = touched;
+    return true;
+}
+
+bool board_touch_start(const board_display_t *display, board_touch_t *out)
+{
+    return board_touch_start_at(0, display, out);
+}
+
+dgx_di_device_t *board_dgx_di_device(const board_touch_t *touch)
+{
+    return touch && touch->index == 0 && touched.name ? &mouse.device : NULL;
+}
+
+dgx_di_pointer_t *board_dgx_di_pointer(const board_touch_t *touch)
+{
+    return touch && touch->index == 0 && touched.name ? &pointer : NULL;
 }
 
 void board_touch_firmware_set(const uint8_t *start, size_t size)

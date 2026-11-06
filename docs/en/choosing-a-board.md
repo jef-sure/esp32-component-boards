@@ -183,8 +183,9 @@ on it as on the panel of the board, and its title tells how long the bytes sent 
 how much memory the program and DGX hold. The task that starts the display shows the window in its waits (`vTaskDelay`), so the
 display is started from `app_main` or from a task with 48 KB of stack left; `sdkconfig.defaults.host` gives `app_main`
 128 KB (`CONFIG_ESP_MAIN_TASK_STACK_SIZE=16384`, in words of 8 bytes). After `app_main` returns the window stays until
-it is closed; a window that is closed ends the program. The computer has the sound, by SDL. There is no touch until
-DGX-DI builds for the linux target. It takes SDL2 and libbsd of the computer (`libsdl2-dev`, `libbsd-dev`) and runs on
+it is closed; a window that is closed ends the program. The touch panel is the mouse: pressed on the window it is a
+finger on the glass (`dgx_di_host.h`, DGX-DI 0.1.5 and later), read through `board_dgx_di_pointer()` as on a board, with
+no calibration, and it turns with the display. The computer has the sound, by SDL. It takes SDL2 and libbsd of the computer (`libsdl2-dev`, `libbsd-dev`) and runs on
 Linux; Windows is not a target of ESP-IDF.
 
 ## What comes with the choice

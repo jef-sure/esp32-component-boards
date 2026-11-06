@@ -71,7 +71,7 @@ const struct board_touch_table board_touch_table = {.entries = touch_entries, .s
 static const struct board_sound_es8311 sound0_es8311 = {.i2s = &board_i2s_i2s0, .i2c_port = I2C_NUM_0, .address = 0x18, .pa = GPIO_NUM_20,
                                                       .pa_voltage = 5.0f, .codec_dac_voltage = 3.3f, .volume = 25};
 
-static const struct board_sound_entry sound_entries[] = {{.name = "sound", .rate = 22050, .init = board_glue_sound_es8311_init, .es8311 = &sound0_es8311}};
+static const struct board_sound_entry sound_entries[] = {{.name = "sound", .rate = 22050, .mixer_volume = 50, .init = board_glue_sound_es8311_init, .es8311 = &sound0_es8311}};
 static struct board_sound_stream sound_streams[1];
 const struct board_sound_table board_sound_table = {.entries = sound_entries, .streams = sound_streams, .count = 1};
 

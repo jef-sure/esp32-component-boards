@@ -98,6 +98,13 @@
             "covers": ["power"],
             "source": "TLV62569: 2 A, step-down, ti.com/product/TLV62569",
             "date": "2026-10-31"
+        },
+        "sound_level": {
+            "level": "hardware",
+            "covers": ["devices.sound.config.mixer_volume"],
+            "by": "Anton",
+            "date": "2026-11-06",
+            "notes": "examples/sound_level on the board, the codec at its start volume 25: 5 percent of full scale quiet, 100 percent noticeable, the middle normal."
         }
     },
     "buses": {
@@ -252,7 +259,7 @@
             "part": "ES8311-S",
             "on": {"i2c.i2c0": {}, "i2s.i2s0": {}},
             "pins": {"pa": 20},
-            "config": {"sample_rate": 22050, "pa_voltage": 5, "codec_dac_voltage": 3.3},
+            "config": {"sample_rate": 22050, "pa_voltage": 5, "codec_dac_voltage": 3.3, "mixer_volume": 50},
             "controls": {"volume": {"start": 25}},
             "notes": [
                 "MIC1 feeds the codec and ASDOUT comes in on GPIO11. Only the output is set up.",

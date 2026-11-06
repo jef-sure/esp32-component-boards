@@ -13,6 +13,7 @@
 - A sound may have `mixer_volume` in its data, the level of samples in percent of full scale heard comfortable on the
   speaker of the board, and `board_sound_t` gives it to the program (0 when the data has none).
   `examples/sound_level` plays a tone at levels from 5 to 100 percent to hear it.
+- The JC8012P4A1C has its level, 50 percent, heard on the board.
 
 ## 0.0.4 (2026-11-06)
 

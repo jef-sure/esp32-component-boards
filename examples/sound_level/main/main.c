@@ -16,12 +16,13 @@
 #include "dgx_draw.h"
 #endif
 
-enum { TONE_PERIOD = 50, LEVEL_STEP = 5, LEVEL_MAX = 100, STEP_MS = 3000 }; /* 441 Hz at 22050 */
+enum { TONE_HZ = 441, LEVEL_STEP = 5, LEVEL_MAX = 100, STEP_MS = 3000 };
 #define TWO_PI    6.2831853f
 #define FULL_SCALE 32767.0f
 
 struct tone {
-    volatile int level; /* percent of full scale */
+    volatile int level;  /* percent of full scale */
+    uint32_t     period; /* samples a wave at the rate of the board */
     uint32_t     phase;
 };
 
@@ -30,8 +31,8 @@ static void tone(void *ctx, int16_t *samples, size_t count)
     struct tone *wave      = ctx;
     const float  amplitude = FULL_SCALE * (float)wave->level / LEVEL_MAX;
     for (size_t i = 0; i < count; ++i) {
-        samples[i]  = (int16_t)(sinf((float)wave->phase * TWO_PI / TONE_PERIOD) * amplitude);
-        wave->phase = (wave->phase + 1) % TONE_PERIOD;
+        samples[i]  = (int16_t)(sinf((float)wave->phase * TWO_PI / (float)wave->period) * amplitude);
+        wave->phase = (wave->phase + 1) % wave->period;
     }
 }
 
@@ -43,10 +44,11 @@ void app_main(void)
         printf("the board has no sound, or it could not be set up\n");
         return;
     }
+    wave.period = sound.rate / TONE_HZ;
     if (sound.mixer_volume) printf("the data of %s says %d%%\n", board_info()->name, sound.mixer_volume);
     else printf("the data of %s has no level of its sound yet\n", board_info()->name);
 #if CONFIG_BOARD_DISPLAY_GRAPHICS
-    board_display_t display;
+    board_display_t display = {0};
     dgx_screen_t   *screen = board_display_init(&display) ? board_dgx_screen(&display) : NULL;
     if (screen) dgx_fill_rectangle(screen, 0, 0, display.width, display.height, 0);
 #endif

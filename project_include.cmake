@@ -49,3 +49,7 @@ if(BOARD AND DEFINED CONFIG_IDF_TARGET AND EXISTS "${PROJECT_DIR}/sdkconfig.defa
 endif()
 unset(_boards_record)
 unset(_boards_upper)
+unset(_boards_chosen)
+unset(_boards_variables)
+unset(_boards_variable)
+unset(_boards_target)

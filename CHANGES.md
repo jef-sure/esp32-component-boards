@@ -5,7 +5,8 @@
 - On the computer the window is the glass of the display of the board shown, turned as the board is held, with the
   screen at the orientation the board starts with: `board_display_init` gives the width, the height and the
   orientation it gives on the board. The title of the window tells the time on the bus of that board when it is SPI or
-  QSPI. This takes DGX 0.10.10 for every board.
+  QSPI, and none is counted for another. The boards take DGX 0.10.11, the first version with the turn of the window,
+  its keys and a window on no bus.
 - On the computer a task asks the source of the sound, as on a board; the audio thread of SDL asked it before.
 - On the computer the flash of a program that has partitions is kept in `build/host/flash.bin` between runs, while the
   partition table of the build is the one it has: NVS keeps what it was given. ESP-IDF made a new file in `/tmp` at
@@ -19,8 +20,7 @@
   program has not.
 - A program finds a button by its name, `board_button_find`. A button that controls a program has a name of a gamepad,
   `up`, `down`, `left`, `right`, `a`, `b`, `start`, `select`. On the computer the buttons of the board shown and those
-  of a gamepad are keys (DGX 0.10.11), WASD and the arrows among them; CI presses them by a script of keys.
-- On the computer a display that is not on SPI or QSPI has no bus counted in the title of its window.
+  of a gamepad are keys, WASD and the arrows among them; CI presses them by a script of keys.
 
 ## 0.0.4 (2026-11-06)
 

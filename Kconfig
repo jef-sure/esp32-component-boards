@@ -129,6 +129,27 @@ config BOARD_HOST_MM_W
 config BOARD_HOST_MM_H
     int "Its height in millimetres, 0 when the data has no size"
     default 0
+config BOARD_HOST_DIR_X
+    int "The direction of x on its glass at start: 1, or -1 the other way"
+    default 1
+config BOARD_HOST_DIR_Y
+    int "The direction of y on its glass at start: 1, or -1 the other way"
+    default 1
+config BOARD_HOST_SWAP
+    int "1 when x and y are exchanged on its glass at start"
+    default 0
+config BOARD_HOST_TURN
+    int "Its glass turned clockwise in the window as the board is held, degrees"
+    default 0
+config BOARD_HOST_BUS_HZ
+    int "The clock of the bus of its display, 0 for the window's 40 MHz"
+    default 0
+config BOARD_HOST_BUS_LINES
+    int "The data lines of that bus: 1 for SPI, 4 for QSPI, 0 for 1"
+    default 0
+config BOARD_HOST_COLOR_BITS
+    int "Its depth of color, 16 or 18"
+    default 16
 endif
 
 config BOARD_SOUND_TASK_STACK

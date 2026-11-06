@@ -1,5 +1,16 @@
 # CHANGES
 
+## 0.0.5 (not released yet)
+
+- On the computer the window is the glass of the display of the board shown, turned as the board is held, with the
+  screen at the orientation the board starts with: `board_display_init` gives the width, the height and the
+  orientation it gives on the board. The title of the window tells the time on the bus of that board when it is SPI or
+  QSPI. This takes DGX 0.10.10 for every board.
+- On the computer a task asks the source of the sound, as on a board; the audio thread of SDL asked it before.
+- On the computer the flash of a program that has partitions is kept in `build/host/flash.bin` between runs, while the
+  partition table of the build is the one it has: NVS keeps what it was given. ESP-IDF made a new file in `/tmp` at
+  each run and left it there.
+
 ## 0.0.4 (2026-11-06)
 
 - A build whose configuration did not choose the board `BOARD` names stops at the configure with a message: on ESP-IDF

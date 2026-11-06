@@ -17,6 +17,14 @@ if(IDF_TARGET STREQUAL "linux")
     if(CONFIG_BOARD_TOUCH)
         idf_component_optional_requires(PUBLIC jef-sure__dgx-di)
     endif()
+    # the flash of a program that has partitions (NVS, a file system) kept in the build directory between runs
+    idf_build_get_property(_boards_components BUILD_COMPONENTS)
+    if("esp_partition" IN_LIST _boards_components)
+        idf_build_get_property(_boards_build_dir BUILD_DIR)
+        idf_component_optional_requires(PRIVATE esp_partition)
+        target_compile_definitions(${COMPONENT_LIB} PRIVATE "BOARDS_HOST_FLASH=\"${_boards_build_dir}/flash.bin\""
+                                                            "BOARDS_HOST_TABLE=\"${_boards_build_dir}/partition_table/partition-table.bin\"")
+    endif()
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(BOARDS_SDL2 REQUIRED IMPORTED_TARGET sdl2)
     target_link_libraries(${COMPONENT_LIB} PUBLIC PkgConfig::BOARDS_SDL2 m) # libm, which a chip's program always has

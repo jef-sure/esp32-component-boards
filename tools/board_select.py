@@ -118,6 +118,11 @@ def defaults_text(project, local, board, modules, revision):
 
 
 HOST = "host"
+# the start orientations of a display that are a turn of its glass, (x, y, swap), and the turn of the window that shows its
+# screen upright, as measured with DGX 0.10.10: a finger pressed at a pixel of the window is at that pixel of the screen
+HOST_TURNS = {("left-right", "top-bottom", False): 0, ("right-left", "bottom-top", False): 180,
+              ("right-left", "top-bottom", True): 270, ("left-right", "bottom-top", True): 90}
+HOST_BUS_LINES = {"spi": 1, "qspi": 4}  # the buses the window of DGX counts the time of
 HOST_MAIN_STACK_WORDS = 16384  # 128 KB on the computer, as DGX asks of the task that makes its window
 RECORD = "# board_select.py "  # the first line of a file it writes: the arguments that make it again
 PRESETS = "CMakePresets.json"
@@ -279,7 +284,8 @@ def host_text(local, shows):
     path = path if path.exists() else ROOT / "catalog" / "boards" / shows / "board.json"
     if not path.exists():
         raise SystemExit(f"{shows}: no such board in catalog/boards/ or in components/local-boards/boards/")
-    primary = boards_gen.primary_shown(boards_gen.read_board(path))
+    board = boards_gen.read_board(path)
+    primary = boards_gen.primary_shown(board)
     if not primary:
         raise SystemExit(f"{shows} has no pixel display for the computer to show")
     width, height, mm_w, mm_h = primary
@@ -287,8 +293,29 @@ def host_text(local, shows):
             "# Read before the project's own sdkconfig.defaults. Made from the data of the component: do not edit.\n"
             f'CONFIG_IDF_TARGET="linux"\nCONFIG_BOARD_SELECT_HOST=y\nCONFIG_BOARD_HOST_SHOWS="{shows}"\n'
             f"CONFIG_BOARD_HOST_WIDTH={width}\nCONFIG_BOARD_HOST_HEIGHT={height}\nCONFIG_BOARD_HOST_MM_W={mm_w}\nCONFIG_BOARD_HOST_MM_H={mm_h}\n"
-            "# the window of DGX needs 48 KB of stack left in the task that starts the display: app_main's, in words of 8 bytes here\n"
+            + host_window(board)
+            + "# the window of DGX needs 48 KB of stack left in the task that starts the display: app_main's, in words of 8 bytes here\n"
             f"CONFIG_ESP_MAIN_TASK_STACK_SIZE={HOST_MAIN_STACK_WORDS}\n"), "linux"
+
+
+def host_window(board):
+    """The window of the computer as the display of the board: its glass turned as the board is held and the screen at the
+    orientation it starts with there, the bus whose time the title tells, the depth of color. A display that starts
+    mirrored, or a group of two, is shown as it is shown on the board, not turned."""
+    display = board.get("display")
+    if board.get("display_groups") or not display:
+        return ""
+    start = display["original_orientation"]
+    turn = HOST_TURNS.get((start["x"], start["y"], start.get("swap", False)))
+    kind, own = display["bus"]["bus"].split(".")
+    bus = (board.get("buses", {}).get(kind) or {}).get(own) or {}
+    lines = [f"CONFIG_BOARD_HOST_COLOR_BITS={display['depth_bits']}"]
+    if turn is not None:
+        lines += [f"CONFIG_BOARD_HOST_DIR_X={1 if start['x'] == 'left-right' else -1}", f"CONFIG_BOARD_HOST_DIR_Y={1 if start['y'] == 'top-bottom' else -1}",
+                  f"CONFIG_BOARD_HOST_SWAP={int(start.get('swap', False))}", f"CONFIG_BOARD_HOST_TURN={turn}"]
+    if kind in HOST_BUS_LINES and bus.get("hz"):
+        lines += [f"CONFIG_BOARD_HOST_BUS_HZ={bus['hz']}", f"CONFIG_BOARD_HOST_BUS_LINES={HOST_BUS_LINES[kind]}"]
+    return "".join(f"{line}\n" for line in lines)
 
 
 def target_of(path):

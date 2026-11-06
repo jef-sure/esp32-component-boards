@@ -166,8 +166,8 @@ snippet above only sets the variable when none is given.
 
 ## The computer
 
-A program runs on the computer as on a board: the board `host`, the linux target of ESP-IDF, a window of DGX as large
-as the display of the board it shows.
+A program runs on the computer as on a board: the board `host`, the linux target of ESP-IDF, a window of DGX with the
+display of the board it shows.
 
 ```sh
 python3 managed_components/jef-sure__boards/tools/board_select.py host --as jc8012p4a1c .
@@ -180,14 +180,19 @@ gives it at once.
 
 `board_select.py` writes `sdkconfig.defaults.host` beside the files of the boards of the project, and the CMake of the
 skeleton builds only `main` and what it asks for the computer. `BOARD_PIXELS` and `BOARD_MM` are those of the board
-shown. The window is a host screen of DGX (`dgx_host_screen_init`, DGX 0.10.8 and later): `board_dgx_screen()` draws
-on it as on the panel of the board, and its title tells how long the bytes sent would take on an SPI bus of 40 MHz and
-how much memory the program and DGX hold. The task that starts the display shows the window in its waits (`vTaskDelay`), so the
+shown. The window is a host screen of DGX (`dgx_host_screen_init`, DGX 0.10.10 and later): the glass of the display of
+the board, turned as the board is held, with the screen at the orientation the board starts with, so
+`board_display_init` gives the width, the height and the orientation it gives on the board, and `board_dgx_screen()`
+draws on it as on the panel. Its title tells how long the bytes sent would take on the bus of that board when it is SPI
+or QSPI, and how much memory the program and DGX hold. A display that starts mirrored, or a group of two, is shown as
+it is seen, not turned. The task that starts the display shows the window in its waits (`vTaskDelay`), so the
 display is started from `app_main` or from a task with 48 KB of stack left; `sdkconfig.defaults.host` gives `app_main`
 128 KB (`CONFIG_ESP_MAIN_TASK_STACK_SIZE=16384`, in words of 8 bytes). After `app_main` returns the window stays until
 it is closed; a window that is closed ends the program. The touch panel is the mouse: pressed on the window it is a
 finger on the glass (`dgx_di_host.h`, DGX-DI 0.1.5 and later), read through `board_dgx_di_pointer()` as on a board, with
-no calibration, and it turns with the display. The computer has the sound, by SDL. It takes SDL2 and libbsd of the computer (`libsdl2-dev`, `libbsd-dev`) and runs on
+no calibration, and it turns with the display. The sound goes to the speakers of the computer: a task asks the
+source, as on a board. The flash of a program that has partitions (NVS, a file system) is kept between runs in
+`build/host/flash.bin` while the partition table of the build is the one it has; removing the file erases it. It takes SDL2 and libbsd of the computer (`libsdl2-dev`, `libbsd-dev`) and runs on
 Linux; Windows is not a target of ESP-IDF.
 
 ## What comes with the choice

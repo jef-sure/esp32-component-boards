@@ -103,17 +103,19 @@ jobs:
           command: ${{ matrix.idf == 'v6.1' && 'idf.py build' || 'idf.py -B build/my_board -D SDKCONFIG=build/my_board/sdkconfig -D BOARD=my_board build' }}
 
   host:
-    name: the computer as the JC4827W543C on ESP-IDF ${{ matrix.idf }}
+    name: the computer as the ${{ matrix.shows }} on ESP-IDF ${{ matrix.idf }}
     needs: check
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         idf: [release-v5.5, v6.1]
+        # a glass shown as it is, and one turned in the window as the board is held
+        shows: [jc4827w543c, cyd_s028r]
     steps:
       - uses: actions/checkout@v4
       - name: choose the computer
-        run: python3 tools/board_select.py host --as jc4827w543c examples/hello_board
+        run: python3 tools/board_select.py host --as ${{ matrix.shows }} examples/hello_board
       - name: build hello_board for the linux target, run it with no screen, check the picture of its window and its touch, the mouse
         uses: espressif/esp-idf-ci-action@v1
         with:

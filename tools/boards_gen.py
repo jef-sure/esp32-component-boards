@@ -1208,7 +1208,14 @@ def gen_kconfig(boards, modules):
     out("config BOARD_HOST_SHOWS")
     out("    string \"The board the window shows\"")
     for symbol, prompt, value in (("WIDTH", "Its width in pixels, as shown", 320), ("HEIGHT", "Its height in pixels, as shown", 240),
-                                  ("MM_W", "Its width in millimetres, 0 when the data has no size", 0), ("MM_H", "Its height in millimetres, 0 when the data has no size", 0)):
+                                  ("MM_W", "Its width in millimetres, 0 when the data has no size", 0), ("MM_H", "Its height in millimetres, 0 when the data has no size", 0),
+                                  ("DIR_X", "The direction of x on its glass at start: 1, or -1 the other way", 1),
+                                  ("DIR_Y", "The direction of y on its glass at start: 1, or -1 the other way", 1),
+                                  ("SWAP", "1 when x and y are exchanged on its glass at start", 0),
+                                  ("TURN", "Its glass turned clockwise in the window as the board is held, degrees", 0),
+                                  ("BUS_HZ", "The clock of the bus of its display, 0 for the window's 40 MHz", 0),
+                                  ("BUS_LINES", "The data lines of that bus: 1 for SPI, 4 for QSPI, 0 for 1", 0),
+                                  ("COLOR_BITS", "Its depth of color, 16 or 18", 16)):
         out(f"config BOARD_HOST_{symbol}")
         out(f"    int \"{prompt}\"")
         out(f"    default {value}")

@@ -29,6 +29,14 @@
             "source": "Anton: an approximate AliExpress price for Germany"
         }
     },
+    "images": {
+        "front": {
+            "file": "front.webp",
+            "source": "a photo by Anton of his board, 2026-11-07, reflections on the glass removed",
+            "shows": "front"
+        },
+        "back": {"file": "back.webp", "source": "a photo by Anton of his board, 2026-11-07", "shows": "back"}
+    },
     "checked": {
         "pins": {
             "level": "schematic",

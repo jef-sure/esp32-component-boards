@@ -22,9 +22,9 @@ Checks of the data format. Needs jsonschema and node: the Python of ESP-IDF has 
 12. board_select.py writes for one board what it writes for several, a preset for each board in the order named and default
    for the current one; a board named again becomes current, --current changes only default, --again makes them again by
    selection.json, and a CMakePresets.json or a file of defaults of another is left alone;
-13. the lines of CMake that read the defaults of the board and its lock are the same in editor/skeleton/, the examples, the
-   quick start and choosing-a-board.md, and examples/hello, which the registry hands out, is the skeleton filled for the
-   registry; --fix writes it so;
+13. the lines of CMake that read the defaults of the board and its lock are the same in editor/skeleton/, the examples and
+   choosing-a-board.md, the program of the quick start is examples/hello/main/main.c, and examples/hello, which the
+   registry hands out, is the skeleton filled for the registry; --fix writes it so;
 14. board_project.py --selection takes back a kit the page wired, with its board of the program under the new name;
 15. the documents of the catalog and shops.json lie in the form resolve.dump writes; --fix writes them so.
 """
@@ -428,7 +428,8 @@ def snippets_differ():
     start = text.index("# BOARD=<board>")
     defaults = text[start:text.index("\nendif()\n", start) + len("\nendif()\n")]
     lock = re.search(r"^if\(BOARD\)\n    idf_build_set_property\(DEPENDENCIES_LOCK [^\n]*\nendif\(\)\n", text, flags=re.M)[0]
-    copies = ["docs/en/quick-start.md", "docs/ru/quick-start.md", "docs/en/choosing-a-board.md", "docs/ru/choosing-a-board.md", "examples/hello_board/CMakeLists.txt",
+    # the quick start takes the CMake with the example of the registry, which example_wrong() compares whole
+    copies = ["docs/en/choosing-a-board.md", "docs/ru/choosing-a-board.md", "examples/hello_board/CMakeLists.txt",
               "examples/hello_lvgl/CMakeLists.txt", "examples/local_boards/CMakeLists.txt", "examples/multi_board/CMakeLists.txt", "examples/sound_level/CMakeLists.txt"]
     wrong = [f"{name}: the lines that read the defaults of the board differ from editor/skeleton/CMakeLists.txt" for name in copies
              if defaults not in (ROOT / name).read_text() or lock not in (ROOT / name).read_text()]

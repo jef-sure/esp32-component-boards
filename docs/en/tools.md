@@ -317,8 +317,8 @@ python3 managed_components/jef-sure__boards/tools/boards_mcp.py --serve   # or -
 It prints the link of the page and serves until Ctrl-C. The link says that no model talks, so the page shows no
 dialog.
 
-The server can write the files of a project for the page, so the page writes inside VS Code too, whose Simple Browser gives a
-page no access to folders. It writes into one folder, the one the agent works in or `--project DIR`: an empty folder for a new
+The server can write the files of a project for the page, so the page writes from the integrated browser of VS Code too:
+the files go through the server, whatever the browser lets a page do with folders. It writes into one folder, the one the agent works in or `--project DIR`: an empty folder for a new
 project, or one with `CMakeLists.txt`, never the component itself. The rules are those of `tools/project_writer.py`:
 
 - nothing is written unless the person allows it, every time or for ever; for ever is kept for the user, in

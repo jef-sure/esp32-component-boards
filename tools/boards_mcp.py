@@ -14,8 +14,8 @@ With no agent, the page and its solver for the folder it runs in: python3 tools/
 The project is the folder the agent works in, or --project: the page may write its files there through this server, by
 the rules of project_writer.py, when the person allows it. A project with its own copy of the component in
 managed_components/ is served by that copy: this server hands over to it at the start, so one --install serves every
-project, each with the catalog and the board_select.py of its own version. It is how the page writes inside VS Code, whose Simple
-Browser gives a page no access to folders.
+project, each with the catalog and the board_select.py of its own version. It is how the page writes from the
+integrated browser of VS Code: the files go through this server, not through the browser.
 """
 import argparse
 import http.server

@@ -1,58 +1,84 @@
 # Быстрый старт
 
-Программа на плате за несколько минут: компонент настраивает плату, а программа запрашивает её части по типу, а не по
-имени платы.
+Программа с графикой сначала на компьютере, в окне с дисплеем выбранной платы, потом на самой плате. Компонент
+настраивает плату, а программа запрашивает её части по типу, а не по имени платы, поэтому один и тот же код идёт и туда,
+и туда. Пример здесь — CYD S028R (ESP32-2432S028R, 2,8 дюйма); для другой платы вместо `cyd_s028r` подставьте её имя из
+[таблицы README](../../README.ru.md#платы).
 
-Нужны ESP-IDF 5.5 или 6.x в оболочке (`idf.py --version` отвечает), Python 3.9 или новее и плата из
-[таблицы README](../../README.ru.md#платы) на USB. Здесь пример — CYD S028R (ESP32-2432S028R, 2,8 дюйма); для другой платы
-вместо `cyd_s028r` подставьте её имя из таблицы.
+Путь проверен в VS Code 1.145 с расширениями ESP-IDF 2.3.0 и CMake Tools 1.24 на Linux, с ESP-IDF 6.1.
 
-## 1. Проект с компонентом
+## Что нужно
+
+- ESP-IDF 5.5 или 6.x: в его терминале `idf.py --version` отвечает.
+- VS Code с расширением ESP-IDF от Espressif. CMake Tools, который VS Code предлагает поставить, увидев файлы CMake, не
+  мешает: компонент даёт ему окружение ESP-IDF.
+- Для программы на компьютере — Linux с SDL2 и libbsd (`libsdl2-dev`, `libbsd-dev`). Windows целью ESP-IDF `linux`
+  не является.
+- Для второй половины — плата на USB.
+
+## 1. Проект
+
+В терминале ESP-IDF (в VS Code: Ctrl+Shift+P → «ESP-IDF: Open ESP-IDF Terminal»):
 
 ```sh
-idf.py create-project hello && cd hello
-idf.py add-dependency "jef-sure/boards>=0.0.6"
+compote project create-from-example -p my_project jef-sure/boards:hello
 ```
 
-## 2. CMake, который читает плату
+Папка `my_project` должна быть новой или пустой: в непустую пример не ложится. В ней уже есть `.gitignore`,
+`CMakeLists.txt`, который читает плату, и программа `main/main.c`. Компонент берётся из реестра, клон репозитория не
+нужен.
 
-В `CMakeLists.txt` строка `include($ENV{IDF_PATH}/tools/cmake/project.cmake)` заменяется этими строками, include
-остаётся среди них. Они читают умолчания платы перед собственными умолчаниями проекта и дают каждой плате свой lock
-компонентов:
-
-```cmake
-# BOARD=<board>, which the preset of a board sets, builds with sdkconfig.defaults.<board> that board_select.py writes,
-# then with the program's own sdkconfig.defaults when it has one. A -D SDKCONFIG_DEFAULTS=... on the command line wins.
-set(BOARD "" CACHE STRING "a board of this project: its file sdkconfig.defaults.<board>")
-if(NOT SDKCONFIG_DEFAULTS AND BOARD)
-    if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/sdkconfig.defaults.${BOARD})
-        message(FATAL_ERROR "no sdkconfig.defaults.${BOARD} here: run board_select.py ${BOARD} . of jef-sure/boards")
-    endif()
-    set(SDKCONFIG_DEFAULTS "sdkconfig.defaults.${BOARD}")
-    if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/sdkconfig.defaults)
-        list(APPEND SDKCONFIG_DEFAULTS "sdkconfig.defaults")
-    endif()
-endif()
-include($ENV{IDF_PATH}/tools/cmake/project.cmake)
-if(BOARD)
-    idf_build_set_property(DEPENDENCIES_LOCK ${CMAKE_CURRENT_LIST_DIR}/dependencies.lock.${BOARD})
-endif()
-```
-
-## 3. Плата, один раз
+Откройте папку в VS Code (File → Open Folder) и в терминале ESP-IDF этого окна выполните:
 
 ```sh
 idf.py reconfigure
-python3 managed_components/jef-sure__boards/tools/board_select.py cyd_s028r .
 ```
 
-Первая команда скачивает компонент в `managed_components/`. Вторая пишет `sdkconfig.defaults.cyd_s028r` (чип, флеш,
-память и строку выбора платы), `CMakePresets.json` (пресет, который собирает плату в `build/cyd_s028r`) и lock
-компонентов этой платы. Без `set-target` и без `menuconfig`.
+Команда скачивает компонент в `managed_components/` и записывает в `.vscode/settings.json` окружение ESP-IDF, с которым
+CMake Tools собирает проект.
 
-## 4. Программа
+## 2. Плата
 
-`main/hello.c`:
+Плата, которую вы знаете, — одна команда, компьютер — вторая:
+
+```sh
+python3 managed_components/jef-sure__boards/tools/board_select.py cyd_s028r .
+python3 managed_components/jef-sure__boards/tools/board_select.py host --as cyd_s028r .
+```
+
+Первая пишет `sdkconfig.defaults.cyd_s028r`, пресет платы в `CMakePresets.json` и её lock компонентов. Вторая делает то же
+для компьютера: окно с дисплеем CYD, повёрнутым так, как плату держат. Текущей становится плата, названная последней,
+здесь компьютер. Без `set-target` и без `menuconfig`.
+
+Если плата ещё не выбрана, её подбирает страница. Запустите её сервер из папки проекта:
+
+```sh
+python3 managed_components/jef-sure__boards/tools/boards_mcp.py --serve
+```
+
+Он печатает ссылку. Откройте её во встроенном браузере VS Code: Ctrl+Shift+P → «Browser: Open Integrated Browser» и
+вставьте ссылку в адресную строку; с настройкой `workbench.browser.openLocalhostLinks` хватает Ctrl+клика по ссылке в
+терминале. Положите на холст то, что нужно устройству, например «Дисплей»: справа появятся подходящие платы, у каждой —
+что на ней есть и на каких выводах. Плату проекта страница показывает отдельной карточкой, а её детали — в левом списке:
+деталь оттуда ложится на холст с характеристиками этой платы. См. [tools.md](tools.md#страница).
+
+## 3. На компьютере
+
+В VS Code: Ctrl+Shift+P → «CMake: Select Configure Preset» → «the computer», затем F7 («CMake: Build») и Ctrl+Shift+F5
+(«CMake: Run Without Debugging»). Откроется окно: белый экран и синяя полоса сверху. Тач — это мышь, кнопка BOOT —
+клавиша B.
+
+То же из терминала ESP-IDF:
+
+```sh
+idf.py build
+build/host/hello.elf
+```
+
+ESP-IDF 6 собирает текущую плату по её пресету. ESP-IDF 5 пресеты не читает:
+`idf.py -B build/host -D SDKCONFIG=build/host/sdkconfig -D BOARD=host build`.
+
+Программа, `main/main.c`:
 
 ```c
 #include <stdio.h>
@@ -91,18 +117,14 @@ void app_main(void)
 }
 ```
 
-Каждая функция `boards.h` есть на каждой плате; для части, которой у платы нет, она возвращает `false`. Заголовок DGX —
-для платы с графическим дисплеем, поэтому он включён под `CONFIG_BOARD_DISPLAY_GRAPHICS`.
-[examples/hello_board](../../examples/hello_board) — то же самое со звуком и символьным дисплеем.
+Каждая функция `boards.h` есть на каждой плате; для части, которой у платы нет, она возвращает `false`. Поменяйте цвет
+полосы на красный, `0xf800`, нажмите F7 и Ctrl+Shift+F5 — полоса станет красной.
 
-## 5. Собрать, прошить, посмотреть
+## 4. На плате
 
-```sh
-idf.py build flash monitor
-```
-
-ESP-IDF 6 собирает пресет платы в `build/cyd_s028r`. ESP-IDF 5 пресеты не читает:
-`idf.py -B build/cyd_s028r -D SDKCONFIG=build/cyd_s028r/sdkconfig -D BOARD=cyd_s028r build flash monitor`.
+Подключите плату по USB. В VS Code: Ctrl+Shift+P → «ESP-IDF: Select Project Configuration» → «CYD (ESP32-2432S028R)»,
+затем «ESP-IDF: Select Port to Use» и «ESP-IDF: Build, Flash and Start a Monitor on Your Device». Расширение собирает
+плату в `build/cyd_s028r`. Из терминала ESP-IDF 6 то же: `idf.py --preset cyd_s028r build flash monitor`.
 
 Лог CYD S028R:
 
@@ -113,46 +135,44 @@ the touch: 1 fingers
 the button: free
 ```
 
-На экране белый фон и синяя полоса сверху. Если держать BOOT при сбросе, последняя строка скажет `held`.
+На экране та же картинка, что в окне на компьютере. Монитор держит порт: перед следующей прошивкой закройте его, Ctrl+].
 
-## Другая плата или несколько
+## 5. Git и GitHub
 
-```sh
-python3 managed_components/jef-sure__boards/tools/board_select.py jc4827w543c .
-idf.py build flash monitor
-```
-
-Та же программа на прошитой так JC4827W543C:
-
-```
-the board: Guition JC4827W543C (jc4827w543c), esp32s3
-the display: 480 x 272 pixels, 95 x 54 mm
-the touch: 5 fingers
-the button: free
-```
-
-Плата, названная последней, становится текущей; `idf.py --preset cyd_s028r build` собирает другую, каждую в своём
-`build/<плата>`. См. [choosing-a-board.md](choosing-a-board.md).
-
-## Без правки файлов: одна команда или страница
-
-С клоном репозитория проект создаётся целиком, CMake и программа — среди его файлов:
+Когда проект собрался, он готов к первому коммиту:
 
 ```sh
-git clone --depth 1 https://github.com/jef-sure/esp32-component-boards.git
-python3 esp32-component-boards/tools/board_project.py hello --board cyd_s028r
-cd hello && idf.py reconfigure && python3 managed_components/jef-sure__boards/tools/board_select.py --again . && idf.py build flash monitor
+gh repo license view mit > LICENSE      # впишите год и имя вместо [year] и [fullname]
+git init -b main
+git add .
+git commit -m "new project"
+gh repo create my_project --public --source . --push
 ```
 
-Страница подбирает плату и детали под устройство и пишет проект:
+`.gitignore` проекта не пускает в коммит `build/`, `managed_components/`, `sdkconfig`, индекс clangd `.cache/` и
+`.vscode/` с путями этой машины. Файлы `sdkconfig.defaults.<плата>`, `CMakePresets.json` и `dependencies.lock.<плата>`
+коммитятся: без них проект не собирается. Лицензию `gh repo create` вместе с `--source` не берёт, поэтому она кладётся
+файлом.
 
-```sh
-mkdir hello2 && python3 esp32-component-boards/tools/boards_mcp.py --serve --project hello2
-```
+## 6. Дальше
 
-Откройте ссылку, которую она печатает. См. [tools.md](tools.md#страница).
+- Рисование: [DGX](https://components.espressif.com/components/jef-sure/dgx), его README. Экран, который даёт
+  `board_dgx_screen()`, тот же на компьютере и на плате.
+- Другая плата или несколько: [choosing-a-board.md](choosing-a-board.md).
+- Своя программа, которая уже есть: [moving-a-program.md](moving-a-program.md).
+- Подбор платы вместе с агентом: `python3 managed_components/jef-sure__boards/tools/boards_mcp.py --install` один раз на
+  машину, до страницы; см. [tools.md](tools.md#boards_mcppy).
 
-## Программа, которая уже есть
+## Чего не делать
 
-[moving-a-program.md](moving-a-program.md): компонент рядом с остальными зависимостями, строки CMake, платы названы один
-раз, свой код плат заменён вызовами по типу.
+| что сделали | что увидите | как правильно |
+|---|---|---|
+| создали пример в непустой папке, например в клоне с одной лицензией | `is not empty` | новая папка; репозиторий на GitHub — в конце, из готовой папки |
+| открыли `editor/index.html` правым кликом → «Open in Integrated Browser» | страница без каталога и с командой сервера | `boards_mcp.py --serve` из папки проекта и его ссылка |
+| CMake Tools сконфигурировал проект до первого `idf.py` | `IDF_PATH is not set` | `idf.py reconfigure` в терминале ESP-IDF, затем снова конфигурация CMake Tools |
+| «Build Project» расширения ESP-IDF без выбранной конфигурации | `no board chosen` и платы проекта | «ESP-IDF: Select Project Configuration» |
+| F5 («Run and Debug») для программы на компьютере | просьба создать `launch.json`, программа `a.out` | Ctrl+Shift+F5, «CMake: Run Without Debugging» |
+| «ESP-IDF: Launch Debug» | просьба создать `launch.json` | это отладка на чипе через JTAG; у CYD нет своего JTAG по USB |
+| прошивка при открытом мониторе | `the port is busy or doesn't exist` | закрыть монитор, Ctrl+] |
+| на ESP32 нарисовали, а потом запустили тач | конец картинки неверный | сначала все части, потом работа: см. [api.md](api.md) |
+| положили на холст вид детали, которой в каталоге нет, например символьный дисплей | ничего не подходит | пока подходят только детали каталога; модулей символьных дисплеев в нём нет |

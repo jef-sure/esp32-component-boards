@@ -1,58 +1,84 @@
 # Quick start
 
-A program on a board in a few minutes: the component sets the board up, and the program asks for its parts by kind,
-never by the board's name.
+A program with graphics, first on the computer, in a window with the display of the board chosen, then on the board
+itself. The component sets the board up and the program asks for its parts by kind, never by the board's name, so the
+same code goes to both. The example here is the CYD S028R (ESP32-2432S028R, 2.8-inch); for another board, its name from
+the [README table](../../README.md#the-boards) goes instead of `cyd_s028r`.
 
-You need ESP-IDF 5.5 or 6.x in the shell (`idf.py --version` answers), Python 3.9 or newer, and a board of the
-[table of the README](../../README.md#the-boards) on USB. The CYD S028R (ESP32-2432S028R, 2.8-inch) is the example here;
-for another board, put its name from the table in place of `cyd_s028r`.
+The path was checked in VS Code 1.145 with the ESP-IDF 2.3.0 and CMake Tools 1.24 extensions on Linux, with ESP-IDF 6.1.
 
-## 1. A project with the component
+## What you need
+
+- ESP-IDF 5.5 or 6.x: `idf.py --version` answers in its terminal.
+- VS Code with the ESP-IDF extension of Espressif. CMake Tools, which VS Code offers when it sees CMake files, does no
+  harm: the component gives it the environment of ESP-IDF.
+- For the program on the computer: Linux with SDL2 and libbsd (`libsdl2-dev`, `libbsd-dev`). Windows is not a target of
+  the `linux` target of ESP-IDF.
+- For the second half: the board on USB.
+
+## 1. The project
+
+In a terminal of ESP-IDF (in VS Code: Ctrl+Shift+P → "ESP-IDF: Open ESP-IDF Terminal"):
 
 ```sh
-idf.py create-project hello && cd hello
-idf.py add-dependency "jef-sure/boards>=0.0.6"
+compote project create-from-example -p my_project jef-sure/boards:hello
 ```
 
-## 2. The CMake that reads the board
+The folder `my_project` is a new one or an empty one: the example does not go into a folder with files. It has a
+`.gitignore`, a `CMakeLists.txt` that reads the board, and the program `main/main.c`. The component comes from the
+registry; no clone of the repository is needed.
 
-In `CMakeLists.txt` the line `include($ENV{IDF_PATH}/tools/cmake/project.cmake)` becomes these lines, the include among
-them. They read the defaults of the board before the project's own and give each board its own lock of the
-components:
-
-```cmake
-# BOARD=<board>, which the preset of a board sets, builds with sdkconfig.defaults.<board> that board_select.py writes,
-# then with the program's own sdkconfig.defaults when it has one. A -D SDKCONFIG_DEFAULTS=... on the command line wins.
-set(BOARD "" CACHE STRING "a board of this project: its file sdkconfig.defaults.<board>")
-if(NOT SDKCONFIG_DEFAULTS AND BOARD)
-    if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/sdkconfig.defaults.${BOARD})
-        message(FATAL_ERROR "no sdkconfig.defaults.${BOARD} here: run board_select.py ${BOARD} . of jef-sure/boards")
-    endif()
-    set(SDKCONFIG_DEFAULTS "sdkconfig.defaults.${BOARD}")
-    if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/sdkconfig.defaults)
-        list(APPEND SDKCONFIG_DEFAULTS "sdkconfig.defaults")
-    endif()
-endif()
-include($ENV{IDF_PATH}/tools/cmake/project.cmake)
-if(BOARD)
-    idf_build_set_property(DEPENDENCIES_LOCK ${CMAKE_CURRENT_LIST_DIR}/dependencies.lock.${BOARD})
-endif()
-```
-
-## 3. The board, once
+Open the folder in VS Code (File → Open Folder) and in a terminal of ESP-IDF of that window run:
 
 ```sh
 idf.py reconfigure
-python3 managed_components/jef-sure__boards/tools/board_select.py cyd_s028r .
 ```
 
-The first command downloads the component into `managed_components/`. The second writes `sdkconfig.defaults.cyd_s028r`
-(the chip, the flash, the memory and the line that chooses the board), `CMakePresets.json` (a preset that builds the
-board in `build/cyd_s028r`) and the lock of the board's components. No `set-target`, no `menuconfig`.
+It downloads the component into `managed_components/` and writes into `.vscode/settings.json` the environment of ESP-IDF
+that CMake Tools builds the project with.
 
-## 4. The program
+## 2. The board
 
-`main/hello.c`:
+A board you know is one command, the computer another:
+
+```sh
+python3 managed_components/jef-sure__boards/tools/board_select.py cyd_s028r .
+python3 managed_components/jef-sure__boards/tools/board_select.py host --as cyd_s028r .
+```
+
+The first writes `sdkconfig.defaults.cyd_s028r`, the preset of the board in `CMakePresets.json` and its lock of the
+components. The second does the same for the computer: a window with the display of the CYD, turned as the board is held.
+The board named last is the current one, here the computer. No `set-target` and no `menuconfig`.
+
+When the board is not chosen yet, the page finds one. Start its server from the folder of the project:
+
+```sh
+python3 managed_components/jef-sure__boards/tools/boards_mcp.py --serve
+```
+
+It prints a link. Open it in the integrated browser of VS Code: Ctrl+Shift+P → "Browser: Open Integrated Browser" and the
+link in its address bar; with the setting `workbench.browser.openLocalhostLinks`, Ctrl+click on the link in the terminal
+does. Put on the canvas what the device needs, as "Display": the boards that fit come on the right, each with what it has
+and on which pins. The board of the project has a card of its own, and its parts are in the list on the left: a part
+from there goes on the canvas with the characteristics it has on that board. See [tools.md](tools.md#the-page).
+
+## 3. On the computer
+
+In VS Code: Ctrl+Shift+P → "CMake: Select Configure Preset" → "the computer", then F7 ("CMake: Build") and
+Ctrl+Shift+F5 ("CMake: Run Without Debugging"). A window opens: white, with a blue band at the top. The touch is the
+mouse, the BOOT button the key B.
+
+The same from a terminal of ESP-IDF:
+
+```sh
+idf.py build
+build/host/hello.elf
+```
+
+ESP-IDF 6 builds the current board by its preset. ESP-IDF 5 does not read presets:
+`idf.py -B build/host -D SDKCONFIG=build/host/sdkconfig -D BOARD=host build`.
+
+The program, `main/main.c`:
 
 ```c
 #include <stdio.h>
@@ -91,18 +117,14 @@ void app_main(void)
 }
 ```
 
-Every function of `boards.h` exists on every board; one for a part the board does not have returns `false`. The header
-of DGX is for a board with a graphics display, so it is included under `CONFIG_BOARD_DISPLAY_GRAPHICS`.
-[examples/hello_board](../../examples/hello_board) is the same with the sound and a character display.
+Every function of `boards.h` exists on every board; one for a part the board does not have returns `false`. Change the
+colour of the band to red, `0xf800`, press F7 and Ctrl+Shift+F5: the band is red.
 
-## 5. Build, flash, look
+## 4. On the board
 
-```sh
-idf.py build flash monitor
-```
-
-ESP-IDF 6 builds the preset of the board, into `build/cyd_s028r`. ESP-IDF 5 does not read presets:
-`idf.py -B build/cyd_s028r -D SDKCONFIG=build/cyd_s028r/sdkconfig -D BOARD=cyd_s028r build flash monitor`.
+Connect the board by USB. In VS Code: Ctrl+Shift+P → "ESP-IDF: Select Project Configuration" → "CYD (ESP32-2432S028R)",
+then "ESP-IDF: Select Port to Use" and "ESP-IDF: Build, Flash and Start a Monitor on Your Device". The extension builds
+the board in `build/cyd_s028r`. From a terminal of ESP-IDF 6 the same is `idf.py --preset cyd_s028r build flash monitor`.
 
 The log of the CYD S028R:
 
@@ -113,46 +135,45 @@ the touch: 1 fingers
 the button: free
 ```
 
-On the screen: white, with a blue band along the top. Hold BOOT at reset and the last line says `held`.
+The screen shows the picture of the window on the computer. The monitor holds the port: close it, Ctrl+], before the
+next flash.
 
-## Another board, or several
+## 5. Git and GitHub
 
-```sh
-python3 managed_components/jef-sure__boards/tools/board_select.py jc4827w543c .
-idf.py build flash monitor
-```
-
-The same program, on a JC4827W543C flashed so:
-
-```
-the board: Guition JC4827W543C (jc4827w543c), esp32s3
-the display: 480 x 272 pixels, 95 x 54 mm
-the touch: 5 fingers
-the button: free
-```
-
-The board named last is the current one; `idf.py --preset cyd_s028r build` builds the other, each in its own
-`build/<board>`. See [choosing-a-board.md](choosing-a-board.md).
-
-## Without editing a file: one command, or the page
-
-With a clone of the repository, a project is made whole, the CMake and the program among its files:
+Once the project builds, it is ready for its first commit:
 
 ```sh
-git clone --depth 1 https://github.com/jef-sure/esp32-component-boards.git
-python3 esp32-component-boards/tools/board_project.py hello --board cyd_s028r
-cd hello && idf.py reconfigure && python3 managed_components/jef-sure__boards/tools/board_select.py --again . && idf.py build flash monitor
+gh repo license view mit > LICENSE      # put the year and the name for [year] and [fullname]
+git init -b main
+git add .
+git commit -m "new project"
+gh repo create my_project --public --source . --push
 ```
 
-The page chooses a board and the parts for a device and writes the project:
+The `.gitignore` of the project keeps out `build/`, `managed_components/`, `sdkconfig`, the clangd index `.cache/` and
+`.vscode/` with the paths of this machine. The files `sdkconfig.defaults.<board>`, `CMakePresets.json` and
+`dependencies.lock.<board>` are committed: the project does not build without them. `gh repo create` with `--source`
+takes no licence, so the licence is a file.
 
-```sh
-mkdir hello2 && python3 esp32-component-boards/tools/boards_mcp.py --serve --project hello2
-```
+## 6. Next
 
-Open the link it prints. See [tools.md](tools.md#the-page).
+- Drawing: [DGX](https://components.espressif.com/components/jef-sure/dgx), its README. The screen `board_dgx_screen()`
+  gives is the same on the computer and on the board.
+- Another board, or several: [choosing-a-board.md](choosing-a-board.md).
+- A program you have already: [moving-a-program.md](moving-a-program.md).
+- Choosing a board with an agent: `python3 managed_components/jef-sure__boards/tools/boards_mcp.py --install` once a
+  machine, before the page; see [tools.md](tools.md#boards_mcppy).
 
-## A program you already have
+## What not to do
 
-[moving-a-program.md](moving-a-program.md): the component beside your other dependencies, the CMake lines, the boards
-named once, your board code replaced by calls by kind.
+| what was done | what you see | the right way |
+|---|---|---|
+| the example made in a folder with files, as a clone with only a licence | `is not empty` | a new folder; the repository on GitHub last, from the folder made |
+| `editor/index.html` opened by a right click → "Open in Integrated Browser" | the page with no catalog, naming the command of its server | `boards_mcp.py --serve` from the folder of the project, and its link |
+| CMake Tools configured the project before the first `idf.py` | `IDF_PATH is not set` | `idf.py reconfigure` in a terminal of ESP-IDF, then the configure of CMake Tools again |
+| "Build Project" of the ESP-IDF extension with no project configuration chosen | `no board chosen` and the boards of the project | "ESP-IDF: Select Project Configuration" |
+| F5 ("Run and Debug") for the program on the computer | a request for `launch.json`, a program `a.out` | Ctrl+Shift+F5, "CMake: Run Without Debugging" |
+| "ESP-IDF: Launch Debug" | a request for `launch.json` | that is debugging on the chip by JTAG; the CYD has no JTAG of its own on USB |
+| a flash while the monitor is open | `the port is busy or doesn't exist` | close the monitor, Ctrl+] |
+| on an ESP32, drawn first and the touch started after | the end of the picture wrong | every part first, then the work: see [api.md](api.md) |
+| a kind of part on the canvas that the catalog has none of, as a character display | nothing fits | only parts of the catalog fit for now; it has no module of a character display |

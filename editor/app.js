@@ -296,7 +296,10 @@ const SelectPage = {
         const fit = computed(() => store.kits.filter((kit) => kit.fits));
         const others = computed(() => store.kits.filter((kit) => !kit.fits));
         // One card a board: the kits come sorted, so its first is its best, and the rest wait behind it.
-        const boards = computed(() => [...Map.groupBy(fit.value, (kit) => kit.name).values()].map(([first, ...rest]) => ({ first, rest })));
+        // the boards of the project first, so their cards are always in sight; the rest as the solver sorted them
+        const inProject = computed(() => new Set(store.projectBoards()));
+        const boards = computed(() => [...Map.groupBy(fit.value, (kit) => kit.name).values()].map(([first, ...rest]) => ({ first, rest }))
+            .sort((a, b) => inProject.value.has(b.first.name) - inProject.value.has(a.first.name)));
         const shownBoards = ref(BOARDS_SHOWN);
         const asked = computed(() => Object.values(store.answers).some((answer) => (Array.isArray(answer) ? answer.length : answer && answer !== 'none')));
         const addOutput = () => store.answers.outputs.push({ kind: 'tone', hz: undefined, ppm: undefined, jitter: 'any', bits: 8, pins: 1, live: false });
@@ -309,6 +312,9 @@ const SelectPage = {
         });
         const addOwned = () => (store.answers.have ??= []).push({ part: ownable.value.boards[0]?.name, count: 1 });
         Vue.watch(() => [store.loaded, store.stamp, store.language, store.currency, store.answers, store.installed], () => store.askKits(), { deep: true, immediate: true });
+        // a board taken into the project or out of it counts as had or not; by its names only, as every count makes the kits
+        // of the project again
+        Vue.watch(() => store.projectBoards().join(' '), () => store.askKits());
         // a plan belongs to the answers it was made for
         Vue.watch(() => store.answers, (answers) => {
             store.plan = null;
@@ -366,7 +372,7 @@ const SelectPage = {
         const chosenHas = (kit) => store.chosen.some((item) => item.headline === kit.headline);
         // the cards wait for what the device needs: with nothing asked every board fits, and a hundred cards say nothing
         const showAll = ref(false);
-        const showKits = computed(() => asked.value || store.chosen.length > 0 || Boolean(store.answers.board) || showAll.value);
+        const showKits = computed(() => asked.value || store.chosen.length > 0 || Boolean(store.answers.board) || showAll.value || inProject.value.size > 0);
         // a card says first what fits and what is not known; the steps and the notes wait behind it
         const FIRST_LEVELS = ['yes', 'no', 'unknown'];
         const firstSays = (kit) => kit.says.filter((line) => FIRST_LEVELS.includes(line.level));
@@ -383,7 +389,7 @@ const SelectPage = {
             block.part.splice(at, 1);
             if (!block.part.length) block.part = undefined;
         };
-        return { store, host, fit, boards, others, asked, showAll, showKits, firstSays, laterSays, addOutput, ownable, addOwned, money, numberOf, priceLink, MARKS, filter, groups, roleOf, nameOf, outputsQuestion, firstOfRole, said, sendSaid, talking, stream, partsOf, boardTitle, servedBy, install, local, copied, copyInstall, setAsk, shownBoards, BOARDS_SHOWN, canWrite, chosenHas, chainBlock, haveOf, addHave, dropHave };
+        return { store, host, fit, boards, inProject, others, asked, showAll, showKits, firstSays, laterSays, addOutput, ownable, addOwned, money, numberOf, priceLink, MARKS, filter, groups, roleOf, nameOf, outputsQuestion, firstOfRole, said, sendSaid, talking, stream, partsOf, boardTitle, servedBy, install, local, copied, copyInstall, setAsk, shownBoards, BOARDS_SHOWN, canWrite, chosenHas, chainBlock, haveOf, addHave, dropHave };
     },
     template: `
         <div class="select" :class="{ talking, waiting: !showKits }">
@@ -555,6 +561,7 @@ idf.py build flash monitor</pre>
                 <p v-else class="hint">{{ t('An empty folder gets a whole project. A folder with a program gets only its board.') }}</p>
                 <p v-if="boards.length > shownBoards" class="hint">{{ t('To narrow: a budget or a platform above, pin a part in a block, or pin a board.') }}</p>
                 <article v-for="{ first: kit, rest } in boards.slice(0, shownBoards)" :key="kit.name" class="kit">
+                    <p v-if="inProject.has(kit.name)" class="hint">{{ t('a board of the project: counted as one you have') }}</p>
                     <img v-if="kit.picture" class="picture" :src="host.pictureSrc(kit.picture)" :alt="kit.title">
                     <h3>{{ kit.title }}</h3>
                     <p v-if="kit.modules.length || kit.addons?.length" class="added">+ {{ partsOf(kit) }}</p>
@@ -562,7 +569,7 @@ idf.py build flash monitor</pre>
                     <div v-if="kit.modules.some((module) => module.picture)" class="parts">
                         <figure v-for="module in kit.modules.filter((item) => item.picture)" :key="module.name" :title="module.credit">
                             <img :src="host.pictureSrc(module.picture)" :alt="module.title"><figcaption>{{ module.title }}</figcaption></figure>
-                        <p class="hint credit">{{ t('Pictures of parts: Fritzing, CC BY-SA 3.0. Hold the pointer on one for its author.') }}</p>
+                        <p class="hint credit">{{ t('Pictures of parts: hold the pointer on one for its source.') }}</p>
                     </div>
                     <ul><li v-for="line in firstSays(kit)" :key="line.text" :class="line.level" :title="line.basis ?? (line.judgement ? line.judgement + ' (catalog/judgements.json)' : null)"><span class="mark">{{ MARKS[line.level] }}</span> {{ line.text }}</li></ul>
                     <details v-if="laterSays(kit).length" class="later"><summary>{{ t('steps and notes ({0})', laterSays(kit).length) }}</summary>
@@ -570,6 +577,12 @@ idf.py build flash monitor</pre>
                     </details>
                     <p v-if="kit.price.unpriced.length" class="hint">{{ t('Know a price?') }}
                         <a v-for="item in kit.price.unpriced" :key="item.item" target="_blank" rel="noopener" :href="priceLink(item.item)">{{ item.title }}</a></p>
+                    <details v-if="kit.held?.length" open><summary>{{ t('on the board') }}</summary>
+                        <div v-for="part in kit.held" :key="part.device" class="wiring"><b>{{ part.block }}: {{ part.title }}</b> {{ part.buses.join(', ') }}
+                            <span v-for="wire in part.lines" :key="wire.line"><code>{{ wire.line }}</code> → {{ wire.to }}</span>
+                            <span v-for="item in part.set" :key="item.control">{{ t('{0} = {1}, set by a {2} on the board', item.control, item.start, item.how) }}</span></div>
+                        <p class="hint">{{ t('Wired on the board: nothing to wire, and these pins are taken.') }}</p>
+                    </details>
                     <details v-if="kit.wiring.length"><summary>{{ t('the wires') }}</summary>
                         <div v-for="module in kit.wiring" :key="module.use" class="wiring"><b>{{ module.title }}</b>
                             <span v-for="wire in module.lines" :key="wire.line"><code>{{ wire.line }}</code> → {{ wire.to }}</span></div>

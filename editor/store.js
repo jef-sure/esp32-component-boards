@@ -428,6 +428,10 @@ const useEditor = Pinia.defineStore('editor', {
             const shown = new Set(library.questions.filter((question) => question.top || classes.has(question.limit?.of)).map((question) => question.id));
             const kept = Object.entries(copied(this.answers)).filter(([key]) => SHOWN_ANSWERS.includes(key) || shown.has(key));
             const answers = { ...Object.fromEntries(kept), currency: this.currency, ...(this.installed ? { installed: copied(this.installed) } : {}) };
+            // a board of the project is one the person has: its price and what nobody asked for on it count nothing
+            const had = new Set((answers.have ?? []).map((item) => item?.part));
+            const owned = this.projectBoards().filter((name) => !had.has(name)).map((part) => ({ part, count: 1 }));
+            if (owned.length) answers.have = [...(answers.have ?? []), ...owned];
             if (!library.worker) {
                 this.kits = library.solver.solve(answers);
                 this.restoreChosen();
@@ -463,6 +467,11 @@ const useEditor = Pinia.defineStore('editor', {
         withoutKit() {
             const taken = new Set(this.chosen.filter((item) => !item.kit.project).map((item) => item.kit.name));
             return [...this.kept.map((board) => ({ board, kept: true })), ...this.bare].filter((item) => !taken.has(item.board));
+        },
+        // The boards of the project by their names in the catalog: of its kits, of selection.json and of its presets
+        projectBoards() {
+            const names = [...this.chosen.map((item) => item.kit.name), ...this.withoutKit().map((item) => item.board), ...(this.wanted?.boards ?? []).map((entry) => entry.base ?? entry.board)];
+            return [...new Set(names)].filter((name) => library.catalog?.boards?.[name]);
         },
         isWithoutKit(current) {
             return this.withoutKit().some((item) => item.board === current);

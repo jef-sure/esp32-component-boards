@@ -120,6 +120,12 @@ def handler_of(desk, token, port, project=None):
         def log_message(self, *_):
             pass  # stdout belongs to MCP, and the log of a page says nothing here
 
+        def end_headers(self):
+            # every file asked again: a page cached from another copy or version would run one script of each
+            if not any(line.lower().startswith(b"cache-control") for line in getattr(self, "_headers_buffer", [])):
+                self.send_header("Cache-Control", "no-cache")
+            super().end_headers()
+
         def allowed(self):
             """Only this address: another site in the browser can reach 127.0.0.1, but not with this Host and token."""
             return self.headers.get("Host") == f"127.0.0.1:{port}"

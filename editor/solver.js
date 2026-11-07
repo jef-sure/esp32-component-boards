@@ -981,6 +981,24 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         });
     }
 
+    // A part of the board that answers a block, as the card shows it: what it is, its buses and its lines on the board, and
+    // what a switch or a solder bridge on the board sets for it, as the board comes
+    function heldOf(board, need, name, device) {
+        const lines = [];
+        for (const [bus, wires] of Object.entries(device.on || {})) {
+            const [kind, own] = bus.split('.');
+            for (const [line, value] of Object.entries(board.buses?.[kind]?.[own] ?? {})) if (value?.gpio !== undefined) lines.push({ line, to: `GPIO ${value.gpio}` });
+            for (const [line, value] of Object.entries(wires || {})) if (value?.gpio !== undefined) lines.push({ line, to: `GPIO ${value.gpio}` });
+        }
+        for (const [line, value] of Object.entries(device.pins || {})) if (value?.gpio !== undefined) lines.push({ line, to: `GPIO ${value.gpio}` });
+        const panel = device.config?.panel;
+        const chip = catalog.devices[device.chip]?.title ?? device.chip ?? name;
+        const part = device.part && !chip.toLowerCase().includes(device.part.toLowerCase()) ? device.part : null;
+        const title = [chip, part, panel?.width && `${panel.width} x ${panel.height}`].filter(Boolean).join(', ');
+        const set = Object.entries(device.controls || {}).filter(([, control]) => ['switch', 'solder'].includes(control.how)).map(([control, { how, start }]) => ({ control, how, start: JSON.stringify(start) }));
+        return { block: need.title, device: name, title, buses: Object.keys(device.on || {}).map((bus) => (bus.split('.')[1].startsWith(bus.split('.')[0]) ? bus.split('.')[1] : bus).toUpperCase()), lines, set };
+    }
+
     // What each module puts on the lines of the chip, against what its pins take.
     function levelsOf(resolved, picks, base, project) {
         const lines = [];
@@ -1102,6 +1120,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         const doc = catalog.boards[name];
         const board = loader.resolve(doc);
         const says = [];
+        const held = []; // the parts of the board that answer a block, for the card
         const say = (level, text) => says.push({ level, text });
         const rejected = () => [{ name, title: doc.title ?? name, fits: false, says, modules: [], wires: [], unasked: 0, unaskedWorth: 0, price: null, project: null }];
         const asked = (device) => wanted.needs.some((need) => isClass(device, need));
@@ -1202,6 +1221,8 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             if (answering.length < large.length) says.push({ level: 'note', text: t(named.says, need.title), judgement: named.id });
             if (need.variant && answering.some((device) => !device.provides?.[need.id]?.variant)) say('unknown', t('{0} is on the board, and the data does not say of which variant', need.title));
             else if (answering.length) say('yes', t('{0} is on the board', need.title));
+            const names = new Map(Object.entries(board.devices).map(([key, device]) => [device, key]));
+            for (const device of answering.slice(0, need.count)) held.push(heldOf(board, need, names.get(device), device));
             if (answering.length < need.count) shortfalls.push({ need, count: need.count - answering.length });
         }
         if (!shortfalls.length && !unasked.length) return [kit(name, doc, board, says, null, [])];
@@ -1438,7 +1459,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             const headline = [title, ...modules.map(named), ...addons.map(named)].join(' + ');
             const pictures = Object.values(board.images || {});
             const picture = pictures.find((item) => item.shows === 'front') ?? pictures[0];
-            return { name: boardName, title, headline, libraries, addons, cost: { ...price.full, currency: price.currency }, unasked: unasked.length, unaskedWorth: had ? 0 : cents(unasked.reduce((sum, [, device]) => sum + worthOf(device), 0)), imported: Boolean(doc.origin), writable: !doc.origin && platform?.writes_projects !== false, picture: picture ? `boards/${boardName}/${picture.file}` : null, fits, says: lines, modules, wires: project ? wiresOf(base, project, picks) : [], wiring: project ? wiringOf(base, project, picks) : [], price, project, free: freePins(resolved).length };
+            return { name: boardName, title, headline, libraries, addons, cost: { ...price.full, currency: price.currency }, unasked: unasked.length, unaskedWorth: had ? 0 : cents(unasked.reduce((sum, [, device]) => sum + worthOf(device), 0)), imported: Boolean(doc.origin), writable: !doc.origin && platform?.writes_projects !== false, picture: picture ? `boards/${boardName}/${picture.file}` : null, fits, says: lines, held, modules, wires: project ? wiresOf(base, project, picks) : [], wiring: project ? wiringOf(base, project, picks) : [], price, project, free: freePins(resolved).length };
         }
     }
 

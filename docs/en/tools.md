@@ -2,8 +2,7 @@
 
 All in `tools/`, Python 3.9 or later, as ESP-IDF 5.5 has. Most need only the standard library:
 `check_format.py` needs `jsonschema` and Node.js, which runs the JavaScript of
-the page; the importers need `jsonschema`, and `import_pictures.py` Chrome and
-ImageMagick. Run them from the root of the repository (or of
+the page; the importers need `jsonschema`. Run them from the root of the repository (or of
 `managed_components/jef-sure__boards/`).
 
 The package of the registry carries the tools a program uses: `board_select.py`, `board_project.py`,
@@ -234,19 +233,6 @@ python3 tools/import_fritzing.py adafruit=PATH fritzing=PATH --ref adafruit=COMM
 
 Only facts are taken: the contacts, the supply they name, the part number. A module needs a bus its contacts show.
 Its roles come from the words of `catalog/roles.json`, and from the sections of a shop when `--shop` names a copy of its list, which also gives the price and leaves out what is no longer sold.
-
-## import_pictures.py
-
-Gives the imported modules a picture: the breadboard drawing of their Fritzing part, drawn by Chrome into a square of 320 px
-and kept as `drawing.webp` beside the module. Run it after `import_fritzing.py`, with the same sources. Needs Chrome and ImageMagick.
-
-```sh
-python3 tools/import_pictures.py adafruit=PATH fritzing=PATH
-```
-
-The drawings are under CC BY-SA 3.0, and so are the pictures. The `source` of each names the part, its author and the
-license, and the page shows the credit under the pictures of a kit. A drawing is read from the `.fzpz` in place and drawn as
-an image, in which no script runs.
 
 ## import_libraries.py
 

@@ -2,8 +2,7 @@
 
 Все в `tools/`, Python 3.9 или новее, как у ESP-IDF 5.5. Большинству хватает стандартной
 библиотеки: `check_format.py` нужны `jsonschema` и Node.js, на котором идёт
-JavaScript страницы; импортёрам нужен `jsonschema`, а `import_pictures.py` —
-Chrome и ImageMagick. Запускайте их из корня репозитория (или из
+JavaScript страницы; импортёрам нужен `jsonschema`. Запускайте их из корня репозитория (или из
 `managed_components/jef-sure__boards/`).
 
 Пакет реестра несёт инструменты, которыми пользуется программа: `board_select.py`, `board_project.py`,
@@ -236,19 +235,6 @@ python3 tools/import_fritzing.py adafruit=PATH fritzing=PATH --ref adafruit=COMM
 
 Берутся только факты: контакты, питание по их именам, номер детали. Модулю нужна шина, которую видно по контактам.
 Роли идут из слов `catalog/roles.json` и из разделов магазина, если `--shop` указывает на копию его списка; она же даёт цену и убирает то, что больше не продаётся.
-
-## import_pictures.py
-
-Даёт импортированным модулям картинку: рисунок макетной платы их детали Fritzing, который Chrome рисует в квадрат 320 px; он
-лежит рядом с модулем как `drawing.webp`. Запускается после `import_fritzing.py` с теми же источниками. Нужны Chrome и ImageMagick.
-
-```sh
-python3 tools/import_pictures.py adafruit=PATH fritzing=PATH
-```
-
-Рисунки под CC BY-SA 3.0, а значит, и картинки тоже. `source` каждой называет деталь, её автора и лицензию, а страница
-показывает подпись под картинками комплекта. Рисунок читается из `.fzpz` на месте и рисуется как изображение, в котором
-скрипты не выполняются.
 
 ## import_libraries.py
 

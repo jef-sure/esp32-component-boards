@@ -1,7 +1,6 @@
 # Imported data
 
-What `tools/import_board_manager.py`, `tools/import_fritzing.py`, `tools/import_addresses.py` and `tools/import_pictures.py`,
-run in this order, took from the data of others. All about libraries lies in `catalog/libraries/`.
+What `tools/import_board_manager.py`, `tools/import_fritzing.py` and `tools/import_addresses.py`, run in this order, took from the data of others. All about libraries lies in `catalog/libraries/`.
 The solver reads this tree after `catalog/`.
 It has no glue and no build in CI, and it is not part of the component package.
 
@@ -14,8 +13,7 @@ to `catalog/` through a pull request with its glue and a green build.
   the packs, what the format has no place for, the libraries the packs name.
 - `report_fritzing.json`: the same for the parts of Fritzing, which are under CC BY-SA 3.0: only facts are taken.
 - `report_addresses.json`: the source of each I2C address in `devices/` and the values refused. The list of a chip can be short.
-- `modules/*/drawing.webp`: the breadboard drawing of the Fritzing part of a module, as a picture of 320 px. These pictures
-  are under CC BY-SA 3.0, as the drawings are: the `source` of each names the part, its author and the license.
+- No pictures: a picture of others whose license MIT cannot take, as the Fritzing drawings under CC BY-SA 3.0, stays out.
 - `licenses/`: the license and the notice of each pack. The packs of Espressif may be used only with Espressif products.
 
 `imported-shops/` beside this tree is not in the repository: it holds what comes from the lists of shops, prices and

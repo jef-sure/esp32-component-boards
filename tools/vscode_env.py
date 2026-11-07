@@ -1,16 +1,22 @@
 #!/usr/bin/env python3
 """
-The environment of ESP-IDF for CMake Tools of VS Code: cmake.environment in .vscode/settings.json of a project, with
-IDF_PATH, IDF_PYTHON_ENV_PATH, IDF_TOOLS_PATH and PATH as the shell of ESP-IDF has them. CMake Tools takes the presets
-board_select.py writes and runs cmake in the environment of VS Code, which has no ESP-IDF; with these four it
-configures and builds as idf.py does.
+The settings of VS Code a project of boards needs, in its .vscode/settings.json:
 
-Usage: vscode_env.py PROJECT_DIR
+- cmake.environment with IDF_PATH, IDF_PYTHON_ENV_PATH, IDF_TOOLS_PATH and PATH as the shell of ESP-IDF has them.
+  CMake Tools takes the presets board_select.py writes and runs cmake in the environment of VS Code, which has no
+  ESP-IDF; with these four it configures and builds as idf.py does. project_include.cmake writes them at each
+  configuration: vscode_env.py PROJECT_DIR.
+- the target of the current board for the ESP-IDF extension: idf.customExtraVars.IDF_TARGET and idf.sdkconfigFilePath,
+  build/<board>/sdkconfig. The extension gives its terminals the IDF_TARGET of that sdkconfig, of that setting when the
+  board was not built yet, and of the sdkconfig of the project's folder, or esp32, when neither is set; idf.py stops when
+  it differs from the target of the board a preset builds. board_select.py writes them when the current board changes:
+  vscode_env.py PROJECT_DIR --current BOARD TARGET. A terminal open before keeps its IDF_TARGET.
 
-project_include.cmake runs it at each configuration. It writes only for a project VS Code is used on: one with .vscode/,
-or configured from VS Code. The values stay while IDF_PATH is the same, so a configuration whose PATH is in another
-order changes nothing. A settings.json that is not plain JSON, as one with comments, is left as it is, and the lines it
-needs are printed.
+Only a project VS Code is used on gets them: one with .vscode/, or worked on from VS Code. Values already there are not
+written again. A settings.json that is not plain JSON, as one with comments, is left as it is, and the lines it needs
+are printed.
+
+Usage: vscode_env.py PROJECT_DIR [--current BOARD TARGET]
 """
 import json
 import os
@@ -26,30 +32,67 @@ def from_vscode():
     return os.environ.get("TERM_PROGRAM") == "vscode" or bool(os.environ.get("VSCODE_PID"))
 
 
-def main():
-    if len(sys.argv) != 2:
-        raise SystemExit(__doc__)
-    folder = pathlib.Path(sys.argv[1]) / ".vscode"
-    wanted = {key: os.environ[key] for key in KEYS if os.environ.get(key)}
-    if "IDF_PATH" not in wanted or not (folder.is_dir() or from_vscode()):
-        return 0
+def update(project, change, said):
+    """Applies change, a function of the settings that returns them changed or None for nothing to do, to the settings of
+    the project, under the rules above; said names what was written."""
+    folder = pathlib.Path(project) / ".vscode"
+    if not (folder.is_dir() or from_vscode()):
+        return
     path = folder / "settings.json"
     try:
         settings = json.loads(path.read_text()) if path.exists() else {}
     except (OSError, ValueError):
         settings = None
     if not isinstance(settings, dict):
-        print(f"{path}: not plain JSON, left as it is. CMake Tools needs in it:\n{json.dumps({SETTING: wanted}, indent=4)}")
-        return 0
-    have = settings.get(SETTING) if isinstance(settings.get(SETTING), dict) else {}
-    if have.get("IDF_PATH") == wanted["IDF_PATH"] and all(key in have for key in wanted):
-        return 0
-    settings[SETTING] = {**have, **wanted}
+        print(f"{path}: not plain JSON, left as it is. It needs:\n{json.dumps(change({}) or {}, indent=4)}")
+        return
+    changed = change(dict(settings))
+    if changed is None:
+        return
     folder.mkdir(exist_ok=True)
     made = path.with_name(path.name + ".new")
-    made.write_text(json.dumps(settings, indent=4) + "\n")
+    made.write_text(json.dumps(changed, indent=4) + "\n")
     os.replace(made, path)
-    print(f"{path}: {SETTING} for CMake Tools, from ESP-IDF {wanted['IDF_PATH']}")
+    print(f"{path}: {said}")
+
+
+def environment(project):
+    """cmake.environment from the shell of ESP-IDF, kept while IDF_PATH is the same, so a configuration whose PATH is in
+    another order changes nothing."""
+    wanted = {key: os.environ[key] for key in KEYS if os.environ.get(key)}
+    if "IDF_PATH" not in wanted:
+        return
+
+    def change(settings):
+        have = settings.get(SETTING) if isinstance(settings.get(SETTING), dict) else {}
+        if have.get("IDF_PATH") == wanted["IDF_PATH"] and all(key in have for key in wanted):
+            return None
+        return {**settings, SETTING: {**have, **wanted}}
+
+    update(project, change, f"{SETTING} for CMake Tools, from ESP-IDF {wanted['IDF_PATH']}")
+
+
+def current(project, board, target):
+    """The target of the current board and its sdkconfig, for the ESP-IDF extension and the terminals it opens."""
+    sdkconfig = str((pathlib.Path(project) / "build" / board / "sdkconfig").resolve())
+
+    def change(settings):
+        extra = settings.get("idf.customExtraVars") if isinstance(settings.get("idf.customExtraVars"), dict) else {}
+        if extra.get("IDF_TARGET") == target and settings.get("idf.sdkconfigFilePath") == sdkconfig:
+            return None
+        return {**settings, "idf.customExtraVars": {**extra, "IDF_TARGET": target}, "idf.sdkconfigFilePath": sdkconfig}
+
+    update(project, change, f"the ESP-IDF extension takes {board}, {target}: a terminal of ESP-IDF opened before keeps its IDF_TARGET")
+
+
+def main():
+    args = sys.argv[1:]
+    if len(args) == 1:
+        environment(args[0])
+    elif len(args) == 4 and args[1] == "--current":
+        current(args[0], args[2], args[3])
+    else:
+        raise SystemExit(__doc__)
     return 0
 
 

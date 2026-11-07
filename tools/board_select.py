@@ -57,6 +57,7 @@ import sys
 
 import boards_gen
 import project_writer
+import vscode_env
 import resolve
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -277,6 +278,7 @@ def again(parser, project):
         presets = [project / PRESETS, *current_taken(project, current)]
         print(f"{project / PRESETS}: a preset for each, and default for the current one, {current}")
         seed_locks(project, boards)
+        vscode_env.current(project, current, targets[current])
     project_writer.keep_ours(project, [*written, *presets])
     print("An sdkconfig made before keeps what it had: ESP-IDF reads the defaults only into a new one. To take what changed,\n"
           "remove build/<BOARD>/sdkconfig of the board.")
@@ -398,6 +400,7 @@ def main():
         (project / PRESETS).write_text(with_current(doc, args.current))
         project_writer.keep_ours(project, [project / PRESETS, *current_taken(project, args.current)])
         print(f"{project / PRESETS}: {args.current} is the current board, idf.py build builds it")
+        vscode_env.current(project, args.current, target_of(project / f"sdkconfig.defaults.{args.current}"))
         return 0
     if len(args.names) < 2:
         parser.error("name a board and the project's directory")
@@ -442,6 +445,7 @@ def main():
     (project / PRESETS).write_text(presets_text(project, every, [target_of(project / f"sdkconfig.defaults.{board}") for board in every], current, command, current))
     project_writer.keep_ours(project, [*texts, project / PRESETS, *current_taken(project, current)])
     seed_locks(project, every)
+    vscode_env.current(project, current, target_of(project / f"sdkconfig.defaults.{current}"))
     if (project / "sdkconfig.defaults.board").exists():
         print(f"{project / 'sdkconfig.defaults.board'}: the file of one board as it was before the presets; the CMakeLists.txt of the "
               "skeleton reads sdkconfig.defaults.<board> by a preset, take its lines")

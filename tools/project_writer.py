@@ -242,6 +242,9 @@ class Project:
             made = {}
             for path in copy.rglob("*"):
                 rel = path.relative_to(copy).as_posix()
+                # the settings of an editor --again writes are this machine's, never a file of the page
+                if any(part.startswith(".") for part in pathlib.PurePosixPath(rel).parts):
+                    continue
                 touched = every and stamps.get(path) != path.stat().st_mtime_ns
                 if path.is_file() and not LOCK.match(path.name) and (touched or before.get(path) != path.read_text(errors="replace")):
                     made[rel] = path.read_text()
@@ -290,4 +293,11 @@ class Project:
             # stdout of the bridge is the channel of MCP: what the tool says goes to stderr
             with contextlib.redirect_stdout(sys.stderr):
                 board_select.seed_locks(self.root, boards)
+                # the current board of the presets written, for the ESP-IDF extension, as board_select.py tells it
+                default = next((preset for preset in json.loads((self.root / board_select.PRESETS).read_text()).get("configurePresets", [])
+                                if preset.get("name") == board_select.DEFAULT), None) if (self.root / board_select.PRESETS).is_file() else None
+                if default:
+                    import vscode_env
+
+                    vscode_env.current(self.root, default["cacheVariables"]["BOARD"], default["cacheVariables"]["IDF_TARGET"])
         return {"written": sorted(done), "refused": {}}

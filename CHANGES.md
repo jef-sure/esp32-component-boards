@@ -8,6 +8,13 @@
   `if(BOARD STREQUAL "host")` to `if(BOARD MATCHES "^host_")`: `board_select.py` says so and writes nothing before.
   Then `board_select.py --again .` renames `sdkconfig.defaults.host` and `dependencies.lock.host`, and the computer
   stays the current board if it was.
+- The ESP-IDF extension of VS Code follows the current board: `board_select.py`, and the page when it writes, set
+  `idf.customExtraVars.IDF_TARGET` and `idf.sdkconfigFilePath` (`build/<board>/sdkconfig`) in `.vscode/settings.json`,
+  so a terminal of ESP-IDF opened after gets the board's `IDF_TARGET`. Before, the extension took the target of the
+  sdkconfig of the project's folder, which the first `idf.py reconfigure` leaves for no board and for esp32, and `idf.py`
+  refused the board of another target.
+- The page writes a project whose boards `board_select.py` chose: a board chosen by its name alone counts as the card of
+  that board, and a file that is what `board_select.py --again` makes of the project is the component's to replace.
 
 ## 0.0.7 (2026-11-07)
 

@@ -98,6 +98,11 @@ one. `--current` alone changes only `default` and that `current`. A board of the
 lock, `dependencies.lock.<board>`, as a copy of `dependencies.lock`. A file of defaults or a `CMakePresets.json` it did
 not write is not replaced. See [choosing-a-board.md](choosing-a-board.md).
 
+In a project VS Code works on (one with `.vscode/`, or the command run from VS Code) it writes the target of the
+current board for the ESP-IDF extension into `.vscode/settings.json`: `idf.customExtraVars.IDF_TARGET` and
+`idf.sdkconfigFilePath`, `build/<board>/sdkconfig`. A terminal of ESP-IDF opened after the board changed then gets its
+`IDF_TARGET`, and `idf.py` builds it (`tools/vscode_env.py`).
+
 Each file it writes begins with the command that made it and the version and commit of the component. After
 the component changes, `board_select.py --again ~/myproject` makes every such file of the project again the same
 way, and the presets in their order with their current board, unless the page changed the `current` of

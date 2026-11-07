@@ -101,6 +101,11 @@ python3 tools/board_select.py host --as cyd_s028r --as jc1060p470c ~/myproject  
 начинается с копии `dependencies.lock`. Файл умолчаний или `CMakePresets.json`, которые писал не он, не заменяются.
 См. [choosing-a-board.md](choosing-a-board.md).
 
+В проекте, с которым работают в VS Code (у него есть `.vscode/` или команда запущена из VS Code), он записывает в
+`.vscode/settings.json` цель текущей платы для расширения ESP-IDF: `idf.customExtraVars.IDF_TARGET` и
+`idf.sdkconfigFilePath`, `build/<плата>/sdkconfig`. Тогда терминал ESP-IDF, открытый после смены платы, получает её
+`IDF_TARGET`, и `idf.py` её собирает (`tools/vscode_env.py`).
+
 Каждый записанный файл начинается с команды, которой он сделан, и с версии и коммита компонента. Когда компонент
 меняется, `board_select.py --again ~/myproject` делает все такие файлы проекта заново той же командой, а пресеты — в
 их порядке и с их текущей платой, если только страница с тех пор не поменяла `current` в `selection.json` (см.

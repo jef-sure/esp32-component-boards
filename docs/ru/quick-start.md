@@ -24,7 +24,9 @@
 
 - В VS Code: Ctrl+Shift+P → «ESP-IDF: Open ESP-IDF Terminal». Если расширение ещё не знает, какую установку брать,
   сначала «ESP-IDF: Select Current ESP-IDF Version». Терминал открывается в своём окне VS Code: в новом окне — снова
-  «Open ESP-IDF Terminal».
+  «Open ESP-IDF Terminal». Расширение даёт этому терминалу `IDF_TARGET` текущей платы проекта; `board_select.py`
+  сообщает ему плату при каждой смене. Терминал, открытый до смены платы, держит прежний `IDF_TARGET`: откройте его
+  заново или выполните в нём `unset IDF_TARGET`.
 - В обычном терминале — команда активации вашей установки: у EIM это
   `source ~/.espressif/tools/activate_idf_v6.1.sh` (с вашей версией), у установки через `install.sh` —
   `. ~/esp/esp-idf/export.sh`.
@@ -204,6 +206,8 @@ git push -u origin main
 | что сделали | что увидите | как правильно |
 |---|---|---|
 | `idf.py` или `compote` в обычном терминале VS Code | `command not found` | терминал ESP-IDF: «ESP-IDF: Open ESP-IDF Terminal» |
+| `idf.py build` в терминале ESP-IDF, открытом до смены платы | `was generated for target 'linux', but environment variable IDF_TARGET is set to 'esp32'` | новый терминал ESP-IDF или `unset IDF_TARGET` |
+| `idf.py set-target`, как советует `idf.py` | сборка уходит в корневой `build/` и падает | не нужен: цель и каталог задаёт пресет платы |
 | создали пример в непустой папке, например в клоне с одной лицензией | `is not empty` | новая папка; репозиторий на GitHub — в конце, из готовой папки |
 | открыли `editor/index.html` правым кликом → «Open in Integrated Browser» | страница без каталога и с командой сервера | `boards_mcp.py --serve` из папки проекта и его ссылка |
 | CMake Tools сконфигурировал проект до первого `idf.py` | `IDF_PATH is not set` | `idf.py reconfigure` в терминале ESP-IDF, затем снова конфигурация CMake Tools |

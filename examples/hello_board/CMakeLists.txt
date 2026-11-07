@@ -30,8 +30,8 @@ if(NOT DEFINED BOARDS_COMPONENT_DIR)
     get_filename_component(BOARDS_COMPONENT_DIR "${CMAKE_CURRENT_LIST_DIR}/../.." ABSOLUTE)
 endif()
 set(EXTRA_COMPONENT_DIRS "${BOARDS_COMPONENT_DIR}")
-# the computer (BOARD=host, the linux target of ESP-IDF): only main and the component, the drivers of a chip are not there
-if(BOARD STREQUAL "host")
+# the computer (BOARD=host_<board>, the linux target of ESP-IDF): only main and the component, the drivers of a chip are not there
+if(BOARD MATCHES "^host_")
     get_filename_component(_boards_name "${BOARDS_COMPONENT_DIR}" NAME)
     set(COMPONENTS main ${_boards_name})
     # in a shell of ESP-IDF the linker of a chip comes first in PATH: the compiler of the computer looks in /usr/bin first

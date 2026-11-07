@@ -64,8 +64,9 @@ python3 managed_components/jef-sure__boards/tools/board_select.py host --as cyd_
 ```
 
 Первая пишет `sdkconfig.defaults.cyd_s028r`, пресет платы в `CMakePresets.json` и её lock компонентов. Вторая делает то же
-для компьютера: окно с дисплеем CYD, повёрнутым так, как плату держат. Текущей становится плата, названная последней,
-здесь компьютер. Без `set-target` и без `menuconfig`.
+для компьютера `host_cyd_s028r`: окно с дисплеем CYD, повёрнутым так, как плату держат. Ещё одно `--as` даёт ещё один
+компьютер рядом, например `host_jc1060p470c`. Текущей становится плата, названная последней, здесь компьютер. Без
+`set-target` и без `menuconfig`.
 
 Если плата ещё не выбрана, её подбирает страница. Запустите её сервер из папки проекта:
 
@@ -81,7 +82,7 @@ python3 managed_components/jef-sure__boards/tools/boards_mcp.py --serve
 
 ## 3. На компьютере
 
-В VS Code: Ctrl+Shift+P → «CMake: Select Configure Preset» → «the computer», затем F7 («CMake: Build») и Ctrl+Shift+F5
+В VS Code: Ctrl+Shift+P → «CMake: Select Configure Preset» → «the computer as CYD (ESP32-2432S028R)», затем F7 («CMake: Build») и Ctrl+Shift+F5
 («CMake: Run Without Debugging»). Откроется окно: белый экран и синяя полоса сверху. Тач — это мышь, кнопка BOOT —
 клавиша B.
 
@@ -89,11 +90,11 @@ python3 managed_components/jef-sure__boards/tools/boards_mcp.py --serve
 
 ```sh
 idf.py build
-build/host/hello.elf
+build/host_cyd_s028r/hello.elf
 ```
 
 ESP-IDF 6 собирает текущую плату по её пресету. ESP-IDF 5 пресеты не читает:
-`idf.py -B build/host -D SDKCONFIG=build/host/sdkconfig -D BOARD=host build`.
+`idf.py -B build/host_cyd_s028r -D SDKCONFIG=build/host_cyd_s028r/sdkconfig -D BOARD=host_cyd_s028r build`.
 
 Программа, `main/main.c`:
 

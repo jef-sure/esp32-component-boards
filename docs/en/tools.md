@@ -85,7 +85,8 @@ python3 tools/board_select.py cyd_s028r ~/myproject
 python3 tools/board_select.py my_board ~/myproject    # a board of the program, in its components/local-boards/
 python3 tools/board_select.py cyd_s028r jc8012p4a1c --current jc8012p4a1c ~/myproject
 python3 tools/board_select.py --current cyd_s028r ~/myproject
-python3 tools/board_select.py host --as jc8012p4a1c ~/myproject    # the computer, as large as the 10-inch board
+python3 tools/board_select.py host --as jc8012p4a1c ~/myproject    # the computer host_jc8012p4a1c, as large as the 10-inch board
+python3 tools/board_select.py host --as cyd_s028r --as jc1060p470c ~/myproject  # two computers, side by side
 ```
 
 Writes `~/myproject/sdkconfig.defaults.<board>` for each board named: the board's defaults, the lines of the

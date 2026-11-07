@@ -64,8 +64,9 @@ python3 managed_components/jef-sure__boards/tools/board_select.py host --as cyd_
 ```
 
 The first writes `sdkconfig.defaults.cyd_s028r`, the preset of the board in `CMakePresets.json` and its lock of the
-components. The second does the same for the computer: a window with the display of the CYD, turned as the board is held.
-The board named last is the current one, here the computer. No `set-target` and no `menuconfig`.
+components. The second does the same for the computer `host_cyd_s028r`: a window with the display of the CYD, turned as
+the board is held. Another `--as` gives another computer beside it, as `host_jc1060p470c`. The board named last is the
+current one, here the computer. No `set-target` and no `menuconfig`.
 
 When the board is not chosen yet, the page finds one. Start its server from the folder of the project:
 
@@ -81,7 +82,7 @@ from there goes on the canvas with the characteristics it has on that board. See
 
 ## 3. On the computer
 
-In VS Code: Ctrl+Shift+P → "CMake: Select Configure Preset" → "the computer", then F7 ("CMake: Build") and
+In VS Code: Ctrl+Shift+P → "CMake: Select Configure Preset" → "the computer as CYD (ESP32-2432S028R)", then F7 ("CMake: Build") and
 Ctrl+Shift+F5 ("CMake: Run Without Debugging"). A window opens: white, with a blue band at the top. The touch is the
 mouse, the BOOT button the key B.
 
@@ -89,11 +90,11 @@ The same from a terminal of ESP-IDF:
 
 ```sh
 idf.py build
-build/host/hello.elf
+build/host_cyd_s028r/hello.elf
 ```
 
 ESP-IDF 6 builds the current board by its preset. ESP-IDF 5 does not read presets:
-`idf.py -B build/host -D SDKCONFIG=build/host/sdkconfig -D BOARD=host build`.
+`idf.py -B build/host_cyd_s028r -D SDKCONFIG=build/host_cyd_s028r/sdkconfig -D BOARD=host_cyd_s028r build`.
 
 The program, `main/main.c`:
 

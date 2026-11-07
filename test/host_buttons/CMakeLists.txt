@@ -3,7 +3,7 @@
 #
 #     python3 ../../tools/board_select.py host --as cyd_s028r .
 #     idf.py build
-#     SDL_VIDEODRIVER=dummy DGX_HOST_SCRIPT=buttons.script build/host/host_buttons.elf
+#     SDL_VIDEODRIVER=dummy DGX_HOST_SCRIPT=buttons.script build/host_cyd_s028r/host_buttons.elf
 cmake_minimum_required(VERSION 3.22)
 # BOARD=<board>, which the preset of a board sets, builds with sdkconfig.defaults.<board> that board_select.py writes,
 # then with the program's own sdkconfig.defaults when it has one. A -D SDKCONFIG_DEFAULTS=... on the command line wins.
@@ -26,8 +26,8 @@ if(NOT DEFINED BOARDS_COMPONENT_DIR)
     get_filename_component(BOARDS_COMPONENT_DIR "${CMAKE_CURRENT_LIST_DIR}/../.." ABSOLUTE)
 endif()
 set(EXTRA_COMPONENT_DIRS "${BOARDS_COMPONENT_DIR}")
-# the computer (BOARD=host, the linux target of ESP-IDF): only main and the component, the drivers of a chip are not there
-if(BOARD STREQUAL "host")
+# the computer (BOARD=host_<board>, the linux target of ESP-IDF): only main and the component, the drivers of a chip are not there
+if(BOARD MATCHES "^host_")
     get_filename_component(_boards_name "${BOARDS_COMPONENT_DIR}" NAME)
     set(COMPONENTS main ${_boards_name})
     # in a shell of ESP-IDF the linker of a chip comes first in PATH: the compiler of the computer looks in /usr/bin first

@@ -1,5 +1,14 @@
 # CHANGES
 
+## 0.1.0 (not released yet)
+
+- The computer is `host_<board>`, one for each board it shows: `board_select.py host --as cyd_s028r --as jc1060p470c .`
+  makes `host_cyd_s028r` and `host_jc1060p470c`, each with its file of defaults, preset, lock and build directory, so
+  they build and run side by side. A project of 0.0.7 changes one line of its `CMakeLists.txt`,
+  `if(BOARD STREQUAL "host")` to `if(BOARD MATCHES "^host_")`: `board_select.py` says so and writes nothing before.
+  Then `board_select.py --again .` renames `sdkconfig.defaults.host` and `dependencies.lock.host`, and the computer
+  stays the current board if it was.
+
 ## 0.0.7 (2026-11-07)
 
 - A new project comes from the registry: `compote project create-from-example -p my_project jef-sure/boards:hello`.

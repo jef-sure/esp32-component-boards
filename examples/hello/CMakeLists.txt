@@ -14,8 +14,8 @@ if(NOT SDKCONFIG_DEFAULTS AND BOARD)
     endif()
 endif()
 
-# the computer (BOARD=host, the linux target of ESP-IDF): only main and what it asks, the drivers of a chip are not there
-if(BOARD STREQUAL "host")
+# the computer (BOARD=host_<board>, the linux target of ESP-IDF): only main and what it asks, the drivers of a chip are not there
+if(BOARD MATCHES "^host_")
     set(COMPONENTS main)
     # in a shell of ESP-IDF the linker of a chip comes first in PATH: the compiler of the computer looks in /usr/bin first
     set(CMAKE_EXE_LINKER_FLAGS "-B/usr/bin/")

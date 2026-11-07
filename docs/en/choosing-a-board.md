@@ -169,19 +169,28 @@ snippet above only sets the variable when none is given.
 
 ## The computer
 
-A program runs on the computer as on a board: the board `host`, the linux target of ESP-IDF, a window of DGX with the
-display of the board it shows.
+A program runs on the computer as on a board: the board `host_<board>`, the linux target of ESP-IDF, a window of DGX
+with the display of the board it shows.
 
 ```sh
 python3 managed_components/jef-sure__boards/tools/board_select.py host --as jc8012p4a1c .
-idf.py -B build/host -D SDKCONFIG=build/host/sdkconfig -D BOARD=host build
-build/host/<project>.elf
+idf.py -B build/host_jc8012p4a1c -D SDKCONFIG=build/host_jc8012p4a1c/sdkconfig -D BOARD=host_jc8012p4a1c build
+build/host_jc8012p4a1c/<project>.elf
 ```
 
-Its log comes as it is written in a terminal; through a pipe it is buffered, and `stdbuf -o0 build/host/<project>.elf`
-gives it at once.
+Each `--as` is a computer of its own, with its name, file, preset and build directory: `host --as cyd_s028r --as
+jc1060p470c` gives `host_cyd_s028r` and `host_jc1060p470c`, which build and run side by side. On ESP-IDF 6,
+`idf.py --preset host_jc8012p4a1c build`.
 
-`board_select.py` writes `sdkconfig.defaults.host` beside the files of the boards of the project, and the CMake of the
+Its log comes as it is written in a terminal; through a pipe it is buffered, and
+`stdbuf -o0 build/host_jc8012p4a1c/<project>.elf` gives it at once.
+
+In 0.0.7 the computer was one, named `host`. In a project of that time the line `if(BOARD STREQUAL "host")` of
+`CMakeLists.txt` becomes `if(BOARD MATCHES "^host_")` (`board_select.py` says so and writes nothing before), and
+`board_select.py --again .` renames `sdkconfig.defaults.host` and `dependencies.lock.host` to `…host_<board>`;
+`build/host` may go.
+
+`board_select.py` writes `sdkconfig.defaults.host_<board>` beside the files of the boards of the project, and the CMake of the
 skeleton builds only `main` and what it asks for the computer. `BOARD_PIXELS` and `BOARD_MM` are those of the board
 shown. The window is a host screen of DGX (`dgx_host_screen_init`, DGX 0.10.10 and later): the glass of the display of
 the board, turned as the board is held, with the screen at the orientation the board starts with, so
@@ -189,13 +198,13 @@ the board, turned as the board is held, with the screen at the orientation the b
 draws on it as on the panel. Its title tells how long the bytes sent would take on the bus of that board when it is SPI
 or QSPI, and how much memory the program and DGX hold. A display that starts mirrored, or a group of two, is shown as
 it is seen, not turned. The task that starts the display shows the window in its waits (`vTaskDelay`), so the
-display is started from `app_main` or from a task with 48 KB of stack left; `sdkconfig.defaults.host` gives `app_main`
+display is started from `app_main` or from a task with 48 KB of stack left; `sdkconfig.defaults.host_<board>` gives `app_main`
 128 KB (`CONFIG_ESP_MAIN_TASK_STACK_SIZE=16384`, in words of 8 bytes). After `app_main` returns the window stays until
 it is closed; a window that is closed ends the program. The touch panel is the mouse: pressed on the window it is a
 finger on the glass (`dgx_di_host.h`, DGX-DI 0.1.5 and later), read through `board_dgx_di_pointer()` as on a board, with
 no calibration, and it turns with the display. The sound goes to the speakers of the computer: a task asks the
 source, as on a board. The flash of a program that has partitions (NVS, a file system) is kept between runs in
-`build/host/flash.bin` while the partition table of the build is the one it has; removing the file erases it. The
+`build/host_<board>/flash.bin` while the partition table of the build is the one it has; removing the file erases it. The
 buttons are keys: those of the board shown, `boot` on B, and those of a gamepad, WASD and the arrows among them (see
 the buttons in [api.md](api.md)); `DGX_HOST_SCRIPT` of DGX presses them, and the mouse, with nobody at the computer. It takes SDL2 and libbsd of the computer (`libsdl2-dev`, `libbsd-dev`) and runs on
 Linux; Windows is not a target of ESP-IDF.

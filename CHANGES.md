@@ -1,6 +1,6 @@
 # CHANGES
 
-## 0.0.6 (not released yet)
+## 0.0.6 (2026-11-07)
 
 - A graphics display can be on I2C: the glue puts it on the board's bus with `dgx_i2c_init_on_bus`, and the master of
   the bus comes from `board_glue_i2c`, so other parts can share it. A driver with no orientation call starts its panel
@@ -16,16 +16,19 @@
 - `board_display.mm_w` and `mm_h` and `BOARD_MM` are whole millimetres, rounded, where the data has fractions.
 - The catalog describes DGX-DI 0.1.5, whose mouse on the computer is a touch, and hd44780 0.1.3. The list of libraries
   says the version each record describes, and the checks see when it does not.
-- New boards: the ESP32 DevKit with USB-C and a CH340 (`esp32_devkit_usb_c`, a variant of `esp32_devkit`), and the
-  ESP32-C3 with a 0.42-inch 72x40 OLED (`esp32_c3_oled_042`), and the ESP32 with a 0.96-inch 128x64 OLED, yellow on its
-  top 16 rows (`esp32_oled_096`), and the NodeMCU ESP-32S V1.1 of 38 pins in the layout of the ESP32-DevKitC
-  (`nodemcu_esp32s`), the ESP32-C6 Super Mini with its charger for a cell (`esp32_c6_supermini`), and the
-  ESP32-WROVER-DEV with 8 MB PSRAM and an OV2640 camera (`esp32_wrover_dev`).
+- New boards:
+  - the ESP32 DevKit with USB-C and a CH340, `esp32_devkit_usb_c`, a variant of `esp32_devkit`;
+  - the ESP32-C3 with a 0.42-inch 72x40 OLED, `esp32_c3_oled_042`;
+  - the ESP32 with a 0.96-inch 128x64 OLED, yellow on its top 16 rows, `esp32_oled_096`;
+  - the NodeMCU ESP-32S V1.1 of 38 pins in the layout of the ESP32-DevKitC, `nodemcu_esp32s`;
+  - the ESP32-C6 Super Mini with its charger for a cell, `esp32_c6_supermini`;
+  - the ESP32-WROVER-DEV with 8 MB PSRAM and an OV2640 camera, `esp32_wrover_dev`.
 - A camera on a parallel port: the catalog describes esp32-camera 2.1.8 and its sensors, the OV2640, and the OV2640 on a
   24-pin ribbon as a module. The component does not start the camera; a program takes its pins from the board:
   `board_bus_get` gives a list of lines by number, as `data0` to `data7` of `dvp.dvp0`. Every line of a DVP port is an
   input of the chip, so GPIO 34 to 39 of an ESP32 can carry them.
-- Photos of the S3 DevKit, the front of the C3-Zero and the three Guition boards.
+- Photos of the S3 DevKit, the front of the C3-Zero, the three Guition boards and the CYD.
+- The recipes take the component as `>=0.0.6`.
 
 ## 0.0.5 (2026-11-06)
 

@@ -11,7 +11,7 @@ for another board, put its name from the table in place of `cyd_s028r`.
 
 ```sh
 idf.py create-project hello && cd hello
-idf.py add-dependency "jef-sure/boards>=0.0.5"
+idf.py add-dependency "jef-sure/boards>=0.0.6"
 ```
 
 ## 2. The CMake that reads the board

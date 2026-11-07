@@ -45,7 +45,7 @@
             "class": "other",
             "ref": "TP1",
             "part": "TP4054",
-            "notes": "Charges a cell on BAT from VBUS. Its green LED on CHRG, BAT on the board, lights while it charges. PROG has 10 kΩ."
+            "notes": "Charges a cell on BAT from VBUS. Its green LED on CHRG, BAT on the board, lights while it charges; no GPIO reaches it. With no cell on the pads it blinks in short flashes. PROG has 10 kΩ."
         },
         "d_vbus": {"class": "other", "ref": "PD1", "notes": "From VBUS to VCC."},
         "d_bat": {"class": "other", "notes": "From BAT to VCC; the schematic names it PD2, as the blue LED."},
@@ -111,6 +111,13 @@
             "covers": ["mcu"],
             "source": "esptool on Anton's board: ESP32-C6FH4 (QFN32) rev 0.2, 4 MB flash in the chip",
             "date": "2026-11-06"
+        },
+        "charger_led": {
+            "level": "hardware",
+            "covers": ["devices.charger"],
+            "by": "Anton, by eye",
+            "date": "2026-11-07",
+            "notes": "No cell on B+ and B-: the green LED blinks in short flashes all the time, whatever the program."
         }
     }
 }

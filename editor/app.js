@@ -691,8 +691,10 @@ const app = createApp({
                 <select v-model="store.language" :aria-label="store.language"><option v-for="(language, code) in LANGUAGES" :key="code" :value="code">{{ language.title }}</option></select>
             </span>
         </header>
-        <p v-if="store.error" class="banner">{{ store.error }}</p>
-        <p v-if="!store.loaded" class="start">The page is not served from the repository, so it has no catalog: open the folder of the repository.
+        <p v-if="store.error && !(FROM_FILE && !store.loaded)" class="banner">{{ store.error }}</p>
+        <p v-if="!store.loaded && FROM_FILE" class="start">{{ t('Opened as a file, the page reads nothing: the browser lets a file fetch no other file. Start its server in the folder of the project and open the link it prints:') }}
+            <code>python3 managed_components/jef-sure__boards/tools/boards_mcp.py --serve</code>. {{ t('In a clone of the repository:') }} <code>python3 tools/boards_mcp.py --serve</code>.</p>
+        <p v-else-if="!store.loaded" class="start">The page is not served from the repository, so it has no catalog: open the folder of the repository.
             A program or its <code>local-boards</code> comes after it.</p>
         <select-page v-else-if="store.page === 'select'"></select-page>
         <main v-else>
@@ -731,6 +733,8 @@ const app = createApp({
 });
 
 app.config.globalProperties.PLACES_OPEN = PLACES_OPEN;
+// a page opened as a file fetches nothing: it says how to serve it instead of what failed
+app.config.globalProperties.FROM_FILE = location.protocol === 'file:';
 app.use(Pinia.createPinia());
 app.config.globalProperties.t = (text, ...values) => translate(useEditor().language, text, ...values);
 app.mount('#app');

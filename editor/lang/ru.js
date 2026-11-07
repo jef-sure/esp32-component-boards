@@ -292,6 +292,8 @@ LANGUAGES.ru = {
         'Pictures of parts: hold the pointer on one for its source.': 'Картинки деталей: источник виден при наведении на картинку.',
         'on the board': 'на плате',
         'On the board': 'На плате',
+        'Opened as a file, the page reads nothing: the browser lets a file fetch no other file. Start its server in the folder of the project and open the link it prints:': 'Открытая как файл, страница ничего не читает: браузер не даёт файлу брать другие файлы. Запустите её сервер в папке проекта и откройте ссылку, которую он напечатает:',
+        'In a clone of the repository:': 'В клоне репозитория:',
         'on the board {0}: {1}': 'на плате {0}: {1}',
         'on the canvas as it is on the board': 'на холст таким, как на плате',
         'a board of the project: counted as one you have': 'плата проекта: считается, что она у вас есть',

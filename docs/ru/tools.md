@@ -103,8 +103,9 @@ python3 tools/board_select.py host --as cyd_s028r --as jc1060p470c ~/myproject  
 
 В проекте, с которым работают в VS Code (у него есть `.vscode/` или команда запущена из VS Code), он записывает в
 `.vscode/settings.json` цель текущей платы для расширения ESP-IDF: `idf.customExtraVars.IDF_TARGET` и
-`idf.sdkconfigFilePath`, `build/<плата>/sdkconfig`. Тогда терминал ESP-IDF, открытый после смены платы, получает её
-`IDF_TARGET`, и `idf.py` её собирает (`tools/vscode_env.py`).
+`idf.sdkconfigFilePath`, `build/<плата>/sdkconfig` (`tools/vscode_env.py`). Расширение берёт из них цель, когда
+перечитывает её — у нас после перезагрузки окна и выбора пресета платы, — и кладёт её в свои терминалы как `IDF_TARGET`;
+до тех пор в терминале ESP-IDF нужен `unset IDF_TARGET`.
 
 Каждый записанный файл начинается с команды, которой он сделан, и с версии и коммита компонента. Когда компонент
 меняется, `board_select.py --again ~/myproject` делает все такие файлы проекта заново той же командой, а пресеты — в

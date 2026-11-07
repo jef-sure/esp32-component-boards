@@ -24,12 +24,14 @@
 
 - В VS Code: Ctrl+Shift+P → «ESP-IDF: Open ESP-IDF Terminal». Если расширение ещё не знает, какую установку брать,
   сначала «ESP-IDF: Select Current ESP-IDF Version». Терминал открывается в своём окне VS Code: в новом окне — снова
-  «Open ESP-IDF Terminal». Расширение даёт этому терминалу `IDF_TARGET` текущей платы проекта; `board_select.py`
-  сообщает ему плату при каждой смене. Терминал, открытый до смены платы, держит прежний `IDF_TARGET`: откройте его
-  заново или выполните в нём `unset IDF_TARGET`.
+  «Open ESP-IDF Terminal». Расширение кладёт в этот терминал `IDF_TARGET` — цель, которую оно считает текущей.
+  `board_select.py` сообщает ему текущую плату, но расширение перечитывает цель не сразу: у нас — после перезагрузки
+  окна («Developer: Reload Window») и выбора пресета этой платы в списке, который предлагает CMake Tools. Если `idf.py`
+  пишет, что `IDF_TARGET` не совпадает с целью платы, выполните в терминале `unset IDF_TARGET`: плату и её цель задаёт
+  пресет.
 - В обычном терминале — команда активации вашей установки: у EIM это
   `source ~/.espressif/tools/activate_idf_v6.1.sh` (с вашей версией), у установки через `install.sh` —
-  `. ~/esp/esp-idf/export.sh`.
+  `. ~/esp/esp-idf/export.sh`. Такой терминал `IDF_TARGET` не задаёт, и пресет каждой платы сам даёт её цель.
 
 ## 1. Проект
 
@@ -206,7 +208,7 @@ git push -u origin main
 | что сделали | что увидите | как правильно |
 |---|---|---|
 | `idf.py` или `compote` в обычном терминале VS Code | `command not found` | терминал ESP-IDF: «ESP-IDF: Open ESP-IDF Terminal» |
-| `idf.py build` в терминале ESP-IDF, открытом до смены платы | `was generated for target 'linux', but environment variable IDF_TARGET is set to 'esp32'` | новый терминал ESP-IDF или `unset IDF_TARGET` |
+| `idf.py build` в терминале ESP-IDF, когда расширение считает текущей другую цель | `was generated for target 'linux', but environment variable IDF_TARGET is set to 'esp32'` | `unset IDF_TARGET` в этом терминале |
 | `idf.py set-target`, как советует `idf.py` | сборка уходит в корневой `build/` и падает | не нужен: цель и каталог задаёт пресет платы |
 | создали пример в непустой папке, например в клоне с одной лицензией | `is not empty` | новая папка; репозиторий на GitHub — в конце, из готовой папки |
 | открыли `editor/index.html` правым кликом → «Open in Integrated Browser» | страница без каталога и с командой сервера | `boards_mcp.py --serve` из папки проекта и его ссылка |

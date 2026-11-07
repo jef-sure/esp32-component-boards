@@ -10,7 +10,8 @@ The settings of VS Code a project of boards needs, in its .vscode/settings.json:
   build/<board>/sdkconfig. The extension gives its terminals the IDF_TARGET of that sdkconfig, of that setting when the
   board was not built yet, and of the sdkconfig of the project's folder, or esp32, when neither is set; idf.py stops when
   it differs from the target of the board a preset builds. board_select.py writes them when the current board changes:
-  vscode_env.py PROJECT_DIR --current BOARD TARGET. A terminal open before keeps its IDF_TARGET.
+  vscode_env.py PROJECT_DIR --current BOARD TARGET. The extension keeps the target it took and reads it again later, as
+  after a reload of the window and the preset of the board chosen: till then its terminals keep the old IDF_TARGET.
 
 Only a project VS Code is used on gets them: one with .vscode/, or worked on from VS Code. Values already there are not
 written again. A settings.json that is not plain JSON, as one with comments, is left as it is, and the lines it needs
@@ -82,7 +83,7 @@ def current(project, board, target):
             return None
         return {**settings, "idf.customExtraVars": {**extra, "IDF_TARGET": target}, "idf.sdkconfigFilePath": sdkconfig}
 
-    update(project, change, f"the ESP-IDF extension takes {board}, {target}: a terminal of ESP-IDF opened before keeps its IDF_TARGET")
+    update(project, change, f"the ESP-IDF extension takes {board}, {target} when it reads the target again; till then, unset IDF_TARGET in its terminal")
 
 
 def main():

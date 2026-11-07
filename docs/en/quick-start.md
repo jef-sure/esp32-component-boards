@@ -24,12 +24,14 @@ activated: `idf.py --version` answers in it. The plain terminal of VS Code (Ctrl
 
 - In VS Code: Ctrl+Shift+P → "ESP-IDF: Open ESP-IDF Terminal". When the extension does not know yet which installation
   to take, "ESP-IDF: Select Current ESP-IDF Version" first. The terminal belongs to its window of VS Code: in a new
-  window, "Open ESP-IDF Terminal" again. The extension gives that terminal the `IDF_TARGET` of the current board of the
-  project, which `board_select.py` tells it at each change. A terminal opened before the board changed keeps the old
-  `IDF_TARGET`: open it again, or run `unset IDF_TARGET` in it.
+  window, "Open ESP-IDF Terminal" again. The extension puts into that terminal the `IDF_TARGET` it takes for the current
+  one. `board_select.py` tells it the current board, but the extension reads the target again later: here, after a
+  reload of the window ("Developer: Reload Window") and the preset of the board chosen in the list CMake Tools offers.
+  When `idf.py` says `IDF_TARGET` differs from the target of the board, run `unset IDF_TARGET` in the terminal: the
+  preset gives the board and its target.
 - In a plain terminal, the activation of your installation: for EIM,
   `source ~/.espressif/tools/activate_idf_v6.1.sh` (with your version); for an installation by `install.sh`,
-  `. ~/esp/esp-idf/export.sh`.
+  `. ~/esp/esp-idf/export.sh`. Such a terminal sets no `IDF_TARGET`, and the preset of each board gives its target.
 
 ## 1. The project
 
@@ -208,7 +210,7 @@ then `git pull`.
 | what was done | what you see | the right way |
 |---|---|---|
 | `idf.py` or `compote` in the plain terminal of VS Code | `command not found` | a terminal of ESP-IDF: "ESP-IDF: Open ESP-IDF Terminal" |
-| `idf.py build` in a terminal of ESP-IDF opened before the board changed | `was generated for target 'linux', but environment variable IDF_TARGET is set to 'esp32'` | a new terminal of ESP-IDF, or `unset IDF_TARGET` |
+| `idf.py build` in a terminal of ESP-IDF while the extension takes another target for the current one | `was generated for target 'linux', but environment variable IDF_TARGET is set to 'esp32'` | `unset IDF_TARGET` in that terminal |
 | `idf.py set-target`, as `idf.py` advises | the build goes to the root `build/` and fails | not needed: the preset of the board gives the target and the directory |
 | the example made in a folder with files, as a clone with only a licence | `is not empty` | a new folder; the repository on GitHub last, from the folder made |
 | `editor/index.html` opened by a right click → "Open in Integrated Browser" | the page with no catalog, naming the command of its server | `boards_mcp.py --serve` from the folder of the project, and its link |

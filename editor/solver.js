@@ -984,7 +984,8 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
     // What a part of a board is, in a few words: its chip, its part when that says more, and the pixels of a panel.
     function partTitle(name, device) {
         const panel = device.config?.panel;
-        const chip = catalog.devices[device.chip]?.title ?? device.chip ?? name;
+        // a part with no chip is named by its part number, as a photoresistor, and only then by its name on the board
+        const chip = catalog.devices[device.chip]?.title ?? device.chip ?? device.part ?? name;
         const part = device.part && !chip.toLowerCase().includes(device.part.toLowerCase()) ? device.part : null;
         return [chip, part, panel?.width && `${panel.width} x ${panel.height}`].filter(Boolean).join(', ');
     }
@@ -1014,7 +1015,9 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
                     const value = valueAt(device, question.limit.field);
                     if (typeof value === 'number') asks[question.id] = value;
                 }
-                parts.push({ device: name, role: role.id, title: partTitle(name, device), variant, asks });
+                // its buses and lines on the board, as the card of a kit shows them
+                const { buses, lines } = heldOf(board, { title: role.text }, name, device);
+                parts.push({ device: name, role: role.id, title: partTitle(name, device), variant, asks, buses, lines });
             }
         }
         return parts;

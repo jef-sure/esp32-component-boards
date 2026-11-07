@@ -433,6 +433,8 @@ const SelectPage = {
         const laterSays = (kit) => kit.says.filter((line) => !FIRST_LEVELS.includes(line.level));
         // what the person has of a chain, its products and their counts in order from the board: the part of the block as a list
         const chainBlock = (block) => store.asksOf(block).some((question) => question.limit?.measure === 'chain');
+        // where a part of the board is: its buses, or the GPIOs of a part on lines of its own, as an LED
+        const partWhere = (part) => part.buses.join(', ') || (part.lines.length ? `GPIO ${part.lines.map((wire) => wire.to.replace('GPIO ', '')).join(', ')}` : '');
         // the Part of a block: the part of the board it came from, any, or a module the person fixes
         const setPart = (block, value) => {
             if (value === FROM_BOARD) block.part = undefined;
@@ -450,7 +452,7 @@ const SelectPage = {
             if (!block.part.length) block.part = undefined;
         };
         const cardHelpers = { store, host, inProject, money, partsOf, firstSays, laterSays, MARKS, priceLink, canWrite, chosenHas };
-        return { store, host, fit, boards, inProject, setPart, FROM_BOARD, cardHelpers, currentCard, currentMiss, listed, others, asked, showAll, showKits, firstSays, laterSays, addOutput, ownable, addOwned, money, numberOf, priceLink, MARKS, filter, groups, roleOf, nameOf, outputsQuestion, firstOfRole, said, sendSaid, talking, stream, partsOf, boardTitle, servedBy, install, local, copied, copyInstall, setAsk, shownBoards, BOARDS_SHOWN, canWrite, chosenHas, chainBlock, haveOf, addHave, dropHave };
+        return { store, host, fit, boards, inProject, setPart, FROM_BOARD, cardHelpers, currentCard, currentMiss, listed, partWhere, others, asked, showAll, showKits, firstSays, laterSays, addOutput, ownable, addOwned, money, numberOf, priceLink, MARKS, filter, groups, roleOf, nameOf, outputsQuestion, firstOfRole, said, sendSaid, talking, stream, partsOf, boardTitle, servedBy, install, local, copied, copyInstall, setAsk, shownBoards, BOARDS_SHOWN, canWrite, chosenHas, chainBlock, haveOf, addHave, dropHave };
     },
     template: `
         <div class="select" :class="{ talking, waiting: !showKits }">
@@ -462,7 +464,7 @@ const SelectPage = {
                 </details>
                 <section v-if="store.boardParts.length && !talking" class="board-parts"><h2>{{ t('On the board {0}', boardTitle(store.selectedBoard)) }}</h2>
                     <button v-for="part in store.boardParts" :key="part.device + '/' + part.role" type="button" class="role" :title="t('on the canvas as it is on the board')"
-                        @click="store.addBoardPart(part)">{{ t(roleOf(part.role).text) }} <span class="note">{{ part.title }}</span></button></section>
+                        @click="store.addBoardPart(part)">{{ t(roleOf(part.role).text) }} <span class="note">{{ part.title }}<template v-if="partWhere(part)"> · {{ partWhere(part) }}</template></span></button></section>
                 <h2 v-if="!talking">{{ t('Roles') }}</h2>
                 <input type="search" v-model="filter" :placeholder="t('find a role')">
                 <div v-if="!talking || filter" class="roles">

@@ -1,5 +1,35 @@
 # CHANGES
 
+## 0.0.7 (2026-11-07)
+
+- A new project comes from the registry: `compote project create-from-example -p my_project jef-sure/boards:hello`.
+  `examples/hello` is the project the page and `tools/board_project.py` make, filled for the registry: it builds for the
+  computer, its program is `main/main.c`, and its `.gitignore` keeps out `build/`, `managed_components/`, `sdkconfig`,
+  the clangd index `.cache/` and `.vscode/`. `tools/check_format.py` compares the two, and `--fix` writes the example.
+  `main/idf_component.yml` of a new project ends with no empty line.
+- CMake Tools of VS Code builds a project: each configuration writes the environment of ESP-IDF into `cmake.environment`
+  of `.vscode/settings.json` (`tools/vscode_env.py`), for a project with `.vscode/` or configured from VS Code, and the
+  presets name Ninja, so CMake Tools and `idf.py` share a build directory.
+- A build with no `BOARD` in a project whose boards `board_select.py` made stops and names them, as `cmake` with no
+  preset builds, the ESP-IDF extension of VS Code with no project configuration among them. The CMake of a new project
+  stops `cmake` run outside ESP-IDF with what to do.
+- On an ESP32 a program starts every part before any other work: both SPI hosts share one DMA, and setting a host up
+  resets it, so a transfer on the other host breaks. `hello` started the touch after it drew, and the end of the band
+  reached the CYD wrong; `hello` and `hello_board` start every part first, and the glue of an ESP32 board with SPI buses
+  and `api.md` say why.
+- The page: a kit shows the parts of its board that answer the blocks, with their buses and lines on the board, and what
+  a switch or a solder bridge sets. The boards of the project count as ones the person has, and the current one has a
+  card of its own. The palette shows the parts of the selected board; one goes on the canvas with its variant and the
+  answers its data gives, as the diagonal and the shape of a display, so another board is asked for the same. A page
+  opened as a file names the command that serves it. The server of the page asks the browser to fetch every file again.
+- One `boards_mcp.py --install` serves every project: a server started in a project with its own copy of the component
+  in `managed_components/` hands over to that copy, so the catalog and `board_select.py` are of the version the project
+  builds with.
+- `LICENSES.md` says what is not under MIT. The breadboard drawings of the imported Fritzing parts, under CC BY-SA 3.0,
+  are gone, with `tools/import_pictures.py`.
+- The quick start follows the path of a beginner in VS Code: the project from the registry, the computer, the board,
+  Git and GitHub, and what not to do.
+
 ## 0.0.6 (2026-11-07)
 
 - A graphics display can be on I2C: the glue puts it on the board's bus with `dgx_i2c_init_on_bus`, and the master of

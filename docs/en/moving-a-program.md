@@ -23,7 +23,7 @@ this way was built and runs on the Guition JC1060P470C and the JC8012P4A1C, with
 1. The component goes into `main/idf_component.yml` beside what the program uses itself:
 
    ```sh
-   idf.py add-dependency "jef-sure/boards>=0.0.6"
+   idf.py add-dependency "jef-sure/boards>=0.0.7"
    ```
 
    The rule that brought the touch driver of one board goes away: the component brings the parts of the board chosen.

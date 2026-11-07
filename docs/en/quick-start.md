@@ -9,16 +9,29 @@ The path was checked in VS Code 1.145 with the ESP-IDF 2.3.0 and CMake Tools 1.2
 
 ## What you need
 
-- ESP-IDF 5.5 or 6.x: `idf.py --version` answers in its terminal.
+- ESP-IDF 5.5 or 6.x. The EIM installer of Espressif puts it in; in VS Code, "ESP-IDF: Open ESP-IDF Installation Manager".
 - VS Code with the ESP-IDF extension of Espressif. CMake Tools, which VS Code offers when it sees CMake files, does no
   harm: the component gives it the environment of ESP-IDF.
 - For the program on the computer: Linux with SDL2 and libbsd (`libsdl2-dev`, `libbsd-dev`). Windows is not a target of
   the `linux` target of ESP-IDF.
 - For the second half: the board on USB.
 
+## The terminal of ESP-IDF
+
+Every command below, `compote`, `idf.py`, `python3 managed_components/…`, runs in a terminal where ESP-IDF is
+activated: `idf.py --version` answers in it. The plain terminal of VS Code (Ctrl+`) is not one: it answers
+`command not found`.
+
+- In VS Code: Ctrl+Shift+P → "ESP-IDF: Open ESP-IDF Terminal". When the extension does not know yet which installation
+  to take, "ESP-IDF: Select Current ESP-IDF Version" first. The terminal belongs to its window of VS Code: in a new
+  window, "Open ESP-IDF Terminal" again.
+- In a plain terminal, the activation of your installation: for EIM,
+  `source ~/.espressif/tools/activate_idf_v6.1.sh` (with your version); for an installation by `install.sh`,
+  `. ~/esp/esp-idf/export.sh`.
+
 ## 1. The project
 
-In a terminal of ESP-IDF (in VS Code: Ctrl+Shift+P → "ESP-IDF: Open ESP-IDF Terminal"):
+In a terminal of ESP-IDF:
 
 ```sh
 compote project create-from-example -p my_project jef-sure/boards:hello
@@ -31,7 +44,8 @@ registry; no clone of the repository is needed.
 So far it is a folder on your machine. It goes to GitHub later, once the project builds (step 5). A repository on
 GitHub is not made first and cloned here: with a licence or a README the folder is no longer empty.
 
-Open the folder in VS Code (File → Open Folder) and in a terminal of ESP-IDF of that window run:
+Open the folder in VS Code (File → Open Folder). In the new window open its terminal of ESP-IDF, Ctrl+Shift+P →
+"ESP-IDF: Open ESP-IDF Terminal", and run in it:
 
 ```sh
 idf.py reconfigure
@@ -190,6 +204,7 @@ then `git pull`.
 
 | what was done | what you see | the right way |
 |---|---|---|
+| `idf.py` or `compote` in the plain terminal of VS Code | `command not found` | a terminal of ESP-IDF: "ESP-IDF: Open ESP-IDF Terminal" |
 | the example made in a folder with files, as a clone with only a licence | `is not empty` | a new folder; the repository on GitHub last, from the folder made |
 | `editor/index.html` opened by a right click → "Open in Integrated Browser" | the page with no catalog, naming the command of its server | `boards_mcp.py --serve` from the folder of the project, and its link |
 | CMake Tools configured the project before the first `idf.py` | `IDF_PATH is not set` | `idf.py reconfigure` in a terminal of ESP-IDF, then the configure of CMake Tools again |

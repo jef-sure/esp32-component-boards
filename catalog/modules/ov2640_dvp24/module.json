@@ -1,0 +1,56 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "ov2640_dvp24",
+    "title": "OV2640 camera on a 24-pin ribbon",
+    "description": "An OV2640 with its lens on a ribbon of 24 contacts at 0.5 mm: the parallel port for the picture, SCCB for its registers",
+    "notes": [
+        "Sold with ESP32 camera boards such as the ESP32-WROVER-DEV: it has no price of its own here.",
+        "It has no regulators: the board gives it 1.2 V, 2.8 V and the voltage of its port on DVDD, AVDD and DOVDD.",
+        "The contacts are those of the HDF3M-811 of Freenove's kit; the ribbon of another maker may be wired another way."
+    ],
+    "devices": {"sensor": {"chip": "ov2640", "on": {"dvp": {}, "i2c": {}}}},
+    "connectors": {
+        "ribbon": {
+            "type": "FPC 0.5 mm, 24 contacts",
+            "pins": [
+                "STROBE",
+                "AGND",
+                "SIO_D",
+                "AVDD",
+                "SIO_C",
+                "RESET",
+                "VSYNC",
+                "PWDN",
+                "HREF",
+                "DVDD",
+                "DOVDD",
+                "Y9",
+                "XCLK",
+                "Y8",
+                "DGND",
+                "Y7",
+                "PCLK",
+                "Y6",
+                "Y2",
+                "Y5",
+                "Y3",
+                "Y4",
+                "Y1",
+                "Y0"
+            ]
+        }
+    },
+    "images": {
+        "picture": {"file": "picture.webp", "source": "a photo by Anton of his camera, 2026-11-06", "shows": "front"}
+    },
+    "checked": {
+        "contacts": {
+            "level": "vendor-docs",
+            "covers": ["connectors"],
+            "source": "HDF3M-811, the specification of the OV2640 camera in Datasheet/OV2640 of github.com/Freenove/Freenove_ESP32_WROVER_Board",
+            "date": "2026-11-07"
+        }
+    }
+}

@@ -8097,6 +8097,33 @@
             "platforms": ["esp_idf"],
             "chips": []
         },
+        "esp-idf/espressif/esp32-camera": {
+            "title": "esp32-camera",
+            "version": "2.1.8",
+            "repository": "https://github.com/espressif/esp32-camera",
+            "platforms": ["esp_idf"],
+            "chips": [
+                "bf20a6",
+                "bf3005",
+                "gc0308",
+                "gc032a",
+                "gc2145",
+                "hm0360",
+                "hm1055",
+                "mega_ccm",
+                "nt99141",
+                "ov2640",
+                "ov3640",
+                "ov3660",
+                "ov5640",
+                "ov7670",
+                "ov7725",
+                "sc030iot",
+                "sc031gs",
+                "sc101iot"
+            ],
+            "requires": ["esp-idf/espressif/esp_jpeg"]
+        },
         "esp-idf/espressif/esp_codec_dev": {
             "title": "esp_codec_dev",
             "version": "1.6.2",
@@ -8150,6 +8177,12 @@
             "title": "espressif/esp_io_expander_tca95xx_16bit",
             "platforms": ["esp_idf"],
             "chips": ["tca9554"]
+        },
+        "esp-idf/espressif/esp_jpeg": {
+            "title": "esp-idf/espressif/esp_jpeg",
+            "repository": "",
+            "platforms": ["esp_idf"],
+            "chips": []
         },
         "esp-idf/espressif/esp_lcd_axs15231b": {
             "title": "espressif/esp_lcd_axs15231b",

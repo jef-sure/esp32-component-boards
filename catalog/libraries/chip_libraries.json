@@ -90,6 +90,8 @@
         ],
         "axs15231b": ["esp-idf/espressif/esp_lcd_axs15231b", "esp-idf/espressif/esp_lcd_touch"],
         "axs15260": ["esp-idf/espressif/esp_lcd_panel_io_additions", "esp-idf/guition/esp_lcd_axs15260"],
+        "bf20a6": ["esp-idf/espressif/esp32-camera"],
+        "bf3005": ["esp-idf/espressif/esp32-camera"],
         "bh1750": [
             "arduino/artronshop/artronshop_bh1750",
             "arduino/claws/bh1750",
@@ -264,6 +266,9 @@
         "esp32_dac": ["esp-idf/espressif/esp_driver_dac", "github/espressif/esp-matter", "github/m5stack/m5epd"],
         "ft5x06": ["esp-idf/espressif/esp_lcd_touch_ft5x06"],
         "fxos8700": ["arduino/adafruit/adafruit-fxos8700"],
+        "gc0308": ["esp-idf/espressif/esp32-camera"],
+        "gc032a": ["esp-idf/espressif/esp32-camera"],
+        "gc2145": ["esp-idf/espressif/esp32-camera"],
         "gc9503": ["esp-idf/espressif/esp_lcd_gc9503", "esp-idf/espressif/esp_lcd_panel_io_additions"],
         "gc9a01": [
             "arduino/adafruit/adafruit-gc9a01a",
@@ -295,6 +300,8 @@
             "arduino/zulns/lcd_hd44780",
             "esp-idf/jef-sure/hd44780"
         ],
+        "hm0360": ["esp-idf/espressif/esp32-camera"],
+        "hm1055": ["esp-idf/espressif/esp32-camera"],
         "hmc5883": ["arduino/adafruit/adafruit-hmc5883-unified", "arduino/bonezegei/bonezegei_hmc5883l"],
         "hmc5883l": ["arduino/bonezegei/bonezegei_hmc5883l"],
         "hmc6352": ["arduino/robtillaart/hmc6352"],
@@ -474,6 +481,7 @@
             "arduino/microchip-pic-avr-solutions/avr-iot-mcp9808",
             "arduino/robtillaart/mcp9808_rt"
         ],
+        "mega_ccm": ["esp-idf/espressif/esp32-camera"],
         "mfrc522": [
             "arduino/boerge1/mfrc522_fix",
             "arduino/kkloesener/mfrc522_i2c",
@@ -542,6 +550,7 @@
             "arduino/adafruit/adafruit-nau7802-library",
             "arduino/sparkfun/sparkfun-qwiic-scale-nau7802-arduino-library"
         ],
+        "nt99141": ["esp-idf/espressif/esp32-camera"],
         "nv3041a": [
             "esp-idf/jef-sure/dgx",
             "github/bmorcelli/displaydrivers",
@@ -556,7 +565,12 @@
             "arduino/sparkfun/sparkfun-color-sensor-opt4048"
         ],
         "ov02c10": ["esp-idf/guition/esp_cam_sensor", "github/csvke/esp32_p4_jc4880p433c_bsp"],
-        "ov5640": ["arduino/0015/ov5640-auto-focus-for-esp32-camera"],
+        "ov2640": ["esp-idf/espressif/esp32-camera"],
+        "ov3640": ["esp-idf/espressif/esp32-camera"],
+        "ov3660": ["esp-idf/espressif/esp32-camera"],
+        "ov5640": ["arduino/0015/ov5640-auto-focus-for-esp32-camera", "esp-idf/espressif/esp32-camera"],
+        "ov7670": ["esp-idf/espressif/esp32-camera"],
+        "ov7725": ["esp-idf/espressif/esp32-camera"],
         "pca9685": [
             "arduino/bonezegei/bonezegei_pca9685",
             "arduino/faboplatform/fabo-pwm-pca9685",
@@ -608,6 +622,9 @@
         "rs232": ["arduino/digitalcodesign/mentorbit-rs232"],
         "rv8803": ["arduino/adafruit/adafruit-rv8803", "arduino/sparkfun/sparkfun-qwiic-rtc-rv8803-arduino-library"],
         "rx8025t": ["arduino/marcinsaj/rtc_rx8025t"],
+        "sc030iot": ["esp-idf/espressif/esp32-camera"],
+        "sc031gs": ["esp-idf/espressif/esp32-camera"],
+        "sc101iot": ["esp-idf/espressif/esp32-camera"],
         "scd30": [
             "arduino/adafruit/adafruit-scd30",
             "arduino/mcci-catena/mcci-catena-scd30",

@@ -97,6 +97,7 @@ idf.py build flash monitor
 | Waveshare ESP32-P4-ETH | ESP32-P4 | нет | нет | ES8311 | да |
 | Waveshare ESP32-P4-POE-ETH | ESP32-P4 | нет | нет | ES8311 | да |
 | Waveshare ESP32-S3-Zero | ESP32-S3 | нет | нет | нет | да |
+| ESP32-WROVER-DEV | ESP32 | нет | нет | нет | да |
 | ESP32-S3 DevKit, 16 MB, 8 MB PSRAM | ESP32-S3 | нет | нет | нет | да |
 | Guition JC1060P470C | ESP32-P4 | 1024x600 JD9165, MIPI-DSI, 154x86 mm | GT911 | ES8311 | да |
 | Guition JC4827W543C | ESP32-S3 | 480x272 NV3041A, QSPI, 95x54 mm | GT911 | усилитель I2S | да |

@@ -11,10 +11,11 @@ function pinsOf(board) {
     for (const [kind, named] of Object.entries(board.buses || {})) {
         for (const [own, bus] of Object.entries(named || {})) {
             for (const key of Object.keys(bus || {}).sort()) {
-                // the data lines of RGB and DVP are a list
-                if (Array.isArray(bus[key])) bus[key].forEach((line, at) => Number.isInteger(line?.gpio) && add(line.gpio, `${kind}.${own}.${key}${at}`, 'bus'));
+                // a camera drives every line of its DVP port; the data lines of RGB and DVP are a list
+                const inbound = kind === 'dvp';
+                if (Array.isArray(bus[key])) bus[key].forEach((line, at) => Number.isInteger(line?.gpio) && add(line.gpio, `${kind}.${own}.${key}${at}`, inbound ? 'in' : 'bus'));
                 if (PIN_NOT_LINES.has(key) || !Number.isInteger(bus[key]?.gpio)) continue;
-                add(bus[key].gpio, `${kind}.${own}.${key}`, key === 'miso' || key === 'din' ? 'in' : 'bus');
+                add(bus[key].gpio, `${kind}.${own}.${key}`, inbound || key === 'miso' || key === 'din' ? 'in' : 'bus');
             }
         }
     }

@@ -1,0 +1,35 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "ov2640",
+    "title": "OmniVision OV2640",
+    "maker": "omnivision",
+    "part": "OV2640",
+    "class": "camera",
+    "on": {
+        "dvp": {"required": true, "role": "data", "lines": ["xclk"]},
+        "i2c": {"required": true, "role": "control", "address": "0x30"}
+    },
+    "provides": {
+        "camera": {
+            "width_max": 1600,
+            "height_max": 1200,
+            "formats": ["jpeg", "yuv422", "yuv420", "rgb565", "rgb555", "raw8", "raw10"]
+        }
+    },
+    "notes": "A 2-megapixel sensor with its own compression: 15 frames a second at 1600x1200, 30 at 800x600. XVCLK 6 to 24 MHz. It takes 1.2 V for its core, 2.5 to 3.0 V for its analog part and 1.7 to 3.3 V for its port.",
+    "checked": {
+        "facts": {
+            "level": "datasheet",
+            "source": "OV2640_DS(1.6), the datasheet in Datasheet/OV2640 of github.com/Freenove/Freenove_ESP32_WROVER_Board"
+        },
+        "id": {
+            "level": "hardware",
+            "covers": ["on.i2c"],
+            "by": "a probe with esp32-camera 2.1.8 on the ESP32-WROVER-DEV",
+            "date": "2026-11-07",
+            "notes": "PID 0x26, VER 0x42, maker 0x7fa2 at SCCB 0x30; an 800x600 JPEG."
+        }
+    }
+}

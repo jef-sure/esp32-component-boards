@@ -102,6 +102,14 @@ config BOARD_SELECT_ESP32_S3_ZERO
         castellated holes, USB-C to the chip, a WS2812B, BOOT and RESET buttons,
         a ceramic antenna.
 
+config BOARD_SELECT_ESP32_WROVER_DEV
+    bool "ESP32-WROVER-DEV"
+    depends on IDF_TARGET_ESP32
+    help
+        An ESP32-WROVER-E board with 8 MB PSRAM and a connector for a camera,
+        sold with an OV2640: a CH340 USB bridge on micro-USB, a blue LED on GPIO
+        2, EN and BOOT buttons.
+
 config BOARD_SELECT_ESP32S3_DEVKIT
     bool "ESP32-S3 DevKit, 16 MB, 8 MB PSRAM"
     depends on IDF_TARGET_ESP32S3
@@ -256,6 +264,11 @@ config BOARD_ESP32_P4_POE_ETH
 config BOARD_ESP32_S3_ZERO
     int
     default 1 if BOARD_SELECT_ESP32_S3_ZERO
+    default 0
+
+config BOARD_ESP32_WROVER_DEV
+    int
+    default 1 if BOARD_SELECT_ESP32_WROVER_DEV
     default 0
 
 config BOARD_ESP32S3_DEVKIT

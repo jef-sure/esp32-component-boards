@@ -427,7 +427,8 @@ def read_board(path):
                 if not bus or not isinstance(bus, dict):
                     raise ValueError(f"the bus {kind}.{own} is nothing")
                 for key, value in bus.items():
-                    if value is not None and not isinstance(value, (int, str)):
+                    items = value if isinstance(value, list) else [value]  # the data lines of a parallel port come as a list
+                    if value is not None and not all(isinstance(item, (int, str, dict)) for item in items):
                         raise ValueError(f'the bus {kind}.{own} has a "{key}" that is neither a pin nor a parameter')
 
     # the display: a pixel panel of dgx or a character LCD of hd44780
@@ -588,12 +589,14 @@ def pins_of(board):
     for kind, named in (board.get("buses") or {}).items():
         for own, bus in (named or {}).items():
             for key, value in sorted((bus or {}).items()):
+                # a camera drives every line of its DVP port; of the other buses only MISO and I2S DIN are inputs,
+                # data lines are bidirectional and RD is driven by the chip
+                inbound = kind == "dvp"
                 if isinstance(value, list):  # the data lines of RGB and DVP
-                    pins.extend((line["gpio"], f"{kind}.{own}.{key}{at}", "bus") for at, line in enumerate(value) if isinstance(line, dict) and "gpio" in line)
+                    pins.extend((line["gpio"], f"{kind}.{own}.{key}{at}", "in" if inbound else "bus") for at, line in enumerate(value) if isinstance(line, dict) and "gpio" in line)
                 if key in resolve.NOT_LINES or not isinstance(value, int):
                     continue
-                # only MISO and I2S DIN are inputs; data lines are bidirectional and RD is driven by the chip
-                pins.append((value, f"{kind}.{own}.{key}", "in" if key in ("miso", "din") else "bus"))
+                pins.append((value, f"{kind}.{own}.{key}", "in" if inbound or key in ("miso", "din") else "bus"))
     for step in board.get("power") or []:
         if isinstance(step.get("line"), dict) and "gpio" in step["line"]:
             pins.append((step["line"]["gpio"], f"power.{step.get('name', 'strobe')}", "out"))
@@ -865,6 +868,8 @@ def gen_c(board):
                 for key, value in sorted((bus or {}).items()):
                     if isinstance(value, int):
                         rows.append((f"{kind}.{own}", key, value))
+                    elif isinstance(value, list):  # the data lines of a parallel port, data0 first
+                        rows.extend((f"{kind}.{own}", f"{key}{at}", number(item)) for at, item in enumerate(value) if isinstance(number(item), int))
         for own, numbers in board["kept"].items():
             rows.extend((own, key, value) for key, value in sorted(numbers.items()))
         out("/* Every bus of the board, its numbers by name: the kinds the component sets up and the")

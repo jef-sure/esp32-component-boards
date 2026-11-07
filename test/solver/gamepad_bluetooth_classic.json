@@ -1,6 +1,6 @@
 {
     "title": "A gamepad by Bluetooth Classic: only the chips that have it fit, and BLE alone is not enough",
     "answers": {"blocks": [{"role": "gamepad", "name": "pad", "variant": "classic"}]},
-    "fit": ["cyd_s028r", "esp32_devkit", "esp32_devkit_usb_c", "esp32_oled_096", "nodemcu_esp32s"],
+    "fit": ["cyd_s028r", "esp32_devkit", "esp32_devkit_usb_c", "esp32_oled_096", "esp32_wrover_dev", "nodemcu_esp32s"],
     "says": "Bluetooth Classic is on the board"
 }

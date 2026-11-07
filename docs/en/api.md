@@ -237,7 +237,8 @@ if (board_bus_get("nfc_in_nfc", "host", &host) && board_bus_get("nfc_in_nfc", "c
 ```
 
 `board_bus_get("sdio.sdio0", "clk", &pin)` reads any number of any bus
-the data names, including the kinds the component does not set up.
+the data names, including the kinds the component does not set up. A list of lines, as the data lines
+of a parallel camera, comes by number: `board_bus_get("dvp.dvp0", "data0", &pin)` is the first.
 
 ## The buttons
 

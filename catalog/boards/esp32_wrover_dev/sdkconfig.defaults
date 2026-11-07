@@ -1,0 +1,5 @@
+# The ESP32-WROVER-DEV: what its chip, its memory and its flash need, read before the program's own
+CONFIG_IDF_TARGET="esp32"
+CONFIG_BOARD_SELECT_ESP32_WROVER_DEV=y
+CONFIG_ESPTOOLPY_FLASHSIZE_4MB=y
+CONFIG_SPIRAM=y

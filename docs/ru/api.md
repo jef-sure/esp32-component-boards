@@ -228,7 +228,8 @@ if (board_bus_get("nfc_in_nfc", "host", &host) && board_bus_get("nfc_in_nfc", "c
 
 `board_bus_get("sdio.sdio0", "clk", &pin)`
 читает любое число любой шины, которую называют данные, включая роды, которые
-компонент не настраивает.
+компонент не настраивает. Список линий, например линии данных параллельной камеры, идёт по номерам:
+`board_bus_get("dvp.dvp0", "data0", &pin)` — первая.
 
 ```c
 struct i2c_master_bus_t *board_i2c(int port);   /* i2c_master_bus_handle_t ESP-IDF */

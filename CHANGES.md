@@ -17,7 +17,12 @@
 - New boards: the ESP32 DevKit with USB-C and a CH340 (`esp32_devkit_usb_c`, a variant of `esp32_devkit`), and the
   ESP32-C3 with a 0.42-inch 72x40 OLED (`esp32_c3_oled_042`), and the ESP32 with a 0.96-inch 128x64 OLED, yellow on its
   top 16 rows (`esp32_oled_096`), and the NodeMCU ESP-32S V1.1 of 38 pins in the layout of the ESP32-DevKitC
-  (`nodemcu_esp32s`), and the ESP32-C6 Super Mini with its charger for a cell (`esp32_c6_supermini`).
+  (`nodemcu_esp32s`), the ESP32-C6 Super Mini with its charger for a cell (`esp32_c6_supermini`), and the
+  ESP32-WROVER-DEV with 8 MB PSRAM and an OV2640 camera (`esp32_wrover_dev`).
+- A camera on a parallel port: the catalog describes esp32-camera 2.1.8 and its sensors, the OV2640, and the OV2640 on a
+  24-pin ribbon as a module. The component does not start the camera; a program takes its pins from the board:
+  `board_bus_get` gives a list of lines by number, as `data0` to `data7` of `dvp.dvp0`. Every line of a DVP port is an
+  input of the chip, so GPIO 34 to 39 of an ESP32 can carry them.
 - Photos of the S3 DevKit, the front of the C3-Zero and the three Guition boards.
 
 ## 0.0.5 (2026-11-06)

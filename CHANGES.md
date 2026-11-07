@@ -14,6 +14,8 @@
   those of its chip and size, and with none named it gets the first of its size. The DGX entries of SSD1306, SH1106,
   SSD1309, SSD1322 and ST7789 have them; the init calls take `{panel}`, and `supports.resolution` is gone.
 - `board_display.mm_w` and `mm_h` and `BOARD_MM` are whole millimetres, rounded, where the data has fractions.
+- The catalog describes DGX-DI 0.1.5, whose mouse on the computer is a touch, and hd44780 0.1.3. The list of libraries
+  says the version each record describes, and the checks see when it does not.
 - New boards: the ESP32 DevKit with USB-C and a CH340 (`esp32_devkit_usb_c`, a variant of `esp32_devkit`), and the
   ESP32-C3 with a 0.42-inch 72x40 OLED (`esp32_c3_oled_042`), and the ESP32 with a 0.96-inch 128x64 OLED, yellow on its
   top 16 rows (`esp32_oled_096`), and the NodeMCU ESP-32S V1.1 of 38 pins in the layout of the ESP32-DevKitC

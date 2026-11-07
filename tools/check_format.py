@@ -735,6 +735,8 @@ def library_list_problems():
     problems += [f"libraries.json: {library} requires {needed}, which is not in it" for library, entry in libraries.items() for needed in entry.get("requires", []) if needed not in libraries]
     records = resolve.all_libraries((ROOT / "catalog",))
     problems += [f"libraries.json has no {library}, which has a record" for library in records if library not in libraries]
+    problems += [f"libraries.json: {library} is {libraries[library].get('version')}, its record describes {record.get('described')}"
+                 for library, record in records.items() if library in libraries and libraries[library].get("version") != record.get("described")]
     return problems + audit_problems()
 
 

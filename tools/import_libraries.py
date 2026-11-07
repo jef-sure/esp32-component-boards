@@ -132,7 +132,10 @@ def catalog_libraries(found):
         fields = {"title": record.get("title", record["name"]), "version": record.get("described", ""), "repository": record.get("url", ""), "platforms": sorted(built)}
         newest = record.get("versions", {}).get(record.get("described")) or next(iter(record.get("versions", {}).values()), {})
         needed = sorted(newest.get("requires", {}))
-        found.setdefault(resolve.library_id(record), {**fields, "chips": [], "requires": needed, **({"audited": [entry.get("version", entry["commit"][:COMMIT_SHOWN]) for entry in read]} if read else {})})
+        # a record required by one read before it is in the list already as a bare name: its own facts go over that
+        own = resolve.library_id(record)
+        known = found.get(own, {})
+        found[own] = {**known, **fields, "chips": known.get("chips", []), "requires": needed, **({"audited": [entry.get("version", entry["commit"][:COMMIT_SHOWN]) for entry in read]} if read else {})}
         for library in needed:
             found.setdefault(library, {"title": library, "repository": "", "platforms": sorted(built), "chips": []})
         for chip in sorted(chips):

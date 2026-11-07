@@ -310,6 +310,11 @@ it, it writes `.mcp.json` in the current folder, beside the servers that file na
 that keeps it elsewhere. The paths are full, so the folder of the agent does not matter. Then start the agent again and ask
 it to help choose the hardware of a device.
 
+One install serves every project. A server started in a project with its own copy of the component in
+`managed_components/` hands over to that copy at once: the catalog, the page and `board_select.py` are those of the
+version the project builds with. The copy the install was made from serves folders with no copy of their own; when it
+is removed, install again.
+
 The agent gives the person a link with a token. On that page a dialog appears, and once it starts it takes the column of the roles, whose search stays: the model reads the description, the blocks
 and the best kits, sets the blocks with their variants and parts, the conditions of the solver, and writes a description that a
 project keeps as `DESCRIPTION.md`. What the person fixes is theirs: the pin of a block, a part chosen in it, or the button

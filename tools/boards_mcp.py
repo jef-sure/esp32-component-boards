@@ -12,7 +12,9 @@ Once, to give it to the agent: python3 tools/boards_mcp.py --install
 With no agent, the page and its solver for the folder it runs in: python3 tools/boards_mcp.py --serve [--project DIR]
 
 The project is the folder the agent works in, or --project: the page may write its files there through this server, by
-the rules of project_writer.py, when the person allows it. It is how the page writes inside VS Code, whose Simple
+the rules of project_writer.py, when the person allows it. A project with its own copy of the component in
+managed_components/ is served by that copy: this server hands over to it at the start, so one --install serves every
+project, each with the catalog and the board_select.py of its own version. It is how the page writes inside VS Code, whose Simple
 Browser gives a page no access to folders.
 """
 import argparse
@@ -36,6 +38,7 @@ PROTOCOL = "2025-06-18"
 NAME = "boards"
 VERSION = "0.0.1"
 SERVED = ("/editor/", "/catalog/", "/imported/", "/imported-shops/")
+HANDED = "BOARDS_MCP_HANDED"  # set at a handover, so the copy that takes it hands over no further
 IMPORTED_INDEXES = ("/imported/index.json", "/imported-shops/index.json")
 # the files a new project takes from outside editor/, as editor/skeleton/files.json names them: those and no others of their folders
 SKELETON_FILES = {posixpath.normpath(f"/editor/{source}") for source, _ in json.loads((ROOT / "editor" / "skeleton" / "files.json").read_text())["files"]}
@@ -404,6 +407,14 @@ def install():
     return 0
 
 
+def own_copy(project):
+    """The server of the project's own copy of the component, when it has one and this is not it."""
+    if os.environ.get(HANDED):
+        return None
+    theirs = project / "managed_components" / "jef-sure__boards" / "tools" / "boards_mcp.py"
+    return theirs if theirs.is_file() and theirs.resolve() != pathlib.Path(__file__).resolve() else None
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--port", type=int, default=0, help="0: any free port")
@@ -415,6 +426,11 @@ def main():
         return install()
     if not args.project.is_dir():
         parser.error(f"--project {args.project}: no such folder")
+    theirs = own_copy(args.project.resolve())
+    if theirs:
+        print(f"boards_mcp.py: the project's own copy serves it: {theirs}", file=sys.stderr, flush=True)
+        os.environ[HANDED] = "1"
+        os.execv(sys.executable, [sys.executable, str(theirs), *sys.argv[1:]])
 
     desk = Desk()
     token = secrets.token_urlsafe(24)

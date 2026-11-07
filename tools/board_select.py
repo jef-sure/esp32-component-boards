@@ -157,7 +157,8 @@ def presets_text(project, boards, targets, current, command, follows=None):
     """CMakePresets.json of the boards: one preset each in the order named, and default for the current one. follows is
     the current board they are made with, which selection.json gets too: a page that names another later has changed it."""
     our_presets(project, boards)
-    presets = [{"name": board, "displayName": title_of(board), "binaryDir": f"build/{board}",
+    # Ninja, as idf.py takes it: a build directory CMake Tools of VS Code made with another generator stops idf.py there
+    presets = [{"name": board, "displayName": title_of(board), "generator": "Ninja", "binaryDir": f"build/{board}",
                 "cacheVariables": {"BOARD": board, "IDF_TARGET": target, "SDKCONFIG": f"build/{board}/sdkconfig"}} for board, target in zip(boards, targets)]
     made = {"made by": command, **({"follows": follows} if follows else {})}
     return with_current({"version": 3, "vendor": {VENDOR: made}, "configurePresets": presets}, current)

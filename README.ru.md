@@ -207,4 +207,4 @@ docs/en/, docs/ru/                     документация
 (`dgx_di_calibrate_measure` из DGX-DI) и отдайте лог `tools/board_calibration.py`.
 См. [docs/ru/adding-a-board.md](docs/ru/adding-a-board.md).
 
-Лицензия: MIT.
+Лицензия: MIT на работу этого репозитория; то, что взято у других, сохраняет свою лицензию, см. [LICENSES.md](LICENSES.md).

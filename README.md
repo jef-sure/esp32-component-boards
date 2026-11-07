@@ -211,4 +211,4 @@ without touching any of them. Measure the touch on the board
 (`dgx_di_calibrate_measure` of DGX-DI) and give the log to `tools/board_calibration.py`.
 See [docs/en/adding-a-board.md](docs/en/adding-a-board.md).
 
-License: MIT.
+License: MIT for the work of this repository; what came from others keeps its own license, see [LICENSES.md](LICENSES.md).

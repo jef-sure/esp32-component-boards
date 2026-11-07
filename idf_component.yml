@@ -85,6 +85,7 @@ files:
     - "editor/**/*"
     # the one example the registry hands out, as it builds from there; the others take the component by the path of a
     # clone, for CI, and stay out
+    - "examples/hello/.gitignore"
     - "examples/hello/CMakeLists.txt"
     - "examples/hello/README.md"
     - "examples/hello/main/*"

@@ -27,6 +27,8 @@ import sys
 import tempfile
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
+SKELETON = ROOT / "editor" / "skeleton"
+EXAMPLE = ROOT / "examples" / "hello"
 WRITTEN = ".boards/written.json"
 NEW_FILE_MODE = 0o666  # the umask of the person takes from it
 ALLOWED = "allowed.json"
@@ -114,9 +116,33 @@ def component_source():
             version = re.search(r"^    version: '?([^'\s]+)'?$", entry[1], re.M) if entry else None
             if version:
                 return {"git": version[1]} if re.search(r"^      type: git$", entry[1], re.M) else {"registry": version[1]}
+    version = manifest_version()
+    return {"registry": version} if version else None
+
+
+def manifest_version():
     # quoted in the repository, bare in the manifest the registry ships
     manifest = re.search(r"""^version:\s*["']?([^"'\s#]+)""", (ROOT / "idf_component.yml").read_text(), re.M)
-    return {"registry": manifest[1]} if manifest else None
+    return manifest[1] if manifest else None
+
+
+def skeleton_files(fill):
+    """The files of a new project that editor/skeleton/files.json names, with the marks filled: {target: (source, text)}."""
+    files = {}
+    for source, target in json.loads((SKELETON / "files.json").read_text())["files"]:
+        path = (SKELETON.parent / source).resolve()
+        text = path.read_text()
+        for mark, value in fill.items():
+            text = text.replace(mark, value)
+        files[target] = (path, text)
+    return files
+
+
+def example_files():
+    """examples/hello, which the registry hands out as a new project: the skeleton named hello, with the component from the
+    registry at the version of the manifest. Its README is its own, and its program is the one the skeleton takes."""
+    fill = {"@NAME@": EXAMPLE.name, "@TITLE@": EXAMPLE.name, "@COMPONENT@": component_lines({"registry": manifest_version()}), "@DEPENDENCIES@": ""}
+    return {target: text for target, (source, text) in skeleton_files(fill).items() if target != "README.md" and source != (EXAMPLE / target).resolve()}
 
 
 def component_lines(source):

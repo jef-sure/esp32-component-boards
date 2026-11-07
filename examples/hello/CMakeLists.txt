@@ -1,5 +1,5 @@
-# The program of the quick start (docs/en/quick-start.md): the board is chosen by tools/board_select.py of
-# jef-sure/boards, which writes sdkconfig.defaults.<board> and CMakePresets.json here.
+# hello. The boards are chosen by tools/board_select.py of jef-sure/boards: sdkconfig.defaults.<board> of each and
+# CMakePresets.json, whose preset sets BOARD; a board of this program lies in components/local-boards/.
 cmake_minimum_required(VERSION 3.22)
 # BOARD=<board>, which the preset of a board sets, builds with sdkconfig.defaults.<board> that board_select.py writes,
 # then with the program's own sdkconfig.defaults when it has one. A -D SDKCONFIG_DEFAULTS=... on the command line wins.
@@ -13,7 +13,16 @@ if(NOT SDKCONFIG_DEFAULTS AND BOARD)
         list(APPEND SDKCONFIG_DEFAULTS "sdkconfig.defaults")
     endif()
 endif()
+
+# the computer (BOARD=host, the linux target of ESP-IDF): only main and what it asks, the drivers of a chip are not there
+if(BOARD STREQUAL "host")
+    set(COMPONENTS main)
+    # in a shell of ESP-IDF the linker of a chip comes first in PATH: the compiler of the computer looks in /usr/bin first
+    set(CMAKE_EXE_LINKER_FLAGS "-B/usr/bin/")
+endif()
+
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
+# each board has its lock of the components beside the project, to commit: dependencies.lock.<board>
 if(BOARD)
     idf_build_set_property(DEPENDENCIES_LOCK ${CMAKE_CURRENT_LIST_DIR}/dependencies.lock.${BOARD})
 endif()

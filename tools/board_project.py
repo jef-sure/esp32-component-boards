@@ -28,7 +28,6 @@ import boards_gen  # noqa: E402
 import project_writer  # noqa: E402
 import resolve  # noqa: E402
 
-EDITOR = ROOT / "editor"
 NAME = re.compile(r"^[a-z][a-z0-9_]*$")  # as a name of the schema: a board of the program is <project>_<board>
 REPOSITORY_ONLY = re.compile(r"^(\.git|\.gitignore|\.gitattributes|README.*|LICENSE.*)$", re.IGNORECASE)
 SELECTION = "selection.json"
@@ -157,12 +156,7 @@ def main():
         "@DEPENDENCIES@": dependencies,
         "@COMPONENT@": project_writer.component_lines(project_writer.component_source()),
     }
-    files = {}
-    for source, target in json.loads((EDITOR / "skeleton" / "files.json").read_text())["files"]:
-        text = (EDITOR / source).read_text()
-        for mark, value in fill.items():
-            text = text.replace(mark, value)
-        files[target] = text
+    files = {target: text for target, (_, text) in project_writer.skeleton_files(fill).items()}
     entry = {**kit, "board": named} if raw else {"board": args.board,
                                                   "modules": [{"name": module["name"], "count": 1, "on": ", ".join(boards_gen.bus_kinds(module))} for module in modules],
                                                   "libraries": [{"name": item["name"], "version": item["version"]} for item in started],

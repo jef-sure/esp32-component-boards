@@ -54,6 +54,35 @@ unset(_boards_variables)
 unset(_boards_variable)
 unset(_boards_target)
 
+# No BOARD, while board_select.py made the defaults of boards here: a build of none of them, as the ESP-IDF extension of
+# VS Code makes with no project configuration chosen, or idf.py of ESP-IDF 5 without -D BOARD. It would build with no
+# board and say nothing.
+if(NOT BOARD AND CONFIG_BOARD_SELECT_NONE)
+    file(GLOB _boards_defaults "${PROJECT_DIR}/sdkconfig.defaults.*")
+    set(_boards_made "")
+    foreach(_boards_file ${_boards_defaults})
+        file(STRINGS "${_boards_file}" _boards_record LIMIT_COUNT 1)
+        if(_boards_record MATCHES "^# board_select.py ")
+            get_filename_component(_boards_name "${_boards_file}" EXT)
+            string(SUBSTRING "${_boards_name}" 1 -1 _boards_name)
+            string(REPLACE "defaults." "" _boards_name "${_boards_name}")
+            list(APPEND _boards_made "${_boards_name}")
+        endif()
+    endforeach()
+    if(_boards_made)
+        list(JOIN _boards_made ", " _boards_made)
+        message(FATAL_ERROR "no board chosen: this build has no BOARD, so it is for none of the boards of the project (${_boards_made}). "
+                            "In VS Code choose one: ESP-IDF: Select Project Configuration, or CMake: Select Configure Preset. On ESP-IDF 6 "
+                            "idf.py build builds the current board and idf.py --preset <board> build another; on ESP-IDF 5 "
+                            "idf.py -B build/<board> -D SDKCONFIG=build/<board>/sdkconfig -D BOARD=<board> build.")
+    endif()
+    unset(_boards_defaults)
+    unset(_boards_made)
+    unset(_boards_file)
+    unset(_boards_record)
+    unset(_boards_name)
+endif()
+
 # CMake Tools of VS Code builds by the presets in the environment of VS Code, which has no ESP-IDF: this configuration
 # has it and gives it to the project's .vscode/settings.json, see tools/vscode_env.py
 idf_build_get_property(_boards_python PYTHON)

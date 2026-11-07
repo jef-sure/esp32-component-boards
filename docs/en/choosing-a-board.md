@@ -160,6 +160,9 @@ its presets. ESP-IDF reads the defaults only into a new `sdkconfig`: to take wha
 remove `build/<board>/sdkconfig`. A build whose configuration did not choose the board `BOARD` names stops at the
 configure and says which board it chose and for which chip: on ESP-IDF 6 the form `-B ... -D BOARD=<board>` takes the
 chip of the preset `default`, and an `sdkconfig` of another board in the build directory keeps its board.
+A build with no `BOARD` in a project where `board_select.py` has made the files of boards stops too and names its
+boards: `cmake` with no preset builds so, as the ESP-IDF extension of VS Code does while no project configuration is
+chosen in it. `idf.py` of ESP-IDF 6 with no `--preset` takes the preset `default`, the current board.
 
 A `-D SDKCONFIG_DEFAULTS=...` on the command line wins over both: the CMake
 snippet above only sets the variable when none is given.

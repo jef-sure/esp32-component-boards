@@ -21,6 +21,11 @@ if(BOARD STREQUAL "host")
     set(CMAKE_EXE_LINKER_FLAGS "-B/usr/bin/")
 endif()
 
+# cmake run outside ESP-IDF, as CMake Tools of VS Code is before the project's first configuration by idf.py
+if(NOT DEFINED ENV{IDF_PATH})
+    message(FATAL_ERROR "IDF_PATH is not set: configure the project once with idf.py reconfigure in a terminal of ESP-IDF "
+                        "(in VS Code: ESP-IDF: Open ESP-IDF Terminal); that gives CMake Tools the environment in .vscode/settings.json")
+endif()
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 # each board has its lock of the components beside the project, to commit: dependencies.lock.<board>
 if(BOARD)

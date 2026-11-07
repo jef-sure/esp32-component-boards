@@ -8,7 +8,7 @@
     "notes": [
         "ESP32-WROVER-DEV on the board: a copy of Freenove's ESP32 WROVER CAM, whose pinout V1.6 is read. Freenove publishes no schematic of it.",
         "The flash lines SD0 to SD3, CMD and CLK come out on the headers; GPIO 16 and 17 belong to the PSRAM of the module and do not.",
-        "LEDs: ON, green, the power; TX and RX on the lines of the USB bridge; IO2, blue."
+        "LEDs: ON, green, the power; TX and RX, yellow, on the lines of the USB bridge; IO2, blue."
     ],
     "mcu": {
         "target": "esp32",
@@ -79,6 +79,13 @@
             "covers": ["mcu", "devices.usb_serial"],
             "source": "esptool on Anton's board: ESP32-D0WDQ6-V3 rev 3.0, 4 MB flash of maker 0x5e; the port is a CH340, USB 1a86:7523",
             "date": "2026-11-07"
+        },
+        "leds": {
+            "level": "hardware",
+            "covers": ["notes"],
+            "by": "Anton, by eye",
+            "date": "2026-11-07",
+            "notes": "While esptool read the flash at 115200 baud, RX and TX blinked yellow; the green power LED lights them too."
         }
     }
 }

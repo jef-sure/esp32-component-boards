@@ -70,7 +70,9 @@ python3 managed_components/jef-sure__boards/tools/board_select.py host --as cyd_
 The first writes `sdkconfig.defaults.cyd_s028r`, the preset of the board in `CMakePresets.json` and its lock of the
 components. The second does the same for the computer `host_cyd_s028r`: a window with the display of the CYD, turned as
 the board is held. Another `--as` gives another computer beside it, as `host_jc1060p470c`. The board named last is the
-current one, here the computer. No `set-target` and no `menuconfig`.
+current one, here the computer. No `set-target` and no `menuconfig`. In VS Code, after a change of the board, reload the
+window ("Developer: Reload Window") and open a new terminal of ESP-IDF: so the extension takes the target of the current
+board.
 
 When the board is not chosen yet, the page finds one. Start its server from the folder of the project:
 
@@ -84,11 +86,22 @@ does. Put on the canvas what the device needs, as "Display": the boards that fit
 and on which pins. The board of the project has a card of its own, and its parts are in the list on the left: a part
 from there goes on the canvas with the characteristics it has on that board. See [tools.md](tools.md#the-page).
 
+The page keeps the canvas in the browser at once, but for its address. The server takes a free port each time it starts,
+and on a new port the canvas is empty; `--serve --port 8765` keeps the address. Into the project the page writes only by
+the button "make the project of these boards…" (or "make a project…" on a card), once you allow it:
+- the files of the board;
+- a board of the program, `components/local-boards/boards/<project>_<board>`, when the canvas has not all the board has:
+  its glue starts only what is on the canvas;
+- `selection.json` with the canvas, which the page starts from when the folder is opened again.
+
+The page does not write the program, `main/main.c`. `board_display_init()` starts the display, and the glue of the board
+knows how to start it on that board.
+
 ## 3. On the computer
 
-In VS Code: Ctrl+Shift+P → "CMake: Select Configure Preset" → "the computer as CYD (ESP32-2432S028R)", then F7 ("CMake: Build") and
-Ctrl+Shift+F5 ("CMake: Run Without Debugging"). A window opens: white, with a blue band at the top. The touch is the
-mouse, the BOOT button the key B.
+In VS Code: Ctrl+Shift+P → "CMake: Select Configure Preset" → "the computer as CYD (ESP32-2432S028R)", then F7
+("CMake: Build") and Ctrl+Shift+F5 ("CMake: Run Without Debugging"). A window opens: white, with a blue band at the
+top. The touch is the mouse, the BOOT button the key B.
 
 The same from a terminal of ESP-IDF:
 

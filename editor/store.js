@@ -254,6 +254,26 @@ const useEditor = Pinia.defineStore('editor', {
                 || (question.asked === 'block' && [].concat(question.limit?.of ?? []).includes(classOf(block))
                     && (!question.limit.variant || (block.variant ? [].concat(question.limit.variant).includes(block.variant) : question.limit.any_variant !== false))));
         },
+        // The current board of the project by its name in the catalog: of its kit, or the board of its radio; null for none.
+        currentBoard(state) {
+            state.stamp;
+            const kit = state.chosen.find((item) => item.headline === state.current)?.kit;
+            const name = kit ? kit.name : state.current;
+            return name && library.catalog?.boards?.[name] ? name : null;
+        },
+        // The board whose parts the palette offers: the one pinned, else the current board of the project, else its first one.
+        selectedBoard(state) {
+            if (state.answers.board && library.catalog?.boards?.[state.answers.board]) return state.answers.board;
+            return this.currentBoard ?? this.projectBoards()[0] ?? null;
+        },
+        // The parts of the selected board that answer a role, each with what its block takes from its data.
+        boardParts() {
+            return this.selectedBoard ? library.solver?.boardParts(this.selectedBoard) ?? [] : [];
+        },
+        // The part of a board a block was taken from, as the solver names it, or null.
+        partFrom() {
+            return (block) => (block.from ? (library.solver?.boardParts(block.from.board) ?? []).find((part) => part.device === block.from.device && part.role === block.role) ?? null : null);
+        },
         // The parts of the catalog a block can have, for the person to fix one.
         partsOf() {
             return (block) => library.solver?.partsOfBlock(block) ?? [];
@@ -396,6 +416,15 @@ const useEditor = Pinia.defineStore('editor', {
             }
             this.applied = message.id;
             localStorage.setItem(stored, String(message.id));
+        },
+        // A part of the selected board on the canvas, with what its block takes from its data. Another of the role takes the
+        // next such part of the board, and a block of its own when the board has no more.
+        addBoardPart(part) {
+            const board = this.selectedBoard;
+            const taken = new Set(this.answers.blocks.filter((block) => block.from?.board === board && block.role === part.role).map((block) => block.from.device));
+            const next = taken.has(part.device) ? this.boardParts.find((item) => item.role === part.role && !taken.has(item.device)) : part;
+            if (!next) return this.addBlock(part.role);
+            this.answers.blocks.push({ role: next.role, variant: next.variant, name: '', by: 'person', asks: { ...next.asks }, from: { board, device: next.device } });
         },
         addBlock(role) {
             if (knownRole(role)) this.answers.blocks.push({ role, variant: undefined, name: '', by: 'person' });

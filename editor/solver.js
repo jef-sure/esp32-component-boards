@@ -981,6 +981,45 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         });
     }
 
+    // What a part of a board is, in a few words: its chip, its part when that says more, and the pixels of a panel.
+    function partTitle(name, device) {
+        const panel = device.config?.panel;
+        const chip = catalog.devices[device.chip]?.title ?? device.chip ?? name;
+        const part = device.part && !chip.toLowerCase().includes(device.part.toLowerCase()) ? device.part : null;
+        return [chip, part, panel?.width && `${panel.width} x ${panel.height}`].filter(Boolean).join(', ');
+    }
+
+    // The parts of a board that answer a role, for the person to put on the canvas as they are: the role, the variant the
+    // part gives and the answers of its block from its data, so that another board is asked for the same. A measure of
+    // how parts stand to each other, as the gap between readers, is no answer of one part.
+    function boardParts(boardName) {
+        const doc = catalog.boards[boardName];
+        if (!doc) return [];
+        const board = loader.resolve(doc);
+        const parts = [];
+        for (const [name, device] of Object.entries(board.devices ?? {})) {
+            for (const role of roles.flatMap((group) => group.roles).filter((item) => item.id !== OWN_PART)) {
+                if (!isClass(device, { ...(role.needs ?? { role: role.id }), id: role.id })) continue;
+                const variant = role.variants?.some((item) => item.id === device.provides?.[role.id]?.variant) ? device.provides[role.id].variant : undefined;
+                const cls = role.needs?.class;
+                const asks = {};
+                for (const question of questions.filter((item) => item.asked === 'block' && item.limit?.measure && ofClass(item, cls, variant))) {
+                    const measure = MEASURES[question.limit.measure];
+                    if (!measure || measure.soft || !measure.unknown) continue;
+                    const value = measure.of(device);
+                    if (typeof value === 'number') asks[question.id] = Math.floor(value * 10) / 10;
+                    else if (typeof value === 'string') asks[question.id] = value;
+                }
+                for (const question of questions.filter((item) => item.limit?.field && item.limit.of === role.id && (!item.limit.variant || item.limit.variant === variant) && item.limit.fits !== 'includes')) {
+                    const value = valueAt(device, question.limit.field);
+                    if (typeof value === 'number') asks[question.id] = value;
+                }
+                parts.push({ device: name, role: role.id, title: partTitle(name, device), variant, asks });
+            }
+        }
+        return parts;
+    }
+
     // A part of the board that answers a block, as the card shows it: what it is, its buses and its lines on the board, and
     // what a switch or a solder bridge on the board sets for it, as the board comes
     function heldOf(board, need, name, device) {
@@ -991,10 +1030,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             for (const [line, value] of Object.entries(wires || {})) if (value?.gpio !== undefined) lines.push({ line, to: `GPIO ${value.gpio}` });
         }
         for (const [line, value] of Object.entries(device.pins || {})) if (value?.gpio !== undefined) lines.push({ line, to: `GPIO ${value.gpio}` });
-        const panel = device.config?.panel;
-        const chip = catalog.devices[device.chip]?.title ?? device.chip ?? name;
-        const part = device.part && !chip.toLowerCase().includes(device.part.toLowerCase()) ? device.part : null;
-        const title = [chip, part, panel?.width && `${panel.width} x ${panel.height}`].filter(Boolean).join(', ');
+        const title = partTitle(name, device);
         const set = Object.entries(device.controls || {}).filter(([, control]) => ['switch', 'solder'].includes(control.how)).map(([control, { how, start }]) => ({ control, how, start: JSON.stringify(start) }));
         return { block: need.title, device: name, title, buses: Object.keys(device.on || {}).map((bus) => (bus.split('.')[1].startsWith(bus.split('.')[0]) ? bus.split('.')[1] : bus).toUpperCase()), lines, set };
     }
@@ -1518,7 +1554,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         return [...new Map(modulesWith(need).map((module) => [module.name, { name: module.name, title: module.title }])).values()];
     }
 
-    return { solve, holds, selectionOf, partsOfBlock };
+    return { solve, holds, selectionOf, partsOfBlock, boardParts };
 }
 
 if (typeof module !== 'undefined') module.exports = { kitSolver, auditSummary, auditedOrder, within };

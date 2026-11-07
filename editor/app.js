@@ -462,7 +462,8 @@ const SelectPage = {
                     <div class="command"><code>{{ install }}</code><button type="button" @click="copyInstall">{{ t(copied ? 'copied' : 'copy') }}</button></div>
                     <p class="hint">{{ t('Then ask your agent to help choose the hardware: it gives a link to this page, with a dialog.') }}</p>
                 </details>
-                <section v-if="store.boardParts.length && !talking" class="board-parts"><h2>{{ t('On the board {0}', boardTitle(store.selectedBoard)) }}</h2>
+                <section v-if="store.boardParts.length && !talking" class="board-parts"><h3>{{ t('On the board') }}</h3>
+                    <p class="board-name">{{ boardTitle(store.selectedBoard) }}</p>
                     <button v-for="part in store.boardParts" :key="part.device + '/' + part.role" type="button" class="role" :title="t('on the canvas as it is on the board')"
                         @click="store.addBoardPart(part)">{{ t(roleOf(part.role).text) }} <span class="note">{{ part.title }}<template v-if="partWhere(part)"> · {{ partWhere(part) }}</template></span></button></section>
                 <h2 v-if="!talking">{{ t('Roles') }}</h2>

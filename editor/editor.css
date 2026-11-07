@@ -148,6 +148,10 @@ li.unknown .mark, li.do .mark { color: var(--accent); }
 .offer { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin-top: 4px; }
 .more p { margin: 4px 0; font-size: 13px; }
 .role.empty { color: var(--muted); }
+/* a part of the selected board: its role, and under it what it is and where */
+.board-parts .board-name { margin: 0 0 2px; font-weight: 600; }
+.board-parts .role { display: block; }
+.board-parts .role .note { display: block; }
 .canvas { background: var(--soft); border-right: 1px solid var(--line); }
 .task { width: 100%; box-sizing: border-box; margin-bottom: 10px; padding: 6px; border: 1px solid var(--line); border-radius: 6px; font: inherit; color: inherit; background: light-dark(#fff, #1b1d22); resize: vertical; }
 .blocks { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; align-items: start; margin-bottom: 14px; }
@@ -164,6 +168,8 @@ li.unknown .mark, li.do .mark { color: var(--accent); }
 .pin { padding: 0 6px; border: 1px solid var(--line); border-radius: 4px; background: none; color: var(--muted); font-size: 11px; }
 .pin.on { border-color: var(--accent, #4a7bd0); color: var(--accent, #4a7bd0); }
 .fixed-board { display: flex; gap: 6px; align-items: center; margin: 0 0 6px; font-weight: 600; }
+/* a board of the project: its title, its name and what is said of it, apart */
+.chosen label code, .chosen p > .hint { margin-left: 0.5em; }
 .block label { display: grid; gap: 1px; font-size: 12px; color: var(--muted); }
 /* what the person has of a chain: a row of a product, its count and the cross; a long title does not widen the block */
 .block { min-width: 0; }

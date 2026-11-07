@@ -986,8 +986,10 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         const panel = device.config?.panel;
         // a part with no chip is named by its part number, as a photoresistor, and only then by its name on the board
         const chip = catalog.devices[device.chip]?.title ?? device.chip ?? device.part ?? name;
-        const part = device.part && !chip.toLowerCase().includes(device.part.toLowerCase()) ? device.part : null;
-        return [chip, part, panel?.width && `${panel.width} x ${panel.height}`].filter(Boolean).join(', ');
+        // the part number says more than its chip when it holds the chip's name, as JD9365DA-H3 of the JD9365
+        const named = device.part && device.part.toLowerCase().includes(chip.toLowerCase()) ? device.part : chip;
+        const part = device.part && !named.toLowerCase().includes(device.part.toLowerCase()) ? device.part : null;
+        return [named, part, panel?.width && `${panel.width} x ${panel.height}`].filter(Boolean).join(', ');
     }
 
     // The parts of a board that answer a role, for the person to put on the canvas as they are: the role, the variant the
@@ -1035,7 +1037,11 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         for (const [line, value] of Object.entries(device.pins || {})) if (value?.gpio !== undefined) lines.push({ line, to: `GPIO ${value.gpio}` });
         const title = partTitle(name, device);
         const set = Object.entries(device.controls || {}).filter(([, control]) => ['switch', 'solder'].includes(control.how)).map(([control, { how, start }]) => ({ control, how, start: JSON.stringify(start) }));
-        return { block: need.title, device: name, title, buses: Object.keys(device.on || {}).map((bus) => (bus.split('.')[1].startsWith(bus.split('.')[0]) ? bus.split('.')[1] : bus).toUpperCase()), lines, set };
+        return { block: need.title, device: name, title, buses: Object.keys(device.on || {}).map((bus) => {
+            // SPI2 or I2C0 by the host alone; a host of another kind of bus says the kind, as SPI2 (QSPI)
+            const [kind, own] = bus.split('.');
+            return (own.startsWith(kind) ? own : `${own} (${kind})`).toUpperCase();
+        }), lines, set };
     }
 
     // What each module puts on the lines of the chip, against what its pins take.

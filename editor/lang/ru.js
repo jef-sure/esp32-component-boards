@@ -291,7 +291,7 @@ LANGUAGES.ru = {
         '{0}: your own part, not in the catalog: {1}': '{0}: своя деталь, её нет в каталоге: {1}',
         'Pictures of parts: hold the pointer on one for its source.': 'Картинки деталей: источник виден при наведении на картинку.',
         'on the board': 'на плате',
-        'On the board {0}': 'На плате {0}',
+        'On the board': 'На плате',
         'on the board {0}: {1}': 'на плате {0}: {1}',
         'on the canvas as it is on the board': 'на холст таким, как на плате',
         'a board of the project: counted as one you have': 'плата проекта: считается, что она у вас есть',

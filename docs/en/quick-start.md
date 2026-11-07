@@ -28,6 +28,9 @@ The folder `my_project` is a new one or an empty one: the example does not go in
 `.gitignore`, a `CMakeLists.txt` that reads the board, and the program `main/main.c`. The component comes from the
 registry; no clone of the repository is needed.
 
+So far it is a folder on your machine. It goes to GitHub later, once the project builds (step 5). A repository on
+GitHub is not made first and cloned here: with a licence or a README the folder is no longer empty.
+
 Open the folder in VS Code (File → Open Folder) and in a terminal of ESP-IDF of that window run:
 
 ```sh
@@ -138,22 +141,41 @@ the button: free
 The screen shows the picture of the window on the computer. The monitor holds the port: close it, Ctrl+], before the
 next flash.
 
-## 5. Git and GitHub
+## 5. On GitHub, if you want
 
-Once the project builds, it is ready for its first commit:
+Once the project builds, it is ready for its first commit. In the folder of the project:
 
 ```sh
-gh repo license view mit > LICENSE      # put the year and the name for [year] and [fullname]
 git init -b main
 git add .
 git commit -m "new project"
-gh repo create my_project --public --source . --push
 ```
 
 The `.gitignore` of the project keeps out `build/`, `managed_components/`, `sdkconfig`, the clangd index `.cache/` and
 `.vscode/` with the paths of this machine. The files `sdkconfig.defaults.<board>`, `CMakePresets.json` and
-`dependencies.lock.<board>` are committed: the project does not build without them. `gh repo create` with `--source`
-takes no licence, so the licence is a file.
+`dependencies.lock.<board>` are committed: the project does not build without them.
+
+With the [GitHub CLI](https://cli.github.com/) (`gh`), after one `gh auth login`, the licence and the repository are
+three commands:
+
+```sh
+gh repo license view mit > LICENSE      # put the year and the name for [year] and [fullname]
+git add LICENSE && git commit -m "add the licence"
+gh repo create my_project --public --source . --push
+```
+
+`gh repo create` with `--source` takes no licence, so the licence is a file.
+
+Without `gh`: on github.com make an empty repository `my_project`, with no README, `.gitignore` or licence, or the first
+`push` is refused, and send the project to it:
+
+```sh
+git remote add origin https://github.com/<your name>/my_project.git
+git push -u origin main
+```
+
+GitHub adds the licence then: Add file → Create new file, the name `LICENSE`, the button "Choose a license template";
+then `git pull`.
 
 ## 6. Next
 

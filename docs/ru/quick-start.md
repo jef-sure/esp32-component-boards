@@ -28,6 +28,9 @@ compote project create-from-example -p my_project jef-sure/boards:hello
 `CMakeLists.txt`, который читает плату, и программа `main/main.c`. Компонент берётся из реестра, клон репозитория не
 нужен.
 
+Пока это только папка на вашей машине. Отправить её на GitHub можно потом, когда проект соберётся (шаг 5). Репозиторий
+на GitHub не создают заранее и не клонируют сюда: с лицензией или README папка уже не пуста.
+
 Откройте папку в VS Code (File → Open Folder) и в терминале ESP-IDF этого окна выполните:
 
 ```sh
@@ -137,22 +140,40 @@ the button: free
 
 На экране та же картинка, что в окне на компьютере. Монитор держит порт: перед следующей прошивкой закройте его, Ctrl+].
 
-## 5. Git и GitHub
+## 5. На GitHub, по желанию
 
-Когда проект собрался, он готов к первому коммиту:
+Когда проект собрался, он готов к первому коммиту. В папке проекта:
 
 ```sh
-gh repo license view mit > LICENSE      # впишите год и имя вместо [year] и [fullname]
 git init -b main
 git add .
 git commit -m "new project"
-gh repo create my_project --public --source . --push
 ```
 
 `.gitignore` проекта не пускает в коммит `build/`, `managed_components/`, `sdkconfig`, индекс clangd `.cache/` и
 `.vscode/` с путями этой машины. Файлы `sdkconfig.defaults.<плата>`, `CMakePresets.json` и `dependencies.lock.<плата>`
-коммитятся: без них проект не собирается. Лицензию `gh repo create` вместе с `--source` не берёт, поэтому она кладётся
-файлом.
+коммитятся: без них проект не собирается.
+
+С [GitHub CLI](https://cli.github.com/) (`gh`), после одного `gh auth login`, лицензия и репозиторий — три команды:
+
+```sh
+gh repo license view mit > LICENSE      # впишите год и имя вместо [year] и [fullname]
+git add LICENSE && git commit -m "add the licence"
+gh repo create my_project --public --source . --push
+```
+
+Лицензию `gh repo create` вместе с `--source` не берёт, поэтому она кладётся файлом.
+
+Без `gh`: на github.com создайте пустой репозиторий `my_project` — без README, `.gitignore` и лицензии, иначе первый
+`push` откажет, — и отправьте в него проект:
+
+```sh
+git remote add origin https://github.com/<ваше имя>/my_project.git
+git push -u origin main
+```
+
+Лицензию тогда добавляет сам GitHub: Add file → Create new file, имя `LICENSE`, кнопка «Choose a license template»;
+после этого `git pull`.
 
 ## 6. Дальше
 

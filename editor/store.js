@@ -179,7 +179,7 @@ async function skeletonOf(chosen, current, name, source) {
         '@KITS@': chosen.map(([kit, board]) => kitSection(kit, board)).join('\n\n'),
         '@CURRENT@': current,
         // what the kits take that the program names itself, once
-        '@DEPENDENCIES@': [...new Map(chosen.flatMap(([kit]) => kit.libraries.filter((library) => library.own)).map((library) => [library.name, dependencyOf(library)])).values()].join('\n'),
+        '@DEPENDENCIES@': [...new Map(chosen.flatMap(([kit]) => kit.libraries.filter((library) => library.own)).map((library) => [library.name, dependencyOf(library)])).values()].map((line) => `\n${line}`).join(''),
         '@COMPONENT@': COMPONENT_LINES(source),
     };
     const files = {};

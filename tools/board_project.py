@@ -140,7 +140,8 @@ def main():
                         [f"- `{item['name']}` {item['version']}: the program calls it, main/idf_component.yml names it." for item in own]
         section = "\n".join([f"## {raw.get('title', board['title'])}: `{named}`", "", "### What it takes", "", *parts, "", "### The wires", "", program_wires(program, raw), "",
                              "### The libraries", "", "\n".join(library_lines) or "None."])
-        dependencies = "\n".join(dependency_of(item["name"], item["version"]) for item in own)
+        # each on a line of its own after the component: none leaves no empty line
+        dependencies = "".join("\n" + dependency_of(item["name"], item["version"]) for item in own)
     else:
         parts = [f"- {board['title']}", *(f"- 1 x {module['title']}, on {', '.join(boards_gen.bus_kinds(module)).upper()}" for module in modules)]
         started = libraries([board, *modules])

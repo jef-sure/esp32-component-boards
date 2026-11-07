@@ -899,9 +899,9 @@ def gen_c(board):
         out(f"const struct board_spi_table board_spi_table = {{{', '.join(fields) or '.count = 0'}}};")
         if spi_hosts and board.get("mcu", {}).get("target") == "esp32":
             # ESP-IDF: spi_bus_initialize with DMA calls spi_dma_ll_reset_register, which on the ESP32 resets the one SPI DMA
-            out("/* On the ESP32 both SPI hosts share one DMA, and setting up a host resets it: a picture still being sent to a")
-            out(" * display on the other host would end in wrong pixels. So a program starts every part, the touch and its own SPI")
-            out(" * devices too, before it draws. */")
+            out("/* On the ESP32 both SPI hosts share one DMA, and setting up a host resets it: a transfer still on its way on the")
+            out(" * other host breaks, as a picture to a display or a block of an SD card. So a program starts every part, the touch")
+            out(" * and its own SPI devices too, before any other work. */")
         out("")
         if i2c_buses:
             out("/* The board's I2C buses by port: board_glue_i2c makes the master of one at the first ask. */")

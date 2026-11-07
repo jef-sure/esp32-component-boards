@@ -69,8 +69,8 @@ void app_main(void)
     const board_info_t *board = board_info();
     printf("the board: %s (%s), %s\n", board->title, board->name, board->target);
 
-    /* Start every part before drawing. On an ESP32 both SPI hosts share one DMA, and board_touch_start sets up the
-     * touch's host, which resets that DMA: a picture still being sent to the display would end in wrong pixels. */
+    /* Start every part before any other work. On an ESP32 both SPI hosts share one DMA, and board_touch_start sets up
+     * the touch's host, which resets that DMA: a transfer still on its way, as a picture to the display, breaks. */
     board_display_t display = {0};
     bool            shown   = board_display_init(&display);
     if (shown) printf("the display: %d x %d pixels, %d x %d mm\n", display.width, display.height, display.mm_w, display.mm_h);

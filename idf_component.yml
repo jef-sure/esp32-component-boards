@@ -73,6 +73,7 @@ files:
     - "catalog/**/sdkconfig.defaults"
     # the tools a program uses and what they import; the checks, imports and audits need test/ or the network
     - "tools/board_select.py"
+    - "tools/vscode_env.py"
     - "tools/board_project.py"
     - "tools/board_pins.py"
     - "tools/board_bom.py"

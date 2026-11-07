@@ -53,3 +53,17 @@ unset(_boards_chosen)
 unset(_boards_variables)
 unset(_boards_variable)
 unset(_boards_target)
+
+# CMake Tools of VS Code builds by the presets in the environment of VS Code, which has no ESP-IDF: this configuration
+# has it and gives it to the project's .vscode/settings.json, see tools/vscode_env.py
+idf_build_get_property(_boards_python PYTHON)
+execute_process(COMMAND "${_boards_python}" "${COMPONENT_DIR}/tools/vscode_env.py" "${PROJECT_DIR}"
+                RESULT_VARIABLE _boards_status OUTPUT_VARIABLE _boards_said ERROR_VARIABLE _boards_said OUTPUT_STRIP_TRAILING_WHITESPACE)
+if(_boards_status)
+    message(WARNING "tools/vscode_env.py: ${_boards_said}")
+elseif(_boards_said)
+    message(STATUS "${_boards_said}")
+endif()
+unset(_boards_python)
+unset(_boards_status)
+unset(_boards_said)

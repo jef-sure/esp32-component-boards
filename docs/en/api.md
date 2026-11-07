@@ -15,6 +15,11 @@ and says so. Every public
 structure has a typedef ending in `_t`, as `board_display_t`; its tag stays, so a
 header of the program can declare it ahead (`struct board_display;`).
 
+A program starts every part of the board — the display, the touch, its own SPI devices — before it draws. On the
+ESP32 one DMA serves both SPI hosts, and `spi_bus_initialize` of any host resets it: a picture still being sent to
+a display on the other host ends in wrong pixels. That happens when a touch on its own host is started after drawing. The glue of an
+ESP32 board says so beside its table of SPI buses.
+
 ## What the board is
 
 ```c

@@ -47,17 +47,14 @@ void app_main(void)
     const board_info_t *board = board_info();
     printf("the board: %s (%s), %s\n", board->title, board->name, board->target);
 
+    /* Start every part before drawing. On an ESP32 both SPI hosts share one DMA, and board_touch_start sets up the
+     * touch's host, which resets that DMA: a picture still being sent to the display would end in wrong pixels. */
     board_display_t display = {0};
-    if (board_display_init(&display)) {
+    bool            shown   = board_display_init(&display);
+    if (shown) {
         printf("the display: %d x %d pixels", display.width, display.height);
         if (display.mm_w) printf(", %d x %d mm", display.mm_w, display.mm_h);
         printf("\n");
-#if CONFIG_BOARD_DISPLAY_GRAPHICS
-        /* a frame: white, a blue bar at the top, so that the orientation and the order of the colors are seen */
-        dgx_screen_t *screen = board_dgx_screen(&display);
-        dgx_fill_rectangle(screen, 0, 0, display.width, display.height, 0xffff);
-        dgx_fill_rectangle(screen, 0, 0, display.width, display.height / 8, 0x001f);
-#endif
     } else {
         printf("the display: none, or it could not be set up\n");
     }
@@ -88,6 +85,15 @@ void app_main(void)
         bool pressed;
         if (board_button_at(i, &pressed)) printf("  %s: %s\n", board_button_name(i), pressed ? "held" : "free");
     }
+
+#if CONFIG_BOARD_DISPLAY_GRAPHICS
+    if (shown) {
+        /* a frame: white, a blue bar at the top, so that the orientation and the order of the colors are seen */
+        dgx_screen_t *screen = board_dgx_screen(&display);
+        dgx_fill_rectangle(screen, 0, 0, display.width, display.height, 0xffff);
+        dgx_fill_rectangle(screen, 0, 0, display.width, display.height / 8, 0x001f);
+    }
+#endif
 
     static struct tone wave;
     board_sound_t      sound;

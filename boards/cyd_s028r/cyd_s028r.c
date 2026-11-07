@@ -36,6 +36,9 @@ static const struct board_spi_bus *const board_spi_buses[] = {&board_spi_spi3};
 /* The hosts the board's buses claim, SPI and QSPI alike: spi2, spi3. */
 static const int board_spi_hosts[] = {SPI2_HOST, SPI3_HOST};
 const struct board_spi_table board_spi_table = {.buses = board_spi_buses, .count = sizeof(board_spi_buses) / sizeof(board_spi_buses[0]), .taken = board_spi_hosts, .taken_count = sizeof(board_spi_hosts) / sizeof(board_spi_hosts[0])};
+/* On the ESP32 both SPI hosts share one DMA, and setting up a host resets it: a picture still being sent to a
+ * display on the other host would end in wrong pixels. So a program starts every part, the touch and its own SPI
+ * devices too, before it draws. */
 
 /* The board wires no I2C bus: nothing for board_glue_i2c to make. */
 const struct board_i2c_table board_i2c_table = {.count = 0};

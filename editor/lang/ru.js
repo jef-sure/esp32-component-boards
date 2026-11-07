@@ -14,7 +14,7 @@ LANGUAGES.ru = {
         'it is there, left as it is': 'уже есть, остаётся как есть',
         'it differs: replace it': 'отличается: заменить',
         'made by board_select.py --again': 'делает board_select.py --again',
-        'written here before and not changed since: replaced': 'записан здесь раньше и с тех пор не менялся: заменяется',
+        'made by the page or by board_select.py and not changed since: replaced': 'сделан страницей или board_select.py и с тех пор не менялся: заменяется',
         'not written: {0}': 'не пишется: {0}',
         'yours, or changed by you: replace it': 'ваш или изменён вами: заменить',
         'what board_select.py --again makes': 'то, что делает board_select.py --again',

@@ -502,6 +502,21 @@ const useEditor = Pinia.defineStore('editor', {
             const names = [...this.chosen.map((item) => item.kit.name), ...this.withoutKit().map((item) => item.board), ...(this.wanted?.boards ?? []).map((entry) => entry.base ?? entry.board)];
             return [...new Set(names)].filter((name) => library.catalog?.boards?.[name]);
         },
+        // The kits of the boards of the project a command chose by their names alone, as board_select.py <board> . does:
+        // each is the card of its board with no module, while it fits the canvas, as "add to the project" on that card
+        // takes it. A board made with a module is not taken: the page does not know what it carries.
+        async adoptedKits(read) {
+            const plain = new Map(this.kits.filter((kit) => kit.fits && !kit.modules.length && !kit.addons?.length).map((kit) => [kit.name, kit]));
+            const taken = new Set(this.chosen.map((item) => item.kit.name));
+            const found = [];
+            for (const item of this.withoutKit()) {
+                const kit = plain.get(item.board);
+                if (!kit || taken.has(item.board)) continue;
+                const first = ((await read(`sdkconfig.defaults.${item.board}`)) ?? '').split('\n')[0];
+                if (first === STUB(item.board)) found.push(kit);
+            }
+            return found;
+        },
         isWithoutKit(current) {
             return this.withoutKit().some((item) => item.board === current);
         },
@@ -683,8 +698,10 @@ const useEditor = Pinia.defineStore('editor', {
                 const alone = single && !savedBoards.length;
                 const gone = alone ? [] : this.chosen.filter((item) => item.gone);
                 if (gone.length) throw new Error(`${gone.map((item) => item.headline).join(', ')}: does not fit the answers now: take it out of the project, or change the answers`);
-                const kits = alone ? [single] : this.chosen.map((item) => item.kit);
-                if (!kits.length) throw new Error('no kit in the project: add one from its card');
+                // a board a command chose by its name alone is the kit of its card: it is written with the others
+                const adopted = alone ? [] : await this.adoptedKits(read);
+                const kits = [...(alone ? [single] : this.chosen.map((item) => item.kit)), ...adopted];
+                if (!kits.length) throw new Error('nothing to write: no board of the project fits what is on the canvas as it is; add a board with "add to the project" on its card');
                 // a kit the project has keeps the name of its board; a new one takes none the project has
                 const taken = new Set(savedBoards.map((entry) => entry.board));
                 const chosen = kits.map((kit) => {

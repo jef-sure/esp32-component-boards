@@ -573,7 +573,7 @@ const SelectPage = {
                             <td v-if="row.state === 'new'">{{ t('new') }}</td>
                             <td v-else-if="row.state === 'same'">{{ t('the same, left as it is') }}</td>
                             <td v-else-if="row.state === 'kept'">{{ t('it is there, left as it is') }}</td>
-                            <td v-else-if="row.state === 'ours'">{{ t('written here before and not changed since: replaced') }}</td>
+                            <td v-else-if="row.state === 'ours'">{{ t('made by the page or by board_select.py and not changed since: replaced') }}</td>
                             <td v-else-if="row.state === 'refused'" class="no">{{ t('not written: {0}', row.why) }}</td>
                             <td v-else-if="row.state === 'changed'"><label><input type="checkbox" v-model="row.replace"> {{ t('yours, or changed by you: replace it') }}</label></td>
                             <td v-else><label><input type="checkbox" v-model="row.replace"> {{ t('it differs: replace it') }}</label></td>

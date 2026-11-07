@@ -188,9 +188,10 @@ class Project:
         allowed[str(self.root)] = self.name()
         put(path, json.dumps(allowed, indent=2, sort_keys=True) + "\n")
 
-    def states(self, files):
-        """For each file: refused with why, new, same, ours (unchanged since written here) or changed (a person's), with
-        the digest of what lies there now: a tick to replace a person's file names it, so it replaces what was shown."""
+    def states(self, files, made_here=frozenset()):
+        """For each file: refused with why, new, same, ours (unchanged since written here, or what board_select.py --again
+        makes of the project as it is, made_here) or changed (a person's), with the digest of what lies there now: a tick
+        to replace a person's file names it, so it replaces what was shown."""
         written = self.written()
         found = {}
         for rel, text in files.items():
@@ -200,13 +201,22 @@ class Project:
                 continue
             path = self.root / rel
             old = path.read_text(errors="replace") if path.exists() else None
-            state = "new" if old is None else "same" if old == text else "ours" if written.get(rel) == digest(old) else "changed"
+            state = "new" if old is None else "same" if old == text else "ours" if written.get(rel) == digest(old) or rel in made_here else "changed"
             found[rel] = {"state": state, **({"digest": digest(old)} if old is not None else {})}
         return found
 
-    def made_again(self, files):
+    def as_made(self):
+        """The files of the project that are what board_select.py --again makes of it as it is: the component made them
+        and nobody changed them since, as after board_select.py <board> . run by hand, so they are the component's to
+        replace, as --again itself would. A file changed by hand differs from what --again makes and stays a person's."""
+        outputs, failed = self.made_again({}, every=True)
+        if failed:
+            return frozenset()
+        return frozenset(rel for rel, text in outputs.items() if (self.root / rel).is_file() and (self.root / rel).read_text(errors="replace") == text)
+
+    def made_again(self, files, every=False):
         """The files board_select.py --again makes when files are written: run on a copy of the project, so nothing of
-        the project changes before the person has seen what would."""
+        the project changes before the person has seen what would. every: each file it writes, changed or not."""
         with tempfile.TemporaryDirectory() as folder:
             copy = pathlib.Path(folder)
             for name in AGAIN_READS:
@@ -223,6 +233,7 @@ class Project:
                 (copy / rel).parent.mkdir(parents=True, exist_ok=True)
                 (copy / rel).write_text(text)
             before = {path: path.read_text(errors="replace") for path in copy.rglob("*") if path.is_file()}
+            stamps = {path: path.stat().st_mtime_ns for path in before}
             if not any(path.read_text(errors="replace").startswith("# board_select.py ") for path in copy.glob("sdkconfig.defaults.*")):
                 return {}, None
             run = subprocess.run([sys.executable, str(ROOT / "tools" / "board_select.py"), "--again", str(copy)], capture_output=True, text=True)
@@ -231,14 +242,16 @@ class Project:
             made = {}
             for path in copy.rglob("*"):
                 rel = path.relative_to(copy).as_posix()
-                if path.is_file() and not LOCK.match(path.name) and before.get(path) != path.read_text(errors="replace"):
+                touched = every and stamps.get(path) != path.stat().st_mtime_ns
+                if path.is_file() and not LOCK.match(path.name) and (touched or before.get(path) != path.read_text(errors="replace")):
                     made[rel] = path.read_text()
             return made, None
 
     def plan(self, files):
         """What a write of files would do: their states and those of what --again makes after them."""
         made, failed = self.made_again(files)
-        return {"files": self.states(files), "made": self.states(made), **({"failed": failed} if failed else {})}
+        ours = self.as_made()
+        return {"files": self.states(files, ours), "made": self.states(made, ours), **({"failed": failed} if failed else {})}
 
     def write(self, files, replace=None):
         """Writes files and what --again makes after them, all or nothing: refused when one is refused, or is a person's
@@ -249,7 +262,7 @@ class Project:
         if failed:
             return {"written": [], "refused": {}, "failed": failed}
         every = {**files, **made}
-        states = self.states(every)
+        states = self.states(every, self.as_made())
         refused = {rel: state for rel, state in states.items() if state["state"] == "refused" or (state["state"] == "changed" and replace.get(rel) != state["digest"])}
         if refused:
             return {"written": [], "refused": refused}

@@ -6,9 +6,12 @@
 # main and on pull requests.
 name: build
 
+# CI runs for main, a pull request and by hand: a branch pushed beside main ran the same commit twice.
 on:
   push:
+    branches: [main]
   pull_request:
+  workflow_dispatch:
 
 jobs:
   check:
@@ -37,6 +40,14 @@ jobs:
         idf: [release-v5.5, v6.1]
     steps:
       - uses: actions/checkout@v4
+      # the component manager keeps what it downloads in .component-cache, which actions/cache keeps between runs:
+      # a run took DGX from the registry some 60 times
+      - name: keep the components downloaded
+        uses: actions/cache@v4
+        with:
+          path: .component-cache
+          key: components-${{ hashFiles('**/idf_component.yml') }}
+          restore-keys: components-
       - name: choose the board
         run: |
           python3 tools/board_select.py ${{ matrix.board }} examples/hello_board
@@ -47,6 +58,7 @@ jobs:
       - name: build hello_board
         uses: espressif/esp-idf-ci-action@v1
         with:
+          extra_docker_args: -e IDF_COMPONENT_CACHE_PATH=/app/${{ github.repository }}/.component-cache
           esp_idf_version: ${{ matrix.idf }}
           target: ${{ steps.board.outputs.target }}
           path: examples/hello_board
@@ -55,6 +67,7 @@ jobs:
         if: ${{ steps.board.outputs.graphics == 'true' }}
         uses: espressif/esp-idf-ci-action@v1
         with:
+          extra_docker_args: -e IDF_COMPONENT_CACHE_PATH=/app/${{ github.repository }}/.component-cache
           esp_idf_version: ${{ matrix.idf }}
           target: ${{ steps.board.outputs.target }}
           path: examples/hello_lvgl
@@ -63,6 +76,7 @@ jobs:
         if: ${{ steps.board.outputs.sound == 'true' }}
         uses: espressif/esp-idf-ci-action@v1
         with:
+          extra_docker_args: -e IDF_COMPONENT_CACHE_PATH=/app/${{ github.repository }}/.component-cache
           esp_idf_version: ${{ matrix.idf }}
           target: ${{ steps.board.outputs.target }}
           path: examples/sound_level
@@ -78,6 +92,14 @@ jobs:
         idf: [release-v5.5, v6.1]
     steps:
       - uses: actions/checkout@v4
+      # the component manager keeps what it downloads in .component-cache, which actions/cache keeps between runs:
+      # a run took DGX from the registry some 60 times
+      - name: keep the components downloaded
+        uses: actions/cache@v4
+        with:
+          path: .component-cache
+          key: components-${{ hashFiles('**/idf_component.yml') }}
+          restore-keys: components-
       - name: write the project as the page does
         run: |
           mkdir -p examples/hello_board/components/local-boards/boards/project_unused
@@ -86,6 +108,7 @@ jobs:
       - name: build it
         uses: espressif/esp-idf-ci-action@v1
         with:
+          extra_docker_args: -e IDF_COMPONENT_CACHE_PATH=/app/${{ github.repository }}/.component-cache
           esp_idf_version: ${{ matrix.idf }}
           target: esp32s3
           path: examples/hello_board
@@ -101,11 +124,20 @@ jobs:
         idf: [release-v5.5, v6.1]
     steps:
       - uses: actions/checkout@v4
+      # the component manager keeps what it downloads in .component-cache, which actions/cache keeps between runs:
+      # a run took DGX from the registry some 60 times
+      - name: keep the components downloaded
+        uses: actions/cache@v4
+        with:
+          path: .component-cache
+          key: components-${{ hashFiles('**/idf_component.yml') }}
+          restore-keys: components-
       - name: choose the board
         run: python3 tools/board_select.py my_board examples/local_boards
       - name: build examples/local_boards
         uses: espressif/esp-idf-ci-action@v1
         with:
+          extra_docker_args: -e IDF_COMPONENT_CACHE_PATH=/app/${{ github.repository }}/.component-cache
           esp_idf_version: ${{ matrix.idf }}
           target: esp32s3
           path: examples/local_boards
@@ -123,6 +155,14 @@ jobs:
         shows: [jc4827w543c, cyd_s028r]
     steps:
       - uses: actions/checkout@v4
+      # the component manager keeps what it downloads in .component-cache, which actions/cache keeps between runs:
+      # a run took DGX from the registry some 60 times
+      - name: keep the components downloaded
+        uses: actions/cache@v4
+        with:
+          path: .component-cache
+          key: components-${{ hashFiles('**/idf_component.yml') }}
+          restore-keys: components-
       - name: choose the computer
         run: |
           python3 tools/board_select.py host --as ${{ matrix.shows }} examples/hello_board
@@ -130,6 +170,7 @@ jobs:
       - name: build hello_board for the linux target, run it with no screen, check the picture of its window and its touch, the mouse
         uses: espressif/esp-idf-ci-action@v1
         with:
+          extra_docker_args: -e IDF_COMPONENT_CACHE_PATH=/app/${{ github.repository }}/.component-cache
           esp_idf_version: ${{ matrix.idf }}
           target: linux
           path: examples/hello_board
@@ -142,6 +183,7 @@ jobs:
       - name: build test/host_buttons and press its buttons by a script of keys
         uses: espressif/esp-idf-ci-action@v1
         with:
+          extra_docker_args: -e IDF_COMPONENT_CACHE_PATH=/app/${{ github.repository }}/.component-cache
           esp_idf_version: ${{ matrix.idf }}
           target: linux
           path: test/host_buttons
@@ -167,11 +209,20 @@ jobs:
             second: idf.py --preset jc8012p4a1c build
     steps:
       - uses: actions/checkout@v4
+      # the component manager keeps what it downloads in .component-cache, which actions/cache keeps between runs:
+      # a run took DGX from the registry some 60 times
+      - name: keep the components downloaded
+        uses: actions/cache@v4
+        with:
+          path: .component-cache
+          key: components-${{ hashFiles('**/idf_component.yml') }}
+          restore-keys: components-
       - name: choose the boards
         run: python3 tools/board_select.py cyd_s028r jc8012p4a1c examples/multi_board
       - name: build for the CYD S028R
         uses: espressif/esp-idf-ci-action@v1
         with:
+          extra_docker_args: -e IDF_COMPONENT_CACHE_PATH=/app/${{ github.repository }}/.component-cache
           esp_idf_version: ${{ matrix.idf }}
           target: esp32
           path: examples/multi_board
@@ -179,6 +230,7 @@ jobs:
       - name: build for the JC8012P4A1C beside it
         uses: espressif/esp-idf-ci-action@v1
         with:
+          extra_docker_args: -e IDF_COMPONENT_CACHE_PATH=/app/${{ github.repository }}/.component-cache
           esp_idf_version: ${{ matrix.idf }}
           target: esp32p4
           path: examples/multi_board
@@ -187,6 +239,7 @@ jobs:
         if: matrix.idf == 'v6.1'
         uses: espressif/esp-idf-ci-action@v1
         with:
+          extra_docker_args: -e IDF_COMPONENT_CACHE_PATH=/app/${{ github.repository }}/.component-cache
           esp_idf_version: v6.1
           target: esp32
           path: examples/multi_board
@@ -201,9 +254,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # the component manager keeps what it downloads in .component-cache, which actions/cache keeps between runs:
+      # a run took DGX from the registry some 60 times
+      - name: keep the components downloaded
+        uses: actions/cache@v4
+        with:
+          path: .component-cache
+          key: components-${{ hashFiles('**/idf_component.yml') }}
+          restore-keys: components-
       - name: pack the component, take its example from the archive with the component at this commit, build it for a board of another chip than the first reconfigure
         uses: espressif/esp-idf-ci-action@v1
         with:
+          extra_docker_args: -e IDF_COMPONENT_CACHE_PATH=/app/${{ github.repository }}/.component-cache
           esp_idf_version: v6.1
           command: >-
             unset IDF_TARGET &&

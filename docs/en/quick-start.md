@@ -25,10 +25,10 @@ activated: `idf.py --version` answers in it. The plain terminal of VS Code (Ctrl
 - In VS Code: Ctrl+Shift+P → "ESP-IDF: Open ESP-IDF Terminal". When the extension does not know yet which installation
   to take, "ESP-IDF: Select Current ESP-IDF Version" first. The terminal belongs to its window of VS Code: in a new
   window, "Open ESP-IDF Terminal" again. The extension puts into that terminal the `IDF_TARGET` it takes for the current
-  one. `board_select.py` tells it the current board, but the extension reads the target again later: here, after a
-  reload of the window ("Developer: Reload Window") and the preset of the board chosen in the list CMake Tools offers.
-  When `idf.py` says `IDF_TARGET` differs from the target of the board, run `unset IDF_TARGET` in the terminal: the
-  preset gives the board and its target.
+  one. `board_select.py` tells it the current board, but the extension reads the target when it starts. After a change of
+  the board: "Developer: Reload Window", then a new terminal of ESP-IDF. A terminal that was open is joined again to the
+  same process by VS Code after the reload, with its old variables. When `idf.py` says `IDF_TARGET` differs from the
+  target of the board, run `unset IDF_TARGET` in the terminal: the preset gives the board and its target.
 - In a plain terminal, the activation of your installation: for EIM,
   `source ~/.espressif/tools/activate_idf_v6.1.sh` (with your version); for an installation by `install.sh`,
   `. ~/esp/esp-idf/export.sh`. Such a terminal sets no `IDF_TARGET`, and the preset of each board gives its target.

@@ -101,8 +101,8 @@ not write is not replaced. See [choosing-a-board.md](choosing-a-board.md).
 In a project VS Code works on (one with `.vscode/`, or the command run from VS Code) it writes the target of the
 current board for the ESP-IDF extension into `.vscode/settings.json`: `idf.customExtraVars.IDF_TARGET` and
 `idf.sdkconfigFilePath`, `build/<board>/sdkconfig` (`tools/vscode_env.py`). The extension takes the target from them
-when it reads it again (here, after a reload of the window and the preset of the board chosen) and puts it into its
-terminals as `IDF_TARGET`; till then a terminal of ESP-IDF needs `unset IDF_TARGET`.
+when it starts, after a reload of the window, and puts it into new terminals as `IDF_TARGET`; `idf.buildPath`,
+`build/<board>`, is where its build goes while no project configuration is chosen in it; till then a terminal of ESP-IDF needs `unset IDF_TARGET`.
 
 Each file it writes begins with the command that made it and the version and commit of the component. After
 the component changes, `board_select.py --again ~/myproject` makes every such file of the project again the same

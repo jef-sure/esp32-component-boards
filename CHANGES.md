@@ -10,8 +10,10 @@
   stays the current board if it was.
 - The ESP-IDF extension of VS Code follows the current board: `board_select.py`, and the page when it writes, set
   `idf.customExtraVars.IDF_TARGET` and `idf.sdkconfigFilePath` (`build/<board>/sdkconfig`) in `.vscode/settings.json`,
-  which the extension reads when it takes the target again (after a reload of the window and the preset of the board
-  chosen) and gives its terminals as `IDF_TARGET`; till then `unset IDF_TARGET` in such a terminal. Before, the extension took the target of the
+  which the extension reads when it starts and gives new terminals as `IDF_TARGET`, and `idf.buildPath`, `build/<board>`,
+  where its build goes with no project configuration chosen; till then `unset IDF_TARGET` in such a terminal. A
+  configuration with no `BOARD` in a project with presets of `board_select.py` stops before the compiler checks, as the
+  build of the extension with no project configuration once failed at the compiler of the computer. Before, the extension took the target of the
   sdkconfig of the project's folder, which the first `idf.py reconfigure` leaves for no board and for esp32, and `idf.py`
   refused the board of another target.
 - The page writes a project whose boards `board_select.py` chose: a board chosen by its name alone counts as the card of

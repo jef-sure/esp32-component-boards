@@ -6,8 +6,8 @@ The settings of VS Code a project of boards needs, in its .vscode/settings.json:
   CMake Tools takes the presets board_select.py writes and runs cmake in the environment of VS Code, which has no
   ESP-IDF; with these four it configures and builds as idf.py does. project_include.cmake writes them at each
   configuration: vscode_env.py PROJECT_DIR.
-- the target of the current board for the ESP-IDF extension: idf.customExtraVars.IDF_TARGET and idf.sdkconfigFilePath,
-  build/<board>/sdkconfig. The extension gives its terminals the IDF_TARGET of that sdkconfig, of that setting when the
+- the current board for the ESP-IDF extension: idf.customExtraVars.IDF_TARGET, idf.sdkconfigFilePath,
+  build/<board>/sdkconfig, and idf.buildPath, build/<board>, where its build goes with no project configuration chosen. The extension gives its terminals the IDF_TARGET of that sdkconfig, of that setting when the
   board was not built yet, and of the sdkconfig of the project's folder, or esp32, when neither is set; idf.py stops when
   it differs from the target of the board a preset builds. board_select.py writes them when the current board changes:
   vscode_env.py PROJECT_DIR --current BOARD TARGET. The extension keeps the target it took and reads it again later, as
@@ -75,13 +75,15 @@ def environment(project):
 
 def current(project, board, target):
     """The target of the current board and its sdkconfig, for the ESP-IDF extension and the terminals it opens."""
-    sdkconfig = str((pathlib.Path(project) / "build" / board / "sdkconfig").resolve())
+    build = (pathlib.Path(project) / "build" / board).resolve()
+    sdkconfig = str(build / "sdkconfig")
 
     def change(settings):
         extra = settings.get("idf.customExtraVars") if isinstance(settings.get("idf.customExtraVars"), dict) else {}
-        if extra.get("IDF_TARGET") == target and settings.get("idf.sdkconfigFilePath") == sdkconfig:
+        if extra.get("IDF_TARGET") == target and settings.get("idf.sdkconfigFilePath") == sdkconfig and settings.get("idf.buildPath") == str(build):
             return None
-        return {**settings, "idf.customExtraVars": {**extra, "IDF_TARGET": target}, "idf.sdkconfigFilePath": sdkconfig}
+        # the build of the extension with no project configuration chosen goes to the board's directory, which has its BOARD
+        return {**settings, "idf.customExtraVars": {**extra, "IDF_TARGET": target}, "idf.sdkconfigFilePath": sdkconfig, "idf.buildPath": str(build)}
 
     update(project, change, f"the ESP-IDF extension takes {board}, {target} when it reads the target again; till then, unset IDF_TARGET in its terminal")
 

@@ -24,12 +24,13 @@ activated: `idf.py --version` answers in it. The plain terminal of VS Code (Ctrl
 
 - In VS Code, in a window with a folder open: Ctrl+Shift+P → "ESP-IDF: Open ESP-IDF Terminal". When the extension
   does not know yet which installation to take, "ESP-IDF: Select Current ESP-IDF Version" first. The terminal belongs to
-  its window of VS Code: in a new window, "Open ESP-IDF Terminal" again. The extension puts into that terminal the `IDF_TARGET` it takes for the current
-  one. `board_select.py` tells it the current board, but the extension reads the target when it starts. After a change of
-  the board: "Developer: Reload Window" (CMake Tools then asks for a preset: choose the same board in its list), then a
-  new terminal of ESP-IDF. A terminal that was open is joined again to the
-  same process by VS Code after the reload, with its old variables. When `idf.py` says `IDF_TARGET` differs from the
-  target of the board, run `unset IDF_TARGET` in the terminal: the preset gives the board and its target.
+  its window of VS Code: in a new window, "Open ESP-IDF Terminal" again. The extension puts into that terminal the
+  `IDF_TARGET` it takes for the current one. `board_select.py` tells it the current board, but the extension reads the
+  target when it starts. After a change of the board: "Developer: Reload Window" (CMake Tools then asks for a preset:
+  choose the same board in its list), then a new terminal of ESP-IDF, and close the old ones: a terminal that was open
+  is joined again to the same process by VS Code after the reload, with its old variables. When `idf.py` says
+  `IDF_TARGET` differs from the target of the board, run `unset IDF_TARGET` in the terminal: the preset gives the board
+  and its target.
 - In a plain terminal, the activation of your installation: for EIM,
   `source ~/.espressif/tools/activate_idf_v6.1.sh` (with your version); for an installation by `install.sh`,
   `. ~/esp/esp-idf/export.sh`. Such a terminal sets no `IDF_TARGET`, and the preset of each board gives its target.
@@ -78,7 +79,8 @@ components. The second does the same for the computer `host_cyd_s028r`: a window
 the board is held. Another `--as` gives another computer beside it, as `host_jc1060p470c`. The board named last is the
 current one, here the computer. No `set-target` and no `menuconfig`. In VS Code, after a change of the board, reload the
 window ("Developer: Reload Window"), choose the current board in the list of presets CMake Tools then shows, and open a
-new terminal of ESP-IDF: so the extension takes the target of the current board.
+new terminal of ESP-IDF: so the extension takes the target of the current board. Close the old terminals of ESP-IDF:
+they keep the old target.
 
 When the board is not chosen yet, the page of the component helps to choose it: `editor/index.html` of its copy in
 `managed_components/`. On it a device is described: what it needs goes on the canvas, a display, a touch, sensors, and

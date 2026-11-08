@@ -59,7 +59,9 @@ idf.py reconfigure
 ```
 
 Команда скачивает компонент в `managed_components/` и записывает в `.vscode/settings.json` окружение ESP-IDF, с которым
-CMake Tools собирает проект.
+CMake Tools собирает проект. Расширение ESP-IDF, открыв папку, само предлагает внизу справа «compile_commands.json is
+missing…» с кнопкой «Generate compile_commands.json»: она запускает ту же `idf.py reconfigure` («ESP-IDF: Run idf.py
+reconfigure Task»), так что вместо команды можно нажать её.
 
 ## 2. Плата
 

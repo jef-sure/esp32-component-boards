@@ -59,7 +59,9 @@ idf.py reconfigure
 ```
 
 It downloads the component into `managed_components/` and writes into `.vscode/settings.json` the environment of ESP-IDF
-that CMake Tools builds the project with.
+that CMake Tools builds the project with. The ESP-IDF extension, once the folder is open, offers "compile_commands.json is
+missing…" at the bottom right with the button "Generate compile_commands.json": it runs the same `idf.py reconfigure`
+("ESP-IDF: Run idf.py reconfigure Task"), so the button does instead of the command.
 
 ## 2. The board
 

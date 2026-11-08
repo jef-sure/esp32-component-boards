@@ -13,6 +13,8 @@
 
 #if CONFIG_BOARD_DISPLAY_GRAPHICS
 #include "boards_dgx.h"
+#include "dgx_bits.h"
+#include "dgx_colors.h"
 #include "dgx_draw.h"
 #endif
 
@@ -58,7 +60,8 @@ void app_main(void)
         printf("level %d%% of full scale\n", level);
 #if CONFIG_BOARD_DISPLAY_GRAPHICS
         /* a bar as wide as the level, white on black */
-        if (screen) dgx_fill_rectangle(screen, 0, display.height / 3, display.width * level / LEVEL_MAX, display.height / 3, 0xffff);
+        if (screen)
+            dgx_fill_rectangle(screen, 0, display.height / 3, display.width * level / LEVEL_MAX, display.height / 3, DGX_WHITE(dgx_rgb_to_16));
 #endif
         vTaskDelay(pdMS_TO_TICKS(STEP_MS));
     }

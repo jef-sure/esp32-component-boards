@@ -17,6 +17,8 @@
 
 #if CONFIG_BOARD_DISPLAY_GRAPHICS
 #include "boards_dgx.h"
+#include "dgx_bits.h"
+#include "dgx_colors.h"
 #include "dgx_draw.h"
 #endif
 #if CONFIG_BOARD_DISPLAY_HD44780
@@ -90,8 +92,8 @@ void app_main(void)
     if (shown) {
         /* a frame: white, a blue bar at the top, so that the orientation and the order of the colors are seen */
         dgx_screen_t *screen = board_dgx_screen(&display);
-        dgx_fill_rectangle(screen, 0, 0, display.width, display.height, 0xffff);
-        dgx_fill_rectangle(screen, 0, 0, display.width, display.height / 8, 0x001f);
+        dgx_fill_rectangle(screen, 0, 0, display.width, display.height, DGX_WHITE(dgx_rgb_to_16));
+        dgx_fill_rectangle(screen, 0, 0, display.width, display.height / 8, DGX_BLUE(dgx_rgb_to_16));
     }
 #endif
 

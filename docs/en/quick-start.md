@@ -138,6 +138,8 @@ The program, `main/main.c`:
 #include "sdkconfig.h"
 #if CONFIG_BOARD_DISPLAY_GRAPHICS
 #include "boards_dgx.h"
+#include "dgx_bits.h"
+#include "dgx_colors.h"
 #include "dgx_draw.h"
 #endif
 
@@ -160,16 +162,18 @@ void app_main(void)
 
 #if CONFIG_BOARD_DISPLAY_GRAPHICS
     if (shown) {
+        /* colors of dgx_colors.h packed for 16 bits, RGB565, the depth most displays take; another takes its dgx_rgb_to_* */
         dgx_screen_t *screen = board_dgx_screen(&display);
-        dgx_fill_rectangle(screen, 0, 0, display.width, display.height, 0xffff);     /* white */
-        dgx_fill_rectangle(screen, 0, 0, display.width, display.height / 8, 0x001f); /* a blue band at the top */
+        dgx_fill_rectangle(screen, 0, 0, display.width, display.height, DGX_WHITE(dgx_rgb_to_16));
+        dgx_fill_rectangle(screen, 0, 0, display.width, display.height / 8, DGX_BLUE(dgx_rgb_to_16)); /* a band at the top */
     }
 #endif
 }
 ```
 
 Every function of `boards.h` exists on every board; one for a part the board does not have returns `false`. Change the
-colour of the band to red, `0xf800`, press F7 and Ctrl+Shift+F5: the band is red.
+colour of the band to red, `DGX_RED(dgx_rgb_to_16)` for `DGX_BLUE(dgx_rgb_to_16)`, press F7 and Ctrl+Shift+F5: the band
+is red. The names of the colours are in `dgx_colors.h` of DGX.
 
 ## 4. On the board
 

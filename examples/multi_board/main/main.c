@@ -10,12 +10,10 @@
 
 #if CONFIG_BOARD_DISPLAY_GRAPHICS
 #include "boards_dgx.h"
+#include "dgx_bits.h"
+#include "dgx_colors.h"
 #include "dgx_draw.h"
 #endif
-
-/* RGB565 */
-#define WHITE 0xffff
-#define BLUE  0x001f
 
 void app_main(void)
 {
@@ -29,7 +27,7 @@ void app_main(void)
     printf("the display: %d x %d pixels, %d x %d mm\n", display.width, display.height, display.mm_w, display.mm_h);
 #if CONFIG_BOARD_DISPLAY_GRAPHICS
     dgx_screen_t *screen = board_dgx_screen(&display);
-    dgx_fill_rectangle(screen, 0, 0, display.width, display.height, WHITE);
-    dgx_fill_rectangle(screen, 0, 0, display.width, display.height / 8, BLUE);
+    dgx_fill_rectangle(screen, 0, 0, display.width, display.height, DGX_WHITE(dgx_rgb_to_16));
+    dgx_fill_rectangle(screen, 0, 0, display.width, display.height / 8, DGX_BLUE(dgx_rgb_to_16));
 #endif
 }

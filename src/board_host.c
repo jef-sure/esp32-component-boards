@@ -4,8 +4,9 @@
  * as the board is held, its screen at the orientation it starts with there, the time on the bus of that board in the
  * title (CONFIG_BOARD_HOST_*, written by tools/board_select.py host --as <board>); the sound goes to the speakers of the
  * computer. The task that starts the display shows the window in its waits and needs 48 KB of stack left, as
- * CONFIG_ESP_MAIN_TASK_STACK_SIZE=16384 gives app_main. The touch panel is the mouse over the window, a finger of DGX-DI
- * (dgx_di_host.h, DGX-DI 0.1.5 and later); every part the computer has not returns false as on a board.
+ * CONFIG_ESP_MAIN_TASK_STACK_SIZE=16384 gives app_main. When the board it shows has a touch panel (CONFIG_BOARD_TOUCH),
+ * it is the mouse over the window, a finger of DGX-DI (dgx_di_host.h, DGX-DI 0.1.5 and later); every part the computer
+ * has not returns false as on a board.
  */
 #include "sdkconfig.h"
 
@@ -15,7 +16,9 @@
 
 #include "boards.h"
 #include "boards_dgx.h"
+#if CONFIG_BOARD_TOUCH
 #include "boards_dgx_di.h"
+#endif
 #include "board_volume.h"
 
 #include <SDL.h>
@@ -23,7 +26,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if CONFIG_BOARD_TOUCH
 #include "dgx_di_host.h"
+#endif
 #ifdef BOARDS_HOST_FLASH
 #include <errno.h>
 #include <stdio.h>
@@ -139,6 +144,7 @@ bool board_character_display_init(board_character_display_t *out)
 
 /* ---- the touch panel: the mouse over the window, a finger on its glass as DGX-DI reads it ---- */
 
+#if CONFIG_BOARD_TOUCH
 static board_touch_t       touched;
 static dgx_di_host_touch_t mouse;
 static dgx_di_pointer_t    pointer;
@@ -175,6 +181,27 @@ dgx_di_pointer_t *board_dgx_di_pointer(const board_touch_t *touch)
 {
     return touch && touch->index == 0 && touched.name ? &pointer : NULL;
 }
+#else
+int board_touch_count(void)
+{
+    return 0;
+}
+
+bool board_touch_start_at(int index, const board_display_t *display, board_touch_t *out)
+{
+    (void)index;
+    (void)display;
+    (void)out;
+    return false;
+}
+
+bool board_touch_start(const board_display_t *display, board_touch_t *out)
+{
+    (void)display;
+    (void)out;
+    return false;
+}
+#endif
 
 void board_touch_firmware_set(const uint8_t *start, size_t size)
 {

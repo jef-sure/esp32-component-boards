@@ -201,6 +201,9 @@ config BOARD_HOST_BUS_LINES
 config BOARD_HOST_COLOR_BITS
     int "Its depth of color, 16 or 18"
     default 16
+config BOARD_HOST_TOUCH
+    int "1 when it has a touch, which the mouse over the window is; 0 for none"
+    default 1
 config BOARD_HOST_BUTTONS
     string "The names of its buttons, by commas"
 endif
@@ -300,7 +303,7 @@ config BOARD_NODEMCU_ESP32S
 # brings DGX, a touch brings DGX-DI and its driver, sound with an ES8311 brings esp_codec_dev,
 # a character display brings hd44780. Derived from the data, so the data of a board and the
 # rules cannot drift apart. The computer has a graphics display, its window a screen of DGX, and a
-# touch, the mouse over it as DGX-DI reads it.
+# touch, the mouse over it as DGX-DI reads it, when the board it shows has one.
 config BOARD_DISPLAY_GRAPHICS
     int
     default 1 if BOARD_SELECT_CYD_S028R || BOARD_SELECT_ESP32_C3_OLED_042 || BOARD_SELECT_ESP32_OLED_096 || BOARD_SELECT_JC1060P470C || BOARD_SELECT_JC4827W543C || BOARD_SELECT_JC8012P4A1C || BOARD_SELECT_HOST
@@ -331,7 +334,7 @@ config BOARD_SOUND_I2S
 
 config BOARD_TOUCH
     int
-    default 1 if BOARD_SELECT_CYD_S028R || BOARD_SELECT_JC1060P470C || BOARD_SELECT_JC4827W543C || BOARD_SELECT_JC8012P4A1C || BOARD_SELECT_HOST
+    default 1 if BOARD_SELECT_CYD_S028R || BOARD_SELECT_JC1060P470C || BOARD_SELECT_JC4827W543C || BOARD_SELECT_JC8012P4A1C || (BOARD_SELECT_HOST && BOARD_HOST_TOUCH != 0)
     default 0
 
 config BOARD_TOUCH_ESP_LCD

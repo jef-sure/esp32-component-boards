@@ -2,6 +2,9 @@
 
 ## 0.1.1 (not released yet)
 
+- The computer has a touch, the mouse over its window, only when the board it shows has one: `board_select.py` writes
+  `CONFIG_BOARD_HOST_TOUCH` from the data of that board, and DGX-DI comes only then. Before, it had one always, and a
+  computer that showed a board with no touch took DGX-DI nobody asked for.
 - A configuration of a project VS Code works on adds the ESP-IDF extension and clangd to the recommendations of
   `.vscode/extensions.json`, after those it has: the ESP-IDF extension sets clangd up, and nothing reads that without
   the clangd extension.

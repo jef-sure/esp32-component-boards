@@ -206,7 +206,8 @@ or QSPI, and how much memory the program and DGX hold. A display that starts mir
 it is seen, not turned. The task that starts the display shows the window in its waits (`vTaskDelay`), so the
 display is started from `app_main` or from a task with 48 KB of stack left; `sdkconfig.defaults.host_<board>` gives `app_main`
 128 KB (`CONFIG_ESP_MAIN_TASK_STACK_SIZE=16384`, in words of 8 bytes). After `app_main` returns the window stays until
-it is closed; a window that is closed ends the program. The touch panel is the mouse: pressed on the window it is a
+it is closed; a window that is closed ends the program. When the board shown has a touch panel, it is the mouse
+(`CONFIG_BOARD_HOST_TOUCH`; DGX-DI comes only then): pressed on the window it is a
 finger on the glass (`dgx_di_host.h`, DGX-DI 0.1.5 and later), read through `board_dgx_di_pointer()` as on a board, with
 no calibration, and it turns with the display. The sound goes to the speakers of the computer: a task asks the
 source, as on a board. The flash of a program that has partitions (NVS, a file system) is kept between runs in

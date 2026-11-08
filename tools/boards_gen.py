@@ -72,8 +72,8 @@ RULES = json.loads((ROOT / "catalog" / "rules.json").read_text())
 I2C_HZ_DEFAULT = 400000
 INPUT_LINES = ("in", "int", "irq", "te", "busy")  # lines of a device that only come in
 STARTED_CLASSES = {"display", "touch", "audio", "button"}  # the rest is kept as data
-# the window of the computer is a host screen of DGX, and its mouse a finger of DGX-DI (src/board_host.c)
-HOST_FEATURES = ("BOARD_DISPLAY_GRAPHICS", "BOARD_TOUCH")
+# the window of the computer is a host screen of DGX, always; its mouse a finger of DGX-DI when the board it shows has a touch (src/board_host.c)
+HOST_FEATURES = {"BOARD_DISPLAY_GRAPHICS": "BOARD_SELECT_HOST", "BOARD_TOUCH": "(BOARD_SELECT_HOST && BOARD_HOST_TOUCH != 0)"}
 
 MANIFEST_BEGIN = "  # boards: dependencies generated"
 MANIFEST_END = "  # boards: end of generated"
@@ -1264,7 +1264,8 @@ def gen_kconfig(boards, modules):
                                   ("TURN", "Its glass turned clockwise in the window as the board is held, degrees", 0),
                                   ("BUS_HZ", "The clock of the bus of its display, 0 for the window's 40 MHz", 0),
                                   ("BUS_LINES", "The data lines of that bus: 1 for SPI, 4 for QSPI, 0 for 1", 0),
-                                  ("COLOR_BITS", "Its depth of color, 16 or 18", 16)):
+                                  ("COLOR_BITS", "Its depth of color, 16 or 18", 16),
+                                  ("TOUCH", "1 when it has a touch, which the mouse over the window is; 0 for none", 1)):
         out(f"config BOARD_HOST_{symbol}")
         out(f"    int \"{prompt}\"")
         out(f"    default {value}")
@@ -1310,7 +1311,7 @@ def gen_kconfig(boards, modules):
     out("# brings DGX, a touch brings DGX-DI and its driver, sound with an ES8311 brings esp_codec_dev,")
     out("# a character display brings hd44780. Derived from the data, so the data of a board and the")
     out("# rules cannot drift apart. The computer has a graphics display, its window a screen of DGX, and a")
-    out("# touch, the mouse over it as DGX-DI reads it.")
+    out("# touch, the mouse over it as DGX-DI reads it, when the board it shows has one.")
     all_features = {}
     for board in boards:
         for feature in features_of(board):
@@ -1318,8 +1319,8 @@ def gen_kconfig(boards, modules):
     for module in modules:
         for feature in features_of(module):
             all_features.setdefault(feature, []).append(module_symbol(module))
-    for feature in HOST_FEATURES:
-        all_features.setdefault(feature, []).append("BOARD_SELECT_HOST")
+    for feature, condition in HOST_FEATURES.items():
+        all_features.setdefault(feature, []).append(condition)
     for symbol, _, _ in feature_deps():
         all_features.setdefault(symbol, [])
     all_features.setdefault("BOARD_DISPLAY_GROUP", [])  # #if in the adapter of DGX: defined, 0, on a board with no group

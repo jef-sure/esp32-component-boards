@@ -12,6 +12,9 @@ if(NOT SDKCONFIG_DEFAULTS AND BOARD)
     if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/sdkconfig.defaults)
         list(APPEND SDKCONFIG_DEFAULTS "sdkconfig.defaults")
     endif()
+elseif(NOT BOARD AND NOT SDKCONFIG)
+    # no board: its sdkconfig stays in build/, as idf.py checks the target of <project>/sdkconfig while a board has no build
+    set(SDKCONFIG ${CMAKE_BINARY_DIR}/sdkconfig)
 endif()
 
 # the computer (BOARD=host_<board>, the linux target of ESP-IDF): only main and what it asks, the drivers of a chip are not there

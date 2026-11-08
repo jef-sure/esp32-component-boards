@@ -14,6 +14,9 @@ if(NOT SDKCONFIG_DEFAULTS AND BOARD)
     if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/sdkconfig.defaults)
         list(APPEND SDKCONFIG_DEFAULTS "sdkconfig.defaults")
     endif()
+elseif(NOT BOARD AND NOT SDKCONFIG)
+    # no board: its sdkconfig stays in build/, as idf.py checks the target of <project>/sdkconfig while a board has no build
+    set(SDKCONFIG ${CMAKE_BINARY_DIR}/sdkconfig)
 endif()
 
 # The component this example lies in. A project of its own takes it from the registry instead

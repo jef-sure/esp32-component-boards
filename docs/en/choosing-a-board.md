@@ -38,6 +38,9 @@ if(NOT SDKCONFIG_DEFAULTS AND BOARD)
     if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/sdkconfig.defaults)
         list(APPEND SDKCONFIG_DEFAULTS "sdkconfig.defaults")
     endif()
+elseif(NOT BOARD AND NOT SDKCONFIG)
+    # no board: its sdkconfig stays in build/, as idf.py checks the target of <project>/sdkconfig while a board has no build
+    set(SDKCONFIG ${CMAKE_BINARY_DIR}/sdkconfig)
 endif()
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 if(BOARD)
@@ -71,8 +74,10 @@ first file of `SDKCONFIG_DEFAULTS` that names one, so no `idf.py set-target`
 is needed, and the menu *Boards → Board the program runs on* shows the board
 chosen. It writes `CMakePresets.json` too: the preset `cyd_s028r`, which sets `BOARD`
 and builds in `build/cyd_s028r` with its `sdkconfig` there, and the preset `default`,
-a copy of it, which `idf.py` takes when no preset is named. The `build/` and
-`sdkconfig` the first `reconfigure` leaves are not read after it.
+a copy of it, which `idf.py` takes when no preset is named. The first `reconfigure`, with no board,
+builds in `build/` and keeps its `sdkconfig` there, which no board reads. In the folder of the project an `sdkconfig`
+of esp32 would stop the first build of the computer in a terminal with `IDF_TARGET=linux`: until a board has a
+build, `idf.py` checks the target of that file.
 
 ESP-IDF 5 does not read presets; the board is named on the command line:
 
@@ -188,7 +193,8 @@ Its log comes as it is written in a terminal; through a pipe it is buffered, and
 In 0.0.7 the computer was one, named `host`. In a project of that time the line `if(BOARD STREQUAL "host")` of
 `CMakeLists.txt` becomes `if(BOARD MATCHES "^host_")` (`board_select.py` says so and writes nothing before), and
 `board_select.py --again .` renames `sdkconfig.defaults.host` and `dependencies.lock.host` to `…host_<board>`;
-`build/host` may go.
+`build/host` may go. The `sdkconfig` in the folder of the project, left by the first `reconfigure`, goes too, and the
+lines of the CMake above that keep it in `build/` come in.
 
 `board_select.py` writes `sdkconfig.defaults.host_<board>` beside the files of the boards of the project, and the CMake of the
 skeleton builds only `main` and what it asks for the computer. `BOARD_PIXELS` and `BOARD_MM` are those of the board

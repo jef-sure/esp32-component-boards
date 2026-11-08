@@ -39,6 +39,9 @@ if(NOT SDKCONFIG_DEFAULTS AND BOARD)
     if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/sdkconfig.defaults)
         list(APPEND SDKCONFIG_DEFAULTS "sdkconfig.defaults")
     endif()
+elseif(NOT BOARD AND NOT SDKCONFIG)
+    # no board: its sdkconfig stays in build/, as idf.py checks the target of <project>/sdkconfig while a board has no build
+    set(SDKCONFIG ${CMAKE_BINARY_DIR}/sdkconfig)
 endif()
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 if(BOARD)
@@ -72,7 +75,9 @@ idf.py build flash monitor
 program runs on* показывает выбранную плату. Ещё он пишет `CMakePresets.json`: пресет
 `cyd_s028r`, который задаёт `BOARD` и собирает в `build/cyd_s028r` со своим `sdkconfig`
 там же, и пресет `default` — его копию, которую `idf.py` берёт, когда пресет не назван.
-`build/` и `sdkconfig`, которые оставляет первый `reconfigure`, дальше не читаются.
+Первый `reconfigure`, без платы, собирает в `build/` и держит свой `sdkconfig` там же; платы его не читают. В папке
+проекта `sdkconfig` с целью esp32 остановил бы первую сборку компьютера в терминале с `IDF_TARGET=linux`: пока у платы
+нет своей сборки, `idf.py` сверяет цель с этим файлом.
 
 ESP-IDF 5 пресетов не читает; плата называется в командной строке:
 
@@ -187,7 +192,8 @@ build/host_jc8012p4a1c/<project>.elf
 В 0.0.7 компьютер был один и назывался `host`. В проекте того времени строка `if(BOARD STREQUAL "host")` в
 `CMakeLists.txt` меняется на `if(BOARD MATCHES "^host_")` — `board_select.py` говорит об этом и до правки ничего не
 пишет, — а `board_select.py --again .` переименовывает `sdkconfig.defaults.host` и `dependencies.lock.host` в
-`…host_<плата>`; `build/host` можно удалить.
+`…host_<плата>`; `build/host` можно удалить. Удаляется и `sdkconfig` в папке проекта, который оставил первый
+`reconfigure`, а в CMake приходят строки выше, которые держат его в `build/`.
 
 `board_select.py` пишет `sdkconfig.defaults.host_<плата>` рядом с файлами плат проекта, а CMake заготовки собирает для компьютера
 только `main` и то, что он требует. `BOARD_PIXELS` и `BOARD_MM` берутся у показываемой платы. Окно — экран DGX для компьютера

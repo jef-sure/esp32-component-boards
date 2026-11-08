@@ -22,9 +22,9 @@
 активирован: в нём `idf.py --version` отвечает. Обычный терминал VS Code (Ctrl+`) не такой: в нём будет
 `command not found`.
 
-- В VS Code: Ctrl+Shift+P → «ESP-IDF: Open ESP-IDF Terminal». Если расширение ещё не знает, какую установку брать,
-  сначала «ESP-IDF: Select Current ESP-IDF Version». Терминал открывается в своём окне VS Code: в новом окне — снова
-  «Open ESP-IDF Terminal». Расширение кладёт в этот терминал `IDF_TARGET` — цель, которую оно считает текущей.
+- В VS Code, в окне с открытой папкой: Ctrl+Shift+P → «ESP-IDF: Open ESP-IDF Terminal». Если расширение ещё не знает,
+  какую установку брать, сначала «ESP-IDF: Select Current ESP-IDF Version». Терминал открывается в своём окне VS Code: в
+  новом окне — снова «Open ESP-IDF Terminal». Расширение кладёт в этот терминал `IDF_TARGET` — цель, которую оно считает текущей.
   `board_select.py` сообщает ему текущую плату, но расширение перечитывает цель при своём запуске. После смены платы:
   «Developer: Reload Window», затем новый терминал ESP-IDF. Терминал, который был открыт, после перезагрузки окна
   VS Code подключает к тому же процессу, с прежними переменными. Если `idf.py` пишет, что `IDF_TARGET` не совпадает с
@@ -35,10 +35,13 @@
 
 ## 1. Проект
 
-В терминале ESP-IDF:
+Проекта ещё нет, и открыть в VS Code пока нечего, поэтому он создаётся в обычном терминале системы, где ESP-IDF
+активирован командой вашей установки:
 
 ```sh
+source ~/.espressif/tools/activate_idf_v6.1.sh      # EIM; с установкой через install.sh — . ~/esp/esp-idf/export.sh
 compote project create-from-example -p my_project jef-sure/boards:hello
+code my_project
 ```
 
 Папка `my_project` должна быть новой или пустой: в непустую пример не ложится. В ней уже есть `.gitignore`,
@@ -48,8 +51,8 @@ compote project create-from-example -p my_project jef-sure/boards:hello
 Пока это только папка на вашей машине. Отправить её на GitHub можно потом, когда проект соберётся (шаг 5). Репозиторий
 на GitHub не создают заранее и не клонируют сюда: с лицензией или README папка уже не пуста.
 
-Откройте папку в VS Code (File → Open Folder). В новом окне откройте его терминал ESP-IDF, Ctrl+Shift+P →
-«ESP-IDF: Open ESP-IDF Terminal», и выполните в нём:
+Последняя команда открывает папку в VS Code (то же — File → Open Folder). В этом окне откройте терминал ESP-IDF,
+Ctrl+Shift+P → «ESP-IDF: Open ESP-IDF Terminal», и выполните в нём:
 
 ```sh
 idf.py reconfigure
@@ -219,7 +222,7 @@ git push -u origin main
 
 | что сделали | что увидите | как правильно |
 |---|---|---|
-| `idf.py` или `compote` в обычном терминале VS Code | `command not found` | терминал ESP-IDF: «ESP-IDF: Open ESP-IDF Terminal» |
+| `idf.py` или `compote` в обычном терминале без активации | `command not found` | команда активации ESP-IDF или терминал «ESP-IDF: Open ESP-IDF Terminal» |
 | `idf.py build` в терминале ESP-IDF, когда расширение считает текущей другую цель | `was generated for target 'linux', but environment variable IDF_TARGET is set to 'esp32'` | `unset IDF_TARGET` в этом терминале |
 | `idf.py set-target`, как советует `idf.py` | сборка уходит в корневой `build/` и падает | не нужен: цель и каталог задаёт пресет платы |
 | создали пример в непустой папке, например в клоне с одной лицензией | `is not empty` | новая папка; репозиторий на GitHub — в конце, из готовой папки |

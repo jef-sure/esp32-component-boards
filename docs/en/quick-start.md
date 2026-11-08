@@ -22,9 +22,9 @@ Every command below, `compote`, `idf.py`, `python3 managed_components/…`, runs
 activated: `idf.py --version` answers in it. The plain terminal of VS Code (Ctrl+`) is not one: it answers
 `command not found`.
 
-- In VS Code: Ctrl+Shift+P → "ESP-IDF: Open ESP-IDF Terminal". When the extension does not know yet which installation
-  to take, "ESP-IDF: Select Current ESP-IDF Version" first. The terminal belongs to its window of VS Code: in a new
-  window, "Open ESP-IDF Terminal" again. The extension puts into that terminal the `IDF_TARGET` it takes for the current
+- In VS Code, in a window with a folder open: Ctrl+Shift+P → "ESP-IDF: Open ESP-IDF Terminal". When the extension
+  does not know yet which installation to take, "ESP-IDF: Select Current ESP-IDF Version" first. The terminal belongs to
+  its window of VS Code: in a new window, "Open ESP-IDF Terminal" again. The extension puts into that terminal the `IDF_TARGET` it takes for the current
   one. `board_select.py` tells it the current board, but the extension reads the target when it starts. After a change of
   the board: "Developer: Reload Window", then a new terminal of ESP-IDF. A terminal that was open is joined again to the
   same process by VS Code after the reload, with its old variables. When `idf.py` says `IDF_TARGET` differs from the
@@ -35,10 +35,13 @@ activated: `idf.py --version` answers in it. The plain terminal of VS Code (Ctrl
 
 ## 1. The project
 
-In a terminal of ESP-IDF:
+There is no project yet, and nothing to open in VS Code, so it is made in a plain terminal of the system, where ESP-IDF
+is activated by the command of your installation:
 
 ```sh
+source ~/.espressif/tools/activate_idf_v6.1.sh      # EIM; with an installation by install.sh, . ~/esp/esp-idf/export.sh
 compote project create-from-example -p my_project jef-sure/boards:hello
+code my_project
 ```
 
 The folder `my_project` is a new one or an empty one: the example does not go into a folder with files. It has a
@@ -48,8 +51,8 @@ registry; no clone of the repository is needed.
 So far it is a folder on your machine. It goes to GitHub later, once the project builds (step 5). A repository on
 GitHub is not made first and cloned here: with a licence or a README the folder is no longer empty.
 
-Open the folder in VS Code (File → Open Folder). In the new window open its terminal of ESP-IDF, Ctrl+Shift+P →
-"ESP-IDF: Open ESP-IDF Terminal", and run in it:
+The last command opens the folder in VS Code (as File → Open Folder does). In that window open a terminal of ESP-IDF,
+Ctrl+Shift+P → "ESP-IDF: Open ESP-IDF Terminal", and run in it:
 
 ```sh
 idf.py reconfigure
@@ -222,7 +225,7 @@ then `git pull`.
 
 | what was done | what you see | the right way |
 |---|---|---|
-| `idf.py` or `compote` in the plain terminal of VS Code | `command not found` | a terminal of ESP-IDF: "ESP-IDF: Open ESP-IDF Terminal" |
+| `idf.py` or `compote` in a plain terminal with no activation | `command not found` | the activation of ESP-IDF, or a terminal of "ESP-IDF: Open ESP-IDF Terminal" |
 | `idf.py build` in a terminal of ESP-IDF while the extension takes another target for the current one | `was generated for target 'linux', but environment variable IDF_TARGET is set to 'esp32'` | `unset IDF_TARGET` in that terminal |
 | `idf.py set-target`, as `idf.py` advises | the build goes to the root `build/` and fails | not needed: the preset of the board gives the target and the directory |
 | the example made in a folder with files, as a clone with only a licence | `is not empty` | a new folder; the repository on GitHub last, from the folder made |

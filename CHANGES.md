@@ -1,6 +1,6 @@
 # CHANGES
 
-## 0.1.0 (not released yet)
+## 0.1.0 (2026-11-08)
 
 - The computer is `host_<board>`, one for each board it shows: `board_select.py host --as cyd_s028r --as jc1060p470c .`
   makes `host_cyd_s028r` and `host_jc1060p470c`, each with its file of defaults, preset, lock and build directory, so
@@ -22,6 +22,7 @@
   the folder of the project that file, of esp32, stopped the first build of the computer in a terminal of the ESP-IDF
   extension: until a board has a build, `idf.py` checks `IDF_TARGET` against the target of `<project>/sdkconfig`, not
   against the preset.
+- The recipes take the component as `>=0.1.0`.
 
 ## 0.0.7 (2026-11-07)
 

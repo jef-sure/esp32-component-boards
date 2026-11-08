@@ -80,7 +80,12 @@ current one, here the computer. No `set-target` and no `menuconfig`. In VS Code,
 window ("Developer: Reload Window"), choose the current board in the list of presets CMake Tools then shows, and open a
 new terminal of ESP-IDF: so the extension takes the target of the current board.
 
-When the board is not chosen yet, the page finds one. Start its server from the folder of the project:
+When the board is not chosen yet, the page of the component helps to choose it: `editor/index.html` of its copy in
+`managed_components/`. On it a device is described: what it needs goes on the canvas, a display, a touch, sensors, and
+the boards of the catalog that give it come on the right, with the modules to buy for them. Each board shows what it has
+and on which pins, the wires to the modules, what it all costs and the libraries the board starts. The page can write
+what is chosen into the project. It runs on your machine: it is opened in a browser through a small server of the
+component. Start it from the folder of the project:
 
 ```sh
 python3 managed_components/jef-sure__boards/tools/boards_mcp.py --serve

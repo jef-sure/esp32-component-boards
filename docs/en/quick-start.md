@@ -162,7 +162,8 @@ void app_main(void)
 
 #if CONFIG_BOARD_DISPLAY_GRAPHICS
     if (shown) {
-        /* colors of dgx_colors.h packed for 16 bits, RGB565, the depth most displays take; another takes its dgx_rgb_to_* */
+        /* colors of dgx_colors.h packed for 16 bits, RGB565, the depth most displays take; 12, 18 and 24 bits have their
+         * dgx_rgb_to_*, and a screen of 1 or 4 bits takes a brightness */
         dgx_screen_t *screen = board_dgx_screen(&display);
         dgx_fill_rectangle(screen, 0, 0, display.width, display.height, DGX_WHITE(dgx_rgb_to_16));
         dgx_fill_rectangle(screen, 0, 0, display.width, display.height / 8, DGX_BLUE(dgx_rgb_to_16)); /* a band at the top */

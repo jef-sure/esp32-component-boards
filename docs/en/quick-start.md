@@ -93,9 +93,8 @@ python3 managed_components/jef-sure__boards/tools/boards_mcp.py --serve
 
 It prints a link. Open it in the integrated browser of VS Code: Ctrl+Shift+P → "Browser: Open Integrated Browser" and the
 link in its address bar; with the setting `workbench.browser.openLocalhostLinks`, Ctrl+click on the link in the terminal
-does. Put on the canvas what the device needs, as "Display": the boards that fit come on the right, each with what it has
-and on which pins. The board of the project has a card of its own, and its parts are in the list on the left: a part
-from there goes on the canvas with the characteristics it has on that board. See [tools.md](tools.md#the-page).
+does. The board of the project has a card of its own, and its parts are in the list on the left: a part from there goes
+on the canvas with the characteristics it has on that board. See [tools.md](tools.md#the-page).
 
 The page keeps the canvas in the browser at once, but for its address. The server takes a free port each time it starts,
 and on a new port the canvas is empty; `--serve --port 8765` keeps the address. Into the project the page writes only by

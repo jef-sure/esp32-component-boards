@@ -5,7 +5,7 @@
 и туда. Пример здесь — CYD S028R (ESP32-2432S028R, 2,8 дюйма); для другой платы вместо `cyd_s028r` подставьте её имя из
 [таблицы README](../../README.ru.md#платы).
 
-Путь проверен в VS Code 1.145 с расширениями ESP-IDF 2.3.0 и CMake Tools 1.24 на Linux, с ESP-IDF 6.1.
+Путь проверен в VS Code 1.145 с расширениями ESP-IDF 2.3.0, CMake Tools 1.24 и clangd 0.6.0 на Linux, с ESP-IDF 6.1.
 
 ## Что нужно
 
@@ -81,9 +81,10 @@ idf.py reconfigure
 ```
 
 Команда скачивает компонент в `managed_components/` и записывает в `.vscode/settings.json` окружение ESP-IDF, с которым
-CMake Tools собирает проект. Расширение ESP-IDF, открыв папку, само предлагает внизу справа «compile_commands.json is
-missing…» с кнопкой «Generate compile_commands.json»: она запускает ту же `idf.py reconfigure` («ESP-IDF: Run idf.py
-reconfigure Task»), так что вместо команды можно нажать её.
+CMake Tools собирает проект, а в `.vscode/extensions.json` — расширения ESP-IDF и clangd в рекомендованные: недостающее
+VS Code показывает в «Extensions: Show Recommended Extensions». Расширение ESP-IDF, открыв папку, само предлагает внизу
+справа «compile_commands.json is missing…» с кнопкой «Generate compile_commands.json»: она запускает ту же `idf.py
+reconfigure` («ESP-IDF: Run idf.py reconfigure Task»), так что вместо команды можно нажать её.
 
 ## 2. Плата
 

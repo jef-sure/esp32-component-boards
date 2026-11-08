@@ -1,5 +1,15 @@
 # CHANGES
 
+## 0.1.1 (not released yet)
+
+- A configuration of a project VS Code works on adds the ESP-IDF extension and clangd to the recommendations of
+  `.vscode/extensions.json`, after those it has: the ESP-IDF extension sets clangd up, and nothing reads that without
+  the clangd extension.
+- The examples name their colors by `dgx_colors.h`, packed by `dgx_rgb_to_16`, the depth most displays take.
+- The quick start names the project before the board, says that clangd needs its extension and, on ESP-IDF 6.1, the
+  headers of clang, which its package lacks, why the debug of the ESP-IDF extension asks for a build of the computer
+  again and again, and to close the old terminals of ESP-IDF after a change of the board.
+
 ## 0.1.0 (2026-11-08)
 
 - The computer is `host_<board>`, one for each board it shows: `board_select.py host --as cyd_s028r --as jc1060p470c .`

@@ -103,6 +103,8 @@ current board for the ESP-IDF extension into `.vscode/settings.json`: `idf.custo
 `idf.sdkconfigFilePath`, `build/<board>/sdkconfig` (`tools/vscode_env.py`). The extension takes the target from them
 when it starts, after a reload of the window, and puts it into new terminals as `IDF_TARGET`; `idf.buildPath`,
 `build/<board>`, is where its build goes while no project configuration is chosen in it; till then a terminal of ESP-IDF needs `unset IDF_TARGET`.
+Each configuration of such a project, as `idf.py reconfigure`, writes there the environment of ESP-IDF for CMake Tools,
+`cmake.environment`, and adds the ESP-IDF extension and clangd to the recommendations of `.vscode/extensions.json`.
 
 Each file it writes begins with the command that made it and the version and commit of the component. After
 the component changes, `board_select.py --again ~/myproject` makes every such file of the project again the same

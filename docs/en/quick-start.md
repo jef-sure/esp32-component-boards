@@ -5,7 +5,8 @@ itself. The component sets the board up and the program asks for its parts by ki
 same code goes to both. The example here is the CYD S028R (ESP32-2432S028R, 2.8-inch); for another board, its name from
 the [README table](../../README.md#the-boards) goes instead of `cyd_s028r`.
 
-The path was checked in VS Code 1.145 with the ESP-IDF 2.3.0 and CMake Tools 1.24 extensions on Linux, with ESP-IDF 6.1.
+The path was checked in VS Code 1.145 with the ESP-IDF 2.3.0, CMake Tools 1.24 and clangd 0.6.0 extensions on Linux,
+with ESP-IDF 6.1.
 
 ## What you need
 
@@ -82,9 +83,11 @@ idf.py reconfigure
 ```
 
 It downloads the component into `managed_components/` and writes into `.vscode/settings.json` the environment of ESP-IDF
-that CMake Tools builds the project with. The ESP-IDF extension, once the folder is open, offers "compile_commands.json is
-missing…" at the bottom right with the button "Generate compile_commands.json": it runs the same `idf.py reconfigure`
-("ESP-IDF: Run idf.py reconfigure Task"), so the button does instead of the command.
+that CMake Tools builds the project with, and into `.vscode/extensions.json` the ESP-IDF extension and clangd among the
+recommended ones: VS Code shows those missing in "Extensions: Show Recommended Extensions". The ESP-IDF extension, once
+the folder is open, offers "compile_commands.json is missing…" at the bottom right with the button "Generate
+compile_commands.json": it runs the same `idf.py reconfigure` ("ESP-IDF: Run idf.py reconfigure Task"), so the button
+does instead of the command.
 
 ## 2. The board
 

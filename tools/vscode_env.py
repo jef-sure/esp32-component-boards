@@ -12,6 +12,9 @@ The settings of VS Code a project of boards needs, in its .vscode/settings.json:
   it differs from the target of the board a preset builds. board_select.py writes them when the current board changes:
   vscode_env.py PROJECT_DIR --current BOARD TARGET. The extension keeps the target it took and reads it again later, as
   after a reload of the window and the preset of the board chosen: till then its terminals keep the old IDF_TARGET.
+- in .vscode/extensions.json, the ESP-IDF extension and clangd among the recommended ones: the ESP-IDF extension sets
+  clangd up, and nothing reads that without the clangd extension. VS Code offers to install those missing. Written with
+  cmake.environment.
 
 Only a project VS Code is used on gets them: one with .vscode/, or worked on from VS Code. Values already there are not
 written again. A settings.json that is not plain JSON, as one with comments, is left as it is, and the lines it needs
@@ -26,6 +29,7 @@ import sys
 
 KEYS = ("IDF_PATH", "IDF_PYTHON_ENV_PATH", "IDF_TOOLS_PATH", "PATH")
 SETTING = "cmake.environment"
+RECOMMENDED = ("espressif.esp-idf-extension", "llvm-vs-code-extensions.vscode-clangd")
 
 
 def from_vscode():
@@ -33,13 +37,13 @@ def from_vscode():
     return os.environ.get("TERM_PROGRAM") == "vscode" or bool(os.environ.get("VSCODE_PID"))
 
 
-def update(project, change, said):
-    """Applies change, a function of the settings that returns them changed or None for nothing to do, to the settings of
-    the project, under the rules above; said names what was written."""
+def update(project, change, said, name="settings.json"):
+    """Applies change, a function of the settings that returns them changed or None for nothing to do, to the file name of
+    .vscode/ of the project, under the rules above; said names what was written."""
     folder = pathlib.Path(project) / ".vscode"
     if not (folder.is_dir() or from_vscode()):
         return
-    path = folder / "settings.json"
+    path = folder / name
     try:
         settings = json.loads(path.read_text()) if path.exists() else {}
     except (OSError, ValueError):
@@ -73,6 +77,17 @@ def environment(project):
     update(project, change, f"{SETTING} for CMake Tools, from ESP-IDF {wanted['IDF_PATH']}")
 
 
+def recommend(project):
+    """The ESP-IDF extension and clangd added to the recommendations of the project, after those it has."""
+
+    def change(extensions):
+        have = extensions.get("recommendations") if isinstance(extensions.get("recommendations"), list) else []
+        missing = [name for name in RECOMMENDED if name not in have]
+        return {**extensions, "recommendations": have + missing} if missing else None
+
+    update(project, change, f"recommends {', '.join(RECOMMENDED)}", "extensions.json")
+
+
 def current(project, board, target):
     """The target of the current board and its sdkconfig, for the ESP-IDF extension and the terminals it opens."""
     build = (pathlib.Path(project) / "build" / board).resolve()
@@ -92,6 +107,7 @@ def main():
     args = sys.argv[1:]
     if len(args) == 1:
         environment(args[0])
+        recommend(args[0])
     elif len(args) == 4 and args[1] == "--current":
         current(args[0], args[2], args[3])
     else:

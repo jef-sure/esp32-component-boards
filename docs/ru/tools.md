@@ -106,7 +106,9 @@ python3 tools/board_select.py host --as cyd_s028r --as jc1060p470c ~/myproject  
 `idf.sdkconfigFilePath`, `build/<плата>/sdkconfig` (`tools/vscode_env.py`). Расширение берёт из них цель, когда
 перечитывает её при своём запуске, после перезагрузки окна, и кладёт в новые терминалы как `IDF_TARGET`; `idf.buildPath`,
 `build/<плата>`, — туда идёт его сборка, пока в нём не выбрана конфигурация проекта;
-до тех пор в терминале ESP-IDF нужен `unset IDF_TARGET`.
+до тех пор в терминале ESP-IDF нужен `unset IDF_TARGET`. Каждая конфигурация такого проекта, как `idf.py reconfigure`,
+записывает туда окружение ESP-IDF для CMake Tools, `cmake.environment`, и добавляет расширения ESP-IDF и clangd в
+рекомендованные `.vscode/extensions.json`.
 
 Каждый записанный файл начинается с команды, которой он сделан, и с версии и коммита компонента. Когда компонент
 меняется, `board_select.py --again ~/myproject` делает все такие файлы проекта заново той же командой, а пресеты — в

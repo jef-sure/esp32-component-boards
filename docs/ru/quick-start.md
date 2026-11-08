@@ -252,6 +252,12 @@ git push -u origin main
   `board_dgx_screen()`, тот же на компьютере и на плате.
 - Другая плата или несколько: [choosing-a-board.md](choosing-a-board.md).
 - Своя программа, которая уже есть: [moving-a-program.md](moving-a-program.md).
+- Опции ESP-IDF и библиотек, например `CONFIG_DGX_ENABLE_VSCREEN` для виртуального экрана DGX: шестерёнка внизу окна
+  (редактор настроек) или `idf.py menuconfig` меняют `build/<плата>/sdkconfig` текущей платы. Чтобы опция стала частью
+  проекта, для всех плат и в git, затем выполните
+  `python3 managed_components/jef-sure__boards/tools/board_select.py --keep .`: она попадёт в `sdkconfig.defaults`
+  проекта. Опции самой платы он не переносит и называет. Плата, у которой уже есть `build/<плата>/sdkconfig`, возьмёт
+  их, когда этот файл удалят: ESP-IDF читает умолчания только в новый `sdkconfig`.
 - Подбор платы вместе с агентом: `python3 managed_components/jef-sure__boards/tools/boards_mcp.py --install` один раз на
   машину, до страницы; см. [tools.md](tools.md#boards_mcppy).
 
@@ -259,6 +265,7 @@ git push -u origin main
 
 | что сделали | что увидите | как правильно |
 |---|---|---|
+| «ESP-IDF: Save Default Configuration» (`idf.py save-defconfig`) | в `sdkconfig.defaults` проекта — цель, выбор и настройки текущей платы, а его читает каждая плата | `board_select.py --keep .`, см. «Дальше» |
 | ничего: так ставит ESP-IDF 6.1 | `'stddef.h' file not found` в редакторе, F12 не находит | заголовки clang рядом с `clangd`, см. «Что нужно» |
 | `idf.py` или `compote` в обычном терминале без активации | `command not found` | команда активации ESP-IDF или терминал «ESP-IDF: Open ESP-IDF Terminal» |
 | `idf.py build` в терминале ESP-IDF, когда расширение считает текущей другую цель | `was generated for target 'linux', but environment variable IDF_TARGET is set to 'esp32'` | `unset IDF_TARGET` в этом терминале |

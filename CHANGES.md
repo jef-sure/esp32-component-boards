@@ -2,6 +2,9 @@
 
 ## 0.1.1 (not released yet)
 
+- `board_select.py --keep .` puts the options set for the current board, in the configuration editor of VS Code or
+  in menuconfig, into the project's own `sdkconfig.defaults`, which every board reads: all but those its file of
+  defaults sets, which it names. `idf.py save-defconfig` writes the target and the choice of the board there too.
 - The computer has a touch, the mouse over its window, only when the board it shows has one: `board_select.py` writes
   `CONFIG_BOARD_HOST_TOUCH` from the data of that board, and DGX-DI comes only then. Before, it had one always, and a
   computer that showed a board with no touch took DGX-DI nobody asked for.

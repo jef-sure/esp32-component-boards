@@ -259,6 +259,12 @@ then `git pull`.
   gives is the same on the computer and on the board.
 - Another board, or several: [choosing-a-board.md](choosing-a-board.md).
 - A program you have already: [moving-a-program.md](moving-a-program.md).
+- Options of ESP-IDF and of the libraries, as `CONFIG_DGX_ENABLE_VSCREEN` for a virtual screen of DGX: the gear at the
+  bottom of the window (the configuration editor) or `idf.py menuconfig` change `build/<board>/sdkconfig` of the current
+  board. For an option to be a part of the project, for every board and in git, then run
+  `python3 managed_components/jef-sure__boards/tools/board_select.py --keep .`: it goes into the `sdkconfig.defaults`
+  of the project. The options of the board itself are named and not kept. A board that has `build/<board>/sdkconfig`
+  already takes them once that file is removed: ESP-IDF reads the defaults only into a new `sdkconfig`.
 - Choosing a board with an agent: `python3 managed_components/jef-sure__boards/tools/boards_mcp.py --install` once a
   machine, before the page; see [tools.md](tools.md#boards_mcppy).
 
@@ -266,6 +272,7 @@ then `git pull`.
 
 | what was done | what you see | the right way |
 |---|---|---|
+| "ESP-IDF: Save Default Configuration" (`idf.py save-defconfig`) | the target, the choice and the settings of the current board in the `sdkconfig.defaults` of the project, which every board reads | `board_select.py --keep .`, see "Next" |
 | nothing: so ESP-IDF 6.1 installs it | `'stddef.h' file not found` in the editor, F12 finds nothing | the headers of clang next to `clangd`, see "What you need" |
 | `idf.py` or `compote` in a plain terminal with no activation | `command not found` | the activation of ESP-IDF, or a terminal of "ESP-IDF: Open ESP-IDF Terminal" |
 | `idf.py build` in a terminal of ESP-IDF while the extension takes another target for the current one | `was generated for target 'linux', but environment variable IDF_TARGET is set to 'esp32'` | `unset IDF_TARGET` in that terminal |

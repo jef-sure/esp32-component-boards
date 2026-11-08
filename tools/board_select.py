@@ -6,6 +6,7 @@ Usage: board_select.py BOARD [--module MODULE ...] [--revision R] [--current BOA
        board_select.py host --as BOARD [--as BOARD ...] PROJECT_DIR
        board_select.py --current BOARD PROJECT_DIR
        board_select.py --again PROJECT_DIR
+       board_select.py --keep PROJECT_DIR
 
 BOARD is a board of the catalog, or a board of the program: components/local-boards/boards/BOARD/board.json in the
 project, whose glue is made there, beside its data. host is the computer: the linux target of ESP-IDF, a window of
@@ -41,6 +42,12 @@ gets it too, so --again takes the current board of selection.json only when the 
 time, the order of selection.json too. A file whose first line alone is the command, as the page writes it, is made in
 full. ESP-IDF reads the defaults only into a new sdkconfig, so an
 sdkconfig made before keeps what it had.
+
+The configuration editor of VS Code and menuconfig change build/<BOARD>/sdkconfig of the current board alone.
+board_select.py --keep PROJECT_DIR puts what they set into the project's own sdkconfig.defaults, which every board
+reads after its own file: the minimal configuration of ESP-IDF (savedefconfig) less what sdkconfig.defaults.<BOARD>
+sets, the chip and the choice of the board among it. An option of the board changed there is named and not kept.
+save-defconfig of ESP-IDF writes the lines of the board too, so every board would take this one's.
 
 The data is found beside this script (the component's catalog/), wherever the component lies: a checkout beside the
 project or managed_components/jef-sure__boards/.
@@ -369,6 +376,76 @@ def host_window(board):
     return "".join(f"{line}\n" for line in lines)
 
 
+# a line of sdkconfig or of a file of defaults: an option and its value, or a bool that is off
+OPTION_LINE = re.compile(r"^(?:(CONFIG_\w+)=.*|# (CONFIG_\w+) is not set)$")
+KEEP_HEAD = "# The program's own options, on every board after its sdkconfig.defaults.<board>: board_select.py --keep adds them"
+
+
+def options_of(text):
+    """The options a file sets, by name, each with its line."""
+    found = {}
+    for line in text.splitlines():
+        matched = OPTION_LINE.match(line.strip())
+        if matched:
+            found[matched[1] or matched[2]] = line.strip()
+    return found
+
+
+def keep(project):
+    """--keep: the options of the configuration of the current board that its file of defaults does not set, into the
+    project's sdkconfig.defaults; its other lines stay, and an option it names takes the value the configuration has."""
+    doc = our_presets(project, [])
+    if doc is None:
+        raise SystemExit(f"{project}: no {PRESETS} there: choose the boards first")
+    board = next(preset["cacheVariables"]["BOARD"] for preset in doc["configurePresets"] if preset["name"] == DEFAULT)
+    build = project / "build" / board
+    ninja = build / "build.ninja"
+    if not ninja.exists() or not (build / "sdkconfig").exists():
+        raise SystemExit(f"{build}: not configured yet: idf.py reconfigure, then change the options and run this again")
+    # the command of save-defconfig as ESP-IDF made it for this build, written elsewhere than the project's file
+    rule = re.search(r"^build CMakeFiles/save-defconfig\b.*\n  COMMAND = (.*)$", ninja.read_text(), flags=re.M)
+    if not rule:
+        raise SystemExit(f"{ninja}: no save-defconfig there to take the minimal configuration from")
+    saved = build.resolve() / "sdkconfig.kept"  # the command runs in the build directory
+    command = re.sub(r"--output savedefconfig \S+", f"--output savedefconfig {shlex.quote(str(saved))}", rule[1])
+    # a file of defaults removed since the configuration is left out, as the next configuration leaves it
+    command = re.sub(r"--defaults (\S+)", lambda found: found[0] if pathlib.Path(found[1]).exists() else "", command)
+    run = subprocess.run(command, shell=True, capture_output=True, text=True)
+    text = saved.read_text() if saved.exists() else None
+    saved.unlink(missing_ok=True)
+    if run.returncode or text is None:
+        raise SystemExit(f"savedefconfig of ESP-IDF failed:\n{run.stdout}{run.stderr}")
+    minimal = options_of(text)
+    have = options_of((build / "sdkconfig").read_text())
+    of_board = options_of((project / f"sdkconfig.defaults.{board}").read_text())
+    changed = sorted(name for name, line in of_board.items() if name in have and have[name] != line)
+    path = project / "sdkconfig.defaults"
+    lines = path.read_text().splitlines() if path.exists() else [KEEP_HEAD]
+    named = {name: at for at, line in enumerate(lines) for name in options_of(line)}
+    wanted = {name: line for name, line in minimal.items() if name not in of_board}
+    wanted.update({name: have[name] for name in named if name in have and name not in of_board})
+    done = []
+    for name, line in wanted.items():
+        if name in named:
+            if lines[named[name]] != line:
+                lines[named[name]] = line
+                done.append(line)
+        else:
+            lines.append(line)
+            done.append(line)
+    if done:
+        path.write_text("\n".join(lines) + "\n")
+        print(f"{path}: " + ", ".join(done))
+    else:
+        print(f"{path}: nothing new from build/{board}/sdkconfig")
+    if changed:
+        print(f"set by sdkconfig.defaults.{board}, not kept: {', '.join(changed)}. The options of a board are its data, "
+              "the same for every program on it")
+    others = [other for other in boards_of(project) if other != board and (project / "build" / other / "sdkconfig").exists()]
+    if done and others:
+        print("An sdkconfig made before keeps what it had: to take these, remove " + ", ".join(f"build/{other}/sdkconfig" for other in others))
+
+
 def target_of(path):
     """The chip of a file of defaults this command wrote: its line CONFIG_IDF_TARGET."""
     found = re.search(r'^CONFIG_IDF_TARGET="(\w+)"$', path.read_text(), flags=re.M)
@@ -386,11 +463,16 @@ def main():
                         help="for host: a board whose display a window of the computer has, the board host_<BOARD>; may repeat")
     parser.add_argument("--again", action="store_true", help="make every sdkconfig.defaults.* of the project again, by the command each was made with")
     parser.add_argument("--current", metavar="BOARD", help="the board idf.py builds when no preset is named; alone with the project, it changes only that")
+    parser.add_argument("--keep", action="store_true", help="the options set for the current board into the project's sdkconfig.defaults")
     args = parser.parse_intermixed_args()  # options may stand between the boards and the project, as board_select.py b --module m .
     if args.again:
         if len(args.names) != 1 or args.module or args.revision or args.shows or args.current:
             parser.error("--again takes only the project's directory")
         return again(parser, pathlib.Path(args.names[0]))
+    if args.keep:
+        if len(args.names) != 1 or args.module or args.revision or args.shows or args.current:
+            parser.error("--keep takes only the project's directory")
+        return keep(pathlib.Path(args.names[0]))
     if args.current and len(args.names) == 1:
         project = pathlib.Path(args.names[0])
         doc = our_presets(project, [args.current])

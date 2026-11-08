@@ -113,6 +113,14 @@ way, and the presets in their order with their current board, unless the page ch
 has stays the page's: its new hash goes into the list. An `sdkconfig` made before keeps what it had: remove
 `build/<board>/sdkconfig` to take what changed.
 
+The configuration editor of the ESP-IDF extension (the gear) and `idf.py menuconfig` change `build/<board>/sdkconfig`
+of the current board alone. `board_select.py --keep ~/myproject` puts what was set into the project's own
+`sdkconfig.defaults`, which every board reads after its own file: the minimal configuration of ESP-IDF (savedefconfig)
+less what `sdkconfig.defaults.<board>` sets, the target, the choice of the board, its memory. An option of the board
+changed there is named and not kept. The lines `sdkconfig.defaults` has stay, and an option named there takes the value
+of the configuration. `idf.py save-defconfig` ("ESP-IDF: Save Default Configuration") does not do: it writes the lines
+of the current board into `sdkconfig.defaults` too, and every board reads that file.
+
 ## board_project.py
 
 ```sh

@@ -117,6 +117,14 @@ python3 tools/board_select.py host --as cyd_s028r --as jc1060p470c ~/myproject  
 страницы: его новый хеш попадает в список. `sdkconfig`, сделанный раньше, хранит то, что в нём было: чтобы взять
 изменённое, удалите `build/<плата>/sdkconfig`.
 
+Редактор настроек расширения ESP-IDF (шестерёнка) и `idf.py menuconfig` меняют `build/<плата>/sdkconfig` одной текущей
+платы. `board_select.py --keep ~/myproject` переносит выбранное в собственный `sdkconfig.defaults` проекта, который
+каждая плата читает после своего файла: минимальную конфигурацию ESP-IDF (savedefconfig) без того, что задаёт
+`sdkconfig.defaults.<плата>`, — цели, выбора платы, её памяти. Опцию самой платы, изменённую там, он называет и не
+переносит. Строки, которые в `sdkconfig.defaults` уже есть, остаются, а названная там опция получает значение из
+конфигурации. `idf.py save-defconfig` («ESP-IDF: Save Default Configuration») так не годится: он пишет в
+`sdkconfig.defaults` и строки текущей платы, а этот файл читают все платы.
+
 ## board_project.py
 
 ```sh

@@ -50,6 +50,10 @@ The folder `my_project` is a new one or an empty one: the example does not go in
 `.gitignore`, a `CMakeLists.txt` that reads the board, and the program `main/main.c`. The component comes from the
 registry; no clone of the repository is needed.
 
+The example is named `hello`, and the program would build into `hello.elf`. Give it its own name at once, before the
+board: the last line of `CMakeLists.txt`, `project(hello)`, becomes `project(my_project)`. The page takes that name
+too: it names the board of the program `<project>_<board>` and keeps the name in `selection.json`.
+
 So far it is a folder on your machine. It goes to GitHub later, once the project builds (step 5). A repository on
 GitHub is not made first and cloned here: with a licence or a README the folder is no longer empty.
 
@@ -119,7 +123,7 @@ The same from a terminal of ESP-IDF:
 
 ```sh
 idf.py build
-build/host_cyd_s028r/hello.elf
+build/host_cyd_s028r/my_project.elf
 ```
 
 ESP-IDF 6 builds the current board by its preset. ESP-IDF 5 does not read presets:
@@ -242,7 +246,7 @@ then `git pull`.
 | CMake Tools configured the project before the first `idf.py` | `IDF_PATH is not set` | `idf.py reconfigure` in a terminal of ESP-IDF, then the configure of CMake Tools again |
 | "Build Project" of the ESP-IDF extension with no project configuration chosen | `no board chosen` and the boards of the project | "ESP-IDF: Select Project Configuration" |
 | F5 ("Run and Debug") for the program on the computer | a request for `launch.json`, a program `a.out` | Ctrl+Shift+F5, "CMake: Run Without Debugging" |
-| "ESP-IDF: Launch Debug" | a request for `launch.json` | that is debugging on the chip by JTAG; the CYD has no JTAG of its own on USB |
+| "ESP-IDF: Launch Debug", or its button at the bottom | a request for `launch.json` or to build the project; after the build, nothing | that is debugging on the chip: before it starts, the extension compares the program with the chip through the port by `build/<board>/flasher_args.json`, which a build for the computer does not make. `gdb build/host_cyd_s028r/my_project.elf` debugs the program on the computer; the CYD has no JTAG of its own on USB |
 | a flash while the monitor is open | `the port is busy or doesn't exist` | close the monitor, Ctrl+] |
 | on an ESP32, drawn first and the touch started after | the end of the picture wrong | every part first, then the work: see [api.md](api.md) |
 | a kind of part on the canvas that the catalog has none of, as a character display | nothing fits | only parts of the catalog fit for now; it has no module of a character display |

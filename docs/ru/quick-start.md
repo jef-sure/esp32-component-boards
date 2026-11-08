@@ -49,6 +49,10 @@ code my_project
 `CMakeLists.txt`, который читает плату, и программа `main/main.c`. Компонент берётся из реестра, клон репозитория не
 нужен.
 
+Пример называется `hello`, и программа собралась бы в `hello.elf`. Своё имя задайте сразу, до выбора платы: последнюю
+строку `CMakeLists.txt`, `project(hello)`, замените на `project(my_project)`. Это имя берёт и страница: плату программы
+она называет `<проект>_<плата>` и запоминает имя в `selection.json`.
+
 Пока это только папка на вашей машине. Отправить её на GitHub можно потом, когда проект соберётся (шаг 5). Репозиторий
 на GitHub не создают заранее и не клонируют сюда: с лицензией или README папка уже не пуста.
 
@@ -117,7 +121,7 @@ python3 managed_components/jef-sure__boards/tools/boards_mcp.py --serve
 
 ```sh
 idf.py build
-build/host_cyd_s028r/hello.elf
+build/host_cyd_s028r/my_project.elf
 ```
 
 ESP-IDF 6 собирает текущую плату по её пресету. ESP-IDF 5 пресеты не читает:
@@ -238,7 +242,7 @@ git push -u origin main
 | CMake Tools сконфигурировал проект до первого `idf.py` | `IDF_PATH is not set` | `idf.py reconfigure` в терминале ESP-IDF, затем снова конфигурация CMake Tools |
 | «Build Project» расширения ESP-IDF без выбранной конфигурации | `no board chosen` и платы проекта | «ESP-IDF: Select Project Configuration» |
 | F5 («Run and Debug») для программы на компьютере | просьба создать `launch.json`, программа `a.out` | Ctrl+Shift+F5, «CMake: Run Without Debugging» |
-| «ESP-IDF: Launch Debug» | просьба создать `launch.json` | это отладка на чипе через JTAG; у CYD нет своего JTAG по USB |
+| «ESP-IDF: Launch Debug», и кнопкой внизу | просьба создать `launch.json` или собрать проект; после сборки — ничего | это отладка на чипе: перед стартом расширение сверяет программу с чипом через порт по `build/<плата>/flasher_args.json`, а сборка для компьютера его не делает. Программу на компьютере отлаживает `gdb build/host_cyd_s028r/my_project.elf`; у CYD нет своего JTAG по USB |
 | прошивка при открытом мониторе | `the port is busy or doesn't exist` | закрыть монитор, Ctrl+] |
 | на ESP32 нарисовали, а потом запустили тач | конец картинки неверный | сначала все части, потом работа: см. [api.md](api.md) |
 | положили на холст вид детали, которой в каталоге нет, например символьный дисплей | ничего не подходит | пока подходят только детали каталога; модулей символьных дисплеев в нём нет |

@@ -17,6 +17,7 @@ const nameOf = (text) => text.toLowerCase().replace(/[^a-z0-9_]+/g, '_').replace
 const REPOSITORY_ONLY = /^(\.git|\.gitignore|\.gitattributes|README.*|LICENSE.*)$/i; // a folder with only these is still empty for a new project
 const LOCAL_BOARD = (name) => `components/local-boards/boards/${name}/board.json`;
 const STUB = (board) => `# board_select.py ${board}`; // the first line of the defaults of a board: the command that makes them
+const COMPUTER = (board) => `host_${board}`; // the computer that shows a board, as board_select.py host --as <board> names it
 const SKELETON = 'skeleton/files.json'; // the files of a new project, which tools/board_project.py writes too
 const TREE_ORDER = ['mcu', 'power', 'buses', 'devices', 'modules', 'connectors', 'shared_pins', 'display_groups', 'price', 'checked'];
 
@@ -714,15 +715,20 @@ const useEditor = Pinia.defineStore('editor', {
                     if (kit.project && library.catalog.boards[board]) throw new Error(`the catalog has a board ${board}: give the project another name`);
                     return [kit, board];
                 });
+                // a computer of the project that shows the base of a board of the program gets one that shows that board, with
+                // only what is on the canvas; the old one stays, as every board the page did not make
+                const computers = new Set(this.withoutKit().map((item) => item.board));
+                const shows = new Map(chosen.filter(([kit]) => kit.project && computers.has(COMPUTER(kit.name))).map(([kit, board]) => [COMPUTER(kit.name), COMPUTER(board)]));
                 const currentKit = (savedBoards.length ? null : single) ?? this.chosen.find((item) => item.headline === this.current)?.kit ?? kits[0];
-                // a board with no kit here stays current when the radio names it
+                // a board with no kit here stays current when the radio names it, a computer as its new one
                 const named = !alone && !this.chosen.some((item) => item.headline === this.current) && this.isWithoutKit(this.current) ? this.current : null;
-                const current = named ?? chosen.find(([kit]) => kit === currentKit)?.[1] ?? chosen[0][1];
+                const current = shows.get(named) ?? named ?? chosen.find(([kit]) => kit === currentKit)?.[1] ?? chosen[0][1];
                 const files = {};
+                const boards = [...chosen.map(([, board]) => board), ...shows.values()];
                 for (const [kit, board] of chosen) {
                     if (kit.project) files[LOCAL_BOARD(board)] = `${catalogJson({ ...kit.project, name: board, title: kit.modules.length ? `${kit.title} with ${kit.modules.map((item) => item.title).join(', ')}` : kit.title })}\n`;
-                    files[`sdkconfig.defaults.${board}`] = `${STUB(board)}\n# The page wrote this line only: board_select.py --again . makes the defaults of the board.\n`;
                 }
+                for (const board of boards) files[`sdkconfig.defaults.${board}`] = `${STUB(board)}\n# The page wrote this line only: board_select.py --again . makes the defaults of the board.\n`;
                 if (mode === 'create') Object.assign(files, await skeletonOf(chosen, current, name, this.installed?.component));
                 if (this.description) files[DESCRIPTION] = `${this.description.trim()}\n`;
                 const selection = library.solver.selectionOf(chosen.map(([kit, board]) => ({ kit, board })), current, this.kits, copied(this.answers), this.currency, name);
@@ -752,7 +758,7 @@ const useEditor = Pinia.defineStore('editor', {
                 const project = mode === 'update' ? await read('CMakeLists.txt') : null;
                 const cmakeLines = mode === 'update' && !project?.includes('sdkconfig.defaults.${BOARD}') ? await cmakeSnippet() : null;
                 const own = [...new Map(kits.flatMap((kit) => kit.libraries.filter((item) => item.own)).map((item) => [item.name, item])).values()];
-                this.plan = { folder: folder && Vue.markRaw(folder), bridge: Boolean(bridge), folderName: bridge ? bridge.path : folder.name, mode, rows, files, current, boards: chosen.map(([, board]) => board), written: null,
+                this.plan = { folder: folder && Vue.markRaw(folder), bridge: Boolean(bridge), folderName: bridge ? bridge.path : folder.name, mode, rows, files, current, boards, written: null,
                     allow: bridge && !bridge.for_ever ? 'once' : null, cmakeLines,
                     // how the component is taken, so a first reconfigure that fails says why
                     source: this.installed?.component ?? null,

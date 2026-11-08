@@ -128,6 +128,9 @@ the button "make the project of these boards…" (or "make a project…" on a ca
 - the files of the board;
 - a board of the program, `components/local-boards/boards/<project>_<board>`, when the canvas has not all the board has:
   its glue starts only what is on the canvas;
+- the computer that shows the board of the program, `host_<project>_<board>`, when the project has a computer for the
+  board itself: it too has only what is on the canvas, and it becomes current in place of the old one, which stays in
+  the project;
 - `selection.json` with the canvas, which the page starts from when the folder is opened again.
 
 The page does not write the program, `main/main.c`. `board_display_init()` starts the display, and the glue of the board

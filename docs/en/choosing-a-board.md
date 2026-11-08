@@ -153,7 +153,9 @@ that makes it in its first line: `board_select.py --again .` makes the rest, the
 Opened from `tools/boards_mcp.py`, the page writes through it and the server runs `--again` itself, so the project
 builds at once; it also starts from the `selection.json` of the project, to add a board. A board of the presets that
 the page has no kit for, one a command named or one whose kit does not fit the answers now, is listed among the boards
-of the project with its radio and stays in the project.
+of the project with its radio and stays in the project. When such a board is a computer, `host_<board>`, and the page
+writes a board of the program `<project>_<board>`, it writes the computer `host_<project>_<board>` too, which shows the
+board of the program with the same parts; when the old computer was current, the new one is.
 
 A `CMakePresets.json` that `board_select.py` did not write is not touched: the
 command says so, and the presets are added by hand. `board_select.py --again .` makes

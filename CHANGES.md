@@ -5,6 +5,9 @@
 - The computer has a touch, the mouse over its window, only when the board it shows has one: `board_select.py` writes
   `CONFIG_BOARD_HOST_TOUCH` from the data of that board, and DGX-DI comes only then. Before, it had one always, and a
   computer that showed a board with no touch took DGX-DI nobody asked for.
+- The page writes a computer for the board of the program it writes, `host_<project>_<board>`, when the project has a
+  computer for the board itself: it shows only what is on the canvas, and it becomes current in place of the old one,
+  which stays. The computer showed the whole board before, its touch among the rest.
 - A configuration of a project VS Code works on adds the ESP-IDF extension and clangd to the recommendations of
   `.vscode/extensions.json`, after those it has: the ESP-IDF extension sets clangd up, and nothing reads that without
   the clangd extension.

@@ -15,6 +15,23 @@
 - Для программы на компьютере — Linux с SDL2 и libbsd (`libsdl2-dev`, `libbsd-dev`). Windows целью ESP-IDF `linux`
   не является.
 - Для второй половины — плата на USB.
+- Расширение clangd (`llvm-vs-code-extensions.vscode-clangd`): с ним работают подсказки и переход к определению, F12.
+  Расширение ESP-IDF настраивает его само: `clangd` из ESP-IDF и сборка текущей платы. IntelliSense расширения C/C++ от
+  Microsoft выключите, `"C_Cpp.intelliSenseEngine": "disabled"`, чтобы не работали два движка.
+
+В ESP-IDF 6.1 `clangd` ставится всегда, но без заголовков самого clang, и редактор пишет `'stddef.h' file not found`.
+Один раз на установку их кладут рядом с ним (Linux x86-64):
+
+```sh
+source ~/.espressif/tools/activate_idf_v6.1.sh
+cd "$(dirname "$(which clangd)")/.."     # esp-clangd этой установки
+V=$(basename "$(dirname "$PWD")")         # его версия, esp-21.1.3_20260408
+curl -L https://github.com/espressif/llvm-project/releases/download/$V/libs-clang-$V-x86_64-linux-gnu.tar.xz |
+    tar -xJ --strip-components=1 esp-clang/lib/clang
+```
+
+Архив — 83 МБ, из него берутся только заголовки, 8 МБ, в `lib/clang/21`. Затем в VS Code: Ctrl+Shift+P → «clangd:
+Restart language server». В ESP-IDF 5.5 и 6.0 `clangd` входит в esp-clang, который ставится по запросу.
 
 ## Терминал ESP-IDF
 
@@ -239,6 +256,7 @@ git push -u origin main
 
 | что сделали | что увидите | как правильно |
 |---|---|---|
+| ничего: так ставит ESP-IDF 6.1 | `'stddef.h' file not found` в редакторе, F12 не находит | заголовки clang рядом с `clangd`, см. «Что нужно» |
 | `idf.py` или `compote` в обычном терминале без активации | `command not found` | команда активации ESP-IDF или терминал «ESP-IDF: Open ESP-IDF Terminal» |
 | `idf.py build` в терминале ESP-IDF, когда расширение считает текущей другую цель | `was generated for target 'linux', but environment variable IDF_TARGET is set to 'esp32'` | `unset IDF_TARGET` в этом терминале |
 | `idf.py set-target`, как советует `idf.py` | сборка уходит в корневой `build/` и падает | не нужен: цель и каталог задаёт пресет платы |

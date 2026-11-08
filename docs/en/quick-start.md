@@ -15,6 +15,23 @@ The path was checked in VS Code 1.145 with the ESP-IDF 2.3.0 and CMake Tools 1.2
 - For the program on the computer: Linux with SDL2 and libbsd (`libsdl2-dev`, `libbsd-dev`). Windows is not a target of
   the `linux` target of ESP-IDF.
 - For the second half: the board on USB.
+- The clangd extension (`llvm-vs-code-extensions.vscode-clangd`): hints and the jump to a definition, F12, work with it.
+  The ESP-IDF extension sets it up: the `clangd` of ESP-IDF and the build of the current board. Turn the IntelliSense of
+  the C/C++ extension of Microsoft off, `"C_Cpp.intelliSenseEngine": "disabled"`, so that two engines do not run.
+
+In ESP-IDF 6.1 `clangd` is always installed, but with no headers of clang itself, and the editor says
+`'stddef.h' file not found`. Once for an installation they are put next to it (Linux x86-64):
+
+```sh
+source ~/.espressif/tools/activate_idf_v6.1.sh
+cd "$(dirname "$(which clangd)")/.."     # esp-clangd of this installation
+V=$(basename "$(dirname "$PWD")")         # its version, esp-21.1.3_20260408
+curl -L https://github.com/espressif/llvm-project/releases/download/$V/libs-clang-$V-x86_64-linux-gnu.tar.xz |
+    tar -xJ --strip-components=1 esp-clang/lib/clang
+```
+
+The archive is 83 MB; only the headers, 8 MB, are taken from it, into `lib/clang/21`. Then in VS Code: Ctrl+Shift+P →
+"clangd: Restart language server". In ESP-IDF 5.5 and 6.0 `clangd` comes with esp-clang, which is installed on request.
 
 ## The terminal of ESP-IDF
 
@@ -243,6 +260,7 @@ then `git pull`.
 
 | what was done | what you see | the right way |
 |---|---|---|
+| nothing: so ESP-IDF 6.1 installs it | `'stddef.h' file not found` in the editor, F12 finds nothing | the headers of clang next to `clangd`, see "What you need" |
 | `idf.py` or `compote` in a plain terminal with no activation | `command not found` | the activation of ESP-IDF, or a terminal of "ESP-IDF: Open ESP-IDF Terminal" |
 | `idf.py build` in a terminal of ESP-IDF while the extension takes another target for the current one | `was generated for target 'linux', but environment variable IDF_TARGET is set to 'esp32'` | `unset IDF_TARGET` in that terminal |
 | `idf.py set-target`, as `idf.py` advises | the build goes to the root `build/` and fails | not needed: the preset of the board gives the target and the directory |

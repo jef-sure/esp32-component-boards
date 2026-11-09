@@ -38,9 +38,9 @@ if(NOT SDKCONFIG_DEFAULTS AND BOARD)
     file(STRINGS ${CMAKE_CURRENT_LIST_DIR}/sdkconfig.defaults.${BOARD} _boards_target REGEX "^CONFIG_IDF_TARGET=")
     string(REGEX REPLACE "^CONFIG_IDF_TARGET=\"(.*)\"$" "\\1" _boards_target "${_boards_target}")
     if(IDF_TARGET AND _boards_target AND NOT IDF_TARGET STREQUAL _boards_target)
-        message(FATAL_ERROR "${BOARD} is built for ${_boards_target}, and this configuration asks for ${IDF_TARGET}: set-target "
-                            "chooses no board. Build another board by its preset: idf.py --preset <board> build, or in VS Code "
-                            "ESP-IDF: Select Project Configuration.")
+        message(FATAL_ERROR "${BOARD} is built for ${_boards_target}, and this configuration is for ${IDF_TARGET}: a board builds by "
+                            "its own preset, idf.py --preset <board> build, or in VS Code ESP-IDF: Select Project Configuration. "
+                            "set-target, or -D BOARD with the preset of another board, chooses no board.")
     endif()
     set(SDKCONFIG_DEFAULTS "sdkconfig.defaults.${BOARD}")
     if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/sdkconfig.defaults)

@@ -245,7 +245,7 @@ jobs:
           path: examples/multi_board
           command: >-
             ! idf.py -B build/asked -D SDKCONFIG=build/asked/sdkconfig -D BOARD=jc8012p4a1c reconfigure > asked.log 2>&1 &&
-            cat asked.log && grep -q "the board jc8012p4a1c was asked for" asked.log
+            cat asked.log && grep -q "jc8012p4a1c is built for esp32p4, and this configuration is for esp32" asked.log
 
   example:
     name: the example the registry hands out, on ESP-IDF v6.1

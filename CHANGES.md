@@ -3,8 +3,10 @@
 ## 0.1.1 (not released yet)
 
 - A configuration whose target is not the one the file of its board names stops before the compiler checks, with what
-  to do: `idf.py set-target` made the build directory of the current board one of another chip, and in the computer's
-  the compiler of the chip took the linker of the computer (`unrecognised emulation mode: elf32lriscv`).
+  to do: `idf.py set-target`, as the button with a chip of the ESP-IDF extension runs it, made the build directory of
+  the current board one of another chip, and in the computer's the compiler of the chip took the linker of the
+  computer (`unrecognised emulation mode: elf32lriscv`). It stops `-D BOARD` with the preset of a board of another
+  chip too, before the check of the board chosen.
 - `board_select.py --keep .` puts the options set for the current board, in the configuration editor of VS Code or
   in menuconfig, into the project's own `sdkconfig.defaults`, which every board reads: all but those its file of
   defaults sets, which it names. `idf.py save-defconfig` writes the target and the choice of the board there too.

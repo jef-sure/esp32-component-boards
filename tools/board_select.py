@@ -19,7 +19,7 @@ Each board named gets PROJECT_DIR/sdkconfig.defaults.<BOARD>: the board's sdkcon
 its flash, and the two lines that choose it, CONFIG_IDF_TARGET and CONFIG_BOARD_SELECT_<BOARD>=y), the lines of the
 revision of its chip, and the defaults of every module named. One board or several, the project gets the same:
 PROJECT_DIR/CMakePresets.json, a preset for each board of the project with its build directory build/<BOARD> and its
-sdkconfig there, and the preset default, a copy of the preset of the current board (--current, else the first named).
+sdkconfig beside its defaults, PROJECT_DIR/sdkconfig.<BOARD>, and the preset default, a copy of the preset of the current board (--current, else the first named).
 A board the project had stays among the presets; a board is taken out by removing its file. Each board has its lock
 of the components beside the project, dependencies.lock.<BOARD>, started as a copy of dependencies.lock when the
 project has one.
@@ -30,7 +30,7 @@ so a new board is a new sdkconfig made from its defaults: no set-target, no menu
 board_select.py --current BOARD PROJECT_DIR rewrites only default, so the boards keep their order, and the current board
 of selection.json, so the page shows it. ESP-IDF 5 does not read the presets:
 
-    idf.py -B build/<BOARD> -D SDKCONFIG=build/<BOARD>/sdkconfig -D BOARD=<BOARD> build
+    idf.py -B build/<BOARD> -D SDKCONFIG=sdkconfig.<BOARD> -D BOARD=<BOARD> build
 
 Both need a CMakeLists.txt that reads sdkconfig.defaults.${BOARD} when BOARD is given, as the skeleton of the page
 does. A CMakePresets.json or a file of defaults this command did not write is not touched.
@@ -43,7 +43,9 @@ time, the order of selection.json too. A file whose first line alone is the comm
 full. ESP-IDF reads the defaults only into a new sdkconfig, so an
 sdkconfig made before keeps what it had.
 
-The configuration editor of VS Code and menuconfig change build/<BOARD>/sdkconfig of the current board alone.
+The sdkconfig of a board lies in the project, not in build/, so build/ holds only what a build makes again, as in any
+project of ESP-IDF; this command moves one a version before 0.1.1 left in build/<BOARD>/ there.
+The configuration editor of VS Code and menuconfig change sdkconfig.<BOARD> of the current board alone.
 board_select.py --keep PROJECT_DIR puts what they set into the project's own sdkconfig.defaults, which every board
 reads after its own file: the minimal configuration of ESP-IDF (savedefconfig) less what sdkconfig.defaults.<BOARD>
 sets, the chip and the choice of the board among it. An option of the board changed there is named and not kept.
@@ -172,7 +174,7 @@ def presets_text(project, boards, targets, current, command, follows=None):
     our_presets(project, boards)
     # Ninja, as idf.py takes it: a build directory CMake Tools of VS Code made with another generator stops idf.py there
     presets = [{"name": board, "displayName": title_of(board), "generator": "Ninja", "binaryDir": f"build/{board}",
-                "cacheVariables": {"BOARD": board, "IDF_TARGET": target, "SDKCONFIG": f"build/{board}/sdkconfig"}} for board, target in zip(boards, targets)]
+                "cacheVariables": {"BOARD": board, "IDF_TARGET": target, "SDKCONFIG": f"sdkconfig.{board}"}} for board, target in zip(boards, targets)]
     made = {"made by": command, **({"follows": follows} if follows else {})}
     return with_current({"version": 3, "vendor": {VENDOR: made}, "configurePresets": presets}, current)
 
@@ -186,6 +188,19 @@ def seed_locks(project, boards):
         shutil.copyfile(root, project / f"dependencies.lock.{board}")
     if seeded:
         print(f"{root}: copied to dependencies.lock.<board> for {', '.join(seeded)}; each board reads its own now, and this one is not read")
+
+
+def move_sdkconfig(project, boards, renamed=None):
+    """The sdkconfig of a board a version before 0.1.1 kept in its build directory, moved beside its defaults with what was
+    set in it; a board renamed takes the one of its old name."""
+    old_names = {new: old for old, new in (renamed or {}).items()}
+    for board in boards:
+        kept = project / f"sdkconfig.{board}"
+        for name in (board, old_names.get(board)):
+            old = project / "build" / name / "sdkconfig" if name else None
+            if old and old.exists() and not kept.exists():
+                old.rename(kept)
+                print(f"{kept}: moved from {old}, with what was set in it; build/ holds no configuration now")
 
 
 def is_host(board):
@@ -285,10 +300,11 @@ def again(parser, project):
         presets = [project / PRESETS, *current_taken(project, current)]
         print(f"{project / PRESETS}: a preset for each, and default for the current one, {current}")
         seed_locks(project, boards)
+        move_sdkconfig(project, boards, renamed)
         vscode_env.current(project, current, targets[current])
     project_writer.keep_ours(project, [*written, *presets])
     print("An sdkconfig made before keeps what it had: ESP-IDF reads the defaults only into a new one. To take what changed,\n"
-          "remove build/<BOARD>/sdkconfig of the board.")
+          "remove sdkconfig.<BOARD> of the board, after board_select.py --keep . for what was set in it.")
     return 0
 
 
@@ -400,8 +416,9 @@ def keep(project):
     board = next(preset["cacheVariables"]["BOARD"] for preset in doc["configurePresets"] if preset["name"] == DEFAULT)
     build = project / "build" / board
     ninja = build / "build.ninja"
-    if not ninja.exists() or not (build / "sdkconfig").exists():
-        raise SystemExit(f"{build}: not configured yet: idf.py reconfigure, then change the options and run this again")
+    config = project / f"sdkconfig.{board}"
+    if not ninja.exists() or not config.exists():
+        raise SystemExit(f"{board}: not configured yet: idf.py reconfigure, then change the options and run this again")
     # the command of save-defconfig as ESP-IDF made it for this build, written elsewhere than the project's file
     rule = re.search(r"^build CMakeFiles/save-defconfig\b.*\n  COMMAND = (.*)$", ninja.read_text(), flags=re.M)
     if not rule:
@@ -416,7 +433,7 @@ def keep(project):
     if run.returncode or text is None:
         raise SystemExit(f"savedefconfig of ESP-IDF failed:\n{run.stdout}{run.stderr}")
     minimal = options_of(text)
-    have = options_of((build / "sdkconfig").read_text())
+    have = options_of(config.read_text())
     of_board = options_of((project / f"sdkconfig.defaults.{board}").read_text())
     changed = sorted(name for name, line in of_board.items() if name in have and have[name] != line)
     path = project / "sdkconfig.defaults"
@@ -437,13 +454,13 @@ def keep(project):
         path.write_text("\n".join(lines) + "\n")
         print(f"{path}: " + ", ".join(done))
     else:
-        print(f"{path}: nothing new from build/{board}/sdkconfig")
+        print(f"{path}: nothing new from {config.name}")
     if changed:
         print(f"set by sdkconfig.defaults.{board}, not kept: {', '.join(changed)}. The options of a board are its data, "
               "the same for every program on it")
-    others = [other for other in boards_of(project) if other != board and (project / "build" / other / "sdkconfig").exists()]
+    others = [other for other in boards_of(project) if other != board and (project / f"sdkconfig.{other}").exists()]
     if done and others:
-        print("An sdkconfig made before keeps what it had: to take these, remove " + ", ".join(f"build/{other}/sdkconfig" for other in others))
+        print("An sdkconfig made before keeps what it had: to take these, remove " + ", ".join(f"sdkconfig.{other}" for other in others))
 
 
 def target_of(path):
@@ -528,6 +545,7 @@ def main():
     (project / PRESETS).write_text(presets_text(project, every, [target_of(project / f"sdkconfig.defaults.{board}") for board in every], current, command, current))
     project_writer.keep_ours(project, [*texts, project / PRESETS, *current_taken(project, current)])
     seed_locks(project, every)
+    move_sdkconfig(project, every)
     vscode_env.current(project, current, target_of(project / f"sdkconfig.defaults.{current}"))
     if (project / "sdkconfig.defaults.board").exists():
         print(f"{project / 'sdkconfig.defaults.board'}: the file of one board as it was before the presets; the CMakeLists.txt of the "
@@ -535,7 +553,7 @@ def main():
     print(f"{project / PRESETS}: a preset for each board of the project ({', '.join(every)}), and default for the current one, {current}\n"
           f"ESP-IDF 6: idf.py build builds {current} in build/{current}, idf.py --preset <board> build another;\n"
           f"board_select.py --current <board> {project} makes another current. ESP-IDF 5 does not read the presets:\n"
-          f"  idf.py -B build/{current} -D SDKCONFIG=build/{current}/sdkconfig -D BOARD={current} build")
+          f"  idf.py -B build/{current} -D SDKCONFIG=sdkconfig.{current} -D BOARD={current} build")
     return 0
 
 

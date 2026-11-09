@@ -81,8 +81,8 @@ idf.py build flash monitor
 чипу, памяти и флешу. ESP-IDF берёт target из первого файла в `SDKCONFIG_DEFAULTS`,
 который его называет, поэтому `idf.py set-target` не нужен, а меню *Boards → Board the
 program runs on* показывает выбранную плату. Ещё он пишет `CMakePresets.json`: пресет
-`cyd_s028r`, который задаёт `BOARD` и собирает в `build/cyd_s028r` со своим `sdkconfig`
-там же, и пресет `default` — его копию, которую `idf.py` берёт, когда пресет не назван.
+`cyd_s028r`, который задаёт `BOARD` и собирает в `build/cyd_s028r` со своим `sdkconfig` в папке проекта,
+`sdkconfig.cyd_s028r`, и пресет `default` — его копию, которую `idf.py` берёт, когда пресет не назван.
 Первый `reconfigure`, без платы, собирает в `build/` и держит свой `sdkconfig` там же; платы его не читают. В папке
 проекта `sdkconfig` с целью esp32 остановил бы первую сборку компьютера в терминале с `IDF_TARGET=linux`: пока у платы
 нет своей сборки, `idf.py` сверяет цель с этим файлом.
@@ -90,7 +90,7 @@ program runs on* показывает выбранную плату. Ещё он
 ESP-IDF 5 пресетов не читает; плата называется в командной строке:
 
 ```sh
-idf.py -B build/cyd_s028r -D SDKCONFIG=build/cyd_s028r/sdkconfig -D BOARD=cyd_s028r build
+idf.py -B build/cyd_s028r -D SDKCONFIG=sdkconfig.cyd_s028r -D BOARD=cyd_s028r build
 ```
 
 Закоммитьте `sdkconfig.defaults.<плата>`, `CMakePresets.json` и
@@ -171,7 +171,9 @@ idf.py --preset jc1060p470c build     # другая
 команда, которая её меняет, пишет её и в `current` файла `selection.json`, поэтому текущая плата,
 которую страница с тех пор поменяла, берётся, а выбранная командой остаётся. Страница открывает проект с порядком и текущей платой его пресетов. ESP-IDF
 читает умолчания только в новый `sdkconfig`: чтобы взять изменённое, удалите
-`build/<плата>/sdkconfig`. Сборка, конфигурация которой не выбрала плату из `BOARD`, останавливается на конфигурации
+`sdkconfig.<плата>`. `sdkconfig` платы лежит в папке проекта, а не в `build/`, поэтому `build/` удаляют, как в любом
+проекте ESP-IDF; версия до 0.1.1 держала его в `build/<плата>/`, и `board_select.py --again .` переносит его.
+Сборка, конфигурация которой не выбрала плату из `BOARD`, останавливается на конфигурации
 и говорит, какую плату она выбрала и для какого чипа: на ESP-IDF 6 форма `-B ... -D BOARD=<плата>` берёт чип пресета
 `default`, а `sdkconfig` другой платы в каталоге сборки оставляет свою плату.
 Сборка без `BOARD` в проекте, где `board_select.py` уже сделал файлы плат, тоже останавливается и называет его платы:
@@ -188,7 +190,7 @@ CMake выше задаёт переменную только когда она 
 
 ```sh
 python3 managed_components/jef-sure__boards/tools/board_select.py host --as jc8012p4a1c .
-idf.py -B build/host_jc8012p4a1c -D SDKCONFIG=build/host_jc8012p4a1c/sdkconfig -D BOARD=host_jc8012p4a1c build
+idf.py -B build/host_jc8012p4a1c -D SDKCONFIG=sdkconfig.host_jc8012p4a1c -D BOARD=host_jc8012p4a1c build
 build/host_jc8012p4a1c/<project>.elf
 ```
 

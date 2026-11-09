@@ -103,7 +103,7 @@ python3 tools/board_select.py host --as cyd_s028r --as jc1060p470c ~/myproject  
 
 В проекте, с которым работают в VS Code (у него есть `.vscode/` или команда запущена из VS Code), он записывает в
 `.vscode/settings.json` цель текущей платы для расширения ESP-IDF: `idf.customExtraVars.IDF_TARGET` и
-`idf.sdkconfigFilePath`, `build/<плата>/sdkconfig` (`tools/vscode_env.py`). Расширение берёт из них цель, когда
+`idf.sdkconfigFilePath`, `sdkconfig.<плата>` (`tools/vscode_env.py`). Расширение берёт из них цель, когда
 перечитывает её при своём запуске, после перезагрузки окна, и кладёт в новые терминалы как `IDF_TARGET`; `idf.buildPath`,
 `build/<плата>`, — туда идёт его сборка, пока в нём не выбрана конфигурация проекта;
 до тех пор в терминале ESP-IDF нужен `unset IDF_TARGET`. Каждая конфигурация такого проекта, как `idf.py reconfigure`,
@@ -115,9 +115,9 @@ python3 tools/board_select.py host --as cyd_s028r --as jc1060p470c ~/myproject  
 их порядке и с их текущей платой, если только страница с тех пор не поменяла `current` в `selection.json` (см.
 [choosing-a-board.md](choosing-a-board.md)). Записанный им файл, который есть в списке моста, остаётся файлом
 страницы: его новый хеш попадает в список. `sdkconfig`, сделанный раньше, хранит то, что в нём было: чтобы взять
-изменённое, удалите `build/<плата>/sdkconfig`.
+изменённое, удалите `sdkconfig.<плата>`.
 
-Редактор настроек расширения ESP-IDF (шестерёнка) и `idf.py menuconfig` меняют `build/<плата>/sdkconfig` одной текущей
+Редактор настроек расширения ESP-IDF (шестерёнка) и `idf.py menuconfig` меняют `sdkconfig.<плата>` одной текущей
 платы. `board_select.py --keep ~/myproject` переносит выбранное в собственный `sdkconfig.defaults` проекта, который
 каждая плата читает после своего файла: минимальную конфигурацию ESP-IDF (savedefconfig) без того, что задаёт
 `sdkconfig.defaults.<плата>`, — цели, выбора платы, её памяти. Опцию самой платы, изменённую там, он называет и не

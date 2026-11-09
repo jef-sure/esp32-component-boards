@@ -73,7 +73,7 @@ idf.py build flash monitor
 `sdkconfig.defaults.<плата>` — настройки чипа, памяти и флеша платы и строку, которая выбирает её в меню конфигурации, —
 и `CMakePresets.json`, пресет которого собирает плату в `build/<плата>`. Ни `set-target`, ни `menuconfig`. ESP-IDF 5
 пресетов не читает; там плата называется в командной строке:
-`idf.py -B build/cyd_s028r -D SDKCONFIG=build/cyd_s028r/sdkconfig -D BOARD=cyd_s028r build flash monitor`.
+`idf.py -B build/cyd_s028r -D SDKCONFIG=sdkconfig.cyd_s028r -D BOARD=cyd_s028r build flash monitor`.
 
 Что нужно плате, приходит вместе с выбором: драйверы DGX её панели — как `select`-ы, остальные части (драйвер тача,
 кодек, hd44780) — по правилам в `idf_component.yml` компонента, так что сборка для CYD S028R скачивает драйвер XPT2046

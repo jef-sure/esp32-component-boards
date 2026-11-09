@@ -62,7 +62,7 @@ jobs:
           esp_idf_version: ${{ matrix.idf }}
           target: ${{ steps.board.outputs.target }}
           path: examples/hello_board
-          command: ${{ matrix.idf == 'v6.1' && 'idf.py build' || format('idf.py -B build/{0} -D SDKCONFIG=build/{0}/sdkconfig -D BOARD={0} build', matrix.board) }}
+          command: ${{ matrix.idf == 'v6.1' && 'idf.py build' || format('idf.py -B build/{0} -D SDKCONFIG=sdkconfig.{0} -D BOARD={0} build', matrix.board) }}
       - name: build hello_lvgl
         if: ${{ steps.board.outputs.graphics == 'true' }}
         uses: espressif/esp-idf-ci-action@v1
@@ -71,7 +71,7 @@ jobs:
           esp_idf_version: ${{ matrix.idf }}
           target: ${{ steps.board.outputs.target }}
           path: examples/hello_lvgl
-          command: ${{ matrix.idf == 'v6.1' && 'idf.py build' || format('idf.py -B build/{0} -D SDKCONFIG=build/{0}/sdkconfig -D BOARD={0} build', matrix.board) }}
+          command: ${{ matrix.idf == 'v6.1' && 'idf.py build' || format('idf.py -B build/{0} -D SDKCONFIG=sdkconfig.{0} -D BOARD={0} build', matrix.board) }}
       - name: build sound_level
         if: ${{ steps.board.outputs.sound == 'true' }}
         uses: espressif/esp-idf-ci-action@v1
@@ -80,7 +80,7 @@ jobs:
           esp_idf_version: ${{ matrix.idf }}
           target: ${{ steps.board.outputs.target }}
           path: examples/sound_level
-          command: ${{ matrix.idf == 'v6.1' && 'idf.py build' || format('idf.py -B build/{0} -D SDKCONFIG=build/{0}/sdkconfig -D BOARD={0} build', matrix.board) }}
+          command: ${{ matrix.idf == 'v6.1' && 'idf.py build' || format('idf.py -B build/{0} -D SDKCONFIG=sdkconfig.{0} -D BOARD={0} build', matrix.board) }}
 
   parts-left-alone:
     name: a project that leaves parts alone on ESP-IDF ${{ matrix.idf }}
@@ -112,7 +112,7 @@ jobs:
           esp_idf_version: ${{ matrix.idf }}
           target: esp32s3
           path: examples/hello_board
-          command: ${{ matrix.idf == 'v6.1' && 'idf.py build' || 'idf.py -B build/project_unused -D SDKCONFIG=build/project_unused/sdkconfig -D BOARD=project_unused build' }}
+          command: ${{ matrix.idf == 'v6.1' && 'idf.py build' || 'idf.py -B build/project_unused -D SDKCONFIG=sdkconfig.project_unused -D BOARD=project_unused build' }}
 
   local-boards:
     name: a board of the program with a display and a 2004 on ESP-IDF ${{ matrix.idf }}
@@ -141,7 +141,7 @@ jobs:
           esp_idf_version: ${{ matrix.idf }}
           target: esp32s3
           path: examples/local_boards
-          command: ${{ matrix.idf == 'v6.1' && 'idf.py build' || 'idf.py -B build/my_board -D SDKCONFIG=build/my_board/sdkconfig -D BOARD=my_board build' }}
+          command: ${{ matrix.idf == 'v6.1' && 'idf.py build' || 'idf.py -B build/my_board -D SDKCONFIG=sdkconfig.my_board -D BOARD=my_board build' }}
 
   host:
     name: the computer as the ${{ matrix.shows }} on ESP-IDF ${{ matrix.idf }}
@@ -176,7 +176,7 @@ jobs:
           path: examples/hello_board
           command: >-
             apt-get update -qq && apt-get install -y -qq --no-install-recommends pkg-config libsdl2-dev libbsd-dev > /dev/null &&
-            ${{ matrix.idf == 'v6.1' && 'idf.py build' || format('idf.py -B build/host_{0} -D SDKCONFIG=build/host_{0}/sdkconfig -D BOARD=host_{0} build', matrix.shows) }} &&
+            ${{ matrix.idf == 'v6.1' && 'idf.py build' || format('idf.py -B build/host_{0} -D SDKCONFIG=sdkconfig.host_{0} -D BOARD=host_{0} build', matrix.shows) }} &&
             { SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy DGX_HOST_QUIT_MS=1000 DGX_HOST_SHOT=build/host_${{ matrix.shows }}/shot.ppm timeout 60 build/host_${{ matrix.shows }}/hello_board.elf > build/host_${{ matrix.shows }}/run.log || { cat build/host_${{ matrix.shows }}/run.log; false; }; } &&
             cat build/host_${{ matrix.shows }}/run.log && grep -q "^the touch: 1 fingers" build/host_${{ matrix.shows }}/run.log &&
             python3 ../../test/host_shot.py build/host_${{ matrix.shows }}/shot.ppm
@@ -189,7 +189,7 @@ jobs:
           path: test/host_buttons
           command: >-
             apt-get update -qq && apt-get install -y -qq --no-install-recommends pkg-config libsdl2-dev libbsd-dev > /dev/null &&
-            ${{ matrix.idf == 'v6.1' && 'idf.py build' || format('idf.py -B build/host_{0} -D SDKCONFIG=build/host_{0}/sdkconfig -D BOARD=host_{0} build', matrix.shows) }} &&
+            ${{ matrix.idf == 'v6.1' && 'idf.py build' || format('idf.py -B build/host_{0} -D SDKCONFIG=sdkconfig.host_{0} -D BOARD=host_{0} build', matrix.shows) }} &&
             SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy DGX_HOST_SCRIPT=buttons.script timeout 60 build/host_${{ matrix.shows }}/host_buttons.elf
 
   multi-board:
@@ -202,8 +202,8 @@ jobs:
         # ESP-IDF 6 reads CMakePresets.json: idf.py build builds the first board; ESP-IDF 5 is given the directories
         include:
           - idf: release-v5.5
-            first: idf.py -B build/cyd_s028r -D SDKCONFIG=build/cyd_s028r/sdkconfig -D BOARD=cyd_s028r build
-            second: idf.py -B build/jc8012p4a1c -D SDKCONFIG=build/jc8012p4a1c/sdkconfig -D BOARD=jc8012p4a1c build
+            first: idf.py -B build/cyd_s028r -D SDKCONFIG=sdkconfig.cyd_s028r -D BOARD=cyd_s028r build
+            second: idf.py -B build/jc8012p4a1c -D SDKCONFIG=sdkconfig.jc8012p4a1c -D BOARD=jc8012p4a1c build
           - idf: v6.1
             first: idf.py build
             second: idf.py --preset jc8012p4a1c build

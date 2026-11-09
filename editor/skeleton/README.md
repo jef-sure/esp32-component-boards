@@ -23,7 +23,7 @@ In VS Code, *ESP-IDF: Select Project Configuration* chooses the board. `board_se
 another one current. ESP-IDF 5 does not read the presets:
 
 ```sh
-idf.py -B build/@CURRENT@ -D SDKCONFIG=build/@CURRENT@/sdkconfig -D BOARD=@CURRENT@ build
+idf.py -B build/@CURRENT@ -D SDKCONFIG=sdkconfig.@CURRENT@ -D BOARD=@CURRENT@ build
 ```
 
 `selection.json` keeps how the kits were chosen: the answers, what fits too and why the rest does not. Open this

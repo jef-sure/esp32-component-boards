@@ -100,7 +100,7 @@ not write is not replaced. See [choosing-a-board.md](choosing-a-board.md).
 
 In a project VS Code works on (one with `.vscode/`, or the command run from VS Code) it writes the target of the
 current board for the ESP-IDF extension into `.vscode/settings.json`: `idf.customExtraVars.IDF_TARGET` and
-`idf.sdkconfigFilePath`, `build/<board>/sdkconfig` (`tools/vscode_env.py`). The extension takes the target from them
+`idf.sdkconfigFilePath`, `sdkconfig.<board>` (`tools/vscode_env.py`). The extension takes the target from them
 when it starts, after a reload of the window, and puts it into new terminals as `IDF_TARGET`; `idf.buildPath`,
 `build/<board>`, is where its build goes while no project configuration is chosen in it; till then a terminal of ESP-IDF needs `unset IDF_TARGET`.
 Each configuration of such a project, as `idf.py reconfigure`, writes there the environment of ESP-IDF for CMake Tools,
@@ -111,9 +111,9 @@ the component changes, `board_select.py --again ~/myproject` makes every such fi
 way, and the presets in their order with their current board, unless the page changed the `current` of
 `selection.json` since (see [choosing-a-board.md](choosing-a-board.md)). A file it writes that the list of the bridge
 has stays the page's: its new hash goes into the list. An `sdkconfig` made before keeps what it had: remove
-`build/<board>/sdkconfig` to take what changed.
+`sdkconfig.<board>` to take what changed.
 
-The configuration editor of the ESP-IDF extension (the gear) and `idf.py menuconfig` change `build/<board>/sdkconfig`
+The configuration editor of the ESP-IDF extension (the gear) and `idf.py menuconfig` change `sdkconfig.<board>`
 of the current board alone. `board_select.py --keep ~/myproject` puts what was set into the project's own
 `sdkconfig.defaults`, which every board reads after its own file: the minimal configuration of ESP-IDF (savedefconfig)
 less what `sdkconfig.defaults.<board>` sets, the target, the choice of the board, its memory. An option of the board

@@ -2,6 +2,11 @@
 
 ## 0.1.1 (not released yet)
 
+- The `sdkconfig` of each board lies in the folder of the project, `sdkconfig.<board>` beside its defaults, as the
+  presets and `.vscode/settings.json` name it: `build/` holds only what a build makes again, as in any project of
+  ESP-IDF, and removing it loses no option chosen with the configuration editor. `board_select.py --again .` and a
+  choice of boards move an `sdkconfig` of `build/<board>/` there. The `.gitignore` of a new project keeps
+  `sdkconfig.*` out but for `sdkconfig.defaults*`; a project of 0.1.0 adds those lines itself.
 - A configuration whose target is not the one the file of its board names stops before the compiler checks, with what
   to do: `idf.py set-target`, as the button with a chip of the ESP-IDF extension runs it, made the build directory of
   the current board one of another chip, and in the computer's the compiler of the chip took the linker of the

@@ -4,7 +4,7 @@
 #     python3 ../../tools/board_select.py cyd_s028r jc8012p4a1c .
 #     idf.py build                                 # ESP-IDF 6: the preset default, the current board
 #     idf.py --preset jc8012p4a1c build            # another
-#     idf.py -B build/cyd_s028r -D SDKCONFIG=build/cyd_s028r/sdkconfig -D BOARD=cyd_s028r build   # ESP-IDF 5
+#     idf.py -B build/cyd_s028r -D SDKCONFIG=sdkconfig.cyd_s028r -D BOARD=cyd_s028r build   # ESP-IDF 5
 #
 # Nothing here names a board. A -D SDKCONFIG_DEFAULTS=... on the command line wins over the files.
 cmake_minimum_required(VERSION 3.22)

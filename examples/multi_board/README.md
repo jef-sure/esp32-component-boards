@@ -14,8 +14,8 @@ preset for each board in the order named and `default` for the current one; `boa
 makes the other current. ESP-IDF 5 does not read presets:
 
 ```sh
-idf.py -B build/cyd_s028r -D SDKCONFIG=build/cyd_s028r/sdkconfig -D BOARD=cyd_s028r build
-idf.py -B build/jc8012p4a1c -D SDKCONFIG=build/jc8012p4a1c/sdkconfig -D BOARD=jc8012p4a1c build
+idf.py -B build/cyd_s028r -D SDKCONFIG=sdkconfig.cyd_s028r -D BOARD=cyd_s028r build
+idf.py -B build/jc8012p4a1c -D SDKCONFIG=sdkconfig.jc8012p4a1c -D BOARD=jc8012p4a1c build
 ```
 
 A project of its own commits these files, so that a fresh clone reads them before the component is downloaded; this

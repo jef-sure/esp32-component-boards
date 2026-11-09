@@ -7,7 +7,7 @@ The settings of VS Code a project of boards needs, in its .vscode/settings.json:
   ESP-IDF; with these four it configures and builds as idf.py does. project_include.cmake writes them at each
   configuration: vscode_env.py PROJECT_DIR.
 - the current board for the ESP-IDF extension: idf.customExtraVars.IDF_TARGET, idf.sdkconfigFilePath,
-  build/<board>/sdkconfig, and idf.buildPath, build/<board>, where its build goes with no project configuration chosen. The extension gives its terminals the IDF_TARGET of that sdkconfig, of that setting when the
+  sdkconfig.<board> of the project, which its configuration editor changes, and idf.buildPath, build/<board>, where its build goes with no project configuration chosen. The extension gives its terminals the IDF_TARGET of that sdkconfig, of that setting when the
   board was not built yet, and of the sdkconfig of the project's folder, or esp32, when neither is set; idf.py stops when
   it differs from the target of the board a preset builds. board_select.py writes them when the current board changes:
   vscode_env.py PROJECT_DIR --current BOARD TARGET. The extension keeps the target it took and reads it again later, as
@@ -91,7 +91,7 @@ def recommend(project):
 def current(project, board, target):
     """The target of the current board and its sdkconfig, for the ESP-IDF extension and the terminals it opens."""
     build = (pathlib.Path(project) / "build" / board).resolve()
-    sdkconfig = str(build / "sdkconfig")
+    sdkconfig = str((pathlib.Path(project) / f"sdkconfig.{board}").resolve())
 
     def change(settings):
         extra = settings.get("idf.customExtraVars") if isinstance(settings.get("idf.customExtraVars"), dict) else {}

@@ -10,4 +10,4 @@ idf.py build flash monitor
 ```
 
 ESP-IDF 5 does not read the presets the second command writes:
-`idf.py -B build/cyd_s028r -D SDKCONFIG=build/cyd_s028r/sdkconfig -D BOARD=cyd_s028r build flash monitor`.
+`idf.py -B build/cyd_s028r -D SDKCONFIG=sdkconfig.cyd_s028r -D BOARD=cyd_s028r build flash monitor`.

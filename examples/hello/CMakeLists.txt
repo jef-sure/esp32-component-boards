@@ -45,7 +45,7 @@ if(NOT BOARD AND NOT SDKCONFIG_DEFAULTS AND EXISTS ${CMAKE_CURRENT_LIST_DIR}/CMa
         message(FATAL_ERROR "no board chosen: this configuration has no BOARD. In VS Code choose one: ESP-IDF: Select Project "
                             "Configuration, or CMake: Select Configure Preset. On ESP-IDF 6 idf.py build builds the current board "
                             "and idf.py --preset <board> build another; on ESP-IDF 5 idf.py -B build/<board> "
-                            "-D SDKCONFIG=build/<board>/sdkconfig -D BOARD=<board> build.")
+                            "-D SDKCONFIG=sdkconfig.<board> -D BOARD=<board> build.")
     endif()
 endif()
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)

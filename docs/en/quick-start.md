@@ -150,7 +150,7 @@ build/host_cyd_s028r/my_project.elf
 ```
 
 ESP-IDF 6 builds the current board by its preset. ESP-IDF 5 does not read presets:
-`idf.py -B build/host_cyd_s028r -D SDKCONFIG=build/host_cyd_s028r/sdkconfig -D BOARD=host_cyd_s028r build`.
+`idf.py -B build/host_cyd_s028r -D SDKCONFIG=sdkconfig.host_cyd_s028r -D BOARD=host_cyd_s028r build`.
 
 The program, `main/main.c`:
 
@@ -227,9 +227,10 @@ git add .
 git commit -m "new project"
 ```
 
-The `.gitignore` of the project keeps out `build/`, `managed_components/`, `sdkconfig`, the clangd index `.cache/` and
-`.vscode/` with the paths of this machine. The files `sdkconfig.defaults.<board>`, `CMakePresets.json` and
-`dependencies.lock.<board>` are committed: the project does not build without them.
+The `.gitignore` of the project keeps out `build/`, `managed_components/`, `sdkconfig` and `sdkconfig.<board>`, the
+clangd index `.cache/` and `.vscode/` with the paths of this machine. The files `sdkconfig.defaults.<board>`, the
+project's own `sdkconfig.defaults`, `CMakePresets.json` and `dependencies.lock.<board>` are committed: the project does
+not build the same without them.
 
 With the [GitHub CLI](https://cli.github.com/) (`gh`), after one `gh auth login`, the licence and the repository are
 three commands:
@@ -260,12 +261,12 @@ then `git pull`.
 - Another board, or several: [choosing-a-board.md](choosing-a-board.md).
 - A program you have already: [moving-a-program.md](moving-a-program.md).
 - Options of ESP-IDF and of the libraries, as `CONFIG_DGX_ENABLE_VSCREEN` for a virtual screen of DGX: the gear at the
-  bottom of the window (the configuration editor) or `idf.py menuconfig` change `build/<board>/sdkconfig` of the current
+  bottom of the window (the configuration editor) or `idf.py menuconfig` change `sdkconfig.<board>` of the current
   board. For an option to be a part of the project, for every board and in git, then run
   `python3 managed_components/jef-sure__boards/tools/board_select.py --keep .`: it goes into the `sdkconfig.defaults`
-  of the project. The options of the board itself are named and not kept. A board that has `build/<board>/sdkconfig`
-  already takes them once that file is removed: ESP-IDF reads the defaults only into a new `sdkconfig`. Remove that file
-  alone, not the whole `build/`: see "What not to do".
+  of the project. The options of the board itself are named and not kept. A board that has `sdkconfig.<board>`
+  already takes them once that file is removed: ESP-IDF reads the defaults only into a new `sdkconfig`. `build/` may go,
+  as in any project of ESP-IDF: the configurations of the boards lie in the folder of the project.
 - Choosing a board with an agent: `python3 managed_components/jef-sure__boards/tools/boards_mcp.py --install` once a
   machine, before the page; see [tools.md](tools.md#boards_mcppy).
 
@@ -277,7 +278,7 @@ then `git pull`.
 | nothing: so ESP-IDF 6.1 installs it | `'stddef.h' file not found` in the editor, F12 finds nothing | the headers of clang next to `clangd`, see "What you need" |
 | `idf.py` or `compote` in a plain terminal with no activation | `command not found` | the activation of ESP-IDF, or a terminal of "ESP-IDF: Open ESP-IDF Terminal" |
 | `idf.py build` in a terminal of ESP-IDF while the extension takes another target for the current one | `was generated for target 'linux', but environment variable IDF_TARGET is set to 'esp32'` | `unset IDF_TARGET` in that terminal |
-| removing `build/` or `build/<board>`, "ESP-IDF: Full Clean Project", `idf.py fullclean` (`set-target` does it too) | the options chosen with the gear or in menuconfig and not kept by `--keep` are gone; for the computer, its flash with NVS too, `build/host_<board>/flash.bin` | `board_select.py --keep .` first; to take new defaults, remove `build/<board>/sdkconfig` alone |
+| removing `build/host_<board>`, "ESP-IDF: Full Clean Project" or `idf.py fullclean` of the computer | the flash of the computer with NVS is gone, `build/host_<board>/flash.bin`; the configurations of the boards, `sdkconfig.<board>`, stay | keep that file when its NVS is needed |
 | the button with a chip at the bottom of the window ("Set Espressif Device Target"), or `idf.py set-target` as `idf.py` advises | a stop: `host_jc8012p4a1c is built for linux, and this configuration is for esp32p4`; in a project of 0.1.0, `unrecognised emulation mode: elf32lriscv` from the linker | not needed: the preset gives the board with its target and directory, `idf.py --preset <board> build flash monitor`, or the button with the name of the configuration at the bottom ("Select Project Configuration") |
 | the example made in a folder with files, as a clone with only a licence | `is not empty` | a new folder; the repository on GitHub last, from the folder made |
 | `editor/index.html` opened by a right click → "Open in Integrated Browser" | the page with no catalog, naming the command of its server | `boards_mcp.py --serve` from the folder of the project, and its link |

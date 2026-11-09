@@ -47,7 +47,7 @@ if(BOARD AND DEFINED CONFIG_IDF_TARGET AND EXISTS "${PROJECT_DIR}/sdkconfig.defa
         file(STRINGS "${PROJECT_DIR}/sdkconfig.defaults.${BOARD}" _boards_target REGEX "^CONFIG_IDF_TARGET=")
         message(FATAL_ERROR "the board ${BOARD} was asked for, but the configuration chose ${_boards_chosen}: this build is for "
                             "${CONFIG_IDF_TARGET}, sdkconfig.defaults.${BOARD} has ${_boards_target}. On ESP-IDF 6 a board builds by its "
-                            "preset, idf.py --preset ${BOARD} build; on ESP-IDF 5 by idf.py -B build/${BOARD} -D SDKCONFIG=build/${BOARD}/sdkconfig "
+                            "preset, idf.py --preset ${BOARD} build; on ESP-IDF 5 by idf.py -B build/${BOARD} -D SDKCONFIG=sdkconfig.${BOARD} "
                             "-D BOARD=${BOARD} build. An sdkconfig of another board in the build directory does the same: remove it.")
     endif()
 endif()
@@ -78,7 +78,7 @@ if(NOT BOARD AND CONFIG_BOARD_SELECT_NONE)
         message(FATAL_ERROR "no board chosen: this build has no BOARD, so it is for none of the boards of the project (${_boards_made}). "
                             "In VS Code choose one: ESP-IDF: Select Project Configuration, or CMake: Select Configure Preset. On ESP-IDF 6 "
                             "idf.py build builds the current board and idf.py --preset <board> build another; on ESP-IDF 5 "
-                            "idf.py -B build/<board> -D SDKCONFIG=build/<board>/sdkconfig -D BOARD=<board> build.")
+                            "idf.py -B build/<board> -D SDKCONFIG=sdkconfig.<board> -D BOARD=<board> build.")
     endif()
     unset(_boards_defaults)
     unset(_boards_made)

@@ -145,7 +145,7 @@ build/host_cyd_s028r/my_project.elf
 ```
 
 ESP-IDF 6 собирает текущую плату по её пресету. ESP-IDF 5 пресеты не читает:
-`idf.py -B build/host_cyd_s028r -D SDKCONFIG=build/host_cyd_s028r/sdkconfig -D BOARD=host_cyd_s028r build`.
+`idf.py -B build/host_cyd_s028r -D SDKCONFIG=sdkconfig.host_cyd_s028r -D BOARD=host_cyd_s028r build`.
 
 Программа, `main/main.c`:
 
@@ -221,9 +221,9 @@ git add .
 git commit -m "new project"
 ```
 
-`.gitignore` проекта не пускает в коммит `build/`, `managed_components/`, `sdkconfig`, индекс clangd `.cache/` и
-`.vscode/` с путями этой машины. Файлы `sdkconfig.defaults.<плата>`, `CMakePresets.json` и `dependencies.lock.<плата>`
-коммитятся: без них проект не собирается.
+`.gitignore` проекта не пускает в коммит `build/`, `managed_components/`, `sdkconfig` и `sdkconfig.<плата>`, индекс
+clangd `.cache/` и `.vscode/` с путями этой машины. Файлы `sdkconfig.defaults.<плата>`, свой `sdkconfig.defaults`,
+`CMakePresets.json` и `dependencies.lock.<плата>` коммитятся: без них проект не собирается так же.
 
 С [GitHub CLI](https://cli.github.com/) (`gh`), после одного `gh auth login`, лицензия и репозиторий — три команды:
 
@@ -253,12 +253,12 @@ git push -u origin main
 - Другая плата или несколько: [choosing-a-board.md](choosing-a-board.md).
 - Своя программа, которая уже есть: [moving-a-program.md](moving-a-program.md).
 - Опции ESP-IDF и библиотек, например `CONFIG_DGX_ENABLE_VSCREEN` для виртуального экрана DGX: шестерёнка внизу окна
-  (редактор настроек) или `idf.py menuconfig` меняют `build/<плата>/sdkconfig` текущей платы. Чтобы опция стала частью
+  (редактор настроек) или `idf.py menuconfig` меняют `sdkconfig.<плата>` текущей платы. Чтобы опция стала частью
   проекта, для всех плат и в git, затем выполните
   `python3 managed_components/jef-sure__boards/tools/board_select.py --keep .`: она попадёт в `sdkconfig.defaults`
-  проекта. Опции самой платы он не переносит и называет. Плата, у которой уже есть `build/<плата>/sdkconfig`, возьмёт
-  их, когда этот файл удалят: ESP-IDF читает умолчания только в новый `sdkconfig`. Удаляйте только его, не весь
-  `build/`: см. «Чего не делать».
+  проекта. Опции самой платы он не переносит и называет. Плата, у которой уже есть `sdkconfig.<плата>`, возьмёт
+  их, когда этот файл удалят: ESP-IDF читает умолчания только в новый `sdkconfig`. `build/` можно
+  удалять, как в любом проекте ESP-IDF: настройки плат лежат в папке проекта.
 - Подбор платы вместе с агентом: `python3 managed_components/jef-sure__boards/tools/boards_mcp.py --install` один раз на
   машину, до страницы; см. [tools.md](tools.md#boards_mcppy).
 
@@ -270,7 +270,7 @@ git push -u origin main
 | ничего: так ставит ESP-IDF 6.1 | `'stddef.h' file not found` в редакторе, F12 не находит | заголовки clang рядом с `clangd`, см. «Что нужно» |
 | `idf.py` или `compote` в обычном терминале без активации | `command not found` | команда активации ESP-IDF или терминал «ESP-IDF: Open ESP-IDF Terminal» |
 | `idf.py build` в терминале ESP-IDF, когда расширение считает текущей другую цель | `was generated for target 'linux', but environment variable IDF_TARGET is set to 'esp32'` | `unset IDF_TARGET` в этом терминале |
-| удалить `build/` или `build/<плата>`, «ESP-IDF: Full Clean Project», `idf.py fullclean` (его делает и `set-target`) | пропадают опции, выбранные шестерёнкой или в menuconfig и не перенесённые `--keep`; у компьютера — и его флеш с NVS, `build/host_<плата>/flash.bin` | сначала `board_select.py --keep .`; чтобы взять новые умолчания, удалить один `build/<плата>/sdkconfig` |
+| удалить `build/host_<плата>`, «ESP-IDF: Full Clean Project» или `idf.py fullclean` у компьютера | пропадает флеш компьютера с NVS, `build/host_<плата>/flash.bin`; настройки плат, `sdkconfig.<плата>`, остаются | сохранить этот файл, если NVS нужна |
 | кнопка с чипом внизу окна («Set Espressif Device Target») или `idf.py set-target`, как советует `idf.py` | остановка: `host_jc8012p4a1c is built for linux, and this configuration is for esp32p4`; в проекте из 0.1.0 — `unrecognised emulation mode: elf32lriscv` у линкера | не нужен: плату с её целью и каталогом даёт пресет — `idf.py --preset <плата> build flash monitor` или кнопка с названием конфигурации внизу («Select Project Configuration») |
 | создали пример в непустой папке, например в клоне с одной лицензией | `is not empty` | новая папка; репозиторий на GitHub — в конце, из готовой папки |
 | открыли `editor/index.html` правым кликом → «Open in Integrated Browser» | страница без каталога и с командой сервера | `boards_mcp.py --serve` из папки проекта и его ссылка |

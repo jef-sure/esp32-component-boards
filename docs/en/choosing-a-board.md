@@ -81,7 +81,8 @@ the chip, the memory and the flash need. ESP-IDF takes the target from the
 first file of `SDKCONFIG_DEFAULTS` that names one, so no `idf.py set-target`
 is needed, and the menu *Boards → Board the program runs on* shows the board
 chosen. It writes `CMakePresets.json` too: the preset `cyd_s028r`, which sets `BOARD`
-and builds in `build/cyd_s028r` with its `sdkconfig` there, and the preset `default`,
+and builds in `build/cyd_s028r` with its `sdkconfig` in the folder of the project, `sdkconfig.cyd_s028r`, and the
+preset `default`,
 a copy of it, which `idf.py` takes when no preset is named. The first `reconfigure`, with no board,
 builds in `build/` and keeps its `sdkconfig` there, which no board reads. In the folder of the project an `sdkconfig`
 of esp32 would stop the first build of the computer in a terminal with `IDF_TARGET=linux`: until a board has a
@@ -90,7 +91,7 @@ build, `idf.py` checks the target of that file.
 ESP-IDF 5 does not read presets; the board is named on the command line:
 
 ```sh
-idf.py -B build/cyd_s028r -D SDKCONFIG=build/cyd_s028r/sdkconfig -D BOARD=cyd_s028r build
+idf.py -B build/cyd_s028r -D SDKCONFIG=sdkconfig.cyd_s028r -D BOARD=cyd_s028r build
 ```
 
 Commit `sdkconfig.defaults.<board>`, `CMakePresets.json` and `dependencies.lock.<board>`:
@@ -172,7 +173,9 @@ their current board: the first time, as `selection.json` has them. The presets r
 current board they were made with, and each command that changes it writes it into the `current` of `selection.json`
 too, so a current board the page changes since is taken, and one a command chose stays. The page opens a project with the order and the current board of
 its presets. ESP-IDF reads the defaults only into a new `sdkconfig`: to take what changed,
-remove `build/<board>/sdkconfig`. A build whose configuration did not choose the board `BOARD` names stops at the
+remove `sdkconfig.<board>`. The `sdkconfig` of a board lies in the folder of the project, not in `build/`, so `build/`
+is removed as in any project of ESP-IDF; a version before 0.1.1 kept it in `build/<board>/`, and
+`board_select.py --again .` moves it. A build whose configuration did not choose the board `BOARD` names stops at the
 configure and says which board it chose and for which chip: on ESP-IDF 6 the form `-B ... -D BOARD=<board>` takes the
 chip of the preset `default`, and an `sdkconfig` of another board in the build directory keeps its board.
 A build with no `BOARD` in a project where `board_select.py` has made the files of boards stops too and names its
@@ -189,7 +192,7 @@ with the display of the board it shows.
 
 ```sh
 python3 managed_components/jef-sure__boards/tools/board_select.py host --as jc8012p4a1c .
-idf.py -B build/host_jc8012p4a1c -D SDKCONFIG=build/host_jc8012p4a1c/sdkconfig -D BOARD=host_jc8012p4a1c build
+idf.py -B build/host_jc8012p4a1c -D SDKCONFIG=sdkconfig.host_jc8012p4a1c -D BOARD=host_jc8012p4a1c build
 build/host_jc8012p4a1c/<project>.elf
 ```
 

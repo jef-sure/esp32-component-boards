@@ -73,7 +73,7 @@ The board is named once, on one command line. The component's `tools/board_selec
 project: `sdkconfig.defaults.<board>`, the board's chip, memory and flash settings and the line that chooses it in the
 menu of the configuration; and `CMakePresets.json`, whose preset builds the board in `build/<board>`. No `set-target`,
 no `menuconfig`. ESP-IDF 5 does not read the presets; there the board is named on the command line:
-`idf.py -B build/cyd_s028r -D SDKCONFIG=build/cyd_s028r/sdkconfig -D BOARD=cyd_s028r build flash monitor`.
+`idf.py -B build/cyd_s028r -D SDKCONFIG=sdkconfig.cyd_s028r -D BOARD=cyd_s028r build flash monitor`.
 
 What the board needs comes with the choice: the DGX drivers of its panel as `select`s, the other parts (a touch
 driver, a codec, hd44780) by rules in the component's `idf_component.yml`, so a build for the CYD S028R downloads the

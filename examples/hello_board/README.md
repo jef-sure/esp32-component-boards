@@ -19,7 +19,7 @@ idf.py build flash monitor
 
 Another board named becomes the current one and builds in a directory of its
 own. ESP-IDF 5 does not read the presets:
-`idf.py -B build/cyd_s028r -D SDKCONFIG=build/cyd_s028r/sdkconfig -D BOARD=cyd_s028r build`.
+`idf.py -B build/cyd_s028r -D SDKCONFIG=sdkconfig.cyd_s028r -D BOARD=cyd_s028r build`.
 
 The 10.1-inch Guition JC8012P4A1C builds without the firmware of its touch
 panel (the vendor's array has no licence to give away): the touch of that

@@ -269,7 +269,7 @@ git push -u origin main
 | ничего: так ставит ESP-IDF 6.1 | `'stddef.h' file not found` в редакторе, F12 не находит | заголовки clang рядом с `clangd`, см. «Что нужно» |
 | `idf.py` или `compote` в обычном терминале без активации | `command not found` | команда активации ESP-IDF или терминал «ESP-IDF: Open ESP-IDF Terminal» |
 | `idf.py build` в терминале ESP-IDF, когда расширение считает текущей другую цель | `was generated for target 'linux', but environment variable IDF_TARGET is set to 'esp32'` | `unset IDF_TARGET` в этом терминале |
-| `idf.py set-target`, как советует `idf.py` | сборка уходит в корневой `build/` и падает | не нужен: цель и каталог задаёт пресет платы |
+| `idf.py set-target`, как советует `idf.py`, или чтобы собрать для платы | остановка: `host_jc8012p4a1c is built for linux, and this configuration asks for esp32p4`; в проекте из 0.1.0 — `unrecognised emulation mode: elf32lriscv` у линкера | не нужен: плату с её целью и каталогом даёт пресет — `idf.py --preset <плата> build flash monitor` или «ESP-IDF: Select Project Configuration» |
 | создали пример в непустой папке, например в клоне с одной лицензией | `is not empty` | новая папка; репозиторий на GitHub — в конце, из готовой папки |
 | открыли `editor/index.html` правым кликом → «Open in Integrated Browser» | страница без каталога и с командой сервера | `boards_mcp.py --serve` из папки проекта и его ссылка |
 | CMake Tools сконфигурировал проект до первого `idf.py` | `IDF_PATH is not set` | `idf.py reconfigure` в терминале ESP-IDF, затем снова конфигурация CMake Tools |

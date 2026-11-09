@@ -276,7 +276,7 @@ then `git pull`.
 | nothing: so ESP-IDF 6.1 installs it | `'stddef.h' file not found` in the editor, F12 finds nothing | the headers of clang next to `clangd`, see "What you need" |
 | `idf.py` or `compote` in a plain terminal with no activation | `command not found` | the activation of ESP-IDF, or a terminal of "ESP-IDF: Open ESP-IDF Terminal" |
 | `idf.py build` in a terminal of ESP-IDF while the extension takes another target for the current one | `was generated for target 'linux', but environment variable IDF_TARGET is set to 'esp32'` | `unset IDF_TARGET` in that terminal |
-| `idf.py set-target`, as `idf.py` advises | the build goes to the root `build/` and fails | not needed: the preset of the board gives the target and the directory |
+| `idf.py set-target`, as `idf.py` advises, or to build for the board | a stop: `host_jc8012p4a1c is built for linux, and this configuration asks for esp32p4`; in a project of 0.1.0, `unrecognised emulation mode: elf32lriscv` from the linker | not needed: the preset gives the board with its target and directory, `idf.py --preset <board> build flash monitor` or "ESP-IDF: Select Project Configuration" |
 | the example made in a folder with files, as a clone with only a licence | `is not empty` | a new folder; the repository on GitHub last, from the folder made |
 | `editor/index.html` opened by a right click → "Open in Integrated Browser" | the page with no catalog, naming the command of its server | `boards_mcp.py --serve` from the folder of the project, and its link |
 | CMake Tools configured the project before the first `idf.py` | `IDF_PATH is not set` | `idf.py reconfigure` in a terminal of ESP-IDF, then the configure of CMake Tools again |

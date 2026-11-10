@@ -1,6 +1,6 @@
 # CHANGES
 
-## 0.1.3 (not released yet)
+## 0.1.3 (2026-11-10)
 
 - Each configuration puts what the configuration editor or menuconfig changed in `sdkconfig.<board>` since the one
   before into the project's `sdkconfig.defaults`, as `board_select.py --keep` does: what is set with the gear reaches
@@ -19,6 +19,7 @@
 - The package carries `imported/`, the data of boards and modules taken from others, with the licenses it comes under
   in `imported/licenses/` (`LICENSES.md`): the page of a project made from the registry offers its boards and modules
   as it does in a clone, marked unchecked, with no project for an imported board. It adds about 120 KB to the archive.
+- The recipes take the component as `>=0.1.3`.
 
 ## 0.1.2 (2026-11-10)
 

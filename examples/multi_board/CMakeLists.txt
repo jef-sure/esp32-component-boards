@@ -34,7 +34,7 @@ endif()
 
 # The component this example lies in, taken as a component of the project by its directory: a
 # project of its own takes it from the registry instead (main/idf_component.yml:
-# jef-sure/boards: ">=0.1.2") and has nothing of this. BOARDS_COMPONENT_DIR points elsewhere
+# jef-sure/boards: ">=0.1.3") and has nothing of this. BOARDS_COMPONENT_DIR points elsewhere
 # when the example is copied out of the checkout (-D BOARDS_COMPONENT_DIR=/path/to/boards).
 if(NOT DEFINED BOARDS_COMPONENT_DIR)
     get_filename_component(BOARDS_COMPONENT_DIR "${CMAKE_CURRENT_LIST_DIR}/../.." ABSOLUTE)

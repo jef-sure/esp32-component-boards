@@ -1,6 +1,6 @@
 # CHANGES
 
-## 0.1.1 (not released yet)
+## 0.1.1 (2026-11-10)
 
 - The preset of the current board comes first in `CMakePresets.json`, the one to choose in VS Code: the page and
   `board_select.py --current` change what it builds. A board of the program is named for the program, as
@@ -31,6 +31,7 @@
 - The quick start names the project before the board, says that clangd needs its extension and, on ESP-IDF 6.1, the
   headers of clang, which its package lacks, why the debug of the ESP-IDF extension asks for a build of the computer
   again and again, and to close the old terminals of ESP-IDF after a change of the board.
+- The recipes take the component as `>=0.1.1`.
 
 ## 0.1.0 (2026-11-08)
 

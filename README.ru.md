@@ -58,7 +58,7 @@ Guition.
 
 ```sh
 idf.py create-project hello && cd hello
-idf.py add-dependency "jef-sure/boards>=0.1.0"
+idf.py add-dependency "jef-sure/boards>=0.1.1"
 # строки CMake из быстрого старта — в CMakeLists.txt, затем:
 idf.py reconfigure
 python3 managed_components/jef-sure__boards/tools/board_select.py cyd_s028r .

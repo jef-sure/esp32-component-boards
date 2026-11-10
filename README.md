@@ -58,7 +58,7 @@ is one peripheral among others. What a board can have today:
 
 ```sh
 idf.py create-project hello && cd hello
-idf.py add-dependency "jef-sure/boards>=0.1.0"
+idf.py add-dependency "jef-sure/boards>=0.1.1"
 # the lines of the quick start into CMakeLists.txt, then:
 idf.py reconfigure
 python3 managed_components/jef-sure__boards/tools/board_select.py cyd_s028r .

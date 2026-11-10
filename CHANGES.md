@@ -2,6 +2,10 @@
 
 ## 0.1.3 (not released yet)
 
+- The mark "add the build on the computer" stands beside "make a project…" of a card and "make the project of these
+  boards…": set, the board gets the computer that shows its display, and the computer is current; clear, the board is
+  current and the computers of the project stay as they were. The mark of the list before writing is gone, and the
+  page no longer makes the computer current when the person chose a board.
 - On the page a block with nothing chosen in it takes the part of its role of the board selected, as its display, and
   goes back to any when the board changes; what the person chose stays. The Part of a block offers the parts of the
   board selected, so the display of a board is one to choose there, not only the modules of the catalog.

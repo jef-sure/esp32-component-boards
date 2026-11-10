@@ -328,6 +328,8 @@ const KitCard = {
             </details>
             <button v-if="kit.writable" :class="{ on: chosenHas(kit) }" :title="t('A board the program is built for: a project may have several.')" @click="store.chooseKit(kit)">{{ t(chosenHas(kit) ? 'in the project' : 'add to the project') }}</button>
             <button v-if="canWrite && kit.writable && !store.chosen.length" @click="store.planProject(kit)">{{ t('make a project…') }}</button>
+            <label v-if="canWrite && kit.writable && !store.chosen.length && store.hasDisplay(kit)" class="hint" :title="t('The computer shows the display of the board in a window: Linux with SDL2.')">
+                <input type="checkbox" :checked="store.withComputer" @change="store.setComputer($event.target.checked)"> {{ t('add the build on the computer') }}</label>
             <button v-if="store.answers.board !== kit.name" :title="t('Pin this board: the solver and the model try no other.')" @click="store.answers.board = kit.name">{{ t('pin this board') }}</button>
             <span v-if="kit.imported" class="hint">{{ t('imported: no project until this board is in the catalog') }}</span>
             <span v-else-if="!kit.writable" class="hint">{{ t('The page writes projects for ESP-IDF only for now.') }}</span>
@@ -577,8 +579,6 @@ const SelectPage = {
             <div class="kits">
                 <section v-if="store.plan" class="plan">
                     <h3>{{ t(store.plan.mode === 'create' ? 'A new project in' : 'The project') }} {{ store.plan.folderName }}</h3>
-                    <p v-if="!store.plan.written"><label><input type="checkbox" :checked="store.withComputer" @change="store.setComputer($event.target.checked)">
-                        {{ t('and the computer that shows each board with a display: its window on this computer, Linux with SDL2') }}</label></p>
                     <table>
                         <tr v-for="row in store.plan.rows" :key="row.path" :class="row.state">
                             <td><code>{{ row.path }}</code><span v-if="row.made" class="hint">&nbsp;· {{ t('made by board_select.py --again') }}</span></td>
@@ -626,6 +626,8 @@ idf.py build flash monitor</pre>
                         <span v-if="item.gone" class="hint">{{ t('does not fit the answers now') }}</span>
                         <button class="drop" :title="t('take it out of the project')" @click="store.chooseKit(item.kit)">×</button></p>
                     <button v-if="canWrite" @click="store.planProject()">{{ t('make the project of these boards…') }}</button>
+                    <label v-if="canWrite && store.chosen.some((item) => store.hasDisplay(item.kit))" class="hint" :title="t('The computer shows the display of the board in a window: Linux with SDL2.')">
+                        <input type="checkbox" :checked="store.withComputer" @change="store.setComputer($event.target.checked)"> {{ t('add the build on the computer') }}</label>
                     <kit-card v-if="currentCard" class="current" :kit="currentCard.first" :rest="currentCard.rest" :helpers="cardHelpers"></kit-card>
                     <article v-else-if="currentMiss" class="kit current"><h3>{{ currentMiss.title }}</h3>
                         <ul><li v-for="line in currentMiss.says" :key="line.text" :class="line.level"><span class="mark">{{ MARKS[line.level] }}</span> {{ line.text }}</li></ul></article>

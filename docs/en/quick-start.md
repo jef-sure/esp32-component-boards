@@ -113,9 +113,11 @@ It prints a link. Open it in the integrated browser of VS Code: Ctrl+Shift+P →
 link in its address bar; with the setting `workbench.browser.openLocalhostLinks`, Ctrl+click on the link in the terminal
 does. Put on the canvas what the device needs, as "Display" from the list on the left, and press "make a project…" on
 the card of a board that fits (several boards: "add to the project" on each, then "make the project of these boards…").
-The page shows the files it would write; the mark "and the computer that shows each board with a display" adds the
-computer that shows each board with a display. After "write" and your permission the server of the page does the rest,
-as `board_select.py --again .`, and the computer becomes the current board. The board of the project has a card of its
+Beside the button is the mark "add the build on the computer": with it the board gets the computer that shows its
+display, and the computer is current; without it the board is current and the computers of the project stay as they
+were. The page shows the files it would write; after "write" and your permission its server does the rest, as
+`board_select.py --again .`. To go from the computer to the board, clear the mark and press "make the project of these
+boards…" again; set it, and the computer is current again. The board of the project has a card of its
 own then, and its parts are in the list on the left: a part from there goes on the canvas with the characteristics it
 has on that board. See [tools.md](tools.md#the-page).
 
@@ -125,9 +127,8 @@ the button "make the project of these boards…" (or "make a project…" on a ca
 - the files of the board;
 - a board of the program, `components/local-boards/boards/<project>_<board>`, when the canvas has not all the board has:
   its glue starts only what is on the canvas;
-- the computer `host_<board>` of each board with a display, while the mark is set: the computer of a board of the
-  program has only what is on the canvas too; when the project had a computer for the board itself, the new one becomes
-  current and the old one stays;
+- the computer `host_<board>` of each board with a display, with "add the build on the computer" set: the computer of a
+  board of the program has only what is on the canvas too; a computer the project had stays;
 - `selection.json` with the canvas, which the page starts from when the folder is opened again.
 
 The page does not write the program, `main/main.c`. `board_display_init()` starts the display, and the glue of the board

@@ -165,7 +165,8 @@ def with_current(doc, current):
     if not chosen:
         raise SystemExit(f"--current {current}: not a board of {PRESETS} ({', '.join(preset['name'] for preset in boards)})")
     default = {**chosen, "name": DEFAULT, "displayName": f"The current board: {chosen['displayName']}"}
-    return resolve.dump({**doc, "configurePresets": [*boards, default]}) + "\n"
+    # first, as the one to choose in VS Code: board_select.py --current and the page change what it builds
+    return resolve.dump({**doc, "configurePresets": [default, *boards]}) + "\n"
 
 
 def presets_text(project, boards, targets, current, command, follows=None):
@@ -173,7 +174,7 @@ def presets_text(project, boards, targets, current, command, follows=None):
     the current board they are made with, which selection.json gets too: a page that names another later has changed it."""
     our_presets(project, boards)
     # Ninja, as idf.py takes it: a build directory CMake Tools of VS Code made with another generator stops idf.py there
-    presets = [{"name": board, "displayName": title_of(board), "generator": "Ninja", "binaryDir": f"build/{board}",
+    presets = [{"name": board, "displayName": title_of(board, project), "generator": "Ninja", "binaryDir": f"build/{board}",
                 "cacheVariables": {"BOARD": board, "IDF_TARGET": target, "SDKCONFIG": f"sdkconfig.{board}"}} for board, target in zip(boards, targets)]
     made = {"made by": command, **({"follows": follows} if follows else {})}
     return with_current({"version": 3, "vendor": {VENDOR: made}, "configurePresets": presets}, current)
@@ -221,13 +222,17 @@ def check_host_cmake(project):
                          f"{NEW_HOST_LINE} there, then run this again")
 
 
-def title_of(board):
+def title_of(board, project=None):
+    """The title of a board in the lists of presets; a board of the program is named for the program, so it is not taken
+    for the board it is made of."""
     if is_host(board):
-        return f"the computer as {title_of(shown_by(board))}"
+        return f"the computer as {title_of(shown_by(board), project)}"
     try:
-        return resolve.load("boards", board).get("title", board)
+        doc = resolve.load("boards", board)
     except resolve.Refused:
         return board
+    title = doc.get("title", board)
+    return f"{title} for {project_writer.Project(project).name()}" if doc.get("kind") == "project" and project else title
 
 
 def made_by(board, modules=(), revision=None):

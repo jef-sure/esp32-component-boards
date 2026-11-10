@@ -2,6 +2,9 @@
 
 ## 0.1.1 (not released yet)
 
+- The preset of the current board comes first in `CMakePresets.json`, the one to choose in VS Code: the page and
+  `board_select.py --current` change what it builds. A board of the program is named for the program, as
+  "Guition JC8012P4A1C for hello", so the lists of VS Code do not show it as the board it is made of.
 - The `sdkconfig` of each board lies in the folder of the project, `sdkconfig.<board>` beside its defaults, as the
   presets and `.vscode/settings.json` name it: `build/` holds only what a build makes again, as in any project of
   ESP-IDF, and removing it loses no option chosen with the configuration editor. `board_select.py --again .` and a

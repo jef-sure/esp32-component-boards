@@ -155,7 +155,8 @@ extension takes the target of the current board. Close the old terminals of ESP-
 ## 3. On the computer
 
 The example from here is the CYD chosen by the commands. A board from the page is named as the page wrote it: a board
-of the program `<project>_<board>`, its computer `host_<project>_<board>`.
+of the program `<project>_<board>`, its computer `host_<project>_<board>`, where `<project>` is the name of `project(…)`
+of step 1.
 
 In VS Code: Ctrl+Shift+P → "CMake: Select Configure Preset" → "the computer as CYD (ESP32-2432S028R)", then F7
 ("CMake: Build") and Ctrl+Shift+F5 ("CMake: Run Without Debugging"). A window opens: white, with a blue band at the

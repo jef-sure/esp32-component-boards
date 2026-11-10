@@ -151,7 +151,7 @@ python3 managed_components/jef-sure__boards/tools/board_select.py host --as cyd_
 ## 3. На компьютере
 
 Дальше пример — CYD, выбранный командами. Плата со страницы называется так, как её записала страница: плата
-программы — `<проект>_<плата>`, её компьютер — `host_<проект>_<плата>`.
+программы — `<проект>_<плата>`, её компьютер — `host_<проект>_<плата>`, где `<проект>` — имя из `project(…)` шага 1.
 
 В VS Code: Ctrl+Shift+P → «CMake: Select Configure Preset» → «the computer as CYD (ESP32-2432S028R)», затем F7
 («CMake: Build») и Ctrl+Shift+F5 («CMake: Run Without Debugging»). Откроется окно: белый экран и синяя полоса сверху.

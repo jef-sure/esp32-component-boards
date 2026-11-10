@@ -1,12 +1,13 @@
 # CHANGES
 
-## 0.1.2 (not released yet)
+## 0.1.2 (2026-11-10)
 
 - The page writes the computer that shows each board with a display, `host_<board>`, beside the board, while the mark
   "and the computer that shows each board with a display" in its list is set, as it is at first; the computer of the
   current board becomes current. A project begun on the page had no computer before, and the quick start begins with it.
 - The quick start chooses the board on the page first and by two commands when the board is known, and says which
   characters the name of a project takes.
+- The recipes take the component as `>=0.1.2`.
 
 ## 0.1.1 (2026-11-10)
 

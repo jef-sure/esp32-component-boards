@@ -2,7 +2,7 @@
 ## project's CMakeLists.txt), so it names no dependency on it here. A project of its own does:
 ##
 ##   dependencies:
-##     jef-sure/boards: ">=0.1.1"
+##     jef-sure/boards: ">=0.1.2"
 ##
 ## and the component's own manifest brings what the chosen board needs by its rules.
 dependencies:

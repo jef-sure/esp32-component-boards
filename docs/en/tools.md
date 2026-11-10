@@ -418,6 +418,11 @@ cost in full, everything bought, as for making the thing again; `selection.json`
 each board, and the order and a budget go by the price to buy now. `tools/check_format.py` gives the kits of
 `test/solver/` to the generator as well.
 
+A block with nothing chosen in it takes the part of its role of the board selected, pinned or current, with what its data
+gives, marked "from the board"; when the board changes it goes back to any and takes the part of the new one. What the
+person chose or changed in a block stays. The Part of a block offers the parts of the board selected first, before the
+modules of the catalog.
+
 The cards wait for the first block on the canvas: with nothing asked every board fits. `make a project…` on a card, while
 the project has no boards, or *make the project of these boards…* asks for a folder, and the folder decides what happens:
 

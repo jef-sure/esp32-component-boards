@@ -19,6 +19,8 @@ const LOCAL_BOARD = (name) => `components/local-boards/boards/${name}/board.json
 const STUB = (board) => `# board_select.py ${board}`; // the first line of the defaults of a board: the command that makes them
 const COMPUTER = (board) => `host_${board}`; // the computer that shows a board, as board_select.py host --as <board> names it
 const GRAPHICS = 'jef-sure/dgx'; // the library of a graphics display: the window of the computer is a screen of it
+// a block with nothing chosen in it, as the palette puts one: the board selected fills it
+const isAny = (block) => !block.variant && !block.part && !block.from && !Object.values(block.asks ?? {}).some((value) => value !== undefined && value !== '');
 const SKELETON = 'skeleton/files.json'; // the files of a new project, which tools/board_project.py writes too
 const TREE_ORDER = ['mcu', 'power', 'buses', 'devices', 'modules', 'connectors', 'shared_pins', 'display_groups', 'price', 'checked'];
 
@@ -431,7 +433,29 @@ const useEditor = Pinia.defineStore('editor', {
             this.answers.blocks.push({ role: next.role, variant: next.variant, name: '', by: 'person', asks: { ...next.asks }, from: { board, device: next.device } });
         },
         addBlock(role) {
-            if (knownRole(role)) this.answers.blocks.push({ role, variant: undefined, name: '', by: 'person' });
+            if (!knownRole(role)) return;
+            this.answers.blocks.push({ role, variant: undefined, name: '', by: 'person' });
+            this.followBoard();
+        },
+        // The blocks the selected board filled go back to any when it changes, and every block with nothing chosen takes the
+        // next part of the selected board for its role, as its parts in the palette do; what the person chose stays.
+        followBoard() {
+            const board = this.selectedBoard;
+            for (const block of this.answers.blocks) {
+                if (block.by === 'board' && block.from?.board !== board) Object.assign(block, { variant: undefined, asks: undefined, from: undefined, by: 'person' });
+            }
+            if (!board) return;
+            const taken = new Set(this.answers.blocks.filter((block) => block.from?.board === board).map((block) => `${block.role} ${block.from.device}`));
+            for (const block of this.answers.blocks.filter(isAny)) {
+                const part = this.boardParts.find((item) => item.role === block.role && !taken.has(`${item.role} ${item.device}`));
+                if (!part) continue;
+                taken.add(`${part.role} ${part.device}`);
+                Object.assign(block, { variant: part.variant, asks: { ...part.asks }, from: { board, device: part.device }, by: 'board' });
+            }
+        },
+        // A block the selected board filled is the person's once the person changes it: a change of the board leaves it.
+        chosenByPerson(block) {
+            if (block.by === 'board') block.by = 'person';
         },
         // The worker answers the last question only; a page it cannot start on answers by itself.
         startWorker() {

@@ -282,6 +282,7 @@ const NewDocument = {
 
 const MARKS = { yes: '✓', no: '✗', unknown: '?', do: '→', note: '·' };
 const FROM_BOARD = '@board'; // the value of Part for the part of the board a block came from
+const BOARD_PART = '@board:'; // the value of Part for a part of the selected board, before its device
 const BOARDS_SHOWN = 10; // the cards shown at first: a hundred boards fit when little is asked
 
 // Which question a board and its modules answer: the first screen.
@@ -369,6 +370,7 @@ const SelectPage = {
         // a board taken into the project or out of it counts as had or not; by its names only, as every count makes the kits
         // of the project again
         Vue.watch(() => store.projectBoards().join(' '), () => store.askKits());
+        Vue.watch(() => store.selectedBoard, () => store.followBoard());
         // a plan belongs to the answers it was made for
         Vue.watch(() => store.answers, (answers) => {
             store.plan = null;
@@ -387,6 +389,7 @@ const SelectPage = {
         const boardTitle = (name) => store.kits.find((kit) => kit.name === name)?.title ?? name;
         // An answer of a block to a question about the data of its part; an empty field takes it back.
         const setAsk = (block, question, event) => {
+            store.chosenByPerson(block);
             const asks = { ...(block.asks ?? {}) };
             if (event.target.value === '' || event.target.value === 'any') delete asks[question.id];
             else asks[question.id] = question.type === 'choice' ? event.target.value : Number(event.target.value);
@@ -436,8 +439,14 @@ const SelectPage = {
         // where a part of the board is: its buses, or the GPIOs of a part on lines of its own, as an LED
         const partWhere = (part) => part.buses.join(', ') || (part.lines.length ? `GPIO ${part.lines.map((wire) => wire.to.replace('GPIO ', '')).join(', ')}` : '');
         // the Part of a block: the part of the board it came from, any, or a module the person fixes
+        const boardPartsOf = (block) => store.boardParts.filter((part) => part.role === block.role);
+        const partValue = (block) => block.part ?? (block.from?.board === store.selectedBoard && store.partFrom(block) ? BOARD_PART + block.from.device : store.partFrom(block) ? FROM_BOARD : '');
         const setPart = (block, value) => {
-            if (value === FROM_BOARD) block.part = undefined;
+            store.chosenByPerson(block);
+            const part = value.startsWith(BOARD_PART) ? boardPartsOf(block).find((item) => item.device === value.slice(BOARD_PART.length)) : null;
+            // a part of the selected board brings what its data gives, as from its place in the palette
+            if (part) Object.assign(block, { part: undefined, variant: part.variant, asks: { ...part.asks }, from: { board: store.selectedBoard, device: part.device } });
+            else if (value === FROM_BOARD) block.part = undefined;
             else if (!value) Object.assign(block, { part: undefined, from: undefined });
             else Object.assign(block, { part: value, fixed: true });
         };
@@ -452,7 +461,7 @@ const SelectPage = {
             if (!block.part.length) block.part = undefined;
         };
         const cardHelpers = { store, host, inProject, money, partsOf, firstSays, laterSays, MARKS, priceLink, canWrite, chosenHas };
-        return { store, host, fit, boards, inProject, setPart, FROM_BOARD, cardHelpers, currentCard, currentMiss, listed, partWhere, others, asked, showAll, showKits, firstSays, laterSays, addOutput, ownable, addOwned, money, numberOf, priceLink, MARKS, filter, groups, roleOf, nameOf, outputsQuestion, firstOfRole, said, sendSaid, talking, stream, partsOf, boardTitle, servedBy, install, local, copied, copyInstall, setAsk, shownBoards, BOARDS_SHOWN, canWrite, chosenHas, chainBlock, haveOf, addHave, dropHave };
+        return { store, host, fit, boards, inProject, setPart, FROM_BOARD, BOARD_PART, boardPartsOf, partValue, cardHelpers, currentCard, currentMiss, listed, partWhere, others, asked, showAll, showKits, firstSays, laterSays, addOutput, ownable, addOwned, money, numberOf, priceLink, MARKS, filter, groups, roleOf, nameOf, outputsQuestion, firstOfRole, said, sendSaid, talking, stream, partsOf, boardTitle, servedBy, install, local, copied, copyInstall, setAsk, shownBoards, BOARDS_SHOWN, canWrite, chosenHas, chainBlock, haveOf, addHave, dropHave };
     },
     template: `
         <div class="select" :class="{ talking, waiting: !showKits }">
@@ -498,11 +507,11 @@ const SelectPage = {
                 <div class="blocks">
                     <article v-for="(block, i) in store.answers.blocks" :key="i" class="block" :class="{ fixed: block.fixed }">
                         <header><b>{{ t(roleOf(block.role).text) }}</b>
-                            <span><span v-if="block.by === 'model'" class="hint">{{ t('by the model') }}</span>
+                            <span><span v-if="block.by === 'model'" class="hint">{{ t('by the model') }}</span><span v-if="block.by === 'board'" class="hint">{{ t('from the board') }}</span>
                                 <button class="pin" :class="{ on: block.fixed }" :title="t(block.fixed ? 'Pinned: the model leaves it as it is. Click to free it.' : 'Pin it: the model will leave it as it is.')" @click.prevent="block.fixed = !block.fixed">{{ t(block.fixed ? 'pinned' : 'pin') }}</button>
                                 <button class="drop" @click.prevent="store.answers.blocks.splice(i, 1)">×</button></span></header>
                         <label v-if="roleOf(block.role).variants">{{ t('Variant') }}
-                            <select v-model="block.variant"><option :value="undefined">{{ t('any') }}</option>
+                            <select v-model="block.variant" @change="store.chosenByPerson(block)"><option :value="undefined">{{ t('any') }}</option>
                                 <option v-for="variant in roleOf(block.role).variants" :key="variant.id" :value="variant.id">{{ t(variant.text) }}</option></select></label>
                         <label>{{ t('Name') }} <input type="text" :value="block.name" :placeholder="block.role" @change="block.name = nameOf($event)"></label>
                         <div v-if="chainBlock(block) && store.partsOf(block).length" class="have">{{ t('What you have of it, in order from the board') }}
@@ -511,9 +520,10 @@ const SelectPage = {
                                 <input type="number" min="1" step="1" v-model.number="item.count">
                                 <button class="drop" :title="t('take it out')" @click.prevent="dropHave(block, at)">×</button></p>
                             <button @click.prevent="addHave(block)">{{ t('add what you have') }}</button></div>
-                        <label v-else-if="block.from || store.partsOf(block).length">{{ t('Part') }}
-                            <select :value="block.part ?? (store.partFrom(block) ? FROM_BOARD : '')" @change="setPart(block, $event.target.value)">
-                                <option v-if="store.partFrom(block)" :value="FROM_BOARD">{{ t('on the board {0}: {1}', boardTitle(block.from.board), store.partFrom(block).title) }}</option>
+                        <label v-else-if="block.from || store.partsOf(block).length || boardPartsOf(block).length">{{ t('Part') }}
+                            <select :value="partValue(block)" @change="setPart(block, $event.target.value)">
+                                <option v-for="part in boardPartsOf(block)" :key="part.device" :value="BOARD_PART + part.device">{{ t('on the board {0}: {1}', boardTitle(store.selectedBoard), part.title) }}</option>
+                                <option v-if="store.partFrom(block) && block.from.board !== store.selectedBoard" :value="FROM_BOARD">{{ t('on the board {0}: {1}', boardTitle(block.from.board), store.partFrom(block).title) }}</option>
                                 <option value="">{{ t('any') }}</option>
                                 <option v-for="part in store.partsOf(block)" :key="part.name" :value="part.name">{{ part.title }}</option></select></label>
                         <template v-if="block.role === 'own_part'">

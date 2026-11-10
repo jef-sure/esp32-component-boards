@@ -2,6 +2,9 @@
 
 ## 0.1.3 (not released yet)
 
+- On the page a block with nothing chosen in it takes the part of its role of the board selected, as its display, and
+  goes back to any when the board changes; what the person chose stays. The Part of a block offers the parts of the
+  board selected, so the display of a board is one to choose there, not only the modules of the catalog.
 - The package carries `imported/`, the data of boards and modules taken from others, with the licenses it comes under
   in `imported/licenses/` (`LICENSES.md`): the page of a project made from the registry offers its boards and modules
   as it does in a clone, marked unchecked, with no project for an imported board. It adds about 120 KB to the archive.

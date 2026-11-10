@@ -567,6 +567,8 @@ const SelectPage = {
             <div class="kits">
                 <section v-if="store.plan" class="plan">
                     <h3>{{ t(store.plan.mode === 'create' ? 'A new project in' : 'The project') }} {{ store.plan.folderName }}</h3>
+                    <p v-if="!store.plan.written"><label><input type="checkbox" :checked="store.withComputer" @change="store.setComputer($event.target.checked)">
+                        {{ t('and the computer that shows each board with a display: its window on this computer, Linux with SDL2') }}</label></p>
                     <table>
                         <tr v-for="row in store.plan.rows" :key="row.path" :class="row.state">
                             <td><code>{{ row.path }}</code><span v-if="row.made" class="hint">&nbsp;· {{ t('made by board_select.py --again') }}</span></td>

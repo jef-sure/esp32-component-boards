@@ -18,6 +18,7 @@ const REPOSITORY_ONLY = /^(\.git|\.gitignore|\.gitattributes|README.*|LICENSE.*)
 const LOCAL_BOARD = (name) => `components/local-boards/boards/${name}/board.json`;
 const STUB = (board) => `# board_select.py ${board}`; // the first line of the defaults of a board: the command that makes them
 const COMPUTER = (board) => `host_${board}`; // the computer that shows a board, as board_select.py host --as <board> names it
+const GRAPHICS = 'jef-sure/dgx'; // the library of a graphics display: the window of the computer is a screen of it
 const SKELETON = 'skeleton/files.json'; // the files of a new project, which tools/board_project.py writes too
 const TREE_ORDER = ['mcu', 'power', 'buses', 'devices', 'modules', 'connectors', 'shared_pins', 'display_groups', 'price', 'checked'];
 
@@ -33,7 +34,7 @@ const COMPONENT_NAME = 'jef-sure/boards';
 // the component as the copy beside the page came: from git at a commit, or from the registry at a version
 const COMPONENT_LINES = (source) => (source?.registry ? `  ${COMPONENT_NAME}: ">=${source.registry}"`
     : `  ${COMPONENT_NAME}:\n    git: https://github.com/jef-sure/esp32-component-boards.git\n    version: ${source?.git ?? 'main'}`);
-const PREFERENCES = { language: 'boards.language', currency: 'boards.currency', answers: 'boards.answers', project: 'boards.project' }; // keys of localStorage
+const PREFERENCES = { language: 'boards.language', currency: 'boards.currency', answers: 'boards.answers', project: 'boards.project', computer: 'boards.computer' }; // keys of localStorage
 // a kit and an entry of selection.json are the same when the board and the modules with their counts are
 // a block of a role the palette does not have would stop the solver and the canvas
 const knownRole = (role) => (library.roles ?? []).some((group) => group.roles.some((item) => item.id === role));
@@ -214,6 +215,8 @@ const useEditor = Pinia.defineStore('editor', {
         currency: localStorage.getItem(PREFERENCES.currency) || 'EUR',
         projectName: 'my_project',
         plan: null, // what a project is about to get, shown before anything is written
+        withComputer: localStorage.getItem(PREFERENCES.computer) !== 'no', // each board with a display gets the computer that shows it
+        planned: null, // the kit of a card the last list was made for, to make it again
         kits: [],
         solving: false,
         agent: null, // the token of tools/boards_mcp.py, when the page came from it
@@ -675,7 +678,14 @@ const useEditor = Pinia.defineStore('editor', {
         // added to the project; each gets the name board_select.py takes, a board of the catalog as it is, a kit with modules a
         // board of the program <project>_<board>, and a file of defaults whose first line is the command that makes it. A
         // program with a selection.json keeps its name and its boards: a kit from a card joins them and becomes current.
+        // The list made again with the computers or without: a list made outside the server asks for its folder again.
+        setComputer(on) {
+            this.withComputer = on;
+            localStorage.setItem(PREFERENCES.computer, on ? 'yes' : 'no');
+            return this.planProject(this.planned);
+        },
         async planProject(single) {
+            this.planned = single ?? null;
             await this.run(async () => {
                 // through tools/boards_mcp.py into its folder, or into one picked here
                 const bridge = this.project?.mode ? this.project : null;
@@ -719,12 +729,17 @@ const useEditor = Pinia.defineStore('editor', {
                 // only what is on the canvas; the old one stays, as every board the page did not make
                 const computers = new Set(this.withoutKit().map((item) => item.board));
                 const shows = new Map(chosen.filter(([kit]) => kit.project && computers.has(COMPUTER(kit.name))).map(([kit, board]) => [COMPUTER(kit.name), COMPUTER(board)]));
+                // asked for, a board with a graphics display gets the computer that shows it, as board_select.py host --as does
+                const added = this.withComputer ? chosen.filter(([kit, board]) => kit.libraries.some((item) => item.name === GRAPHICS) && !computers.has(COMPUTER(board)))
+                    .map(([, board]) => COMPUTER(board)).filter((board) => ![...shows.values()].includes(board)) : [];
                 const currentKit = (savedBoards.length ? null : single) ?? this.chosen.find((item) => item.headline === this.current)?.kit ?? kits[0];
                 // a board with no kit here stays current when the radio names it, a computer as its new one
                 const named = !alone && !this.chosen.some((item) => item.headline === this.current) && this.isWithoutKit(this.current) ? this.current : null;
-                const current = shows.get(named) ?? named ?? chosen.find(([kit]) => kit === currentKit)?.[1] ?? chosen[0][1];
+                const chosenCurrent = shows.get(named) ?? named ?? chosen.find(([kit]) => kit === currentKit)?.[1] ?? chosen[0][1];
+                // the computer added for the current board is current, as after board_select.py <board> . then host --as <board> .
+                const current = added.includes(COMPUTER(chosenCurrent)) ? COMPUTER(chosenCurrent) : chosenCurrent;
                 const files = {};
-                const boards = [...chosen.map(([, board]) => board), ...shows.values()];
+                const boards = [...chosen.map(([, board]) => board), ...shows.values(), ...added];
                 for (const [kit, board] of chosen) {
                     if (kit.project) files[LOCAL_BOARD(board)] = `${catalogJson({ ...kit.project, name: board, title: kit.modules.length ? `${kit.title} with ${kit.modules.map((item) => item.title).join(', ')}` : kit.title })}\n`;
                 }

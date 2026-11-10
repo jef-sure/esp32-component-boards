@@ -94,7 +94,46 @@ does instead of the command.
 
 ## 2. The board
 
-A board you know is one command, the computer another:
+The board is chosen on the page of the component or, when you know it already, by two commands. Either way the project
+gets the computer too, which shows its display in a window: the work starts there.
+
+### No board chosen yet: the page
+
+The page of the component is `editor/index.html` of its copy in `managed_components/`. On it a device is described:
+what it needs goes on the canvas, a display, a touch, sensors, and the boards of the catalog that give it come on the
+right, with the modules to buy for them. Each board shows what it has and on which pins, the wires to the modules, what
+it all costs and the libraries the board starts. The page writes what is chosen into the project. It runs on your
+machine: it is opened in a browser through a small server of the component. Start it from the folder of the project:
+
+```sh
+python3 managed_components/jef-sure__boards/tools/boards_mcp.py --serve
+```
+
+It prints a link. Open it in the integrated browser of VS Code: Ctrl+Shift+P → "Browser: Open Integrated Browser" and the
+link in its address bar; with the setting `workbench.browser.openLocalhostLinks`, Ctrl+click on the link in the terminal
+does. Put on the canvas what the device needs, as "Display" from the list on the left, and press "make a project…" on
+the card of a board that fits (several boards: "add to the project" on each, then "make the project of these boards…").
+The page shows the files it would write; the mark "and the computer that shows each board with a display" adds the
+computer that shows each board with a display. After "write" and your permission the server of the page does the rest,
+as `board_select.py --again .`, and the computer becomes the current board. The board of the project has a card of its
+own then, and its parts are in the list on the left: a part from there goes on the canvas with the characteristics it
+has on that board. See [tools.md](tools.md#the-page).
+
+The page keeps the canvas in the browser at once, but for its address. The server takes a free port each time it starts,
+and on a new port the canvas is empty; `--serve --port 8765` keeps the address. Into the project the page writes only by
+the button "make the project of these boards…" (or "make a project…" on a card), once you allow it:
+- the files of the board;
+- a board of the program, `components/local-boards/boards/<project>_<board>`, when the canvas has not all the board has:
+  its glue starts only what is on the canvas;
+- the computer `host_<board>` of each board with a display, while the mark is set: the computer of a board of the
+  program has only what is on the canvas too; when the project had a computer for the board itself, the new one becomes
+  current and the old one stays;
+- `selection.json` with the canvas, which the page starts from when the folder is opened again.
+
+The page does not write the program, `main/main.c`. `board_display_init()` starts the display, and the glue of the board
+knows how to start it on that board.
+
+### A board you know: two commands
 
 ```sh
 python3 managed_components/jef-sure__boards/tools/board_select.py cyd_s028r .
@@ -104,42 +143,18 @@ python3 managed_components/jef-sure__boards/tools/board_select.py host --as cyd_
 The first writes `sdkconfig.defaults.cyd_s028r`, the preset of the board in `CMakePresets.json` and its lock of the
 components. The second does the same for the computer `host_cyd_s028r`: a window with the display of the CYD, turned as
 the board is held. Another `--as` gives another computer beside it, as `host_jc1060p470c`. The board named last is the
-current one, here the computer. No `set-target` and no `menuconfig`. In VS Code, after a change of the board, reload the
-window ("Developer: Reload Window"), choose the current board in the list of presets CMake Tools then shows, and open a
-new terminal of ESP-IDF: so the extension takes the target of the current board. Close the old terminals of ESP-IDF:
-they keep the old target.
+current one, here the computer. No `set-target` and no `menuconfig`.
 
-When the board is not chosen yet, the page of the component helps to choose it: `editor/index.html` of its copy in
-`managed_components/`. On it a device is described: what it needs goes on the canvas, a display, a touch, sensors, and
-the boards of the catalog that give it come on the right, with the modules to buy for them. Each board shows what it has
-and on which pins, the wires to the modules, what it all costs and the libraries the board starts. The page can write
-what is chosen into the project. It runs on your machine: it is opened in a browser through a small server of the
-component. Start it from the folder of the project:
+### After a change of the board
 
-```sh
-python3 managed_components/jef-sure__boards/tools/boards_mcp.py --serve
-```
-
-It prints a link. Open it in the integrated browser of VS Code: Ctrl+Shift+P → "Browser: Open Integrated Browser" and the
-link in its address bar; with the setting `workbench.browser.openLocalhostLinks`, Ctrl+click on the link in the terminal
-does. The board of the project has a card of its own, and its parts are in the list on the left: a part from there goes
-on the canvas with the characteristics it has on that board. See [tools.md](tools.md#the-page).
-
-The page keeps the canvas in the browser at once, but for its address. The server takes a free port each time it starts,
-and on a new port the canvas is empty; `--serve --port 8765` keeps the address. Into the project the page writes only by
-the button "make the project of these boards…" (or "make a project…" on a card), once you allow it:
-- the files of the board;
-- a board of the program, `components/local-boards/boards/<project>_<board>`, when the canvas has not all the board has:
-  its glue starts only what is on the canvas;
-- the computer that shows the board of the program, `host_<project>_<board>`, when the project has a computer for the
-  board itself: it too has only what is on the canvas, and it becomes current in place of the old one, which stays in
-  the project;
-- `selection.json` with the canvas, which the page starts from when the folder is opened again.
-
-The page does not write the program, `main/main.c`. `board_display_init()` starts the display, and the glue of the board
-knows how to start it on that board.
+In VS Code, after a change of the board, by the page or by a command, reload the window ("Developer: Reload Window"),
+choose the current board in the list of presets CMake Tools then shows, and open a new terminal of ESP-IDF: so the
+extension takes the target of the current board. Close the old terminals of ESP-IDF: they keep the old target.
 
 ## 3. On the computer
+
+The example from here is the CYD chosen by the commands. A board from the page is named as the page wrote it: a board
+of the program `<project>_<board>`, its computer `host_<project>_<board>`.
 
 In VS Code: Ctrl+Shift+P → "CMake: Select Configure Preset" → "the computer as CYD (ESP32-2432S028R)", then F7
 ("CMake: Build") and Ctrl+Shift+F5 ("CMake: Run Without Debugging"). A window opens: white, with a blue band at the

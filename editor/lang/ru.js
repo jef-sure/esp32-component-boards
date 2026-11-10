@@ -26,6 +26,7 @@ LANGUAGES.ru = {
         'the current board: idf.py builds it when no preset is named': 'текущая плата: её собирает idf.py, когда пресет не назван',
         'take it out of the project': 'убрать из проекта',
         'make the project of these boards…': 'сделать проект этих плат…',
+        'and the computer that shows each board with a display: its window on this computer, Linux with SDL2': 'и компьютер, который показывает каждую плату с дисплеем: её окно на этом компьютере, Linux с SDL2',
         'A board the program is built for: a project may have several.': 'Плата, для которой собирается программа: у проекта их может быть несколько.',
         'in the project': 'в проекте',
         'What you have of it, in order from the board': 'Что у вас есть, по порядку от платы',

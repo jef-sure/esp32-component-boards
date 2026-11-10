@@ -218,8 +218,8 @@ def editor_differs(reached):
 
 
 def package_wrong():
-    """The archive of the registry holds only files git tracks, none of test/, .github/ or imported/: the manager of
-    components does not read .gitignore, and an include it applies after exclude brings back what exclude took."""
+    """The archive of the registry holds only files git tracks, none of test/ or .github/: the manager of components does
+    not read .gitignore, and an include it applies after exclude brings back what exclude took."""
     compote = pathlib.Path(sys.executable).parent / "compote"
     if not compote.exists() or not (ROOT / ".git").exists():
         print("package: not checked, compote or git is not here")
@@ -232,7 +232,7 @@ def package_wrong():
         with tarfile.open(next(pathlib.Path(out).glob("*.tgz"))) as archive:
             packed = {member.name.removeprefix("./") for member in archive.getmembers() if member.isfile()}
     tracked = set(subprocess.run(["git", "-C", str(ROOT), "ls-files"], capture_output=True, text=True).stdout.splitlines())
-    wrong = sorted(packed - tracked) + sorted(name for name in packed if name.split("/")[0] in ("test", ".github", "imported", "imported-shops"))
+    wrong = sorted(packed - tracked) + sorted(name for name in packed if name.split("/")[0] in ("test", ".github", "imported-shops"))
     print(f"package: {len(packed)} files, {len(wrong)} wrong {wrong[:5]}")
     return bool(wrong)
 

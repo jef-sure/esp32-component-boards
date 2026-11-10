@@ -12,4 +12,4 @@ What came from others keeps the license it came with:
 | `editor/vendor/vue.global.prod.js` | MIT, Yuxi (Evan) You | `editor/vendor/LICENSE.vue` |
 | `editor/vendor/pinia.iife.prod.js` | MIT, Eduardo San Martin Morote | `editor/vendor/LICENSE.pinia` |
 
-The MIT License of this repository does not cover them. No picture of others is kept here. `imported/` is not in the package of the component.
+The MIT License of this repository does not cover them. No picture of others is kept here. `imported/` goes into the package of the component with `imported/licenses/`.

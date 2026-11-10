@@ -71,6 +71,10 @@ files:
     - "catalog/**/*.json"
     - "catalog/**/*.webp"
     - "catalog/**/sdkconfig.defaults"
+    # the data imported from others, unchecked, for the page and the solver, with the licenses it comes under (LICENSES.md)
+    - "imported/**/*.json"
+    - "imported/README.md"
+    - "imported/licenses/*"
     # the tools a program uses and what they import; the checks, imports and audits need test/ or the network
     - "tools/board_select.py"
     - "tools/vscode_env.py"

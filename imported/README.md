@@ -2,7 +2,7 @@
 
 What `tools/import_board_manager.py`, `tools/import_fritzing.py` and `tools/import_addresses.py`, run in this order, took from the data of others. All about libraries lies in `catalog/libraries/`.
 The solver reads this tree after `catalog/`.
-It has no glue and no build in CI, and it is not part of the component package.
+It has no glue and no build in CI. The package of the component carries it, with `licenses/`, for the page and the solver.
 
 Nothing here is checked by us: every file has `origin`, and its level is `extracted`. A board that proves itself moves
 to `catalog/` through a pull request with its glue and a green build.

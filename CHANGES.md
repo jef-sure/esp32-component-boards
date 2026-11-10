@@ -1,5 +1,11 @@
 # CHANGES
 
+## 0.1.3 (not released yet)
+
+- The package carries `imported/`, the data of boards and modules taken from others, with the licenses it comes under
+  in `imported/licenses/` (`LICENSES.md`): the page of a project made from the registry offers its boards and modules
+  as it does in a clone, marked unchecked, with no project for an imported board. It adds about 120 KB to the archive.
+
 ## 0.1.2 (2026-11-10)
 
 - The page writes the computer that shows each board with a display, `host_<board>`, beside the board, while the mark

@@ -294,6 +294,7 @@ then `git pull`.
 
 | what was done | what you see | the right way |
 |---|---|---|
+| files copied into `main/` with their old dates (`cp -p`, an archive, a file manager) in a project built before | `undefined reference` to your own functions: the old `CMakeLists.txt` is not newer than the build, and CMake does not read the list of sources again | `idf.py reconfigure`, in CMake Tools "CMake: Delete Cache and Reconfigure" |
 | "ESP-IDF: Save Default Configuration" (`idf.py save-defconfig`) | the target, the choice and the settings of the current board in the `sdkconfig.defaults` of the project, which every board reads | `board_select.py --keep .`, see "Next" |
 | nothing: so ESP-IDF 6.1 installs it | `'stddef.h' file not found` in the editor, F12 finds nothing | the headers of clang next to `clangd`, see "What you need" |
 | `idf.py` or `compote` in a plain terminal with no activation | `command not found` | the activation of ESP-IDF, or a terminal of "ESP-IDF: Open ESP-IDF Terminal" |

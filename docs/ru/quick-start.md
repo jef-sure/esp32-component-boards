@@ -286,6 +286,7 @@ git push -u origin main
 
 | что сделали | что увидите | как правильно |
 |---|---|---|
+| скопировать файлы в `main/` с их прежними датами (`cp -p`, архив, менеджер файлов) в проект, который уже собирался | `undefined reference` на свои функции: старый `CMakeLists.txt` не новее сборки, и CMake не перечитывает список исходников | `idf.py reconfigure`, в CMake Tools — «CMake: Delete Cache and Reconfigure» |
 | «ESP-IDF: Save Default Configuration» (`idf.py save-defconfig`) | в `sdkconfig.defaults` проекта — цель, выбор и настройки текущей платы, а его читает каждая плата | `board_select.py --keep .`, см. «Дальше» |
 | ничего: так ставит ESP-IDF 6.1 | `'stddef.h' file not found` в редакторе, F12 не находит | заголовки clang рядом с `clangd`, см. «Что нужно» |
 | `idf.py` или `compote` в обычном терминале без активации | `command not found` | команда активации ESP-IDF или терминал «ESP-IDF: Open ESP-IDF Terminal» |

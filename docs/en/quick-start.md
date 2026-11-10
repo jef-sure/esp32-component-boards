@@ -70,7 +70,10 @@ registry; no clone of the repository is needed.
 
 The example is named `hello`, and the program would build into `hello.elf`. Give it its own name at once, before the
 board: the last line of `CMakeLists.txt`, `project(hello)`, becomes `project(my_project)`. The page takes that name
-too: it names the board of the program `<project>_<board>` and keeps the name in `selection.json`.
+too: it names the board of the program `<project>_<board>` and keeps the name in `selection.json`. So the name is
+lowercase Latin letters, digits and `_`, a letter first; the page makes another one such itself, capitals lowercase and
+other characters `_`, as `Clock-60` → `clock_60`. ESP-IDF keeps the first 31 characters of the name in the description
+of the firmware.
 
 So far it is a folder on your machine. It goes to GitHub later, once the project builds (step 5). A repository on
 GitHub is not made first and cloned here: with a licence or a README the folder is no longer empty.

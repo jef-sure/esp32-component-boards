@@ -2,6 +2,10 @@
 
 ## 0.1.3 (not released yet)
 
+- Each configuration puts what the configuration editor or menuconfig changed in `sdkconfig.<board>` since the one
+  before into the project's `sdkconfig.defaults`, as `board_select.py --keep` does: what is set with the gear reaches
+  every board at the next build. The options of the board itself are named and not kept, and an older `sdkconfig` of
+  another board takes nothing back. A snapshot of each `sdkconfig` lies in `.boards/` of the project.
 - The mark "add the build on the computer" stands beside "make a project…" of a card and "make the project of these
   boards…": set, the board gets the computer that shows its display, and the computer is current; clear, the board is
   current and the computers of the project stay as they were. The mark of the list before writing is gone, and the

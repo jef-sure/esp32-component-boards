@@ -273,12 +273,12 @@ git push -u origin main
 - Другая плата или несколько: [choosing-a-board.md](choosing-a-board.md).
 - Своя программа, которая уже есть: [moving-a-program.md](moving-a-program.md).
 - Опции ESP-IDF и библиотек, например `CONFIG_DGX_ENABLE_VSCREEN` для виртуального экрана DGX: шестерёнка внизу окна
-  (редактор настроек) или `idf.py menuconfig` меняют `sdkconfig.<плата>` текущей платы. Чтобы опция стала частью
-  проекта, для всех плат и в git, затем выполните
-  `python3 managed_components/jef-sure__boards/tools/board_select.py --keep .`: она попадёт в `sdkconfig.defaults`
-  проекта. Опции самой платы он не переносит и называет. Плата, у которой уже есть `sdkconfig.<плата>`, возьмёт
-  их, когда этот файл удалят: ESP-IDF читает умолчания только в новый `sdkconfig`. `build/` можно
-  удалять, как в любом проекте ESP-IDF: настройки плат лежат в папке проекта.
+  (редактор настроек) или `idf.py menuconfig` меняют `sdkconfig.<плата>` текущей платы, а следующая сборка переносит
+  изменённое в `sdkconfig.defaults` проекта: опция становится общей для всех плат и попадает в git. Опции самой платы
+  не переносятся, сборка их называет. То, что выбрано раньше, переносит
+  `python3 managed_components/jef-sure__boards/tools/board_select.py --keep .`. Плата, у которой уже есть
+  `sdkconfig.<плата>`, возьмёт их, когда этот файл удалят: ESP-IDF читает умолчания только в новый `sdkconfig`. `build/`
+  можно удалять, как в любом проекте ESP-IDF: настройки плат лежат в папке проекта.
 - Подбор платы вместе с агентом: `python3 managed_components/jef-sure__boards/tools/boards_mcp.py --install` один раз на
   машину, до страницы; см. [tools.md](tools.md#boards_mcppy).
 

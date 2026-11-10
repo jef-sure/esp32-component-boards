@@ -119,7 +119,10 @@ of the current board alone. `board_select.py --keep ~/myproject` puts what was s
 less what `sdkconfig.defaults.<board>` sets, the target, the choice of the board, its memory. An option of the board
 changed there is named and not kept. The lines `sdkconfig.defaults` has stay, and an option named there takes the value
 of the configuration. `idf.py save-defconfig` ("ESP-IDF: Save Default Configuration") does not do: it writes the lines
-of the current board into `sdkconfig.defaults` too, and every board reads that file.
+of the current board into `sdkconfig.defaults` too, and every board reads that file. Each configuration does the same
+for what changed in `sdkconfig.<board>` since the one before (`board_select.py --auto-keep <board>`): a snapshot of the
+`sdkconfig` of each board lies in `.boards/` of the project. An option a board left as it was, as an older `sdkconfig`
+of another board with an older value, is not taken back.
 
 ## board_project.py
 

@@ -282,9 +282,9 @@ then `git pull`.
 - A program you have already: [moving-a-program.md](moving-a-program.md).
 - Options of ESP-IDF and of the libraries, as `CONFIG_DGX_ENABLE_VSCREEN` for a virtual screen of DGX: the gear at the
   bottom of the window (the configuration editor) or `idf.py menuconfig` change `sdkconfig.<board>` of the current
-  board. For an option to be a part of the project, for every board and in git, then run
-  `python3 managed_components/jef-sure__boards/tools/board_select.py --keep .`: it goes into the `sdkconfig.defaults`
-  of the project. The options of the board itself are named and not kept. A board that has `sdkconfig.<board>`
+  board, and the next build puts what changed into the `sdkconfig.defaults` of the project: the option is one of every
+  board, and in git. The options of the board itself are not kept, and the build names them. What was set before goes
+  by `python3 managed_components/jef-sure__boards/tools/board_select.py --keep .`. A board that has `sdkconfig.<board>`
   already takes them once that file is removed: ESP-IDF reads the defaults only into a new `sdkconfig`. `build/` may go,
   as in any project of ESP-IDF: the configurations of the boards lie in the folder of the project.
 - Choosing a board with an agent: `python3 managed_components/jef-sure__boards/tools/boards_mcp.py --install` once a

@@ -7,6 +7,7 @@ examples/*/sdkconfig
 examples/*/sdkconfig.old
 examples/*/sdkconfig.defaults.*
 examples/*/sdkconfig.*
+examples/*/.boards/
 !examples/*/sdkconfig.defaults
 examples/*/CMakePresets.json
 examples/*/managed_components/
@@ -16,6 +17,7 @@ test/host_buttons/sdkconfig
 test/host_buttons/sdkconfig.old
 test/host_buttons/sdkconfig.defaults.*
 test/host_buttons/sdkconfig.*
+test/host_buttons/.boards/
 test/host_buttons/CMakePresets.json
 test/host_buttons/managed_components/
 test/host_buttons/dependencies.lock*

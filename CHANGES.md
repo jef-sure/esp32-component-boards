@@ -6,6 +6,9 @@
   before into the project's `sdkconfig.defaults`, as `board_select.py --keep` does: what is set with the gear reaches
   every board at the next build. The options of the board itself are named and not kept, and an older `sdkconfig` of
   another board takes nothing back. A snapshot of each `sdkconfig` lies in `.boards/` of the project.
+- `board_select.py --keep` and the keeping at each configuration take, on ESP-IDF 6, each option the person set on, as
+  its `sdkconfig` marks the others by `# default:`: an option set together with one that selects it, as
+  `DGX_ENABLE_VSCREEN` with `DGX_ENABLE_MORPH`, was left out of the minimal configuration.
 - The mark "add the build on the computer" stands beside "make a project…" of a card and "make the project of these
   boards…": set, the board gets the computer that shows its display, and the computer is current; clear, the board is
   current and the computers of the project stay as they were. The mark of the list before writing is gone, and the

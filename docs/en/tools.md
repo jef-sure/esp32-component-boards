@@ -116,6 +116,7 @@ has stays the page's: its new hash goes into the list. An `sdkconfig` made befor
 The configuration editor of the ESP-IDF extension (the gear) and `idf.py menuconfig` change `sdkconfig.<board>`
 of the current board alone. `board_select.py --keep ~/myproject` puts what was set into the project's own
 `sdkconfig.defaults`, which every board reads after its own file: the minimal configuration of ESP-IDF (savedefconfig)
+and, on ESP-IDF 6, each option set on by the person (the `sdkconfig` marks the rest by a line `# default:`),
 less what `sdkconfig.defaults.<board>` sets, the target, the choice of the board, its memory. An option of the board
 changed there is named and not kept. The lines `sdkconfig.defaults` has stay, and an option named there takes the value
 of the configuration. `idf.py save-defconfig` ("ESP-IDF: Save Default Configuration") does not do: it writes the lines

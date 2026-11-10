@@ -410,7 +410,29 @@ def take_snapshot(config, snapshot):
 
 # a line of sdkconfig or of a file of defaults: an option and its value, or a bool that is off
 OPTION_LINE = re.compile(r"^(?:(CONFIG_\w+)=.*|# (CONFIG_\w+) is not set)$")
+DEFAULT_MARK = "# default:"  # in an sdkconfig of ESP-IDF 6, before an option nobody set
+DEPRECATED_HEAD = "# Deprecated options for backward compatibility"  # the old names an sdkconfig repeats at its end
 KEEP_HEAD = "# The program's own options, on every board after its sdkconfig.defaults.<board>: board_select.py --keep adds them"
+
+
+def chosen_in(text):
+    """The options an sdkconfig has on that the person or a file of defaults set: ESP-IDF 6 marks each other one, a
+    default of Kconfig or one another option selects, by a line "# default:" before it, up to the old names it repeats at
+    the end. An option the person set that another selects too stays: the minimal configuration would leave it to that
+    one. An option set off is in the minimal configuration when it is on by default."""
+    found, marked = {}, False
+    for line in text.splitlines():
+        line = line.strip()
+        if line == DEPRECATED_HEAD:
+            break
+        if line == DEFAULT_MARK:
+            marked = True
+            continue
+        matched = OPTION_LINE.match(line)
+        if matched and matched[1] and not marked:
+            found[matched[1]] = line
+        marked = False
+    return found
 
 
 def options_of(text):
@@ -464,7 +486,10 @@ def keep(project, board=None, edited_only=False):
     if run.returncode or text is None:
         raise SystemExit(f"savedefconfig of ESP-IDF failed:\n{run.stdout}{run.stderr}")
     minimal = options_of(text)
-    have = options_of(config.read_text())
+    config_text = config.read_text()
+    have = options_of(config_text)
+    # what the person set, where the sdkconfig marks the rest (ESP-IDF 6); the minimal configuration alone elsewhere
+    minimal.update(chosen_in(config_text) if DEFAULT_MARK in config_text else {})
     of_board = options_of((project / f"sdkconfig.defaults.{board}").read_text())
     changed = sorted(name for name, line in of_board.items() if name in have and have[name] != line)
     path = project / "sdkconfig.defaults"

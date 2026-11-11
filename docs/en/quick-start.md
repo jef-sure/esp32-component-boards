@@ -94,7 +94,7 @@ does instead of the command.
 
 ## 2. The board
 
-The board is chosen on the page of the component or, when you know it already, by two commands. Either way the project
+The board is chosen on the page of the component or, when you know it already, by one command. Either way the project
 gets the computer too, which shows its display in a window: the work starts there.
 
 ### No board chosen yet: the page
@@ -134,17 +134,17 @@ the button "make the project of these boards…" (or "make a project…" on a ca
 The page does not write the program, `main/main.c`. `board_display_init()` starts the display, and the glue of the board
 knows how to start it on that board.
 
-### A board you know: two commands
+### A board you know: one command
 
 ```sh
-python3 managed_components/jef-sure__boards/tools/board_select.py cyd_s028r .
 python3 managed_components/jef-sure__boards/tools/board_select.py host --as cyd_s028r .
 ```
 
-The first writes `sdkconfig.defaults.cyd_s028r`, the preset of the board in `CMakePresets.json` and its lock of the
-components. The second does the same for the computer `host_cyd_s028r`: a window with the display of the CYD, turned as
-the board is held. Another `--as` gives another computer beside it, as `host_jc1060p470c`. The board named last is the
-current one, here the computer. No `set-target` and no `menuconfig`.
+It writes the board `cyd_s028r` and its computer `host_cyd_s028r`: for each, `sdkconfig.defaults.<board>`, the preset in
+`CMakePresets.json` and the lock of the components. The computer is a window with the display of the CYD, turned as the
+board is held, and it is the current one. Another `--as` gives another board with its computer, as `jc1060p470c` and
+`host_jc1060p470c`; a board the project has already is not touched. The board with no computer:
+`board_select.py cyd_s028r .`. No `set-target` and no `menuconfig`.
 
 ### After a change of the board
 

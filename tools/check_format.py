@@ -387,6 +387,13 @@ def presets_wrong():
         select("cyd_s028r", "jc4827w543c", fails=True)
         if list(project.glob("sdkconfig.defaults.*")) or presets("name"):
             wrong.append("a CMakePresets.json of another was replaced, or defaults written beside it")
+    with tempfile.TemporaryDirectory() as folder:
+        # a computer comes with the board it shows: one command makes both, and the computer is current
+        project = pathlib.Path(folder)
+        (project / "CMakeLists.txt").write_text("")
+        select("host", "--as", "cyd_s028r")
+        if presets("name", "BOARD") != [("default", "host_cyd_s028r"), ("cyd_s028r", "cyd_s028r"), ("host_cyd_s028r", "host_cyd_s028r")]:
+            wrong.append(f"host --as cyd_s028r made the presets {presets('name', 'BOARD')}")
     print(f"presets: {'0 wrong' if not wrong else '; '.join(wrong)}")
     return len(wrong)
 

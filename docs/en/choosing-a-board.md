@@ -197,7 +197,7 @@ build/host_jc8012p4a1c/<project>.elf
 ```
 
 Each `--as` is a computer of its own, with its name, file, preset and build directory: `host --as cyd_s028r --as
-jc1060p470c` gives `host_cyd_s028r` and `host_jc1060p470c`, which build and run side by side. On ESP-IDF 6,
+jc1060p470c` gives `host_cyd_s028r` and `host_jc1060p470c`, which build and run side by side. A computer comes with its board: a board `--as` names that the project does not have is made too. On ESP-IDF 6,
 `idf.py --preset host_jc8012p4a1c build`.
 
 Its log comes as it is written in a terminal; through a pipe it is buffered, and

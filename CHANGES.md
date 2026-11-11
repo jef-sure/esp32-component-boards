@@ -2,6 +2,9 @@
 
 ## 0.1.4 (not released yet)
 
+- `board_select.py host --as BOARD .` makes the board too when the project does not have it, so one command gives the
+  board and its computer, and the computer is current. A board the project has, or a file of defaults written by hand,
+  is not touched. The quick start chooses a known board with this one command.
 - On the page a computer is no board of its own: it is shown with the board it shows, with no radio, and the mark
   "add the build on the computer" makes it current. A project opened with the computer current has the mark set, and
   with the board current has it clear. Before, the radio of the computer named its board, so choosing it kept the board

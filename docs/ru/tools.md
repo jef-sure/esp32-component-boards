@@ -88,8 +88,8 @@ python3 tools/board_select.py cyd_s028r ~/myproject
 python3 tools/board_select.py my_board ~/myproject    # плата программы, в её components/local-boards/
 python3 tools/board_select.py cyd_s028r jc8012p4a1c --current jc8012p4a1c ~/myproject
 python3 tools/board_select.py --current cyd_s028r ~/myproject
-python3 tools/board_select.py host --as jc8012p4a1c ~/myproject    # компьютер host_jc8012p4a1c размером с 10-дюймовую плату
-python3 tools/board_select.py host --as cyd_s028r --as jc1060p470c ~/myproject  # два компьютера рядом
+python3 tools/board_select.py host --as jc8012p4a1c ~/myproject    # компьютер host_jc8012p4a1c размером с 10-дюймовую плату, и сама плата, если её нет
+python3 tools/board_select.py host --as cyd_s028r --as jc1060p470c ~/myproject  # два компьютера рядом, с их платами
 ```
 
 Записывает `~/myproject/sdkconfig.defaults.<плата>` на каждую названную плату: умолчания платы, строки ревизии её

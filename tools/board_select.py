@@ -13,7 +13,8 @@ BOARD is a board of the catalog, or a board of the program: components/local-boa
 project, whose glue is made there, beside its data. host is the computer: the linux target of ESP-IDF, a window of
 SDL2 as large as the display of the board named by --as (src/board_host.c of the component). Each --as is a board of its
 own, host_<BOARD>, so the computer showing the CYD and the computer showing another board build side by side; the program
-build/host_<BOARD>/<project>.elf runs on the computer. A project of 0.0.7 named the computer host: --again renames its
+build/host_<BOARD>/<project>.elf runs on the computer. A computer comes with its board: a board --as names that the project
+lacks is made too, and the computer is current. A project of 0.0.7 named the computer host: --again renames its
 files, once its CMakeLists.txt takes the computer by if(BOARD MATCHES "^host_").
 
 Each board named gets PROJECT_DIR/sdkconfig.defaults.<BOARD>: the board's sdkconfig.defaults (its chip, its memory,
@@ -623,6 +624,11 @@ def main():
             raise SystemExit("host shows a board: name it with --as, as host --as jc8012p4a1c")
         at = boards.index(HOST)
         boards[at:at + 1] = [f"{HOST}_{shown}" for shown in args.shows]
+        # a computer comes with the board it shows: one the project lacks is made with it, before it, and the computer stays current
+        args.current = args.current or boards[0]
+        for shown in args.shows:
+            if shown not in boards and not (project / f"sdkconfig.defaults.{shown}").exists():
+                boards.insert(boards.index(f"{HOST}_{shown}"), shown)
     elif args.shows:
         raise SystemExit("--as is for host: board_select.py host --as BOARD PROJECT_DIR")
     if not (project / "CMakeLists.txt").exists():

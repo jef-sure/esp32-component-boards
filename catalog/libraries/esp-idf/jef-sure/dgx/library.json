@@ -12,7 +12,7 @@
         {"via": "registry"},
         {"via": "git", "url": "https://github.com/jef-sure/esp32-component-dgx.git", "ref": "{version}"}
     ],
-    "described": "0.10.12",
+    "described": "0.10.14",
     "description": "Graphics on displays of SPI, QSPI, 8-bit parallel, MIPI-DSI and I2C, with its own panel drivers.",
     "values": {
         "color_order": {"rgb": "DgxScreenRGB", "bgr": "DgxScreenBGR"},
@@ -520,7 +520,7 @@
         "version": "^0.10.12",
         "symbol": "BOARD_DISPLAY_GRAPHICS",
         "requires": ["esp_driver_gpio"],
-        "notes": "0.10.0 is not in the registry. 0.10.8 is the first that builds for the linux target of ESP-IDF: the window of the board host; 0.10.9 turns its glass as the board is held, 0.10.10 gives its mouse, 0.10.11 its keys and a window on no bus. 0.10.12 turns the SSD1306, SSD1309 and SH1106.",
+        "notes": "0.10.0 is not in the registry. 0.10.8 is the first that builds for the linux target of ESP-IDF: the window of the board host; 0.10.9 turns its glass as the board is held, 0.10.10 gives its mouse, 0.10.11 its keys and a window on no bus. 0.10.12 turns the SSD1306, SSD1309 and SH1106. 0.10.13 draws straight segments by the pen, 0.10.14 a filled circle with a soft edge and gives a screen its user_data.",
         "headers": ["board_display.h"],
         "public": "boards_dgx.h",
         "sources": {"BOARD_DISPLAY_GRAPHICS": ["board_display.c"]}
@@ -528,13 +528,13 @@
     "checked": {
         "api": {
             "level": "vendor-code",
-            "source": "include/drivers/, include/bus/ and Kconfig of esp32-component-dgx 0.10.12",
+            "source": "include/drivers/, include/bus/ and Kconfig of esp32-component-dgx 0.10.14: 0.10.13 and 0.10.14 changed none of them but the help of DGX_BEZIER_IN_IRAM, by git diff of the tags on 2026-11-11",
             "date": "2026-11-06"
         },
         "history": {
             "level": "vendor-code",
             "covers": ["history"],
-            "source": "headers of include/ at every tag of esp32-component-dgx: the chips, the buses and the arguments of their init; before tag 0.1.0 nothing is known; 0.10.3 to 0.10.12 by the same headers at each tag on 2026-11-06",
+            "source": "headers of include/ at every tag of esp32-component-dgx: the chips, the buses and the arguments of their init; before tag 0.1.0 nothing is known; 0.10.3 to 0.10.12 by the same headers at each tag on 2026-11-06, 0.10.13 and 0.10.14 on 2026-11-11",
             "date": "2026-10-31"
         }
     },
@@ -607,6 +607,8 @@
         {"before": "0.5.0", "chips": {"jd9165": null}, "transports": {"dsi": null}}
     ],
     "versions": {
+        "0.10.14": {"platforms": {"esp_idf": ">=5.2.0"}},
+        "0.10.13": {"platforms": {"esp_idf": ">=5.2.0"}},
         "0.10.12": {"platforms": {"esp_idf": ">=5.2.0"}},
         "0.10.11": {"platforms": {"esp_idf": ">=5.2.0"}},
         "0.10.10": {"platforms": {"esp_idf": ">=5.2.0"}},

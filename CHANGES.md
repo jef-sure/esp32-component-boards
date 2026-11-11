@@ -2,6 +2,8 @@
 
 ## 0.1.4 (not released yet)
 
+- The catalog describes DGX 0.10.14: 0.10.13 draws straight segments by the pen and 0.10.14 a filled circle with a soft
+  edge, and neither changed its drivers, buses or init calls. The component still takes `^0.10.12`.
 - A board of the program is chosen in two steps, so no symbol of Kconfig has two definitions: the choice of the
   component has "A board of this program", and `components/local-boards/Kconfig.projbuild` its own choice, "Board of
   this program", whose boards raise the hidden symbols of the component by selecting their `…_BY_PROGRAM`. Before, that

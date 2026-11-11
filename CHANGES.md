@@ -2,6 +2,10 @@
 
 ## 0.1.4 (not released yet)
 
+- `board_select.py` and the page keep in `CMakePresets.json` what another tool wrote into a preset. The ESP-IDF
+  extension writes the OpenOCD board and its place on USB (Select OpenOCD Board Configuration) into the configuration
+  chosen in VS Code; before, the next change of boards removed them. What it wrote into `default` goes to the preset
+  of the board `default` copies. The quick start says how to choose the OpenOCD board, with no set-target.
 - When the current board changes, the page says after writing to reload the window of VS Code, Developer: Reload Window,
   and open a new terminal of ESP-IDF, and so does `board_select.py`: the build of VS Code takes the new target only
   then.

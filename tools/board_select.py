@@ -21,6 +21,8 @@ its flash, and the two lines that choose it, CONFIG_IDF_TARGET and CONFIG_BOARD_
 revision of its chip, and the defaults of every module named. One board or several, the project gets the same:
 PROJECT_DIR/CMakePresets.json, a preset for each board of the project with its build directory build/<BOARD> and its
 sdkconfig beside its defaults, PROJECT_DIR/sdkconfig.<BOARD>, and the preset default, a copy of the preset of the current board (--current, else the first named).
+What another tool puts in a preset, as the ESP-IDF extension puts the OpenOCD board there, stays; what it puts in default
+goes to the preset of the board default copies.
 A board the project had stays among the presets; a board is taken out by removing its file. Each board has its lock
 of the components beside the project, dependencies.lock.<BOARD>, started as a copy of dependencies.lock when the
 project has one.
@@ -168,27 +170,67 @@ def our_presets(project, boards):
     return doc
 
 
+OURS = ("name", "displayName", "generator", "binaryDir", "cacheVariables")  # the fields of a preset written here
+OUR_VARIABLES = ("BOARD", "IDF_TARGET", "SDKCONFIG")
+COPIED = "others in default"  # in the vendor map, when there were any: the digest of what others had put in the preset default copies
+
+
+def others_in(preset):
+    """What other tools put in a preset, kept when it is written again: the ESP-IDF extension of VS Code puts there the
+    OpenOCD board and its USB place (Select OpenOCD Board Configuration), and its other settings."""
+    kept = {key: value for key, value in preset.items() if key not in OURS}
+    variables = {key: value for key, value in preset.get("cacheVariables", {}).items() if key not in OUR_VARIABLES}
+    return {**kept, "cacheVariables": variables} if variables else kept
+
+
+def with_others(preset, extra):
+    """The preset with the fields of others in place of those it has."""
+    ours = {key: value for key, value in preset.items() if key in OURS}
+    variables = {key: value for key, value in preset["cacheVariables"].items() if key in OUR_VARIABLES}
+    return {**ours, **extra, "cacheVariables": {**variables, **extra.get("cacheVariables", {})}}
+
+
+def others_digest(preset):
+    return project_writer.digest(json.dumps(others_in(preset), sort_keys=True))[:12]
+
+
+def board_presets(doc):
+    """The presets of the boards, default left out. The ESP-IDF extension writes into the configuration chosen in VS Code,
+    and it is default as the quick start chooses it: what changed there since the copy goes to the board it is a copy of."""
+    boards = [preset for preset in doc.get("configurePresets", []) if preset["name"] != DEFAULT]
+    default = next((preset for preset in doc.get("configurePresets", []) if preset["name"] == DEFAULT), None)
+    copied = doc.get("vendor", {}).get(VENDOR, {}).get(COPIED)
+    if default is None or (others_digest(default) == copied if copied else not others_in(default)):
+        return boards
+    shown = default["cacheVariables"].get("BOARD")
+    return [with_others(preset, others_in(default)) if preset["name"] == shown else preset for preset in boards]
+
+
 def with_current(doc, current):
     """The presets with default, the one idf.py builds when no preset is named: a copy of the preset of the current board,
     in the same build directory, so the boards keep their order and only default changes with the current one."""
-    boards = [preset for preset in doc["configurePresets"] if preset["name"] != DEFAULT]
+    boards = board_presets(doc)
     chosen = next((preset for preset in boards if preset["name"] == current), None)
     if not chosen:
         raise SystemExit(f"--current {current}: not a board of {PRESETS} ({', '.join(preset['name'] for preset in boards)})")
     default = {**chosen, "name": DEFAULT, "displayName": f"The current board: {chosen['displayName']}"}
+    made = {key: value for key, value in doc["vendor"][VENDOR].items() if key != COPIED}
+    vendor = {**doc["vendor"], VENDOR: {**made, **({COPIED: others_digest(chosen)} if others_in(chosen) else {})}}
     # first, as the one to choose in VS Code: board_select.py --current and the page change what it builds
-    return resolve.dump({**doc, "configurePresets": [default, *boards]}) + "\n"
+    return resolve.dump({**doc, "vendor": vendor, "configurePresets": [default, *boards]}) + "\n"
 
 
 def presets_text(project, boards, targets, current, command, follows=None):
     """CMakePresets.json of the boards: one preset each in the order named, and default for the current one. follows is
     the current board they are made with, which selection.json gets too: a page that names another later has changed it."""
-    our_presets(project, boards)
+    before = our_presets(project, boards) or {}
+    kept = {preset["name"]: others_in(preset) for preset in board_presets(before)}
     # Ninja, as idf.py takes it: a build directory CMake Tools of VS Code made with another generator stops idf.py there
-    presets = [{"name": board, "displayName": title_of(board, project), "generator": "Ninja", "binaryDir": f"build/{board}",
-                "cacheVariables": {"BOARD": board, "IDF_TARGET": target, "SDKCONFIG": f"sdkconfig.{board}"}} for board, target in zip(boards, targets)]
+    presets = [with_others({"name": board, "displayName": title_of(board, project), "generator": "Ninja", "binaryDir": f"build/{board}",
+                            "cacheVariables": {"BOARD": board, "IDF_TARGET": target, "SDKCONFIG": f"sdkconfig.{board}"}}, kept.get(board, {}))
+               for board, target in zip(boards, targets)]
     made = {"made by": command, **({"follows": follows} if follows else {})}
-    return with_current({"version": 3, "vendor": {VENDOR: made}, "configurePresets": presets}, current)
+    return with_current({"version": 3, "vendor": {**before.get("vendor", {}), VENDOR: made}, "configurePresets": presets}, current)
 
 
 def seed_locks(project, boards):

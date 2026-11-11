@@ -289,6 +289,18 @@ def presets_wrong():
         return [tuple(item[field] if field in item else item["cacheVariables"][field] for field in fields)
                 for item in json.loads(written.read_text())["configurePresets"]] if written.exists() else None
 
+    def openocd(name, location=None):
+        """The USB place of the OpenOCD board in a preset; with location, written there as the ESP-IDF extension of VS Code
+        writes it into the configuration chosen there."""
+        written = project / "CMakePresets.json"
+        doc = json.loads(written.read_text())
+        item = next(item for item in doc["configurePresets"] if item["name"] == name)
+        if location:
+            item["environment"] = {"OPENOCD_USB_ADAPTER_LOCATION": location}
+            item["vendor"] = {"espressif/vscode-esp-idf": {"schemaVersion": 1, "settings": [{"type": "openOCD", "value": {"configs": ["board/esp32s3-builtin.cfg"]}}]}}
+            written.write_text(json.dumps(doc, indent=2))
+        return item.get("environment", {}).get("OPENOCD_USB_ADAPTER_LOCATION")
+
     with tempfile.TemporaryDirectory() as folder:
         project = pathlib.Path(folder)
         (project / "CMakeLists.txt").write_text("")
@@ -356,6 +368,19 @@ def presets_wrong():
         select("--again")
         if presets("name", "binaryDir") != [("default", "build/jc4827w543c"), ("jc4827w543c", "build/jc4827w543c"), ("cyd_s028r", "build/cyd_s028r")]:
             wrong.append(f"--again did not take the current board the page wrote over presets with no record: {presets('name', 'binaryDir')}")
+        # what the ESP-IDF extension writes into default goes to its board; a stale copy in default does not undo what it
+        # writes into a board chosen by name; --again and a board named again keep it
+        openocd("default", "1-3.2.1")
+        select("--current", "cyd_s028r")
+        if (openocd("jc4827w543c"), openocd("default")) != ("1-3.2.1", None):
+            wrong.append(f"what the ESP-IDF extension wrote into default: {openocd('jc4827w543c')} in its board, {openocd('default')} in default")
+        select("--current", "jc4827w543c")
+        openocd("jc4827w543c", "1-1")
+        select("--current", "cyd_s028r")
+        select("--again")
+        select("cyd_s028r")
+        if openocd("jc4827w543c") != "1-1" or "vendor" not in next(item for item in json.loads((project / "CMakePresets.json").read_text())["configurePresets"] if item["name"] == "jc4827w543c"):
+            wrong.append(f"what the ESP-IDF extension wrote into a board chosen by name became {openocd('jc4827w543c')}")
         for path in project.glob("sdkconfig.defaults.*"):
             path.unlink()
         (project / "CMakePresets.json").write_text('{"version": 3, "configurePresets": []}\n')

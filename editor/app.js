@@ -614,6 +614,7 @@ const SelectPage = {
 python3 managed_components/jef-sure__boards/tools/board_select.py --again .
 idf.py build flash monitor</pre>
                         <p class="hint">{{ t('idf.py builds {0}; idf.py --preset <board> builds another, and in VS Code ESP-IDF: Select Project Configuration chooses it.', store.plan.current) }}</p>
+                        <p v-if="store.plan.before !== store.plan.current" class="locked">{{ t('The current board is {0} now: in VS Code reload the window, Developer: Reload Window, so that the ESP-IDF extension and CMake Tools take it, and open a new terminal of ESP-IDF.', store.plan.current) }}</p>
                     </div>
                 </section>
                 <section v-if="store.chosen.length || store.withoutKit().length" class="chosen">

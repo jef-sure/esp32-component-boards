@@ -17,6 +17,15 @@ const nameOf = (text) => text.toLowerCase().replace(/[^a-z0-9_]+/g, '_').replace
 const REPOSITORY_ONLY = /^(\.git|\.gitignore|\.gitattributes|README.*|LICENSE.*)$/i; // a folder with only these is still empty for a new project
 const LOCAL_BOARD = (name) => `components/local-boards/boards/${name}/board.json`;
 const STUB = (board) => `# board_select.py ${board}`; // the first line of the defaults of a board: the command that makes them
+const PRESETS = 'CMakePresets.json';
+// the board the preset default builds, of the text of CMakePresets.json; null for none
+const presetCurrent = (text) => {
+    try {
+        return JSON.parse(text ?? 'null')?.configurePresets?.find((preset) => preset.name === 'default')?.cacheVariables?.BOARD ?? null;
+    } catch {
+        return null;
+    }
+};
 const COMPUTER = (board) => `host_${board}`; // the computer that shows a board, as board_select.py host --as <board> names it
 const GRAPHICS = 'jef-sure/dgx'; // the library of a graphics display: the window of the computer is a screen of it
 // a block with nothing chosen in it, as the palette puts one: the board selected fills it
@@ -359,7 +368,7 @@ const useEditor = Pinia.defineStore('editor', {
                 if (project.mode !== 'update') return;
                 this.projectName = nameOf(project.name);
                 const saved = await this.agentCall('project/file?path=selection.json').catch(() => null);
-                const presets = await this.agentCall('project/file?path=CMakePresets.json').catch(() => null);
+                const presets = await this.agentCall(`project/file?path=${PRESETS}`).catch(() => null);
                 if (saved?.text) this.takeSelection(saved.text, presets?.text);
                 else this.takePresets(presets?.text);
             }).catch(() => {});
@@ -723,6 +732,8 @@ const useEditor = Pinia.defineStore('editor', {
                 }
                 const read = async (path) => (bridge ? (await this.agentCall(`project/file?path=${encodeURIComponent(path)}`).catch(() => null))?.text ?? null : host.readIn(folder, path));
                 const saved = mode === 'update' ? JSON.parse((await read(SELECTION)) ?? 'null') : null;
+                // the current board before this list: a change of it wants a reload of the window of VS Code
+                const before = mode === 'update' ? presetCurrent(await read(PRESETS)) : null;
                 // a selection.json before format 3 had one kit at its top
                 const savedBoards = saved?.boards ?? (saved?.board ? [{ board: saved.board, modules: saved.modules ?? [], libraries: saved.libraries ?? [], says: saved.says ?? [] }] : []);
                 const name = saved?.name ?? this.projectName;
@@ -802,7 +813,7 @@ const useEditor = Pinia.defineStore('editor', {
                 const project = mode === 'update' ? await read('CMakeLists.txt') : null;
                 const cmakeLines = mode === 'update' && !project?.includes('sdkconfig.defaults.${BOARD}') ? await cmakeSnippet() : null;
                 const own = [...new Map(kits.flatMap((kit) => kit.libraries.filter((item) => item.own)).map((item) => [item.name, item])).values()];
-                this.plan = { folder: folder && Vue.markRaw(folder), bridge: Boolean(bridge), folderName: bridge ? bridge.path : folder.name, mode, rows, files, current, boards, written: null,
+                this.plan = { folder: folder && Vue.markRaw(folder), bridge: Boolean(bridge), folderName: bridge ? bridge.path : folder.name, mode, rows, files, current, before, boards, written: null,
                     allow: bridge && !bridge.for_ever ? 'once' : null, cmakeLines,
                     // how the component is taken, so a first reconfigure that fails says why
                     source: this.installed?.component ?? null,

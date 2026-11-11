@@ -100,7 +100,7 @@ def current(project, board, target):
         # the build of the extension with no project configuration chosen goes to the board's directory, which has its BOARD
         return {**settings, "idf.customExtraVars": {**extra, "IDF_TARGET": target}, "idf.sdkconfigFilePath": sdkconfig, "idf.buildPath": str(build)}
 
-    update(project, change, f"the ESP-IDF extension takes {board}, {target} when it reads the target again; till then, unset IDF_TARGET in its terminal")
+    update(project, change, f"the ESP-IDF extension and CMake Tools take {board}, {target} after Developer: Reload Window of VS Code, in a new terminal of ESP-IDF")
 
 
 def main():

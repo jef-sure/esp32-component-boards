@@ -28,6 +28,7 @@ LANGUAGES.ru = {
         'make the project of these boards…': 'сделать проект этих плат…',
         'from the board': 'с платы',
         'add the build on the computer': 'добавить сборку на компьютере',
+        'The current board is {0} now: in VS Code reload the window, Developer: Reload Window, so that the ESP-IDF extension and CMake Tools take it, and open a new terminal of ESP-IDF.': 'Текущая плата теперь {0}: в VS Code перезагрузите окно, Developer: Reload Window, чтобы её взяли расширение ESP-IDF и CMake Tools, и откройте новый терминал ESP-IDF.',
         'The computer shows the display of the board in a window: Linux with SDL2.': 'Компьютер показывает дисплей платы в окне: Linux с SDL2.',
         'A board the program is built for: a project may have several.': 'Плата, для которой собирается программа: у проекта их может быть несколько.',
         'in the project': 'в проекте',

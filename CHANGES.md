@@ -2,6 +2,9 @@
 
 ## 0.1.4 (not released yet)
 
+- When the current board changes, the page says after writing to reload the window of VS Code, Developer: Reload Window,
+  and open a new terminal of ESP-IDF, and so does `board_select.py`: the build of VS Code takes the new target only
+  then.
 - The catalog describes DGX 0.10.14: 0.10.13 draws straight segments by the pen and 0.10.14 a filled circle with a soft
   edge, and neither changed its drivers, buses or init calls. The component still takes `^0.10.12`.
 - A board of the program is chosen in two steps, so no symbol of Kconfig has two definitions: the choice of the

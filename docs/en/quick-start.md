@@ -117,7 +117,7 @@ Beside the button is the mark "add the build on the computer": with it the board
 display, and the computer is current; without it the board is current and the computers of the project stay as they
 were. The page shows the files it would write; after "write" and your permission its server does the rest, as
 `board_select.py --again .`. To go from the computer to the board, clear the mark and press "make the project of these
-boards…" again; set it, and the computer is current again. The board of the project has a card of its
+boards…" again; set it, and the computer is current again. A computer has no line of its own in the list of the boards of the project: it is shown with its board, and a project opened with the computer current has the mark set. The board of the project has a card of its
 own then, and its parts are in the list on the left: a part from there goes on the canvas with the characteristics it
 has on that board. See [tools.md](tools.md#the-page).
 

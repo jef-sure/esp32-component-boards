@@ -2,6 +2,10 @@
 
 ## 0.1.4 (not released yet)
 
+- On the page a computer is no board of its own: it is shown with the board it shows, with no radio, and the mark
+  "add the build on the computer" makes it current. A project opened with the computer current has the mark set, and
+  with the board current has it clear. Before, the radio of the computer named its board, so choosing it kept the board
+  current. A computer of a board the project does not have stays in the list, with no radio.
 - `board_select.py` and the page keep in `CMakePresets.json` what another tool wrote into a preset. The ESP-IDF
   extension writes the OpenOCD board and its place on USB (Select OpenOCD Board Configuration) into the configuration
   chosen in VS Code; before, the next change of boards removed them. What it wrote into `default` goes to the preset

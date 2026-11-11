@@ -169,7 +169,7 @@ li.unknown .mark, li.do .mark { color: var(--accent); }
 .pin.on { border-color: var(--accent, #4a7bd0); color: var(--accent, #4a7bd0); }
 .fixed-board { display: flex; gap: 6px; align-items: center; margin: 0 0 6px; font-weight: 600; }
 /* a board of the project: its title, its name and what is said of it, apart */
-.chosen label code, .chosen p > .hint { margin-left: 0.5em; }
+.chosen label code, .chosen p > code, .chosen p > .hint { margin-left: 0.5em; }
 .block label { display: grid; gap: 1px; font-size: 12px; color: var(--muted); }
 /* what the person has of a chain: a row of a product, its count and the cross; a long title does not widen the block */
 .block { min-width: 0; }

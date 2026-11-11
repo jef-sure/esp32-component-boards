@@ -619,12 +619,16 @@ idf.py build flash monitor</pre>
                 </section>
                 <section v-if="store.chosen.length || store.withoutKit().length" class="chosen">
                     <h3>{{ t('The boards of the project') }}</h3>
-                    <p v-for="item in store.withoutKit()" :key="item.board">
-                        <label :title="t('the current board: idf.py builds it when no preset is named')"><input type="radio" :value="item.board" v-model="store.current"> <template v-if="item.title">{{ item.title }} </template><code>{{ item.board }}</code></label>
-                        <span class="hint">{{ t(item.kept ? 'its kit does not fit the answers now; it stays in the project' : 'no kit of the page: a command made it; it stays in the project') }}</span></p>
+                    <p v-for="item in store.withoutKit().filter((item) => !store.isCompanion(item))" :key="item.board">
+                        <template v-if="store.isComputer(item.board)"><template v-if="item.title">{{ item.title }} </template><code>{{ item.board }}</code>
+                            <span class="hint">{{ t('a computer that shows a board the project does not have; it stays in the project') }}</span></template>
+                        <template v-else><label :title="t('the current board: idf.py builds it when no preset is named')"><input type="radio" :value="item.board" v-model="store.current"> <template v-if="item.title">{{ item.title }} </template><code>{{ item.board }}</code></label>
+                            <span class="hint">{{ t(item.kept ? 'its kit does not fit the answers now; it stays in the project' : 'no kit of the page: a command made it; it stays in the project') }}</span></template>
+                        <span v-if="store.companionOf(item.board)" class="hint">{{ t('its computer: {0}', store.companionOf(item.board)) }}</span></p>
                     <p v-for="item in store.chosen" :key="item.headline">
                         <label :title="t('the current board: idf.py builds it when no preset is named')"><input type="radio" :value="item.headline" v-model="store.current"> {{ item.kit.headline }}</label>
                         <span v-if="item.gone" class="hint">{{ t('does not fit the answers now') }}</span>
+                        <span v-if="store.companionOf(store.boardOf(item))" class="hint">{{ t('its computer: {0}', store.companionOf(store.boardOf(item))) }}</span>
                         <button class="drop" :title="t('take it out of the project')" @click="store.chooseKit(item.kit)">×</button></p>
                     <button v-if="canWrite" @click="store.planProject()">{{ t('make the project of these boards…') }}</button>
                     <label v-if="canWrite && store.chosen.some((item) => store.hasDisplay(item.kit))" class="hint" :title="t('The computer shows the display of the board in a window: Linux with SDL2.')">

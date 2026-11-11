@@ -70,6 +70,8 @@ LANGUAGES.ru = {
         'The component comes from git at main: pin a commit in main/idf_component.yml for a build that stays the same.': 'Компонент берётся из git на main: закрепите коммит в main/idf_component.yml, чтобы сборка не менялась.',
         'its kit does not fit the answers now; it stays in the project': 'её комплект не подходит под нынешние ответы; она остаётся в проекте',
         'no kit of the page: a command made it; it stays in the project': 'комплекта страницы нет: её сделала команда; она остаётся в проекте',
+        'a computer that shows a board the project does not have; it stays in the project': 'компьютер показывает плату, которой в проекте нет; он остаётся в проекте',
+        'its computer: {0}': 'её компьютер: {0}',
         'An empty folder gets a whole project. A folder with a program gets only its board.': 'Пустая папка получит весь проект, папка с программой — только плату.',
         'the wires': 'провода',
         'Know a price?': 'Знаешь цену?',

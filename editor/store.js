@@ -27,6 +27,7 @@ const presetCurrent = (text) => {
     }
 };
 const COMPUTER = (board) => `host_${board}`; // the computer that shows a board, as board_select.py host --as <board> names it
+const shownBy = (name) => (name?.startsWith(COMPUTER('')) ? name.slice(COMPUTER('').length) : null); // the board a computer shows
 const GRAPHICS = 'jef-sure/dgx'; // the library of a graphics display: the window of the computer is a screen of it
 // a block with nothing chosen in it, as the palette puts one: the board selected fills it
 const isAny = (block) => !block.variant && !block.part && !block.from && !Object.values(block.asks ?? {}).some((value) => value !== undefined && value !== '');
@@ -556,16 +557,40 @@ const useEditor = Pinia.defineStore('editor', {
         isWithoutKit(current) {
             return this.withoutKit().some((item) => item.board === current);
         },
+        // A computer is no board of its own: it goes with the line of the board it shows, and the mark makes it current.
+        // The boards with a line: the kits by their names in the project, and those without a kit.
+        boardOf(item) {
+            return item.board ?? (item.kit.project ? null : item.kit.name);
+        },
+        lineBoards() {
+            return new Set([...this.chosen.map((item) => this.boardOf(item)), ...this.withoutKit().map((item) => item.board)]);
+        },
+        isComputer(name) {
+            return shownBy(name) !== null;
+        },
+        isCompanion(item) {
+            return this.lineBoards().has(shownBy(item.board));
+        },
+        companionOf(board) {
+            return board && this.isWithoutKit(COMPUTER(board)) ? COMPUTER(board) : null;
+        },
+        // The radio of the current board of a project, and the mark: a computer current is its board with the mark on.
+        takeCurrent(current, radioOf) {
+            const companion = radioOf(shownBy(current));
+            this.withComputer = companion !== null;
+            return companion ?? radioOf(current);
+        },
         // The kits selection.json of a folder names, found among those counted for its answers: by the board and the modules
         // with their counts, so two kits that differ in the count of a module stay two.
         restoreChosen() {
             if (!this.wanted) return;
             const counted = new Map(this.kits.filter((kit) => kit.fits).map((kit) => [kitKey(kit.name, kit.modules), kit]));
             const found = this.wanted.boards.map((entry) => ({ entry, kit: counted.get(kitKey(entry.base ?? entry.board, entry.modules)) })).filter((item) => item.kit);
-            this.chosen = found.map(({ kit }) => ({ headline: kit.headline, kit: copied(kit) }));
+            this.chosen = found.map(({ entry, kit }) => ({ headline: kit.headline, kit: copied(kit), board: entry.board }));
             this.kept = this.wanted.boards.filter((entry) => !found.some((item) => item.entry === entry)).map((entry) => entry.board);
             this.bare = this.wanted.bare ?? [];
-            const named = found.find(({ entry }) => entry.board === this.wanted.current)?.kit.headline ?? (this.isWithoutKit(this.wanted.current) ? this.wanted.current : null);
+            const radioOf = (board) => found.find(({ entry }) => entry.board === board)?.kit.headline ?? (board && this.isWithoutKit(board) ? board : null);
+            const named = this.wanted.current ? this.takeCurrent(this.wanted.current, radioOf) : null;
             this.current = named ?? this.chosen[0]?.headline ?? null;
             this.wanted = null;
         },
@@ -576,7 +601,7 @@ const useEditor = Pinia.defineStore('editor', {
             const at = this.chosen.findIndex((item) => item.headline === this.current);
             this.chosen = this.chosen.map((item) => {
                 const now = counted.get(kitKey(item.kit.name, item.kit.modules));
-                return now ? { headline: now.headline, kit: copied(now) } : { ...item, gone: true };
+                return now ? { headline: now.headline, kit: copied(now), board: item.board } : { ...item, gone: true };
             });
             if (at >= 0) this.current = this.chosen[at].headline;
         },
@@ -629,7 +654,7 @@ const useEditor = Pinia.defineStore('editor', {
             const order = presetsOrder(presets, { boards: [], current: null });
             this.kept = [];
             this.bare = order.bare ?? [];
-            if (order.current) this.current = order.current;
+            if (order.current) this.current = this.takeCurrent(order.current, (board) => (board && this.isWithoutKit(board) ? board : null));
         },
         take({ local, files, selection, presets }) {
             if (selection) this.takeSelection(selection, presets);
@@ -770,14 +795,15 @@ const useEditor = Pinia.defineStore('editor', {
                 // the board the radio names when it has no kit here; a computer stands for the board it shows, through the board
                 // of the program made of that board, and the mark says which of the two is current
                 const named = !alone && !this.chosen.some((item) => item.headline === this.current) && this.isWithoutKit(this.current) ? this.current : null;
-                const prefix = COMPUTER('');
                 const ofProgram = new Map(chosen.filter(([kit]) => kit.project).map(([kit, board]) => [kit.name, board]));
-                const shownBy = named?.startsWith(prefix) ? named.slice(prefix.length) : null;
+                const shown = shownBy(named);
                 const known = new Set([...chosen.map(([, board]) => board), ...this.withoutKit().map((item) => item.board)]);
                 const kitBoard = chosen.find(([kit]) => kit === currentKit)?.[1] ?? chosen[0][1];
-                const namedBoard = shownBy === null ? named : (ofProgram.get(shownBy) ?? shownBy);
+                const namedBoard = shown === null ? named : (ofProgram.get(shown) ?? shown);
                 const focus = namedBoard && known.has(namedBoard) ? namedBoard : this.withComputer && named ? null : kitBoard;
-                const current = focus === null ? named : hosts.includes(COMPUTER(focus)) ? COMPUTER(focus) : focus;
+                // with the mark, the computer of the board is current, one made now or one the project has
+                const companion = hosts.includes(COMPUTER(focus)) || known.has(COMPUTER(focus)) ? COMPUTER(focus) : null;
+                const current = focus === null ? named : this.withComputer && companion ? companion : focus;
                 const files = {};
                 const boards = [...chosen.map(([, board]) => board), ...hosts];
                 for (const [kit, board] of chosen) {

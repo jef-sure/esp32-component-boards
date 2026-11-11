@@ -132,6 +132,11 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
     // a panel is round only when its data says so: a GC9A01 drives square glass too
     MEASURES.shape = { of: (device) => (device.config?.panel ? (device.config.panel.round ? 'round' : 'rectangular') : null), fits: (shape, asked) => shape === asked, short: (asked) => t('no {0} display', t(asked)), unknown: 'the shape of the display is not in the data' };
 
+    // the depths of color the driver of a display takes; a block taken from a board shows the depth its data starts it with
+    MEASURES.depth_bits = { of: (device) => device.libraries?.[device.library]?.supports?.depth_bits ?? null, fits: (depths, asked) => depths.includes(Number(asked)),
+        short: (asked) => t('no display whose driver takes {0} bits of color', asked), unknown: 'the depths of color its driver takes are not in the data',
+        given: (device) => (device.config?.depth_bits ? String(device.config.depth_bits) : null) };
+
     // a chain grows to the outputs asked, so a part that chains always fits; one that does not says nothing of its outputs
     MEASURES.chain = { of: (device) => (device.chain ? (device.config?.count ?? 1) * (device.chain.unit ?? device.chain.per) : null), fits: () => true, short: () => '', unknown: 'how many outputs a part drives without a chain is not in the data' };
 
@@ -295,6 +300,10 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
 
     // an answer of a block that asks something: none for an empty field or "any"
     const blockAnswer = (value) => (value === undefined || value === null || value === '' || value === 'any' ? undefined : value);
+
+    // the depth of color a block asks of its display, a number; undefined for any
+    const DEPTH = questions.find((item) => item.limit?.measure === 'depth_bits')?.id;
+    const depthAsked = (need) => (DEPTH && blockAnswer(need.asks?.[DEPTH]) !== undefined ? Number(need.asks[DEPTH]) : undefined);
 
     function limitsOf(need, wanted) {
         // a question asked of each block takes the block's answer first, the one of the page after it (an older answer)
@@ -746,7 +755,10 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             // the board keeps its own display as the primary one
             const second = pick.module.device.config?.primary && primaryTaken;
             primaryTaken ||= Boolean(pick.module.device.config?.primary);
-            modules[pick.use] = { ...productOf(pick), on: { [`${pick.transport}.${own}`]: wires }, ...(lines.length ? { pins: needed } : {}), ...(Object.keys(supply).length ? { supply } : {}), ...(second ? { config: { primary: false } } : {}) };
+            // a display of the module started at another depth than its data's
+            const depth = depthAsked(pick.need);
+            const config = { ...(second ? { primary: false } : {}), ...(depth !== undefined && pick.module.device.config?.depth_bits !== depth ? { depth_bits: depth } : {}) };
+            modules[pick.use] = { ...productOf(pick), on: { [`${pick.transport}.${own}`]: wires }, ...(lines.length ? { pins: needed } : {}), ...(Object.keys(supply).length ? { supply } : {}), ...(Object.keys(config).length ? { config } : {}) };
         }
         const sharedPins = Object.fromEntries(Object.entries(shared).filter(([, chain]) => chain.uses.length > 1).flatMap(([id, chain]) => Object.entries(chain.pins).map(([line, pin]) => [`${id}_${line}`, { line: pin, devices: chain.uses }])));
         return { ...KIT_FORMAT, kind: 'project', name: 'kit', extends: name, title: `${board.title} with modules`, ...(Object.keys(buses).length ? { buses } : {}), ...(Object.keys(devices).length ? { devices } : {}), ...(Object.keys(sharedPins).length ? { shared_pins: sharedPins } : {}), modules };
@@ -1009,7 +1021,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
                 for (const question of questions.filter((item) => item.asked === 'block' && item.limit?.measure && ofClass(item, cls, variant))) {
                     const measure = MEASURES[question.limit.measure];
                     if (!measure || measure.soft || !measure.unknown) continue;
-                    const value = measure.of(device);
+                    const value = measure.given ? measure.given(device) : measure.of(device);
                     if (typeof value === 'number') asks[question.id] = Math.floor(value * 10) / 10;
                     else if (typeof value === 'string') asks[question.id] = value;
                 }
@@ -1181,11 +1193,14 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         const modules = doc.modules ?? {};
         const broughtBy = (part) => Object.entries(modules).find(([use, entry]) => part.startsWith(`${use}_`) && part.slice(use.length + 1) in (catalog.modules[entry.module]?.devices ?? {}));
         const unused = { devices: {}, modules: {} };
-        for (const [part] of unasked) {
+        // a layer over a part of the board in the board of the program: through its module when a module of the board brings it
+        const layer = (part, value) => {
             const brought = broughtBy(part);
-            if (!brought) unused.devices[part] = { used: false };
-            else unused.modules[brought[0]] = { module: brought[1].module, devices: { ...unused.modules[brought[0]]?.devices, [part.slice(brought[0].length + 1)]: { used: false } } };
-        }
+            if (!brought) unused.devices[part] = { ...unused.devices[part], ...value };
+            else unused.modules[brought[0]] = { module: brought[1].module, devices: { ...unused.modules[brought[0]]?.devices, [part.slice(brought[0].length + 1)]: value } };
+        };
+        for (const [part] of unasked) layer(part, { used: false });
+        let layered = false; // a part of the board asked with something other than its data, as another depth of color
         const shortfalls = [];
         const extra = []; // the addons that give what the board has not
         // The versions of the platforms that take the chip: of the platform asked, or of every one when none is. A version asked is
@@ -1268,9 +1283,15 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             else if (answering.length) say('yes', t('{0} is on the board', need.title));
             const names = new Map(Object.entries(board.devices).map(([key, device]) => [device, key]));
             for (const device of answering.slice(0, need.count)) held.push(heldOf(board, need, names.get(device), device));
+            // a display of the board started at another depth than its data's
+            const depth = depthAsked(need);
+            for (const device of answering.slice(0, need.count).filter((item) => depth !== undefined && item.config?.depth_bits !== depth)) {
+                layer(names.get(device), { config: { depth_bits: depth } });
+                layered = true;
+            }
             if (answering.length < need.count) shortfalls.push({ need, count: need.count - answering.length });
         }
-        if (!shortfalls.length && !unasked.length) return [kit(name, doc, board, says, null, [])];
+        if (!shortfalls.length && !unasked.length && !layered) return [kit(name, doc, board, says, null, [])];
         const reaching = (need, module) => limitsOf(need, wanted).every((limit) => meets(limit, module.device));
         const output = (need) => ({ name: need.use, title: t('output {0}: {1} timer {2}, {3} Hz', need.index + 1, plan.sources[plan.chosen[need.index].name].title, plan.chosen[need.index].timer, wanted.outputs[need.index].hz), device: { ways: [need.way] }, power: [] });
         // a variant with its own way needs no part of the catalog: the kit gives it the lines
@@ -1368,6 +1389,12 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             const lines = [...reasons];
             const arduino = platform?.ecosystem === 'arduino';
             for (const item of modules.filter((entry) => !entry.after)) lines.push({ level: 'yes', text: t('{0} on {1}', named(item), item.on.toUpperCase()) });
+            // a display started at another depth of color than its data's was not tried so on this board
+            for (const [part, device] of Object.entries(project && base ? resolved.devices : {})) {
+                const data = (base.devices[part] ?? picks.find((pick) => part === `${pick.use}_${pick.module.part}`)?.module.device)?.config?.depth_bits;
+                const depth = device.config?.depth_bits;
+                if (data && depth && depth !== data) lines.push({ level: 'unknown', text: t('{0}: {1} bits of color were not tried on this board; its data starts it with {2}', catalog.devices[device.chip]?.title ?? part, depth, data) });
+            }
             for (const pick of picks.filter((item) => item.count > 1 && !item.members)) lines.push({ level: 'do', text: t('{0}: {1} in one chain on the wires of one, the output of each into the input of the next', pick.module.title, pick.count) });
             for (const pick of picks.filter((item) => item.members)) lines.push({ level: 'do', text: t('{0}: {1} in one chain on the wires of the first, the output of each into the input of the next', pick.need.title, pick.members.map((member) => named({ title: member.module.title, count: member.count })).join(t(', then '))) });
             for (const [name, use] of Object.entries(plan?.used ?? {})) {

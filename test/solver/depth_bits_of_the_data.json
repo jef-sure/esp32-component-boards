@@ -1,0 +1,18 @@
+{
+    "title": "A depth of color the data of the board starts its display with changes nothing in the board of the program",
+    "answers": {
+        "blocks": [
+            {
+                "role": "display",
+                "asks": {
+                    "depth_bits": "16"
+                }
+            }
+        ]
+    },
+    "project": {
+        "board": "cyd_s028r",
+        "at": "devices.lcd",
+        "is": null
+    }
+}

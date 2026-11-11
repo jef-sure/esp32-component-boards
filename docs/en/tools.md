@@ -389,7 +389,10 @@ stays, and the kit names it as an unknown. A measured question of a class with `
 as the reading distance and the cards of a reader, the diagonal and the shape of a graphics display, the outputs of a
 chain: two readers ask their own, and two blocks of one role are always two parts. Its `limit.of` and `limit.variant`
 may be lists, and a block with no variant chosen is asked what any of them is. The distance between readers stays one
-question of the page. Of two displays from modules, the first block gives the primary one. The page shows these fields in the block; the model sets them with `edit_blocks`,
+question of the page. The depth of color of a display, `depth_bits`, keeps the parts whose driver takes it (`supports.depth_bits`
+in the record of the library); when it is not the depth the data starts the display with, the board of the program starts
+it so (`config.depth_bits` of the display of the board or of the module), and the kit names that depth as not tried on the
+board. Of two displays from modules, the first block gives the primary one. The page shows these fields in the block; the model sets them with `edit_blocks`,
 and `roles` lists them. The platform is asked without a version: a kit names the versions that take its chip and its
 libraries, and a version is fixed only when the person chooses one.
 

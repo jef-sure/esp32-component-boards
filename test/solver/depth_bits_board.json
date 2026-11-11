@@ -1,0 +1,23 @@
+{
+    "title": "A display block asks 24 bits of color: only boards whose display driver takes 24 fit, and the board of the program starts the display of the board at 24, a depth not tried on it",
+    "answers": {
+        "blocks": [
+            {
+                "role": "display",
+                "asks": {
+                    "depth_bits": "24"
+                }
+            }
+        ]
+    },
+    "fit": [
+        "jc1060p470c",
+        "jc8012p4a1c"
+    ],
+    "project": {
+        "board": "jc8012p4a1c",
+        "at": "devices.lcd.config.depth_bits",
+        "is": 24
+    },
+    "says": "24 bits of color were not tried on this board"
+}

@@ -126,6 +126,12 @@ for (const name of names) {
         const used = [...others(kit?.project.devices), ...others(kit?.project.modules), ...Object.values(kit?.project.buses ?? {}).flatMap((hosts) => Object.values(hosts).flatMap((lines) => Object.values(lines)))];
         if (!kit?.project || used.some((pin) => given.avoids.pins.includes(pin))) say(`${given.avoids.board} uses a pin it was told is in use`);
     }
+    if (given.project) {
+        // a value of the board of the program a kit writes, by its path there; null for none
+        const kit = fit.find((item) => item.name === given.project.board);
+        const value = given.project.at.split('.').reduce((node, key) => node?.[key], kit?.project) ?? null;
+        if (JSON.stringify(value) !== JSON.stringify(given.project.is)) say(`${given.project.board}: ${given.project.at} is ${JSON.stringify(value)}`);
+    }
     if (given.unused) {
         const kit = fit.find((item) => item.name === given.unused.board);
         const left = Object.entries(kit?.project?.devices ?? {}).filter(([, device]) => device.used === false).map(([part]) => part).sort();

@@ -2,6 +2,11 @@
 
 ## 0.1.4 (not released yet)
 
+- The display block of the page asks the depth of color, from the depths the drivers of the catalog take. Only the
+  parts whose driver takes it fit, and when it is not the depth the data starts the display with, the board of the
+  program starts it so, by `config.depth_bits` of the display of the board or of the module; the card names that
+  depth as not tried on the board. Before, the depth was the one of the data, and only menuconfig of the computer
+  showed a depth.
 - `board_select.py host --as BOARD .` makes the board too when the project does not have it, so one command gives the
   board and its computer, and the computer is current. A board the project has, or a file of defaults written by hand,
   is not touched. The quick start chooses a known board with this one command.

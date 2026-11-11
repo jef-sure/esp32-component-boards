@@ -29,6 +29,15 @@
             "limit": {"measure": "shape", "of": "display", "variant": ["tft", "oled", "epaper", "memory", "mono_lcd"]},
             "choices": [{"value": "any", "text": "any"}, {"value": "round", "text": "round"}, {"value": "rectangular", "text": "rectangular"}]
         },
+        {
+            "id": "depth_bits",
+            "asked": "block",
+            "text": "Its depth of color, bits",
+            "type": "choice",
+            "when": {"display": "graphics"},
+            "limit": {"measure": "depth_bits", "of": "display", "variant": ["tft", "oled", "epaper", "memory", "mono_lcd"]},
+            "choices": [{"value": "any", "text": "any"}, {"value": "1", "text": "1"}, {"value": "4", "text": "4"}, {"value": "12", "text": "12"}, {"value": "16", "text": "16"}, {"value": "18", "text": "18"}, {"value": "24", "text": "24"}]
+        },
         {"id": "touch", "text": "A touch panel", "type": "flag", "needs": {"class": "touch"}},
         {"id": "sound", "text": "Sound", "type": "flag", "needs": {"class": "audio"}},
         {"id": "outputs", "text": "Tones and PWM", "type": "outputs"},

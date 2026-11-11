@@ -1,0 +1,18 @@
+{
+    "title": "A display module asked at 18 bits of color, which its driver takes and its data does not start it with: the board of the program starts it at 18",
+    "answers": {
+        "blocks": [
+            {
+                "role": "display",
+                "asks": {
+                    "depth_bits": "18"
+                }
+            }
+        ]
+    },
+    "project": {
+        "board": "esp32_devkit",
+        "at": "modules.display.config.depth_bits",
+        "is": 18
+    }
+}

@@ -1,5 +1,14 @@
 # CHANGES
 
+## 0.1.4 (not released yet)
+
+- A board of the program is chosen in two steps, so no symbol of Kconfig has two definitions: the choice of the
+  component has "A board of this program", and `components/local-boards/Kconfig.projbuild` its own choice, "Board of
+  this program", whose boards raise the hidden symbols of the component by selecting their `…_BY_PROGRAM`. Before, that
+  file defined the choice and the symbols again, and kconfgen warned that such definitions get a higher severity in the
+  future. Its file of defaults sets `CONFIG_BOARD_SELECT_PROGRAM=y` before its own line; `board_select.py --again .`
+  makes both files of a project made before.
+
 ## 0.1.3 (2026-11-10)
 
 - Each configuration puts what the configuration editor or menuconfig changed in `sdkconfig.<board>` since the one

@@ -107,6 +107,9 @@ idf.py build
 ```
 
 `board_select.py` создаёт клей рядом с данными, записывает `CMakeLists.txt` и `Kconfig.projbuild`
-этой папки, и плата появляется в меню плат. Если у платы нет своего `sdkconfig.defaults`, берётся
-файл платы, которую она расширяет. Пины проверяются так же, как у плат каталога:
+этой папки, и плата появляется в меню плат: *Board the program runs on* → *A board of this program*, а под ним
+*Board of this program* — её выбор. Каждый символ Kconfig определён один раз: скрытые признаки компонента плата
+программы включает через их `…_BY_PROGRAM`, и её файл умолчаний выбирает обе строки, `CONFIG_BOARD_SELECT_PROGRAM` и
+`CONFIG_BOARD_SELECT_<ПЛАТА>`. Если у платы нет своего `sdkconfig.defaults`, берётся файл платы, которую она расширяет.
+Пины проверяются так же, как у плат каталога:
 `tools/board_pins.py my_board --project .`. `examples/local_boards` — такая программа.

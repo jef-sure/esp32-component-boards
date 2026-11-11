@@ -89,15 +89,23 @@ def defaults_of(name, what):
     return defaults.read_text()
 
 
+PROGRAM_LINE = "CONFIG_BOARD_SELECT_PROGRAM=y"  # a board of the program is chosen in two steps: this, then which one
+
+
 def local_defaults(local, name):
-    """The sdkconfig.defaults of a board of the program: its own, or the one of the board it extends with the choice changed."""
+    """The sdkconfig.defaults of a board of the program: its own, or the one of the board it extends with the choice changed;
+    either way with the line that chooses "A board of this program" before its own."""
     own = local / "boards" / name / "sdkconfig.defaults"
     if own.exists():
-        return own.read_text()
-    base = resolve.load("boards", name).get("extends")
-    if not base:
-        raise SystemExit(f"{own}: write it, the board extends nothing to take it from")
-    return re.sub(r"^CONFIG_BOARD_SELECT_\w+=y$", f"CONFIG_BOARD_SELECT_{name.upper()}=y", defaults_of(base, "board"), flags=re.M)
+        text = own.read_text()
+    else:
+        base = resolve.load("boards", name).get("extends")
+        if not base:
+            raise SystemExit(f"{own}: write it, the board extends nothing to take it from")
+        text = re.sub(r"^CONFIG_BOARD_SELECT_\w+=y$", f"CONFIG_BOARD_SELECT_{name.upper()}=y", defaults_of(base, "board"), flags=re.M)
+    if PROGRAM_LINE in text.splitlines():
+        return text
+    return re.sub(rf"^CONFIG_BOARD_SELECT_{name.upper()}=y$", f"{PROGRAM_LINE}\n\\g<0>", text, count=1, flags=re.M)
 
 
 def defaults_text(project, local, board, modules, revision):

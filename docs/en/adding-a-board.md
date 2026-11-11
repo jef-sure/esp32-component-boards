@@ -109,6 +109,9 @@ idf.py build
 ```
 
 `board_select.py` makes the glue beside the data and writes `CMakeLists.txt` and `Kconfig.projbuild`
-of that directory, and the board joins the menu of the boards. Without a `sdkconfig.defaults` of its
-own a board takes the one of the board it extends. A wire of the board is checked like one of the catalog:
+of that directory, and the board joins the menu of the boards: *Board the program runs on* → *A board of this
+program*, and under it *Board of this program* chooses it. Each symbol of Kconfig has one definition: a board of the
+program raises the hidden symbols of the component through their `…_BY_PROGRAM`, and its file of defaults sets both
+lines, `CONFIG_BOARD_SELECT_PROGRAM` and `CONFIG_BOARD_SELECT_<BOARD>`. Without a `sdkconfig.defaults` of its own a board
+takes the one of the board it extends. A wire of the board is checked like one of the catalog:
 `tools/board_pins.py my_board --project .`. `examples/local_boards` is such a program.

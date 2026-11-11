@@ -40,7 +40,8 @@ if(BOARD AND DEFINED CONFIG_IDF_TARGET AND EXISTS "${PROJECT_DIR}/sdkconfig.defa
         set(_boards_chosen "none")
         get_cmake_property(_boards_variables VARIABLES)
         foreach(_boards_variable ${_boards_variables})
-            if(_boards_variable MATCHES "^CONFIG_BOARD_SELECT_(.+)$" AND "${${_boards_variable}}")
+            # a board of the program is chosen by CONFIG_BOARD_SELECT_PROGRAM and its own symbol: the latter names it
+            if(_boards_variable MATCHES "^CONFIG_BOARD_SELECT_(.+)$" AND "${${_boards_variable}}" AND NOT _boards_variable STREQUAL "CONFIG_BOARD_SELECT_PROGRAM")
                 string(TOLOWER "${CMAKE_MATCH_1}" _boards_chosen)
             endif()
         endforeach()

@@ -1162,32 +1162,46 @@ def kconfig_help(text, indent="        "):
     return "\n".join(indent + l for l in lines)
 
 
-def kconfig_board(board):
-    """The entry of a board in the choice."""
+def kconfig_board(board, also=()):
+    """The entry of a board in the choice; also, the symbols a board of a program selects besides."""
     L = [f"config {choice_symbol(board)}", f"    bool \"{quoted(menu_text(board))}\"", f"    depends on IDF_TARGET_{board['mcu']['target'].upper()}"]
     selects = [symbol for shown in board.get("displays") or [] if is_pixel(shown) for symbol in transport_of(shown)["select"] + shown["entry"]["select"]]
     for group in (board.get("display_groups") or {}).values():
         selects += resolve.library(board["display"]["library"])["groups"][group["how"]]["select"]
-    L.extend(f"    select {symbol}" for symbol in dict.fromkeys(selects))
+    L.extend(f"    select {symbol}" for symbol in dict.fromkeys([*selects, *also]))
     L.extend(["    help", kconfig_help(sentence(board["description"])), ""])
     return L
 
 
+BY_PROGRAM = "_BY_PROGRAM"  # the bool a board of a program selects for a hidden symbol: each symbol has one definition
+
+
+def possible_features():
+    """Every hidden symbol a board can raise: the symbol of the adapter of each library, those its chips name, a group of
+    displays."""
+    found = {"BOARD_DISPLAY_GROUP"}
+    for record in resolve.all_libraries(tuple(resolve.ROOTS)).values():
+        adapter = record.get("adapter") or {}
+        if "symbol" in adapter:
+            found.add(adapter["symbol"])
+        for chip in (record.get("chips") or {}).values():
+            found.update((chip.get("adapter") or {}).get("symbols", ()))
+    return found
+
+
 def gen_local_kconfig(boards):
-    """Kconfig.projbuild of the component local-boards: ESP-IDF reads it before the Kconfig of the component, so its defaults come first."""
+    """Kconfig.projbuild of the component local-boards: which board of the program, when the choice of jef-sure/boards is
+    "A board of this program". Its boards raise the hidden symbols of the component by selecting their *_BY_PROGRAM,
+    so no symbol is defined twice."""
     L = ["# The boards of this program, made by tools/board_select.py from boards/: do not edit by hand.",
-         "# They join the choice of jef-sure/boards and raise the same hidden symbols.",
-         "choice BOARD_SELECT", "    prompt \"Board the program runs on\"", ""]
+         "# jef-sure/boards offers \"A board of this program\" in its choice; this choice says which, and its boards",
+         "# raise the hidden symbols of jef-sure/boards by selecting their *_BY_PROGRAM.",
+         "choice BOARD_PROGRAM_SELECT", "    prompt \"Board of this program\"", "    depends on BOARD_SELECT_PROGRAM", ""]
     for board in boards:
-        L.extend(kconfig_board(board))
+        L.extend(kconfig_board(board, [f"{feature}{BY_PROGRAM}" for feature in sorted(features_of(board))]))
     L.extend(["endchoice", ""])
-    features = {}
     for board in boards:
         L.extend([f"config BOARD_{board['name'].upper()}", "    int", f"    default 1 if {choice_symbol(board)}", "    default 0", ""])
-        for feature in features_of(board):
-            features.setdefault(feature, []).append(choice_symbol(board))
-    for feature in sorted(features):
-        L.extend([f"config {feature}", "    int", f"    default 1 if {' || '.join(features[feature])}", ""])
     return "\n".join(L)
 
 
@@ -1242,6 +1256,12 @@ def gen_kconfig(boards, modules):
     out("")
     for board in boards:
         L.extend(kconfig_board(board))
+    out("config BOARD_SELECT_PROGRAM")
+    out("    bool \"A board of this program, in components/local-boards\"")
+    out("    help")
+    out(kconfig_help("A board described in the program, which tools/board_select.py or the page writes into "
+                     "components/local-boards/: its own choice, Board of this program, says which."))
+    out("")
     out("config BOARD_SELECT_HOST")
     out("    bool \"The computer: a window of SDL2 as large as the board it shows\"")
     out("    depends on IDF_TARGET_LINUX")
@@ -1324,12 +1344,17 @@ def gen_kconfig(boards, modules):
     for symbol, _, _ in feature_deps():
         all_features.setdefault(symbol, [])
     all_features.setdefault("BOARD_DISPLAY_GROUP", [])  # #if in the adapter of DGX: defined, 0, on a board with no group
+    for feature in possible_features():
+        all_features.setdefault(feature, [])
+    out("# A board of the program (components/local-boards) raises a symbol by selecting its *_BY_PROGRAM.")
     for feature in sorted(all_features):
         out(f"config {feature}")
         out("    int")
-        if all_features[feature]:
-            out(f"    default 1 if {' || '.join(all_features[feature])}")
+        out(f"    default 1 if {' || '.join([*all_features[feature], feature + BY_PROGRAM])}")
         out("    default 0")
+        out("")
+        out(f"config {feature}{BY_PROGRAM}")
+        out("    bool")
         out("")
     out("endmenu")
     return "\n".join(L) + "\n"

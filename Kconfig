@@ -152,6 +152,13 @@ config BOARD_SELECT_NODEMCU_ESP32S
         ESP-WROOM-32, a CP2102 USB bridge on micro-USB, a power LED, a blue LED
         on GPIO 2, EN and BOOT buttons.
 
+config BOARD_SELECT_PROGRAM
+    bool "A board of this program, in components/local-boards"
+    help
+        A board described in the program, which tools/board_select.py or the
+        page writes into components/local-boards/: its own choice, Board of this
+        program, says which.
+
 config BOARD_SELECT_HOST
     bool "The computer: a window of SDL2 as large as the board it shows"
     depends on IDF_TARGET_LINUX
@@ -304,62 +311,101 @@ config BOARD_NODEMCU_ESP32S
 # a character display brings hd44780. Derived from the data, so the data of a board and the
 # rules cannot drift apart. The computer has a graphics display, its window a screen of DGX, and a
 # touch, the mouse over it as DGX-DI reads it, when the board it shows has one.
+# A board of the program (components/local-boards) raises a symbol by selecting its *_BY_PROGRAM.
 config BOARD_DISPLAY_GRAPHICS
     int
-    default 1 if BOARD_SELECT_CYD_S028R || BOARD_SELECT_ESP32_C3_OLED_042 || BOARD_SELECT_ESP32_OLED_096 || BOARD_SELECT_JC1060P470C || BOARD_SELECT_JC4827W543C || BOARD_SELECT_JC8012P4A1C || BOARD_SELECT_HOST
+    default 1 if BOARD_SELECT_CYD_S028R || BOARD_SELECT_ESP32_C3_OLED_042 || BOARD_SELECT_ESP32_OLED_096 || BOARD_SELECT_JC1060P470C || BOARD_SELECT_JC4827W543C || BOARD_SELECT_JC8012P4A1C || BOARD_SELECT_HOST || BOARD_DISPLAY_GRAPHICS_BY_PROGRAM
     default 0
+
+config BOARD_DISPLAY_GRAPHICS_BY_PROGRAM
+    bool
 
 config BOARD_DISPLAY_GROUP
     int
+    default 1 if BOARD_DISPLAY_GROUP_BY_PROGRAM
     default 0
+
+config BOARD_DISPLAY_GROUP_BY_PROGRAM
+    bool
 
 config BOARD_DISPLAY_HD44780
     int
+    default 1 if BOARD_DISPLAY_HD44780_BY_PROGRAM
     default 0
+
+config BOARD_DISPLAY_HD44780_BY_PROGRAM
+    bool
 
 config BOARD_SOUND_DAC
     int
-    default 1 if BOARD_SELECT_CYD_S028R
+    default 1 if BOARD_SELECT_CYD_S028R || BOARD_SOUND_DAC_BY_PROGRAM
     default 0
+
+config BOARD_SOUND_DAC_BY_PROGRAM
+    bool
 
 config BOARD_SOUND_ES8311
     int
-    default 1 if BOARD_SELECT_ESP32_P4_ETH || BOARD_SELECT_ESP32_P4_POE_ETH || BOARD_SELECT_JC1060P470C || BOARD_SELECT_JC8012P4A1C
+    default 1 if BOARD_SELECT_ESP32_P4_ETH || BOARD_SELECT_ESP32_P4_POE_ETH || BOARD_SELECT_JC1060P470C || BOARD_SELECT_JC8012P4A1C || BOARD_SOUND_ES8311_BY_PROGRAM
     default 0
+
+config BOARD_SOUND_ES8311_BY_PROGRAM
+    bool
 
 config BOARD_SOUND_I2S
     int
-    default 1 if BOARD_SELECT_JC4827W543C
+    default 1 if BOARD_SELECT_JC4827W543C || BOARD_SOUND_I2S_BY_PROGRAM
     default 0
+
+config BOARD_SOUND_I2S_BY_PROGRAM
+    bool
 
 config BOARD_TOUCH
     int
-    default 1 if BOARD_SELECT_CYD_S028R || BOARD_SELECT_JC1060P470C || BOARD_SELECT_JC4827W543C || BOARD_SELECT_JC8012P4A1C || (BOARD_SELECT_HOST && BOARD_HOST_TOUCH != 0)
+    default 1 if BOARD_SELECT_CYD_S028R || BOARD_SELECT_JC1060P470C || BOARD_SELECT_JC4827W543C || BOARD_SELECT_JC8012P4A1C || (BOARD_SELECT_HOST && BOARD_HOST_TOUCH != 0) || BOARD_TOUCH_BY_PROGRAM
     default 0
+
+config BOARD_TOUCH_BY_PROGRAM
+    bool
 
 config BOARD_TOUCH_ESP_LCD
     int
-    default 1 if BOARD_SELECT_CYD_S028R || BOARD_SELECT_JC1060P470C || BOARD_SELECT_JC4827W543C
+    default 1 if BOARD_SELECT_CYD_S028R || BOARD_SELECT_JC1060P470C || BOARD_SELECT_JC4827W543C || BOARD_TOUCH_ESP_LCD_BY_PROGRAM
     default 0
+
+config BOARD_TOUCH_ESP_LCD_BY_PROGRAM
+    bool
 
 config BOARD_TOUCH_GSL3680
     int
-    default 1 if BOARD_SELECT_JC8012P4A1C
+    default 1 if BOARD_SELECT_JC8012P4A1C || BOARD_TOUCH_GSL3680_BY_PROGRAM
     default 0
+
+config BOARD_TOUCH_GSL3680_BY_PROGRAM
+    bool
 
 config BOARD_TOUCH_GT911
     int
-    default 1 if BOARD_SELECT_JC1060P470C || BOARD_SELECT_JC4827W543C
+    default 1 if BOARD_SELECT_JC1060P470C || BOARD_SELECT_JC4827W543C || BOARD_TOUCH_GT911_BY_PROGRAM
     default 0
+
+config BOARD_TOUCH_GT911_BY_PROGRAM
+    bool
 
 config BOARD_TOUCH_SPI
     int
-    default 1 if BOARD_SELECT_CYD_S028R
+    default 1 if BOARD_SELECT_CYD_S028R || BOARD_TOUCH_SPI_BY_PROGRAM
     default 0
+
+config BOARD_TOUCH_SPI_BY_PROGRAM
+    bool
 
 config BOARD_TOUCH_XPT2046
     int
-    default 1 if BOARD_SELECT_CYD_S028R
+    default 1 if BOARD_SELECT_CYD_S028R || BOARD_TOUCH_XPT2046_BY_PROGRAM
     default 0
+
+config BOARD_TOUCH_XPT2046_BY_PROGRAM
+    bool
 
 endmenu

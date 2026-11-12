@@ -1542,11 +1542,14 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
                     }
                 }
             }
-            // a display started at another depth of color than its data's was not tried so on this board
+            // a display started at another depth of color than its data's was not tried so on this board, unless an entry of
+            // checked at the level hardware names that depth among the values it tried
+            const tried = (doc, path, value) => Object.values(doc?.checked ?? {}).some((entry) => entry.level === 'hardware' && (entry.result ?? 'confirmed') === 'confirmed'
+                && (entry.covers ?? []).some((covered) => path === covered || path.startsWith(`${covered}.`)) && entry.values?.includes(value));
             for (const [part, device] of Object.entries(project && base ? resolved.devices : {})) {
                 const data = (base.devices[part] ?? picks.find((pick) => part === `${pick.use}_${pick.module.part}`)?.module.device)?.config?.depth_bits;
                 const depth = device.config?.depth_bits;
-                if (data && depth && depth !== data) lines.push({ level: 'unknown', text: t('{0}: {1} bits of color were not tried on this board; its data starts it with {2}', catalog.devices[device.chip]?.title ?? part, depth, data) });
+                if (data && depth && depth !== data && !tried(base, `devices.${part}.config.depth_bits`, depth)) lines.push({ level: 'unknown', text: t('{0}: {1} bits of color were not tried on this board; its data starts it with {2}', catalog.devices[device.chip]?.title ?? part, depth, data) });
             }
             for (const pick of picks.filter((item) => item.count > 1 && !item.members)) lines.push({ level: 'do', text: t('{0}: {1} in one chain on the wires of one, the output of each into the input of the next', pick.module.title, pick.count) });
             for (const pick of picks.filter((item) => item.members)) lines.push({ level: 'do', text: t('{0}: {1} in one chain on the wires of the first, the output of each into the input of the next', pick.need.title, pick.members.map((member) => named({ title: member.module.title, count: member.count })).join(t(', then '))) });

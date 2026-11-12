@@ -825,7 +825,10 @@ The levels, most trusted first: `hardware`, `schematic`, `datasheet`,
 `vendor-docs`, `vendor-code`, `community`, `extracted`, `unchecked`. `covers`
 names what an entry is about, the whole file without it. `result` is `confirmed`
 when absent, `pending` for what is still to be tried, `refuted` for a source that
-disagrees. `unit` says which piece of the board was tried. A variant inherits the entries of its base marked `on_board`, because
+disagrees. `unit` says which piece of the board was tried. `values` names the values of the field it covers that were
+tried, when the field takes several: a display started at 16 bits that was seen right at 24 too has
+`"covers": ["devices.lcd.config.depth_bits"], "values": [16, 24]`, and a kit at 24 bits does not call that depth
+untried. A variant inherits the entries of its base marked `on_board`, because
 they were earned on another board.
 
 ## Questions

@@ -2,6 +2,9 @@
 
 ## 0.1.4 (not released yet)
 
+- An entry of `checked` may name `values`, the values of the field it covers that were tried. Both DSI boards have
+  their display tried at 16 and 24 bits (Anton, in the test procedure of the DGX drivers), so a kit at 24 bits no
+  longer calls that depth untried there; 18 bits on the CYD still are.
 - Every block on the page has the field "Its side", a letter A to D. A letter names a group, not an edge: the wires
   of the blocks of one letter come out on one edge of the board, those of different letters on different edges,
   and the solver chooses the edges by `edges` of the connectors. An edge where the supply of the group comes out

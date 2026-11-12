@@ -150,6 +150,12 @@
             "covers": ["power"],
             "source": "TLV62569: 2 A, step-down, ti.com/product/TLV62569",
             "date": "2026-10-31"
+        },
+        "depth": {
+            "level": "hardware",
+            "covers": ["devices.lcd.config.depth_bits"],
+            "values": [16, 24],
+            "by": "Anton, by eye, in the test procedure of the DGX driver of its display: 24 bits a pixel seen right as well as 16"
         }
     },
     "buses": {

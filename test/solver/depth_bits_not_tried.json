@@ -1,0 +1,20 @@
+{
+    "title": "18 bits on the CYD are a depth its driver takes and nobody tried on the board: the kit says so",
+    "answers": {
+        "board": "cyd_s028r",
+        "blocks": [
+            {
+                "role": "display",
+                "asks": {
+                    "depth_bits": "18"
+                }
+            }
+        ]
+    },
+    "project": {
+        "board": "cyd_s028r",
+        "at": "devices.lcd.config.depth_bits",
+        "is": 18
+    },
+    "says": "ILI9341: 18 bits of color were not tried on this board"
+}

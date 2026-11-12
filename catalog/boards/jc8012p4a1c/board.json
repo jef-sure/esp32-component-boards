@@ -118,6 +118,12 @@
             "by": "Anton",
             "date": "2026-11-06",
             "notes": "examples/sound_level on the board, the codec at its start volume 25: 5 percent of full scale quiet, 100 percent noticeable, the middle normal."
+        },
+        "depth": {
+            "level": "hardware",
+            "covers": ["devices.lcd.config.depth_bits"],
+            "values": [16, 24],
+            "by": "Anton, by eye, in the test procedure of the DGX driver of its display: 24 bits a pixel seen right as well as 16"
         }
     },
     "buses": {

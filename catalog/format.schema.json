@@ -110,6 +110,7 @@
         "source": { "type": "string", "description": "The document, its version and where it was found." },
         "by": { "type": "string", "description": "Who tried or read it." },
         "unit": { "type": "string", "description": "Which board was tried: on_board names a model, this names one piece of it." },
+        "values": { "type": "array", "minItems": 1, "description": "The values of the field it covers that were tried, when the field takes several: as the depths of color a display was seen at. Without it, the value the data has." },
         "date": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
         "result": { "enum": ["confirmed", "pending", "refuted"], "description": "confirmed when absent. refuted keeps a disagreement in sight; pending says what is still to be tried." },
         "notes": { "$ref": "#/$defs/notes" },

@@ -1,0 +1,43 @@
+{
+    "title": "A buzzer block asks 6 V of swing: a bare disc takes its way of two pins in antiphase, so four discs are eight wires and eight LEDC channels",
+    "answers": {
+        "board": "esp32s3_devkit",
+        "blocks": [
+            {
+                "role": "buzzer",
+                "asks": {
+                    "swing_v": 6
+                }
+            },
+            {
+                "role": "buzzer",
+                "asks": {
+                    "swing_v": 6
+                }
+            },
+            {
+                "role": "buzzer",
+                "asks": {
+                    "swing_v": 6
+                }
+            },
+            {
+                "role": "buzzer",
+                "asks": {
+                    "swing_v": 6
+                }
+            }
+        ]
+    },
+    "kit": {
+        "name": "esp32s3_devkit",
+        "modules": {
+            "piezo_disc": 4
+        }
+    },
+    "lines": {
+        "board": "esp32s3_devkit",
+        "count": 8
+    },
+    "says": "the legs to two GPIOs of its own"
+}

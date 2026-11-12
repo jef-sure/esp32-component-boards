@@ -1219,7 +1219,7 @@
           "oneOf": [{ "required": ["measure"] }, { "required": ["field", "fits", "of"] }],
           "additionalProperties": false,
           "properties": {
-            "measure": { "enum": ["diagonal_in", "range_mm", "gap_mm", "standard", "shape", "depth_bits", "chain", "joint", "price", "platform", "platform_version"] },
+            "measure": { "enum": ["diagonal_in", "range_mm", "gap_mm", "standard", "shape", "depth_bits", "swing_v", "chain", "joint", "price", "platform", "platform_version"] },
             "of": { "oneOf": [{ "type": "string" }, { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string" } }], "description": "The class it is measured on, or the classes for a question asked of each block; with field, the role whose blocks ask it." },
             "variant": { "oneOf": [{ "type": "string" }, { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string" } }], "description": "Only blocks of this variant, or of these, ask it." },
             "any_variant": { "type": "boolean", "description": "With variant: false when a block of any variant does not ask it either, as how many outputs a chain drives, which means nothing for most displays. A block of any variant asks it by default." },

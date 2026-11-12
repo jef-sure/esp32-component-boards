@@ -392,7 +392,7 @@ may be lists, and a block with no variant chosen is asked what any of them is. T
 question of the page. The depth of color of a display, `depth_bits`, keeps the parts whose driver takes it (`supports.depth_bits`
 in the record of the library); when it is not the depth the data starts the display with, the board of the program starts
 it so (`config.depth_bits` of the display of the board or of the module), and the kit names that depth as not tried on the
-board. Of two displays from modules, the first block gives the primary one. The page shows these fields in the block; the model sets them with `edit_blocks`,
+board. The swing of a buzzer, `swing_v`, chooses the way a part with no bus is wired: the first whose `gives.swing_v` is not less; a bare disc on two pins in antiphase takes two LEDC channels. Of two displays from modules, the first block gives the primary one. The page shows these fields in the block; the model sets them with `edit_blocks`,
 and `roles` lists them. The platform is asked without a version: a kit names the versions that take its chip and its
 libraries, and a version is fixed only when the person chooses one.
 

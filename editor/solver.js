@@ -137,6 +137,10 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         short: (asked) => t('no display whose driver takes {0} bits of color', asked), unknown: 'the depths of color its driver takes are not in the data',
         given: (device) => (device.config?.depth_bits ? String(device.config.depth_bits) : null) };
 
+    // the swing a part of sound reaches by the best of its ways
+    MEASURES.swing_v = { of: (device) => (device.ways?.some((way) => way.gives?.swing_v !== undefined) ? Math.max(...device.ways.map((way) => way.gives?.swing_v ?? 0)) : null),
+        short: (asked) => t('no part of sound swings {0} V', asked), unknown: 'its swing is not in the data' };
+
     // a chain grows to the outputs asked, so a part that chains always fits; one that does not says nothing of its outputs
     MEASURES.chain = { of: (device) => (device.chain ? (device.config?.count ?? 1) * (device.chain.unit ?? device.chain.per) : null), fits: () => true, short: () => '', unknown: 'how many outputs a part drives without a chain is not in the data' };
 
@@ -304,6 +308,13 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
     // the depth of color a block asks of its display, a number; undefined for any
     const DEPTH = questions.find((item) => item.limit?.measure === 'depth_bits')?.id;
     const depthAsked = (need) => (DEPTH && blockAnswer(need.asks?.[DEPTH]) !== undefined ? Number(need.asks[DEPTH]) : undefined);
+
+    // the way a part with no bus is wired for a need: the first that gives the swing its block asks, else the first
+    const SWING = questions.find((item) => item.limit?.measure === 'swing_v')?.id;
+    const wayOf = (device, need) => {
+        const swing = SWING && blockAnswer(need?.asks?.[SWING]) !== undefined ? Number(need.asks[SWING]) : undefined;
+        return (swing !== undefined && device.ways.find((way) => (way.gives?.swing_v ?? 0) >= swing)) || device.ways[0];
+    };
 
     function limitsOf(need, wanted) {
         // a question asked of each block takes the block's answer first, the one of the page after it (an older answer)
@@ -726,9 +737,9 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
                 if (pick.way.shared) shared[pick.need.id] = { pins: Object.fromEntries(pick.way.shared.map((line) => [line, devices[pick.use].pins[line]])), uses: [...(shared[pick.need.id]?.uses ?? []), pick.use] };
                 continue;
             }
-            // a part with no bus takes the lines of its first way
+            // a part with no bus takes the lines of its way
             if (pick.module.device.ways) {
-                const { lines } = pick.module.device.ways[0];
+                const { lines } = wayOf(pick.module.device, pick.need);
                 // a part that holds nothing on its lines takes a strapping pin when the free ones run out
                 const extra = pick.module.device.logic === 'none' ? quiet : [];
                 if (pins.length + extra.length < lines.length) return { problem: shortOfPins(lines.length, pins.length + extra.length) };
@@ -860,7 +871,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         const judgement = judgementsOf('resource_limit').find((item) => item.resource === 'ledc');
         const have = board.mcu.facts.frequency_sources?.ledc?.outputs;
         if (!judgement || have === undefined) return null;
-        const asked = taken + choice.reduce((sum, module, i) => sum + shortfalls[i].count * (module.way?.ledc ?? module.device?.ways?.[0]?.ledc ?? 0), 0);
+        const asked = taken + choice.reduce((sum, module, i) => sum + shortfalls[i].count * (module.way?.ledc ?? (module.device?.ways ? wayOf(module.device, shortfalls[i].need).ledc : 0) ?? 0), 0);
         return asked > have ? { problem: t(judgement.says, asked, have), judgement: judgement.id } : null;
     }
 
@@ -1063,7 +1074,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         const wired = (pick) => wiringOf(base, project, [pick])[0].lines.filter((wire) => /^GPIO/.test(wire.to)).length;
         const limit = resolved.mcu.facts.gpio.high_mv_max;
         for (const pick of new Map(picks.filter((item) => !item.way).map((item) => [item.module.name, item])).values()) {
-            const low = pick.module.device.high_min_mv ?? pick.module.device.ways?.[0]?.high_min_mv;
+            const low = pick.module.device.high_min_mv ?? (pick.module.device.ways ? wayOf(pick.module.device, pick.need).high_min_mv : undefined);
             // seen_level: a level a trial on hardware ran it with is a note, not a part
             const seen = judgementsOf('seen_level').find((judgement) => judgement.field === 'high_seen_mv');
             const seenLines = judgementsOf('seen_level').find((judgement) => judgement.field === 'logic_seen_mv');
@@ -1438,6 +1449,9 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
                     else if (limit.soft && !limit.fits(value, limit.asked)) lines.push({ level: 'unknown', text: limit.soft(pick.module.title, value, limit.asked) });
                 }
                 for (const text of catalog.modules[pick.module.name].do ?? []) lines.push({ level: 'do', text: `${pick.module.title}: ${t(text)}` });
+                // how the way taken is wired, as two pins in antiphase
+                const way = pick.module.device.ways && !pick.module.own ? wayOf(pick.module.device, pick.need) : null;
+                if (way?.do) lines.push({ level: 'do', text: `${pick.module.title}: ${t(way.do)}` });
                 // the wires list no supply that the data does not name
                 const steps = pick.module.power.filter((step) => step.source === 'connector');
                 if (!steps.length) lines.push({ level: 'unknown', text: t('{0}: what feeds it is not in the data', pick.module.title) });

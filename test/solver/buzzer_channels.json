@@ -1,0 +1,40 @@
+{
+    "title": "Five discs on two pins each want ten LEDC channels, and an S3 has eight",
+    "answers": {
+        "board": "esp32s3_devkit",
+        "blocks": [
+            {
+                "role": "buzzer",
+                "asks": {
+                    "swing_v": 6
+                }
+            },
+            {
+                "role": "buzzer",
+                "asks": {
+                    "swing_v": 6
+                }
+            },
+            {
+                "role": "buzzer",
+                "asks": {
+                    "swing_v": 6
+                }
+            },
+            {
+                "role": "buzzer",
+                "asks": {
+                    "swing_v": 6
+                }
+            },
+            {
+                "role": "buzzer",
+                "asks": {
+                    "swing_v": 6
+                }
+            }
+        ]
+    },
+    "fit": [],
+    "says": "LEDC: 10 channels asked, the chip has 8"
+}

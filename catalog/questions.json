@@ -41,6 +41,7 @@
         {"id": "touch", "text": "A touch panel", "type": "flag", "needs": {"class": "touch"}},
         {"id": "sound", "text": "Sound", "type": "flag", "needs": {"class": "audio"}},
         {"id": "outputs", "text": "Tones and PWM", "type": "outputs"},
+        {"id": "swing_v", "asked": "block", "text": "Its swing at least, volts: a bare disc swings 3.3 on one pin, 6.6 on two in antiphase", "type": "number", "limit": {"measure": "swing_v", "of": "buzzer"}},
         {"id": "chain_outputs", "asked": "block", "text": "Outputs it drives: a digit has 8 segments, an 8x8 matrix 64 LEDs", "type": "number", "limit": {"measure": "chain", "of": ["led", "display"], "variant": ["matrix", "segment", "addressable", "shift_register"], "any_variant": false}},
         {"id": "joint_outputs", "asked": "block", "text": "A joint of two products in the chain weighs as many outputs to spare (empty: as many as the shortest product has)", "type": "number", "limit": {"measure": "joint", "of": ["led", "display"], "variant": ["matrix", "segment", "addressable", "shift_register"], "any_variant": false}},
         {"id": "nfc_readers", "text": "NFC readers", "type": "count", "max": 4, "needs": {"class": "nfc"}},

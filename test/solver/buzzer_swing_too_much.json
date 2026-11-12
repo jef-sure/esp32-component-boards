@@ -1,0 +1,15 @@
+{
+    "title": "No way of a part of the catalog gives 9 V of swing",
+    "answers": {
+        "blocks": [
+            {
+                "role": "buzzer",
+                "asks": {
+                    "swing_v": 9
+                }
+            }
+        ]
+    },
+    "fit": [],
+    "says": "no part of sound swings 9 V"
+}

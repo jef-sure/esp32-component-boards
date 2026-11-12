@@ -1,0 +1,25 @@
+{
+    "title": "A buzzer block that asks no swing takes the first way of a bare disc, one pin",
+    "answers": {
+        "board": "esp32s3_devkit",
+        "blocks": [
+            {
+                "role": "buzzer"
+            },
+            {
+                "role": "buzzer"
+            },
+            {
+                "role": "buzzer"
+            },
+            {
+                "role": "buzzer"
+            }
+        ]
+    },
+    "lines": {
+        "board": "esp32s3_devkit",
+        "count": 4
+    },
+    "says": "one leg to its GPIO, the other to ground"
+}

@@ -2,6 +2,9 @@
 
 ## 0.1.4 (not released yet)
 
+- The buzzer block asks its swing again, as the page did before the blocks: the solver wires a part with no bus by
+  the first of its ways that gives it, so four bare discs at 6 V are eight wires in antiphase and eight LEDC channels,
+  and the card says how to wire the way taken. Before, a buzzer block always took one pin.
 - The long path from an empty folder to the board is called Getting started now, `docs/*/getting-started.md`;
   `docs/*/quick-start.md` points to it. The quick start is in the README: six commands from the example of the
   registry to the window on the computer and the board, with no CMake to edit. The README says what the component

@@ -1,7 +1,7 @@
 {
     "title": "A board whose data names no edges keeps no side, and the card says so",
     "answers": {
-        "board": "esp32_devkit",
+        "board": "nodemcu_esp32s",
         "blocks": [
             {
                 "role": "nfc",

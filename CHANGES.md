@@ -2,6 +2,11 @@
 
 ## 0.1.4 (not released yet)
 
+- A project takes the component by `^0.1.x` now, as the page, `board_project.py`, the example `hello` and the recipes
+  write it: the versions 0.1.x from that one, and no 0.2.0, which may change what a program calls. `>=` was there
+  for 0.0.x, where a caret takes one version alone.
+- The README says what the computer, a board of the program and the page are, and which libraries the component
+  starts today, with others, Arduino among them, planned.
 - An entry of `checked` may name `values`, the values of the field it covers that were tried. Both DSI boards have
   their display tried at 16 and 24 bits (Anton, in the test procedure of the DGX drivers), so a kit at 24 bits no
   longer calls that depth untried there; 18 bits on the CYD still are.

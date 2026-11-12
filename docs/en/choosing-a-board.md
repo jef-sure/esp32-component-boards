@@ -6,11 +6,12 @@ The board is named once, on one command line. Everything else follows.
 
 ```sh
 idf.py create-project hello && cd hello
-idf.py add-dependency "jef-sure/boards>=0.1.3"
+idf.py add-dependency "jef-sure/boards^0.1.3"
 ```
 
-`>=0.1.3`, not `^0.1.3`: the component manager reads a caret on a version 0.x as the versions below the next 0.x,
-`^0.1.3` as 0.1.x alone, and 0.2.0 would not be taken. What a build took stays in the lock of each board. A commit
+`^0.1.3` takes 0.1.3 and the 0.1.x after it, not 0.2.0: the component manager reads a caret on a version 0.x as the
+versions below the next 0.x, and a component at 0.x may change what a program calls from one 0.x to the next. A program
+moves to 0.2 when it names it. What a build took stays in the lock of each board. A commit
 not published yet is taken from git, at that commit, so that a build gives the same tomorrow:
 
 ```yaml

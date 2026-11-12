@@ -44,7 +44,7 @@ const COMPONENT_NAME = 'jef-sure/boards';
 // until the component is in the registry it comes from git, at the commit of the catalog the page used when the server of the
 // model told it, so that a build gives the same tomorrow; main when nothing told it
 // the component as the copy beside the page came: from git at a commit, or from the registry at a version
-const COMPONENT_LINES = (source) => (source?.registry ? `  ${COMPONENT_NAME}: ">=${source.registry}"`
+const COMPONENT_LINES = (source) => (source?.registry ? `  ${COMPONENT_NAME}: "^${source.registry}"`
     : `  ${COMPONENT_NAME}:\n    git: https://github.com/jef-sure/esp32-component-boards.git\n    version: ${source?.git ?? 'main'}`);
 const PREFERENCES = { language: 'boards.language', currency: 'boards.currency', answers: 'boards.answers', project: 'boards.project', computer: 'boards.computer' }; // keys of localStorage
 // a kit and an entry of selection.json are the same when the board and the modules with their counts are

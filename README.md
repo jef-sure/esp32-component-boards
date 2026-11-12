@@ -52,6 +52,18 @@ helps to choose a board for a device.
 The whole path, in VS Code, with the board chosen on the page, a program of your own and what can go wrong, is in
 [Getting started](docs/en/getting-started.md).
 
+## Three words
+
+- **The computer** is a build of the same program for Linux, for the target `linux` of ESP-IDF. DGX shows the display of
+  the chosen board in a window of SDL2, at its size and turned as the board is held; the mouse is the touch, keys are
+  the buttons of the board, and NVS lies in the file `build/host_<board>/flash.bin`. It is the board `host_<board>`,
+  which `board_select.py host --as <board>` gives: a program is debugged in the window, then built for the board and
+  flashed with no change.
+- **A board of the program** is a board described in the program itself, in `components/local-boards/`: a board of the
+  catalog with the modules wired to it, or a board of your own. The page names it `<project>_<board>`.
+- **The page** is the web page of the component (`editor/`): what the device needs goes on its canvas, and it chooses
+  the boards and modules and writes the project, see [below](#the-page).
+
 ## What a board can have
 
 The component knows no display by itself: a board may have none, and a display is one peripheral among others:
@@ -145,7 +157,8 @@ project, `python3 managed_components/jef-sure__boards/tools/boards_mcp.py --serv
 pulls `lvgl` and `esp_lvgl_port`, and the display comes as an LVGL object.
 [espressif/esp_board_manager](https://github.com/espressif/esp_board_manager) describes boards in YAML and generates
 initialisation code into the project, with a board selected by `idf.py bmgr`. This component is meant for any board
-and any library; it differs in how it works. A board is data a script checks: pins, buses, devices, a calibration
+and any library: today it starts DGX, DGX-DI, DGX-LVGL and hd44780, and other libraries, Arduino among them, are
+planned. It differs in how it works. A board is data a script checks: pins, buses, devices, a calibration
 measured on the board, and where each fact comes from; a board of a program is described the same way, beside the
 program. The display is one peripheral among others. A library is described by chip in `catalog/libraries/`, what it
 does with each chip and what its versions require, so DGX, LVGL through DGX-LVGL and other libraries come in through

@@ -602,7 +602,7 @@ const SelectPage = {
                     <div v-if="store.plan.cmakeLines" class="locked">{{ t('Put these into CMakeLists.txt yourself, the include of project.cmake among them: they read the board.') }}
                         <pre>{{ store.plan.cmakeLines }}</pre></div>
                     <p class="hint">{{ store.plan.source?.git ? t('The component comes from git at the commit {0}.', store.plan.source.git.slice(0, 7))
-                        : store.plan.source?.registry ? t('The component comes from the registry, {0}: it resolves once that version is published.', '>=' + store.plan.source.registry)
+                        : store.plan.source?.registry ? t('The component comes from the registry, {0}: it resolves once that version is published.', '^' + store.plan.source.registry)
                         : t('The component comes from git at main: pin a commit in main/idf_component.yml for a build that stays the same.') }}</p>
                     <div v-if="store.plan.manifestLines.length" class="locked">{{ t('Add these to main/idf_component.yml yourself: the file stays as it is.') }}
                         <pre>{{ store.plan.manifestLines.join('\\n') }}</pre></div>

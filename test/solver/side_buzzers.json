@@ -1,0 +1,42 @@
+{
+    "title": "Four buzzers of one letter come out on one edge of the board, in the order of the contacts along it",
+    "answers": {
+        "board": "esp32_p4_eth",
+        "blocks": [
+            {
+                "role": "buzzer",
+                "asks": {
+                    "swing_v": 6,
+                    "side": "A"
+                }
+            },
+            {
+                "role": "buzzer",
+                "asks": {
+                    "swing_v": 6,
+                    "side": "A"
+                }
+            },
+            {
+                "role": "buzzer",
+                "asks": {
+                    "swing_v": 6,
+                    "side": "A"
+                }
+            },
+            {
+                "role": "buzzer",
+                "asks": {
+                    "swing_v": 6,
+                    "side": "A"
+                }
+            }
+        ]
+    },
+    "edges": {
+        "board": "esp32_p4_eth",
+        "edge": "left",
+        "title": "piezo disc"
+    },
+    "says": "side A: left edge"
+}

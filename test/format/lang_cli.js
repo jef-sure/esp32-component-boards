@@ -15,11 +15,11 @@ for (const file of ['solver.js', 'app.js']) {
         for (const quoted of call[1].matchAll(/(['"])((?:(?!\1).)+)\1/g)) if (/[a-z] |^[a-z]+$|\{0\}/.test(quoted[2])) texts.add(quoted[2]);
     }
 }
-for (const name of ['the size of the display is not in the data', 'the reading distance is not in the data', 'the standards are not in the data', 'the depths of color its driver takes are not in the data', 'its swing is not in the data']) texts.add(name);
+for (const name of ['the size of the display is not in the data', 'the reading distance is not in the data', 'the standards are not in the data', 'the depths of color its driver takes are not in the data', 'its swing is not in the data', 'top edge', 'bottom edge', 'left edge', 'right edge']) texts.add(name);
 for (const question of JSON.parse(fs.readFileSync(path.join(CATALOG, 'questions.json'))).questions) {
     texts.add(question.text);
-    // a choice of digits only, as a depth of color, reads the same in every language
-    for (const choice of question.choices || []) if (/[a-z]/i.test(choice.text)) texts.add(choice.text);
+    // a choice of digits or of one letter, as a depth of color or a side, reads the same in every language
+    for (const choice of question.choices || []) if (/[a-z]{2}/i.test(choice.text)) texts.add(choice.text);
 }
 const read = (file) => JSON.parse(fs.readFileSync(file));
 for (const group of read(path.join(CATALOG, 'roles.json')).groups) {

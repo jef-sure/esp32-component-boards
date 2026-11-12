@@ -2,6 +2,13 @@
 
 ## 0.1.4 (not released yet)
 
+- Every block on the page has the field "Its side", a letter A to D. A letter names a group, not an edge: the wires
+  of the blocks of one letter come out on one edge of the board, those of different letters on different edges,
+  and the solver chooses the edges by `edges` of the connectors. An edge where the supply of the group comes out
+  too goes first, and the card says where to take a supply that is elsewhere. The sides come after what must hold
+  and before the IO MUX of an SPI host, as the new field `rank` of the judgements orders them; a part at a clock
+  above `limits.spi_matrix_mhz` of the chip needs its IO MUX all the same. The card gives each wire its connector,
+  contact and edge. A wire of a line with its own active level showed `GPIO [object Object]`; it shows its GPIO.
 - A chip has `limits.spi_matrix_mhz`, the clock of SPI through the GPIO matrix by the docs of ESP-IDF: 40 MHz on every
   chip, where the ESP32 allows no more and the others run as on the IO MUX. `tools/make_mcu.py` reads it from
   `spi_master.rst`.

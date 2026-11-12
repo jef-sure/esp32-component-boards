@@ -396,6 +396,28 @@ board. The swing of a buzzer, `swing_v`, chooses the way a part with no bus is w
 and `roles` lists them. The platform is asked without a version: a kit names the versions that take its chip and its
 libraries, and a version is fixed only when the person chooses one.
 
+### The side
+
+Every block has the field "Its side": empty, or a letter A, B, C, D. **A letter names a group, not an edge of the board.**
+The wires of the blocks of one letter come out on one edge, those of blocks of different letters on different edges.
+Which edge a group gets, the solver decides; with no letter it gives out pins where it suits, and leaves the edges of the
+groups to them.
+
+An example, the CO2 station on an ESP32-C3-Zero: the sensor and the button have the letter A, the display none. Group A
+needs three lines and a supply. The bottom edge of the board is 5 … 0, 3V3, GND, 5V, the top one 21 … 6 with no supply,
+so the group gets the bottom edge, with 3V3 and GND for the sensor. Another, the time clock on an ESP32-P4-ETH: two
+readers and four buzzers are A, the display B; group A comes out on one row of the header, the display on the other.
+
+The edges come from `edges` of the connectors of the board ([data-format.md](data-format.md#connectors-and-images)) and
+are named as the picture of the board shows it. The card gives each wire its place, as "P1, contact 7, left edge". The
+order of choosing: first what must hold (strapping pins, lines of ADC1, LEDC channels), then the sides, then the IO MUX
+of an SPI host, then costs such as the pins of JTAG; it is the field `rank` of the judgements in
+`catalog/judgements.json`. The supply is a soft part of a side: the solver prefers an edge where the supply of the group
+comes out too, and when none has it, the card says from which edge to take it. The IO MUX gives way to a side and the
+card names the cost, unless a part needs a clock above what the GPIO matrix of the chip runs (`limits.spi_matrix_mhz`):
+then the group goes to the edge of the IO MUX, and when there is no room there, the kit is refused with the reason. A
+board whose data names no edges keeps no side, and the card says so.
+
 The solver wires I2C, SPI, QSPI and UART and the lines a chip needs beside its bus, such as BUSY and
 RST of the PN5180. A DSI module takes a free DSI bus of the board on a ribbon, and its timings stay an
 unknown of the kit, because they are measured on a board. The solver takes free pins that come out to

@@ -309,6 +309,60 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
     const DEPTH = questions.find((item) => item.limit?.measure === 'depth_bits')?.id;
     const depthAsked = (need) => (DEPTH && blockAnswer(need.asks?.[DEPTH]) !== undefined ? Number(need.asks[DEPTH]) : undefined);
 
+    // the letter a block groups its part by: the blocks of one letter take one edge of the board, of other letters other edges
+    const SIDE = questions.find((item) => item.asked === 'block' && !item.limit && item.id === 'side')?.id;
+    const sideOf = (need) => (SIDE ? blockAnswer(need?.asks?.[SIDE]) : undefined);
+    // the sides before the IO MUX of a host, or after it, as the ranks of their judgements order them
+    const rankOf = (kind) => Math.min(...judgementsOf(kind).map((judgement) => judgement.rank ?? Infinity));
+    const sidesFirst = () => rankOf('sides') <= rankOf('prefer_pins');
+    const EDGES = ['top', 'right', 'bottom', 'left'];
+
+    // Where the GPIOs and the supplies of a board come out: places, a GPIO to its connector, its contact from 1 and the
+    // edge of its run as the picture of the board names it; names, each edge to the supplies and grounds on it; spots, a
+    // supply on an edge to its connector and contact.
+    function edgesOf(board) {
+        const places = new Map();
+        const names = new Map();
+        const spots = new Map();
+        for (const [name, connector] of Object.entries(board.connectors || {})) {
+            const runs = (connector.edges || []).flatMap((run) => Array.from({ length: run.count }, (_, at) => ({ edge: run.edge, at })));
+            (connector.pins || []).forEach((pin, i) => {
+                const run = runs[i] ?? {};
+                const gpio = typeof pin === 'object' ? pin?.gpio : typeof pin === 'number' ? pin : undefined;
+                if (gpio !== undefined && !places.has(gpio)) places.set(gpio, { connector: name, contact: i + 1, ...run });
+                if (typeof pin === 'string' && run.edge) names.set(run.edge, new Set([...(names.get(run.edge) ?? []), pin]));
+                if (typeof pin === 'string' && run.edge && !spots.has(`${run.edge} ${pin}`)) spots.set(`${run.edge} ${pin}`, { connector: name, contact: i + 1, edge: run.edge });
+            });
+        }
+        return { places, names, spots };
+    }
+
+    // The plans of the sides a kit tries, best first: each letter of the picks to an edge of its own, an edge where the
+    // supplies of the letter come out too before one where they do not, then the edge with more free pins. No letter, or
+    // a board whose data names no edges: one plan with no sides.
+    function sidePlans(board, picks) {
+        const letters = [...new Set(picks.map((pick) => sideOf(pick.need)).filter(Boolean))].sort();
+        const { places, names } = edgesOf(board);
+        const free = freePins(board);
+        const room = (edge) => free.filter((pin) => places.get(pin)?.edge === edge).length;
+        const edges = EDGES.filter((edge) => room(edge));
+        if (!letters.length || !edges.length) return [new Map()];
+        const supplies = (letter) => picks.filter((pick) => sideOf(pick.need) === letter && pick.module?.power)
+            .flatMap((pick) => Object.values(supplyOf(board, pick.module) ?? {}));
+        const order = (letter) => {
+            const fed = (edge) => supplies(letter).every((name) => names.get(edge)?.has(name)) && (!supplies(letter).length || names.get(edge)?.has('GND'));
+            return [...edges].sort((a, b) => fed(b) - fed(a) || room(b) - room(a));
+        };
+        const plans = [];
+        const assign = (at, taken) => {
+            if (plans.length >= 24) return;
+            if (at === letters.length) return void plans.push(new Map(taken));
+            for (const edge of order(letters[at]).filter((item) => ![...taken.values()].includes(item))) assign(at + 1, new Map([...taken, [letters[at], edge]]));
+        };
+        assign(0, new Map());
+        return plans.length ? plans : [new Map()];
+    }
+
     // the way a part with no bus is wired for a need: the first that gives the swing its block asks, else the first
     const SWING = questions.find((item) => item.limit?.measure === 'swing_v')?.id;
     const wayOf = (device, need) => {
@@ -590,7 +644,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
     }
 
     // The bus of a kind to join: one the board has and a display does not hold, or a new one on a free host.
-    function busOf(board, kind, pins, added, hz, alone, kept, silent, placed, spread) {
+    function busOf(board, kind, pins, added, hz, alone, kept, silent, placed, spread, reach = {}) {
         const spec = KIT_BUSES[kind];
         const room = (own) => !spec.most || Object.values(board.devices).filter((device) => `${kind}.${own}` in (device.on || {})).length + (placed[own] ?? 0) < spec.most;
         const named = Object.keys(board.buses?.[kind] || {});
@@ -605,8 +659,17 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             if (!own) return { problem: t('no free {0} host on this board: {1}', spec.host.toUpperCase(), [...taken].join(', ') || t('it has none')) };
             const lines = spec.lines.filter((line) => !(silent && line === 'miso')); // a device with no line back leaves it unwired
             if (pins.length < lines.length + (spec.select ? 1 : 0)) return { problem: shortOfPins(lines.length, pins.length) };
-            const named = ownPins(board, kind, own, lines, pins);
-            if (named) for (const line of lines) pins.splice(pins.indexOf(named[line]), 1);
+            const named = ownPins(board, kind, own, lines, reach.iomux ?? pins);
+            // above the clock of the GPIO matrix of the chip only the IO MUX runs the host
+            const matrix = board.mcu.facts.limits?.spi_matrix_mhz;
+            if (kind === 'spi' && !named && hz && matrix && hz > matrix * 1e6 && board.mcu.facts.iomux?.spi?.[own]) {
+                return { problem: t('{0} at {1} MHz needs the pins of its IO MUX: through the GPIO matrix the chip runs SPI up to {2} MHz', own.toUpperCase(), hz / 1e6, matrix) };
+            }
+            if (named) for (const line of lines) {
+                const at = pins.indexOf(named[line]);
+                if (at >= 0) pins.splice(at, 1);
+                reach.taken?.(named[line]);
+            }
             added[kind] = { ...added[kind], [own]: { ...Object.fromEntries(spec.lines.map((line) => [line, lines.includes(line) ? (named ? named[line] : pins.shift()) : 'nc'])), ...(hz ? { hz } : {}) } };
             if (alone) kept.add(own);
             return own;
@@ -679,7 +742,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
     // Each product a pick buys, with its count: the members of a chain, or its module.
     const boughtBy = (pick) => pick.members ?? [{ module: pick.module, count: pick.count ?? 1 }];
 
-    function projectOf(name, board, picks, unused, spread = true) {
+    function projectOf(name, board, picks, unused, spread = true, sides = new Map()) {
         // the pins a part of the person's own is soldered to are out of what the kit hands out
         const soldered = picks.flatMap((pick) => Object.values(pick.way?.fixed ?? {}));
         const open = freePins(board);
@@ -697,7 +760,19 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         const theirs = new Set(judgementsOf('prefer_pins').flatMap((judgement) => hostNames(board, KIT_BUSES[judgement.bus].host)
             .filter((own) => !Object.values(board.buses ?? {}).some((named) => own in named))
             .flatMap((own) => [...KIT_BUSES[judgement.bus].lines, 'cs'].map((line) => board.mcu.facts[judgement.pins]?.[judgement.bus]?.[own]?.[line]))));
-        const pins = [...free.filter((pin) => !theirs.has(pin)), ...free.filter((pin) => theirs.has(pin))];
+        const order = [...free.filter((pin) => !theirs.has(pin)), ...free.filter((pin) => theirs.has(pin))];
+        // the sides: a pick of a letter takes the free pins of its edge, in their order along it; one of no letter leaves
+        // the edges of the letters to them, last
+        const { places } = edgesOf(board);
+        const used = new Set();
+        const sideEdges = new Set(sides.values());
+        const along = (a, b) => (places.get(a).connector < places.get(b).connector ? -1 : places.get(a).connector > places.get(b).connector ? 1 : places.get(a).at - places.get(b).at);
+        const poolOf = (pick, list) => {
+            const left = list.filter((pin) => !used.has(pin));
+            const edge = sides.get(sideOf(pick.need));
+            if (edge) return left.filter((pin) => places.get(pin)?.edge === edge).sort(along);
+            return [...left.filter((pin) => !sideEdges.has(places.get(pin)?.edge)), ...left.filter((pin) => sideEdges.has(places.get(pin)?.edge))];
+        };
         const buses = {};
         const modules = { ...unused.modules };
         const devices = { ...unused.devices };
@@ -707,7 +782,15 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         const shared = {}; // the lines the chains of a need have in common
         // one display is the primary: the board's, else the first of the blocks
         let primaryTaken = Object.values(board.devices).some((device) => device.config?.primary);
-        for (const pick of picks) {
+        // by the order of the blocks, whatever order the picks are wired in
+        const seconds = new Set();
+        for (const pick of picks.filter((item) => !item.way && item.module.device.config?.primary)) {
+            if (primaryTaken) seconds.add(pick);
+            primaryTaken = true;
+        }
+        // one pick on its pool: pins, the free pins it may take, spare the strapping pins a part holding nothing may have, reach
+        // where the IO MUX of a new host may come from; returns a problem, or null
+        const place = (pick, pins, spare, reach) => {
             if (pick.way) {
                 // lines a chain shares with the others of its need, as the data and clock of shift registers
                 const common = shared[pick.need.id]?.pins ?? {};
@@ -727,7 +810,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
                 if (devices[pick.use].count === 1) delete devices[pick.use].count;
                 if (!Object.keys(devices[pick.use].pins).length) delete devices[pick.use].pins;
                 if (pick.way.bus) {
-                    const bus = busOf(board, pick.way.bus, pins, buses, undefined, false, kept, false, placed, spread);
+                    const bus = busOf(board, pick.way.bus, pins, buses, undefined, false, kept, false, placed, spread, reach);
                     if (bus.problem) return bus;
                     placed[bus] = (placed[bus] ?? 0) + 1;
                     const wires = KIT_BUSES[pick.way.bus].select ? { cs: selectOf(board, pick.way.bus, bus, pins) } : {};
@@ -735,19 +818,19 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
                     devices[pick.use].on = { [`${pick.way.bus}.${bus}`]: { ...wires, ...(pick.way.address ? { address: pick.way.address } : {}) } };
                 }
                 if (pick.way.shared) shared[pick.need.id] = { pins: Object.fromEntries(pick.way.shared.map((line) => [line, devices[pick.use].pins[line]])), uses: [...(shared[pick.need.id]?.uses ?? []), pick.use] };
-                continue;
+                return null;
             }
             // a part with no bus takes the lines of its way
             if (pick.module.device.ways) {
                 const { lines } = wayOf(pick.module.device, pick.need);
                 // a part that holds nothing on its lines takes a strapping pin when the free ones run out
-                const extra = pick.module.device.logic === 'none' ? quiet : [];
+                const extra = pick.module.device.logic === 'none' ? spare : [];
                 if (pins.length + extra.length < lines.length) return { problem: shortOfPins(lines.length, pins.length + extra.length) };
                 modules[pick.use] = { ...productOf(pick), pins: Object.fromEntries(lines.map((line) => [line, pins.length ? pins.shift() : extra.shift()])) };
-                continue;
+                return null;
             }
             const alone = isDisplay(pick.module.device) && KIT_BUSES[pick.transport].select;
-            const own = busOf(board, pick.transport, pins, buses, pick.module.device.on?.[pick.transport]?.hz, alone, kept, alone && pick.module.device.logic === 'none', placed, spread);
+            const own = busOf(board, pick.transport, pins, buses, pick.module.device.on?.[pick.transport]?.hz, alone, kept, alone && pick.module.device.logic === 'none', placed, spread, reach);
             if (own.problem) return own;
             placed[own] = (placed[own] ?? 0) + 1;
             const wires = {};
@@ -764,12 +847,23 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             const needed = Object.fromEntries(lines.map((line) => [line, pins.shift()]));
             const supply = supplyOf(board, pick.module);
             // the board keeps its own display as the primary one
-            const second = pick.module.device.config?.primary && primaryTaken;
-            primaryTaken ||= Boolean(pick.module.device.config?.primary);
+            const second = seconds.has(pick);
             // a display of the module started at another depth than its data's
             const depth = depthAsked(pick.need);
             const config = { ...(second ? { primary: false } : {}), ...(depth !== undefined && pick.module.device.config?.depth_bits !== depth ? { depth_bits: depth } : {}) };
             modules[pick.use] = { ...productOf(pick), on: { [`${pick.transport}.${own}`]: wires }, ...(lines.length ? { pins: needed } : {}), ...(Object.keys(supply).length ? { supply } : {}), ...(Object.keys(config).length ? { config } : {}) };
+            return null;
+        };
+        // the picks of a side first, so that one of no side does not take the pins of their edges
+        for (const pick of [...picks.filter((item) => sides.has(sideOf(item.need))), ...picks.filter((item) => !sides.has(sideOf(item.need)))]) {
+            const pins = poolOf(pick, order);
+            const spare = poolOf(pick, quiet);
+            const before = [...pins, ...spare];
+            // the sides before the IO MUX: a host of a letter is on it only when its pins are on the edge; after it, from all free pins
+            const reach = { iomux: sides.has(sideOf(pick.need)) && !sidesFirst() ? order.filter((pin) => !used.has(pin)) : pins, taken: (pin) => used.add(pin) };
+            const problem = place(pick, pins, spare, reach);
+            for (const pin of before) if (!pins.includes(pin) && !spare.includes(pin)) used.add(pin);
+            if (problem) return problem;
         }
         const sharedPins = Object.fromEntries(Object.entries(shared).filter(([, chain]) => chain.uses.length > 1).flatMap(([id, chain]) => Object.entries(chain.pins).map(([line, pin]) => [`${id}_${line}`, { line: pin, devices: chain.uses }])));
         return { ...KIT_FORMAT, kind: 'project', name: 'kit', extends: name, title: `${board.title} with modules`, ...(Object.keys(buses).length ? { buses } : {}), ...(Object.keys(devices).length ? { devices } : {}), ...(Object.keys(sharedPins).length ? { shared_pins: sharedPins } : {}), modules };
@@ -885,15 +979,22 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         const problems = new Set();
         for (const transports of product(ways)) {
             const picks = picksFor(shortfalls, choice, transports);
-            // SPI parts on hosts of their own first; when the pins or the hosts run out that way, the same parts sharing hosts
-            const apart = projectOf(name, board, picks, unused);
-            const project = apart.problem ? projectOf(name, board, picks, unused, false) : apart;
+            // the plans of the sides, best first; in each, SPI parts on hosts of their own first, and when the pins or the hosts
+            // run out that way, the same parts sharing hosts
+            let project = null;
+            let sides = null;
+            for (const plan of sidePlans(board, picks)) {
+                const apart = projectOf(name, board, picks, unused, true, plan);
+                const tried = apart.problem ? projectOf(name, board, picks, unused, false, plan) : apart;
+                if (!project || !tried.problem) [project, sides] = [tried, plan];
+                if (!tried.problem) break;
+            }
             if (project.problem) {
-                problems.add(project.problem);
+                problems.add(sides.size ? t('the sides asked: {0}', project.problem) : project.problem);
                 continue;
             }
             const checks = checksOf(project);
-            if (!checks.problems.length) return { project, picks, resolved: checks.resolved };
+            if (!checks.problems.length) return { project, picks, resolved: checks.resolved, sides };
             const clash = checks.problems[0].text.match(/have address (\S+) on (\S+)/);
             problems.add(clash ? t('two devices would have one address, {0}, on {1}', clash[1], clash[2]) : checks.problems[0].text);
         }
@@ -984,8 +1085,10 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             const { on, pins, supply } = project.modules[pick.use] ?? project.devices[pick.use];
             const lines = [];
             if (pick.way && !pick.module.own) {
-                pick.way.lines.forEach((line, i) => lines.push(pick.need.output ? { line: t('channel {0}', pick.need.channel + i), to: `GPIO ${pins[line]}${i ? `, ${t('half a period later')}` : ''}` } : { line, to: `GPIO ${pins[line]}` }));
-                return { use: pick.use, title: pick.module.title, lines };
+                // a line with the level that means on is an object, as the glue takes it
+                const gpio = (line) => pins[line]?.gpio ?? pins[line];
+                pick.way.lines.forEach((line, i) => lines.push(pick.need.output ? { line: t('channel {0}', pick.need.channel + i), to: `GPIO ${gpio(line)}${i ? `, ${t('half a period later')}` : ''}` } : { line, to: `GPIO ${gpio(line)}` }));
+                return { use: pick.use, title: pick.module.title, lines: placed(board, lines) };
             }
             for (const [bus, wires] of Object.entries(on || {})) {
                 const [kind, own] = bus.split('.');
@@ -1000,7 +1103,20 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             for (const [line, from] of Object.entries(supply || {})) lines.push({ line, to: from });
             if (Object.keys(supply || {}).length) lines.push({ line: 'GND', to: 'GND' });
             const number = pick.use.match(/_(\d+)$/)?.[1];
-            return { use: pick.use, title: number ? `${pick.module.title} ${number}` : pick.module.title, lines };
+            return { use: pick.use, title: number ? `${pick.module.title} ${number}` : pick.module.title, lines: placed(board, lines) };
+        });
+    }
+
+    // The wires of a part with where each comes out: a GPIO at its contact and edge; a supply or a ground at a contact of it on
+    // the edge of the GPIOs of the part, when the data has one there.
+    function placed(board, lines) {
+        const { places, spots } = edgesOf(board);
+        const at = (spot) => (spot.edge ? t('{0}, contact {1}, {2}', spot.connector, spot.contact, t(`${spot.edge} edge`)) : t('{0}, contact {1}', spot.connector, spot.contact));
+        const gpioOf = (wire) => Number(/^GPIO (\d+)/.exec(wire.to)?.[1] ?? NaN);
+        const edge = lines.map((wire) => places.get(gpioOf(wire))?.edge).find(Boolean);
+        return lines.map((wire) => {
+            const spot = Number.isNaN(gpioOf(wire)) ? (edge && spots.get(`${edge} ${wire.to}`)) : places.get(gpioOf(wire));
+            return spot ? { ...wire, where: at(spot) } : wire;
         });
     }
 
@@ -1352,7 +1468,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             const serving = new Map([...gone].map(([, at]) => [at, [at]]));
             for (const [i, at] of gone) serving.get(at).push(i);
             const also = [...serving].map(([at, served]) => ({ level: 'yes', text: t('{0} serves: {1}', choice[at].title, served.sort((a, b) => a - b).map((i) => shortfalls[i].need.title).join(', ')) }));
-            const item = result.project ? kit(name, doc, result.resolved, [...says, ...also], result.project, result.picks, board) : { name, title: doc.title ?? name, fits: false, says: [...says, { level: 'no', text: result.problem, ...(result.judgement ? { judgement: result.judgement } : {}) }], modules: [], wires: [], price: null, project: null };
+            const item = result.project ? kit(name, doc, result.resolved, [...says, ...also], result.project, result.picks, board, result.sides) : { name, title: doc.title ?? name, fits: false, says: [...says, { level: 'no', text: result.problem, ...(result.judgement ? { judgement: result.judgement } : {}) }], modules: [], wires: [], price: null, project: null };
             // which part each block gets, for the canvas to show the blocks one part serves together
             // unit: the part as bought, so two SCD41 for two rooms are not one
             if (item.fits) item.served = shortfalls.map((shortfall, i) => ({ role: shortfall.need.id, names: shortfall.need.names ?? [], unit: gone.get(i) ?? i, title: choice[gone.get(i) ?? i].title })).filter((entry) => entry.role);
@@ -1387,7 +1503,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         const reasons = [...new Set(kits.flatMap((item) => item.says.filter((line) => line.level === 'no').map((line) => line.text)))];
         return [{ ...kits[0], says: [...says, ...reasons.map((text) => ({ level: 'no', text }))] }];
 
-        function kit(boardName, source, resolved, reasons, project, picks, base) {
+        function kit(boardName, source, resolved, reasons, project, picks, base, sides = new Map()) {
             const counted = new Map();
             for (const pick of picks.filter((item) => !item.way)) {
                 // a member after the first of a chain is on the wires of the one before it, not on a bus of the board
@@ -1400,6 +1516,32 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             const lines = [...reasons];
             const arduino = platform?.ecosystem === 'arduino';
             for (const item of modules.filter((entry) => !entry.after)) lines.push({ level: 'yes', text: t('{0} on {1}', named(item), item.on.toUpperCase()) });
+            // the sides: the edge of each letter, the supplies of its parts that come out elsewhere, a host off its IO MUX for it,
+            // and a board whose data names no edges
+            const sideJudgement = judgementsOf('sides')[0];
+            if (sideJudgement && picks.some((pick) => sideOf(pick.need)) && !sides.size) lines.push({ level: 'unknown', text: t('the data of this board does not say on which edge its contacts are: the sides are not kept'), judgement: sideJudgement.id });
+            const { names } = edgesOf(base ?? resolved);
+            for (const [letter, edge] of sides) {
+                lines.push({ level: 'yes', text: t(sideJudgement.says, letter, t(`${edge} edge`)), judgement: sideJudgement.id });
+                const ofLetter = picks.filter((pick) => sideOf(pick.need) === letter);
+                const supplies = [...new Set(ofLetter.flatMap((pick) => Object.values(project.modules[pick.use]?.supply ?? {})))];
+                for (const supply of [...supplies, ...(supplies.length ? ['GND'] : [])].filter((name) => !names.get(edge)?.has(name))) {
+                    const there = [...names].filter(([, set]) => set.has(supply)).map(([other]) => t(`${other} edge`));
+                    lines.push({ level: 'do', text: there.length ? t('side {0}: {1} is not on its edge, take it from: {2}', letter, supply, there.join(', ')) : t('side {0}: {1} is not on its edge', letter, supply), judgement: sideJudgement.id });
+                }
+                const matrix = (base ?? resolved).mcu.facts.limits?.spi_matrix_mhz;
+                const hosts = new Set(ofLetter.flatMap((pick) => Object.keys((project.modules[pick.use] ?? project.devices[pick.use])?.on ?? {})).filter((bus) => bus.startsWith('spi.')).map((bus) => bus.slice(4)));
+                for (const own of hosts) {
+                    const named = (base ?? resolved).mcu.facts.iomux?.spi?.[own];
+                    const wired = project.buses?.spi?.[own];
+                    if (!named || !wired) continue;
+                    const off = KIT_BUSES.spi.lines.some((line) => wired[line] !== 'nc' && wired[line] !== named[line]);
+                    const free = freePins(base ?? resolved);
+                    if (off && KIT_BUSES.spi.lines.every((line) => wired[line] === 'nc' || free.includes(named[line]))) {
+                        lines.push({ level: 'note', text: matrix ? t('{0} is not on the pins of its IO MUX, to keep side {1}: through the GPIO matrix up to {2} MHz', own.toUpperCase(), letter, matrix) : t('{0} is not on the pins of its IO MUX, to keep side {1}', own.toUpperCase(), letter), judgement: sideJudgement.id });
+                    }
+                }
+            }
             // a display started at another depth of color than its data's was not tried so on this board
             for (const [part, device] of Object.entries(project && base ? resolved.devices : {})) {
                 const data = (base.devices[part] ?? picks.find((pick) => part === `${pick.use}_${pick.module.part}`)?.module.device)?.config?.depth_bits;

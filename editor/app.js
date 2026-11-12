@@ -324,7 +324,7 @@ const KitCard = {
             </details>
             <details v-if="kit.wiring.length"><summary>{{ t('the wires') }}</summary>
                 <div v-for="module in kit.wiring" :key="module.use" class="wiring"><b>{{ module.title }}</b>
-                    <span v-for="wire in module.lines" :key="wire.line"><code>{{ wire.line }}</code> → {{ wire.to }}</span></div>
+                    <span v-for="wire in module.lines" :key="wire.line"><code>{{ wire.line }}</code> → {{ wire.to }}&nbsp;<span v-if="wire.where" class="hint">· {{ wire.where }}</span></span></div>
             </details>
             <button v-if="kit.writable" :class="{ on: chosenHas(kit) }" :title="t('A board the program is built for: a project may have several.')" @click="store.chooseKit(kit)">{{ t(chosenHas(kit) ? 'in the project' : 'add to the project') }}</button>
             <button v-if="canWrite && kit.writable && !store.chosen.length" @click="store.planProject(kit)">{{ t('make a project…') }}</button>

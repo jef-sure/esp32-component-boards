@@ -1,0 +1,34 @@
+{
+    "title": "A sensor and a button of one letter take the edge of a C3-Zero where 3V3 and GND come out too, as the CO2 station has them",
+    "answers": {
+        "board": "esp32_c3_zero",
+        "blocks": [
+            {
+                "role": "air",
+                "variant": "co2",
+                "asks": {
+                    "side": "A"
+                }
+            },
+            {
+                "role": "button",
+                "variant": "on_gpio",
+                "asks": {
+                    "side": "A"
+                }
+            }
+        ]
+    },
+    "edges": [
+        {
+            "board": "esp32_c3_zero",
+            "edge": "bottom",
+            "title": "SCD40"
+        },
+        {
+            "board": "esp32_c3_zero",
+            "edge": "bottom",
+            "title": "On a GPIO"
+        }
+    ]
+}

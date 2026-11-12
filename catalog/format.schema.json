@@ -620,9 +620,10 @@
             "required": ["id", "kind", "says", "why"],
             "properties": {
               "id": { "$ref": "#/$defs/name" },
-              "kind": { "enum": ["prefer_pins", "keep_out", "note_cost", "unnamed_variant", "resource_limit", "seen_level"] },
+              "kind": { "enum": ["prefer_pins", "keep_out", "note_cost", "unnamed_variant", "resource_limit", "seen_level", "sides"] },
               "says": { "type": "string", "description": "The line of a kit, {0} what it is about." },
-              "why": { "type": "string" }
+              "why": { "type": "string" },
+              "rank": { "type": "integer", "minimum": 1, "description": "The order of the judgements that choose pins, 1 first: 1 what must hold, then the sides a person asked, the IO MUX of a host, the costs. The solver reads it where two of them pull apart, the sides and the IO MUX." }
             },
             "allOf": [
               {

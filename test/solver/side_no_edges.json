@@ -1,0 +1,15 @@
+{
+    "title": "A board whose data names no edges keeps no side, and the card says so",
+    "answers": {
+        "board": "esp32_devkit",
+        "blocks": [
+            {
+                "role": "nfc",
+                "asks": {
+                    "side": "A"
+                }
+            }
+        ]
+    },
+    "says": "does not say on which edge its contacts are"
+}

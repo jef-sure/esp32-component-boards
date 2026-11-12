@@ -2,12 +2,20 @@
     "description": "The judgements of the solver as data. A kind is one function of editor/solver.js; a record is one judgement with its id, and a line of a kit it made carries that id, so a wrong line points at its judgement or at the engine.",
     "judgements": [
         {
+            "id": "sides_asked",
+            "kind": "sides",
+            "rank": 2,
+            "says": "side {0}: {1}",
+            "why": "A person groups blocks by a letter on the page, A to D: a letter names a group, not an edge. The wires of the blocks of one letter come out on one edge of the board, those of another letter on another edge, as the picture of the board names them (connectors.*.edges); the solver chooses the edges. An edge where the supply the group takes comes out too goes first; when no plan has it, the wires keep their edge and the card says where to take the supply. The sides come after what must hold, rank 1, and before the IO MUX of a host, rank 3: a host of a side is on its IO MUX only when those pins are on its edge, and the card says what that costs, unless the clock of its part is above what the GPIO matrix runs (limits.spi_matrix_mhz of the chip): then the IO MUX must hold. A board whose data names no edges keeps no side, and the card says so."
+        },
+        {
             "id": "host_on_its_iomux",
             "kind": "prefer_pins",
             "bus": "spi",
             "pins": "iomux",
             "says": "{0} on the pins of its IO MUX",
-            "why": "A host on the pins of its own IO MUX runs at its full speed, and wired boards often take them: SPI3 of the terminal and of dotview-clock is on 23 and 18. Taken only when every line of the host is free there; a pin the solver keeps out, as a strapping pin, leaves the host to other pins, so SPI2 of an ESP32, whose MISO is GPIO 12, is not on its IO MUX in a kit while the terminal has it there."
+            "why": "A host on the pins of its own IO MUX runs at its full speed, and wired boards often take them: SPI3 of the terminal and of dotview-clock is on 23 and 18. Taken only when every line of the host is free there; a pin the solver keeps out, as a strapping pin, leaves the host to other pins, so SPI2 of an ESP32, whose MISO is GPIO 12, is not on its IO MUX in a kit while the terminal has it there.",
+            "rank": 3
         },
         {
             "id": "strapping_by_harm",
@@ -17,14 +25,16 @@
             "unless": {"logic": "none"},
             "says": "{0} is a strapping pin ({1}): nothing on it should hold a level of its own at reset",
             "says_unless": "{0} is a strapping pin ({1}): {2} holds no level on it at reset, so the kit takes it",
-            "why": "A strapping pin is sampled at reset. The datasheet gives what it selects and the rows of the table of boot modes (gpio.boot_modes, gpio.pins.*.boot of the chip); the solver reads from them the harm of a level there: run, where the start of the program or the voltage of the flash depends on it, download, where only a download mode does, none otherwise. The kit keeps out the harms listed here and a strapping pin the datasheet does not describe; it may take the others, as GPIO 5 of an ESP32, which the terminal takes for a CS. The lines of a part whose logic is none, which holds nothing on them, may have any of them all the same: a pin sampled at reset is harmed by a line that pulls it, and such a line pulls nowhere. The kit gives them those pins last, when the free ones run out: a free pin asks nothing of reset, such a pin is often a pin of JTAG too, which is a cost, and a kit that fits without them stays as it was. Only the lines of a way have them, which no other part shares."
+            "why": "A strapping pin is sampled at reset. The datasheet gives what it selects and the rows of the table of boot modes (gpio.boot_modes, gpio.pins.*.boot of the chip); the solver reads from them the harm of a level there: run, where the start of the program or the voltage of the flash depends on it, download, where only a download mode does, none otherwise. The kit keeps out the harms listed here and a strapping pin the datasheet does not describe; it may take the others, as GPIO 5 of an ESP32, which the terminal takes for a CS. The lines of a part whose logic is none, which holds nothing on them, may have any of them all the same: a pin sampled at reset is harmed by a line that pulls it, and such a line pulls nowhere. The kit gives them those pins last, when the free ones run out: a free pin asks nothing of reset, such a pin is often a pin of JTAG too, which is a cost, and a kit that fits without them stays as it was. Only the lines of a way have them, which no other part shares.",
+            "rank": 1
         },
         {
             "id": "jtag_is_a_cost",
             "kind": "note_cost",
             "note": "JTAG",
             "says": "{0} is a pin of JTAG: the kit leaves no debugging by JTAG on it",
-            "why": "A note of the docs of ESP-IDF on a pin keeps it out of a kit. The pins of JTAG are a cost, not a danger: a kit may take them, and says so, as the terminal and dotview-clock take 13 and 14 of an ESP32 for SPI2."
+            "why": "A note of the docs of ESP-IDF on a pin keeps it out of a kit. The pins of JTAG are a cost, not a danger: a kit may take them, and says so, as the terminal and dotview-clock take 13 and 14 of an ESP32 for SPI2.",
+            "rank": 4
         },
         {
             "id": "unnamed_variant_is_no_answer",
@@ -37,7 +47,8 @@
             "kind": "resource_limit",
             "resource": "ledc",
             "says": "LEDC: {0} channels asked, the chip has {1}",
-            "why": "A way of a part names the LEDC channels it takes (ledc of the way: the OE of a chain of shift registers, the three colours of an RGB LED). They and the outputs of the page come out of the same channels of the chip (frequency_sources.ledc.outputs): a kit that asks more is refused, before its pins are counted."
+            "why": "A way of a part names the LEDC channels it takes (ledc of the way: the OE of a chain of shift registers, the three colours of an RGB LED). They and the outputs of the page come out of the same channels of the chip (frequency_sources.ledc.outputs): a kit that asks more is refused, before its pins are counted.",
+            "rank": 1
         },
         {
             "id": "level_seen_on_hardware",

@@ -126,6 +126,13 @@ for (const name of names) {
         const used = [...others(kit?.project.devices), ...others(kit?.project.modules), ...Object.values(kit?.project.buses ?? {}).flatMap((hosts) => Object.values(hosts).flatMap((lines) => Object.values(lines)))];
         if (!kit?.project || used.some((pin) => given.avoids.pins.includes(pin))) say(`${given.avoids.board} uses a pin it was told is in use`);
     }
+    // the wires of the parts whose titles hold these words come out on this edge: {board, edge, title}, or a list of them
+    for (const side of [].concat(given.edges ?? [])) {
+        const kit = fit.find((item) => item.name === side.board);
+        const wires = (kit?.wiring ?? []).filter((part) => part.title.includes(side.title)).flatMap((part) => part.lines.filter((wire) => /^GPIO \d/.test(wire.to)));
+        const off = wires.filter((wire) => !wire.where?.endsWith(`${side.edge} edge`));
+        if (!wires.length || off.length) say(`${side.board}: ${side.title} on ${side.edge}: ${wires.length ? off.map((wire) => `${wire.to} ${wire.where ?? 'nowhere'}`).join(', ') : 'no wires'}`);
+    }
     if (given.project) {
         // a value of the board of the program a kit writes, by its path there; null for none
         const kit = fit.find((item) => item.name === given.project.board);

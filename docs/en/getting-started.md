@@ -113,7 +113,9 @@ It prints a link. Open it in the integrated browser of VS Code: Ctrl+Shift+P →
 link in its address bar; with the setting `workbench.browser.openLocalhostLinks`, Ctrl+click on the link in the terminal
 does. Put on the canvas what the device needs, as "Display" from the list on the left, and press "make a project…" on
 the card of a board that fits (several boards: "add to the project" on each, then "make the project of these boards…").
-Beside the button is the mark "add the build on the computer": with it the board gets the computer that shows its
+When the wires of several blocks should come out on one edge of the board, give them one letter in the field "Its
+side": a letter names a group, not an edge, see [tools.md](tools.md#the-side). Beside the button is the mark "add the
+build on the computer": with it the board gets the computer that shows its
 display, and the computer is current; without it the board is current and the computers of the project stay as they
 were. The page shows the files it would write; after "write" and your permission its server does the rest, as
 `board_select.py --again .`. To go from the computer to the board, clear the mark and press "make the project of these

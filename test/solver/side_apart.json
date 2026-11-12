@@ -1,0 +1,73 @@
+{
+    "title": "The time clock on an ESP32-P4-ETH: two readers and four buzzers of one letter, the display of another; thirteen lines do not fit the right row, so they take the left, and the card says where their 3V3 is",
+    "answers": {
+        "board": "esp32_p4_eth",
+        "blocks": [
+            {
+                "role": "nfc",
+                "asks": {
+                    "side": "A"
+                }
+            },
+            {
+                "role": "nfc",
+                "asks": {
+                    "side": "A"
+                }
+            },
+            {
+                "role": "display",
+                "variant": "mono_lcd",
+                "asks": {
+                    "side": "B"
+                }
+            },
+            {
+                "role": "buzzer",
+                "asks": {
+                    "swing_v": 6,
+                    "side": "A"
+                }
+            },
+            {
+                "role": "buzzer",
+                "asks": {
+                    "swing_v": 6,
+                    "side": "A"
+                }
+            },
+            {
+                "role": "buzzer",
+                "asks": {
+                    "swing_v": 6,
+                    "side": "A"
+                }
+            },
+            {
+                "role": "buzzer",
+                "asks": {
+                    "swing_v": 6,
+                    "side": "A"
+                }
+            }
+        ]
+    },
+    "edges": [
+        {
+            "board": "esp32_p4_eth",
+            "edge": "left",
+            "title": "PN532"
+        },
+        {
+            "board": "esp32_p4_eth",
+            "edge": "left",
+            "title": "piezo disc"
+        },
+        {
+            "board": "esp32_p4_eth",
+            "edge": "right",
+            "title": "ST7920"
+        }
+    ],
+    "says": "side A: ESP_3V3 is not on its edge, take it from: right edge"
+}

@@ -1,0 +1,47 @@
+{
+    "title": "On a C3-Zero the IO MUX of SPI2 takes GPIO 2, a strapping pin the kit keeps out: a part at 80 MHz is refused, and says why",
+    "modules": {
+        "fast_pn532": {
+            "format": "jef-sure/boards",
+            "format_version": 2,
+            "kind": "module",
+            "name": "fast_pn532",
+            "title": "A PN532 on SPI at 80 MHz",
+            "power": [
+                {
+                    "name": "VCC",
+                    "source": "connector",
+                    "volts": [
+                        3.3,
+                        5.5
+                    ]
+                }
+            ],
+            "devices": {
+                "nfc": {
+                    "chip": "pn532",
+                    "logic": "VCC",
+                    "on": {
+                        "spi": {
+                            "hz": 80000000
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "answers": {
+        "board": "esp32_c3_zero",
+        "blocks": [
+            {
+                "role": "nfc",
+                "part": "fast_pn532",
+                "asks": {
+                    "side": "A"
+                }
+            }
+        ]
+    },
+    "fit": [],
+    "says": "SPI2 at 80 MHz needs the pins of its IO MUX"
+}

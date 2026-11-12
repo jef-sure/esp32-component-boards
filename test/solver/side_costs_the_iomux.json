@@ -1,0 +1,20 @@
+{
+    "title": "A reader of a letter takes the edge of an S3-Zero with its supply, and its SPI is off the pins of its IO MUX, which are on the other edge: the card says what that costs",
+    "answers": {
+        "board": "esp32_s3_zero",
+        "blocks": [
+            {
+                "role": "nfc",
+                "asks": {
+                    "side": "A"
+                }
+            }
+        ]
+    },
+    "edges": {
+        "board": "esp32_s3_zero",
+        "edge": "bottom",
+        "title": "PN532"
+    },
+    "says": "SPI2 is not on the pins of its IO MUX, to keep side A: through the GPIO matrix up to 40 MHz"
+}

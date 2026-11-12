@@ -1,0 +1,51 @@
+{
+    "title": "A part on SPI at 80 MHz needs the IO MUX, above the clock of the GPIO matrix: its letter takes the edge where those pins are, and the card says where to take the supply",
+    "modules": {
+        "fast_pn532": {
+            "format": "jef-sure/boards",
+            "format_version": 2,
+            "kind": "module",
+            "name": "fast_pn532",
+            "title": "A PN532 on SPI at 80 MHz",
+            "power": [
+                {
+                    "name": "VCC",
+                    "source": "connector",
+                    "volts": [
+                        3.3,
+                        5.5
+                    ]
+                }
+            ],
+            "devices": {
+                "nfc": {
+                    "chip": "pn532",
+                    "logic": "VCC",
+                    "on": {
+                        "spi": {
+                            "hz": 80000000
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "answers": {
+        "board": "esp32_s3_zero",
+        "blocks": [
+            {
+                "role": "nfc",
+                "part": "fast_pn532",
+                "asks": {
+                    "side": "A"
+                }
+            }
+        ]
+    },
+    "edges": {
+        "board": "esp32_s3_zero",
+        "edge": "top",
+        "title": "80 MHz"
+    },
+    "says": "side A: 3V3 is not on its edge, take it from: bottom edge"
+}

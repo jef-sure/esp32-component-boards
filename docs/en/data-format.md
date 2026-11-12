@@ -585,6 +585,20 @@ stand in any file of the catalog, the file beside the JSON; `source` is required
 and a vendor's photos are not copied. `at` places a mark in shares of the picture,
 and `up` shows where the top of the screen points.
 
+`edges` says on which sides of the board the contacts come out, where pins are soldered: runs along the edges in the
+order of `pins`, each with its edge, the end of that edge its first contact is at, and how many contacts it holds.
+The edges are named as the picture of the board shows it, `top`, `bottom`, `left`, `right`; a board with no picture
+names the drawing it follows in `checked`. Holes along two edges are two runs; a header of two rows numbered as on a
+Raspberry Pi Pico is two runs as well:
+
+```json
+"P1": { "type": "2.54 mm header, 2x20 pins, the layout of a Pico", "pins": [54, 19, "GND", ...],
+        "edges": [{ "edge": "left", "from": "top", "count": 20 }, { "edge": "right", "from": "bottom", "count": 20 }] }
+```
+
+The runs hold all the pins of the connector. A connector with no `edges` is on no side: pads on the back or holes
+inside the board, listed by number; order does not matter there.
+
 ## Supply and levels
 
 A module says what it takes and what it puts on its lines. A board or a project says where it takes

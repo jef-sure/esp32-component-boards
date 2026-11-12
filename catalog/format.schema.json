@@ -1899,6 +1899,24 @@
               "type": { "type": "string" },
               "of": { "$ref": "#/$defs/name", "description": "A directory of catalog/connectors/: a connector whose contacts are fixed by a standard." },
               "pins": { "type": "array", "items": { "anyOf": [{ "$ref": "#/$defs/line" }, { "type": "string" }] } },
+              "edges": {
+                "type": "array",
+                "minItems": 1,
+                "description": "Where its contacts come out, as the picture of the board shows it: runs along its edges in the order of pins, each with its edge, the end of that edge contact 1 of the run is at, and how many contacts it holds; together they hold all the pins. A connector with no edges is on no side: pads on the back, holes inside.",
+                "items": {
+                  "type": "object",
+                  "required": ["edge", "from", "count"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "edge": { "enum": ["top", "bottom", "left", "right"] },
+                    "from": { "enum": ["top", "bottom", "left", "right"] },
+                    "count": { "type": "integer", "minimum": 1 }
+                  },
+                  "if": { "properties": { "edge": { "enum": ["top", "bottom"] } } },
+                  "then": { "properties": { "from": { "enum": ["left", "right"] } } },
+                  "else": { "properties": { "from": { "enum": ["top", "bottom"] } } }
+                }
+              },
               "at": {
                 "type": "object",
                 "required": ["image", "x", "y"],

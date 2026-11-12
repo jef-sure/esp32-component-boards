@@ -1,0 +1,199 @@
+{
+    "expect": "'top' is not one of",
+    "board": {
+        "format": "jef-sure/boards",
+        "format_version": 2,
+        "kind": "board",
+        "name": "esp32_c3_zero",
+        "title": "Waveshare ESP32-C3-Zero",
+        "maker": "waveshare",
+        "part": "ESP32-C3-Zero",
+        "description": "A small ESP32-C3 board: 4 MB flash in the chip, castellated holes, USB-C to the chip, a WS2812B, BOOT and RESET buttons, a ceramic antenna",
+        "notes": [
+            "USB-C goes to the chip itself, GPIO 18 and 19: no USB bridge, the log comes on the USB Serial/JTAG port. GPIO 18 and 19 also come out on holes; wired to something else they take the USB away.",
+            "The WS2812B on GPIO 10 is fed from 5V, so its data input wants more than the 3.3 V of the pin. Not tried on the board.",
+            "TX and RX are GPIO 21 and 20, UART0."
+        ],
+        "mcu": {
+            "target": "esp32c3",
+            "flash_mb": 4,
+            "antenna": {
+                "kind": "on_board",
+                "form": "ceramic",
+                "quality": 4
+            }
+        },
+        "devices": {
+            "boot": {
+                "class": "button",
+                "pins": {
+                    "in": {
+                        "gpio": 9,
+                        "active": "low"
+                    }
+                }
+            },
+            "usb": {
+                "class": "usb",
+                "pins": {
+                    "d_minus": 18,
+                    "d_plus": 19
+                },
+                "notes": "The USB-C: D- and D+ go to the USB Serial/JTAG of the chip (UD_N on IO18, UD_P on IO19), the console and the flashing."
+            },
+            "led": {
+                "class": "led",
+                "ref": "WS_L1",
+                "chip": "ws2812b",
+                "provides": {
+                    "led": {
+                        "variant": "addressable"
+                    }
+                },
+                "pins": {
+                    "data": 10
+                },
+                "config": {
+                    "kind": "ws2812",
+                    "count": 1
+                }
+            },
+            "reg_3v3": {
+                "class": "other",
+                "ref": "CAT1",
+                "notes": "An LDO from 5V to VCC3.3; the product page of Waveshare names an ME6217C33M5G."
+            }
+        },
+        "power": [
+            {
+                "name": "5V",
+                "source": "usb",
+                "mv": 5000,
+                "plug": "usb_c",
+                "why": "VBUS of the USB-C, also on the 5V hole."
+            },
+            {
+                "name": "3V3",
+                "from": "5V",
+                "through": "reg_3v3",
+                "regulator": "ldo",
+                "mv": 3300,
+                "feeds": [
+                    "mcu"
+                ]
+            }
+        ],
+        "connectors": {
+            "header": {
+                "type": "castellated holes, 2.54 mm, 18 along two edges",
+                "pins": [
+                    21,
+                    20,
+                    19,
+                    18,
+                    10,
+                    9,
+                    8,
+                    7,
+                    6,
+                    5,
+                    4,
+                    3,
+                    2,
+                    1,
+                    0,
+                    "3V3",
+                    "GND",
+                    "5V"
+                ],
+                "edges": [
+                    {
+                        "edge": "top",
+                        "from": "top",
+                        "count": 9
+                    },
+                    {
+                        "edge": "bottom",
+                        "from": "right",
+                        "count": 9
+                    }
+                ]
+            }
+        },
+        "images": {
+            "front": {
+                "file": "front.webp",
+                "source": "a photo by Anton of his board, 2026-11-06",
+                "shows": "front"
+            },
+            "back": {
+                "file": "back.webp",
+                "source": "a photo by Anton of his board, 2026-11-02",
+                "shows": "back"
+            }
+        },
+        "checked": {
+            "pins": {
+                "level": "schematic",
+                "source": "ESP32-C3-Zero-Sch.pdf of Waveshare, dated 2023-10-19, files.waveshare.com/wiki/ESP32-C3-Zero",
+                "date": "2026-11-02"
+            },
+            "connectors": {
+                "level": "schematic",
+                "covers": [
+                    "connectors"
+                ],
+                "source": "Header 20 of the schematic; the labels of the holes on the photo of the back of Anton's board",
+                "date": "2026-11-02"
+            },
+            "flash": {
+                "level": "vendor-docs",
+                "covers": [
+                    "mcu.flash_mb"
+                ],
+                "source": "the product page of Waveshare: an ESP32-C3 with 4 MB flash in the package",
+                "date": "2026-11-02"
+            },
+            "chip": {
+                "level": "hardware",
+                "covers": [
+                    "mcu.target"
+                ],
+                "by": "esptool",
+                "unit": "MAC 8c:d0:b2:a8:e0:b1",
+                "date": "2026-11-02",
+                "notes": "ESP32-C3 (QFN32) revision 0.4."
+            },
+            "antenna": {
+                "level": "schematic",
+                "covers": [
+                    "mcu.antenna"
+                ],
+                "source": "ANT1 through R221, 0 ohm, no connector; a ceramic chip on the photo. quality by the marks of data-format.md",
+                "date": "2026-11-02"
+            },
+            "antenna_rssi": {
+                "level": "hardware",
+                "covers": [
+                    "mcu.antenna"
+                ],
+                "by": "rssi_probe on Anton's desk, one access point on channel 1, 60 s each",
+                "unit": "MAC 8c:d0:b2:a8:e0:b1",
+                "date": "2026-11-02",
+                "notes": "Median RSSI on its pins, face down: -60 dBm at 0 and -64 at 90 degrees; face up, flat on the desk: -64 at 0 degrees."
+            }
+        },
+        "price": {
+            "report_3": {
+                "shop": "aliexpress",
+                "currency": "EUR",
+                "range": [
+                    3.76,
+                    3.76
+                ],
+                "date": "2026-11-04",
+                "source": "Issue 3, as reported"
+            }
+        }
+    }
+}

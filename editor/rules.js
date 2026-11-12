@@ -129,6 +129,13 @@ function check(doc, data) {
         } else if (rule.kind === 'earlier') {
             const at = new Map(select(doc, rule.among, sets, memo).map((item) => [mark(item.value), +item.ctx['1']]));
             for (const item of items) if (!(at.get(mark(item.value)) < +item.ctx['1'])) report(item.ctx);
+        } else if (rule.kind === 'total') {
+            // the figures of a list add up to the length of another, as the runs of a connector to its pins
+            for (const item of items) {
+                const whole = get(doc, rule.equals, item.ctx);
+                if (!Array.isArray(item.value) || !Array.isArray(whole)) continue;
+                if (item.value.reduce((sum, entry) => sum + (entry?.[rule.sum] ?? 0), 0) !== whole.length) report(item.ctx);
+            }
         } else if (rule.kind === 'within') {
             for (const item of items) {
                 const { value, ctx } = item;

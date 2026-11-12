@@ -47,7 +47,8 @@
     "connectors": {
         "P15": {
             "type": "castellated holes, 2.54 mm, 18 along two edges",
-            "pins": [43, 44, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, "3V3", "GND", "5V"]
+            "pins": [43, 44, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, "3V3", "GND", "5V"],
+            "edges": [{"edge": "top", "from": "left", "count": 9}, {"edge": "bottom", "from": "right", "count": 9}]
         },
         "pads_front": {"type": "pads on the front", "pins": [14, 15, 16]},
         "pads_back": {"type": "pads on the back", "pins": [17, 18, 38, 39, 40, 41, 42, 45]}
@@ -89,6 +90,12 @@
             "unit": "MAC ac:27:6e:ce:c8:88",
             "date": "2026-11-02",
             "notes": "Median RSSI on foam, 0 degrees: -64 dBm; flat on the desk: -66 at 0 and -70 at 90 degrees. In the same place an ESP32 DevKit with an ESP-WROOM-32 on its pins gave -63 at 0 degrees, an ESP32-C6 Super Mini on foam -59 and -70."
+        },
+        "edges": {
+            "level": "vendor-docs",
+            "covers": ["connectors.P15.edges"],
+            "source": "the labels of the holes on front.webp, the photo of the front of Anton's board, USB-C on the left",
+            "date": "2026-11-12"
         }
     }
 }

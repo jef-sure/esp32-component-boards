@@ -146,6 +146,14 @@ def check(doc, data):
             for item in items:
                 if mark(item["value"]) not in at or at[mark(item["value"])] >= int(item["ctx"]["1"]):
                     found.append({"rule": rule["id"], "message": fill(message, item["ctx"])})
+        elif kind == "total":
+            # the figures of a list add up to the length of another, as the runs of a connector to its pins
+            for item in items:
+                whole = get(doc, rule["equals"], item["ctx"])
+                if not isinstance(item["value"], list) or not isinstance(whole, list):
+                    continue
+                if sum((entry or {}).get(rule["sum"], 0) for entry in item["value"]) != len(whole):
+                    found.append({"rule": rule["id"], "message": fill(message, item["ctx"])})
         elif kind == "within":
             for item in items:
                 value, ctx = item["value"], item["ctx"]

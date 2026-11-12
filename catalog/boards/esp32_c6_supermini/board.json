@@ -76,8 +76,16 @@
         }
     ],
     "connectors": {
-        "H1": {"type": "castellated holes, 2.54 mm, 10", "pins": [7, 6, 5, 4, 3, 2, 1, 0, 17, 16]},
-        "H2": {"type": "castellated holes, 2.54 mm, 10", "pins": ["VBUS", "GND", "3V3", 20, 19, 18, 15, 14, 9, 8]},
+        "H1": {
+            "type": "castellated holes, 2.54 mm, 10",
+            "pins": [7, 6, 5, 4, 3, 2, 1, 0, 17, 16],
+            "edges": [{"edge": "bottom", "from": "right", "count": 10}]
+        },
+        "H2": {
+            "type": "castellated holes, 2.54 mm, 10",
+            "pins": ["VBUS", "GND", "3V3", 20, 19, 18, 15, 14, 9, 8],
+            "edges": [{"edge": "top", "from": "left", "count": 10}]
+        },
         "pads": {"type": "holes inside the board", "pins": [12, 13, 21, 22, 23]},
         "battery": {"type": "pads on the back, B+ and B-", "pins": ["BAT", "GND"]}
     },
@@ -118,6 +126,12 @@
             "by": "Anton, by eye",
             "date": "2026-11-07",
             "notes": "No cell on B+ and B-: the green LED blinks in short flashes all the time, whatever the program."
+        },
+        "edges": {
+            "level": "vendor-docs",
+            "covers": ["connectors.H1.edges", "connectors.H2.edges"],
+            "source": "the labels of the holes on front.webp and back.webp, the photos of both sides of Anton's board: on the front USB-C is on the left",
+            "date": "2026-11-12"
         }
     }
 }

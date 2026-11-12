@@ -144,6 +144,8 @@
       "message": "{1}: {library} {at} does not do {node} of {2}" },
     { "id": "covers_exist", "kind": "path", "in_files": true, "each": { "path": "checked.*.covers.*" },
       "message": "checked {1}: this file has no {value}" },
+    { "id": "connector_edges_hold_pins", "kind": "total", "each": { "path": "connectors.*.edges" }, "sum": "count",
+      "equals": "connectors.{1}.pins", "message": "connector {1}: its edges hold another number of contacts than its pins" },
     { "id": "connector_image_exists", "kind": "exists", "each": { "path": "connectors.*.at.image" },
       "among": [{ "path": "images.*", "as": "{1}" }], "message": "connector {1}: no image {value}" },
     { "id": "after_exist", "kind": "exists", "each": { "path": "devices.*.start.after.*" },

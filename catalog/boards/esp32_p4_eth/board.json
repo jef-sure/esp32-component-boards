@@ -40,6 +40,12 @@
             "covers": ["devices.ethernet", "buses.rmii"],
             "by": "the sdkconfig of tc-eth-p4, which runs on this board: MDC 31, MDIO 52, reset 51, PHY address 1",
             "date": "2026-10-14"
+        },
+        "edges": {
+            "level": "vendor-docs",
+            "covers": ["connectors.P1.edges"],
+            "source": "the pinout drawing of the Waveshare wiki of ESP32-P4-ETH, sent by Anton: the board as it shows it, USB-C at the top and RJ45 at the bottom; the catalog has no picture of this board",
+            "date": "2026-11-12"
         }
     },
     "buses": {
@@ -156,7 +162,8 @@
                 "GND",
                 "VCC_5V",
                 "VCC1_5V"
-            ]
+            ],
+            "edges": [{"edge": "left", "from": "top", "count": 20}, {"edge": "right", "from": "bottom", "count": 20}]
         },
         "H7": {"type": "header of a PoE module, 6 pins", "pins": ["RJ78", "RJ45", "RJ36", "RJ12", "VCC1_5V", "GND"]},
         "J3": {"type": "USB 2.0 OTG, 4 pins", "pins": ["VCC_5V", "USBD_N", "USBD_P", "GND"]},

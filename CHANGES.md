@@ -16,7 +16,8 @@
   its pins, the edges named as the picture of the board shows it. A rule checks that the runs hold all the pins. The
   ESP32-C3-Zero, ESP32-S3-Zero and ESP32-C6 Super Mini have them by the photos of Anton's boards, and the
   ESP32-P4-ETH by the pinout drawing of Waveshare, the ESP32 DevKit by the photo of its USB-C sibling, the same board
-  with a micro-USB connector. The solver does not use them yet.
+  with a micro-USB connector. The connectors of the DevKit are `en_side` and `3v3_side` now, not `left` and `right`:
+  a connector is named by itself, and where it lies comes from `edges` and the picture.
 - The buzzer block asks its swing again, as the page did before the blocks: the solver wires a part with no bus by
   the first of its ways that gives it, so four bare discs at 6 V are eight wires in antiphase and eight LEDC channels,
   and the card says how to wire the way taken. Before, a buzzer block always took one pin.

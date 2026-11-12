@@ -20,12 +20,12 @@
         {"name": "3V3", "from": "VIN", "regulator": "ldo", "mv": 3300, "feeds": ["mcu"]}
     ],
     "connectors": {
-        "left": {
+        "en_side": {
             "type": "2.54 mm header, 15 pins",
             "pins": ["EN", 36, 39, 34, 35, 32, 33, 25, 26, 27, 14, 12, 13, "GND", "VIN"],
             "edges": [{"edge": "top", "from": "right", "count": 15}]
         },
-        "right": {
+        "3v3_side": {
             "type": "2.54 mm header, 15 pins",
             "pins": ["3V3", "GND", 15, 2, 4, 16, 17, 5, 18, 19, 21, 3, 1, 22, 23],
             "edges": [{"edge": "bottom", "from": "left", "count": 15}]
@@ -70,8 +70,8 @@
         },
         "edges": {
             "level": "vendor-docs",
-            "covers": ["connectors.left.edges", "connectors.right.edges"],
-            "source": "the labels on front.webp of esp32_devkit_usb_c, the photo of Anton's board, USB-C on the left: the same board with a micro-USB connector (Anton, 2026-11-12). The names left and right are of a board held upright; on that picture they are the top and the bottom row",
+            "covers": ["connectors.en_side.edges", "connectors.3v3_side.edges"],
+            "source": "the labels on front.webp of esp32_devkit_usb_c, the photo of Anton's board, USB-C on the left: the same board with a micro-USB connector (Anton, 2026-11-12)",
             "date": "2026-11-12"
         }
     }

@@ -596,6 +596,9 @@ Raspberry Pi Pico is two runs as well:
         "edges": [{ "edge": "left", "from": "top", "count": 20 }, { "edge": "right", "from": "bottom", "count": 20 }] }
 ```
 
+The name of a connector is its own, not its place: the mark of the maker, as `P1` or `J3`, or the contact at an end of
+it, as `en_side`, never `left` or `right`, which depend on how the board is held. Where it lies, `left` or `top` as a
+person sees it, comes from `edges` and the picture; the solver only groups by the edges and does not read their names.
 The runs hold all the pins of the connector. A connector with no `edges` is on no side: pads on the back or holes
 inside the board, listed by number; order does not matter there.
 

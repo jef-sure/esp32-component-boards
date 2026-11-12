@@ -74,6 +74,11 @@
             "source": "~/dgx-bench/datasheets-espressif-2026-11-04/esp32h2/esp32-h2_datasheet_en_v1.3.pdf, Tables 3-1 and 3-3"
         },
         "iomux": {"level": "vendor-docs", "covers": ["iomux"], "source": "ESP-IDF esp-idf, spi_pins.h of esp32h2"},
+        "spi_matrix": {
+            "level": "vendor-docs",
+            "covers": ["limits.spi_matrix_mhz"],
+            "source": "ESP-IDF esp-idf, docs/en/api-reference/peripherals/spi_master.rst, GPIO Matrix and IO_MUX"
+        },
         "platforms": {"level": "vendor-docs", "covers": ["platforms"], "source": "COMPATIBILITY.md of ESP-IDF"}
     },
     "frequency_sources": {
@@ -121,7 +126,7 @@
             "can": ["start_stop"]
         }
     },
-    "limits": {"cpu_mhz": 64},
+    "limits": {"cpu_mhz": 64, "spi_matrix_mhz": 40},
     "iomux": {"spi": {"spi2": {"miso": 0, "hd": 3, "wp": 2, "sclk": 4, "mosi": 5, "cs": 1}}},
     "platforms": {
         "esp_idf": {

@@ -159,6 +159,11 @@
             "source": "~/dgx-bench/datasheets-espressif-2026-11-04/esp32p4/esp32-p4_datasheet_en_v0.7.pdf, Tables 3-1 and 3-3"
         },
         "iomux": {"level": "vendor-docs", "covers": ["iomux"], "source": "ESP-IDF esp-idf, spi_pins.h of esp32p4"},
+        "spi_matrix": {
+            "level": "vendor-docs",
+            "covers": ["limits.spi_matrix_mhz"],
+            "source": "ESP-IDF esp-idf, docs/en/api-reference/peripherals/spi_master.rst, GPIO Matrix and IO_MUX"
+        },
         "platforms": {"level": "vendor-docs", "covers": ["platforms"], "source": "COMPATIBILITY.md of ESP-IDF"}
     },
     "frequency_sources": {
@@ -219,7 +224,7 @@
             "can": []
         }
     },
-    "limits": {"psram_mhz": 250, "cpu_mhz": 400},
+    "limits": {"psram_mhz": 250, "cpu_mhz": 400, "spi_matrix_mhz": 40},
     "sdkconfig": {
         "revision": "CONFIG_ESP32P4_REV_MIN_{value}",
         "psram_mhz": "CONFIG_SPIRAM_SPEED_{value}M",

@@ -149,6 +149,11 @@
             "source": "~/dgx-bench/datasheets-espressif-2026-11-04/esp32/esp32_datasheet_en_v5.3.pdf, Tables 3-1 and 3-3"
         },
         "iomux": {"level": "vendor-docs", "covers": ["iomux"], "source": "ESP-IDF esp-idf, spi_pins.h of esp32"},
+        "spi_matrix": {
+            "level": "vendor-docs",
+            "covers": ["limits.spi_matrix_mhz"],
+            "source": "ESP-IDF esp-idf, docs/en/api-reference/peripherals/spi_master.rst, GPIO Matrix and IO_MUX"
+        },
         "platforms": {"level": "vendor-docs", "covers": ["platforms"], "source": "COMPATIBILITY.md of ESP-IDF"}
     },
     "frequency_sources": {
@@ -211,7 +216,7 @@
         "dac_cosine": {"title": "DAC cosine", "kind": "rc", "timers": 1, "outputs": 2, "pairs": false, "can": []}
     },
     "controls": {"wifi_tx_power": {"how": "wifi_tx_power", "min": 8, "max": 84, "unit": "0.25 dBm", "read": "command"}},
-    "limits": {"psram_mhz": 80, "cpu_mhz": 240},
+    "limits": {"psram_mhz": 80, "cpu_mhz": 240, "spi_matrix_mhz": 40},
     "iomux": {
         "spi": {
             "spi2": {"miso": 12, "mosi": 13, "sclk": 14, "cs": 15, "wp": 2, "hd": 4},

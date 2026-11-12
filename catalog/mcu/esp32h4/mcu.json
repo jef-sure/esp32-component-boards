@@ -97,6 +97,11 @@
             "source": "ESP-IDF esp-idf, docs/en/api-reference/peripherals/gpio/esp32h4.inc"
         },
         "iomux": {"level": "vendor-docs", "covers": ["iomux"], "source": "ESP-IDF esp-idf, spi_pins.h of esp32h4"},
+        "spi_matrix": {
+            "level": "vendor-docs",
+            "covers": ["limits.spi_matrix_mhz"],
+            "source": "ESP-IDF esp-idf, docs/en/api-reference/peripherals/spi_master.rst, GPIO Matrix and IO_MUX"
+        },
         "platforms": {"level": "vendor-docs", "covers": ["platforms"], "source": "COMPATIBILITY.md of ESP-IDF"}
     },
     "frequency_sources": {
@@ -144,7 +149,7 @@
             "can": ["start_stop"]
         }
     },
-    "limits": {"psram_mhz": 64},
+    "limits": {"psram_mhz": 64, "spi_matrix_mhz": 40},
     "iomux": {"spi": {"spi2": {"miso": 15, "hd": 19, "wp": 18, "sclk": 16, "mosi": 17, "cs": 20}}},
     "platforms": {"esp_idf": {"preview": "6.0"}}
 }

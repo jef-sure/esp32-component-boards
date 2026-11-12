@@ -53,7 +53,12 @@
             "covers": ["gpio.pins", "gpio.strapping"],
             "source": "ESP-IDF esp-idf, docs/en/api-reference/peripherals/gpio/esp32h21.inc"
         },
-        "iomux": {"level": "vendor-docs", "covers": ["iomux"], "source": "ESP-IDF esp-idf, spi_pins.h of esp32h21"}
+        "iomux": {"level": "vendor-docs", "covers": ["iomux"], "source": "ESP-IDF esp-idf, spi_pins.h of esp32h21"},
+        "spi_matrix": {
+            "level": "vendor-docs",
+            "covers": ["limits.spi_matrix_mhz"],
+            "source": "ESP-IDF esp-idf, docs/en/api-reference/peripherals/spi_master.rst, GPIO Matrix and IO_MUX"
+        }
     },
     "frequency_sources": {
         "ledc": {
@@ -91,5 +96,6 @@
             "can": ["carrier", "loop"]
         }
     },
-    "iomux": {"spi": {"spi2": {"wp": 0, "hd": 1, "sclk": 2, "mosi": 3, "miso": 4, "cs": 12}}}
+    "iomux": {"spi": {"spi2": {"wp": 0, "hd": 1, "sclk": 2, "mosi": 3, "miso": 4, "cs": 12}}},
+    "limits": {"spi_matrix_mhz": 40}
 }

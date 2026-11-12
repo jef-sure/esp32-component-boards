@@ -863,7 +863,9 @@ solver's to read: `run` where the row `spi_boot` names a level or the pin select
 does not start), `download` where only another row names one, none otherwise.
 
 `host_on_its_iomux` is the first: an SPI host on the pins of its IO MUX (`iomux` of `mcu.json`, from `spi_pins.h` of
-ESP-IDF), as a wired board takes them.
+ESP-IDF), as a wired board takes them. `limits.spi_matrix_mhz` of `mcu.json` is the clock of SPI off those pins, through
+the GPIO matrix, by the section GPIO Matrix and IO_MUX of `spi_master.rst` of ESP-IDF: the ESP32 allows only so much
+there, 40 MHz against 80 on its IO MUX, and the other chips behave as on the IO MUX up to it, 40 MHz.
 
 ## What is refused
 

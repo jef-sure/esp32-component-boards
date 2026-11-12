@@ -117,6 +117,21 @@ def speeds(path, symbol):
     return [(int(mhz), block) for mhz, block in blocks if "FPGA" not in block]
 
 
+SPI_MASTER_DOC = "docs/en/api-reference/peripherals/spi_master.rst"
+
+
+def spi_matrix_mhz(target):
+    """The clock up to which SPI off the pins of its IO MUX, through the GPIO matrix, runs as on them, by the section
+    GPIO Matrix and IO_MUX of spi_master.rst: the ESP32 allows only so much there, the other chips behave the same."""
+    text = (IDF / SPI_MASTER_DOC).read_text()
+    pattern = (r"only up to (\d+) MHz, as opposed to \d+ MHz if IO_MUX pins are used" if target == "esp32"
+               else r"set to (\d+) MHz or lower frequencies, routing SPI pins via the GPIO matrix will behave the same")
+    found = re.search(pattern, text)
+    if not found:
+        raise SystemExit(f"{IDF / SPI_MASTER_DOC}: no clock of the GPIO matrix for {target}; read the section GPIO Matrix and IO_MUX again")
+    return int(found[1])
+
+
 def limits_of(target):
     """The largest speeds of a chip and, when revisions of it differ, those of the older ones."""
     limits, older = {}, {}
@@ -383,6 +398,9 @@ def main():
         if iomux:
             entry["iomux"] = iomux
             entry["checked"]["iomux"] = {"level": "vendor-docs", "covers": ["iomux"], "source": f"ESP-IDF {IDF.name}, spi_pins.h of {target}"}
+        if "spi" in iomux:
+            entry.setdefault("limits", {})["spi_matrix_mhz"] = spi_matrix_mhz(target)
+            entry["checked"]["spi_matrix"] = {"level": "vendor-docs", "covers": ["limits.spi_matrix_mhz"], "source": f"ESP-IDF {IDF.name}, {SPI_MASTER_DOC}, GPIO Matrix and IO_MUX"}
         if target in supported:
             entry["platforms"] = {"esp_idf": supported[target]}
             entry["checked"]["platforms"] = {"level": "vendor-docs", "covers": ["platforms"], "source": "COMPATIBILITY.md of ESP-IDF"}

@@ -2,6 +2,9 @@
 
 ## 0.1.4 (not released yet)
 
+- A chip has `limits.spi_matrix_mhz`, the clock of SPI through the GPIO matrix by the docs of ESP-IDF: 40 MHz on every
+  chip, where the ESP32 allows no more and the others run as on the IO MUX. `tools/make_mcu.py` reads it from
+  `spi_master.rst`.
 - A connector says on which sides of the board its contacts come out: `edges`, runs along the edges in the order of
   its pins, the edges named as the picture of the board shows it. A rule checks that the runs hold all the pins. The
   ESP32-C3-Zero, ESP32-S3-Zero and ESP32-C6 Super Mini have them by the photos of Anton's boards, and the

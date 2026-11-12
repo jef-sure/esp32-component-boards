@@ -89,6 +89,11 @@
             "source": "~/dgx-bench/datasheets-espressif-2026-11-04/esp32c61/esp32-c61_datasheet_en_v1.1.pdf, Tables 3-1 and 3-3"
         },
         "iomux": {"level": "vendor-docs", "covers": ["iomux"], "source": "ESP-IDF esp-idf, spi_pins.h of esp32c61"},
+        "spi_matrix": {
+            "level": "vendor-docs",
+            "covers": ["limits.spi_matrix_mhz"],
+            "source": "ESP-IDF esp-idf, docs/en/api-reference/peripherals/spi_master.rst, GPIO Matrix and IO_MUX"
+        },
         "platforms": {"level": "vendor-docs", "covers": ["platforms"], "source": "COMPATIBILITY.md of ESP-IDF"}
     },
     "frequency_sources": {
@@ -115,7 +120,7 @@
         }
     },
     "controls": {"wifi_tx_power": {"how": "wifi_tx_power", "min": 8, "max": 84, "unit": "0.25 dBm", "read": "command"}},
-    "limits": {"psram_mhz": 120, "cpu_mhz": 160},
+    "limits": {"psram_mhz": 120, "cpu_mhz": 160, "spi_matrix_mhz": 40},
     "iomux": {"spi": {"spi2": {"miso": 2, "hd": 3, "wp": 4, "sclk": 6, "mosi": 7, "cs": 8}}},
     "platforms": {
         "esp_idf": {

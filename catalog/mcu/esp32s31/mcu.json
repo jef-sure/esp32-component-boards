@@ -169,7 +169,12 @@
             "covers": ["gpio.boot_modes", "gpio.strapping", "gpio.pins"],
             "source": "~/dgx-bench/datasheets-espressif-2026-11-04/esp32s31/esp32-s31_datasheet_en_v0.5.pdf, Tables 3-1 and 3-3"
         },
-        "iomux": {"level": "vendor-docs", "covers": ["iomux"], "source": "ESP-IDF esp-idf, spi_pins.h of esp32s31"}
+        "iomux": {"level": "vendor-docs", "covers": ["iomux"], "source": "ESP-IDF esp-idf, spi_pins.h of esp32s31"},
+        "spi_matrix": {
+            "level": "vendor-docs",
+            "covers": ["limits.spi_matrix_mhz"],
+            "source": "ESP-IDF esp-idf, docs/en/api-reference/peripherals/spi_master.rst, GPIO Matrix and IO_MUX"
+        }
     },
     "frequency_sources": {
         "ledc": {
@@ -230,6 +235,6 @@
         }
     },
     "controls": {"wifi_tx_power": {"how": "wifi_tx_power", "min": 8, "max": 84, "unit": "0.25 dBm", "read": "command"}},
-    "limits": {"psram_mhz": 250, "cpu_mhz": 320},
+    "limits": {"psram_mhz": 250, "cpu_mhz": 320, "spi_matrix_mhz": 40},
     "iomux": {"spi": {"spi2": {"sclk": 20, "mosi": 21, "miso": 22, "cs": 23, "hd": 24, "wp": 25}}}
 }

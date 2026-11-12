@@ -47,11 +47,11 @@
         }
     ],
     "connectors": {
-        "left": {
+        "svp_side": {
             "type": "2.54 mm holes, 10, from the antenna end",
             "pins": [36, 25, 26, 8, 11, 7, 6, "3V3", "GND", "5V"]
         },
-        "right": {
+        "svn_side": {
             "type": "2.54 mm holes, 16, from the antenna end",
             "pins": [39, 16, 5, 4, 0, 2, 14, 12, 13, 15, 3, 1, "3V3", "GND", "GND", "5V"]
         }

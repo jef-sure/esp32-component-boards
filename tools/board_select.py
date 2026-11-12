@@ -197,7 +197,7 @@ def others_digest(preset):
 
 def board_presets(doc):
     """The presets of the boards, default left out. The ESP-IDF extension writes into the configuration chosen in VS Code,
-    and it is default as the quick start chooses it: what changed there since the copy goes to the board it is a copy of."""
+    and it is default as getting started chooses it: what changed there since the copy goes to the board it is a copy of."""
     boards = [preset for preset in doc.get("configurePresets", []) if preset["name"] != DEFAULT]
     default = next((preset for preset in doc.get("configurePresets", []) if preset["name"] == DEFAULT), None)
     copied = doc.get("vendor", {}).get(VENDOR, {}).get(COPIED)

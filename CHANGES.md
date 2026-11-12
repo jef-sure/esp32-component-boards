@@ -2,6 +2,10 @@
 
 ## 0.1.4 (not released yet)
 
+- The long path from an empty folder to the board is called Getting started now, `docs/*/getting-started.md`;
+  `docs/*/quick-start.md` points to it. The quick start is in the README: six commands from the example of the
+  registry to the window on the computer and the board, with no CMake to edit. The README says what the component
+  is in plainer words, and its status names no version but points to this file.
 - The display block of the page asks the depth of color, from the depths the drivers of the catalog take. Only the
   parts whose driver takes it fit, and when it is not the depth the data starts the display with, the board of the
   program starts it so, by `config.depth_bits` of the display of the board or of the module; the card names that

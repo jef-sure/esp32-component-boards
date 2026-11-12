@@ -2,10 +2,11 @@
 
 *[По-русски: README.ru.md](README.ru.md)*
 
-An ESP-IDF component for two questions about a device: what to build it on, and how its program gets to the
-hardware. A board is described **once, as data**: its pins, buses and parts, each fact with where it comes from.
-The component sets the hardware of the chosen board up, and the program asks for what it needs **by kind**, never by
-the board's name:
+An ESP-IDF component that sets up the hardware of a board, its display, touch, sound, buttons and buses, from a
+description of the board. A board is described **once, as data**: pins, buses, parts, the size of the display, the
+calibration of the touch, each fact with where it comes from. The program asks for parts **by kind**, never by the
+board's name, so the same `main.c` builds for the 2.8-inch CYD S028R, for the 10.1-inch Guition, and for a window on
+the computer with the display of the board chosen:
 
 ```c
 #include "boards.h"
@@ -26,15 +27,34 @@ if (board_touch_start(&display, &touch)) {
 }
 ```
 
-Every function of `boards.h` exists on every board. One the board does not have
-returns `false`, and the program goes on without it. `boards.h` names no library:
-the handles of DGX, DGX-DI or hd44780 come from the headers of their adapters, each for a board that has the part:
-a program for boards without it includes it under `#if CONFIG_BOARD_DISPLAY_GRAPHICS` or `#if CONFIG_BOARD_TOUCH`,
-as [examples/hello_board](examples/hello_board) does, and the header stops the build where the part is missing. The same `main.c` builds
-and runs on the 2.8-inch CYD S028R and on the 10.1-inch Guition.
+Every function of `boards.h` exists on every board; for a part the board does not have it returns `false`, and the
+program goes on without it. The handles of libraries (DGX, DGX-DI, hd44780) come from the headers of their adapters,
+see [the API](docs/en/api.md).
 
-The component knows no display by itself: a board may have none, and a display
-is one peripheral among others. What a board can have today:
+## Quick start
+
+It needs ESP-IDF 6 activated in the terminal, and for the window on the computer, Linux with SDL2.
+
+```sh
+compote project create-from-example -p my_project jef-sure/boards:hello
+cd my_project
+idf.py reconfigure
+python3 managed_components/jef-sure__boards/tools/board_select.py host --as cyd_s028r .
+idf.py build && build/host_cyd_s028r/hello.elf
+idf.py --preset cyd_s028r build flash monitor
+```
+
+`board_select.py host --as cyd_s028r` gives the project two boards: the CYD and the computer that shows its display in a
+window. The first build is the computer: a window with the display of the CYD, the mouse as its touch. The last line
+builds and flashes the CYD itself. For another board, put its name from [the table](#the-boards); [the page](#the-page)
+helps to choose a board for a device.
+
+The whole path, in VS Code, with the board chosen on the page, a program of your own and what can go wrong, is in
+[Getting started](docs/en/getting-started.md).
+
+## What a board can have
+
+The component knows no display by itself: a board may have none, and a display is one peripheral among others:
 
 - a **graphics display** driven by [DGX](https://github.com/jef-sure/esp32-component-dgx):
   MIPI-DSI, QSPI or SPI panels, with their size in pixels and in millimetres and
@@ -53,19 +73,6 @@ is one peripheral among others. What a board can have today:
 - a **button**; and any **bus** the board wires, even one the component does not
   set up itself (the SDIO of a radio, the pins of an SD slot), kept as data the
   program can read.
-
-## Quick start
-
-```sh
-idf.py create-project hello && cd hello
-idf.py add-dependency "jef-sure/boards>=0.1.3"
-# the lines of the quick start into CMakeLists.txt, then:
-idf.py reconfigure
-python3 managed_components/jef-sure__boards/tools/board_select.py cyd_s028r .
-idf.py build flash monitor
-```
-
-The whole path, with the lines of CMake and a program to flash, is in [the quick start](docs/en/quick-start.md).
 
 ## Choosing a board
 
@@ -120,13 +127,13 @@ builds and runs with its touch off.
 ## The page
 
 The page chooses a board and the parts for a device: the roles it needs (a display, a reader, a sensor), the kits that
-fit with their wires, levels and prices, and what is not known; then it writes the project. From a clone of the
-repository, `python3 tools/boards_mcp.py --serve --project <folder>` prints its link; given to an agent over MCP
+fit with their wires, levels and prices, and what is not known; then it writes the project. In the folder of a
+project, `python3 managed_components/jef-sure__boards/tools/boards_mcp.py --serve` prints its link; given to an agent over MCP
 (`boards_mcp.py --install`), the page has a dialog with the model too. See [tools.md](docs/en/tools.md#the-page).
 
 ## Documentation
 
-[The quick start](docs/en/quick-start.md), [choosing a board](docs/en/choosing-a-board.md),
+[Getting started](docs/en/getting-started.md), [choosing a board](docs/en/choosing-a-board.md),
 [moving a program with boards of its own](docs/en/moving-a-program.md), [the API](docs/en/api.md),
 [modules](docs/en/modules.md), [the touch firmware](docs/en/touch-firmware.md), [calibration](docs/en/calibration.md),
 [the tools](docs/en/tools.md), [the data format](docs/en/data-format.md), [how it works](docs/en/how-it-works.md),
@@ -142,15 +149,16 @@ and any library; it differs in how it works. A board is data a script checks: pi
 measured on the board, and where each fact comes from; a board of a program is described the same way, beside the
 program. The display is one peripheral among others. A library is described by chip in `catalog/libraries/`, what it
 does with each chip and what its versions require, so DGX, LVGL through DGX-LVGL and other libraries come in through
-adapters on the same terms. The page and its solver choose a board and the parts for a task from those facts. Today the
-catalog holds the ten boards of the table above, and the page also offers boards imported from other descriptions,
-marked as such. What it takes from esp-bsp is the mechanism of `components/bsp_selector`: one Kconfig
+adapters on the same terms. The page and its solver choose a board and the parts for a task from those facts. Beside the boards of the catalog
+in the table above, the page offers boards imported from other descriptions, marked as such. What it takes from esp-bsp is the mechanism of `components/bsp_selector`: one Kconfig
 choice, hidden symbols beside it, manifest rules on them.
 
 ## Status
 
-0.0.1. Builds for every board under ESP-IDF 5.5 and 6.1, and a board of a program with a display and a
-2004: the jobs of `.github/workflows/build.yml`. `examples/hello_board` and
+The versions and what changed in each are in [CHANGES.md](CHANGES.md). CI builds every board of the catalog under
+ESP-IDF 5.5 and 6.1, and a board of a program with a display and a 2004: the jobs of `.github/workflows/build.yml`.
+
+On hardware, in the versions before 0.1.0: `examples/hello_board` and
 `examples/hello_lvgl` were flashed on a CYD S028R, a JC4827W543C and a JC1060P470C
 under ESP-IDF 6.1: the display, the touch and the sound start without errors in
 the log. Touch coordinates were checked by finger on all three and are correct.

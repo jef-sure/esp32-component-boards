@@ -185,7 +185,7 @@ function kitSection(kit, board) {
 }
 
 // The files of a new project for its kits, each [kit, board], board the name board_select.py takes: the templates of the
-// page, and the program of the quick start, examples/hello.
+// page, and the program of getting started, examples/hello.
 async function skeletonOf(chosen, current, name, source) {
     const fill = {
         '@NAME@': name,

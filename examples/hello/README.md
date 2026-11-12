@@ -1,6 +1,6 @@
 # hello
 
-The program of the [quick start](../../docs/en/quick-start.md): it tells the board, its display, its touch and its
+The program of [getting started](../../docs/en/getting-started.md): it tells the board, its display, its touch and its
 button, and paints the display white with a blue band at the top. The component comes from the registry.
 
 ```sh

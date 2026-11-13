@@ -14,7 +14,13 @@
             "config": {"kind": "max7219", "count": 32}
         }
     },
-    "connectors": {"J1": {"type": "5 wires", "pins": ["VCC", "GND", "DIN", "CS", "CLK"]}},
+    "connectors": {
+        "J1": {
+            "type": "5 wires",
+            "pins": ["VCC", "GND", "DIN", "CS", "CLK"],
+            "edges": [{"edge": "left", "from": "top", "count": 5}]
+        }
+    },
     "price": {
         "aliexpress": {
             "shop": "aliexpress",
@@ -34,11 +40,30 @@
             "source": "A listing of Anton"
         }
     },
+    "images": {
+        "front": {
+            "file": "front.webp",
+            "source": "a photo by Anton of his module, 2026-11-13, straightened",
+            "shows": "front"
+        },
+        "back": {
+            "file": "back.webp",
+            "source": "a photo by Anton of his module, 2026-11-13, straightened",
+            "shows": "back"
+        }
+    },
     "checked": {
         "listing": {
             "level": "unchecked",
-            "covers": ["connectors", "power"],
-            "source": "A listing of AliExpress; the order of the wires is not read from a board, and no such module has been tried"
+            "covers": ["power"],
+            "source": "A listing of AliExpress; no such module has been tried"
+        },
+        "photo": {
+            "level": "hardware",
+            "covers": ["connectors"],
+            "source": "a photo by Anton of his module, 2026-11-13",
+            "notes": "On the back, at the end with the pins: VCC GND DIN CS CLK from the top, and IN with an arrow; the other end has VCC GND DOUT CS CLK, OUT, and no pins. Each matrix has its own board, joined to the next by five bridges.",
+            "date": "2026-11-13"
         }
     }
 }

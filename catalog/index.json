@@ -130,6 +130,7 @@
     "modules/rc522_module/module.json",
     "modules/scd40_module/module.json",
     "modules/scd41_module/module.json",
+    "modules/tft114_st7789/module.json",
     "modules/tft128_gc9a01_7pin/module.json",
     "modules/tft128_gc9a01_8pin/module.json",
     "modules/tft13_st7789/module.json",

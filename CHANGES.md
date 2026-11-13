@@ -61,6 +61,9 @@
   by Anton with DGX on SPI of an ESP32, in all eight orientations. The screen of DGX takes a byte a pixel, the ink, so
   its depth is 8, and the program sends a picture by `dgx_ssd1680_refresh()`. A module with no MISO contact says
   `"miso": "nc"`: the kit wires none to it, though its BUSY puts a level on a pin.
+- `tft114_st7789`, a 1.14-inch 135x240 module on an ST7789 with CS and BLK, with photos: read from its silkscreen, the
+  size of its glass and its 3.3 V from modules of other makers with the same contacts, the window of the memory it
+  shows from DGX and TFT_eSPI; not tried.
 - A part wired by its lines gets its supply in a kit, as a part on a bus did: the WS2812B panel and the 2004 now list
   their 5 V wire.
 - A question that limits some variants keeps a part of another variant out: a block of a display of any kind that

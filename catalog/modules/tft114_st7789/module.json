@@ -1,0 +1,100 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "tft114_st7789",
+    "title": "1.14-inch TFT on an ST7789",
+    "part": "1.14\"(RGB)135x240IPS Ver:1.1",
+    "description": "A 135x240 IPS colour display on SPI, eight contacts in a row: the backlight on a line of its own, BLK",
+    "notes": [
+        "NFP114H-01BF on the ribbon of the panel. Q1 with R1 to R3 on the back switches the backlight; no regulator is seen.",
+        "The glass shows the middle of the 240x320 memory of the controller: 52 columns and 40 rows in, 53 columns from the other side when mirrored."
+    ],
+    "power": [{"name": "VCC", "source": "connector", "volts": [3, 3.6], "feeds": ["lcd"]}],
+    "devices": {
+        "lcd": {
+            "chip": "st7789",
+            "on": {"spi": {"lines": ["dc", "rst", "backlight"]}},
+            "logic": "none",
+            "config": {
+                "primary": true,
+                "panel": {
+                    "width": 135,
+                    "height": 240,
+                    "mm_w": 14.86,
+                    "mm_h": 24.91,
+                    "memory_width": 240,
+                    "memory_height": 320,
+                    "offset_x": 52,
+                    "offset_y": 40
+                },
+                "depth_bits": 16
+            },
+            "controls": {"orientation": {"start": {"x": "left-right", "y": "top-bottom", "swap": false}}}
+        }
+    },
+    "connectors": {
+        "J1": {
+            "type": "2.54 mm header, 8 pins",
+            "pins": ["GND", "VCC", "SCL", "SDA", "RES", "DC", "CS", "BLK"],
+            "edges": [{"edge": "left", "from": "bottom", "count": 8}]
+        }
+    },
+    "images": {
+        "front": {
+            "file": "front.webp",
+            "source": "a photo by Anton of his module, 2026-11-13, straightened",
+            "shows": "front"
+        },
+        "back": {
+            "file": "back.webp",
+            "source": "a photo by Anton of his module, 2026-11-13, straightened and turned",
+            "shows": "back"
+        }
+    },
+    "checked": {
+        "photo": {
+            "level": "hardware",
+            "covers": ["connectors"],
+            "source": "a photo by Anton of his module, 2026-11-13",
+            "notes": "GND VCC SCL SDA RES DC CS BLK beside the pins on the front, from the bottom; J1 on the back. The back has Q1, R1 to R3, C1 and C2, and no regulator.",
+            "date": "2026-11-13"
+        },
+        "silkscreen": {
+            "level": "vendor-docs",
+            "covers": ["devices.lcd.chip", "devices.lcd.config.panel.width", "devices.lcd.config.panel.height"],
+            "source": "the back: IC:ST7789V 4-SPI, 1.14\"(RGB)135x240IPS, Ver:1.1; the front: 1.14\"(RGB)135x240IPS. Not tried.",
+            "date": "2026-11-13"
+        },
+        "glass": {
+            "level": "community",
+            "covers": ["devices.lcd.config.panel.mm_w", "devices.lcd.config.panel.mm_h"],
+            "source": "the 1.14-inch 135x240 modules of other makers: LCDWiki MSP1141 User Manual Rev1.0 (www.lcdwiki.com/res/MSP1141/, sha256 01453e4a...), active area 14.86x24.91 mm; Waveshare 1.14inch LCD Module, display size 24.91 x 14.86 mm. Not measured on this one.",
+            "date": "2026-11-13"
+        },
+        "memory": {
+            "level": "vendor-code",
+            "covers": [
+                "devices.lcd.config.panel.memory_width",
+                "devices.lcd.config.panel.memory_height",
+                "devices.lcd.config.panel.offset_x",
+                "devices.lcd.config.panel.offset_y",
+                "notes"
+            ],
+            "source": "dgx_panel_st7789_135x240 in src/drivers/st7789.c of DGX 0.10.16, and TFT_Drivers/ST7789_Rotation.h of TFT_eSPI: column 52 and row 40 in portrait, 53 mirrored. Not tried on a module.",
+            "date": "2026-11-13"
+        },
+        "levels": {
+            "level": "community",
+            "covers": ["power", "devices.lcd.on"],
+            "source": "LCDWiki MSP1141 User Manual Rev1.0, a module of the same eight contacts in the same order: VCC of 3.3 V only, a transistor on the board lights the backlight on a high level of BLK. Not measured on this one.",
+            "date": "2026-11-13"
+        },
+        "start": {
+            "level": "unchecked",
+            "covers": ["devices.lcd.controls.orientation.start"],
+            "source": "What the ST7789 driver starts with for ST7789_RESOLUTION_135x240, not tried.",
+            "date": "2026-11-13"
+        }
+    }
+}

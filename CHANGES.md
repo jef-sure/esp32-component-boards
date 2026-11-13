@@ -13,6 +13,10 @@
   serves LEDs of the variant matrix, as the MAX7219 module does, not a garland: for 61 addressable LEDs the solver
   would take one panel of 64 instead of strips. The case of the MAX7219 module names the module the person has, so a
   matrix there is still that module and not the panel, which takes one line instead of three.
+- A 2.8-inch TFT module on an ILI9341, `tft28_ili9341`, with photos: SPI on eight contacts, the controller and the
+  size read from its silkscreen, not tried. Its DC, RES and BLK are lines of the module, in `lines` of its `on`: the
+  solver now takes those of a module before those of its chip, which an ILI9341 does not name, as on the M5Stack
+  Core2 its reset and backlight go through the PMIC. The corner of its first pixel is the start of the chip, unchecked.
 - The table of the boards in the README says what was tried on each board: the display, touch, sound and button
   that entries of `checked` at level `hardware` cover, and those that only started. The facts of the status
   paragraph went into the data: the start of the display of the JC4827W543C and the handwritten clock on both DSI

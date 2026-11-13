@@ -842,7 +842,8 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
                 held[own] ??= new Set(Object.values(board.devices).flatMap((device) => device.on?.[`i2c.${own}`]?.address ?? device.on?.[`i2c.${own}`]?.address_try?.[0] ?? []));
                 Object.assign(wires, addressFor(pick.module.device, held[own]));
             }
-            const lines = catalog.devices[pick.module.device.chip]?.on?.[pick.transport]?.lines || [];
+            // the lines a module brings out beyond the bus, else those of its chip
+            const lines = pick.module.device.on?.[pick.transport]?.lines ?? catalog.devices[pick.module.device.chip]?.on?.[pick.transport]?.lines ?? [];
             if (pins.length < lines.length) return { problem: shortOfPins(lines.length, pins.length) };
             const needed = Object.fromEntries(lines.map((line) => [line, pins.shift()]));
             const supply = supplyOf(board, pick.module);

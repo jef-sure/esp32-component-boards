@@ -1,0 +1,69 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "tft28_ili9341",
+    "title": "2.8-inch TFT on an ILI9341, SPI",
+    "part": "2.8'TFT_LCD 240*320",
+    "description": "A 240x320 colour display on SPI, eight contacts in a row: the backlight on a line of its own, BLK, and MISO to read the controller back",
+    "power": [{"name": "VCC", "source": "connector", "volts": [3, 3.6], "feeds": ["lcd"]}],
+    "devices": {
+        "lcd": {
+            "chip": "ili9341",
+            "on": {"spi": {"lines": ["dc", "rst", "backlight"]}},
+            "logic": "VCC",
+            "config": {
+                "primary": true,
+                "panel": {"width": 240, "height": 320, "mm_w": 42.7, "mm_h": 56.9},
+                "depth_bits": 16
+            },
+            "controls": {"orientation": {"start": {"x": "left-right", "y": "top-bottom", "swap": false}}}
+        }
+    },
+    "connectors": {
+        "header": {
+            "type": "2.54 mm header, 8 pins",
+            "pins": ["GND", "VCC", "CLK", "MOSI", "RES", "DC", "BLK", "MISO"],
+            "edges": [{"edge": "top", "from": "left", "count": 8}]
+        }
+    },
+    "images": {
+        "front": {
+            "file": "front.webp",
+            "source": "a photo by Anton of his module, 2026-11-13, straightened",
+            "shows": "front"
+        },
+        "back": {
+            "file": "back.webp",
+            "source": "a photo by Anton of his module, 2026-11-13, straightened",
+            "shows": "back"
+        }
+    },
+    "checked": {
+        "photo": {
+            "level": "hardware",
+            "covers": ["connectors"],
+            "source": "a photo by Anton of his module, 2026-11-13",
+            "notes": "The silkscreen over the pins: GND VCC CLK MOSI RES DC BLK MISO, GND on a square pad.",
+            "date": "2026-11-13"
+        },
+        "silkscreen": {
+            "level": "vendor-docs",
+            "covers": ["devices.lcd"],
+            "source": "the module: 2.8'TFT_LCD 240*320 RGB on the front, 2.8'TFT_LCD 240*320 and DRIVER IC:ILI9341 on the back; the size in mm is the 2.8 inches over the 3:4 of 240x320, not measured. Not tried.",
+            "date": "2026-11-13"
+        },
+        "start": {
+            "level": "unchecked",
+            "covers": ["devices.lcd.controls.orientation.start"],
+            "source": "What an ILI9341 does with MADCTL 0 on a panel of 240x320. At which corner of this module the first pixel lies is not tried.",
+            "date": "2026-11-13"
+        },
+        "levels": {
+            "level": "unchecked",
+            "covers": ["power", "devices.lcd.logic"],
+            "source": "No regulator is seen on the board: U2, a SOT-23 next to R5 and R6, looks like the switch of the backlight, so VCC would go to the panel as it is. Not measured.",
+            "date": "2026-11-13"
+        }
+    }
+}

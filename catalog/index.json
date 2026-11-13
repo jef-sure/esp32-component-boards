@@ -122,6 +122,7 @@
     "modules/scd40_module/module.json",
     "modules/scd41_module/module.json",
     "modules/tft153_st77916/module.json",
+    "modules/tft28_ili9341/module.json",
     "modules/waveshare_poe_b/module.json",
     "modules/ws2812b_8x8/module.json",
     "modules/ws2812b_strip_1m_60/module.json",

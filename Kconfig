@@ -60,7 +60,7 @@ config BOARD_SELECT_ESP32_DEVKIT
     bool "ESP32 DevKit, 4 MB"
     depends on IDF_TARGET_ESP32
     help
-        A standard ESP32 dev board with a CP210x USB bridge, a power LED, a
+        A standard ESP32 dev board with a CP2102 USB bridge, a power LED, a
         second LED and a BOOT button.
 
 config BOARD_SELECT_ESP32_DEVKIT_USB_C

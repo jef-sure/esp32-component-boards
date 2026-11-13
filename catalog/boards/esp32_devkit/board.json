@@ -4,7 +4,7 @@
     "kind": "board",
     "name": "esp32_devkit",
     "title": "ESP32 DevKit, 4 MB",
-    "description": "A standard ESP32 dev board with a CP210x USB bridge, a power LED, a second LED and a BOOT button",
+    "description": "A standard ESP32 dev board with a CP2102 USB bridge, a power LED, a second LED and a BOOT button",
     "notes": [
         "A board sold by many makers, so no maker is written and no schematic was read.",
         "The LED follows GPIO 2. With an internal pull-up that pin reads about 0 V, lower than an LED to ground gives, so something else is on the line too; what it is is not known."
@@ -13,7 +13,7 @@
     "devices": {
         "boot": {"class": "button", "pins": {"in": {"gpio": 0, "active": "low"}}},
         "led": {"class": "led", "provides": {"led": {"variant": "single"}}, "pins": {"out": 2}},
-        "usb_serial": {"class": "other", "part": "CP210x"}
+        "usb_serial": {"class": "other", "part": "CP2102"}
     },
     "power": [
         {"name": "VIN", "source": "vin", "mv": 5000, "why": "5 V from USB, or from this contact."},
@@ -71,6 +71,12 @@
             "covers": ["mcu"],
             "source": "esptool on the board of the local terminal: ESP32-D0WD-V3 rev 3.0, 4 MB, CP210x port",
             "date": "2026-10-31"
+        },
+        "bridge": {
+            "level": "hardware",
+            "covers": ["devices.usb_serial"],
+            "source": "the marking CP2102 on the chip next to the micro-USB, in the photo by Anton of his board, 2026-11-13",
+            "date": "2026-11-13"
         },
         "edges": {
             "level": "vendor-docs",

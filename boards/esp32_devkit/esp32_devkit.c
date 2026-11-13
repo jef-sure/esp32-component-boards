@@ -11,7 +11,7 @@
 #include "sdkconfig.h"
 
 
-/* ESP32 DevKit, 4 MB: A standard ESP32 dev board with a CP210x USB bridge, a power LED, a second LED and a BOOT button. */
+/* ESP32 DevKit, 4 MB: A standard ESP32 dev board with a CP2102 USB bridge, a power LED, a second LED and a BOOT button. */
 
 /* The buses of the board. */
 

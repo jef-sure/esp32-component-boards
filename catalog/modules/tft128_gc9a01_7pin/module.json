@@ -1,0 +1,58 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "tft128_gc9a01_7pin",
+    "title": "Round 1.28-inch TFT on a GC9A01, seven contacts",
+    "part": "1.28\"TFT VER1.0",
+    "description": "A round 240x240 colour display on SPI, on a round board with seven contacts: no line for the backlight, which is always on",
+    "notes": [
+        "The back says that R8 pulls CS down and that the module may be left without CS and RST. U3, a SOT-23, is not identified."
+    ],
+    "power": [{"name": "VCC", "source": "connector", "volts": [3, 3.6], "feeds": ["lcd"]}],
+    "devices": {
+        "lcd": {
+            "chip": "gc9a01",
+            "on": {"spi": {"lines": ["dc", "rst"]}},
+            "logic": "none",
+            "config": {
+                "primary": true,
+                "panel": {"width": 240, "height": 240, "mm_w": 23, "mm_h": 23, "round": true},
+                "depth_bits": 16
+            },
+            "controls": {"orientation": {"start": {"x": "left-right", "y": "top-bottom", "swap": false}}}
+        }
+    },
+    "connectors": {
+        "SPI": {
+            "type": "2.54 mm header, 7 pins",
+            "pins": ["VCC", "GND", "SCL", "SDA", "DC", "CS", "RST"],
+            "edges": [{"edge": "bottom", "from": "right", "count": 7}]
+        }
+    },
+    "images": {
+        "front": {"file": "front.webp", "source": "a photo by Anton of his module, 2026-11-13", "shows": "front"},
+        "back": {"file": "back.webp", "source": "a photo by Anton of his module, 2026-11-13", "shows": "back"}
+    },
+    "checked": {
+        "photo": {
+            "level": "hardware",
+            "covers": ["connectors"],
+            "source": "a photo by Anton of his module, 2026-11-13",
+            "notes": "RST CS DC SDA SCL GND VCC on the front, VCC on a square pad; SPI beside the header on the back.",
+            "date": "2026-11-13"
+        },
+        "silkscreen": {
+            "level": "vendor-docs",
+            "covers": ["devices.lcd"],
+            "source": "the back: 1.28\"TFT VER1.0, 240*240, IC:GC9A01; the size in mm is a square of 1.28 inches across, not measured. Not tried.",
+            "date": "2026-11-13"
+        },
+        "levels": {
+            "level": "unchecked",
+            "covers": ["power", "devices.lcd.controls.orientation.start"],
+            "source": "VCC is taken as the 3.3 V of the panel; what U3 does is not known. The start is what the GC9A01 driver starts with, not tried.",
+            "date": "2026-11-13"
+        }
+    }
+}

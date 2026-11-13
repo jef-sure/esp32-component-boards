@@ -1,6 +1,6 @@
 {
-    "title": "On the canvas the settings of a display block hold: a round one asked for gives the round ST77916 module",
+    "title": "On the canvas the settings of a display block hold: a round one asked for gives a round module, the GC9A01 of seven contacts with the fewest wires",
     "answers": {"blocks": [{"role": "display", "name": "screen"}], "display_shape": "round"},
-    "first": {"name": "esp32_devkit", "modules": {"tft153_st77916": 1}},
+    "first": {"name": "esp32_devkit", "modules": {"tft128_gc9a01_7pin": 1}},
     "without": "lcd12864_st7920"
 }

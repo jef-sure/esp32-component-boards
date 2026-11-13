@@ -1,5 +1,5 @@
 {
-    "title": "The diagonal and the shape are asked of each display: a dial that must be round takes the round ST77916, a panel of at least 3 inches the 12864, and neither part is the answer to both (the old questions of the page into the asks of a block, after NFC)",
+    "title": "The diagonal and the shape are asked of each display: a dial that must be round takes a round module, the GC9A01 of seven contacts, which takes the fewest wires, a panel of at least 3 inches the 12864, and neither part is the answer to both (the old questions of the page into the asks of a block, after NFC)",
     "answers": {
         "board": "esp32_devkit",
         "blocks": [
@@ -7,5 +7,5 @@
             {"role": "display", "name": "panel", "asks": {"diagonal_in": 3}}
         ]
     },
-    "first": {"name": "esp32_devkit", "modules": {"tft153_st77916": 1, "lcd12864_st7920": 1}}
+    "first": {"name": "esp32_devkit", "modules": {"tft128_gc9a01_7pin": 1, "lcd12864_st7920": 1}}
 }

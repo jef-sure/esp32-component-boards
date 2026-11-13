@@ -1,0 +1,20 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "gc9a01",
+    "title": "GC9A01",
+    "maker": "galaxycore",
+    "part": "GC9A01",
+    "class": "display",
+    "provides": {"display": {"variant": "tft"}},
+    "on": {"spi": {}, "p8": {}},
+    "config": {"kind": "graphics"},
+    "controls": {"orientation": {"how": "driver", "read": "none"}},
+    "checked": {
+        "facts": {
+            "level": "vendor-code",
+            "source": "include/drivers/gc9a01.h of DGX 0.10.15: a round panel on SPI or P8"
+        }
+    }
+}

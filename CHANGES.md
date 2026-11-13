@@ -25,6 +25,10 @@
   own: it refused such a module there, and failed on its touch first. A project wires such a module by part.
 - The Waveshare 1.5-inch RGB OLED, `oled15_ssd1351`, with photos: an SSD1351 of 128x128 on SPI, its power and both
   rows of contacts by the schematic of Waveshare, not tried.
+- The GC9A01, a device of the catalog now, and two round 1.28-inch modules on it with photos: `tft128_gc9a01_7pin`, a
+  round board with no backlight line, and `tft128_gc9a01_8pin`, with BLK; read from their silkscreen, not tried. A
+  round display asked for now gives the one of seven contacts, which takes the fewest wires; the cases that named the
+  ST77916 module, the only round one before, name it, and `qspi_display` still takes the ST77916.
 - The table of the boards in the README says what was tried on each board: the display, touch, sound and button
   that entries of `checked` at level `hardware` cover, and those that only started. The facts of the status
   paragraph went into the data: the start of the display of the JC4827W543C and the handwritten clock on both DSI

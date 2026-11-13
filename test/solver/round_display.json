@@ -1,6 +1,6 @@
 {
-    "title": "A round display asked for: the round ST77916 module, and no rectangular panel of a board",
+    "title": "A round display asked for: a round module, the GC9A01 of seven contacts with the fewest wires, and no rectangular panel of a board",
     "answers": {"display": "graphics", "display_shape": "round"},
-    "first": {"name": "esp32_devkit", "modules": {"tft153_st77916": 1}},
+    "first": {"name": "esp32_devkit", "modules": {"tft128_gc9a01_7pin": 1}},
     "without": "lcd12864_st7920"
 }

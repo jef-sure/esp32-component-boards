@@ -185,10 +185,20 @@ def started_by(device):
     return {"library": name, "entry": libraries[name]}
 
 
+def lines_transport(library, pins):
+    """The transport of a library whose call takes these lines and no others, as gpio.4bit takes rs, en, d4 to d7."""
+    for name, transport in resolve.library(library)["transports"].items():
+        if {arg.strip("{}") for arg in transport["init"]["args"]} == set(pins):
+            return name
+    return None
+
+
 def display_part(name, device, module):
-    key, connection = next(iter(device["on"].items()))
+    key, connection = next(iter(device["on"].items()), (None, {}))
     pins, config = device.get("pins", {}), device["config"]
-    part = {"name": name, "driver": device["chip"], "kind": config["kind"], "bus": {"bus": MODULE_BUS if module else key}, "primary": bool(config.get("primary")), **started_by(device)}
+    started = started_by(device)
+    bus = (MODULE_BUS if module else key) if key else lines_transport(started["library"], pins)  # a part with no bus is wired by its lines
+    part = {"name": name, "driver": device["chip"], "kind": config["kind"], "bus": {"bus": bus}, "primary": bool(config.get("primary")), **started}
     chosen = ((config.get("libraries") or {}).get(part["library"]) or {}).get("panel")
     if chosen:
         part["panel_choice"] = chosen
@@ -453,16 +463,13 @@ def read_board(path):
                 if not is_module and bus_of(data, bus_name) is None:
                     raise ValueError(f'the character LCD is on the board\'s bus "{bus_name}", which the board does not wire')
             elif kind == "gpio":
-                width = bus_parts(bus_name)[1]
                 pins = transport.get("pins", {})
-                need = ("rs", "en", "d4", "d5", "d6", "d7") if width == "4bit" else ("rs", "en", "d0", "d1", "d2", "d3", "d4", "d5", "d6", "d7") if width == "8bit" else ()
-                if not need:
-                    raise ValueError('a character LCD on GPIOs is "gpio.4bit" or "gpio.8bit"')
-                for signal in need:
-                    if not isinstance(pins.get(signal), int):
-                        raise ValueError(f'the character LCD on gpio.{width} lacks its "{signal}" pin')
+                for signal, pin in pins.items():
+                    if not isinstance(pin, int):
+                        raise ValueError(f'the character LCD on {bus_name} has a "{signal}" that is not a pin')
             else:
-                raise ValueError('a character LCD is on one of three transports: "i2c.<own>" (a PCF8574 backpack), "gpio.4bit", "gpio.8bit"')
+                ways = "; ".join(", ".join(arg.strip("{}") for arg in step["init"]["args"]) for own, step in resolve.library(display["library"])["transports"].items() if own.startswith("gpio."))
+                raise ValueError(f"a character LCD is on I2C, by a PCF8574 backpack, or with no bus on the lines of one of: {ways}")
         elif is_pixel(display):
             bus_name = display.get("bus", {}).get("bus")
             if not bus_name or bus_parts(bus_name)[0] not in display["entry"]["on"]:
@@ -1453,9 +1460,9 @@ ALONE_REFUSED = {"touch", "audio", "button"}  # read_board refuses these in a mo
 
 def has_glue(module_file):
     """A module the component sets up with --module: a chip of it has an adapter. A panel takes its wires from a project,
-    and so does a module with a part the glue of a module does not start: a project wires it by part."""
+    and so does a module with a part the glue of a module does not start, or a part with no bus: a project wires it."""
     data = json.loads(module_file.read_text())
-    if any(ALONE_REFUSED & set(device["classes"]) for device in resolve.resolve(data)["devices"].values()):
+    if any(ALONE_REFUSED & set(device["classes"]) or not device.get("on") for device in resolve.resolve(data)["devices"].values()):
         return False
     devices = data["devices"].values()
     return any(entry.get("adapter", {}).get("kind") not in (None, "panel") for device in devices for entry in resolve.libraries_of(device.get("chip")).values())

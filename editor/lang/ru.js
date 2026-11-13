@@ -454,5 +454,8 @@ LANGUAGES.ru = {
 
         'a board of 93 x 70 mm, on four M2 screws': 'плата 93 x 70 мм, на четырёх винтах M2',
         'serial mode: PSB and K to GND, A to VCC, so the backlight is always on; RS is the select, R/W the data, E the clock': 'последовательный режим: PSB и K на GND, A на VCC, подсветка горит всегда; RS это выбор, R/W данные, E клок',
+        'VO to the wiper of a potentiometer between VDD and VSS: it sets the contrast': 'VO на средний вывод потенциометра между VDD и VSS: им задаётся контраст',
+        'RW to ground, D0 to D3 left open': 'RW на землю, D0–D3 никуда не подключать',
+        'RW to ground': 'RW на землю',
     },
 };

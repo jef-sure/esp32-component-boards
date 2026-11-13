@@ -1061,9 +1061,11 @@
     "hasChip": { "anyOf": [{ "required": ["chip"] }, { "required": ["chip_try"] }] },
     "display": {
       "$ref": "#/$defs/hasChip",
-      "required": ["on", "config"],
+      "required": ["config"],
+      "description": "A character display may have no bus: an HD44780 is wired by its lines, in pins.",
+      "if": { "properties": { "config": { "properties": { "kind": { "const": "character" } } } } },
+      "else": { "required": ["on"], "properties": { "on": { "minProperties": 1 } } },
       "properties": {
-        "on": { "minProperties": 1 },
         "config": {
           "type": "object",
           "required": ["kind"],

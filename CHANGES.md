@@ -39,6 +39,18 @@
 - The HT16K33, a device of the catalog now by its datasheet: I2C at 0x70 to 0x77, 4.5 to 5.5 V, a high level from 3.5
   V on 5 V. With it `ht16k33_8x8`, an 8x8 matrix on an HT16K33 backpack, MRA210A, with photos; its contacts and chip
   read from it, not tried.
+- The HD44780 is wired by its lines: `ways` of four bits, RS, E and D4 to D7, and of eight, with RW to ground, by
+  the Hitachi datasheet, which also gives the high level, 2.2 V on 5 V, and the pull-ups to VCC of RS, RW and the
+  data lines. The chip no longer says I2C: that is the PCF8574 backpack, and a 2004 sold with one soldered on says
+  `on.i2c` itself, as the module of `examples/local_boards` does. A module that names a bus is wired by it, one that
+  names none by the buses and ways of its chip, and the glue takes the call of the library whose arguments are the
+  lines in `pins`, `lcd_bus_gpio4_create` for these. With it `lcd2004`, the bare C2004A, with photos; the names of
+  its contacts are those of the usual 2004, not printed on it, not tried. A kit puts a level shifter on its lines,
+  as they are pulled up to 5 V.
+- A part wired by its lines gets its supply in a kit, as a part on a bus did: the WS2812B panel and the 2004 now list
+  their 5 V wire.
+- A question that limits some variants keeps a part of another variant out: a block of a display of any kind that
+  asks 24 bits of color no longer takes a character LCD, which has no depth of color.
 - The table of the boards in the README says what was tried on each board: the display, touch, sound and button
   that entries of `checked` at level `hardware` cover, and those that only started. The facts of the status
   paragraph went into the data: the start of the display of the JC4827W543C and the handwritten clock on both DSI

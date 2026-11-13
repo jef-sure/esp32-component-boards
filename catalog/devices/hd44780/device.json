@@ -9,7 +9,26 @@
     "compat": "hit,hd44780",
     "class": "display",
     "provides": {"display": {"variant": "character"}},
-    "on": {"i2c": {}},
+    "ways": [
+        {"lines": ["rs", "en", "d4", "d5", "d6", "d7"], "high_min_mv": 2200, "do": "RW to ground, D0 to D3 left open"},
+        {
+            "lines": ["rs", "en", "d0", "d1", "d2", "d3", "d4", "d5", "d6", "d7"],
+            "high_min_mv": 2200,
+            "do": "RW to ground"
+        }
+    ],
     "config": {"kind": "character"},
-    "checked": {"facts": {"level": "hardware", "source": "boards-data, flashed or checked against the schematic"}}
+    "notes": [
+        "The chip has no I2C: a product with a PCF8574 backpack soldered on says so with on.i2c of its own.",
+        "RS, RW and DB0 to DB7 are pulled up to VCC inside the chip, E is not."
+    ],
+    "checked": {
+        "facts": {"level": "hardware", "source": "boards-data, flashed or checked against the schematic"},
+        "datasheet": {
+            "level": "datasheet",
+            "covers": ["ways", "notes"],
+            "source": "Hitachi HD44780U (LCD-II), ADE-207-272(Z) Rev. 0.0 '99.9, the copy of soldered.com (sha256 7abafd9e...): at VCC 4.5 to 5.5 V VIH1 2.2 V, at 2.7 to 4.5 V 0.7 VCC; pull-up MOS 50 to 250 uA on DB0-DB7, RS, R/W at 5 V, none on E; DB0 to DB3 unused in 4-bit operation",
+            "date": "2026-11-13"
+        }
+    }
 }

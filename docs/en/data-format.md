@@ -196,7 +196,9 @@ An empty list in a project says that none the data lists is free: the data of an
 same direction. The millimetres are optional, but go together: without them
 `board_display.mm_w` and `mm_h` are 0. `orientation` is how the board shows it. `swap` is true when the
 display's x runs along the glass's columns. `primary` marks the main display.
-A character display has `config.geometry`, such as `"20x4"`.
+A character display has `config.geometry`, such as `"20x4"`. An HD44780 with no backpack has no bus: its
+lines are in `pins`, `rs`, `en` and `d4` to `d7` (or `d0` to `d7`), and the glue calls the transport of the library
+whose arguments are those lines.
 
 A display on I2C, such as an SSD1306 OLED, is on the board's bus at its address:
 `"on": { "i2c.i2c0": { "address": "0x3C" } }`. The glue takes the bus from
@@ -675,6 +677,10 @@ So each piezo disc takes one pin and one channel, or two of each when a question
 The solver takes the first way that gives what is asked and counts its channels, with those the outputs of the page
 take, against `frequency_sources.ledc.outputs` of the chip (the judgement `ledc_channels`).
 
+A chip may have ways and buses both. The HD44780 has its ways only, and a 2004 with a PCF8574 soldered on says
+`"on": {"i2c": {"address": "0x27"}}` itself: a module that names a bus is wired by it, one that names none by the buses
+and the ways of its chip.
+
 A variant of a role in `catalog/roles.json` may have a way too, as buttons on GPIOs: `{"lines": ["in"], "active":
 {"in": "low"}}`. The part a kit writes for it takes the class of its role and, for a line with `active`, the level that
 means on: `"program": {"class": "button", "pins": {"in": {"gpio": 4, "active": "low"}}}`. The glue then counts it among
@@ -844,7 +850,8 @@ their ids: `true` for any answer but `none`, `{"at_least": n}` for a count. An a
 `needs`, of the question or of the choice taken: a device of a `class`, with `where` the fields it must have, what the
 board `provides`, what its `chip` provides, or an `external` antenna. A question with `limit` limits the parts instead:
 a `measure` of the solver (`diagonal_in`, `range_mm`, `shape`, `chain` and others), or a `field` of the data of a part
-with how it `fits` the answer, `of` a class or a role, and only for blocks of a `variant` when it names some.
+with how it `fits` the answer, `of` a class or a role, and only for blocks of a `variant` when it names some. A part
+whose data names a variant the limit does not list does not fit it: a character LCD has no depth of color.
 `"asked": "block"` asks it of each block, the answer in `asks` of the block; `"any_variant": false` of its `limit`
 keeps a block of any variant from asking it.
 

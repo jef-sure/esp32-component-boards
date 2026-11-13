@@ -1,0 +1,6 @@
+{
+    "title": "A bare 2004 has no bus: the four-bit way of its HD44780, RS, E and D4 to D7, and its supply",
+    "answers": {"board": "esp32_devkit", "blocks": [{"role": "display", "name": "text", "variant": "character"}]},
+    "first": {"name": "esp32_devkit", "modules": {"lcd2004": 1}, "on": {"lcd2004": "gpio"}},
+    "wiring": {"board": "esp32_devkit", "use": "text", "lines": ["rs", "en", "d4", "d5", "d6", "d7", "VDD", "GND"]}
+}

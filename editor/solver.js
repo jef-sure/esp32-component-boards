@@ -374,7 +374,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         // a question asked of each block takes the block's answer first, the one of the page after it (an older answer)
         const answerOf = (item) => (item.asked === 'block' && blockAnswer(need.asks?.[item.id]) !== undefined ? need.asks[item.id] : wanted.limits[item.limit.measure]);
         const measured = questions.filter((item) => item.limit?.measure && ofClass(item, need.class, need.variant) && answerOf(item) !== undefined)
-            .map((item) => ({ asked: answerOf(item), fits: (value, asked) => value >= asked, ...MEASURES[item.limit.measure] }));
+            .map((item) => ({ asked: answerOf(item), fits: (value, asked) => value >= asked, ...MEASURES[item.limit.measure], ...(item.limit.variant ? { variants: { of: [].concat(item.limit.of), are: [].concat(item.limit.variant) } } : {}) }));
         // what a block asks of the data of its part: a value not in the data leaves the part in, as an unknown
         const asked = Object.entries(need.asks ?? {}).filter(([, value]) => blockAnswer(value) !== undefined).map(([id, value]) => {
             const question = questions.find((item) => item.id === id && item.limit?.field);
@@ -387,7 +387,9 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         return [...measured, ...asked.filter(Boolean)];
     }
 
-    const meets = (limit, device) => Boolean(limit.soft) || limit.of(device) === null || limit.fits(limit.of(device), limit.asked);
+    // a part of a variant the limit does not measure has nothing to answer it with, as a character LCD has no depth of color
+    const otherVariant = (limit, device) => Boolean(limit.variants) && limit.variants.of.some((cls) => device.provides?.[cls]?.variant && !limit.variants.are.includes(device.provides[cls].variant));
+    const meets = (limit, device) => !otherVariant(limit, device) && (Boolean(limit.soft) || limit.of(device) === null || limit.fits(limit.of(device), limit.asked));
 
     // What the answers ask for: {class or provides, count, title}, and the numbers that limit them.
     function wantedBy(given) {
@@ -821,12 +823,13 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
                 return null;
             }
             // a part with no bus takes the lines of its way
-            if (pick.module.device.ways) {
+            if (pick.transport === 'gpio') {
                 const { lines } = wayOf(pick.module.device, pick.need);
                 // a part that holds nothing on its lines takes a strapping pin when the free ones run out
                 const extra = pick.module.device.logic === 'none' ? spare : [];
                 if (pins.length + extra.length < lines.length) return { problem: shortOfPins(lines.length, pins.length + extra.length) };
-                modules[pick.use] = { ...productOf(pick), pins: Object.fromEntries(lines.map((line) => [line, pins.length ? pins.shift() : extra.shift()])) };
+                const supply = supplyOf(board, pick.module);
+                modules[pick.use] = { ...productOf(pick), pins: Object.fromEntries(lines.map((line) => [line, pins.length ? pins.shift() : extra.shift()])), ...(Object.keys(supply).length ? { supply } : {}) };
                 return null;
             }
             // a part with no select line, as a display module with CS tied low, has the bus to itself
@@ -881,8 +884,13 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         for (const item of first) for (const tail of product(rest)) yield [item, ...tail];
     }
 
-    // The chip says what it can be wired by, a module may narrow it.
-    const transportsOf = (device) => (device.ways ? ['gpio'] : Object.keys(KIT_BUSES)).filter((kind) => device.ways || kind in (Object.keys(device.on || {}).length ? device.on : catalog.devices[device.chip]?.on || {}));
+    // The chip says what it can be wired by, its buses and its ways, and a module that names a bus is wired by that bus:
+    // a 2004 with a PCF8574 soldered on is on I2C, a bare one by the lines of its HD44780.
+    const transportsOf = (device) => {
+        const own = Object.keys(device.on || {});
+        if (own.length) return Object.keys(KIT_BUSES).filter((kind) => own.includes(kind));
+        return [...Object.keys(KIT_BUSES).filter((kind) => kind in (catalog.devices[device.chip]?.on || {})), ...(device.ways ? ['gpio'] : [])];
+    };
 
     // The buses a chip was tried on with its libraries, by their records. None named says nothing of any bus.
     const tried = new Map();
@@ -1193,7 +1201,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         const wired = (pick) => wiringOf(base, project, [pick])[0].lines.filter((wire) => /^GPIO/.test(wire.to)).length;
         const limit = resolved.mcu.facts.gpio.high_mv_max;
         for (const pick of new Map(picks.filter((item) => !item.way).map((item) => [item.module.name, item])).values()) {
-            const low = pick.module.device.high_min_mv ?? (pick.module.device.ways ? wayOf(pick.module.device, pick.need).high_min_mv : undefined);
+            const low = pick.module.device.high_min_mv ?? (pick.transport === 'gpio' ? wayOf(pick.module.device, pick.need).high_min_mv : undefined);
             // seen_level: a level a trial on hardware ran it with is a note, not a part
             const seen = judgementsOf('seen_level').find((judgement) => judgement.field === 'high_seen_mv');
             const seenLines = judgementsOf('seen_level').find((judgement) => judgement.field === 'logic_seen_mv');
@@ -1598,7 +1606,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
                 }
                 for (const text of catalog.modules[pick.module.name].do ?? []) lines.push({ level: 'do', text: `${pick.module.title}: ${t(text)}` });
                 // how the way taken is wired, as two pins in antiphase
-                const way = pick.module.device.ways && !pick.module.own ? wayOf(pick.module.device, pick.need) : null;
+                const way = pick.transport === 'gpio' && !pick.module.own ? wayOf(pick.module.device, pick.need) : null;
                 if (way?.do) lines.push({ level: 'do', text: `${pick.module.title}: ${t(way.do)}` });
                 // the wires list no supply that the data does not name
                 const steps = pick.module.power.filter((step) => step.source === 'connector');

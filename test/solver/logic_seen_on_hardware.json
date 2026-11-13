@@ -64,7 +64,7 @@
     },
     "answers": {
         "board": "esp32_devkit",
-        "display": "character"
+        "blocks": [{"role": "display", "variant": "character", "part": "lcd2004_seen"}]
     },
     "judged": {
         "board": "esp32_devkit",

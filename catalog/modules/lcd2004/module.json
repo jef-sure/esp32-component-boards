@@ -1,0 +1,55 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "lcd2004",
+    "title": "2004 character LCD",
+    "part": "C2004A",
+    "description": "A 20x4 character LCD with no backpack: 16 contacts in a row, wired by RS, E and D4 to D7 with RW to ground",
+    "notes": [
+        "C2004A on the back. U1 to U3 are blobs, so which HD44780 or clone is under them is not seen.",
+        "R8 and R9, marked 680, stand beside the backlight pads A and K at the left edge; their path is not traced."
+    ],
+    "do": ["VO to the wiper of a potentiometer between VDD and VSS: it sets the contrast"],
+    "power": [{"name": "VDD", "source": "connector", "volts": [4.5, 5.5], "feeds": ["lcd"]}],
+    "devices": {"lcd": {"chip": "hd44780", "logic": "VDD", "config": {"primary": true, "geometry": "20x4"}}},
+    "connectors": {
+        "header": {
+            "type": "2.54 mm pins, 16 in a row",
+            "pins": ["VSS", "VDD", "VO", "RS", "RW", "E", "D0", "D1", "D2", "D3", "D4", "D5", "D6", "D7", "A", "K"],
+            "edges": [{"edge": "top", "from": "left", "count": 16}]
+        }
+    },
+    "images": {
+        "front": {
+            "file": "front.webp",
+            "source": "a photo by Anton of his module, 2026-11-13, straightened",
+            "shows": "front"
+        },
+        "back": {
+            "file": "back.webp",
+            "source": "a photo by Anton of his module, 2026-11-13, straightened",
+            "shows": "back"
+        }
+    },
+    "checked": {
+        "contacts": {
+            "level": "community",
+            "covers": ["connectors"],
+            "source": "a photo by Anton of his module, 2026-11-13: 16 contacts at the top left of the front, only 1 and 16 printed; the names between are the order of the usual 2004, which the 2004 with a backpack of the same photos prints as GND VDD VO RS RW E D0-D7 BLA BLK",
+            "date": "2026-11-13"
+        },
+        "controller": {
+            "level": "unchecked",
+            "covers": ["devices.lcd.chip"],
+            "source": "the controller is under a blob; every 2004 of this kind takes the commands of the HD44780. Not tried.",
+            "date": "2026-11-13"
+        },
+        "levels": {
+            "level": "unchecked",
+            "covers": ["power", "devices.lcd.logic"],
+            "source": "The usual 2004 takes 5 V. The HD44780 pulls RS and D0 to D7 up to VDD by its datasheet, so its lines are of VDD. Not measured.",
+            "date": "2026-11-13"
+        }
+    }
+}

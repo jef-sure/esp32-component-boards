@@ -464,8 +464,9 @@ libraries, and a board names a library by that path: `esp-idf/jef-sure/pn5180`.
 parameters (`controls`) and what it can do (`standards`, `modes`, `supports`, `limits`).
 `{name}` in `args` is a value the caller gives, the rest goes into the call as it stands. A
 step is a `call`, a `control` applied or a `line` set: a step `"line": "backlight"` says the
-driver does not light it by itself. `transports` says how the library sets a bus up: `init`
-creates it, `shared` joins one set up before.
+driver does not light it by itself. A backlight lit by a low level the glue lights too, as a driver
+that takes `{backlight}` lights it by a high one. `transports` says how the library sets a bus up:
+`init` creates it, `shared` joins one set up before.
 
 An operation not listed in `supports` is one the library does not do:
 `"mifare_classic": ["uid", "ndef_read"]` says it reads NDEF from such a card and does not write

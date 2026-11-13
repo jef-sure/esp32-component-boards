@@ -47,11 +47,11 @@ static dgx_bus_protocols_t *display0_bus(void)
 
 static dgx_screen_t *display0_screen(dgx_bus_protocols_t *bus)
 {
-    return dgx_jd9165_init(bus, GPIO_NUM_0, 16, DgxScreenRGB, DgxDsiTwoFrames);
+    return dgx_jd9165_init(bus, GPIO_NUM_0, GPIO_NUM_23, 16, DgxScreenRGB, DgxDsiTwoFrames);
 }
 
 static const struct board_display_panel display_panels[] = {
-    {.name = "lcd", .glass_w = 1024, .glass_h = 600, .mm_w = 154, .mm_h = 86, .dir_x = DgxScreenLeftRight, .dir_y = DgxScreenTopBottom, .swap_xy = false, .backlight = GPIO_NUM_23, .backlight_on = 1, .bus = display0_bus, .screen = display0_screen, .orientation = dgx_jd9165_orientation},
+    {.name = "lcd", .glass_w = 1024, .glass_h = 600, .mm_w = 154, .mm_h = 86, .dir_x = DgxScreenLeftRight, .dir_y = DgxScreenTopBottom, .swap_xy = false, .backlight = GPIO_NUM_NC, .backlight_on = 1, .bus = display0_bus, .screen = display0_screen, .orientation = dgx_jd9165_orientation},
 };
 static struct board_display_started displays_started[1];
 const struct board_display_table board_display_table = {.panels = display_panels, .started = displays_started, .count = 1};

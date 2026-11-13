@@ -986,8 +986,10 @@ def gen_c(board):
             out("}")
             out("")
             backlight = c_gpio(shown.get("backlight"))
+            lit_low = not shown.get("backlight_on_high", True)  # a driver lights its line by a high level, so one lit by low stays with the glue
             order = "bgr" if shown.get("color_order") == "bgr" else "rgb"
-            values = {"bus": "bus", "rst": c_gpio(shown.get("rst")), "busy": c_gpio(shown.get("busy")), "cs": c_gpio(db.get("cs")), "backlight": backlight, "depth": shown.get("depth_bits", 16),
+            values = {"bus": "bus", "rst": c_gpio(shown.get("rst")), "busy": c_gpio(shown.get("busy")), "cs": c_gpio(db.get("cs")),
+                      "backlight": "GPIO_NUM_NC" if lit_low else backlight, "depth": shown.get("depth_bits", 16),
                       "color": library["values"]["color_order"][order], "width": panel["width"], "height": panel["height"],
                       "external_vcc": "true" if shown.get("external_vcc") else "false", "panel": shown.get("panel_value")}
             out(f"static dgx_screen_t *display{i}_screen(dgx_bus_protocols_t *bus)")
@@ -995,7 +997,7 @@ def gen_c(board):
             out(f"    return {fill_call(entry['init'][0], values)};")
             out("}")
             out("")
-            light = backlight if any(step.get("line") == "backlight" for step in entry.get("setup", ())) else "GPIO_NUM_NC"
+            light = backlight if lit_low or any(step.get("line") == "backlight" for step in entry.get("setup", ())) else "GPIO_NUM_NC"
             rows.append(f"    {{.name = \"{shown['name']}\", .glass_w = {panel['width']}, .glass_h = {panel['height']}, .mm_w = {whole_mm(panel.get('mm_w', 0))}, .mm_h = {whole_mm(panel.get('mm_h', 0))}, "
                         f".dir_x = {library['values']['dir_x'][orientation['x']]}, .dir_y = {library['values']['dir_y'][orientation['y']]}, .swap_xy = {'true' if orientation.get('swap', False) else 'false'}, "
                         f".backlight = {light}, .backlight_on = {1 if shown.get('backlight_on_high', True) else 0}, {f'.host = &board_spi_{own}, ' if bus_name in shared else ''}{bus_field}, .screen = display{i}_screen, .orientation = {entry.get('controls', {}).get('orientation', {}).get('call', 'NULL')}}},")

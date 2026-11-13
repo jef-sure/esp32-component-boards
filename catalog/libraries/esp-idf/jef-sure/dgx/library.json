@@ -12,7 +12,7 @@
         {"via": "registry"},
         {"via": "git", "url": "https://github.com/jef-sure/esp32-component-dgx.git", "ref": "{version}"}
     ],
-    "described": "0.10.17",
+    "described": "0.11.0",
     "description": "Graphics on displays of SPI, QSPI, 8-bit parallel, MIPI-DSI and I2C, with its own panel drivers.",
     "values": {
         "color_order": {"rgb": "DgxScreenRGB", "bgr": "DgxScreenBGR"},
@@ -138,7 +138,7 @@
             "init": [
                 {
                     "call": "dgx_gc9a01_init",
-                    "args": ["{bus}", "{rst}", "{depth}", "{color}"],
+                    "args": ["{bus}", "{rst}", "{backlight}", "{depth}", "{color}"],
                     "returns": "screen",
                     "ok": {"not": "NULL"}
                 }
@@ -151,10 +151,7 @@
                     "ok": "none"
                 }
             },
-            "setup": [
-                {"control": "orientation"},
-                {"line": "backlight", "notes": "After the first frame: the driver does not light it."}
-            ],
+            "setup": [{"control": "orientation"}],
             "adapter": {"kind": "panel"}
         },
         "ili9341": {
@@ -187,7 +184,7 @@
             "init": [
                 {
                     "call": "dgx_jd9165_init",
-                    "args": ["{bus}", "{rst}", "{depth}", "{color}", "DgxDsiTwoFrames"],
+                    "args": ["{bus}", "{rst}", "{backlight}", "{depth}", "{color}", "DgxDsiTwoFrames"],
                     "returns": "screen",
                     "ok": {"not": "NULL"}
                 }
@@ -200,10 +197,7 @@
                     "ok": "none"
                 }
             },
-            "setup": [
-                {"control": "orientation"},
-                {"line": "backlight", "notes": "After the first frame: the driver does not light it."}
-            ],
+            "setup": [{"control": "orientation"}],
             "adapter": {"kind": "panel"}
         },
         "jd9365": {
@@ -213,7 +207,7 @@
             "init": [
                 {
                     "call": "dgx_jd9365_init",
-                    "args": ["{bus}", "{rst}", "{depth}", "{color}", "DgxDsiTwoFrames"],
+                    "args": ["{bus}", "{rst}", "{backlight}", "{depth}", "{color}", "DgxDsiTwoFrames"],
                     "returns": "screen",
                     "ok": {"not": "NULL"}
                 }
@@ -226,10 +220,7 @@
                     "ok": "none"
                 }
             },
-            "setup": [
-                {"control": "orientation"},
-                {"line": "backlight", "notes": "After the first frame: the driver does not light it."}
-            ],
+            "setup": [{"control": "orientation"}],
             "adapter": {"kind": "panel"}
         },
         "nv3041a": {
@@ -368,7 +359,12 @@
             "on": ["spi"],
             "select": ["DGX_ENABLE_ST7565R"],
             "init": [
-                {"call": "dgx_st7565r_init", "args": ["{bus}", "{rst}"], "returns": "screen", "ok": {"not": "NULL"}}
+                {
+                    "call": "dgx_st7565r_init",
+                    "args": ["{bus}", "{rst}", "{backlight}"],
+                    "returns": "screen",
+                    "ok": {"not": "NULL"}
+                }
             ],
             "supports": {"depth_bits": [1]}
         },
@@ -379,7 +375,7 @@
             "init": [
                 {
                     "call": "dgx_st7735_init",
-                    "args": ["{bus}", "{rst}", "{depth}", "{color}"],
+                    "args": ["{bus}", "{rst}", "{backlight}", "{depth}", "{color}", "{panel}"],
                     "returns": "screen",
                     "ok": {"not": "NULL"}
                 }
@@ -392,9 +388,27 @@
                     "ok": "none"
                 }
             },
-            "setup": [
-                {"control": "orientation"},
-                {"line": "backlight", "notes": "After the first frame: the driver does not light it."}
+            "setup": [{"control": "orientation"}],
+            "panels": [
+                {"width": 128, "height": 160, "value": "ST7735_RESOLUTION_128x160"},
+                {
+                    "width": 160,
+                    "height": 128,
+                    "value": "ST7735_RESOLUTION_160x128",
+                    "notes": "128x160 turned by dgx_st7735_orientation(scr, DgxScreenRightLeft, DgxScreenTopBottom, true)"
+                },
+                {
+                    "width": 80,
+                    "height": 160,
+                    "value": "ST7735_RESOLUTION_80x160",
+                    "notes": "the 0.96-inch IPS glass, upright, at column 24 of a controller set for 128x160, with no inversion, usually in BGR order: Adafruit's INITR_MINI160x80"
+                },
+                {
+                    "width": 160,
+                    "height": 80,
+                    "value": "ST7735_RESOLUTION_160x80",
+                    "notes": "the 0.96-inch glass turned as 160x128 is"
+                }
             ]
         },
         "st7789": {
@@ -404,7 +418,7 @@
             "init": [
                 {
                     "call": "dgx_st7789_init",
-                    "args": ["{bus}", "{rst}", "{depth}", "{color}", "{panel}"],
+                    "args": ["{bus}", "{rst}", "{backlight}", "{depth}", "{color}", "{panel}"],
                     "returns": "screen",
                     "ok": {"not": "NULL"}
                 }
@@ -417,10 +431,7 @@
                     "ok": "none"
                 }
             },
-            "setup": [
-                {"control": "orientation"},
-                {"line": "backlight", "notes": "After the first frame: the driver does not light it."}
-            ],
+            "setup": [{"control": "orientation"}],
             "adapter": {"kind": "panel"},
             "panels": [
                 {"width": 240, "height": 240, "value": "ST7789_RESOLUTION_240x240"},
@@ -482,7 +493,7 @@
             "init": [
                 {
                     "call": "dgx_st7920_init",
-                    "args": ["{bus}", "{rst}", "{cs}"],
+                    "args": ["{bus}", "{rst}", "{backlight}", "{cs}"],
                     "returns": "screen",
                     "ok": {"not": "NULL"}
                 }
@@ -582,10 +593,10 @@
         }
     },
     "adapter": {
-        "version": "^0.10.17",
+        "version": "^0.11.0",
         "symbol": "BOARD_DISPLAY_GRAPHICS",
         "requires": ["esp_driver_gpio"],
-        "notes": "0.10.0 is not in the registry. 0.10.8 is the first that builds for the linux target of ESP-IDF: the window of the board host; 0.10.9 turns its glass as the board is held, 0.10.10 gives its mouse, 0.10.11 its keys and a window on no bus. 0.10.12 turns the SSD1306, SSD1309 and SH1106. 0.10.13 draws straight segments by the pen, 0.10.14 a filled circle with a soft edge and gives a screen its user_data. 0.10.16 has the 1.14-inch glass of the ST7789 and the NV3041A at 18 bits, 0.10.17 the SSD1680 of e-paper, whose glue calls dgx_ssd1680_init.",
+        "notes": "0.10.0 is not in the registry. 0.10.8 is the first that builds for the linux target of ESP-IDF: the window of the board host; 0.10.9 turns its glass as the board is held, 0.10.10 gives its mouse, 0.10.11 its keys and a window on no bus. 0.10.12 turns the SSD1306, SSD1309 and SH1106. 0.10.13 draws straight segments by the pen, 0.10.14 a filled circle with a soft edge and gives a screen its user_data. 0.10.16 has the 1.14-inch glass of the ST7789 and the NV3041A at 18 bits, 0.10.17 the SSD1680 of e-paper, whose glue calls dgx_ssd1680_init. 0.11.0 takes the backlight line in the constructor of every display that has one and lights it once the display is set up; it has the 0.96-inch glass of the ST7735.",
         "headers": ["board_display.h"],
         "public": "boards_dgx.h",
         "sources": {"BOARD_DISPLAY_GRAPHICS": ["board_display.c"]}
@@ -593,17 +604,114 @@
     "checked": {
         "api": {
             "level": "vendor-code",
-            "source": "include/drivers/, include/bus/ and Kconfig of esp32-component-dgx 0.10.17: from 0.10.14 the ST7789 has the 1.14-inch glass and the NV3041A 18 bits (0.10.16), the SSD1680 is new (0.10.17); the rest changed the DSI bus, the panel description and fonts, by git diff of the tags on 2026-11-13",
-            "date": "2026-11-13"
+            "source": "include/drivers/, include/bus/ and Kconfig of esp32-component-dgx 0.11.0: every constructor of a display with a backlight takes its line after the reset line, the ST7735 takes a panel and has the 0.96-inch glass of 80x160, reading a display back through its window is gone, which the glue never called; by git diff of the tags 0.10.17 and 0.11.0 on 2026-11-14",
+            "date": "2026-11-14"
         },
         "history": {
             "level": "vendor-code",
             "covers": ["history"],
-            "source": "headers of include/ at every tag of esp32-component-dgx: the chips, the buses and the arguments of their init; before tag 0.1.0 nothing is known; 0.10.3 to 0.10.12 by the same headers at each tag on 2026-11-06, 0.10.13 and 0.10.14 on 2026-11-11, 0.10.15 to 0.10.17 on 2026-11-13",
+            "source": "headers of include/ at every tag of esp32-component-dgx: the chips, the buses and the arguments of their init; before tag 0.1.0 nothing is known; 0.10.3 to 0.10.12 by the same headers at each tag on 2026-11-06, 0.10.13 and 0.10.14 on 2026-11-11, 0.10.15 to 0.10.17 on 2026-11-13, 0.11.0 on 2026-11-14",
             "date": "2026-10-31"
         }
     },
     "history": [
+        {
+            "before": "0.11.0",
+            "chips": {
+                "gc9a01": {
+                    "init": [
+                        {
+                            "call": "dgx_gc9a01_init",
+                            "args": ["{bus}", "{rst}", "{depth}", "{color}"],
+                            "returns": "screen",
+                            "ok": {"not": "NULL"}
+                        }
+                    ],
+                    "setup": [
+                        {"control": "orientation"},
+                        {"line": "backlight", "notes": "After the first frame: the driver does not light it."}
+                    ]
+                },
+                "jd9165": {
+                    "init": [
+                        {
+                            "call": "dgx_jd9165_init",
+                            "args": ["{bus}", "{rst}", "{depth}", "{color}", "DgxDsiTwoFrames"],
+                            "returns": "screen",
+                            "ok": {"not": "NULL"}
+                        }
+                    ],
+                    "setup": [
+                        {"control": "orientation"},
+                        {"line": "backlight", "notes": "After the first frame: the driver does not light it."}
+                    ]
+                },
+                "jd9365": {
+                    "init": [
+                        {
+                            "call": "dgx_jd9365_init",
+                            "args": ["{bus}", "{rst}", "{depth}", "{color}", "DgxDsiTwoFrames"],
+                            "returns": "screen",
+                            "ok": {"not": "NULL"}
+                        }
+                    ],
+                    "setup": [
+                        {"control": "orientation"},
+                        {"line": "backlight", "notes": "After the first frame: the driver does not light it."}
+                    ]
+                },
+                "st7565r": {
+                    "init": [
+                        {
+                            "call": "dgx_st7565r_init",
+                            "args": ["{bus}", "{rst}"],
+                            "returns": "screen",
+                            "ok": {"not": "NULL"}
+                        }
+                    ]
+                },
+                "st7735": {
+                    "init": [
+                        {
+                            "call": "dgx_st7735_init",
+                            "args": ["{bus}", "{rst}", "{depth}", "{color}"],
+                            "returns": "screen",
+                            "ok": {"not": "NULL"}
+                        }
+                    ],
+                    "setup": [
+                        {"control": "orientation"},
+                        {"line": "backlight", "notes": "After the first frame: the driver does not light it."}
+                    ],
+                    "panels": null
+                },
+                "st7789": {
+                    "init": [
+                        {
+                            "call": "dgx_st7789_init",
+                            "args": ["{bus}", "{rst}", "{depth}", "{color}", "{panel}"],
+                            "returns": "screen",
+                            "ok": {"not": "NULL"}
+                        }
+                    ],
+                    "setup": [
+                        {"control": "orientation"},
+                        {"line": "backlight", "notes": "After the first frame: the driver does not light it."}
+                    ]
+                },
+                "st7920": {
+                    "init": [
+                        {
+                            "call": "dgx_st7920_init",
+                            "args": ["{bus}", "{rst}", "{cs}"],
+                            "returns": "screen",
+                            "ok": {"not": "NULL"}
+                        }
+                    ]
+                }
+            },
+            "notes": "The constructors of the GC9A01, JD9165, JD9365, ST7565R, ST7735, ST7789 and ST7920 took no backlight line, and the glue lit it after the first frame; the ST7735 took no panel and had only the 128x160 glass."
+        },
         {"before": "0.10.17", "chips": {"ssd1680": null}},
         {
             "before": "0.10.16",
@@ -704,6 +812,7 @@
         {"before": "0.5.0", "chips": {"jd9165": null}, "transports": {"dsi": null}}
     ],
     "versions": {
+        "0.11.0": {"platforms": {"esp_idf": ">=5.2.0"}},
         "0.10.17": {"platforms": {"esp_idf": ">=5.2.0"}},
         "0.10.16": {"platforms": {"esp_idf": ">=5.2.0"}},
         "0.10.15": {"platforms": {"esp_idf": ">=5.2.0"}},

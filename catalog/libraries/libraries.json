@@ -8323,7 +8323,7 @@
         },
         "esp-idf/jef-sure/dgx": {
             "title": "DGX",
-            "version": "0.10.17",
+            "version": "0.11.0",
             "repository": "https://github.com/jef-sure/esp32-component-dgx",
             "platforms": ["esp_idf"],
             "chips": [
@@ -8344,20 +8344,20 @@
                 "st7920"
             ],
             "stars": 6,
-            "changed": "2026-11-13",
+            "changed": "2026-11-14",
             "archived": false,
             "license": "MIT",
             "requires": []
         },
         "esp-idf/jef-sure/dgx-di": {
             "title": "DGX-DI",
-            "version": "0.1.5",
+            "version": "0.1.6",
             "repository": "https://github.com/jef-sure/esp32-component-dgx-di",
             "platforms": ["esp_idf"],
             "chips": ["gsl3680"],
             "requires": ["esp-idf/jef-sure/dgx"],
             "stars": 0,
-            "changed": "2026-10-30",
+            "changed": "2026-11-14",
             "archived": false,
             "license": "MIT"
         },

@@ -48,6 +48,10 @@
             "notes": "Less than 3 euro, before delivery and the duty on small parcels in the EU."
         }
     },
+    "images": {
+        "front": {"file": "front.webp", "source": "a photo by Anton of his board, 2026-11-13", "shows": "front"},
+        "back": {"file": "back.webp", "source": "a photo by Anton of his board, 2026-11-13", "shows": "back"}
+    },
     "checked": {
         "pins": {
             "level": "unchecked",

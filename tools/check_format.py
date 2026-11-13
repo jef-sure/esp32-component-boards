@@ -876,7 +876,7 @@ def main():
     files = [path for root in (ROOT / "catalog", ROOT / "imported", ROOT / "imported-shops", TESTS / "catalog") for path in documents_under(root)]
     for path in files:
         doc = json.loads(path.read_text())
-        problems = errors_of(RAW, doc, "schema")
+        problems = errors_of(RAW, no_nulls(doc) if "extends" in doc else doc, "schema")  # a layer removes a field by null
         if doc["kind"] == "project" and ROOT / "catalog" in path.parents:
             problems.append(f"a project is somebody's own board: its place is {resolve.LOCAL_BOARDS} of the program")
         if not problems and doc["kind"] == "library" and path.parent.parts[-3:] != tuple(resolve.library_id(doc).split("/")):

@@ -2,6 +2,9 @@
 
 ## 0.1.4 (not released yet)
 
+- Photos of the ESP32 DevKit with micro-USB, the front as its edges name the sides, USB on the left. The variant with
+  USB-C keeps its own front and drops the back it would inherit: `"back": null`. The check of the files of the catalog
+  takes null in a board that extends another, as the rest of the checks did.
 - The table of the boards in the README says what was tried on each board: the display, touch, sound and button
   that entries of `checked` at level `hardware` cover, and those that only started. The facts of the status
   paragraph went into the data: the start of the display of the JC4827W543C and the handwritten clock on both DSI

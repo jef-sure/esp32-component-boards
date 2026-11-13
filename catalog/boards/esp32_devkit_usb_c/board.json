@@ -21,7 +21,10 @@
         },
         {"name": "3V3", "from": "VIN", "regulator": "ldo", "mv": 3300, "feeds": ["mcu"]}
     ],
-    "images": {"front": {"file": "front.webp", "source": "a photo by Anton of his board, 2026-11-06", "shows": "front"}},
+    "images": {
+        "front": {"file": "front.webp", "source": "a photo by Anton of his board, 2026-11-06", "shows": "front"},
+        "back": null
+    },
     "checked": {
         "photo": {
             "level": "hardware",

@@ -29,6 +29,8 @@
   round board with no backlight line, and `tft128_gc9a01_8pin`, with BLK; read from their silkscreen, not tried. A
   round display asked for now gives the one of seven contacts, which takes the fewest wires; the cases that named the
   ST77916 module, the only round one before, name it, and `qspi_display` still takes the ST77916.
+- The round GC9A01 module of seven contacts is the display of esp32-co2-station: SPI at 40 MHz, 16 bits in BGR, VCC
+  of 3.3 V, tried on hardware there; its data says so now, with the colour order it needs.
 - The table of the boards in the README says what was tried on each board: the display, touch, sound and button
   that entries of `checked` at level `hardware` cover, and those that only started. The facts of the status
   paragraph went into the data: the start of the display of the JC4827W543C and the handwritten clock on both DSI

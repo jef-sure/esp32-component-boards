@@ -1,0 +1,47 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "ws2812b_8x8",
+    "title": "WS2812B panel, 8x8",
+    "part": "WS2812B-64",
+    "description": "64 WS2812B in a square of 8 by 8 on a rigid board, one data line through all of them: IN at one corner, OUT at the opposite one goes on into the next panel",
+    "notes": [
+        "QYF-0728 on the back. In what order the data line goes through the LEDs, row by row or as a snake, is not known: a trial shows it."
+    ],
+    "power": [{"name": "V+", "source": "connector", "volts": [3.5, 5.3], "feeds": ["leds"]}],
+    "devices": {
+        "leds": {"chip": "ws2812b", "logic": "V+", "provides": {"led": {"variant": "matrix"}}, "config": {"count": 64}}
+    },
+    "connectors": {
+        "IN": {"type": "3 pads", "pins": ["V+", "IN", "V-"]},
+        "OUT": {"type": "3 pads", "pins": ["V+", "OUT", "V-"]}
+    },
+    "images": {
+        "front": {
+            "file": "front.webp",
+            "source": "a photo by Anton of his panel, 2026-11-13, straightened",
+            "shows": "front"
+        },
+        "back": {
+            "file": "back.webp",
+            "source": "a photo by Anton of his panel, 2026-11-13, straightened",
+            "shows": "back"
+        }
+    },
+    "checked": {
+        "photo": {
+            "level": "hardware",
+            "covers": ["connectors"],
+            "source": "a photo by Anton of his panel, 2026-11-13",
+            "notes": "Pads on the back, their names printed mirrored: V+ IN V- at one corner, V+ OUT V- at the opposite one.",
+            "date": "2026-11-13"
+        },
+        "silkscreen": {
+            "level": "vendor-docs",
+            "covers": ["devices.leds", "power"],
+            "source": "the back of the panel: WS2812B-64, Only ONE Pin, 24 bit color, 64 RGB LEDs; the volts are those of the WS2812B. Not tried.",
+            "date": "2026-11-13"
+        }
+    }
+}

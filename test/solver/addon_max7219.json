@@ -5,7 +5,8 @@
             {
                 "role": "led",
                 "variant": "matrix",
-                "name": "wall"
+                "name": "wall",
+                "part": "max7219_4in1"
             }
         ]
     },

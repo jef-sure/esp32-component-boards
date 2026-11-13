@@ -9,6 +9,10 @@
   written CP210x.
 - Photos of the MAX7219 matrix of four 8x8, front and back. The order of its five wires, VCC GND DIN CS CLK, is now
   read from the silkscreen, not from the listing, and the connector says its edge: the left one of the front.
+- A WS2812B panel of 8x8, `ws2812b_8x8`, with photos: one data line through 64 LEDs, pads IN and OUT on the back. It
+  serves LEDs of the variant matrix, as the MAX7219 module does, not a garland: for 61 addressable LEDs the solver
+  would take one panel of 64 instead of strips. The case of the MAX7219 module names the module the person has, so a
+  matrix there is still that module and not the panel, which takes one line instead of three.
 - The table of the boards in the README says what was tried on each board: the display, touch, sound and button
   that entries of `checked` at level `hardware` cover, and those that only started. The facts of the status
   paragraph went into the data: the start of the display of the JC4827W543C and the handwritten clock on both DSI

@@ -52,6 +52,15 @@
   the datasheet of the PCF8574 and the usual backpack, not tried. `examples/local_boards` takes it from the catalog and
   keeps the round display as its own module; CI builds `hello_board` with it on the JC1060P470C again, with
   `--module`.
+- The record of DGX describes 0.10.17: the 1.14-inch glass of the ST7789, 135x240 and 240x135, and the NV3041A at 18
+  bits came in 0.10.16, the SSD1680 of e-paper in 0.10.17. The component takes DGX `^0.10.17` now, as the glue of an
+  e-paper calls `dgx_ssd1680_init` with its BUSY line. The JC4827W543C has its display tried at 16 and 18 bits, by the
+  test of DGX 0.10.16.
+- The SSD1680, a device of the catalog by its datasheet, and `epaper29_ssd1680`, the 2.9-inch e-paper of black, white
+  and red of WeAct Studio, with photos: its contacts, its regulator and its 3.3 V lines by the schematic of WeAct, tried
+  by Anton with DGX on SPI of an ESP32, in all eight orientations. The screen of DGX takes a byte a pixel, the ink, so
+  its depth is 8, and the program sends a picture by `dgx_ssd1680_refresh()`. A module with no MISO contact says
+  `"miso": "nc"`: the kit wires none to it, though its BUSY puts a level on a pin.
 - A part wired by its lines gets its supply in a kit, as a part on a bus did: the WS2812B panel and the 2004 now list
   their 5 V wire.
 - A question that limits some variants keeps a part of another variant out: a block of a display of any kind that

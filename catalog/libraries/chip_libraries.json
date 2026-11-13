@@ -676,6 +676,7 @@
             "esp-idf/jef-sure/dgx"
         ],
         "ssd1351": ["esp-idf/jef-sure/dgx"],
+        "ssd1680": ["esp-idf/jef-sure/dgx"],
         "st7262": ["arduino/iamfaraz/waveshare_st7262_lvgl"],
         "st7565r": ["esp-idf/jef-sure/dgx"],
         "st7701": ["esp-idf/espressif/esp_lcd_st7701"],

@@ -1,0 +1,31 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "ssd1680",
+    "title": "SSD1680 e-paper",
+    "maker": "solomon-systech",
+    "part": "SSD1680",
+    "class": "display",
+    "provides": {"display": {"variant": "epaper"}},
+    "on": {"spi": {"hz": 20000000}},
+    "config": {"kind": "graphics"},
+    "controls": {"orientation": {"how": "driver", "read": "none"}},
+    "notes": [
+        "BUSY is high while the glass changes; RES is the only way out of deep sleep. The glass keeps its picture with no power, and a change of all of it takes about 20 s."
+    ],
+    "checked": {
+        "datasheet": {
+            "level": "datasheet",
+            "covers": ["on"],
+            "source": "Solomon Systech SSD1680 Rev 0.14, June 2019, the copy of WeAct Studio (sha256 b28ec2b4...): SCL at 20 MHz at most to write, VCI 2.2 to 3.7 V",
+            "date": "2026-11-13"
+        },
+        "driver": {
+            "level": "vendor-code",
+            "covers": ["notes", "controls"],
+            "source": "include/drivers/ssd1680.h of DGX 0.10.17",
+            "date": "2026-11-13"
+        }
+    }
+}

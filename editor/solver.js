@@ -835,7 +835,8 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             // a part with no select line, as a display module with CS tied low, has the bus to itself
             const unselected = pick.module.device.on?.[pick.transport]?.cs === 'nc';
             const alone = (isDisplay(pick.module.device) || unselected) && KIT_BUSES[pick.transport].select;
-            const own = busOf(board, pick.transport, pins, buses, pick.module.device.on?.[pick.transport]?.hz, alone, kept, alone && pick.module.device.logic === 'none', placed, spread, { ...reach, unselected });
+            const silent = pick.module.device.logic === 'none' || pick.module.device.on?.[pick.transport]?.miso === 'nc'; // nothing comes back on MISO
+            const own = busOf(board, pick.transport, pins, buses, pick.module.device.on?.[pick.transport]?.hz, alone, kept, alone && silent, placed, spread, { ...reach, unselected });
             if (own.problem) return own;
             placed[own] = (placed[own] ?? 0) + 1;
             const wires = {};
@@ -1104,7 +1105,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             for (const [bus, wires] of Object.entries(on || {})) {
                 const [kind, own] = bus.split('.');
                 for (const line of KIT_BUSES[kind].lines) {
-                    if (line === 'miso' && pick.module.device.logic === 'none') continue; // it sends nothing back
+                    if (line === 'miso' && (pick.module.device.logic === 'none' || pick.module.device.on?.[kind]?.miso === 'nc')) continue; // it sends nothing back
                     const pin = project.buses?.[kind]?.[own]?.[line] ?? board.buses[kind][own][line].gpio;
                     if (pin !== 'nc') lines.push({ line, to: `GPIO ${pin}` });
                 }

@@ -305,6 +305,7 @@
         "address": { "$ref": "#/$defs/address" },
         "address_try": { "type": "array", "items": { "$ref": "#/$defs/address" }, "description": "The addresses a chip can have, the first as it comes. Empty in a project: none of those the data lists is free, and the list can be short." },
         "cs": { "$ref": "#/$defs/line" },
+        "miso": { "const": "nc", "description": "Of an SPI bus: the device has no line back, though it puts a level on other lines, as BUSY of an e-paper." },
         "hz": { "$ref": "#/$defs/hz" },
         "mode": { "enum": [0, 1, 2, 3] },
         "role": { "enum": ["data", "control"] },

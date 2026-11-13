@@ -1,0 +1,87 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "epaper29_ssd1680",
+    "title": "WeAct 2.9-inch e-paper of black, white and red",
+    "maker": "weact",
+    "part": "2.9\" Epaper Module",
+    "description": "A 2.9-inch e-paper of three colours, 128x296, on an SSD1680: SPI with D/C, RES and BUSY on eight holes and a 1.25 mm socket; a regulator takes 3.3 to 5 V, the lines are of 3.3 V",
+    "notes": [
+        "SB1 and SB2 on the back choose four-wire SPI with D/C or three-wire; SB4 and SB5 the regulator, SB3 VCC straight to 3.3 V. The lines go through 100 ohm, with no pull-ups.",
+        "The glass changes in about 20 s and keeps its picture with no power: the program sends a picture by dgx_ssd1680_refresh()."
+    ],
+    "power": [
+        {
+            "name": "VCC",
+            "source": "connector",
+            "volts": [3.3, 5],
+            "why": "3.3 to 5 V through U1 with SB4 and SB5 closed, as on this module; 3.3 V only with SB3 instead."
+        },
+        {"name": "VDD33", "from": "VCC", "regulator": "ldo", "mv": 3300, "feeds": ["epd"], "why": "U1, an ME6231A33."}
+    ],
+    "devices": {
+        "epd": {
+            "chip": "ssd1680",
+            "on": {"spi": {"hz": 10000000, "miso": "nc", "lines": ["dc", "rst", "busy"]}},
+            "logic": "VDD33",
+            "config": {
+                "primary": true,
+                "panel": {"width": 128, "height": 296, "mm_w": 29.06, "mm_h": 66.9},
+                "depth_bits": 8
+            },
+            "controls": {"orientation": {"start": {"x": "left-right", "y": "bottom-top", "swap": true}}}
+        }
+    },
+    "connectors": {
+        "P1": {
+            "type": "2.54 mm holes, 2x4",
+            "pins": ["BUSY", "RES", "D/C", "CS", "SCL", "SDA", "GND", "VCC"],
+            "edges": [{"edge": "right", "from": "top", "count": 8}]
+        },
+        "J2": {
+            "type": "Wafer 1.25 mm socket, 8 pins, on the back",
+            "pins": ["BUSY", "RES", "D/C", "CS", "SCL", "SDA", "GND", "VCC"]
+        }
+    },
+    "images": {
+        "front": {
+            "file": "front.webp",
+            "source": "a photo by Anton of his module, 2026-11-13, straightened",
+            "shows": "front"
+        },
+        "back": {
+            "file": "back.webp",
+            "source": "a photo by Anton of his module, 2026-11-13, straightened",
+            "shows": "back"
+        }
+    },
+    "checked": {
+        "photo": {
+            "level": "hardware",
+            "covers": ["connectors"],
+            "source": "a photo by Anton of his module, 2026-11-13",
+            "notes": "The back: BUSY RES D/C CS SCL SDA GND VCC beside the holes, 1 and 2 in the top row, and beside the socket from 1 to 8; VCC: 3.3-5V (SB4+SB5), VCC: 3.3V Only (SB3), I/O: 3.3V. SB4, SB5 and 4-Lines SPI look closed, SB3 and 3-Lines SPI open.",
+            "date": "2026-11-13"
+        },
+        "schematic": {
+            "level": "schematic",
+            "covers": ["power", "devices.epd.logic", "connectors"],
+            "source": "WeAct Studio, Hardware/WeAct-EpaperModule-2.13_2.9 SchDoc.pdf, V1.0 of 2025-11-15, in github.com/WeActStudio/WeActStudio.EpaperModule: P1 and J2 from BUSY at 1 to VDD at 8, U1 ME6231A33 behind SB5 and SB4, SB3 around it, every line through 100 ohm, BS by SB1 to ground or SB2 to 3.3 V",
+            "date": "2026-11-13"
+        },
+        "glass": {
+            "level": "vendor-docs",
+            "covers": ["devices.epd.config.panel"],
+            "source": "Yingruida YRD0290RWS800F6 V2.4, the glass WeAct gives for its 2.9-inch module of three colours in Doc/ of the same repository: 128x296, active area 29.06 x 66.90 mm, an SSD1680Z8. What glass this module has is not printed on it.",
+            "date": "2026-11-13"
+        },
+        "trial": {
+            "level": "hardware",
+            "by": "Anton",
+            "covers": ["devices.epd.chip", "devices.epd.on", "devices.epd.controls.orientation.start"],
+            "source": "examples/ssd1680_demo of DGX 0.10.17 on SPI3 of an ESP32 at 10 MHz: BUSY 4, RES 16, D/C 17, CS 5, SCL 18, SDA 23, VCC 3.3 V; seen right in all eight orientations and in landscape with its pins on the right, a change in 19.4 s",
+            "date": "2026-11-13"
+        }
+    }
+}

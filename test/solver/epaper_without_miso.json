@@ -1,0 +1,5 @@
+{
+    "title": "An e-paper with BUSY and no MISO contact: a bus of its own with no line back, its CS, D/C, RES and BUSY",
+    "answers": {"board": "esp32_devkit", "blocks": [{"role": "display", "name": "paper", "part": "epaper29_ssd1680"}]},
+    "wiring": {"board": "esp32_devkit", "use": "paper", "lines": ["mosi", "sclk", "cs", "dc", "rst", "busy", "VCC", "GND"]}
+}

@@ -211,6 +211,8 @@ def display_part(name, device, module):
         part["bus"]["dc"] = number(pins["dc"])
     if "rst" in pins:
         part["rst"] = number(pins["rst"])
+    if "busy" in pins:
+        part["busy"] = number(pins["busy"])  # an e-paper says on it when the glass is done
     if "backlight" in pins:
         part["backlight"] = number(pins["backlight"])
         if isinstance(pins["backlight"], dict):
@@ -985,7 +987,7 @@ def gen_c(board):
             out("")
             backlight = c_gpio(shown.get("backlight"))
             order = "bgr" if shown.get("color_order") == "bgr" else "rgb"
-            values = {"bus": "bus", "rst": c_gpio(shown.get("rst")), "cs": c_gpio(db.get("cs")), "backlight": backlight, "depth": shown.get("depth_bits", 16),
+            values = {"bus": "bus", "rst": c_gpio(shown.get("rst")), "busy": c_gpio(shown.get("busy")), "cs": c_gpio(db.get("cs")), "backlight": backlight, "depth": shown.get("depth_bits", 16),
                       "color": library["values"]["color_order"][order], "width": panel["width"], "height": panel["height"],
                       "external_vcc": "true" if shown.get("external_vcc") else "false", "panel": shown.get("panel_value")}
             out(f"static dgx_screen_t *display{i}_screen(dgx_bus_protocols_t *bus)")

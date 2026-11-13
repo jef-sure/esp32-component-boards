@@ -12,7 +12,7 @@
         {"via": "registry"},
         {"via": "git", "url": "https://github.com/jef-sure/esp32-component-dgx.git", "ref": "{version}"}
     ],
-    "described": "0.10.14",
+    "described": "0.10.17",
     "description": "Graphics on displays of SPI, QSPI, 8-bit parallel, MIPI-DSI and I2C, with its own panel drivers.",
     "values": {
         "color_order": {"rgb": "DgxScreenRGB", "bgr": "DgxScreenBGR"},
@@ -244,7 +244,7 @@
                     "ok": {"not": "NULL"}
                 }
             ],
-            "supports": {"depth_bits": [16]},
+            "supports": {"depth_bits": [16, 18]},
             "controls": {
                 "orientation": {
                     "call": "dgx_nv3041a_orientation",
@@ -437,6 +437,18 @@
                     "height": 76,
                     "value": "ST7789_RESOLUTION_284x76",
                     "notes": "the 2.25-inch bar turned as 320x240 is"
+                },
+                {
+                    "width": 135,
+                    "height": 240,
+                    "value": "ST7789_RESOLUTION_135x240",
+                    "notes": "the 1.14-inch glass, upright, 52 columns and 40 rows into the memory"
+                },
+                {
+                    "width": 240,
+                    "height": 135,
+                    "value": "ST7789_RESOLUTION_240x135",
+                    "notes": "the 1.14-inch glass turned as 320x240 is"
                 }
             ]
         },
@@ -525,13 +537,55 @@
                     "notes": "Newhaven NHD-2.7-12864WDW3, two segments a pixel"
                 }
             ]
+        },
+        "ssd1680": {
+            "header": "drivers/ssd1680.h",
+            "on": ["spi"],
+            "select": ["DGX_ENABLE_SSD1680"],
+            "init": [
+                {
+                    "call": "dgx_ssd1680_init",
+                    "args": ["{bus}", "{panel}", "{rst}", "{busy}"],
+                    "returns": "screen",
+                    "ok": {"not": "NULL"}
+                }
+            ],
+            "supports": {"depth_bits": [8]},
+            "controls": {
+                "orientation": {
+                    "call": "dgx_ssd1680_orientation",
+                    "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
+                    "ok": "none"
+                }
+            },
+            "setup": [
+                {
+                    "control": "orientation",
+                    "notes": "Drawing changes the picture in memory only: dgx_ssd1680_refresh() of the program sends it, and the glass takes about 20 s."
+                }
+            ],
+            "adapter": {"kind": "panel"},
+            "panels": [
+                {
+                    "width": 128,
+                    "height": 296,
+                    "value": "SSD1680_128X296_BWR",
+                    "notes": "2.9-inch: WeAct Studio, Good Display GDEM029C90"
+                },
+                {
+                    "width": 122,
+                    "height": 250,
+                    "value": "SSD1680_122X250_BWR",
+                    "notes": "2.13-inch: WeAct Studio, Good Display GDEY0213Z98; not checked on a module"
+                }
+            ]
         }
     },
     "adapter": {
-        "version": "^0.10.12",
+        "version": "^0.10.17",
         "symbol": "BOARD_DISPLAY_GRAPHICS",
         "requires": ["esp_driver_gpio"],
-        "notes": "0.10.0 is not in the registry. 0.10.8 is the first that builds for the linux target of ESP-IDF: the window of the board host; 0.10.9 turns its glass as the board is held, 0.10.10 gives its mouse, 0.10.11 its keys and a window on no bus. 0.10.12 turns the SSD1306, SSD1309 and SH1106. 0.10.13 draws straight segments by the pen, 0.10.14 a filled circle with a soft edge and gives a screen its user_data.",
+        "notes": "0.10.0 is not in the registry. 0.10.8 is the first that builds for the linux target of ESP-IDF: the window of the board host; 0.10.9 turns its glass as the board is held, 0.10.10 gives its mouse, 0.10.11 its keys and a window on no bus. 0.10.12 turns the SSD1306, SSD1309 and SH1106. 0.10.13 draws straight segments by the pen, 0.10.14 a filled circle with a soft edge and gives a screen its user_data. 0.10.16 has the 1.14-inch glass of the ST7789 and the NV3041A at 18 bits, 0.10.17 the SSD1680 of e-paper, whose glue calls dgx_ssd1680_init.",
         "headers": ["board_display.h"],
         "public": "boards_dgx.h",
         "sources": {"BOARD_DISPLAY_GRAPHICS": ["board_display.c"]}
@@ -539,17 +593,49 @@
     "checked": {
         "api": {
             "level": "vendor-code",
-            "source": "include/drivers/, include/bus/ and Kconfig of esp32-component-dgx 0.10.14: 0.10.13 and 0.10.14 changed none of them but the help of DGX_BEZIER_IN_IRAM, by git diff of the tags on 2026-11-11",
-            "date": "2026-11-06"
+            "source": "include/drivers/, include/bus/ and Kconfig of esp32-component-dgx 0.10.17: from 0.10.14 the ST7789 has the 1.14-inch glass and the NV3041A 18 bits (0.10.16), the SSD1680 is new (0.10.17); the rest changed the DSI bus, the panel description and fonts, by git diff of the tags on 2026-11-13",
+            "date": "2026-11-13"
         },
         "history": {
             "level": "vendor-code",
             "covers": ["history"],
-            "source": "headers of include/ at every tag of esp32-component-dgx: the chips, the buses and the arguments of their init; before tag 0.1.0 nothing is known; 0.10.3 to 0.10.12 by the same headers at each tag on 2026-11-06, 0.10.13 and 0.10.14 on 2026-11-11",
+            "source": "headers of include/ at every tag of esp32-component-dgx: the chips, the buses and the arguments of their init; before tag 0.1.0 nothing is known; 0.10.3 to 0.10.12 by the same headers at each tag on 2026-11-06, 0.10.13 and 0.10.14 on 2026-11-11, 0.10.15 to 0.10.17 on 2026-11-13",
             "date": "2026-10-31"
         }
     },
     "history": [
+        {"before": "0.10.17", "chips": {"ssd1680": null}},
+        {
+            "before": "0.10.16",
+            "chips": {
+                "st7789": {
+                    "panels": [
+                        {"width": 240, "height": 240, "value": "ST7789_RESOLUTION_240x240"},
+                        {"width": 240, "height": 320, "value": "ST7789_RESOLUTION_240x320"},
+                        {
+                            "width": 320,
+                            "height": 240,
+                            "value": "ST7789_RESOLUTION_320x240",
+                            "notes": "240x320 turned by dgx_st7789_orientation(scr, DgxScreenRightLeft, DgxScreenTopBottom, true)"
+                        },
+                        {
+                            "width": 76,
+                            "height": 284,
+                            "value": "ST7789_RESOLUTION_76x284",
+                            "notes": "the 2.25-inch bar, upright"
+                        },
+                        {
+                            "width": 284,
+                            "height": 76,
+                            "value": "ST7789_RESOLUTION_284x76",
+                            "notes": "the 2.25-inch bar turned as 320x240 is"
+                        }
+                    ]
+                },
+                "nv3041a": {"supports": {"depth_bits": [16]}}
+            },
+            "notes": "No 1.14-inch glass of the ST7789; the NV3041A at 16 bits only."
+        },
         {
             "before": "0.10.12",
             "chips": {
@@ -618,6 +704,9 @@
         {"before": "0.5.0", "chips": {"jd9165": null}, "transports": {"dsi": null}}
     ],
     "versions": {
+        "0.10.17": {"platforms": {"esp_idf": ">=5.2.0"}},
+        "0.10.16": {"platforms": {"esp_idf": ">=5.2.0"}},
+        "0.10.15": {"platforms": {"esp_idf": ">=5.2.0"}},
         "0.10.14": {"platforms": {"esp_idf": ">=5.2.0"}},
         "0.10.13": {"platforms": {"esp_idf": ">=5.2.0"}},
         "0.10.12": {"platforms": {"esp_idf": ">=5.2.0"}},

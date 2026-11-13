@@ -23,6 +23,8 @@
   the case that said the catalog has no such module is now `touch_module_of_parts`.
 - `boards_gen.py --all` no longer takes a module with touch, sound or a button for one the component sets up on its
   own: it refused such a module there, and failed on its touch first. A project wires such a module by part.
+- The Waveshare 1.5-inch RGB OLED, `oled15_ssd1351`, with photos: an SSD1351 of 128x128 on SPI, its power and both
+  rows of contacts by the schematic of Waveshare, not tried.
 - The table of the boards in the README says what was tried on each board: the display, touch, sound and button
   that entries of `checked` at level `hardware` cover, and those that only started. The facts of the status
   paragraph went into the data: the start of the display of the JC4827W543C and the handwritten clock on both DSI

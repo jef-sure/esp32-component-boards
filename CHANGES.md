@@ -47,6 +47,11 @@
   lines in `pins`, `lcd_bus_gpio4_create` for these. With it `lcd2004`, the bare C2004A, with photos; the names of
   its contacts are those of the usual 2004, not printed on it, not tried. A kit puts a level shifter on its lines,
   as they are pulled up to 5 V.
+- The 2004 on a PCF8574 is back in the catalog, `lcd2004_pcf8574`, with photos: Anton bought it with the backpack
+  soldered on, so it is a product; 0.0.1 took it out as his own build. A PCF8574T, the address 0x27 of open pads by
+  the datasheet of the PCF8574 and the usual backpack, not tried. `examples/local_boards` takes it from the catalog and
+  keeps the round display as its own module; CI builds `hello_board` with it on the JC1060P470C again, with
+  `--module`.
 - A part wired by its lines gets its supply in a kit, as a part on a bus did: the WS2812B panel and the 2004 now list
   their 5 V wire.
 - A question that limits some variants keeps a part of another variant out: a block of a display of any kind that

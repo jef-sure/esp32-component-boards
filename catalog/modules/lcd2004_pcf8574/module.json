@@ -1,0 +1,69 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "lcd2004_pcf8574",
+    "title": "2004 LCD on a PCF8574",
+    "description": "A 20x4 character LCD sold with a PCF8574 backpack soldered on: I2C on four contacts, a trimmer for the contrast, a jumper for the backlight",
+    "notes": [
+        "The backpack is marked MH, its chip PCF8574T. The usual backpack wires P0 to RS, P1 to RW, P2 to E, P3 to the backlight and P4 to P7 to D4 to D7, as hd44780 takes it; not traced on this one."
+    ],
+    "power": [{"name": "VCC", "source": "connector", "volts": [4.5, 5.5], "feeds": ["lcd"]}],
+    "devices": {
+        "lcd": {
+            "chip": "hd44780",
+            "on": {"i2c": {"address": "0x27"}},
+            "logic": "VCC",
+            "config": {"primary": true, "geometry": "20x4"}
+        }
+    },
+    "connectors": {
+        "J1": {
+            "type": "2.54 mm pins, 4 in a row on the backpack",
+            "pins": ["GND", "VCC", "SDA", "SCL"],
+            "edges": [{"edge": "left", "from": "top", "count": 4}]
+        }
+    },
+    "price": {
+        "ebay": {
+            "shop": "ebay",
+            "currency": "EUR",
+            "range": [7, 12],
+            "date": "2026-11-01",
+            "source": "Listings found by a search on ebay.de, not a purchase"
+        }
+    },
+    "images": {
+        "front": {
+            "file": "front.webp",
+            "source": "a photo by Anton of his module, 2026-11-13, straightened",
+            "shows": "front"
+        },
+        "back": {
+            "file": "back.webp",
+            "source": "a photo by Anton of his module, 2026-11-13, straightened",
+            "shows": "back"
+        }
+    },
+    "checked": {
+        "photo": {
+            "level": "hardware",
+            "covers": ["connectors"],
+            "source": "a photo by Anton of his module, 2026-11-13, bought with the backpack soldered on (Anton)",
+            "notes": "GND VCC SDA SCL beside the four pins at the right edge of the back, so at the left of the front; PCF8574T on the chip; the pads A0 to A2 open.",
+            "date": "2026-11-13"
+        },
+        "address": {
+            "level": "community",
+            "covers": ["devices.lcd.on"],
+            "source": "TI PCF8574, SCPS068K, September 2024: the address is 0100 A2 A1 A0, 0x20 to 0x27; the pads are open, and the usual backpack pulls A0 to A2 up, which gives 0x27. Not traced, not tried.",
+            "date": "2026-11-13"
+        },
+        "levels": {
+            "level": "unchecked",
+            "covers": ["power", "devices.lcd.logic"],
+            "source": "The LCD takes 5 V. R8 and R9 of the backpack, marked 472, are on the usual backpack the pull-ups of SDA and SCL to VCC, so its lines are of VCC. Not traced, not measured.",
+            "date": "2026-11-13"
+        }
+    }
+}

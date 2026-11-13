@@ -67,9 +67,9 @@ idf.py --preset cyd_s028r build flash monitor
 - **графический дисплей** под управлением [DGX](https://github.com/jef-sure/esp32-component-dgx):
   панели MIPI-DSI, QSPI или SPI, с их размером в пикселях и в миллиметрах и
   тем, как они лежат на плате;
-- **символьный дисплей** (HD44780, 2004 на переходнике PCF8574) через
+- **символьный дисплей** (HD44780) через
   [hd44780](https://github.com/jef-sure/esp32-component-hd44780), на плате
-  или как модуль программы на её шине I2C;
+  или как модуль: 2004 на переходнике PCF8574 по I2C или голый по GPIO;
 - **тач-панель** как устройство [DGX-DI](https://github.com/jef-sure/esp32-component-dgx-di),
   с калибровкой, измеренной на плате и хранящейся в данных;
 - **LVGL** через [DGX-LVGL](https://github.com/jef-sure/esp32-component-dgx-lvgl):

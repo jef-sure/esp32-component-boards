@@ -1,6 +1,5 @@
 {
     "title": "The strapping pins of an ESP32 that select its boot or the voltage of its flash, 0, 2 and 12, are no line of a kit",
-    "modules": ["lcd2004_pcf8574"],
     "answers": {"blocks": [{"role": "nfc", "name": "nfc_in"}, {"role": "nfc", "name": "nfc_out"}, {"role": "display", "variant": "character", "name": "screen"}]},
     "keeps_out": {"board": "esp32_devkit", "pins": [0, 2, 12]}
 }

@@ -215,6 +215,19 @@ config BOARD_HOST_BUTTONS
     string "The names of its buttons, by commas"
 endif
 
+config BOARD_BUS_I2C
+    bool
+    default y if BOARD_SELECT_ESP32_C3_OLED_042 || BOARD_SELECT_ESP32_OLED_096 || BOARD_SELECT_ESP32_P4_ETH || BOARD_SELECT_ESP32_P4_POE_ETH || BOARD_SELECT_ESP32_WROVER_DEV || BOARD_SELECT_JC1060P470C || BOARD_SELECT_JC4827W543C || BOARD_SELECT_JC8012P4A1C
+
+# A module is not a board of its own: it is on whichever board the choice above picked, and
+# its glue comes in beside the board's (its sdkconfig.defaults turns it on, read after the board's).
+config BOARD_MODULE_LCD2004_PCF8574
+    bool "2004 LCD on a PCF8574: 20x4 HD44780"
+    depends on !BOARD_SELECT_NONE && BOARD_BUS_I2C
+    help
+        A 20x4 character LCD sold with a PCF8574 backpack soldered on: I2C on
+        four contacts, a trimmer for the contrast, a jumper for the backlight.
+
 config BOARD_SOUND_TASK_STACK
     int "Stack of the task of the sound, bytes"
     default 3072
@@ -330,7 +343,7 @@ config BOARD_DISPLAY_GROUP_BY_PROGRAM
 
 config BOARD_DISPLAY_HD44780
     int
-    default 1 if BOARD_DISPLAY_HD44780_BY_PROGRAM
+    default 1 if BOARD_MODULE_LCD2004_PCF8574 || BOARD_DISPLAY_HD44780_BY_PROGRAM
     default 0
 
 config BOARD_DISPLAY_HD44780_BY_PROGRAM

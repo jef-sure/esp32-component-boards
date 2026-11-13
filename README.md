@@ -71,9 +71,9 @@ The component knows no display by itself: a board may have none, and a display i
 - a **graphics display** driven by [DGX](https://github.com/jef-sure/esp32-component-dgx):
   MIPI-DSI, QSPI or SPI panels, with their size in pixels and in millimetres and
   the way they lie on the board;
-- a **character display** (HD44780, a 2004 on a PCF8574 backpack) through
+- a **character display** (HD44780) through
   [hd44780](https://github.com/jef-sure/esp32-component-hd44780), on the board
-  or as a module of the program on its I2C bus;
+  or as a module: a 2004 on a PCF8574 backpack on I2C, or a bare one on GPIOs;
 - a **touch panel** as a device of [DGX-DI](https://github.com/jef-sure/esp32-component-dgx-di),
   with the calibration measured on the board kept in the data;
 - **LVGL** through [DGX-LVGL](https://github.com/jef-sure/esp32-component-dgx-lvgl):

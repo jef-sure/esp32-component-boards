@@ -27,7 +27,7 @@ jobs:
       - run: python3 tools/board_pins.py --all
 
   build:
-    name: ${{ matrix.board }} on ESP-IDF ${{ matrix.idf }}
+    name: ${{ matrix.board }}${{ matrix.module && format(' + {0}', matrix.module) || '' }} on ESP-IDF ${{ matrix.idf }}
     needs: check
     if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
@@ -38,6 +38,11 @@ jobs:
         board: [cyd_s028r, esp32_c3_oled_042, esp32_c3_zero, esp32_c6_supermini, esp32_devkit, esp32_devkit_usb_c, esp32_oled_096, esp32_p4_eth, esp32_p4_poe_eth, esp32_s3_zero, esp32_wrover_dev, esp32s3_devkit, jc1060p470c, jc4827w543c, jc8012p4a1c, nodemcu_esp32s]
         # boards: end of generated
         idf: [release-v5.5, v6.1]
+        module: [""]
+        include:
+          - board: jc1060p470c
+            idf: v6.1
+            module: lcd2004_pcf8574
     steps:
       - uses: actions/checkout@v4
       # the component manager keeps what it downloads in .component-cache, which actions/cache keeps between runs:
@@ -50,7 +55,7 @@ jobs:
           restore-keys: components-
       - name: choose the board
         run: |
-          python3 tools/board_select.py ${{ matrix.board }} examples/hello_board
+          python3 tools/board_select.py ${{ matrix.board }} ${{ matrix.module && format('--module {0}', matrix.module) || '' }} examples/hello_board
           python3 tools/board_select.py ${{ matrix.board }} examples/hello_lvgl
           python3 tools/board_select.py ${{ matrix.board }} examples/sound_level
           python3 -c "import sys; sys.path.insert(0, 'tools'); import resolve; board = resolve.resolve(resolve.load('boards', '${{ matrix.board }}')); print('target=' + board['mcu']['target']); print('graphics=' + str(any((device.get('config') or {}).get('kind') == 'graphics' for device in board['devices'].values())).lower()); print('sound=' + str(any('audio' in (device.get('classes') or []) for device in board['devices'].values())).lower())" >> "$GITHUB_OUTPUT"
@@ -64,7 +69,7 @@ jobs:
           path: examples/hello_board
           command: ${{ matrix.idf == 'v6.1' && 'idf.py build' || format('idf.py -B build/{0} -D SDKCONFIG=sdkconfig.{0} -D BOARD={0} build', matrix.board) }}
       - name: build hello_lvgl
-        if: ${{ steps.board.outputs.graphics == 'true' }}
+        if: ${{ !matrix.module && steps.board.outputs.graphics == 'true' }}
         uses: espressif/esp-idf-ci-action@v1
         with:
           extra_docker_args: -e IDF_COMPONENT_CACHE_PATH=/app/${{ github.repository }}/.component-cache
@@ -73,7 +78,7 @@ jobs:
           path: examples/hello_lvgl
           command: ${{ matrix.idf == 'v6.1' && 'idf.py build' || format('idf.py -B build/{0} -D SDKCONFIG=sdkconfig.{0} -D BOARD={0} build', matrix.board) }}
       - name: build sound_level
-        if: ${{ steps.board.outputs.sound == 'true' }}
+        if: ${{ !matrix.module && steps.board.outputs.sound == 'true' }}
         uses: espressif/esp-idf-ci-action@v1
         with:
           extra_docker_args: -e IDF_COMPONENT_CACHE_PATH=/app/${{ github.repository }}/.component-cache

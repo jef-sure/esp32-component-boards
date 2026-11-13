@@ -1,0 +1,69 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "tft13_st7789",
+    "title": "1.3-inch TFT on an ST7789, SPI with no CS",
+    "description": "A 240x240 IPS colour display on SPI with seven contacts and no CS: the backlight on BLK; with its select tied low it takes SPI mode 3 and a bus of its own",
+    "notes": ["FP-133H01D on the ribbon of the panel."],
+    "power": [{"name": "VCC", "source": "connector", "volts": [3, 3.6], "feeds": ["lcd"]}],
+    "devices": {
+        "lcd": {
+            "chip": "st7789",
+            "on": {"spi": {"cs": "nc", "mode": 3, "lines": ["dc", "rst", "backlight"]}},
+            "logic": "none",
+            "config": {
+                "primary": true,
+                "panel": {"width": 240, "height": 240, "mm_w": 23.4, "mm_h": 23.4},
+                "depth_bits": 16
+            },
+            "controls": {"orientation": {"start": {"x": "left-right", "y": "top-bottom", "swap": false}}}
+        }
+    },
+    "connectors": {
+        "header": {
+            "type": "2.54 mm header, 7 pins",
+            "pins": ["GND", "VCC", "SCL", "SDA", "RES", "DC", "BLK"],
+            "edges": [{"edge": "top", "from": "left", "count": 7}]
+        }
+    },
+    "images": {
+        "front": {
+            "file": "front.webp",
+            "source": "a photo by Anton of his module, 2026-11-13, straightened",
+            "shows": "front"
+        },
+        "back": {
+            "file": "back.webp",
+            "source": "a photo by Anton of his module, 2026-11-13, straightened and turned",
+            "shows": "back"
+        }
+    },
+    "checked": {
+        "photo": {
+            "level": "hardware",
+            "covers": ["connectors"],
+            "source": "a photo by Anton of his module, 2026-11-13",
+            "notes": "GND VCC SCL SDA RES DC BLK on the front and on the back: no CS.",
+            "date": "2026-11-13"
+        },
+        "silkscreen": {
+            "level": "vendor-docs",
+            "covers": ["devices.lcd.chip", "devices.lcd.config"],
+            "source": "the back: Size: 1.3 inch, Interface:SPI, Driver IC: ST7789, Pixel:240x240; the front: 240*240 IPS. The size in mm is a square of 1.3 inches across, not measured. Not tried.",
+            "date": "2026-11-13"
+        },
+        "mode": {
+            "level": "community",
+            "covers": ["devices.lcd.on"],
+            "source": "A module of an ST7789 with no CS takes SPI mode 3, as the libraries for it say, such as TFT_eSPI with TFT_SPI_MODE SPI_MODE3; Anton: it can be taken while nothing else is on its bus. Not tried.",
+            "date": "2026-11-13"
+        },
+        "levels": {
+            "level": "unchecked",
+            "covers": ["power", "devices.lcd.controls.orientation.start"],
+            "source": "VCC is taken as the 3.3 V of the panel. The start is what the ST7789 driver starts with, not tried.",
+            "date": "2026-11-13"
+        }
+    }
+}

@@ -380,7 +380,7 @@ layer and is checked against `min`, `max` and `values`.
 }
 ```
 
-A chip names what it needs beside a bus in `lines` of its connection, as `"on": {"spi": {"required": true, "lines": ["busy", "rst"]}}`: a board wires them in `pins`, and a rule refuses a board that does not. A module names so the lines it brings out: an SPI display with DC, RES and BLK on its header says `"lines": ["dc", "rst", "backlight"]`, not its chip, which sits without them on other boards; a kit wires them to the module.
+A chip names what it needs beside a bus in `lines` of its connection, as `"on": {"spi": {"required": true, "lines": ["busy", "rst"]}}`: a board wires them in `pins`, and a rule refuses a board that does not. A module names so the lines it brings out: an SPI display with DC, RES and BLK on its header says `"lines": ["dc", "rst", "backlight"]`, not its chip, which sits without them on other boards; a kit wires them to the module. A module with no CS contact says `"cs": "nc"` and its SPI mode in `mode`, as an ST7789 with CS tied low: `{"cs": "nc", "mode": 3}`; a kit gives it no select line and a bus of its own, and the glue passes the mode to DGX.
 
 `output` is what it can report, `specified` is where the maker promises accuracy.
 Other figures depend on the kind, such as `standards`, `targets_max` and `range_mm`

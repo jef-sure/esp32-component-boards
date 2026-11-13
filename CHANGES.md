@@ -31,6 +31,11 @@
   ST77916 module, the only round one before, name it, and `qspi_display` still takes the ST77916.
 - The round GC9A01 module of seven contacts is the display of esp32-co2-station: SPI at 40 MHz, 16 bits in BGR, VCC
   of 3.3 V, tried on hardware there; its data says so now, with the colour order it needs.
+- An SPI part with no select line: a module says `"cs": "nc"` and its `mode`, a kit gives it a bus of its own and no CS,
+  and the glue passes the mode to `dgx_spi_init`, 0 as before when none is said; the record of DGX takes the mode of
+  SPI and QSPI from `{mode}`. The first such part is `tft13_st7789`, a 1.3-inch 240x240 module with no CS, in SPI mode
+  3 as its libraries say, not tried; with it the ST7789 is a device of the catalog. Anton: such a module can be taken
+  while nothing else is on its bus.
 - The table of the boards in the README says what was tried on each board: the display, touch, sound and button
   that entries of `checked` at level `hardware` cover, and those that only started. The facts of the status
   paragraph went into the data: the start of the display of the JC4827W543C and the handwritten clock on both DSI

@@ -658,7 +658,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             const own = hostNames(board, spec.host).find((name) => !taken.has(name));
             if (!own) return { problem: t('no free {0} host on this board: {1}', spec.host.toUpperCase(), [...taken].join(', ') || t('it has none')) };
             const lines = spec.lines.filter((line) => !(silent && line === 'miso')); // a device with no line back leaves it unwired
-            if (pins.length < lines.length + (spec.select ? 1 : 0)) return { problem: shortOfPins(lines.length, pins.length) };
+            if (pins.length < lines.length + (spec.select && !reach.unselected ? 1 : 0)) return { problem: shortOfPins(lines.length, pins.length) };
             const named = ownPins(board, kind, own, lines, reach.iomux ?? pins);
             // above the clock of the GPIO matrix of the chip only the IO MUX runs the host
             const matrix = board.mcu.facts.limits?.spi_matrix_mhz;
@@ -829,12 +829,14 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
                 modules[pick.use] = { ...productOf(pick), pins: Object.fromEntries(lines.map((line) => [line, pins.length ? pins.shift() : extra.shift()])) };
                 return null;
             }
-            const alone = isDisplay(pick.module.device) && KIT_BUSES[pick.transport].select;
-            const own = busOf(board, pick.transport, pins, buses, pick.module.device.on?.[pick.transport]?.hz, alone, kept, alone && pick.module.device.logic === 'none', placed, spread, reach);
+            // a part with no select line, as a display module with CS tied low, has the bus to itself
+            const unselected = pick.module.device.on?.[pick.transport]?.cs === 'nc';
+            const alone = (isDisplay(pick.module.device) || unselected) && KIT_BUSES[pick.transport].select;
+            const own = busOf(board, pick.transport, pins, buses, pick.module.device.on?.[pick.transport]?.hz, alone, kept, alone && pick.module.device.logic === 'none', placed, spread, { ...reach, unselected });
             if (own.problem) return own;
             placed[own] = (placed[own] ?? 0) + 1;
             const wires = {};
-            if (KIT_BUSES[pick.transport].select) {
+            if (KIT_BUSES[pick.transport].select && !unselected) {
                 if (!pins.length) return { problem: shortOfPins(1, 0) };
                 wires.cs = selectOf(board, pick.transport, own, pins);
             }

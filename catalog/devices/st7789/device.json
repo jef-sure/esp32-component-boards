@@ -1,0 +1,21 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "st7789",
+    "title": "ST7789",
+    "maker": "sitronix",
+    "part": "ST7789",
+    "compat": "sitronix,st7789v",
+    "class": "display",
+    "provides": {"display": {"variant": "tft"}},
+    "on": {"spi": {}, "p8": {}},
+    "config": {"kind": "graphics"},
+    "controls": {"orientation": {"how": "driver", "read": "none"}},
+    "checked": {
+        "facts": {
+            "level": "vendor-code",
+            "source": "include/drivers/st7789.h of DGX 0.10.15: SPI or P8, a memory of 240x320"
+        }
+    }
+}

@@ -1,0 +1,5 @@
+{
+    "title": "A display module with no CS takes a bus of its own and no select line: SPI clock and data, its DC, reset and backlight",
+    "answers": {"board": "esp32_devkit", "blocks": [{"role": "display", "name": "screen", "part": "tft13_st7789"}]},
+    "wiring": {"board": "esp32_devkit", "use": "screen", "lines": ["mosi", "sclk", "dc", "rst", "backlight", "VCC", "GND"]}
+}

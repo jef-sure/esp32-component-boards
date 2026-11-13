@@ -25,34 +25,45 @@
             "select": ["DGX_ENABLE_SPI"],
             "init": {
                 "call": "dgx_spi_init",
-                "args": ["{host}", "SPI_DMA_CH_AUTO", "{mosi}", "{miso}", "{sclk}", "{cs}", "{dc}", "{hz}", "0"],
+                "args": ["{host}", "SPI_DMA_CH_AUTO", "{mosi}", "{miso}", "{sclk}", "{cs}", "{dc}", "{hz}", "{mode}"],
                 "returns": "bus",
                 "ok": {"not": "NULL"}
             },
             "shared": {
                 "call": "dgx_spi_init_on_bus",
-                "args": ["{host}", "{cs}", "{dc}", "{hz}", "0"],
+                "args": ["{host}", "{cs}", "{dc}", "{hz}", "{mode}"],
                 "returns": "bus",
                 "ok": {"not": "NULL"}
             },
-            "defaults": {"hz": 40000000, "miso": "GPIO_NUM_NC", "dc": "GPIO_NUM_NC"}
+            "defaults": {"hz": 40000000, "miso": "GPIO_NUM_NC", "dc": "GPIO_NUM_NC", "mode": 0}
         },
         "qspi": {
             "header": "bus/dgx_qspi_esp32.h",
             "select": ["DGX_ENABLE_SPI"],
             "init": {
                 "call": "dgx_qspi_init",
-                "args": ["{host}", "SPI_DMA_CH_AUTO", "{d0}", "{d1}", "{d2}", "{d3}", "{sclk}", "{cs}", "{hz}", "0"],
+                "args": [
+                    "{host}",
+                    "SPI_DMA_CH_AUTO",
+                    "{d0}",
+                    "{d1}",
+                    "{d2}",
+                    "{d3}",
+                    "{sclk}",
+                    "{cs}",
+                    "{hz}",
+                    "{mode}"
+                ],
                 "returns": "bus",
                 "ok": {"not": "NULL"}
             },
             "shared": {
                 "call": "dgx_qspi_init_on_bus",
-                "args": ["{host}", "{cs}", "{hz}", "0"],
+                "args": ["{host}", "{cs}", "{hz}", "{mode}"],
                 "returns": "bus",
                 "ok": {"not": "NULL"}
             },
-            "defaults": {"hz": 40000000}
+            "defaults": {"hz": 40000000, "mode": 0}
         },
         "p8": {
             "header": "bus/dgx_p8_esp32.h",

@@ -195,6 +195,8 @@ def display_part(name, device, module):
     for field in ("cs", "address", "hz"):
         if field in connection:
             part["bus"][field] = number(connection[field])
+    if "mode" in connection:
+        part["bus"]["mode"] = connection["mode"]  # CPOL and CPHA: 3 for a panel whose CS is tied low
     if "dc" in pins:
         part["bus"]["dc"] = number(pins["dc"])
     if "rst" in pins:
@@ -968,6 +970,7 @@ def gen_c(board):
                 own_select = "{cs}" in entry["init"][0]["args"]  # the driver of such a chip holds its select itself, so the bus has none
                 values.update({"dc": "GPIO_NUM_NC", **{line: c_gpio(db[line]) for line in ("cs", "dc") if line in db and not (own_select and line == "cs")}})
                 values.update({"hz": db["hz"]} if "hz" in db else {})  # the speed of a device goes before that of its bus
+                values.update({"mode": db["mode"]} if "mode" in db else {})
                 values.setdefault("cs", "GPIO_NUM_NC")
                 out(f"    return {fill_call(transport['shared' if bus_name in shared else 'init'], values)};")
                 bus_field = f".bus = display{i}_bus"

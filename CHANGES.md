@@ -36,6 +36,9 @@
   SPI and QSPI from `{mode}`. The first such part is `tft13_st7789`, a 1.3-inch 240x240 module with no CS, in SPI mode
   3 as its libraries say, not tried; with it the ST7789 is a device of the catalog. Anton: such a module can be taken
   while nothing else is on its bus.
+- The HT16K33, a device of the catalog now by its datasheet: I2C at 0x70 to 0x77, 4.5 to 5.5 V, a high level from 3.5
+  V on 5 V. With it `ht16k33_8x8`, an 8x8 matrix on an HT16K33 backpack, MRA210A, with photos; its contacts and chip
+  read from it, not tried.
 - The table of the boards in the README says what was tried on each board: the display, touch, sound and button
   that entries of `checked` at level `hardware` cover, and those that only started. The facts of the status
   paragraph went into the data: the start of the display of the JC4827W543C and the handwritten clock on both DSI

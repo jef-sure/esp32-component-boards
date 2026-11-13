@@ -1,0 +1,55 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "ht16k33_8x8",
+    "title": "8x8 LED matrix on an HT16K33",
+    "part": "MRA210A",
+    "description": "One 8x8 LED matrix on an HT16K33 backpack, on I2C: four contacts, two sockets of four beside them, A0 to A2 pads for eight addresses",
+    "notes": [
+        "HT16K33 LED Backpack, Monochrome 8x8 Matrix on the back. What the two sockets of four carry is not printed. The matrix sits in holes of the backpack."
+    ],
+    "power": [{"name": "VCC", "source": "connector", "volts": [4.5, 5.5], "feeds": ["matrix"]}],
+    "devices": {
+        "matrix": {
+            "chip": "ht16k33",
+            "on": {"i2c": {"address": "0x70"}},
+            "logic": "VCC",
+            "provides": {"led": {"variant": "matrix"}}
+        }
+    },
+    "connectors": {
+        "header": {
+            "type": "2.54 mm holes, 4 pins",
+            "pins": ["VCC", "GND", "SDA", "SCL"],
+            "edges": [{"edge": "top", "from": "left", "count": 4}]
+        }
+    },
+    "images": {
+        "front": {
+            "file": "front.webp",
+            "source": "a photo by Anton of his module, 2026-11-13, straightened",
+            "shows": "front"
+        },
+        "back": {
+            "file": "back.webp",
+            "source": "a photo by Anton of his module, 2026-11-13, straightened and turned",
+            "shows": "back"
+        }
+    },
+    "checked": {
+        "photo": {
+            "level": "hardware",
+            "covers": ["connectors", "devices.matrix.chip"],
+            "source": "a photo by Anton of his module, 2026-11-13",
+            "notes": "+ - D C over the holes on the front, SCL SDA GND VCC beside them on the back; HOLTEK HT16K33A on the chip; the pads A2 A1 A0 open.",
+            "date": "2026-11-13"
+        },
+        "levels": {
+            "level": "unchecked",
+            "covers": ["power", "devices.matrix.logic", "devices.matrix.on"],
+            "source": "The volts of the HT16K33; the open pads give 0x70 by its datasheet. Whether the backpack pulls SDA and SCL up to VCC is not seen. Not tried.",
+            "date": "2026-11-13"
+        }
+    }
+}

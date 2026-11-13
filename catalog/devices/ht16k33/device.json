@@ -1,0 +1,25 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "ht16k33",
+    "title": "Holtek HT16K33 LED matrix driver",
+    "class": "led",
+    "maker": "holtek",
+    "part": "HT16K33",
+    "compat": "holtek,ht16k33",
+    "high_min_mv": 3500,
+    "on": {"i2c": {"address_try": ["0x70", "0x71", "0x72", "0x73", "0x74", "0x75", "0x76", "0x77"]}},
+    "notes": [
+        "It keeps 16x8 LEDs in its RAM and scans them itself, with a key scan beside. A0 to A2 choose its address, 0x70 when they are open.",
+        "On 5 V a high level on SDA and SCL starts at 0.7 VDD, 3.5 V, so a chip of 3.3 V falls short."
+    ],
+    "checked": {
+        "datasheet": {
+            "level": "datasheet",
+            "covers": ["on", "high_min_mv"],
+            "source": "Holtek HT16K33A datasheet Rev. 1.00 of May 11, 2022, the copy of akizukidenshi.com (HT16K33A.pdf, sha256 5c1312f2...): VDD 4.5 to 5.5 V, VIH of SDA and SCL 0.7 VDD, fSCL to 400 kHz, the address 1110 A2 A1 A0 with A2 to A0 at 0 when they float",
+            "date": "2026-11-13"
+        }
+    }
+}

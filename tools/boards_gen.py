@@ -1389,12 +1389,33 @@ def replace_between(text, begin, end, block, what):
     return text[:start] + block + text[stop:]
 
 
+PARTS = {"en": ("display", "touch", "sound", "button"), "ru": ("дисплей", "тач", "звук", "кнопка")}
+
+
+def tried(board, lang):
+    """The parts of the table a unit of this board showed: named in covers of an entry of level hardware it earned
+    itself. A pending entry says the part started and was not judged."""
+    names = ([d["name"] for d in board.get("displays") or []], [t["name"] for t in board["touches"]],
+             [s["name"] for s in board["sounds"]], [b["name"] for b in board["buttons"]])
+    entries = [e for e in (board.get("checked") or {}).values() if e["level"] == "hardware" and "on_board" not in e]
+    seen, started = [], []
+    for word, parts in zip(PARTS[lang], names):
+        results = {e.get("result", "confirmed") for e in entries for part in parts if f"devices.{part}" in e.get("covers", ())}
+        if "confirmed" in results:
+            seen.append(word)
+        elif "pending" in results:
+            started.append(word)
+    cell = ", ".join(seen)
+    if started:
+        cell += ("; " if cell else "") + {"en": "only started: ", "ru": "только запуск: "}[lang] + ", ".join(started)
+    return cell or "—"
+
+
 def gen_table(boards, lang="en"):
     """The table of the boards for the README, between its markers."""
-    head = {"en": ("board", "chip", "display", "touch", "sound", "button"),
-            "ru": ("плата", "чип", "дисплей", "тач", "звук", "кнопка")}[lang]
+    head = {"en": ("board", "chip", *PARTS["en"], "tried on the board"), "ru": ("плата", "чип", *PARTS["ru"], "проверено на плате")}[lang]
     none = {"en": "none", "ru": "нет"}[lang]
-    L = [TABLE_BEGIN, "| " + " | ".join(head) + " |", "|---|---|---|---|---|---|"]
+    L = [TABLE_BEGIN, "| " + " | ".join(head) + " |", "|" + "---|" * len(head)]
     for board in boards:
         display = board.get("display")
         if is_pixel(display):
@@ -1419,7 +1440,7 @@ def gen_table(boards, lang="en"):
         t = ", ".join(cells) or none
         s = ", ".join({"es8311": "ES8311", "i2s": {"en": "I2S amplifier", "ru": "усилитель I2S"}[lang]}.get(sound["kind"], f"DAC, GPIO{sound.get('out')}") for sound in board["sounds"]) or none
         b = {"en": "yes", "ru": "да"}[lang] if board["buttons"] else none
-        L.append(f"| {board['title']} | {board['mcu']['target'].upper().replace('ESP32', 'ESP32-').rstrip('-')} | {disp} | {t} | {s} | {b} |")
+        L.append(f"| {board['title']} | {board['mcu']['target'].upper().replace('ESP32', 'ESP32-').rstrip('-')} | {disp} | {t} | {s} | {b} | {tried(board, lang)} |")
     L.append(TABLE_END)
     return "\n".join(L)
 

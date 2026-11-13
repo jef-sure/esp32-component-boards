@@ -63,7 +63,7 @@
     "checked": {
         "photo": {
             "level": "hardware",
-            "covers": ["connectors", "devices.usb_serial", "devices.boot", "devices.reg_3v3"],
+            "covers": ["connectors", "devices.usb_serial", "devices.boot.notes", "devices.reg_3v3"],
             "source": "a photo by Anton of his board, 2026-11-06",
             "notes": "The silkscreen, from the antenna end: SVP 25 26 S1 CM S0 CL 3V GND 5V on one side, SVN 16 5 4 0 2 14 12 13 15 RX TX 3V3 GND GND 5V on the other; S1, CM, S0 and CL are the flash lines SD1, CMD, SD0 and CLK. SILABS CP2102 on the back, a micro-USB, buttons EN and Boot.",
             "date": "2026-11-06"

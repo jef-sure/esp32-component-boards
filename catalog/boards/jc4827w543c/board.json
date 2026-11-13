@@ -91,6 +91,14 @@
             "result": "pending",
             "notes": "the I2S starts and takes samples without errors; this says nothing of the amplifier"
         },
+        "start": {
+            "level": "hardware",
+            "covers": ["devices.lcd"],
+            "by": "log of hello_board",
+            "date": "2026-10-30",
+            "result": "pending",
+            "notes": "starts without errors; the picture not judged"
+        },
         "power": {
             "level": "schematic",
             "covers": ["power"],

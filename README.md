@@ -106,25 +106,29 @@ for several boards are in [choosing-a-board.md](docs/en/choosing-a-board.md).
 ## The boards
 
 <!-- boards:table -->
-| board | chip | display | touch | sound | button |
-|---|---|---|---|---|---|
-| CYD (ESP32-2432S028R) | ESP32 | 320x240 ILI9341, SPI, 58x43 mm | XPT2046 (resistive) | DAC, GPIO26 | yes |
-| ESP32-C3 with a 0.42-inch OLED | ESP32-C3 | 72x40 SSD1306, I2C, 9.196x5.18 mm | none | none | yes |
-| Waveshare ESP32-C3-Zero | ESP32-C3 | none | none | none | yes |
-| ESP32-C6 Super Mini | ESP32-C6 | none | none | none | yes |
-| ESP32 DevKit, 4 MB | ESP32 | none | none | none | yes |
-| ESP32 DevKit, 4 MB, USB-C | ESP32 | none | none | none | yes |
-| ESP32 with a 0.96-inch OLED | ESP32 | 128x64 SSD1306, I2C, 22x11.2 mm | none | none | yes |
-| Waveshare ESP32-P4-ETH | ESP32-P4 | none | none | ES8311 | yes |
-| Waveshare ESP32-P4-POE-ETH | ESP32-P4 | none | none | ES8311 | yes |
-| Waveshare ESP32-S3-Zero | ESP32-S3 | none | none | none | yes |
-| ESP32-WROVER-DEV | ESP32 | none | none | none | yes |
-| ESP32-S3 DevKit, 16 MB, 8 MB PSRAM | ESP32-S3 | none | none | none | yes |
-| Guition JC1060P470C | ESP32-P4 | 1024x600 JD9165, MIPI-DSI, 154x86 mm | GT911 | ES8311 | yes |
-| Guition JC4827W543C | ESP32-S3 | 480x272 NV3041A, QSPI, 95x54 mm | GT911 | I2S amplifier | yes |
-| Guition JC8012P4A1C | ESP32-P4 | 1280x800 JD9365, MIPI-DSI, 217x136 mm | GSL3680 (firmware embedded by the program) | ES8311 | yes |
-| NodeMCU ESP-32S V1.1, 38 pins | ESP32 | none | none | none | yes |
+| board | chip | display | touch | sound | button | tried on the board |
+|---|---|---|---|---|---|---|
+| CYD (ESP32-2432S028R) | ESP32 | 320x240 ILI9341, SPI, 58x43 mm | XPT2046 (resistive) | DAC, GPIO26 | yes | touch; only started: display, sound |
+| ESP32-C3 with a 0.42-inch OLED | ESP32-C3 | 72x40 SSD1306, I2C, 9.196x5.18 mm | none | none | yes | display |
+| Waveshare ESP32-C3-Zero | ESP32-C3 | none | none | none | yes | — |
+| ESP32-C6 Super Mini | ESP32-C6 | none | none | none | yes | — |
+| ESP32 DevKit, 4 MB | ESP32 | none | none | none | yes | — |
+| ESP32 DevKit, 4 MB, USB-C | ESP32 | none | none | none | yes | — |
+| ESP32 with a 0.96-inch OLED | ESP32 | 128x64 SSD1306, I2C, 22x11.2 mm | none | none | yes | display |
+| Waveshare ESP32-P4-ETH | ESP32-P4 | none | none | ES8311 | yes | — |
+| Waveshare ESP32-P4-POE-ETH | ESP32-P4 | none | none | ES8311 | yes | — |
+| Waveshare ESP32-S3-Zero | ESP32-S3 | none | none | none | yes | — |
+| ESP32-WROVER-DEV | ESP32 | none | none | none | yes | — |
+| ESP32-S3 DevKit, 16 MB, 8 MB PSRAM | ESP32-S3 | none | none | none | yes | button |
+| Guition JC1060P470C | ESP32-P4 | 1024x600 JD9165, MIPI-DSI, 154x86 mm | GT911 | ES8311 | yes | display, touch; only started: sound |
+| Guition JC4827W543C | ESP32-S3 | 480x272 NV3041A, QSPI, 95x54 mm | GT911 | I2S amplifier | yes | touch; only started: display, sound |
+| Guition JC8012P4A1C | ESP32-P4 | 1280x800 JD9365, MIPI-DSI, 217x136 mm | GSL3680 (firmware embedded by the program) | ES8311 | yes | display, touch, sound |
+| NodeMCU ESP-32S V1.1, 38 pins | ESP32 | none | none | none | yes | — |
 <!-- boards:end -->
+
+The last column comes from the `checked` entries of level `hardware` in each `board.json`: the parts a unit of
+the board was seen, felt or heard working. "Only started" means no errors in the log, the result not judged. A variant
+does not take the checks of its base.
 
 A module is wired to a board in a board of the program, in its `components/local-boards/`: the page writes one
 for a kit with modules, and [examples/local_boards](examples/local_boards) has one written by hand, a round display
@@ -171,19 +175,11 @@ choice, hidden symbols beside it, manifest rules on them.
 The versions and what changed in each are in [CHANGES.md](CHANGES.md). CI builds every board of the catalog under
 ESP-IDF 5.5 and 6.1, and a board of a program with a display and a 2004: the jobs of `.github/workflows/build.yml`.
 
-On hardware, in the versions before 0.1.0: `examples/hello_board` and
-`examples/hello_lvgl` were flashed on a CYD S028R, a JC4827W543C and a JC1060P470C
-under ESP-IDF 6.1: the display, the touch and the sound start without errors in
-the log. Touch coordinates were checked by finger on all three and are correct.
-On the JC1060P470C the picture was checked too, colors and orientation. The 2004
-module showed its text on an ESP32 dev board, as a board of a program that wires its I2C: `esp32_devkit` of the
-catalog opens no bus to a module. On the JC8012P4A1C, flashed too, the display starts and the sound of
-`hello_board` was heard. Its touch needs the firmware the program embeds: with it the handwritten clock, moved onto
-the component, was worked by finger on this board and on the JC1060P470C.
-
-The display module `tft153_st77916` ran on `esp32s3_devkit` as a board of a program, and its picture
-was seen. On those pins ESP-IDF 6.1 needs DGX 0.10.3: the SPI driver of 6.1 takes a quad bus for an
-octal one. `esp32_devkit` ran as the base of a board of a program.
+The `checked` entries say how each part was tried: `examples/hello_board` and `examples/hello_lvgl` under ESP-IDF 6.1
+on versions before 0.1.0, the handwritten clock moved onto the component, probes of DGX on the bench. The 2004 module
+showed its text on `esp32_devkit` as the base of a board of a program that wires its I2C: the catalog board opens no
+bus to a module. The display module `tft153_st77916` ran on `esp32s3_devkit` as a board of a program, and its picture
+was seen. On those pins ESP-IDF 6.1 needs DGX 0.10.3: the SPI driver of 6.1 takes a quad bus for an octal one.
 
 ## How the repository is built
 

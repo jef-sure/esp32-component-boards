@@ -2,6 +2,11 @@
 
 ## 0.1.4 (not released yet)
 
+- The table of the boards in the README says what was tried on each board: the display, touch, sound and button
+  that entries of `checked` at level `hardware` cover, and those that only started. The facts of the status
+  paragraph went into the data: the start of the display of the JC4827W543C and the handwritten clock on both DSI
+  boards. The photo of the ESP32 with a 0.96-inch OLED covers the note of its Boot button, not the button: it was
+  not pressed.
 - A project takes the component by `^0.1.x` now, as the page, `board_project.py`, the example `hello` and the recipes
   write it: the versions 0.1.x from that one, and no 0.2.0, which may change what a program calls. `>=` was there
   for 0.0.x, where a caret takes one version alone.

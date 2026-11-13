@@ -124,6 +124,12 @@
             "covers": ["devices.lcd.config.depth_bits"],
             "values": [16, 24],
             "by": "Anton, by eye, in the test procedure of the DGX driver of its display: 24 bits a pixel seen right as well as 16"
+        },
+        "clock": {
+            "level": "hardware",
+            "covers": ["devices.lcd", "devices.touch"],
+            "by": "Anton, by finger: the handwritten clock moved onto the component, the firmware of the touch embedded by it",
+            "date": "2026-11-04"
         }
     },
     "buses": {

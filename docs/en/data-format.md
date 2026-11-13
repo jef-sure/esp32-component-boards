@@ -831,6 +831,10 @@ tried, when the field takes several: a display started at 16 bits that was seen 
 untried. A variant inherits the entries of its base marked `on_board`, because
 they were earned on another board.
 
+The last column of the table of the boards in the README comes from these entries: a display, touch, sound or
+button named in `covers` of an entry of level `hardware` the board earned itself was tried; with `result: pending`
+it only started.
+
 ## Questions
 
 `catalog/questions.json` holds what the page asks. A question has an `id`, a `text` and a `type`: `choice` (its

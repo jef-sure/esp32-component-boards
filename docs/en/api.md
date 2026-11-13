@@ -92,8 +92,9 @@ typedef struct board_character_display { int cols, rows; } board_character_displ
 bool board_character_display_init(board_character_display_t *out);
 ```
 
-An HD44780 the board has, or a module on its I2C bus brings. The display is
-set up, cleared, its backlight on. `board_hd44780(&lcd)` of `boards_hd44780.h`
+An HD44780 the board has, or a module brings: a 2004 on a PCF8574 backpack on
+I2C, or a bare one on GPIOs. The display is set up, cleared, its backlight on
+where the backpack switches it. `board_hd44780(&lcd)` of `boards_hd44780.h`
 gives the `hd44780_t *` for `lcd_set_cursor`, `lcd_write_str` and the rest of
 `hd44780.h`. Only when the build has one (`CONFIG_BOARD_DISPLAY_HD44780`) is
 hd44780 linked, so include the header under that symbol in a program that runs

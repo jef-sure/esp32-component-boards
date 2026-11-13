@@ -93,8 +93,9 @@ typedef struct board_character_display { int cols, rows; } board_character_displ
 bool board_character_display_init(board_character_display_t *out);
 ```
 
-HD44780, который есть у платы, или который приносит модуль на её шине I2C.
-Дисплей настроен, очищен, его подсветка включена. `board_hd44780(&lcd)` из
+HD44780, который есть у платы, или который приносит модуль: 2004 на переходнике
+PCF8574 по I2C или голый по GPIO. Дисплей настроен, очищен, его подсветка включена,
+если её переключает переходник. `board_hd44780(&lcd)` из
 `boards_hd44780.h` даёт `hd44780_t *` для `lcd_set_cursor`, `lcd_write_str` и
 остального из `hd44780.h`. hd44780 компонуется только когда он есть в сборке
 (`CONFIG_BOARD_DISPLAY_HD44780`), поэтому в программе, работающей на платах без него,

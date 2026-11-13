@@ -65,9 +65,9 @@ bool board_display_init_at(int index, board_display_t *out);  /* 0 is the primar
 bool board_display_orientation(board_display_t *display, int dir_x, int dir_y, bool swap_xy);
 
 /*
- * A character display (HD44780) the board has or a module on its I2C bus brings (the 2004 on
- * a PCF8574 backpack, a module of a board of the program): set up, cleared, its light on. false
- * when there is none or it does not respond; *out untouched then.
+ * A character display (HD44780) the board has or a module brings, a 2004 on a PCF8574 backpack
+ * on I2C or a bare one on GPIOs: set up, cleared, its light on where the backpack switches it.
+ * false when there is none or it cannot be set up (on I2C: does not respond); *out untouched then.
  */
 typedef struct board_character_display {
     int cols, rows; /* its geometry, in characters */

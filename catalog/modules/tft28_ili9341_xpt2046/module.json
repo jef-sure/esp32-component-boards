@@ -1,0 +1,105 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "tft28_ili9341_xpt2046",
+    "title": "2.8-inch TFT on an ILI9341, SPI, with touch and an SD slot",
+    "part": "2.8 TFT SPI 240X320 V1.2",
+    "description": "A 240x320 colour display on SPI with an XPT2046 resistive touch on lines of its own and an SD slot on four more pins; a regulator makes 3.3 V from VCC",
+    "notes": [
+        "The board is that of the schematic of lcdwiki for its MSP2807: the same parts by their names, Q1, U1, J1, U2, R1 to R6, and the same order of contacts. J1 is open for 5 V on VCC and closed for 3.3 V. The touch has its own clock and data contacts, T_CLK, T_DIN, T_DO, beside those of the display."
+    ],
+    "power": [
+        {"name": "VCC", "source": "connector", "volts": [3.3, 5.5], "why": "5 V with J1 open, 3.3 V with J1 closed."},
+        {
+            "name": "VCC3.3",
+            "from": "VCC",
+            "regulator": "ldo",
+            "mv": 3300,
+            "feeds": ["lcd", "touch", "sd"],
+            "why": "U1, an XC6206."
+        }
+    ],
+    "devices": {
+        "lcd": {
+            "chip": "ili9341",
+            "on": {"spi": {"lines": ["dc", "rst", "backlight"]}},
+            "logic": "VCC3.3",
+            "config": {
+                "primary": true,
+                "panel": {"width": 240, "height": 320, "mm_w": 43.2, "mm_h": 57.6},
+                "depth_bits": 16
+            },
+            "controls": {"orientation": {"start": {"x": "left-right", "y": "top-bottom", "swap": false}}},
+            "notes": "LED switches the backlight through Q1, an S8050: high lights it."
+        },
+        "touch": {"chip": "xpt2046", "on": {"spi": {"lines": ["int"]}}, "logic": "VCC3.3", "config": {"over": "lcd"}},
+        "sd": {
+            "class": "storage",
+            "on": {"sdspi": {}},
+            "logic": "VCC3.3",
+            "config": {"media": "sd"},
+            "notes": "CS, MOSI and CLK of the card go through 1 kOhm."
+        }
+    },
+    "connectors": {
+        "J2": {
+            "type": "2.54 mm header, 14 pins",
+            "pins": [
+                "VCC",
+                "GND",
+                "CS",
+                "RESET",
+                "DC",
+                "SDI(MOSI)",
+                "SCK",
+                "LED",
+                "SDO(MISO)",
+                "T_CLK",
+                "T_CS",
+                "T_DIN",
+                "T_DO",
+                "T_IRQ"
+            ],
+            "edges": [{"edge": "top", "from": "right", "count": 14}]
+        },
+        "J4": {
+            "type": "2.54 mm holes, 4 pins",
+            "pins": ["SD_CS", "SD_MOSI", "SD_MISO", "SD_SCK"],
+            "edges": [{"edge": "bottom", "from": "right", "count": 4}]
+        }
+    },
+    "images": {
+        "front": {
+            "file": "front.webp",
+            "source": "a photo by Anton of his module, 2026-11-13, straightened",
+            "shows": "front"
+        },
+        "back": {
+            "file": "back.webp",
+            "source": "a photo by Anton of his module, 2026-11-13, straightened",
+            "shows": "back"
+        }
+    },
+    "checked": {
+        "photo": {
+            "level": "hardware",
+            "covers": ["connectors"],
+            "source": "a photo by Anton of his module, 2026-11-13",
+            "notes": "The silkscreen of the back: VCC GND CS RESET DC SDI(MOSI) SCK LED SDO(MISO) T_CLK T_CS T_DIN T_DO T_IRQ, and SD_CS SD_MOSI SD_MISO SD_SCK; J2 and J4 on the front, contact 1 of each on a square pad.",
+            "date": "2026-11-13"
+        },
+        "schematic": {
+            "level": "schematic",
+            "covers": ["power", "devices"],
+            "source": "lcdwiki, MSP2807-2.8-SPI.pdf of 2019-06-15 (https://www.lcdwiki.com/res/MSP2807/MSP2807-2.8-SPI.pdf), for a board with the same parts and contacts; the size of the pixels is the active area of the page of the MSP2807. Not tried.",
+            "date": "2026-11-13"
+        },
+        "start": {
+            "level": "unchecked",
+            "covers": ["devices.lcd.controls.orientation.start"],
+            "source": "What an ILI9341 does with MADCTL 0 on a panel of 240x320. At which corner of this module the first pixel lies is not tried.",
+            "date": "2026-11-13"
+        }
+    }
+}

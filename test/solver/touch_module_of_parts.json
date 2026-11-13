@@ -1,0 +1,6 @@
+{
+    "title": "A touch panel on a dev board: the module with touch has several parts, a display, touch and an SD slot, and a kit does not wire such a module yet",
+    "answers": {"touch": true},
+    "fit": ["cyd_s028r", "jc1060p470c", "jc4827w543c", "jc8012p4a1c"],
+    "says": "a module of several parts takes its wiring by part"
+}

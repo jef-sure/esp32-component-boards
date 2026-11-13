@@ -1445,9 +1445,16 @@ def gen_table(boards, lang="en"):
     return "\n".join(L)
 
 
+ALONE_REFUSED = {"touch", "audio", "button"}  # read_board refuses these in a module set up on its own
+
+
 def has_glue(module_file):
-    """A module the component sets up with --module: a chip of it has an adapter. A panel takes its wires from a project."""
-    devices = json.loads(module_file.read_text())["devices"].values()
+    """A module the component sets up with --module: a chip of it has an adapter. A panel takes its wires from a project,
+    and so does a module with a part the glue of a module does not start: a project wires it by part."""
+    data = json.loads(module_file.read_text())
+    if any(ALONE_REFUSED & set(device["classes"]) for device in resolve.resolve(data)["devices"].values()):
+        return False
+    devices = data["devices"].values()
     return any(entry.get("adapter", {}).get("kind") not in (None, "panel") for device in devices for entry in resolve.libraries_of(device.get("chip")).values())
 
 

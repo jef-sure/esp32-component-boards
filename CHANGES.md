@@ -17,6 +17,12 @@
   size read from its silkscreen, not tried. Its DC, RES and BLK are lines of the module, in `lines` of its `on`: the
   solver now takes those of a module before those of its chip, which an ILI9341 does not name, as on the M5Stack
   Core2 its reset and backlight go through the PMIC. The corner of its first pixel is the start of the chip, unchecked.
+- A 2.8-inch TFT module with touch and an SD slot, `tft28_ili9341_xpt2046`, with photos: an ILI9341, an XPT2046 and
+  an XC6206 by the schematic of lcdwiki for a board with the same parts and contacts, not tried. The solver finds it
+  for touch on a dev board and says that a module of several parts is wired by part, which a kit does not do yet;
+  the case that said the catalog has no such module is now `touch_module_of_parts`.
+- `boards_gen.py --all` no longer takes a module with touch, sound or a button for one the component sets up on its
+  own: it refused such a module there, and failed on its touch first. A project wires such a module by part.
 - The table of the boards in the README says what was tried on each board: the display, touch, sound and button
   that entries of `checked` at level `hardware` cover, and those that only started. The facts of the status
   paragraph went into the data: the start of the display of the JC4827W543C and the handwritten clock on both DSI

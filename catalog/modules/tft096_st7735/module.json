@@ -1,0 +1,96 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "module",
+    "name": "tft096_st7735",
+    "title": "0.96-inch TFT on an ST7735S",
+    "part": "0.96\"80x160(RGB)IPS",
+    "description": "An 80x160 IPS colour display on SPI, eight contacts in a row: the backlight on a line of its own, BLK",
+    "notes": [
+        "NFP096H-01AY on the ribbon of the panel. Q1 with R1 to R3 on the back switches the backlight: R3 holds it on while BLK is open, low on BLK turns it off.",
+        "The controller is set for 128x160 and the glass lies at column 24 of it, with its colours in BGR order."
+    ],
+    "power": [{"name": "VCC", "source": "connector", "volts": [3, 3.6], "feeds": ["lcd"]}],
+    "devices": {
+        "lcd": {
+            "chip": "st7735",
+            "on": {"spi": {"hz": 10000000, "lines": ["dc", "rst", "backlight"]}},
+            "logic": "none",
+            "config": {
+                "primary": true,
+                "panel": {
+                    "width": 80,
+                    "height": 160,
+                    "mm_w": 10.8,
+                    "mm_h": 21.7,
+                    "memory_width": 128,
+                    "memory_height": 160,
+                    "offset_x": 24,
+                    "offset_y": 0
+                },
+                "depth_bits": 16,
+                "color_order": "bgr"
+            },
+            "controls": {"orientation": {"start": {"x": "left-right", "y": "top-bottom", "swap": false}}}
+        }
+    },
+    "connectors": {
+        "J1": {
+            "type": "2.54 mm header, 8 pins",
+            "pins": ["GND", "VCC", "SCL", "SDA", "RES", "DC", "CS", "BLK"],
+            "edges": [{"edge": "left", "from": "bottom", "count": 8}]
+        }
+    },
+    "images": {
+        "front": {
+            "file": "front.webp",
+            "source": "a photo by Anton of his module, 2026-11-13, straightened",
+            "shows": "front"
+        },
+        "back": {
+            "file": "back.webp",
+            "source": "a photo by Anton of his module, 2026-11-13, straightened and turned",
+            "shows": "back"
+        }
+    },
+    "checked": {
+        "photo": {
+            "level": "hardware",
+            "covers": ["connectors"],
+            "source": "a photo by Anton of his module, 2026-11-13",
+            "notes": "GND VCC SCL SDA RES DC CS BLK beside the pins on the front, from the bottom; J1 on the back, with 4-SPI, IC:ST7735S, Display Color:65K. R1 is marked 100, R2 102, R3 103; Q1, C1, and no regulator.",
+            "date": "2026-11-13"
+        },
+        "schematic": {
+            "level": "schematic",
+            "covers": ["power", "devices.lcd.on", "notes"],
+            "source": "QDtech, 0.96inch IPS of 2019-07-27, the schematic of lcdwiki for its MSP0961 (https://www.lcdwiki.com/res/MSP0961/0.96inch_IPS_Schematic.pdf, sha256 e5e0df51...), for a board with the same parts and contacts: J1 GND VCC3.3 SCL SDA RESET RS CS BL; VCC3.3 straight to VCC and LEDA of the panel; BL through R2 1K to the base of Q1, an S8050, R3 10K from the base to VCC3.3, R1 10R in LEDK",
+            "date": "2026-11-14"
+        },
+        "glass": {
+            "level": "community",
+            "covers": ["devices.lcd.config.panel.mm_w", "devices.lcd.config.panel.mm_h"],
+            "source": "the page of the MSP0961 of lcdwiki (www.lcdwiki.com/0.96inch_IPS_Module): active area 10.80x21.70 mm. Not measured on this one.",
+            "date": "2026-11-14"
+        },
+        "trial": {
+            "level": "hardware",
+            "by": "Anton",
+            "covers": [
+                "devices.lcd.chip",
+                "devices.lcd.on",
+                "devices.lcd.config.panel",
+                "devices.lcd.config.depth_bits",
+                "devices.lcd.config.color_order"
+            ],
+            "source": "~/dgx-bench/st7735-80x160-2026-11-13, built with ESP-IDF 5.5.4 against the working copy of DGX before 0.11.0 was released, on SPI3 of an ESP32 at 10 MHz: SCK 18, MOSI 23, CS 5, DC 17, RST 16, BLK 4; ST7735_RESOLUTION_80x160, 16 bits in BGR. The CHANGES of DGX 0.11.0 say it was seen right in all eight orientations, the backlight turned off and on by dgx_st7735_backlight().",
+            "date": "2026-11-13"
+        },
+        "start": {
+            "level": "unchecked",
+            "covers": ["devices.lcd.controls.orientation.start"],
+            "source": "What the ST7735 driver starts with for ST7735_RESOLUTION_80x160; which edge of the module was up in the trial is not written down.",
+            "date": "2026-11-14"
+        }
+    }
+}

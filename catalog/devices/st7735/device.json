@@ -1,0 +1,31 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "st7735",
+    "title": "ST7735",
+    "maker": "sitronix",
+    "part": "ST7735S",
+    "class": "display",
+    "provides": {"display": {"variant": "tft"}},
+    "on": {"spi": {}, "p8": {}},
+    "config": {"kind": "graphics"},
+    "controls": {"orientation": {"how": "driver", "read": "none"}},
+    "notes": [
+        "A memory of 132x162 at most; a module sets it for 128x160. Over SPI a write takes a clock cycle of 66 ns at least by the datasheet, about 15 MHz."
+    ],
+    "checked": {
+        "datasheet": {
+            "level": "datasheet",
+            "covers": ["on", "notes"],
+            "source": "Sitronix ST7735S V1.1 of 2011/11, the copy of SparkFun (sha256 0322a527...): 132RGB x 162 of memory, 3- and 4-line serial and 8080 parallel; VDD 2.5 to 4.8 V, VDDI 1.65 to 3.7 V; TSCYCW of 66 ns at least",
+            "date": "2026-11-14"
+        },
+        "driver": {
+            "level": "vendor-code",
+            "covers": ["controls"],
+            "source": "include/drivers/st7735.h of DGX 0.11.0",
+            "date": "2026-11-14"
+        }
+    }
+}

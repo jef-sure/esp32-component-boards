@@ -389,6 +389,7 @@
                 }
             },
             "setup": [{"control": "orientation"}],
+            "adapter": {"kind": "panel"},
             "panels": [
                 {"width": 128, "height": 160, "value": "ST7735_RESOLUTION_128x160"},
                 {

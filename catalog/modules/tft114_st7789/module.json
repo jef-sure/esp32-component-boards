@@ -7,7 +7,7 @@
     "part": "1.14\"(RGB)135x240IPS Ver:1.1",
     "description": "A 135x240 IPS colour display on SPI, eight contacts in a row: the backlight on a line of its own, BLK",
     "notes": [
-        "NFP114H-01BF on the ribbon of the panel. Q1 with R1 to R3 on the back switches the backlight; no regulator is seen.",
+        "NFP114H-01BF on the ribbon of the panel. Q1 with R1 to R3 on the back switches the backlight: R3 holds it on while BLK is open, low on BLK turns it off.",
         "The glass shows the middle of the 240x320 memory of the controller: 52 columns and 40 rows in, 53 columns from the other side when mirrored."
     ],
     "power": [{"name": "VCC", "source": "connector", "volts": [3, 3.6], "feeds": ["lcd"]}],
@@ -57,7 +57,7 @@
             "level": "hardware",
             "covers": ["connectors"],
             "source": "a photo by Anton of his module, 2026-11-13",
-            "notes": "GND VCC SCL SDA RES DC CS BLK beside the pins on the front, from the bottom; J1 on the back. The back has Q1, R1 to R3, C1 and C2, and no regulator.",
+            "notes": "GND VCC SCL SDA RES DC CS BLK beside the pins on the front, from the bottom; J1 on the back. R1 is marked 100, R2 102, R3 103; Q1, C1, C2, and no regulator.",
             "date": "2026-11-13"
         },
         "silkscreen": {
@@ -84,11 +84,11 @@
             "source": "dgx_panel_st7789_135x240 in src/drivers/st7789.c of DGX 0.10.16, and TFT_Drivers/ST7789_Rotation.h of TFT_eSPI: column 52 and row 40 in portrait, 53 mirrored. Not tried on a module.",
             "date": "2026-11-13"
         },
-        "levels": {
-            "level": "community",
-            "covers": ["power", "devices.lcd.on"],
-            "source": "LCDWiki MSP1141 User Manual Rev1.0, a module of the same eight contacts in the same order: VCC of 3.3 V only, a transistor on the board lights the backlight on a high level of BLK. Not measured on this one.",
-            "date": "2026-11-13"
+        "schematic": {
+            "level": "schematic",
+            "covers": ["power", "devices.lcd.on", "notes"],
+            "source": "QDtech, 1.14inch IPS of 2019-09-18, the schematic of lcdwiki for its MSP1141 (https://www.lcdwiki.com/res/MSP1141/1.14inch_IPS_schematic.pdf, sha256 e9bee38b...), for a board with the same parts and contacts: J1 GND VCC3.3 SCL SDA RESET RS CS BL; VCC3.3 straight to VCC and LEDA of the panel; BL through R2 1K to the base of Q1, an S8050, R3 10K from the base to VCC3.3, R1 10R in LEDK",
+            "date": "2026-11-14"
         },
         "start": {
             "level": "unchecked",

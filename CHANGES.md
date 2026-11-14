@@ -61,9 +61,9 @@
   by Anton with DGX on SPI of an ESP32, in all eight orientations. The screen of DGX takes a byte a pixel, the ink, so
   its depth is 8, and the program sends a picture by `dgx_ssd1680_refresh()`. A module with no MISO contact says
   `"miso": "nc"`: the kit wires none to it, though its BUSY puts a level on a pin.
-- `tft114_st7789`, a 1.14-inch 135x240 module on an ST7789 with CS and BLK, with photos: read from its silkscreen, the
-  size of its glass and its 3.3 V from modules of other makers with the same contacts, the window of the memory it
-  shows from DGX and TFT_eSPI; not tried.
+- `tft114_st7789`, a 1.14-inch 135x240 module on an ST7789 with CS and BLK, with photos: read from its silkscreen, its
+  backlight and its 3.3 V by the schematic of QDtech for a board with the same parts, the size of its glass from
+  modules of other makers, the window of the memory it shows from DGX and TFT_eSPI; not tried.
 - The component takes DGX `^0.11.0` and DGX-DI `^0.1.6`, and the records describe them. DGX 0.11.0 takes the
   backlight line in the constructor of the GC9A01, JD9165, JD9365, ST7565R, ST7735, ST7789 and ST7920 and lights it
   once the display is set up: the glue passes the line to it, as it did to the ILI9341, NV3041A and ST77916, instead

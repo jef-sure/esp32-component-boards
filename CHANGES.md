@@ -1,7 +1,8 @@
 # CHANGES
 
-## 0.1.4 (not released yet)
+## 0.1.4 (2026-11-14)
 
+- The recipes take the component as `^0.1.4`, which takes DGX 0.11.0.
 - Photos of the ESP32 DevKit with micro-USB, the front as its edges name the sides, USB on the left. The variant with
   USB-C keeps its own front and drops the back it would inherit: `"back": null`. The check of the files of the catalog
   takes null in a board that extends another, as the rest of the checks did.

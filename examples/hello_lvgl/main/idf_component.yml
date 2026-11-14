@@ -3,4 +3,4 @@
 dependencies:
   idf:
     version: ">=5.5"
-  jef-sure/dgx-lvgl: "^0.0.2"
+  jef-sure/dgx-lvgl: "^0.0.3"

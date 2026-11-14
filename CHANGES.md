@@ -69,7 +69,8 @@
   once the display is set up: the glue passes the line to it, as it did to the ILI9341, NV3041A and ST77916, instead
   of lighting it itself. A backlight lit by a low level stays with the glue, as a driver lights its line by a high one.
   The ST7735 takes a panel: 128x160, or the 0.96-inch glass of 80x160, upright or turned. DGX-DI 0.1.6 is the same
-  code on DGX 0.11.0. The calls of 0.10 are in the history of the record of DGX.
+  code on DGX 0.11.0, and so is DGX-LVGL 0.0.3, which examples/hello_lvgl takes now. The calls of 0.10 are in the
+  history of the record of DGX.
 - The ST7735, a device of the catalog by its datasheet, and `tft096_st7735`, a 0.96-inch 80x160 module on it with
   photos: its backlight and its 3.3 V by the schematic of QDtech for a board with the same parts, tried by Anton with
   DGX on SPI of an ESP32 at 10 MHz, 16 bits in BGR, in all eight orientations.

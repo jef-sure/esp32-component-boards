@@ -8363,13 +8363,13 @@
         },
         "esp-idf/jef-sure/dgx-lvgl": {
             "title": "DGX-LVGL",
-            "version": "0.0.2",
+            "version": "0.0.3",
             "repository": "https://github.com/jef-sure/esp32-component-dgx-lvgl",
             "platforms": ["esp_idf"],
             "chips": [],
             "requires": ["esp-idf/jef-sure/dgx", "esp-idf/jef-sure/dgx-di", "esp-idf/lvgl/lvgl"],
             "stars": 0,
-            "changed": "2026-10-31",
+            "changed": "2026-11-14",
             "archived": false,
             "license": "MIT"
         },

@@ -152,7 +152,14 @@
                 }
             },
             "setup": [{"control": "orientation"}],
-            "adapter": {"kind": "panel"}
+            "adapter": {"kind": "panel"},
+            "panels": [
+                {
+                    "width": 240,
+                    "height": 240,
+                    "notes": "the one glass its init makes, dgx_panel_gc9a01 of src/drivers/gc9a01.c in 0.11.0; another glass is a copy of it for dgx_panel_init()"
+                }
+            ]
         },
         "ili9341": {
             "header": "drivers/ili9341.h",
@@ -175,7 +182,14 @@
                 }
             },
             "setup": [{"control": "orientation"}],
-            "adapter": {"kind": "panel"}
+            "adapter": {"kind": "panel"},
+            "panels": [
+                {
+                    "width": 240,
+                    "height": 320,
+                    "notes": "the one glass its init makes, dgx_panel_ili9341 of src/drivers/ili9341.c in 0.11.0; another glass is a copy of it for dgx_panel_init()"
+                }
+            ]
         },
         "jd9165": {
             "header": "drivers/jd9165.h",
@@ -244,7 +258,14 @@
                 }
             },
             "setup": [{"control": "orientation"}],
-            "adapter": {"kind": "panel"}
+            "adapter": {"kind": "panel"},
+            "panels": [
+                {
+                    "width": 480,
+                    "height": 272,
+                    "notes": "the one glass its init makes, dgx_panel_nv3041a of src/drivers/nv3041a.c in 0.11.0; another glass is a copy of it for dgx_panel_init()"
+                }
+            ]
         },
         "sh1106": {
             "header": "drivers/sh1106.h",
@@ -594,10 +615,10 @@
         }
     },
     "adapter": {
-        "version": "^0.11.0",
+        "version": ">=0.10.12,<0.12.0",
         "symbol": "BOARD_DISPLAY_GRAPHICS",
         "requires": ["esp_driver_gpio"],
-        "notes": "0.10.0 is not in the registry. 0.10.8 is the first that builds for the linux target of ESP-IDF: the window of the board host; 0.10.9 turns its glass as the board is held, 0.10.10 gives its mouse, 0.10.11 its keys and a window on no bus. 0.10.12 turns the SSD1306, SSD1309 and SH1106. 0.10.13 draws straight segments by the pen, 0.10.14 a filled circle with a soft edge and gives a screen its user_data. 0.10.16 has the 1.14-inch glass of the ST7789 and the NV3041A at 18 bits, 0.10.17 the SSD1680 of e-paper, whose glue calls dgx_ssd1680_init. 0.11.0 takes the backlight line in the constructor of every display that has one and lights it once the display is set up; it has the 0.96-inch glass of the ST7735.",
+        "notes": "0.10.0 is not in the registry. 0.10.8 is the first that builds for the linux target of ESP-IDF: the window of the board host; 0.10.9 turns its glass as the board is held, 0.10.10 gives its mouse, 0.10.11 its keys and a window on no bus. 0.10.12 turns the SSD1306, SSD1309 and SH1106. 0.10.13 draws straight segments by the pen, 0.10.14 a filled circle with a soft edge and gives a screen its user_data. 0.10.16 has the 1.14-inch glass of the ST7789 and the NV3041A at 18 bits, 0.10.17 the SSD1680 of e-paper, whose glue calls dgx_ssd1680_init. 0.11.0 takes the backlight line in the constructor of every display that has one and lights it once the display is set up; it has the 0.96-inch glass of the ST7735. The range starts at 0.10.12: src/ and adapters/ built with it, and with 0.10.17 and 0.11.0, in hello_board on cyd_s028r and jc8012p4a1c on 2026-11-14.",
         "headers": ["board_display.h"],
         "public": "boards_dgx.h",
         "sources": {"BOARD_DISPLAY_GRAPHICS": ["board_display.c"]}
@@ -684,7 +705,13 @@
                         {"control": "orientation"},
                         {"line": "backlight", "notes": "After the first frame: the driver does not light it."}
                     ],
-                    "panels": null
+                    "panels": [
+                        {
+                            "width": 128,
+                            "height": 160,
+                            "notes": "the one glass the driver made, as the CHANGES of 0.11.0 say; its init took no panel"
+                        }
+                    ]
                 },
                 "st7789": {
                     "init": [

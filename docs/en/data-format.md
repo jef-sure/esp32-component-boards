@@ -219,6 +219,9 @@ none named it gets the first of its size:
 "config": { "panel": { "width": 256, "height": 64 }, "libraries": { "esp-idf/jef-sure/dgx": { "panel": "SSD1322_256X64_ZJY" } } }
 ```
 
+A glass with no name is the one a driver makes when its init takes no panel: the ST7735 of
+DGX before 0.11.0 lists only 128x160, so a board with the 0.96-inch glass of 80x160 needs 0.11.0.
+
 `config.timing` is for a panel fed without pause, RGB or MIPI-DSI video:
 `pclk_hz`, `hsync_pulse`, `hsync_back`, `hsync_front`, `vsync_pulse`, `vsync_back`,
 `vsync_front`, and optionally `pclk_edge`, `hsync_active`, `vsync_active`,
@@ -512,12 +515,18 @@ it: `esp-idf/jef-sure/pn5180 0.6.0 does not do ndef_write of mifare_classic`. A 
 `described` is refused: the catalog knows nothing about it. `tools/sync_versions.py` says when the
 registry has a version newer than the one described.
 
-`adapter` says how this component takes the library: the version its code is written against,
+`adapter` says how this component takes the library: the range of versions its code is built with,
 the symbol of the manifest rule, the components of the build and the files of
 `adapters/<owner>__<name>/`: what the glue includes (`headers`), what a program includes
 (`public`) and what is compiled by which symbol (`sources`). A record with no `adapter` only
 describes: a chip with such a library stays data and the component does not start it, like the
 PN532 of the terminal.
+
+Where the `history` of a record makes versions inside that range differ, the glue of a board
+has the lines of each under `#if BOARDS_VERSION_JEF_SURE__DGX >= BOARDS_VERSION(0, 11, 0)`:
+CMakeLists.txt defines the macro to the version the component manager chose. A board that an
+older version inside the range cannot start gets `#error` below the version it needs, as the
+1.14-inch ST7789 module below DGX 0.10.16.
 
 What a library requires is a field of the library, so DGX-LVGL has no chips and has versions.
 

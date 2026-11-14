@@ -105,11 +105,16 @@ def adapter_files(record):
     return adapter_sources(record) + [folder / name for name in adapter.get("headers", ())] + public
 
 
+# test/fake has the calls of the version each library describes, so the glue is compiled for that version
+VERSIONS = [f"-D{boards_gen.version_macro(record)}={boards_gen.c_version(record['described'])}" for record in resolve.all_libraries(tuple(resolve.ROOTS)).values()
+            if len(boards_gen.stretches(record)) > 1]
+
+
 def host_syntax(source, name=None):
     """A source compiles against test/fake with -fsyntax-only: the shape of every call is right."""
     cmd = ["gcc", "-std=gnu11", "-fsyntax-only", "-Wall", "-Wextra", "-Werror", "-Wno-unused-parameter", "-Wno-unused-function",
            f"-I{ROOT / 'include'}", f"-I{ROOT / 'src'}", *(f"-I{path}" for path in sorted((ROOT / "adapters").glob("*"))),
-           *(f"-I{path}" for path in sorted((ROOT / "adapters").glob("*/include"))), f"-I{ROOT / 'test' / 'fake'}", str(source)]
+           *(f"-I{path}" for path in sorted((ROOT / "adapters").glob("*/include"))), f"-I{ROOT / 'test' / 'fake'}", *VERSIONS, str(source)]
     result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode != 0:
         return error(f"{name or source.relative_to(ROOT)} does not compile against test/fake:\n{result.stderr}")
@@ -160,7 +165,7 @@ def main():
         spoiled = {**boards[0], "title": 'A "quoted" \\ title */', "description": "a comment ends */ here"}
         with tempfile.TemporaryDirectory() as folder:
             source = pathlib.Path(folder) / f"{spoiled['name']}.c"
-            source.write_text(boards_gen.gen_c(spoiled))
+            source.write_text(boards_gen.glue_of(spoiled))
             errors += host_syntax(source, f"the glue of {spoiled['name']} with a spoiled title")
         prompt = boards_gen.kconfig_board(spoiled)[1]
         if not re.fullmatch(r'    bool "(?:[^"\\]|\\.)*"', prompt):

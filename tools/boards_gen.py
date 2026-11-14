@@ -504,13 +504,15 @@ def read_board(path):
             if panels is not None:
                 sizes = [f"{row['width']}x{row['height']}" for row in panels]
                 size = f"{panel['width']}x{panel['height']}"
-                names = [row["value"] for row, of in zip(panels, sizes) if of == size]
+                names = [row.get("value") for row, of in zip(panels, sizes) if of == size]
                 if not names:
                     raise ValueError(f"{size} is not a panel the driver {driver} takes ({', '.join(dict.fromkeys(sizes))})")
                 chosen = display.get("panel_choice")
                 if chosen is not None and chosen not in names:
                     raise ValueError(f'{chosen} is not a panel of {driver} for {size}: {", ".join(names)}')
                 display["panel_value"] = chosen or names[0]  # the first of the size when the board names none
+                if display["panel_value"] is None and "{panel}" in display["entry"]["init"][0]["args"]:
+                    raise ValueError(f"the panel {size} of {driver} has no value for the {{panel}} of its init")
             kind = bus_parts(bus_name)[0]
             if kind == "dsi":
                 for key in ("lane_mbps", "phy_ldo_chan", "phy_ldo_mv"):
@@ -587,6 +589,7 @@ def read_board(path):
                 raise ValueError('the codec needs its 7-bit I2C address, e.g. "0x18"')
             if not isinstance(sound.get("volume"), int):
                 raise ValueError("the codec needs its volume, 0..100")
+    data["data_file"] = path  # read again with a library pinned to an older version: gen_c
     return data
 
 
@@ -794,8 +797,8 @@ def c_gpio(num):
 TOUCH_DEVICES = {"gt911": "dgx_di_esp_lcd_touch_t", "esp_lcd_touch": "dgx_di_esp_lcd_touch_t", "gsl3680": "dgx_di_gsl3680_t"}
 
 
-def gen_c(board):
-    """The C glue of the board: every function of boards.h, by the data or returning false."""
+def glue_of(board):
+    """The C glue of the board at the versions of its libraries resolve gives: every function of boards.h, by the data or returning false."""
     name = board["name"]
     buses = board.get("buses") or {}
     display = board.get("display")
@@ -1098,6 +1101,122 @@ def gen_c(board):
     return "\n".join(L) + "\n"
 
 
+
+VERSION_OF = "BOARDS_VERSION"  # src/board_glue.h: a version as one number
+
+
+def version_macro(record):
+    """What CMakeLists.txt defines to the version of a library in the build, for the #if of the glue."""
+    return f"{VERSION_OF}_" + re.sub(r"[^A-Z0-9]", "_", idf_name(record).upper())
+
+
+def c_version(version):
+    return f"{VERSION_OF}({', '.join(version.split('.'))})"
+
+
+def stretches(record):
+    """The parts of the range the adapter takes over which the record of a library stays the same, oldest first: the version
+    each starts at (None: where the range starts) and the newest version of it the registry has. One part: nothing differs."""
+    spec = (record.get("adapter") or {}).get("version")
+    if not spec or record["install"][0]["via"] != "registry":
+        return []
+    key = resolve.version_key
+    known = sorted((version for version, entry in (record.get("versions") or {}).items() if "registry" in entry.get("via", ["registry"])
+                    and key(version) <= key(record["described"]) and resolve.in_range(version, spec)), key=key)
+    if not known:
+        raise ValueError(f"{record['owner']}/{record['name']}: no version of the registry it describes is in {spec}")
+    starts = sorted({step["before"] for step in record.get("history") or () if key(known[0]) < key(step["before"]) <= key(known[-1])}, key=key)
+    found = []
+    for start, end in zip([None, *starts], [*starts, None]):
+        inside = [version for version in known if (start is None or key(version) >= key(start)) and (end is None or key(version) < key(end))]
+        if inside:
+            found.append((start, inside[-1]))
+    return found
+
+
+def used_libraries(board):
+    """The libraries the glue of a board calls, each once."""
+    found = {}
+    for _, record, also in started_devices(board):
+        for used in (record, *also):
+            found.setdefault(resolve.library_id(used), used)
+    return found
+
+
+def glue_pinned(board, name, version):
+    """The glue of a board with one library at an older version, or the reason it cannot be made."""
+    try:
+        with resolve.pinned({name: version}):
+            again = read_board(board["data_file"])
+            again.update({key: board[key] for key in ("local",) if key in board})
+            return glue_of(again).split("\n"), None
+    except (ValueError, KeyError, resolve.Refused) as err:
+        return None, str(err)
+
+
+def gen_c(board):
+    """The glue of a board for every version of its libraries the adapters take: the lines that differ between them under
+    #if, and #error below the version a board needs at least."""
+    newest = glue_of(board).split("\n")
+    if "data_file" not in board:
+        return "\n".join(newest)
+    guards, varied = [], {}  # varied: the number of a line -> (library, [(start, line)] oldest first)
+    for name, record in used_libraries(board).items():
+        parts = stretches(record)
+        if len(parts) < 2:
+            continue
+        made = [(start, *glue_pinned(board, name, version)) for start, version in parts[:-1]] + [(parts[-1][0], newest, None)]
+        while made[0][1] is None:
+            _, _, why = made.pop(0)
+            needed = made[0][0]
+            label = f"{record['owner']}/{record['name']}"
+            if made[0][1] is None:
+                continue
+            guards += [f"/* {label} before {needed}: {commented(why)} */", f"#if {version_macro(record)} < {c_version(needed)}",
+                       f'#error "{board["name"]} needs {label} {needed} or later"', "#endif"]
+        broken = [start for start, lines, _ in made if lines is None]
+        if broken:
+            raise ValueError(f"{board['name']}: the glue cannot be made for {record['name']} from {broken[0]}, but can for older versions")
+        for start, lines, _ in made:
+            if len(lines) != len(newest):
+                raise ValueError(f"{board['name']}: the glue for {record['name']} {start} has other lines than for {parts[-1][1]}: "
+                                 "the generator puts only changed lines under #if")
+        for at, line in enumerate(newest):
+            if any(lines[at] != line for _, lines, _ in made):
+                if at in varied:
+                    raise ValueError(f"{board['name']}: line {at + 1} of the glue differs by two libraries: {varied[at][0]['name']} and {record['name']}")
+                varied[at] = (record, [(start, lines[at]) for start, lines, _ in made])
+    out = []
+    at = 0
+    while at < len(newest):
+        if at not in varied:
+            out.append(newest[at])
+            if newest[at] == '#include "board_glue.h"':
+                out += guards
+            at += 1
+            continue
+        record = varied[at][0]
+        end = at
+        while end + 1 in varied and varied[end + 1][0] is record:
+            end += 1
+        blocks = [(varied[at][1][part][0], [varied[line][1][part][1] for line in range(at, end + 1)]) for part in range(len(varied[at][1]))]
+        merged = []  # newest first, a part that writes what the next newer writes joins it
+        for start, block in reversed(blocks):
+            if merged and merged[-1][1] == block:
+                merged[-1] = (start, block)
+            else:
+                merged.append((start, block))
+        for number, (start, block) in enumerate(merged):
+            if number == len(merged) - 1:
+                out.append("#else")
+            else:
+                out.append(f"{'#if' if number == 0 else '#elif'} {version_macro(record)} >= {c_version(start)}")
+            out += block
+        out.append("#endif")
+        at = end + 1
+    return "\n".join(out)
+
+
 def gen_cmake(board):
     """board.cmake: what the glue needs, derived from what the board has."""
     name = board["name"]
@@ -1144,6 +1263,8 @@ def gen_boards_cmake(boards, modules):
     L.append(f"set(BOARDS_ADAPTER_INCLUDES {' '.join(adapter_dir(record) + '/include' for record in adapters if 'public' in record['adapter'])})")
     sources = [f"{symbol}={adapter_dir(record)}/{source}" for record in adapters for symbol, files in record["adapter"].get("sources", {}).items() for source in files]
     L.append(f"set(BOARDS_ADAPTER_SOURCES {' '.join(sources)})")
+    versioned = [f"{idf_name(record)}={version_macro(record)}" for record in resolve.all_libraries(tuple(resolve.ROOTS)).values() if len(stretches(record)) > 1]
+    L.append(f"set(BOARDS_LIBRARY_VERSIONS {' '.join(versioned)})")
     return "\n".join(L) + "\n"
 
 

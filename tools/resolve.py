@@ -5,6 +5,7 @@ catalog under each device, the lines in one form. What it gives is what the rule
 read. The order, general to particular: device, family variant, board, board variant, overlays
 (mine for the model, the project).
 """
+import contextlib
 import copy
 import difflib
 import functools
@@ -24,6 +25,7 @@ FIRMWARE_HISTORY = ("config", "controls", "provides")
 REFERENCES = {"over", "via", "left", "right", "after", "devices", "feeds", "from", "through", "name", "logic"}  # fields of a module that name its parts
 REVISION_HISTORY = ("limits", "provides", "controls", "sdkconfig")
 MODULE_FACTS = ("maker", "part", "revision", "mcu", "price", "tariff")  # what a board keeps of a module beside its parts
+PINNED = {}  # library id -> the version every lookup takes it at, while pinned() runs; else the version described
 
 
 class Refused(Exception):
@@ -51,7 +53,23 @@ def library_id(record):
 
 
 def library(name):
-    return load("libraries", name)
+    return as_pinned(name, load("libraries", name))
+
+
+def as_pinned(name, record):
+    return library_at(record, PINNED[name]) if name in PINNED else record
+
+
+@contextlib.contextmanager
+def pinned(versions):
+    """The libraries as they were in these versions, {id: version}, while the block runs: the glue of an older version."""
+    before = dict(PINNED)
+    PINNED.update(versions)
+    try:
+        yield
+    finally:
+        PINNED.clear()
+        PINNED.update(before)
 
 
 @functools.lru_cache
@@ -81,6 +99,23 @@ def version_key(version, scheme="decimal"):
     while parts and parts[-1] == (0, 0):
         parts.pop()
     return tuple(parts), not pre, runs(pre), int(revision or 0)
+
+
+def in_range(version, spec):
+    """A version is in a range of the component manager: comparisons joined by commas, ^ and ~ as npm reads them. A revision
+    (1.0.0~3) and a pre-release are compared as their release."""
+    numbers = [int(part) for part in re.split(r"[~+-]", version.lstrip("vV"))[0].split(".")]
+    for part in spec.split(","):
+        op, bound = re.fullmatch(r"\s*(>=|<=|==|>|<|=|\^|~)?\s*(\S+)\s*", part).groups()
+        low = [int(item) for item in bound.split(".")]
+        if op in ("^", "~"):
+            at = 2 if op == "^" and low[:2] == [0, 0] else 1 if op == "~" or low[0] == 0 else 0
+            high = low[:at] + [low[at] + 1] + [0] * (len(low) - at - 1)
+            if not low <= numbers < high:
+                return False
+        elif not {">=": numbers >= low, "<=": numbers <= low, ">": numbers > low, "<": numbers < low}.get(op, numbers == low):
+            return False
+    return True
 
 
 def at_version(doc, versions, version, fields):
@@ -116,7 +151,8 @@ def chip_settings(mcu, revision=None):
 
 def libraries_of(chip):
     """The libraries of the catalog that have this chip, by id: the entry of the chip in each."""
-    return {name: record["chips"][chip] for name, record in all_libraries(tuple(ROOTS)).items() if chip in record.get("chips", {})}
+    found = {name: as_pinned(name, record) for name, record in all_libraries(tuple(ROOTS)).items()}
+    return {name: record["chips"][chip] for name, record in found.items() if chip in record.get("chips", {})}
 
 
 def merge(base, patch):
@@ -180,7 +216,7 @@ def apply_type(device):
         out["library"] = next(iter(libraries))
     if out.get("library") in libraries:
         record = all_libraries(tuple(ROOTS))[out["library"]]
-        out["library_at"] = out.get("library_version", record["described"])
+        out["library_at"] = out.get("library_version", PINNED.get(out["library"], record["described"]))
         chips = library_at(record, out["library_at"])["chips"]
         libraries.pop(out["library"])
         if device["chip"] in chips:

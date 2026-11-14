@@ -25,8 +25,9 @@ const FieldValue = {
             if (n < 5 || path[n - 1] !== 'panel' || path[n - 3] !== 'libraries' || path[n - 4] !== 'config') return null;
             const device = valueAt(store.shown, path.slice(0, n - 4));
             const panel = device?.config?.panel;
+            // a row with no value is the one glass of a driver that takes no panel: nothing to name
             const rows = (library.catalog.libraries[path[n - 2]]?.chips?.[device?.chip]?.panels ?? []).filter(
-                (row) => !panel || (row.width === panel.width && row.height === panel.height),
+                (row) => row.value && (!panel || (row.width === panel.width && row.height === panel.height)),
             );
             return rows.length ? rows : null;
         });

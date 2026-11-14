@@ -17,6 +17,10 @@
 extern "C" {
 #endif
 
+/* A version as one number, for the #if of the glue: CMakeLists.txt defines BOARDS_VERSION_<LIBRARY> to the version of
+ * that library in the build, written with this macro. */
+#define BOARDS_VERSION(major, minor, patch) ((major) * 1000000L + (minor) * 1000L + (patch))
+
 /* What the board is: given by its glue (board_data), handed out by board_info(). */
 struct board_data {
     const char *name;   /* the board's directory name, as the data names it */

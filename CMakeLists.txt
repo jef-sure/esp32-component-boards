@@ -182,7 +182,10 @@ if(TARGET flash AND NOT CMAKE_BUILD_EARLY_EXPANSION)
         string(JSON _boards_facts SET "${_boards_facts}" "build_dir" "\"${_boards_build_dir}\"")
         string(JSON _boards_facts SET "${_boards_facts}" "project_name" "\"${_boards_project}\"")
         string(JSON _boards_facts SET "${_boards_facts}" "lock" "\"${_boards_lock}\"")
-        string(JSON _boards_facts SET "${_boards_facts}" "storage" "\"$ENV{IDF_COMPONENT_LOCAL_STORAGE_URL}\"")
+        # a URL, not a path: TO_CMAKE_PATH would split it; its backslashes and quotes are escaped for the JSON
+        string(REPLACE "\\" "\\\\" _boards_storage "$ENV{IDF_COMPONENT_LOCAL_STORAGE_URL}")
+        string(REPLACE "\"" "\\\"" _boards_storage "${_boards_storage}")
+        string(JSON _boards_facts SET "${_boards_facts}" "storage" "\"${_boards_storage}\"")
         string(JSON _boards_facts SET "${_boards_facts}" "radio"
                "{\"target\": \"${BOARD_RADIO_TARGET}\", \"transport\": \"${BOARD_RADIO_TRANSPORT}\", \"firmware\": \"${BOARD_RADIO_FIRMWARE}\"}")
         string(JSON _boards_facts SET "${_boards_facts}" "esp_hosted"
@@ -209,4 +212,5 @@ unset(_boards_count)
 unset(_boards_line)
 unset(_boards_board)
 unset(_boards_lock)
+unset(_boards_storage)
 unset(_boards_facts)

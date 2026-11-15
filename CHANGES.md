@@ -2,8 +2,8 @@
 
 ## 0.2.1 (not released yet)
 
-- A copy of the registry named in `IDF_COMPONENT_LOCAL_STORAGE_URL`, as the installer of ESP-IDF leaves it, is said:
-  the configuration prints one line while the variable is set, and the step of the flash, when it writes an older
+- The configuration says when `IDF_COMPONENT_LOCAL_STORAGE_URL` names a copy of the registry, as the installer of
+  ESP-IDF leaves it: it prints one line while the variable is set, and the step of the flash, when it writes an older
   esp_hosted to the radio than the radio runs, names the lock the version came from and the copy. The component
   manager takes a version from the copy before the registry whenever one there fits the range. Tried on the
   JC1060P470C: the copy of 2026-10-11 gave 3.0.9 for a C6 at 3.0.10.

@@ -147,7 +147,14 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
     // not a limit but a weight the person sets for a chain: a joint of two products against outputs to spare, read by mixOf
     MEASURES.joint = { of: () => 0, fits: () => true, short: () => '', unknown: '' };
 
-    MEASURES.standard = { of: (device) => device.provides?.nfc?.standards ?? null, fits: (standards, asked) => standards.includes(asked), short: (asked) => t('no reader of {0}', asked), unknown: 'the standards are not in the data' };
+    // what a reader reads: the standards of its chip, and the cards its library reads (MIFARE Classic, NTAG, ISO 14443-4), which a
+    // chip of the standard does not give by itself
+    const readsOf = (device) => {
+        const standards = device.provides?.nfc?.standards;
+        const cards = Object.keys(device.libraries?.[device.library]?.supports ?? {});
+        return standards || cards.length ? [...(standards ?? []), ...cards] : null;
+    };
+    MEASURES.standard = { of: readsOf, fits: (reads, asked) => reads.includes(asked), short: (asked) => t('no reader of {0}', asked), unknown: 'the standards are not in the data' };
 
     // What a question can ask for: a board holding such a part that nobody asked for gives more than the kit needs.
     // the classes a person can ask for, by a question or by a role of the palette: a part of such a class on a board, not asked, is left unused

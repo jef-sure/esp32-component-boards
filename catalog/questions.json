@@ -56,7 +56,10 @@
             "when": {"nfc_readers": true},
             "limit": {"measure": "standard", "of": "nfc"},
             "choices": [
-                {"value": "any", "text": "MIFARE, NTAG and the like: any reader"},
+                {"value": "any", "text": "The UID of any card: any reader"},
+                {"value": "mifare_classic", "text": "MIFARE Classic: blocks with keys"},
+                {"value": "ntag", "text": "NTAG and MIFARE Ultralight: pages"},
+                {"value": "iso14443_4", "text": "ISO 14443-4: DESFire and other cards with APDU commands"},
                 {"value": "iso14443b", "text": "ISO 14443 B"},
                 {"value": "felica", "text": "FeliCa"},
                 {"value": "iso15693", "text": "ISO 15693: ICODE, NFC type 5"},

@@ -1,0 +1,5 @@
+{
+    "title": "MIFARE Classic with keys: the RC522 reads its blocks and comes first",
+    "answers": {"nfc_readers": 1, "nfc_cards": "mifare_classic"},
+    "first": {"name": "esp32_devkit", "modules": {"rc522_module": 1}}
+}

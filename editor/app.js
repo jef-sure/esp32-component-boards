@@ -333,8 +333,8 @@ const KitCard = {
                 <input type="checkbox" :checked="store.withComputer" @change="store.setComputer($event.target.checked)"> {{ t('add the build on the computer') }}</label>
             <button v-if="store.answers.board !== kit.name" :title="t('Pin this board: the solver and the model try no other.')" @click="store.answers.board = kit.name">{{ t('pin this board') }}</button>
             <span v-if="kit.imported" class="hint">{{ t('imported: no project until this board is in the catalog') }}</span>
-            <span v-else-if="!kit.writable" class="hint">{{ t('The page writes projects for ESP-IDF only for now.') }}</span>
-            <span v-else-if="!canWrite" class="hint">{{ t('Writing a project into a folder takes Chromium, or the page opened from tools/boards_mcp.py.') }}</span>
+            <span v-else-if="!kit.writable" class="hint">{{ t('The editor writes projects for ESP-IDF only for now.') }}</span>
+            <span v-else-if="!canWrite" class="hint">{{ t('Writing a project into a folder takes Chromium, or the editor opened from tools/boards_mcp.py.') }}</span>
             <details v-if="rest.length" class="more"><summary>{{ t('{0} more on this board', rest.length) }}</summary>
                 <p v-for="other in rest" :key="other.headline">+ {{ partsOf(other) || t('nothing more') }} <span class="note">{{ money(other.price, other.cost) }}</span>
                     <button v-if="other.writable" :class="{ on: chosenHas(other) }" @click="store.chooseKit(other)">{{ t(chosenHas(other) ? 'in the project' : 'add to the project') }}</button>
@@ -470,9 +470,9 @@ const SelectPage = {
         <div class="select" :class="{ talking, waiting: !showKits }">
             <aside class="palette">
                 <details v-if="!store.agent || store.modelless" class="agent-hint"><summary>{{ t('Talk with a model') }}</summary>
-                    <p class="hint">{{ t(local ? 'Once, in the folder you started this page from:' : 'Once, in any folder:') }}</p>
+                    <p class="hint">{{ t(local ? 'Once, in the folder you started the editor from:' : 'Once, in any folder:') }}</p>
                     <div class="command"><code>{{ install }}</code><button type="button" @click="copyInstall">{{ t(copied ? 'copied' : 'copy') }}</button></div>
-                    <p class="hint">{{ t('Then ask your agent to help choose the hardware: it gives a link to this page, with a dialog.') }}</p>
+                    <p class="hint">{{ t('Then ask your agent to help choose the hardware: it gives a link to the editor, with a dialog.') }}</p>
                 </details>
                 <section v-if="store.boardParts.length && !talking" class="board-parts"><h3>{{ t('On the board') }}</h3>
                     <p class="board-name">{{ boardTitle(store.selectedBoard) }}</p>
@@ -586,7 +586,7 @@ const SelectPage = {
                             <td v-if="row.state === 'new'">{{ t('new') }}</td>
                             <td v-else-if="row.state === 'same'">{{ t('the same, left as it is') }}</td>
                             <td v-else-if="row.state === 'kept'">{{ t('it is there, left as it is') }}</td>
-                            <td v-else-if="row.state === 'ours'">{{ t('made by the page or by board_select.py and not changed since: replaced') }}</td>
+                            <td v-else-if="row.state === 'ours'">{{ t('made by the editor or by board_select.py and not changed since: replaced') }}</td>
                             <td v-else-if="row.state === 'refused'" class="no">{{ t('not written: {0}', row.why) }}</td>
                             <td v-else-if="row.state === 'changed'"><label><input type="checkbox" v-model="row.replace"> {{ t('yours, or changed by you: replace it') }}</label></td>
                             <td v-else><label><input type="checkbox" v-model="row.replace"> {{ t('it differs: replace it') }}</label></td>
@@ -624,7 +624,7 @@ idf.py build flash monitor</pre>
                         <template v-if="store.isComputer(item.board)"><template v-if="item.title">{{ item.title }} </template><code>{{ item.board }}</code>
                             <span class="hint">{{ t('a computer that shows a board the project does not have; it stays in the project') }}</span></template>
                         <template v-else><label :title="t('the current board: idf.py builds it when no preset is named')"><input type="radio" :value="item.board" v-model="store.current"> <template v-if="item.title">{{ item.title }} </template><code>{{ item.board }}</code></label>
-                            <span class="hint">{{ t(item.kept ? 'its kit does not fit the answers now; it stays in the project' : 'no kit of the page: a command made it; it stays in the project') }}</span></template>
+                            <span class="hint">{{ t(item.kept ? 'its kit does not fit the answers now; it stays in the project' : 'no kit of the editor: a command made it; it stays in the project') }}</span></template>
                         <span v-if="store.companionOf(item.board)" class="hint">{{ t('its computer: {0}', store.companionOf(item.board)) }}</span></p>
                     <p v-for="item in store.chosen" :key="item.headline">
                         <label :title="t('the current board: idf.py builds it when no preset is named')"><input type="radio" :value="item.headline" v-model="store.current"> {{ item.kit.headline }}</label>
@@ -712,7 +712,7 @@ const app = createApp({
             </span>
         </header>
         <p v-if="store.error && !(FROM_FILE && !store.loaded)" class="banner">{{ store.error }}</p>
-        <p v-if="!store.loaded && FROM_FILE" class="start">{{ t('Opened as a file, the page reads nothing: the browser lets a file fetch no other file. Start its server in the folder of the project and open the link it prints:') }}
+        <p v-if="!store.loaded && FROM_FILE" class="start">{{ t('Opened as a file, the editor reads nothing: the browser lets a file fetch no other file. Start its server in the folder of the project and open the link it prints:') }}
             <code>python3 managed_components/jef-sure__boards/tools/boards_mcp.py --serve</code>. {{ t('In a clone of the repository:') }} <code>python3 tools/boards_mcp.py --serve</code>.</p>
         <p v-else-if="!store.loaded" class="start">The page is not served from the repository, so it has no catalog: open the folder of the repository.
             A program or its <code>local-boards</code> comes after it.</p>

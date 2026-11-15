@@ -1,0 +1,6 @@
+{
+    "title": "DESFire and other ISO 14443-4 cards rule out the RC522, whose library does not read them, and the PN532 comes first",
+    "answers": {"nfc_readers": 1, "nfc_cards": "iso14443_4"},
+    "first": {"name": "esp32_devkit", "modules": {"pn532_module": 1}},
+    "without": "rc522_module"
+}

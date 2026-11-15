@@ -664,7 +664,7 @@ const useEditor = Pinia.defineStore('editor', {
                 this.load(files);
                 return;
             }
-            if (!this.loaded) throw new Error('these boards stand on the catalog: open the folder of this repository first, or serve the page from it');
+            if (!this.loaded) throw new Error('these boards stand on the catalog: open the folder of this repository first, or serve the editor from it');
             library.localFiles = files;
             readTree(files, true);
             this.hasLocal = true;
@@ -859,7 +859,7 @@ const useEditor = Pinia.defineStore('editor', {
                     const refused = Object.keys(done.refused ?? {});
                     if (refused.length) {
                         const unticked = refused.filter((path) => plan.rows.some((row) => row.path === path && row.state === 'changed' && !row.replace));
-                        throw new Error(unticked.length ? `nothing is written: ${unticked.join(', ')} changed since the page wrote it; tick it to replace it`
+                        throw new Error(unticked.length ? `nothing is written: ${unticked.join(', ')} changed since the editor wrote it; tick it to replace it`
                             : `nothing is written: ${refused.join(', ')} changed after the list was made or may not be written; make the list again`);
                     }
                     if (plan.allow === 'for ever') this.project.for_ever = true;

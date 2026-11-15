@@ -1,5 +1,27 @@
 # CHANGES
 
+## 0.2.0 (2026-11-15)
+
+- The radio beside the chip of the JC1060P470C and the JC8012P4A1C: their ESP32-C6 is a device of the catalog,
+  `esp32c6`, driven by esp_hosted `~3.0.9`, with `esp_wifi_remote` on ESP-IDF below 6.1, which a library record now
+  says by the conditions of `adapter.if`. The settings of the host side (the SDIO lines, the reset, the Bluetooth
+  controller in the C6) come with the data of the two boards, and `check_boards.py` checks the lines against
+  `buses.sdio.sdio0`. `board_radio_start()` waits for the radio and names a version of esp_hosted apart in the log.
+- A step of the flash keeps the firmware of the C6 at the esp_hosted of the build and keeps nothing of it in the flash
+  of the board: `tools/board_radio.py` writes an update program into the place of the app, with the program's
+  bootloader and partition table, asks the version over USB and sends an image built from the same esp_hosted when it
+  differs. `idf.py flash` runs it through the target `board_radio`; `board_select.py` puts the same target into the
+  pre-flash task of the presets, for the Flash of VS Code. The version found is remembered by the MAC of the board, so
+  a flash with nothing to change only reads the MAC; `BOARD_RADIO_FORCE=1` checks again. A board remembered as other
+  hardware stops the step. A radio with firmware of its own says `"firmware": {"set": "tool"}` and is left as it is.
+  Tried on the JC1060P470C with the handwritten clock: the C6 from 3.0.10 to 3.0.9 and back, Wi-Fi and the setup of
+  the network over BLE.
+- DGX `>=0.10.12,<0.12.0` and DGX-DI `>=0.1.5,<0.2.0`: the generator puts the calls that differ between versions of
+  a library under `#if`, from the version each build took.
+- [Versions](docs/en/choosing-a-board.md#versions) says how a version is chosen within the range of a library, and
+  [radio.md](docs/en/radio.md) how the radio is kept.
+- The recipes take the component as `^0.2.0`.
+
 ## 0.1.4 (2026-11-14)
 
 - The recipes take the component as `^0.1.4`, which takes DGX 0.11.0.

@@ -2,11 +2,9 @@
 
 *[По-русски: README.ru.md](README.ru.md)*
 
-An ESP-IDF component that sets up the hardware of a board, its display, touch, sound, buttons and buses, from a
-description of the board. A board is described **once, as data**: pins, buses, parts, the size of the display, the
-calibration of the touch, each fact with where it comes from. The program asks for parts **by kind**, never by the
-board's name, so the same `main.c` builds for the 2.8-inch CYD S028R, for the 10.1-inch Guition, and for a window on
-the computer with the display of the board chosen:
+Write an ESP-IDF program once and choose the board when you build it: a board of the catalog, a board of your own, or
+a window on the computer that shows the display of the chosen board. The component sets up the display, touch, sound,
+radio, buttons and buses of that board; the program asks for parts **by kind**, never by the board's name:
 
 ```c
 #include "boards.h"
@@ -31,9 +29,34 @@ Every function of `boards.h` exists on every board; for a part the board does no
 program goes on without it. The handles of libraries (DGX, DGX-DI, hd44780) come from the headers of their adapters,
 see [the API](docs/en/api.md).
 
+When the board of a project changes, the program stays: one command chooses the new board, and at most the program
+adapts to what differs in its data, such as the size of the display or a part the new board lacks. When a fact about a
+board is corrected, or a library changes how its parts are started, the change goes into the data and the component,
+not into the program. The [handwritten clock](https://github.com/jef-sure/handwritten-clock) is such a program: one
+code for the CYD S028R (ESP32, 320x240 on SPI), the 7-inch JC1060P470C and the 10.1-inch JC8012P4A1C (ESP32-P4,
+MIPI-DSI). It names a board in one place only, and not for a technical reason: the vendor gives no licence to
+redistribute the firmware of the touch of the 10.1-inch board, so the program embeds it for that board. When the component took over the radio beside the ESP32-P4 in 0.2.0, the clock dropped its
+own code for it.
+
+A board is described **once, as data**, each fact with where it comes from: a schematic, the vendor, a measurement on
+the board. The rest is made from that description: the code that starts the parts, the configuration, the
+dependencies a build downloads, the map of pins, and the choice of a board for a device.
+
+[The page](#the-page) shortens the way from an idea to the work on it. It takes what a device needs, a display, a
+reader, a sensor, and gives recipes: the boards and modules that do it, with their wires, levels and prices, and the
+libraries that drive them, the best of what is available, parts already at hand among them. Then it writes the
+project.
+
 ## Quick start
 
-It needs ESP-IDF 6 activated in the terminal, and for the window on the computer, Linux with SDL2.
+It needs ESP-IDF 6 activated in the terminal, and for the window on the computer, Linux with SDL2. On Windows there are
+two ways, not tried yet:
+
+- **WSL2**: ESP-IDF in a Linux distribution of WSL2; WSLg shows the window; `usbipd attach --wsl` gives it the board
+  to flash.
+- **A devcontainer**: the ESP-IDF image with SDL2; the window through WSLg mounted into the container
+  (`/tmp/.X11-unix`, `/mnt/wslg`); flashing through RFC2217 (`esp_rfc2217_server` on Windows), which the step of the
+  radio of the ESP32-P4 boards does not take yet.
 
 ```sh
 compote project create-from-example -p my_project jef-sure/boards:hello
@@ -80,6 +103,9 @@ The component knows no display by itself: a board may have none, and a display i
   the display and the touch panel this component sets up become an LVGL display
   and input device, see [examples/hello_lvgl](examples/hello_lvgl);
 - **sound**: an ES8311 codec on I2S, an amplifier on I2S, or the ESP32's own DAC;
+- a **radio** beside the chip: the ESP32-C6 of the two ESP32-P4 boards, reached through esp_hosted.
+  `board_radio_start()` starts it, and a step of the flash brings its firmware to the esp_hosted of the build,
+  keeping nothing of it in the flash of the board, see [the radio](docs/en/radio.md);
 - a **camera**, as data for now: its bus, connector and sensor are described, the
   component does not start it;
 - a **button**; and any **bus** the board wires, even one the component does not
@@ -102,6 +128,11 @@ the registry cannot tell a conditional one from one that always comes and shows 
 may need, not what one build downloads.** See
 [what comes with the choice](docs/en/choosing-a-board.md#what-comes-with-the-choice). Changing the board and building
 for several boards are in [choosing-a-board.md](docs/en/choosing-a-board.md).
+
+Each library comes as a range of versions, those its adapter is built with: the component manager takes the newest of
+the range unless the program names one, and the glue of a board chooses its calls by the version the build took. A
+board whose part a library gained later stops with `#error` below that version. CI builds every board with the oldest
+version of each range and the newest of each older line, see [versions](docs/en/choosing-a-board.md#versions).
 
 ## The boards
 
@@ -140,11 +171,6 @@ licence to redistribute: the program embeds it, see
 [docs/en/touch-firmware.md](docs/en/touch-firmware.md); without it the board
 builds and runs with its touch off.
 
-The Wi-Fi and Bluetooth of the two ESP32-P4 boards are in an ESP32-C6 beside the chip,
-reached through esp_hosted. A step of the flash brings the firmware of the C6 to the
-esp_hosted of the build, keeping nothing of it in the flash of the board, see
-[docs/en/radio.md](docs/en/radio.md).
-
 ## The page
 
 The page chooses a board and the parts for a device: the roles it needs (a display, a reader, a sensor), the kits that
@@ -166,8 +192,11 @@ project, `python3 managed_components/jef-sure__boards/tools/boards_mcp.py --serv
 pulls `lvgl` and `esp_lvgl_port`, and the display comes as an LVGL object.
 [espressif/esp_board_manager](https://github.com/espressif/esp_board_manager) describes boards in YAML and generates
 initialisation code into the project, with a board selected by `idf.py bmgr`. This component is meant for any board
-and any library: today it starts DGX, DGX-DI, DGX-LVGL and hd44780, and other libraries, Arduino among them, are
-planned. It differs in how it works. A board is data a script checks: pins, buses, devices, a calibration
+and any library. Today it starts DGX, DGX-DI and hd44780 of its author, the drivers of Espressif for sound, the touch
+panels and the radio beside the chip, and the XPT2046 driver of atanisoft. For the other parts the page names the
+libraries a program takes itself. Where a library of the author competes for a chip, the libraries of that chip are
+read in audits; the others are described from their own documentation and not checked. Other platforms, Arduino among
+them, are planned. It differs in how it works. A board is data a script checks: pins, buses, devices, a calibration
 measured on the board, and where each fact comes from; a board of a program is described the same way, beside the
 program. The display is one peripheral among others. A library is described by chip in `catalog/libraries/`, what it
 does with each chip and what its versions require, so DGX, LVGL through DGX-LVGL and other libraries come in through
@@ -181,11 +210,11 @@ The versions and what changed in each are in [CHANGES.md](CHANGES.md). CI builds
 ESP-IDF 5.5 and 6.1, each board on the older versions a range of a library takes (the oldest, and the newest of each
 older line), and a board of a program with a display and a 2004: the jobs of `.github/workflows/build.yml`.
 
-The `checked` entries say how each part was tried: `examples/hello_board` and `examples/hello_lvgl` under ESP-IDF 6.1
-on versions before 0.1.0, the handwritten clock moved onto the component, probes of DGX on the bench. The 2004 module
-showed its text on `esp32_devkit` as the base of a board of a program that wires its I2C: the catalog board opens no
-bus to a module. The display module `tft153_st77916` ran on `esp32s3_devkit` as a board of a program, and its picture
-was seen. On those pins ESP-IDF 6.1 needs DGX 0.10.3: the SPI driver of 6.1 takes a quad bus for an octal one.
+The `checked` entries say how each part was tried, each with its date: `examples/hello_board` and
+`examples/hello_lvgl` under ESP-IDF 6.1, the handwritten clock moved onto the component, probes of DGX on the bench.
+The 2004 module showed its text on `esp32_devkit` as the base of a board of a program that wires its I2C: the catalog
+board opens no bus to a module. The display module `tft153_st77916` ran on `esp32s3_devkit` as a board of a program,
+and its picture was seen.
 
 ## How the repository is built
 
@@ -194,6 +223,7 @@ For those who change the component, not for a program that uses it.
 ```
 catalog/boards/<board>/board.json         the board: the only source of truth
 catalog/devices/, catalog/mcu/            what its chips are, under it
+catalog/modules/<module>/module.json      a module: parts on a small board of their own, wired to a board by a program
 catalog/libraries/                        what each library does with each chip, and what its versions require
 catalog/boards/<board>/sdkconfig.defaults what its chip, memory and flash need; the lines that choose it
 boards/<board>/<board>.c, board.cmake  the glue, generated from the data and committed
@@ -201,23 +231,35 @@ boards/boards.cmake, Kconfig           generated too, as are the dependencies of
 include/boards.h                       what a program asks for, by kind
 src/                                   the core: board_info, the shared I2C and SPI, the sound task, the firmware hook
 adapters/<owner>__<name>/              the code for each library, its public header in include/
+radio/                                 the programs of the step of the flash: the firmware of the radio, its update program
+tools/resolve.py, rules.py             a board as the data says it, with what it extends and its chips; the engine of the rules
 tools/boards_gen.py                    data -> glue, Kconfig, lists, manifest rules, README tables
 tools/check_format.py                  the schema, the rules and their cases in test/format/
 tools/check_boards.py                  the generated is what the data says; pins do not collide; the API holds
 tools/board_pins.py                    the map of a board's pins and its tree
 tools/board_select.py                  choose the boards of a project: their defaults, presets and locks
 tools/board_radio.py                   the step of the flash that keeps the radio beside the chip at the program's esp_hosted
+tools/board_calibration.py             a touch calibration into the data of a board, from the log of DGX-DI
 tools/board_project.py                 a new project without the page, or a kit of the page taken back
 tools/boards_mcp.py, project_writer.py the page beside an agent over MCP, or alone with --serve, and its writes
 tools/board_bom.py                     what to buy for a product, with prices as ranges
 tools/take_report.py                   a price from a GitHub issue, into the catalog
 tools/update_rates.py                  the exchange rates of the catalog, from the ECB
+tools/import_libraries.py              the list of known libraries by the chips they name, beside the records
+tools/sync_versions.py                 the versions of a library in the registry and its tags, into its record
+tools/audit.py                         what a reading of a library found, kept beside its record
+tools/import_*.py, make_mcu.py         imported/ from other descriptions; the facts of a chip from ESP-IDF
+tools/vscode_env.py                    the settings of VS Code a project of boards needs
+imported/                              boards, modules and chips taken from other descriptions, marked as such
 editor/                                the page: what to build, a kit, a project; and the editor. Any static server from the root, then /editor/
+examples/hello/                        the program of getting started, as the registry hands it out
 examples/hello_board/                  the smallest program, built for every board in CI
 examples/hello_lvgl/                   LVGL through DGX-LVGL, built in CI for every board with a graphics display
 examples/local_boards/                 a board and a module of the program itself, in components/local-boards/
 examples/multi_board/                  one program built for two boards of different chips, by presets
+examples/sound_level/                  how loud the speaker of a board is at each level, heard on the board
 examples/board_report/                 the report of a new board, for its first entry in the catalog
+test/                                  the cases of the checks, and fake headers to compile every glue on the host
 docs/en/, docs/ru/                     the documentation
 ```
 

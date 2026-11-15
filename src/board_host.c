@@ -469,3 +469,9 @@ bool board_button(bool *pressed)
 {
     return board_button_at(0, pressed);
 }
+
+/* The computer has its own network: no radio beside a chip. */
+bool board_radio_start(void)
+{
+    return false;
+}

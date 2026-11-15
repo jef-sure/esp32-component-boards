@@ -133,6 +133,10 @@ GSL3680 10,1-дюймовой платы не хранит
 [docs/ru/touch-firmware.md](docs/ru/touch-firmware.md); без него плата
 собирается и работает с выключенным тачем.
 
+Wi-Fi и Bluetooth двух плат на ESP32-P4 находятся в ESP32-C6 рядом с чипом, связь с ней
+идёт через esp_hosted. Шаг прошивки приводит прошивку C6 к esp_hosted сборки и ничего из
+неё не хранит на флеше платы, см. [docs/ru/radio.md](docs/ru/radio.md).
+
 ## Страница
 
 Страница подбирает плату и детали под устройство: роли, которые ему нужны (дисплей, считыватель, датчик), комплекты,
@@ -144,7 +148,7 @@ GSL3680 10,1-дюймовой платы не хранит
 
 [Начало работы](docs/ru/getting-started.md), [выбор платы](docs/ru/choosing-a-board.md),
 [переезд программы со своими платами](docs/ru/moving-a-program.md), [API](docs/ru/api.md), [модули](docs/ru/modules.md),
-[прошивка тача](docs/ru/touch-firmware.md), [калибровка](docs/ru/calibration.md), [инструменты](docs/ru/tools.md),
+[прошивка тача](docs/ru/touch-firmware.md), [радио](docs/ru/radio.md), [калибровка](docs/ru/calibration.md), [инструменты](docs/ru/tools.md),
 [формат данных](docs/ru/data-format.md), [как это работает](docs/ru/how-it-works.md),
 [добавление платы](docs/ru/adding-a-board.md). По-английски: [docs/en/](docs/en/).
 
@@ -193,6 +197,7 @@ tools/check_format.py                  схема, правила и их слу
 tools/check_boards.py                  сгенерированное совпадает с данными; пины не пересекаются; API полон
 tools/board_pins.py                    карта пинов платы и её дерево
 tools/board_select.py                  выбор плат проекта: их умолчания, пресеты и lock-файлы
+tools/board_radio.py                   шаг прошивки, который держит радио рядом с чипом на esp_hosted программы
 tools/board_project.py                 новый проект без страницы или комплект страницы, взятый обратно
 tools/boards_mcp.py, project_writer.py страница рядом с агентом по MCP или одна с --serve, и её запись
 tools/update_rates.py                  курсы валют каталога, от ЕЦБ

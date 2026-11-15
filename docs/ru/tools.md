@@ -6,7 +6,7 @@ JavaScript страницы; импортёрам нужен `jsonschema`. За�
 `managed_components/jef-sure__boards/`).
 
 Пакет реестра несёт инструменты, которыми пользуется программа: `board_select.py`, `board_project.py`,
-`board_pins.py`, `board_bom.py`, `board_calibration.py`, `boards_mcp.py`, а также `boards_gen.py`, `project_writer.py`, `resolve.py` и
+`board_pins.py`, `board_bom.py`, `board_calibration.py`, `boards_mcp.py`, `board_radio.py`, а также `boards_gen.py`, `project_writer.py`, `resolve.py` и
 `rules.py`, которые они импортируют. Проверки, импортёры, `audit.py`, `make_mcu.py`, `update_rates.py`,
 `take_report.py` и `sync_versions.py` — для репозитория: им нужны `test/`, ESP-IDF или сеть.
 
@@ -128,6 +128,17 @@ python3 tools/board_select.py host --as cyd_s028r --as jc1060p470c ~/myproject  
 того, что изменилось в `sdkconfig.<плата>` с прошлой конфигурации (`board_select.py --auto-keep <плата>`): снимок
 `sdkconfig` каждой платы лежит в `.boards/` проекта. Опция, которую плата оставила как была, — например, старый
 `sdkconfig` другой платы со старым значением, — обратно не переносится.
+
+## board_radio.py
+
+```sh
+python3 tools/board_radio.py build/<board>/board_radio.json    # с ESPPORT: портом платы
+```
+
+Шаг прошивки для платы с радио рядом с чипом (ESP32-C6 с esp_hosted): приводит прошивку радио к esp_hosted сборки.
+`idf.py flash` запускает его через цель `board_radio`, а Flash расширения ESP-IDF в VS Code — через задачу pre-flash,
+которую `board_select.py` пишет в пресет. `BOARD_RADIO_FORCE=1` проверяет радио заново и прошивает плату, которую
+запомнили как другую. См. [radio.md](radio.md).
 
 ## board_project.py
 

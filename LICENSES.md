@@ -11,5 +11,6 @@ What came from others keeps the license it came with:
 | `imported/` | the license of the source of each file: CC BY-SA 3.0 (the parts of Fritzing and of Adafruit, of which only facts are taken), the Espressif Modified MIT License (the boards of esp_board_manager, M5Stack and part of Guition), Apache 2.0 (Waveshare and part of Guition), MIT (ESPHome, whose addresses are taken as facts, and part of Guition) | `imported/licenses/`, and `origin` of each file |
 | `editor/vendor/vue.global.prod.js` | MIT, Yuxi (Evan) You | `editor/vendor/LICENSE.vue` |
 | `editor/vendor/pinia.iife.prod.js` | MIT, Eduardo San Martin Morote | `editor/vendor/LICENSE.pinia` |
+| the settings in `radio/coprocessor/sdkconfig.defaults*` and `partitions.csv` | Apache 2.0, Espressif: taken as facts from the example `bluetooth/esp_hosted_nimble/bleprph_wifi_coex/cp` of esp_hosted | the first line of `sdkconfig.defaults` |
 
 The MIT License of this repository does not cover them. No picture of others is kept here. `imported/` goes into the package of the component with `imported/licenses/`.

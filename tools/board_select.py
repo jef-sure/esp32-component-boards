@@ -221,14 +221,61 @@ def with_current(doc, current):
     return resolve.dump({**doc, "vendor": vendor, "configurePresets": [default, *boards]}) + "\n"
 
 
+VSCODE = "espressif/vscode-esp-idf"  # the vendor map of the ESP-IDF extension of VS Code in a preset
+# Its Flash runs esptool itself, not the flash target: its pre-flash task runs the step of the radio first (see
+# tools/board_radio.py). The extension puts the port and the build directory of the chosen preset in place of these.
+RADIO_TASK = "cmake -E env ESPPORT=${config:idf.port} cmake --build ${config:idf.buildPath} --target board_radio"
+
+
+def radio_by_program(board):
+    """True when the board has a radio whose firmware the program keeps at its esp_hosted: the flash has a step for it."""
+    if is_host(board):
+        return False
+    try:
+        doc = resolve.resolve(resolve.load("boards", board))
+    except resolve.Refused:
+        return False
+    return any("radio" in device["classes"] and (device.get("firmware") or {}).get("set") == "program"
+               for device in doc["devices"].values() if device.get("used") is not False)
+
+
+def with_radio_task(preset, board):
+    """The preset with the pre-flash task of the radio when the board has one, and without it when not. The extension's
+    other settings stay, and a pre-flash task of someone else is not replaced."""
+    vendor = preset.get("vendor", {})
+    settings = [dict(item) for item in vendor.get(VSCODE, {}).get("settings", [])]
+    tasks = next((item for item in settings if item.get("type") == "tasks"), None)
+    theirs = (tasks or {}).get("value", {}).get("preFlash")
+    if theirs and theirs != RADIO_TASK:
+        if radio_by_program(board):
+            print(f"{PRESETS}: {board} has a pre-flash task of its own, so the radio is not checked by the Flash of VS Code: "
+                  f"run '{RADIO_TASK}' in it")
+        return preset
+    if radio_by_program(board):
+        if tasks is None:
+            tasks = {"type": "tasks", "value": {}}
+            settings.append(tasks)
+        tasks["value"] = {**tasks.get("value", {}), "preFlash": RADIO_TASK}
+    elif tasks is not None and theirs == RADIO_TASK:
+        tasks["value"] = {key: value for key, value in tasks["value"].items() if key != "preFlash"}
+        if not tasks["value"]:
+            settings.remove(tasks)
+    else:
+        return preset
+    others = {key: value for key, value in vendor.get(VSCODE, {}).items() if key != "settings"}
+    mine = {**others, **({"settings": settings} if settings else {})}
+    vendor = {**{key: value for key, value in vendor.items() if key != VSCODE}, **({VSCODE: mine} if mine else {})}
+    return {**{key: value for key, value in preset.items() if key != "vendor"}, **({"vendor": vendor} if vendor else {})}
+
+
 def presets_text(project, boards, targets, current, command, follows=None):
     """CMakePresets.json of the boards: one preset each in the order named, and default for the current one. follows is
     the current board they are made with, which selection.json gets too: a page that names another later has changed it."""
     before = our_presets(project, boards) or {}
     kept = {preset["name"]: others_in(preset) for preset in board_presets(before)}
     # Ninja, as idf.py takes it: a build directory CMake Tools of VS Code made with another generator stops idf.py there
-    presets = [with_others({"name": board, "displayName": title_of(board, project), "generator": "Ninja", "binaryDir": f"build/{board}",
-                            "cacheVariables": {"BOARD": board, "IDF_TARGET": target, "SDKCONFIG": f"sdkconfig.{board}"}}, kept.get(board, {}))
+    presets = [with_radio_task(with_others({"name": board, "displayName": title_of(board, project), "generator": "Ninja", "binaryDir": f"build/{board}",
+                                            "cacheVariables": {"BOARD": board, "IDF_TARGET": target, "SDKCONFIG": f"sdkconfig.{board}"}}, kept.get(board, {})), board)
                for board, target in zip(boards, targets)]
     made = {"made by": command, **({"follows": follows} if follows else {})}
     return with_current({"version": 3, "vendor": {**before.get("vendor", {}), VENDOR: made}, "configurePresets": presets}, current)

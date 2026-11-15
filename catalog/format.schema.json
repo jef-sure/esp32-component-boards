@@ -1706,6 +1706,12 @@
           "properties": {
             "version": { "type": "string" },
             "symbol": { "type": "string" },
+            "if": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": { "type": "string" },
+              "description": "What the manifest asks beside the symbol, every one of them, written as the conditions of a requirement of a version: idf_version <6.1."
+            },
             "requires": { "type": "array", "uniqueItems": true, "items": { "type": "string" } },
             "with": { "type": "array", "items": { "$ref": "#/$defs/libraryId" } },
             "notes": { "$ref": "#/$defs/notes" },

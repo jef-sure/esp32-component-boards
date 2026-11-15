@@ -8158,6 +8158,13 @@
             "platforms": [],
             "chips": ["i2s_amp"]
         },
+        "esp-idf/espressif/esp_hosted": {
+            "title": "ESP-Hosted",
+            "version": "3.0.10",
+            "repository": "https://components.espressif.com/components/espressif/esp_hosted",
+            "platforms": ["esp_idf"],
+            "chips": ["esp32c6"]
+        },
         "esp-idf/espressif/esp_io_expander_aw9523": {
             "title": "espressif/esp_io_expander_aw9523",
             "platforms": ["esp_idf"],
@@ -8300,10 +8307,24 @@
             "platforms": ["esp_idf"],
             "chips": []
         },
+        "esp-idf/espressif/esp_wifi_remote": {
+            "title": "esp_wifi_remote",
+            "version": "1.6.5",
+            "repository": "https://components.espressif.com/components/espressif/esp_wifi_remote",
+            "platforms": ["esp_idf"],
+            "chips": [],
+            "requires": ["esp-idf/espressif/esp_hosted", "esp-idf/espressif/wifi_remote_over_eppp"]
+        },
         "esp-idf/espressif/sensor_hub": {
             "title": "espressif/sensor_hub",
             "platforms": ["esp_idf"],
             "chips": ["bmi270_sensor_hub"]
+        },
+        "esp-idf/espressif/wifi_remote_over_eppp": {
+            "title": "esp-idf/espressif/wifi_remote_over_eppp",
+            "repository": "",
+            "platforms": ["esp_idf"],
+            "chips": []
         },
         "esp-idf/guition/esp_cam_sensor": {
             "title": "esp_cam_sensor with OV02C10, the maker's copy",

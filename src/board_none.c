@@ -12,4 +12,5 @@ const struct board_i2c_table    board_i2c_table = {.count = 0};
 const struct board_touch_table  board_touch_table = {.count = 0};
 const struct board_sound_table  board_sound_table = {.count = 0};
 const struct board_button_table board_button_table = {.count = 0};
+const struct board_radio_table  board_radio_table = {.count = 0};
 const struct board_data         board_data = {.name = "none", .title = "None: the program sets its hardware up itself", .target = CONFIG_IDF_TARGET};

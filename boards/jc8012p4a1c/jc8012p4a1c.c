@@ -11,6 +11,7 @@
 #include "sdkconfig.h"
 
 #include "board_display.h"
+#include "board_radio_esp_hosted.h"
 #include "board_sound_es8311.h"
 #include "board_touch.h"
 #include "board_touch_gsl3680.h"
@@ -85,6 +86,10 @@ const struct board_sound_table board_sound_table = {.entries = sound_entries, .s
 
 static const struct board_button_entry button_entries[] = {{.name = "boot", .pin = 35, .active_low = true}};
 const struct board_button_table board_button_table = {.entries = button_entries, .count = 1};
+
+/* radio: an esp32c6 on sdio, by esp-idf/espressif/esp_hosted. The flash step of the component keeps its firmware at the version of the build. */
+static const struct board_radio_entry radio_entries[] = {{.name = "radio", .update = true, .start = board_glue_radio_esp_hosted_start}};
+const struct board_radio_table board_radio_table = {.entries = radio_entries, .count = 1};
 
 /* What the board is, for board_info(). */
 const struct board_data board_data = {.name = "jc8012p4a1c", .title = "Guition JC8012P4A1C", .target = "esp32p4"};

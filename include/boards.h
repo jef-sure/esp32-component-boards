@@ -183,6 +183,15 @@ int         board_button_find(const char *name);
 bool        board_button(bool *pressed);
 bool        board_button_at(int index, bool *pressed);
 
+/*
+ * The radio beside the chip, as the ESP32-C6 of an ESP32-P4 board: waits until it answers, before the program
+ * calls esp_wifi or Bluetooth. false when the board has no such radio or it does not answer. When the radio runs
+ * another version of esp_hosted than the program, the log names both: a firmware the component sets is brought to the
+ * program's by BOARD_RADIO_FORCE=1 idf.py flash, which makes the flash step check the radio again. A second call
+ * after true returns true.
+ */
+bool board_radio_start(void);
+
 #ifdef __cplusplus
 }
 #endif

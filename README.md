@@ -140,6 +140,11 @@ licence to redistribute: the program embeds it, see
 [docs/en/touch-firmware.md](docs/en/touch-firmware.md); without it the board
 builds and runs with its touch off.
 
+The Wi-Fi and Bluetooth of the two ESP32-P4 boards are in an ESP32-C6 beside the chip,
+reached through esp_hosted. A step of the flash brings the firmware of the C6 to the
+esp_hosted of the build, keeping nothing of it in the flash of the board, see
+[docs/en/radio.md](docs/en/radio.md).
+
 ## The page
 
 The page chooses a board and the parts for a device: the roles it needs (a display, a reader, a sensor), the kits that
@@ -151,7 +156,7 @@ project, `python3 managed_components/jef-sure__boards/tools/boards_mcp.py --serv
 
 [Getting started](docs/en/getting-started.md), [choosing a board](docs/en/choosing-a-board.md),
 [moving a program with boards of its own](docs/en/moving-a-program.md), [the API](docs/en/api.md),
-[modules](docs/en/modules.md), [the touch firmware](docs/en/touch-firmware.md), [calibration](docs/en/calibration.md),
+[modules](docs/en/modules.md), [the touch firmware](docs/en/touch-firmware.md), [the radio](docs/en/radio.md), [calibration](docs/en/calibration.md),
 [the tools](docs/en/tools.md), [the data format](docs/en/data-format.md), [how it works](docs/en/how-it-works.md),
 [adding a board](docs/en/adding-a-board.md). In Russian: [docs/ru/](docs/ru/).
 
@@ -200,6 +205,7 @@ tools/check_format.py                  the schema, the rules and their cases in 
 tools/check_boards.py                  the generated is what the data says; pins do not collide; the API holds
 tools/board_pins.py                    the map of a board's pins and its tree
 tools/board_select.py                  choose the boards of a project: their defaults, presets and locks
+tools/board_radio.py                   the step of the flash that keeps the radio beside the chip at the program's esp_hosted
 tools/board_project.py                 a new project without the page, or a kit of the page taken back
 tools/boards_mcp.py, project_writer.py the page beside an agent over MCP, or alone with --serve, and its writes
 tools/board_bom.py                     what to buy for a product, with prices as ranges

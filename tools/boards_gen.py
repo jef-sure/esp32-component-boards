@@ -71,7 +71,7 @@ RULES = json.loads((ROOT / "catalog" / "rules.json").read_text())
 # alone for the program: SOC_SPI_PERIPH_NUM 2 counts SPI1 of the flash.
 I2C_HZ_DEFAULT = 400000
 INPUT_LINES = ("in", "int", "irq", "te", "busy")  # lines of a device that only come in
-STARTED_CLASSES = {"display", "touch", "audio", "button"}  # the rest is kept as data
+STARTED_CLASSES = {"display", "touch", "audio", "button", "radio"}  # the rest is kept as data
 # the window of the computer is a host screen of DGX, always; its mouse a finger of DGX-DI when the board it shows has a touch (src/board_host.c)
 HOST_FEATURES = {"BOARD_DISPLAY_GRAPHICS": "BOARD_SELECT_HOST", "BOARD_TOUCH": "(BOARD_SELECT_HOST && BOARD_HOST_TOUCH != 0)"}
 
@@ -125,7 +125,7 @@ def adapter_dir(record):
 
 def started_devices(board):
     """What the glue starts, device by device: the device, its library and the libraries that come with it."""
-    for device in (*(board.get("displays") or ()), *board["touches"], *board["sounds"]):
+    for device in (*(board.get("displays") or ()), *board["touches"], *board["sounds"], *board["radios"]):
         record = resolve.library(device["library"])
         yield device, record, [resolve.library(name) for name in (record.get("adapter") or {}).get("with", ())]
 
@@ -258,6 +258,16 @@ def sound_part(name, device):
     return part
 
 
+def radio_part(name, device):
+    """A radio beside the chip: its library, the kind of bus it is on, and who sets its firmware (program: the component)."""
+    started = started_by(device)
+    key = next(iter(device.get("on") or {}), None)
+    if not key:
+        raise ValueError(f"{name}: a radio on no bus: the data names none")
+    return {"name": name, "chip": device["chip"], "kind": started["entry"]["adapter"]["kind"], "bus": key, "transport": bus_parts(key)[0],
+            "firmware": (device.get("firmware") or {}).get("set", "factory"), **started}
+
+
 def kept_numbers(device):
     """The numbers of a device the component does not set up, for board_bus_get: the host or port of its bus, its
     address on I2C, its cs and its pins. A host is printed as its constant (SPI3_HOST), a port as its number."""
@@ -279,7 +289,7 @@ def kept_numbers(device):
 def parts_of(resolved):
     """A resolved board with the devices the glue starts as lists: displays, touches, sounds, buttons; kept for the rest."""
     module = resolved["kind"] == "module"
-    board = {**resolved, "touches": [], "sounds": [], "buttons": [], "kept": {}}
+    board = {**resolved, "touches": [], "sounds": [], "buttons": [], "radios": [], "kept": {}}
     if module:
         board["module"] = True
     board["buses"] = {kind: {own: {key: number(value) for key, value in bus.items()} for own, bus in named.items()} for kind, named in (resolved.get("buses") or {}).items()}
@@ -297,6 +307,9 @@ def parts_of(resolved):
         elif "button" in classes:
             line = device["pins"]["in"]
             board["buttons"].append({"name": name, "pin": line["gpio"], "active_low": line.get("active") == "low"})
+        elif "radio" in classes and device.get("library"):
+            board["radios"].append(radio_part(name, device))
+            board["kept"][name] = kept_numbers(device)  # its bus and lines stay in the table of numbers for the program
         else:
             board["kept"][name] = kept_numbers(device)
     if displays:
@@ -717,12 +730,13 @@ def install_lines(way, version):
 
 
 def feature_deps():
-    """The dependencies the rules bring, (symbol, component, its lines in the manifest): the libraries the adapters are written against."""
+    """The dependencies the rules bring, (symbol, component, its lines in the manifest, the conditions it asks beside the
+    symbol): the libraries the adapters are written against."""
     deps = []
     for record in resolve.all_libraries(tuple(resolve.ROOTS)).values():
         adapter = record.get("adapter") or {}
         if "version" in adapter:
-            deps.append((adapter["symbol"], f"{record['owner']}/{record['name']}", install_lines(record["install"][0], adapter["version"])))
+            deps.append((adapter["symbol"], f"{record['owner']}/{record['name']}", install_lines(record["install"][0], adapter["version"]), adapter.get("if", [])))
     return deps
 
 
@@ -1092,6 +1106,18 @@ def glue_of(board):
         else:
             out("const struct board_button_table board_button_table = {.count = 0};")
         out("")
+        radios = board["radios"]
+        for radio in radios:
+            keeper = "The flash step of the component keeps its firmware at the version of the build" if radio["firmware"] == "program" else \
+                f"Its firmware is set by {radio['firmware']}: the component does not change it"
+            out(f"/* {radio['name']}: an {radio['chip']} on {radio['transport']}, by {radio['library']}. {keeper}. */")
+        if radios:
+            entries = ", ".join(f'{{.name = "{radio["name"]}", .update = {"true" if radio["firmware"] == "program" else "false"}, .start = {radio["entry"]["adapter"]["function"]}}}' for radio in radios)
+            out(f"static const struct board_radio_entry radio_entries[] = {{{entries}}};")
+            out(f"const struct board_radio_table board_radio_table = {{.entries = radio_entries, .count = {len(radios)}}};")
+        else:
+            out("const struct board_radio_table board_radio_table = {.count = 0};")
+        out("")
 
     # ---- what the board is; what it has not returns false in src/ ----
     if not is_module:
@@ -1232,7 +1258,33 @@ def gen_cmake(board):
         L.append(f"idf_component_optional_requires(PUBLIC {' '.join(requires)})")
     else:
         L.append("# nothing beside the component itself")
+    for radio in board.get("radios") or ():
+        L += [f"# The radio beside the chip, for the flash step of the component: the target of its chip, the kind of its bus, who",
+              f"# sets its firmware (program: the component keeps it at the version of the build) and the board of the catalog",
+              f"# this hardware is, the root of what the board extends.",
+              f"set(BOARD_RADIO_TARGET {radio_target(radio)})",
+              f"set(BOARD_RADIO_TRANSPORT {radio['transport']})",
+              f"set(BOARD_RADIO_FIRMWARE {radio['firmware']})",
+              f"set(BOARD_RADIO_HARDWARE {hardware_of(board)})"]
     return "\n".join(L) + "\n"
+
+
+def radio_target(radio):
+    """The ESP-IDF target of the chip of a radio: the firmware of the radio is built for it."""
+    try:
+        resolve.load("mcu", radio["chip"])
+    except resolve.Refused:
+        raise ValueError(f"{radio['name']}: {radio['chip']} is no chip of catalog/mcu, so no firmware can be built for it") from None
+    return radio["chip"]
+
+
+def hardware_of(board):
+    """The board of the catalog a board is, following what it extends to the root: a board of the program on a board of the
+    catalog is that board."""
+    doc = json.loads(board["data_file"].read_text()) if "data_file" in board else {"name": board["name"]}
+    while doc.get("extends"):
+        doc = resolve.load("boards", doc["extends"])
+    return doc["name"]
 
 
 def gen_display_cmake(board):
@@ -1476,7 +1528,7 @@ def gen_kconfig(boards, modules):
             all_features.setdefault(feature, []).append(module_symbol(module))
     for feature, condition in HOST_FEATURES.items():
         all_features.setdefault(feature, []).append(condition)
-    for symbol, _, _ in feature_deps():
+    for symbol, _, _, _ in feature_deps():
         all_features.setdefault(symbol, [])
     all_features.setdefault("BOARD_DISPLAY_GROUP", [])  # #if in the adapter of DGX: defined, 0, on a board with no group
     for feature in possible_features():
@@ -1500,11 +1552,14 @@ def gen_manifest_block(boards):
          "  # What a board needs beside this component comes only with the board that needs it: the",
          "  # rules look at the symbols the Kconfig of the boards defines beside the choice (the model of",
          "  # esp-bsp's bsp_selector). Made by tools/boards_gen.py --all from the data: do not edit here."]
-    for symbol, component, lines in feature_deps():
+    for symbol, component, lines, conditions in feature_deps():
         L.append(f"  {component}:")
         L.extend(f"    {line}" for line in lines)
         L.append("    matches:")
         L.append(f"      - if: \"$CONFIG{{{symbol}}} == 1\"")
+        if conditions:
+            L.append("    rules:")
+            L.extend(f"      - if: \"{condition}\"" for condition in conditions)
     L.append(MANIFEST_END)
     return "\n".join(L)
 

@@ -254,6 +254,23 @@ solving dependencies* in the log) and resolves them again by itself, in the
 same run. One `idf.py build` is enough; the log shows which optional
 dependencies were skipped.
 
+## Versions
+
+Each library a board needs comes with a range of versions in the component's
+`idf_component.yml`: the versions its adapter was written and checked against.
+
+- Nothing chosen: the component manager takes the newest version of the range when it
+  solves the lock of a board, and `dependencies.lock.<board>` keeps it. A newer one comes
+  when the lock is solved again (`idf.py update-dependencies`, or the lock removed).
+- A choice: a version the program names in its own `main/idf_component.yml`, as
+  `espressif/esp_hosted: "3.0.9"`, narrows the range. A version outside the range is a
+  conflict the component manager reports: there is no choice beyond what was checked.
+- No choice: a range of one version, or a part that cannot follow the program. The log
+  then says what runs and what the program has.
+
+The firmware of the radio beside an ESP32-P4 is not a choice of its own: it follows the
+esp_hosted the build took, see [radio.md](radio.md).
+
 ## What stays with the program
 
 The board brings what its hardware needs: the drivers of its panel and, for two displays shown as one,

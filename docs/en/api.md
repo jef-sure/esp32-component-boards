@@ -278,6 +278,18 @@ another on the key of its first letter (`boot` on B), then the buttons of the ga
 | `start` | Enter |
 | `select` | Tab |
 
+## The radio beside the chip
+
+```c
+bool board_radio_start(void);
+```
+
+On a board whose Wi-Fi and Bluetooth are in a chip beside it, as the ESP32-C6 of the two
+ESP32-P4 boards: waits until that chip answers, before the program calls `esp_wifi_*` or
+starts Bluetooth. `false` when the board has no such radio, or it does not answer; a second
+call after `true` returns `true`. When the radio runs another esp_hosted than the program,
+the log names both versions and the way to bring it to the program's
+(`BOARD_RADIO_FORCE=1 idf.py flash`). See [radio.md](radio.md).
 
 ## What to include, what to link
 

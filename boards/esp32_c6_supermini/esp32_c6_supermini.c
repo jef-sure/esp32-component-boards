@@ -33,5 +33,7 @@ const struct board_sound_table board_sound_table = {.count = 0};
 static const struct board_button_entry button_entries[] = {{.name = "boot", .pin = 9, .active_low = true}};
 const struct board_button_table board_button_table = {.entries = button_entries, .count = 1};
 
+const struct board_radio_table board_radio_table = {.count = 0};
+
 /* What the board is, for board_info(). */
 const struct board_data board_data = {.name = "esp32_c6_supermini", .title = "ESP32-C6 Super Mini", .target = "esp32c6"};

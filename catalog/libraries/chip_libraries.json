@@ -264,6 +264,7 @@
         "es8388": ["esp-idf/espressif/esp_codec_dev"],
         "es8389": ["esp-idf/espressif/esp_codec_dev"],
         "esp32_dac": ["esp-idf/espressif/esp_driver_dac", "github/espressif/esp-matter", "github/m5stack/m5epd"],
+        "esp32c6": ["esp-idf/espressif/esp_hosted"],
         "ft5x06": ["esp-idf/espressif/esp_lcd_touch_ft5x06"],
         "fxos8700": ["arduino/adafruit/adafruit-fxos8700"],
         "gc0308": ["esp-idf/espressif/esp32-camera"],

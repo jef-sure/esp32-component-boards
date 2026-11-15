@@ -96,6 +96,18 @@ struct board_button_table {
 };
 extern const struct board_button_table board_button_table;
 
+/* The radio beside the chip, as an ESP32-C6 is beside an ESP32-P4: the adapter of its library starts it. */
+struct board_radio_entry {
+    const char *name;
+    bool        update; /* its firmware is the component's to set: the flash step keeps it at the version of the build */
+    bool (*start)(const struct board_radio_entry *entry);
+};
+struct board_radio_table {
+    const struct board_radio_entry *entries;
+    int                             count;
+};
+extern const struct board_radio_table board_radio_table;
+
 /*
  * One I2S bus of the board, as its data names it ("i2s0" is the chip's I2S0): its port and
  * its lines; a codec streams over it (the din line may be unused: nothing listens).

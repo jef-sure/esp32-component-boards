@@ -518,7 +518,9 @@ registry has a version newer than the one described.
 `adapter` says how this component takes the library: the range of versions its code is built with,
 the symbol of the manifest rule, the components of the build and the files of
 `adapters/<owner>__<name>/`: what the glue includes (`headers`), what a program includes
-(`public`) and what is compiled by which symbol (`sources`). A record with no `adapter` only
+(`public`) and what is compiled by which symbol (`sources`). `if` adds conditions of the manifest
+the dependency needs besides the symbol, as `["idf_version <6.1"]` for `esp_wifi_remote`, which ESP-IDF 6.1
+carries itself. A record with no `adapter` only
 describes: a chip with such a library stays data and the component does not start it, like the
 PN532 of the terminal.
 
@@ -572,6 +574,11 @@ A pre-release is older than its release, `1.2.0~3` is newer than `1.2.0`, and `1
 describes one version and the steps patch `config`, `controls` and `provides` for the older ones.
 A device names its own in `firmware_version`; that layer goes after the family variant and before
 the board. What firmware a library takes is in `firmware` of the chip in its record.
+
+`set: program` on a radio beside the chip (the ESP32-C6 of `esp32c6`) means the component keeps its
+firmware at the esp_hosted of the program's build, by a step of the flash ([radio.md](radio.md)); a
+board of a program whose radio runs firmware of its own says `"firmware": {"set": "tool"}` on it, and
+the step leaves it.
 
 ## Connectors and images
 

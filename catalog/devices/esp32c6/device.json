@@ -1,0 +1,31 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "esp32c6",
+    "title": "Espressif ESP32-C6 as a radio",
+    "maker": "espressif",
+    "part": "ESP32-C6",
+    "class": "radio",
+    "on": {"sdio": {"required": false}, "spi": {"required": false}, "uart": {"required": false}},
+    "provides": {"wifi": {}, "bluetooth": {}},
+    "firmware": {"kept": "flash", "set": "program", "read": "command", "scheme": "decimal"},
+    "checked": {
+        "facts": {
+            "level": "hardware",
+            "source": "the C6 of the JC1060P470C on SDIO, esp_hosted 3.0.9 and 3.0.10",
+            "by": "Anton",
+            "date": "2026-11-15"
+        },
+        "firmware": {
+            "level": "hardware",
+            "covers": ["firmware"],
+            "source": "esp_hosted_get_coprocessor_fwversion and esp_hosted_slave_ota_* from the P4 of the JC1060P470C: 3.0.9 to 3.0.10 and back",
+            "date": "2026-11-15"
+        }
+    },
+    "notes": [
+        "The radio of a chip without one, as the ESP32-P4: Wi-Fi and Bluetooth LE over SDIO, SPI or UART, by esp_hosted on both sides. The host and the C6 run the same version of esp_hosted.",
+        "firmware set by program: the component keeps the firmware of the C6 at the esp_hosted of the program's build, by the flash step of the build. A board whose C6 runs a firmware of its own says set tool (or factory), and the component does not change it."
+    ]
+}

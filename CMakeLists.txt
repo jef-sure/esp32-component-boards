@@ -32,7 +32,7 @@ if(IDF_TARGET STREQUAL "linux")
 endif()
 include("${CMAKE_CURRENT_LIST_DIR}/boards/boards.cmake")
 idf_component_register(SRCS "src/boards.c" "src/board_bus.c" "src/board_i2c.c" "src/board_spi.c" "src/board_button.c" "src/board_sound.c" "src/board_touch.c"
-                            "src/board_touch_fw.c" "src/board_display_none.c" "src/board_volume.c" "src/board_button_find.c"
+                            "src/board_touch_fw.c" "src/board_display_none.c" "src/board_volume.c" "src/board_button_find.c" "src/board_radio.c"
                        INCLUDE_DIRS "include" ${BOARDS_ADAPTER_INCLUDES}
                        PRIV_INCLUDE_DIRS "src" ${BOARDS_ADAPTER_DIRS}
                        PRIV_REQUIRES esp_driver_i2c esp_driver_gpio esp_driver_spi nvs_flash)
@@ -131,3 +131,72 @@ unset(_entry)
 unset(_parts)
 unset(_symbol)
 unset(_source)
+
+# The radio beside the chip (an ESP32-C6 of esp_hosted): a step of the flash keeps its firmware at the esp_hosted this
+# build took, when the data says the program sets that firmware. boards/<board>/board.cmake, made by
+# tools/boards_gen.py, names the radio: BOARD_RADIO_TARGET, BOARD_RADIO_TRANSPORT, BOARD_RADIO_FIRMWARE and
+# BOARD_RADIO_HARDWARE. The facts the step needs go to board_radio.json in the build directory; tools/board_radio.py
+# reads them and builds the update program and the image of the radio only when the radio runs another version.
+# The target is there in every build that flashes, doing nothing for a board with no such radio: a pre-flash task left in a
+# preset of VS Code finds it either way.
+if(TARGET flash AND NOT CMAKE_BUILD_EARLY_EXPANSION)
+    idf_build_get_property(_boards_components BUILD_COMPONENTS)
+    if(NOT BOARD_RADIO_FIRMWARE STREQUAL "program" OR NOT "espressif__esp_hosted" IN_LIST _boards_components)
+        add_custom_target(board_radio)
+    else()
+        idf_build_get_property(_boards_build_dir BUILD_DIR)
+        idf_build_get_property(_boards_python PYTHON)
+        idf_build_get_property(_boards_project PROJECT_NAME)
+        idf_component_get_property(_boards_hosted_dir espressif__esp_hosted COMPONENT_DIR)
+        idf_component_get_property(_boards_hosted_version espressif__esp_hosted COMPONENT_VERSION)
+        # what the update program shares with the program: the revision of the chip it is built for, the flash, the table
+        string(TOUPPER "${IDF_TARGET}" _boards_chip)
+        set(_boards_lines "[]")
+        set(_boards_host "CONFIG_${_boards_chip}_REV_MIN_${CONFIG_${_boards_chip}_REV_MIN_FULL}=y"
+                         "CONFIG_ESPTOOLPY_FLASHSIZE_${CONFIG_ESPTOOLPY_FLASHSIZE}=y"
+                         "CONFIG_PARTITION_TABLE_OFFSET=${CONFIG_PARTITION_TABLE_OFFSET}"
+                         "CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_${CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ}=y")
+        if(CONFIG_${_boards_chip}_SELECTS_REV_LESS_V3)
+            list(APPEND _boards_host "CONFIG_${_boards_chip}_SELECTS_REV_LESS_V3=y")
+        endif()
+        set(_boards_count 0)
+        foreach(_boards_line ${_boards_host})
+            string(JSON _boards_lines SET "${_boards_lines}" ${_boards_count} "\"${_boards_line}\"")
+            math(EXPR _boards_count "${_boards_count} + 1")
+        endforeach()
+        set(_boards_board "${BOARD}")
+        if(NOT _boards_board)
+            set(_boards_board "${BOARD_RADIO_HARDWARE}")
+        endif()
+        file(TO_CMAKE_PATH "${_boards_build_dir}" _boards_build_dir)
+        file(TO_CMAKE_PATH "${_boards_hosted_dir}" _boards_hosted_dir)
+        string(JSON _boards_facts SET "{}" "board" "\"${_boards_board}\"")
+        string(JSON _boards_facts SET "${_boards_facts}" "hardware" "\"${BOARD_RADIO_HARDWARE}\"")
+        string(JSON _boards_facts SET "${_boards_facts}" "build_dir" "\"${_boards_build_dir}\"")
+        string(JSON _boards_facts SET "${_boards_facts}" "project_name" "\"${_boards_project}\"")
+        string(JSON _boards_facts SET "${_boards_facts}" "radio"
+               "{\"target\": \"${BOARD_RADIO_TARGET}\", \"transport\": \"${BOARD_RADIO_TRANSPORT}\", \"firmware\": \"${BOARD_RADIO_FIRMWARE}\"}")
+        string(JSON _boards_facts SET "${_boards_facts}" "esp_hosted"
+               "{\"dir\": \"${_boards_hosted_dir}\", \"version\": \"${_boards_hosted_version}\"}")
+        string(JSON _boards_facts SET "${_boards_facts}" "host" "{\"target\": \"${IDF_TARGET}\", \"lines\": ${_boards_lines}}")
+        file(WRITE "${_boards_build_dir}/board_radio.json" "${_boards_facts}\n")
+        # idf.py flash names the port in ESPPORT; the ESP-IDF extension of VS Code runs this target before its own flash
+        add_custom_target(board_radio
+                          COMMAND "${_boards_python}" "${COMPONENT_DIR}/tools/board_radio.py" "${_boards_build_dir}/board_radio.json"
+                          USES_TERMINAL VERBATIM)
+        add_dependencies(flash board_radio)
+    endif()
+endif()
+unset(_boards_components)
+unset(_boards_build_dir)
+unset(_boards_python)
+unset(_boards_project)
+unset(_boards_hosted_dir)
+unset(_boards_hosted_version)
+unset(_boards_chip)
+unset(_boards_lines)
+unset(_boards_host)
+unset(_boards_count)
+unset(_boards_line)
+unset(_boards_board)
+unset(_boards_facts)

@@ -6,7 +6,7 @@ the page; the importers need `jsonschema`. Run them from the root of the reposit
 `managed_components/jef-sure__boards/`).
 
 The package of the registry carries the tools a program uses: `board_select.py`, `board_project.py`,
-`board_pins.py`, `board_bom.py`, `board_calibration.py`, `boards_mcp.py`, and `boards_gen.py`, `project_writer.py`,
+`board_pins.py`, `board_bom.py`, `board_calibration.py`, `boards_mcp.py`, `board_radio.py`, and `boards_gen.py`, `project_writer.py`,
 `resolve.py` and `rules.py`, which they import. The checks, the importers, `audit.py`, `make_mcu.py`, `update_rates.py`,
 `take_report.py` and `sync_versions.py` are for the repository: they need `test/`, ESP-IDF or the network.
 
@@ -124,6 +124,17 @@ of the current board into `sdkconfig.defaults` too, and every board reads that f
 for what changed in `sdkconfig.<board>` since the one before (`board_select.py --auto-keep <board>`): a snapshot of the
 `sdkconfig` of each board lies in `.boards/` of the project. An option a board left as it was, as an older `sdkconfig`
 of another board with an older value, is not taken back.
+
+## board_radio.py
+
+```sh
+python3 tools/board_radio.py build/<board>/board_radio.json    # with ESPPORT: the port of the board
+```
+
+The step of the flash for a board with a radio beside the chip (an ESP32-C6 of esp_hosted): it brings the firmware of the
+radio to the esp_hosted of the build. `idf.py flash` runs it through the target `board_radio`, and the Flash of the
+ESP-IDF extension of VS Code through the pre-flash task `board_select.py` writes into the preset. `BOARD_RADIO_FORCE=1`
+checks the radio again and flashes a board remembered as other hardware. See [radio.md](radio.md).
 
 ## board_project.py
 

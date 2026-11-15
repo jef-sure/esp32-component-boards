@@ -39,8 +39,16 @@
             "level": "hardware",
             "covers": ["chips.ld2410c"],
             "by": "the author of the library, on the bench",
-            "source": "README.md of esp32-component-ld2410c",
-            "notes": "No trial on hardware is written down: host tests only.",
+            "date": "2026-04-21",
+            "source": "the word of the author on 2026-11-15; the test program esp-ld2410c/examples of the author, its last build of 2026-04-21 by the time of its files",
+            "notes": "An HLK-LD2410C on an ESP32 DevKit with a test program, on the driver in the program's own main/, from which the component started on 2026-04-17, before its first tagged version. What was seen is not written down."
+        },
+        "ld2410c_since": {
+            "level": "hardware",
+            "covers": ["chips.ld2410c"],
+            "by": "the author of the library, on the bench",
+            "source": "README.md and the tags of esp32-component-ld2410c",
+            "notes": "The versions of the component, 0.1.2 of 2026-10-06 on, have host tests only: they are still to be tried on hardware.",
             "result": "pending"
         }
     }

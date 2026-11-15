@@ -1,6 +1,6 @@
 # CHANGES
 
-## 0.2.1 (not released yet)
+## 0.2.1 (2026-11-15)
 
 - The configuration says when `IDF_COMPONENT_LOCAL_STORAGE_URL` names a copy of the registry, as the installer of
   ESP-IDF leaves it: it prints one line while the variable is set, and the step of the flash, when it writes an older
@@ -35,6 +35,7 @@
   board that touches at most what differs in the data, and the handwritten clock as such a program. It names the
   radio among the parts of a board, the libraries the component starts, the ranges of versions, and two ways on
   Windows, not tried yet.
+- The recipes take the component as `^0.2.1`.
 
 ## 0.2.0 (2026-11-15)
 

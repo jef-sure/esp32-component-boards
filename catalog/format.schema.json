@@ -568,6 +568,7 @@
         "class": { "$ref": "#/$defs/class" },
         "maker": { "$ref": "#/$defs/maker" },
         "part": { "type": "string", "minLength": 1, "description": "The maker's part number; a family says it in each variant." },
+        "names": { "type": "array", "items": { "type": "string", "pattern": "^[a-z0-9_]+$" }, "description": "Other names libraries and people write for the chip, as rc522 for the MFRC522: tools/import_libraries.py lists a library that names one of them for this chip, as it does for the name of the file and of each variant." },
         "compat": { "$ref": "#/$defs/compat" },
         "draw": { "$ref": "#/$defs/draw" },
         "on": { "$ref": "#/$defs/on" },

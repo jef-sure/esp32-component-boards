@@ -56,7 +56,7 @@
         {
             "board": "esp32_p4_eth",
             "edge": "left",
-            "title": "PN532"
+            "title": "RC522"
         },
         {
             "board": "esp32_p4_eth",

@@ -14,7 +14,7 @@
     "edges": {
         "board": "esp32_s3_zero",
         "edge": "bottom",
-        "title": "PN532"
+        "title": "RC522"
     },
     "says": "SPI2 is not on the pins of its IO MUX, to keep side A: through the GPIO matrix up to 40 MHz"
 }

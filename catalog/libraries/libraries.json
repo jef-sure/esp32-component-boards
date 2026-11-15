@@ -1,5 +1,5 @@
 {
-    "date": "2026-11-02",
+    "date": "2026-11-15",
     "order": "Listed by name, and nothing here ranks them: stars and dates are shown and decide nothing. Only an audit of the code against an open rubric does.",
     "libraries": {
         "arduino/0015/ov5640-auto-focus-for-esp32-camera": {
@@ -8,7 +8,7 @@
             "repository": "https://github.com/0015/ESP32-OV5640-AF.git",
             "platforms": ["arduino_esp32"],
             "chips": ["ov5640"],
-            "stars": 171,
+            "stars": 172,
             "changed": "2024-05-10",
             "archived": false,
             "license": "MIT"
@@ -326,8 +326,30 @@
             "repository": "https://github.com/7semi-solutions/7Semi_TMAG5273-3D-Hall-Effect-Sensor.git",
             "platforms": ["arduino_esp32"],
             "chips": ["tmag5273"],
-            "stars": 0,
+            "stars": 1,
             "changed": "2026-04-10",
+            "archived": false,
+            "license": "MIT"
+        },
+        "arduino/abdulbasitkhatri/oled_display_ssd1306": {
+            "title": "OLED_Display_SSD1306",
+            "version": "1.1.0",
+            "repository": "https://github.com/AbdulBasitKhatri/OLED_Display_SSD1306.git",
+            "platforms": ["arduino_esp32"],
+            "chips": ["ssd1306"],
+            "stars": 0,
+            "changed": "2024-07-13",
+            "archived": false,
+            "license": "NOASSERTION"
+        },
+        "arduino/acrobotic/acrobotic-ssd1306": {
+            "title": "ACROBOTIC SSD1306",
+            "version": "1.0.1",
+            "repository": "https://github.com/acrobotic/Ai_Ardulib_SSD1306.git",
+            "platforms": ["arduino_esp32"],
+            "chips": ["ssd1306"],
+            "stars": 75,
+            "changed": "2022-06-09",
             "archived": false,
             "license": "MIT"
         },
@@ -398,7 +420,7 @@
             "platforms": ["arduino_esp32"],
             "chips": ["adxl345"],
             "requires": ["arduino/adafruit/adafruit-busio", "arduino/adafruit/adafruit-unified-sensor"],
-            "stars": 138,
+            "stars": 139,
             "changed": "2024-04-06",
             "archived": false,
             "license": "NOASSERTION"
@@ -557,7 +579,7 @@
             "platforms": ["arduino_esp32"],
             "chips": ["bme280"],
             "requires": ["arduino/adafruit/adafruit-busio", "arduino/adafruit/adafruit-unified-sensor"],
-            "stars": 396,
+            "stars": 395,
             "changed": "2025-04-30",
             "archived": false,
             "license": "NOASSERTION"
@@ -574,7 +596,7 @@
                 "arduino/adafruit/adafruit-ssd1306",
                 "arduino/adafruit/adafruit-unified-sensor"
             ],
-            "stars": 140,
+            "stars": 139,
             "changed": "2026-03-03",
             "archived": false
         },
@@ -653,7 +675,7 @@
             "platforms": ["arduino_esp32", "esp_idf"],
             "chips": [],
             "audited": ["1.17.4"],
-            "stars": 386,
+            "stars": 390,
             "changed": "2025-09-22",
             "archived": false,
             "license": "MIT"
@@ -763,8 +785,8 @@
             "platforms": ["arduino_esp32"],
             "chips": [],
             "requires": ["arduino/adafruit/adafruit-gfx-library"],
-            "stars": 182,
-            "changed": "2026-10-23",
+            "stars": 183,
+            "changed": "2026-11-13",
             "archived": false,
             "license": "MIT"
         },
@@ -808,8 +830,8 @@
             "platforms": ["arduino_esp32"],
             "chips": [],
             "requires": ["arduino/adafruit/adafruit-busio"],
-            "stars": 2865,
-            "changed": "2026-10-30",
+            "stars": 2874,
+            "changed": "2026-11-15",
             "archived": false,
             "license": "NOASSERTION"
         },
@@ -831,7 +853,7 @@
             "repository": "https://github.com/adafruit/Adafruit_GPS.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
-            "stars": 497,
+            "stars": 496,
             "changed": "2026-09-16",
             "archived": false,
             "license": "NOASSERTION"
@@ -888,7 +910,7 @@
             "repository": "https://github.com/adafruit/Adafruit_HX711.git",
             "platforms": ["arduino_esp32"],
             "chips": ["hx711"],
-            "stars": 2,
+            "stars": 3,
             "changed": "2024-12-03",
             "archived": false,
             "license": "MIT"
@@ -956,7 +978,7 @@
                 "arduino/adafruit/adafruit-st7735-and-st7789-library",
                 "arduino/adafruit/sdfat---adafruit-fork"
             ],
-            "stars": 141,
+            "stars": 142,
             "changed": "2026-08-05",
             "archived": false
         },
@@ -972,7 +994,7 @@
                 "arduino/adafruit/adafruit-neopixel",
                 "arduino/adafruit/adafruit-ssd1306"
             ],
-            "stars": 233,
+            "stars": 234,
             "changed": "2023-11-15",
             "archived": false,
             "license": "NOASSERTION"
@@ -1308,7 +1330,7 @@
             "platforms": ["arduino_esp32"],
             "chips": ["mlx90632"],
             "requires": ["arduino/adafruit/adafruit-busio"],
-            "stars": 1,
+            "stars": 2,
             "changed": "2026-08-07",
             "archived": false,
             "license": "MIT"
@@ -1435,8 +1457,8 @@
             "repository": "https://github.com/adafruit/Adafruit_NeoPixel.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
-            "stars": 3432,
-            "changed": "2026-05-12",
+            "stars": 3436,
+            "changed": "2026-11-12",
             "archived": false,
             "license": "LGPL-3.0"
         },
@@ -1494,7 +1516,7 @@
             "platforms": ["arduino_esp32"],
             "chips": [],
             "requires": ["arduino/adafruit/adafruit-lis3dh", "arduino/adafruit/adafruit-unified-sensor"],
-            "stars": 91,
+            "stars": 92,
             "changed": "2023-11-15",
             "archived": false
         },
@@ -1506,7 +1528,7 @@
             "chips": ["pn532"],
             "requires": ["arduino/adafruit/adafruit-busio"],
             "audited": ["1.3.4", "1.3.4"],
-            "stars": 491,
+            "stars": 493,
             "changed": "2025-02-18",
             "archived": false,
             "license": "NOASSERTION"
@@ -1624,7 +1646,7 @@
             "platforms": ["arduino_esp32"],
             "chips": [],
             "requires": ["arduino/adafruit/adafruit-busio", "arduino/adafruit/adafruit-gfx-library"],
-            "stars": 109,
+            "stars": 108,
             "changed": "2026-08-12",
             "archived": false,
             "license": "NOASSERTION"
@@ -1636,7 +1658,7 @@
             "platforms": ["arduino_esp32"],
             "chips": ["sht31"],
             "requires": ["arduino/adafruit/adafruit-busio"],
-            "stars": 108,
+            "stars": 109,
             "changed": "2023-07-25",
             "archived": false,
             "license": "NOASSERTION"
@@ -1653,7 +1675,7 @@
                 "arduino/adafruit/adafruit-ssd1306",
                 "arduino/adafruit/adafruit-unified-sensor"
             ],
-            "stars": 18,
+            "stars": 19,
             "changed": "2024-07-30",
             "archived": false,
             "license": "NOASSERTION"
@@ -1700,8 +1722,8 @@
             "platforms": ["arduino_esp32"],
             "chips": [],
             "requires": ["arduino/adafruit/adafruit-neopixel", "arduino/adafruit/sdfat---adafruit-fork"],
-            "stars": 197,
-            "changed": "2026-10-28",
+            "stars": 198,
+            "changed": "2026-11-12",
             "archived": false,
             "license": "MIT"
         },
@@ -1710,10 +1732,10 @@
             "version": "2.5.17",
             "repository": "https://github.com/adafruit/Adafruit_SSD1306.git",
             "platforms": ["arduino_esp32"],
-            "chips": [],
+            "chips": ["ssd1306"],
             "requires": ["arduino/adafruit/adafruit-gfx-library"],
-            "stars": 2121,
-            "changed": "2026-05-29",
+            "stars": 2126,
+            "changed": "2026-11-13",
             "archived": false,
             "license": "NOASSERTION"
         },
@@ -1734,14 +1756,14 @@
             "version": "1.3.3",
             "repository": "https://github.com/adafruit/Adafruit-SSD1351-library.git",
             "platforms": ["arduino_esp32"],
-            "chips": [],
+            "chips": ["ssd1351"],
             "requires": [
                 "arduino/adafruit/adafruit-busio",
                 "arduino/adafruit/adafruit-gfx-library",
                 "arduino/adafruit/adafruit-ili9341"
             ],
             "stars": 150,
-            "changed": "2026-10-21",
+            "changed": "2026-11-04",
             "archived": false,
             "license": "NOASSERTION"
         },
@@ -1842,8 +1864,8 @@
                 "arduino/adafruit/sdfat---adafruit-fork",
                 "arduino/fortyseveneffects/midi-library"
             ],
-            "stars": 653,
-            "changed": "2026-11-02",
+            "stars": 654,
+            "changed": "2026-11-13",
             "archived": false,
             "license": "MIT"
         },
@@ -1854,7 +1876,7 @@
             "platforms": ["arduino_esp32"],
             "chips": ["tmag5273"],
             "requires": ["arduino/adafruit/adafruit-busio", "arduino/adafruit/adafruit-unified-sensor"],
-            "stars": 0,
+            "stars": 1,
             "changed": "2026-03-19",
             "archived": false,
             "license": "MIT"
@@ -1915,7 +1937,7 @@
             "repository": "https://github.com/adafruit/Adafruit_TouchScreen.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
-            "stars": 334,
+            "stars": 333,
             "changed": "2025-09-09",
             "archived": false,
             "license": "NOASSERTION"
@@ -1974,7 +1996,7 @@
             "platforms": ["arduino_esp32"],
             "chips": ["tsl2591"],
             "requires": ["arduino/adafruit/adafruit-busio", "arduino/adafruit/adafruit-unified-sensor"],
-            "stars": 67,
+            "stars": 68,
             "changed": "2023-11-15",
             "archived": false
         },
@@ -1984,7 +2006,7 @@
             "repository": "https://github.com/adafruit/Adafruit_Sensor.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
-            "stars": 1071,
+            "stars": 1072,
             "changed": "2026-10-01",
             "archived": false,
             "license": "Apache-2.0"
@@ -2020,7 +2042,7 @@
             "platforms": ["arduino_esp32"],
             "chips": ["vcnl4040"],
             "requires": ["arduino/adafruit/adafruit-busio"],
-            "stars": 12,
+            "stars": 13,
             "changed": "2025-03-18",
             "archived": false,
             "license": "NOASSERTION"
@@ -2091,7 +2113,7 @@
             "chips": ["vs1053"],
             "requires": ["arduino/adafruit/adafruit-busio", "arduino/arduino-libraries/sd"],
             "stars": 152,
-            "changed": "2025-12-09",
+            "changed": "2026-11-06",
             "archived": false
         },
         "arduino/adafruit/adafruit-waveplayer-library": {
@@ -2131,7 +2153,7 @@
                 "arduino/adafruit/adafruit-ili9341",
                 "arduino/adafruit/adafruit-zero-pdm-library"
             ],
-            "stars": 45,
+            "stars": 46,
             "changed": "2023-12-06",
             "archived": false,
             "license": "BSD-3-Clause"
@@ -2193,7 +2215,7 @@
             "repository": "https://github.com/adafruit/Audio.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
-            "stars": 70,
+            "stars": 71,
             "changed": "2022-10-22",
             "archived": false
         },
@@ -2204,7 +2226,7 @@
             "platforms": ["arduino_esp32"],
             "chips": [],
             "requires": ["arduino/adafruit/adafruit-unified-sensor"],
-            "stars": 2174,
+            "stars": 2178,
             "changed": "2026-03-03",
             "archived": false,
             "license": "MIT"
@@ -2238,7 +2260,7 @@
             "platforms": ["arduino_esp32"],
             "chips": [],
             "requires": ["arduino/adafruit/adafruit-busio"],
-            "stars": 860,
+            "stars": 858,
             "changed": "2024-06-28",
             "archived": false,
             "license": "MIT"
@@ -2328,7 +2350,7 @@
             "repository": "https://github.com/alkonosst/ADS1115.git",
             "platforms": ["arduino_esp32"],
             "chips": ["ads1115"],
-            "stars": 8,
+            "stars": 10,
             "changed": "2025-11-24",
             "archived": false,
             "license": "MIT"
@@ -2434,7 +2456,7 @@
             "repository": "https://github.com/arduino-libraries/Arduino_BMI270_BMM150.git",
             "platforms": ["arduino_esp32"],
             "chips": ["bmi270"],
-            "stars": 25,
+            "stars": 26,
             "changed": "2026-09-27",
             "archived": false,
             "license": "LGPL-2.1"
@@ -2576,8 +2598,8 @@
             "repository": "https://github.com/bblanchon/ArduinoJson.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
-            "stars": 7242,
-            "changed": "2026-10-13",
+            "stars": 7246,
+            "changed": "2026-11-13",
             "archived": false,
             "license": "MIT"
         },
@@ -2603,13 +2625,25 @@
             "archived": false,
             "license": "Apache-2.0"
         },
+        "arduino/bitbank2/bb_scd41": {
+            "title": "bb_scd41",
+            "version": "1.3.3",
+            "repository": "https://github.com/bitbank2/bb_scd41.git",
+            "platforms": ["arduino_esp32"],
+            "chips": ["scd4x"],
+            "requires": ["arduino/bitbank2/bitbang_i2c"],
+            "stars": 6,
+            "changed": "2026-03-04",
+            "archived": false,
+            "license": "Apache-2.0"
+        },
         "arduino/bitbank2/bitbang_i2c": {
             "title": "BitBang_I2C",
             "version": "2.2.1",
             "repository": "https://github.com/bitbank2/BitBang_I2C.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
-            "stars": 280,
+            "stars": 281,
             "changed": "2026-04-01",
             "archived": false,
             "license": "GPL-3.0"
@@ -2674,7 +2708,7 @@
             "platforms": ["arduino_esp32"],
             "chips": [],
             "requires": ["arduino/blynk-technologies/blynkncpdriver"],
-            "stars": 4001,
+            "stars": 4004,
             "changed": "2026-10-06",
             "archived": false,
             "license": "MIT"
@@ -2707,7 +2741,7 @@
             "repository": "https://github.com/bogde/HX711.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
-            "stars": 992,
+            "stars": 995,
             "changed": "2023-05-10",
             "archived": false,
             "license": "MIT"
@@ -2718,7 +2752,7 @@
             "repository": "https://github.com/bolderflight/BME280.git",
             "platforms": ["arduino_esp32"],
             "chips": ["bme280"],
-            "stars": 23,
+            "stars": 22,
             "changed": "2022-10-11",
             "archived": false,
             "license": "NOASSERTION"
@@ -2729,7 +2763,7 @@
             "repository": "https://github.com/bolderflight/MPU9250.git",
             "platforms": ["arduino_esp32"],
             "chips": ["mpu9250"],
-            "stars": 570,
+            "stars": 574,
             "changed": "2026-08-24",
             "archived": false,
             "license": "MIT"
@@ -2753,6 +2787,39 @@
             "chips": ["sht31"],
             "stars": 0,
             "changed": "2026-10-24",
+            "archived": false,
+            "license": "MIT"
+        },
+        "arduino/bonezegei/bonezegei_74hc595": {
+            "title": "Bonezegei_74HC595",
+            "version": "1.0.0",
+            "repository": "https://github.com/bonezegei/Bonezegei_74HC595.git",
+            "platforms": ["arduino_esp32"],
+            "chips": ["hc595"],
+            "stars": 0,
+            "changed": "2025-11-04",
+            "archived": false,
+            "license": "MIT"
+        },
+        "arduino/bonezegei/bonezegei_aht20": {
+            "title": "Bonezegei_AHT20",
+            "version": "1.0.0",
+            "repository": "https://github.com/bonezegei/Bonezegei_AHT20.git",
+            "platforms": ["arduino_esp32"],
+            "chips": ["aht20"],
+            "stars": 0,
+            "changed": "2026-11-11",
+            "archived": false,
+            "license": "MIT"
+        },
+        "arduino/bonezegei/bonezegei_bh1750": {
+            "title": "Bonezegei_BH1750",
+            "version": "1.0.0",
+            "repository": "https://github.com/bonezegei/Bonezegei_BH1750.git",
+            "platforms": ["arduino_esp32"],
+            "chips": ["bh1750"],
+            "stars": 0,
+            "changed": "2026-11-09",
             "archived": false,
             "license": "MIT"
         },
@@ -2900,6 +2967,39 @@
             "archived": false,
             "license": "MIT"
         },
+        "arduino/bonezegei/bonezegei_pn532": {
+            "title": "Bonezegei_PN532",
+            "version": "1.0.0",
+            "repository": "https://github.com/bonezegei/Bonezegei_PN532.git",
+            "platforms": ["arduino_esp32"],
+            "chips": ["pn532"],
+            "stars": 0,
+            "changed": "2026-11-02",
+            "archived": false,
+            "license": "MIT"
+        },
+        "arduino/bonezegei/bonezegei_rc522": {
+            "title": "Bonezegei_RC522",
+            "version": "1.0.0",
+            "repository": "https://github.com/bonezegei/Bonezegei_RC522.git",
+            "platforms": ["arduino_esp32"],
+            "chips": ["mfrc522"],
+            "stars": 0,
+            "changed": "2026-10-14",
+            "archived": false,
+            "license": "MIT"
+        },
+        "arduino/bonezegei/bonezegei_ssd1306": {
+            "title": "Bonezegei_SSD1306",
+            "version": "1.0.6",
+            "repository": "https://github.com/bonezegei/Bonezegei_SSD1306.git",
+            "platforms": ["arduino_esp32"],
+            "chips": ["ssd1306"],
+            "stars": 3,
+            "changed": "2025-11-12",
+            "archived": false,
+            "license": "MIT"
+        },
         "arduino/bonezegei/bonezegei_utility": {
             "title": "Bonezegei_Utility",
             "version": "1.1.8",
@@ -2916,7 +3016,7 @@
             "version": "1.0.4",
             "repository": "https://github.com/bonezegei/Bonezegei_WS2812.git",
             "platforms": ["arduino_esp32"],
-            "chips": ["ws2812"],
+            "chips": ["ws2812", "ws2812b"],
             "stars": 5,
             "changed": "2024-02-20",
             "archived": false,
@@ -2973,7 +3073,7 @@
             "repository": "https://github.com/bxparks/AUnit.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
-            "stars": 197,
+            "stars": 198,
             "changed": "2025-01-20",
             "archived": false,
             "license": "MIT"
@@ -3008,7 +3108,7 @@
             "repository": "https://github.com/CelliesProjects/ESP32_VS1053_Stream.git",
             "platforms": ["arduino_esp32"],
             "chips": ["vs1053"],
-            "stars": 145,
+            "stars": 146,
             "changed": "2026-10-28",
             "archived": false,
             "license": "MIT"
@@ -3062,7 +3162,7 @@
             "repository": "https://github.com/coryjfowler/MCP_CAN_lib.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
-            "stars": 821,
+            "stars": 822,
             "changed": "2025-03-13",
             "archived": false,
             "license": "LGPL-3.0"
@@ -3130,7 +3230,7 @@
             "chips": [],
             "requires": ["arduino/dejwk/roo_backport", "arduino/dejwk/roo_logging", "arduino/dejwk/roo_threads"],
             "stars": 0,
-            "changed": "2026-10-30",
+            "changed": "2026-11-09",
             "archived": false,
             "license": "MIT"
         },
@@ -3147,31 +3247,31 @@
                 "arduino/dejwk/roo_time"
             ],
             "stars": 2,
-            "changed": "2026-09-26",
+            "changed": "2026-11-08",
             "archived": false,
             "license": "MIT"
         },
         "arduino/dejwk/roo_threads": {
             "title": "roo_threads",
-            "version": "1.2.9",
+            "version": "1.3.0",
             "repository": "https://github.com/dejwk/roo_threads.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
             "requires": ["arduino/dejwk/roo_time"],
             "stars": 0,
-            "changed": "2026-10-13",
+            "changed": "2026-11-06",
             "archived": false,
             "license": "MIT"
         },
         "arduino/dejwk/roo_time": {
             "title": "roo_time",
-            "version": "2.0.2",
+            "version": "2.1.0",
             "repository": "https://github.com/dejwk/roo_time.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
             "requires": ["arduino/dejwk/roo_backport"],
             "stars": 0,
-            "changed": "2026-11-02",
+            "changed": "2026-11-10",
             "archived": false,
             "license": "MIT"
         },
@@ -3183,7 +3283,7 @@
             "chips": ["ds3231"],
             "requires": ["arduino/dejwk/roo_io", "arduino/dejwk/roo_time"],
             "stars": 0,
-            "changed": "2026-09-19",
+            "changed": "2026-11-05",
             "archived": false,
             "license": "MIT"
         },
@@ -3490,7 +3590,7 @@
             "repository": "https://github.com/DFRobot/DFRobot_SCD4X.git",
             "platforms": ["arduino_esp32"],
             "chips": ["scd4x"],
-            "stars": 2,
+            "stars": 3,
             "changed": "2023-03-31",
             "archived": false,
             "license": "MIT"
@@ -3552,7 +3652,7 @@
             "repository": "https://github.com/dhrubasaha08/DHT11.git",
             "platforms": ["arduino_esp32"],
             "chips": ["dht11"],
-            "stars": 73,
+            "stars": 74,
             "changed": "2026-07-27",
             "archived": false,
             "license": "MIT"
@@ -3627,6 +3727,17 @@
             "archived": false,
             "license": "GPL-3.0"
         },
+        "arduino/diyables/diyables_4digit7segment_74hc595": {
+            "title": "DIYables_4Digit7Segment_74HC595",
+            "version": "2.0.0",
+            "repository": "https://github.com/DIYables/DIYables_4Digit7Segment_74HC595.git",
+            "platforms": ["arduino_esp32"],
+            "chips": ["hc595"],
+            "stars": 13,
+            "changed": "2026-04-18",
+            "archived": false,
+            "license": "BSD-3-Clause"
+        },
         "arduino/diyables/diyables_ds18b20": {
             "title": "DIYables_DS18B20",
             "version": "1.0.0",
@@ -3667,10 +3778,20 @@
             "repository": "https://github.com/duinoWitchery/hd44780.git",
             "platforms": ["arduino_esp32"],
             "chips": ["hd44780"],
-            "stars": 281,
+            "stars": 282,
             "changed": "2022-12-11",
             "archived": false,
             "license": "GPL-3.0"
+        },
+        "arduino/durydevelop/oled-ssd1306---sh1106": {
+            "title": "OLED SSD1306 - SH1106",
+            "version": "1.0.7",
+            "repository": "https://github.com/durydevelop/arduino-lib-oled.git",
+            "platforms": ["arduino_esp32"],
+            "chips": ["ssd1306"],
+            "stars": 53,
+            "changed": "2022-12-23",
+            "archived": false
         },
         "arduino/dvarrel/aht20": {
             "title": "AHT20",
@@ -3711,7 +3832,7 @@
             "repository": "https://github.com/earlephilhower/ESP8266Audio.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
-            "stars": 2413,
+            "stars": 2417,
             "changed": "2026-10-07",
             "archived": false,
             "license": "GPL-3.0"
@@ -3721,10 +3842,21 @@
             "version": "1.0.2",
             "repository": "https://github.com/Eason-SYC/WS2812_SYC_Air001.git",
             "platforms": ["arduino_esp32"],
-            "chips": ["ws2812"],
+            "chips": ["ws2812", "ws2812b"],
             "stars": 5,
             "changed": "2025-10-05",
             "archived": false,
+            "license": "MIT"
+        },
+        "arduino/elc0mpa/oled_ssd1306_chart": {
+            "title": "OLED_SSD1306_Chart",
+            "version": "1.3.2",
+            "repository": "https://github.com/elC0mpa/OLED_SSD1306_Chart.git",
+            "platforms": ["arduino_esp32"],
+            "chips": ["ssd1306"],
+            "stars": 66,
+            "changed": "2022-05-04",
+            "archived": true,
             "license": "MIT"
         },
         "arduino/electroniccats/mpu6050": {
@@ -3792,9 +3924,9 @@
             "version": "1.0.4",
             "repository": "https://github.com/esp-arduino-libs/ESP32_Display_Panel.git",
             "platforms": ["arduino_esp32"],
-            "chips": ["gt911", "ili9341", "jd9165", "jd9365", "st77916", "xpt2046"],
+            "chips": ["gc9a01", "gt911", "ili9341", "jd9165", "jd9365", "st77916", "xpt2046"],
             "requires": ["arduino/esp-arduino-libs/esp-lib-utils", "arduino/esp-arduino-libs/esp32_io_expander"],
-            "stars": 286,
+            "stars": 287,
             "changed": "2025-10-14",
             "archived": false,
             "license": "Apache-2.0"
@@ -3890,12 +4022,12 @@
         },
         "arduino/fastled/fastled": {
             "title": "FastLED",
-            "version": "3.10.8",
+            "version": "3.10.9",
             "repository": "https://github.com/FastLED/FastLED.git",
             "platforms": ["arduino_esp32"],
-            "chips": [],
-            "stars": 7522,
-            "changed": "2026-11-02",
+            "chips": ["ws2812b"],
+            "stars": 7534,
+            "changed": "2026-11-14",
             "archived": false,
             "license": "MIT"
         },
@@ -3927,7 +4059,7 @@
             "repository": "https://github.com/felis/USB_Host_Shield_2.0.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
-            "stars": 1946,
+            "stars": 1947,
             "changed": "2026-05-21",
             "archived": false
         },
@@ -3937,10 +4069,21 @@
             "repository": "https://github.com/finitespace/BME280.git",
             "platforms": ["arduino_esp32"],
             "chips": ["bme280"],
-            "stars": 249,
+            "stars": 248,
             "changed": "2022-05-27",
             "archived": false,
             "license": "GPL-3.0"
+        },
+        "arduino/fmeng/xdigit7segment_74hc595": {
+            "title": "XDigit7Segment_74HC595",
+            "version": "1.0.0",
+            "repository": "https://github.com/fmeng/XDigit7Segment_74HC595.git",
+            "platforms": ["arduino_esp32"],
+            "chips": ["hc595"],
+            "stars": 0,
+            "changed": "2026-04-20",
+            "archived": false,
+            "license": "Apache-2.0"
         },
         "arduino/fortyseveneffects/midi-library": {
             "title": "MIDI Library",
@@ -3948,7 +4091,7 @@
             "repository": "https://github.com/FortySevenEffects/arduino_midi_library.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
-            "stars": 1819,
+            "stars": 1821,
             "changed": "2023-10-16",
             "archived": false,
             "license": "MIT"
@@ -3969,7 +4112,7 @@
             "version": "2.0.1",
             "repository": "https://github.com/Freenove/Freenove_WS2812_Lib_for_ESP32.git",
             "platforms": ["arduino_esp32"],
-            "chips": ["ws2812"],
+            "chips": ["ws2812", "ws2812b"],
             "stars": 80,
             "changed": "2025-08-28",
             "archived": false,
@@ -3980,7 +4123,7 @@
             "version": "1.0.3",
             "repository": "https://github.com/Freenove/Freenove_WS2812B_RGBLED_Controller.git",
             "platforms": ["arduino_esp32"],
-            "chips": ["ws2812"],
+            "chips": ["ws2812", "ws2812b"],
             "stars": 9,
             "changed": "2021-02-04",
             "archived": false,
@@ -4010,24 +4153,24 @@
         },
         "arduino/gavinlyonsrepo/display16_ltsm": {
             "title": "display16_LTSM",
-            "version": "1.0.2",
+            "version": "1.1.0",
             "repository": "https://github.com/gavinlyonsrepo/display16_LTSM.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
-            "stars": 8,
-            "changed": "2026-09-22",
+            "stars": 9,
+            "changed": "2026-11-15",
             "archived": false,
             "license": "GPL-3.0"
         },
         "arduino/gavinlyonsrepo/gc9a01_ltsm": {
             "title": "GC9A01_LTSM",
-            "version": "1.1.1",
+            "version": "1.1.2",
             "repository": "https://github.com/gavinlyonsrepo/GC9A01_LTSM.git",
             "platforms": ["arduino_esp32"],
             "chips": ["gc9a01"],
             "requires": ["arduino/gavinlyonsrepo/display16_ltsm"],
             "stars": 8,
-            "changed": "2026-09-25",
+            "changed": "2026-11-15",
             "archived": false,
             "license": "NOASSERTION"
         },
@@ -4044,13 +4187,13 @@
         },
         "arduino/gavinlyonsrepo/ili9341_ltsm": {
             "title": "ILI9341_LTSM",
-            "version": "1.1.1",
+            "version": "1.1.2",
             "repository": "https://github.com/gavinlyonsrepo/ILI9341_LTSM.git",
             "platforms": ["arduino_esp32"],
             "chips": ["ili9341"],
             "requires": ["arduino/gavinlyonsrepo/display16_ltsm"],
-            "stars": 3,
-            "changed": "2026-09-25",
+            "stars": 4,
+            "changed": "2026-11-15",
             "archived": false,
             "license": "NOASSERTION"
         },
@@ -4077,6 +4220,29 @@
             "changed": "2026-09-25",
             "archived": false,
             "license": "NOASSERTION"
+        },
+        "arduino/greiman/ssd1306ascii": {
+            "title": "SSD1306Ascii",
+            "version": "1.3.5",
+            "repository": "https://github.com/greiman/SSD1306Ascii.git",
+            "platforms": ["arduino_esp32"],
+            "chips": ["ssd1306"],
+            "stars": 572,
+            "changed": "2023-04-19",
+            "archived": false,
+            "license": "MIT"
+        },
+        "arduino/hakkanr/ssd1306tur": {
+            "title": "SSD1306TUR",
+            "version": "1.0.2",
+            "repository": "https://github.com/HakkanR/SSD1306TUR.git",
+            "platforms": ["arduino_esp32"],
+            "chips": ["ssd1306"],
+            "requires": ["arduino/adafruit/adafruit-ssd1306"],
+            "stars": 3,
+            "changed": "2023-06-13",
+            "archived": false,
+            "license": "GPL-3.0"
         },
         "arduino/hasenradball/am2302-sensor": {
             "title": "AM2302-Sensor",
@@ -4237,6 +4403,18 @@
             "archived": false,
             "license": "MIT"
         },
+        "arduino/infinitecoder01/buffered-oreon-ssd1351": {
+            "title": "Buffered Oreon SSD1351",
+            "version": "2.0.0",
+            "repository": "https://github.com/InfiniteCoder01/BufferedOreonSSD1351.git",
+            "platforms": ["arduino_esp32"],
+            "chips": ["ssd1351"],
+            "requires": ["arduino/ivanseidel/linkedlist"],
+            "stars": 1,
+            "changed": "2026-03-22",
+            "archived": false,
+            "license": "MIT"
+        },
         "arduino/italia/cie-pn532": {
             "title": "CIE-PN532",
             "version": "1.0.0",
@@ -4249,6 +4427,17 @@
             "changed": "2022-03-20",
             "archived": false,
             "license": "BSD-3-Clause"
+        },
+        "arduino/ivanseidel/linkedlist": {
+            "title": "LinkedList",
+            "version": "1.3.3",
+            "repository": "https://github.com/ivanseidel/LinkedList.git",
+            "platforms": ["arduino_esp32"],
+            "chips": [],
+            "stars": 365,
+            "changed": "2024-06-21",
+            "archived": false,
+            "license": "MIT"
         },
         "arduino/jakalada/adxl345": {
             "title": "ADXL345",
@@ -4349,6 +4538,17 @@
             "archived": false,
             "license": "LGPL-3.0"
         },
+        "arduino/jodeenio/74hc595plus": {
+            "title": "74HC595Plus",
+            "version": "1.0.0",
+            "repository": "https://github.com/Jodeenio/74HC595Plus.git",
+            "platforms": ["arduino_esp32"],
+            "chips": ["hc595"],
+            "stars": 3,
+            "changed": "2025-07-31",
+            "archived": false,
+            "license": "MIT"
+        },
         "arduino/jojos1220/adafruit_ina219_mock": {
             "title": "adafruit_ina219_mock",
             "version": "1.0.0",
@@ -4418,9 +4618,9 @@
             "version": "1.4.7",
             "repository": "https://github.com/kitesurfer1404/WS2812FX.git",
             "platforms": ["arduino_esp32"],
-            "chips": ["ws2812"],
+            "chips": ["ws2812", "ws2812b"],
             "requires": ["arduino/adafruit/adafruit-neopixel"],
-            "stars": 1731,
+            "stars": 1730,
             "changed": "2026-07-03",
             "archived": false,
             "license": "MIT"
@@ -4441,7 +4641,7 @@
             "repository": "https://github.com/knolleary/pubsubclient.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
-            "stars": 4015,
+            "stars": 4014,
             "changed": "2026-06-10",
             "archived": false,
             "license": "MIT"
@@ -4475,7 +4675,7 @@
             "repository": "https://github.com/kosme/arduinoFFT.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
-            "stars": 664,
+            "stars": 665,
             "changed": "2025-03-23",
             "archived": false,
             "license": "GPL-3.0"
@@ -4547,6 +4747,17 @@
             "archived": false,
             "license": "MIT"
         },
+        "arduino/lexus2k/ssd1306": {
+            "title": "ssd1306",
+            "version": "1.8.8",
+            "repository": "https://github.com/lexus2k/ssd1306.git",
+            "platforms": ["arduino_esp32"],
+            "chips": ["ssd1306", "ssd1351"],
+            "stars": 824,
+            "changed": "2026-04-04",
+            "archived": false,
+            "license": "MIT"
+        },
         "arduino/linus81/pcf8574_lh": {
             "title": "PCF8574_LH",
             "version": "1.0.1",
@@ -4586,8 +4797,8 @@
             "repository": "https://github.com/lvgl/lvgl.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
-            "stars": 25075,
-            "changed": "2026-11-02",
+            "stars": 25172,
+            "changed": "2026-11-13",
             "archived": false,
             "license": "MIT"
         },
@@ -4597,7 +4808,7 @@
             "repository": "https://github.com/m5stack/M5-ADS1100.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
-            "stars": 1,
+            "stars": 2,
             "changed": "2026-10-29",
             "archived": false,
             "license": "MIT"
@@ -4608,7 +4819,7 @@
             "repository": "https://github.com/m5stack/M5-ADS1115.git",
             "platforms": ["arduino_esp32"],
             "chips": ["ads1115"],
-            "stars": 5,
+            "stars": 8,
             "changed": "2026-10-29",
             "archived": false,
             "license": "MIT"
@@ -4652,7 +4863,7 @@
             "repository": "https://github.com/m5stack/M5-RoverC.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
-            "stars": 11,
+            "stars": 12,
             "changed": "2026-10-29",
             "archived": false,
             "license": "MIT"
@@ -4674,7 +4885,7 @@
             "repository": "https://github.com/m5stack/M5_EzData.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
-            "stars": 8,
+            "stars": 9,
             "changed": "2026-10-29",
             "archived": false,
             "license": "GPL-3.0"
@@ -4759,12 +4970,12 @@
         },
         "arduino/m5stack/m5gfx": {
             "title": "M5GFX",
-            "version": "0.2.36",
+            "version": "0.3.0",
             "repository": "https://github.com/m5stack/M5GFX.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
-            "stars": 388,
-            "changed": "2026-10-30",
+            "stars": 390,
+            "changed": "2026-11-13",
             "archived": false,
             "license": "MIT"
         },
@@ -4775,20 +4986,20 @@
             "platforms": ["arduino_esp32"],
             "chips": [],
             "requires": ["arduino/m5stack/m5utility"],
-            "stars": 3,
+            "stars": 4,
             "changed": "2026-10-29",
             "archived": false,
             "license": "MIT"
         },
         "arduino/m5stack/m5unified": {
             "title": "M5Unified",
-            "version": "0.2.29",
+            "version": "0.3.0",
             "repository": "https://github.com/m5stack/M5Unified.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
             "requires": ["arduino/m5stack/m5gfx"],
-            "stars": 724,
-            "changed": "2026-10-30",
+            "stars": 728,
+            "changed": "2026-11-11",
             "archived": false,
             "license": "MIT"
         },
@@ -4810,7 +5021,7 @@
             "platforms": ["arduino_esp32"],
             "chips": [],
             "requires": ["arduino/m5stack/m5hal", "arduino/m5stack/m5unitunified", "arduino/m5stack/m5utility"],
-            "stars": 2,
+            "stars": 1,
             "changed": "2026-10-29",
             "archived": false,
             "license": "MIT"
@@ -4821,14 +5032,14 @@
             "repository": "https://github.com/m5stack/M5Unit-Encoder.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
-            "stars": 3,
+            "stars": 4,
             "changed": "2026-10-29",
             "archived": false,
             "license": "MIT"
         },
         "arduino/m5stack/m5unit-env": {
             "title": "M5Unit-ENV",
-            "version": "1.7.3",
+            "version": "1.7.4",
             "repository": "https://github.com/m5stack/M5Unit-ENV.git",
             "platforms": ["arduino_esp32"],
             "chips": ["scd4x"],
@@ -4839,7 +5050,7 @@
                 "arduino/m5stack/m5utility"
             ],
             "stars": 58,
-            "changed": "2026-10-29",
+            "changed": "2026-11-12",
             "archived": false,
             "license": "MIT"
         },
@@ -4860,7 +5071,7 @@
             "repository": "https://github.com/m5stack/M5Unit-KMeter.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
-            "stars": 6,
+            "stars": 7,
             "changed": "2026-10-29",
             "archived": false,
             "license": "MIT"
@@ -4882,7 +5093,7 @@
             "repository": "https://github.com/m5stack/M5Unit-PoESP32.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
-            "stars": 3,
+            "stars": 4,
             "changed": "2026-10-29",
             "archived": false,
             "license": "MIT"
@@ -4927,20 +5138,20 @@
             "repository": "https://github.com/m5stack/M5Unit-UHF-RFID.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
-            "stars": 37,
+            "stars": 38,
             "changed": "2026-10-30",
             "archived": false,
             "license": "MIT"
         },
         "arduino/m5stack/m5unitunified": {
             "title": "M5UnitUnified",
-            "version": "0.6.4",
+            "version": "0.6.5",
             "repository": "https://github.com/m5stack/M5UnitUnified.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
             "requires": ["arduino/m5stack/m5hal", "arduino/m5stack/m5utility"],
-            "stars": 34,
-            "changed": "2026-10-29",
+            "stars": 36,
+            "changed": "2026-11-14",
             "archived": false,
             "license": "MIT"
         },
@@ -5089,7 +5300,7 @@
             "repository": "https://github.com/mathertel/LiquidCrystal_PCF8574.git",
             "platforms": ["arduino_esp32"],
             "chips": ["pcf8574"],
-            "stars": 147,
+            "stars": 146,
             "changed": "2026-02-22",
             "archived": false,
             "license": "BSD-3-Clause"
@@ -5102,6 +5313,17 @@
             "chips": ["ds18b20"],
             "stars": 117,
             "changed": "2024-09-29",
+            "archived": false,
+            "license": "MIT"
+        },
+        "arduino/matmunk/liquidcrystal_74hc595": {
+            "title": "LiquidCrystal_74HC595",
+            "version": "1.0.0",
+            "repository": "https://github.com/matmunk/LiquidCrystal_74HC595.git",
+            "platforms": ["arduino_esp32"],
+            "chips": ["hc595"],
+            "stars": 25,
+            "changed": "2019-05-16",
             "archived": false,
             "license": "MIT"
         },
@@ -5199,7 +5421,7 @@
             "repository": "https://github.com/miguelbalboa/rfid.git",
             "platforms": ["arduino_esp32"],
             "chips": ["mfrc522"],
-            "stars": 3045,
+            "stars": 3050,
             "changed": "2026-10-01",
             "archived": false,
             "license": "Unlicense"
@@ -5210,7 +5432,7 @@
             "repository": "https://github.com/mikalhart/TinyGPSPlus.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
-            "stars": 1283,
+            "stars": 1286,
             "changed": "2024-05-20",
             "archived": false
         },
@@ -5230,7 +5452,7 @@
             "repository": "https://github.com/milesburton/Arduino-Temperature-Control-Library.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
-            "stars": 1046,
+            "stars": 1047,
             "changed": "2026-04-12",
             "archived": false,
             "license": "MIT"
@@ -5286,7 +5508,7 @@
             "platforms": ["arduino_esp32"],
             "chips": ["qmc5883p"],
             "stars": 0,
-            "changed": "2026-10-26",
+            "changed": "2026-11-12",
             "archived": false,
             "license": "BSD-3-Clause"
         },
@@ -5423,7 +5645,7 @@
             "repository": "https://github.com/OSSLibraries/Arduino_MFRC522v2.git",
             "platforms": ["arduino_esp32"],
             "chips": ["mfrc522"],
-            "stars": 148,
+            "stars": 150,
             "changed": "2026-10-01",
             "archived": false,
             "license": "LGPL-2.1"
@@ -5467,7 +5689,7 @@
             "repository": "https://github.com/PaulStoffregen/DS1307RTC.git",
             "platforms": ["arduino_esp32"],
             "chips": ["ds1307"],
-            "stars": 152,
+            "stars": 151,
             "changed": "2023-07-06",
             "archived": false
         },
@@ -5477,7 +5699,7 @@
             "repository": "https://github.com/PaulStoffregen/ILI9341_t3.git",
             "platforms": ["arduino_esp32"],
             "chips": ["ili9341"],
-            "stars": 292,
+            "stars": 291,
             "changed": "2023-11-22",
             "archived": false
         },
@@ -5487,7 +5709,7 @@
             "repository": "https://github.com/PaulStoffregen/OneWire.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
-            "stars": 673,
+            "stars": 674,
             "changed": "2025-06-24",
             "archived": false
         },
@@ -5497,7 +5719,7 @@
             "repository": "https://github.com/PaulStoffregen/TimerOne.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
-            "stars": 506,
+            "stars": 505,
             "changed": "2024-09-03",
             "archived": false
         },
@@ -5506,7 +5728,7 @@
             "version": "1.0.0",
             "repository": "https://github.com/PaulStoffregen/WS2812Capture.git",
             "platforms": ["arduino_esp32"],
-            "chips": ["ws2812"],
+            "chips": ["ws2812", "ws2812b"],
             "stars": 13,
             "changed": "2024-10-25",
             "archived": false
@@ -5517,7 +5739,7 @@
             "repository": "https://github.com/PaulStoffregen/XPT2046_Touchscreen.git",
             "platforms": ["arduino_esp32"],
             "chips": ["xpt2046"],
-            "stars": 348,
+            "stars": 349,
             "changed": "2024-06-03",
             "archived": false
         },
@@ -5604,7 +5826,7 @@
             "repository": "https://github.com/pololu/vl53l1x-arduino.git",
             "platforms": ["arduino_esp32"],
             "chips": ["vl53l1x"],
-            "stars": 181,
+            "stars": 182,
             "changed": "2024-05-01",
             "archived": false,
             "license": "NOASSERTION"
@@ -5637,7 +5859,7 @@
             "repository": "https://github.com/Protocentral/protocentral_mlx90632_arduino.git",
             "platforms": ["arduino_esp32"],
             "chips": ["mlx90632"],
-            "stars": 4,
+            "stars": 5,
             "changed": "2020-10-29",
             "archived": false,
             "license": "NOASSERTION"
@@ -6108,7 +6330,7 @@
             "repository": "https://github.com/RobTillaart/PCF8574.git",
             "platforms": ["arduino_esp32"],
             "chips": ["pcf8574"],
-            "stars": 158,
+            "stars": 157,
             "changed": "2026-10-12",
             "archived": false,
             "license": "MIT"
@@ -6220,7 +6442,7 @@
             "repository": "https://github.com/sandeepmistry/arduino-LoRa.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
-            "stars": 1933,
+            "stars": 1938,
             "changed": "2024-06-12",
             "archived": false,
             "license": "MIT"
@@ -6629,6 +6851,17 @@
             "archived": false,
             "license": "GPL-3.0"
         },
+        "arduino/solderedelectronics/soldered-scd43": {
+            "title": "Soldered-SCD43",
+            "version": "1.0.0",
+            "repository": "https://github.com/SolderedElectronics/Soldered-SCD43-Arduino-Library.git",
+            "platforms": ["arduino_esp32"],
+            "chips": ["scd4x"],
+            "stars": 0,
+            "changed": "2026-05-19",
+            "archived": false,
+            "license": "GPL-3.0"
+        },
         "arduino/solderedelectronics/soldered-tca9548a-multiplexer-arduino-library": {
             "title": "Soldered TCA9548A Multiplexer Arduino Library",
             "version": "1.0.0",
@@ -6678,7 +6911,7 @@
             "version": "1.0.0",
             "repository": "https://github.com/SolderedElectronics/Soldered-WS2812-Smart-Leds-Arduino-Library.git",
             "platforms": ["arduino_esp32"],
-            "chips": ["ws2812"],
+            "chips": ["ws2812", "ws2812b"],
             "stars": 0,
             "changed": "2026-07-29",
             "archived": false,
@@ -6689,7 +6922,7 @@
             "version": "1.0.0",
             "repository": "https://github.com/SolderedElectronics/Soldered-WS2812B-Grid-Arduino-Library.git",
             "platforms": ["arduino_esp32"],
-            "chips": ["ws2812"],
+            "chips": ["ws2812", "ws2812b"],
             "stars": 0,
             "changed": "2026-05-18",
             "archived": false,
@@ -6795,7 +7028,7 @@
             "repository": "https://github.com/sparkfun/SparkFun_BME280_Arduino_Library.git",
             "platforms": ["arduino_esp32"],
             "chips": ["bme280"],
-            "stars": 129,
+            "stars": 130,
             "changed": "2026-10-05",
             "archived": false,
             "license": "NOASSERTION"
@@ -6806,7 +7039,7 @@
             "repository": "https://github.com/sparkfun/SparkFun_BMI270_Arduino_Library.git",
             "platforms": ["arduino_esp32"],
             "chips": ["bmi270"],
-            "stars": 29,
+            "stars": 30,
             "changed": "2024-06-26",
             "archived": false,
             "license": "NOASSERTION"
@@ -6940,7 +7173,7 @@
             "repository": "https://github.com/sparkfun/SparkFun_MAX3010x_Sensor_Library.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
-            "stars": 288,
+            "stars": 289,
             "changed": "2024-08-14",
             "archived": false,
             "license": "NOASSERTION"
@@ -6974,7 +7207,7 @@
             "repository": "https://github.com/sparkfun/SparkFun_MLX90632_Arduino_Library.git",
             "platforms": ["arduino_esp32"],
             "chips": ["mlx90632"],
-            "stars": 8,
+            "stars": 9,
             "changed": "2024-06-03",
             "archived": false,
             "license": "NOASSERTION"
@@ -7116,7 +7349,7 @@
             "platforms": ["arduino_esp32"],
             "chips": ["tmag5273"],
             "requires": ["arduino/sparkfun/sparkfun-toolkit"],
-            "stars": 19,
+            "stars": 20,
             "changed": "2025-12-12",
             "archived": false,
             "license": "MIT"
@@ -7171,7 +7404,7 @@
             "repository": "https://github.com/sparkfun/SparkFun_VCNL4040_Arduino_Library.git",
             "platforms": ["arduino_esp32"],
             "chips": ["vcnl4040"],
-            "stars": 8,
+            "stars": 10,
             "changed": "2023-05-08",
             "archived": false,
             "license": "NOASSERTION"
@@ -7389,6 +7622,17 @@
             "archived": false,
             "license": "MIT"
         },
+        "arduino/styropyr0/ssd1306-oled-display": {
+            "title": "SSD1306 OLED Display",
+            "version": "1.0.5",
+            "repository": "https://github.com/styropyr0/oled.h.git",
+            "platforms": ["arduino_esp32"],
+            "chips": ["ssd1306"],
+            "stars": 28,
+            "changed": "2025-11-05",
+            "archived": false,
+            "license": "MIT"
+        },
         "arduino/supratikd/7semi-as7343": {
             "title": "7Semi AS7343",
             "version": "1.0.1",
@@ -7410,6 +7654,16 @@
             "changed": "2023-09-17",
             "archived": false,
             "license": "Apache-2.0"
+        },
+        "arduino/tcl47-github/rc522_uart": {
+            "title": "RC522_UART",
+            "version": "1.0.2",
+            "repository": "https://github.com/TCL47-GITHUB/RC522_UART.git",
+            "platforms": ["arduino_esp32"],
+            "chips": ["mfrc522"],
+            "stars": 1,
+            "changed": "2026-08-10",
+            "archived": false
         },
         "arduino/teacher-heiko/mpu6050classroom": {
             "title": "MPU6050Classroom",
@@ -7455,6 +7709,17 @@
             "archived": false,
             "license": "NOASSERTION"
         },
+        "arduino/tejashwikalptaru/ssd1306xled": {
+            "title": "ssd1306xled",
+            "version": "0.0.4",
+            "repository": "https://github.com/tejashwikalptaru/ssd1306xled.git",
+            "platforms": ["arduino_esp32"],
+            "chips": ["ssd1306"],
+            "stars": 114,
+            "changed": "2026-03-31",
+            "archived": false,
+            "license": "MIT"
+        },
         "arduino/the-randalorian/rando-hx711-library": {
             "title": "Rando HX711 Library",
             "version": "1.1.0",
@@ -7488,6 +7753,17 @@
             "changed": "2023-12-16",
             "archived": false,
             "license": "GPL-3.0"
+        },
+        "arduino/thingpulse/esp8266-and-esp32-oled-driver-for-ssd1306-displays": {
+            "title": "ESP8266 and ESP32 OLED driver for SSD1306 displays",
+            "version": "4.6.2",
+            "repository": "https://github.com/ThingPulse/esp8266-oled-ssd1306.git",
+            "platforms": ["arduino_esp32"],
+            "chips": ["ssd1306"],
+            "stars": 2184,
+            "changed": "2026-10-31",
+            "archived": false,
+            "license": "NOASSERTION"
         },
         "arduino/thingpulse/thingpulse-xpt2046-touch": {
             "title": "ThingPulse XPT2046 Touch",
@@ -7669,13 +7945,13 @@
         },
         "arduino/unit-electronics-mx/devlabddp": {
             "title": "DevLabDDP",
-            "version": "1.0.9",
+            "version": "1.1.0",
             "repository": "https://github.com/UNIT-Electronics-MX/unit_devlab_ddp_library.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
             "requires": ["arduino/unit-electronics-mx/devlab_interface"],
             "stars": 0,
-            "changed": "2026-10-27",
+            "changed": "2026-11-13",
             "archived": false,
             "license": "GPL-3.0"
         },
@@ -7725,19 +8001,19 @@
             "repository": "https://github.com/vindar/ILI9341_T4.git",
             "platforms": ["arduino_esp32"],
             "chips": ["ili9341"],
-            "stars": 82,
+            "stars": 83,
             "changed": "2026-06-30",
             "archived": false,
             "license": "LGPL-2.1"
         },
         "arduino/vshymanskyy/tinygsm": {
             "title": "TinyGSM",
-            "version": "0.12.0",
+            "version": "0.10.6",
             "repository": "https://github.com/vshymanskyy/TinyGSM.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
-            "stars": 2226,
-            "changed": "2026-07-21",
+            "stars": 2229,
+            "changed": "2026-11-14",
             "archived": false,
             "license": "LGPL-3.0"
         },
@@ -7877,7 +8153,7 @@
             "version": "1.0.0",
             "repository": "https://github.com/wuigor/mannaNAUTA_WS2812_Lib.git",
             "platforms": ["arduino_esp32"],
-            "chips": ["ws2812"],
+            "chips": ["ws2812", "ws2812b"],
             "stars": 0,
             "changed": "2026-10-31",
             "archived": false,
@@ -7899,8 +8175,8 @@
             "version": "1.0.5",
             "repository": "https://github.com/Xorlent/ESP32_WS2812B.git",
             "platforms": ["arduino_esp32"],
-            "chips": ["ws2812"],
-            "stars": 2,
+            "chips": ["ws2812", "ws2812b"],
+            "stars": 3,
             "changed": "2026-02-28",
             "archived": false,
             "license": "MIT"
@@ -7911,7 +8187,7 @@
             "repository": "https://github.com/xreef/MPU-9250-DMP_Library.git",
             "platforms": ["arduino_esp32"],
             "chips": ["mpu9250"],
-            "stars": 2,
+            "stars": 3,
             "changed": "2026-10-06",
             "archived": false,
             "license": "NOASSERTION"
@@ -7933,7 +8209,7 @@
             "repository": "https://github.com/xreef/PCF8575_library.git",
             "platforms": ["arduino_esp32"],
             "chips": ["pcf8575"],
-            "stars": 75,
+            "stars": 74,
             "changed": "2025-11-05",
             "archived": false,
             "license": "MIT"
@@ -8002,8 +8278,8 @@
             "repository": "https://github.com/z3t0/Arduino-IRremote.git",
             "platforms": ["arduino_esp32"],
             "chips": [],
-            "stars": 5062,
-            "changed": "2026-10-10",
+            "stars": 5073,
+            "changed": "2026-11-13",
             "archived": false,
             "license": "NOASSERTION"
         },
@@ -8045,7 +8321,7 @@
             "version": "2.0.1",
             "repository": "https://github.com/Zhentao-Lin/ESP32_WS2812_Lib.git",
             "platforms": ["arduino_esp32"],
-            "chips": ["ws2812"]
+            "chips": ["ws2812", "ws2812b"]
         },
         "arduino/zischknall/bohlebots_bno055": {
             "title": "BohleBots_BNO055",
@@ -8069,6 +8345,17 @@
             "archived": false,
             "license": "MIT"
         },
+        "esp-idf/abobija/rc522": {
+            "title": "esp-idf-rc522",
+            "version": "4.0.1",
+            "repository": "https://github.com/abobija/esp-idf-rc522",
+            "platforms": ["esp_idf"],
+            "chips": ["mfrc522"],
+            "stars": 211,
+            "changed": "2026-09-15",
+            "archived": false,
+            "license": "Apache-2.0"
+        },
         "esp-idf/atanisoft/esp_lcd_touch_xpt2046": {
             "title": "esp_lcd_touch XPT2046",
             "version": "1.0.6",
@@ -8081,10 +8368,80 @@
             "archived": false,
             "license": "MIT"
         },
+        "esp-idf/esp-idf-lib/ht16k33": {
+            "title": "ht16k33",
+            "version": "1.0.8",
+            "repository": "https://github.com/esp-idf-lib/ht16k33",
+            "platforms": ["esp_idf"],
+            "chips": ["ht16k33"],
+            "requires": ["esp-idf/esp-idf-lib/i2cdev"],
+            "stars": 0,
+            "changed": "2026-11-11",
+            "archived": false,
+            "license": "ISC"
+        },
+        "esp-idf/esp-idf-lib/i2cdev": {"title": "esp-idf/esp-idf-lib/i2cdev", "platforms": ["esp_idf"], "chips": []},
+        "esp-idf/esp-idf-lib/max7219": {
+            "title": "max7219",
+            "version": "1.1.2",
+            "repository": "https://github.com/esp-idf-lib/max7219",
+            "platforms": ["esp_idf"],
+            "chips": ["max7219"],
+            "stars": 2,
+            "changed": "2026-11-11",
+            "archived": false,
+            "license": "BSD-3-Clause"
+        },
+        "esp-idf/esp-idf-lib/shiftregister": {
+            "title": "shiftregister",
+            "version": "1.0.2",
+            "repository": "https://github.com/esp-idf-lib/shiftregister",
+            "platforms": ["esp_idf"],
+            "chips": ["hc595"],
+            "stars": 0,
+            "changed": "2026-11-11",
+            "archived": false,
+            "license": "MIT"
+        },
+        "esp-idf/espressif/aht20": {
+            "title": "espressif/aht20",
+            "version": "2.0.0",
+            "repository": "https://github.com/espressif/esp-iot-solution/tree/master/components/sensors/humiture/aht20",
+            "platforms": ["esp_idf"],
+            "chips": ["aht20"]
+        },
+        "esp-idf/espressif/apds9960": {
+            "title": "espressif/apds9960",
+            "version": "0.1.0",
+            "repository": "https://github.com/espressif/esp-iot-solution/tree/master/components/sensors/gesture/apds9960",
+            "platforms": ["esp_idf"],
+            "chips": ["apds9960"]
+        },
+        "esp-idf/espressif/as5600": {
+            "title": "espressif/as5600",
+            "version": "0.1.0",
+            "repository": "https://github.com/espressif/esp-iot-solution/tree/master/components/sensors/angle_sensor/as5600",
+            "platforms": ["esp_idf"],
+            "chips": ["as5600"]
+        },
+        "esp-idf/espressif/bh1750": {
+            "title": "espressif/bh1750",
+            "version": "2.0.0",
+            "repository": "https://github.com/espressif/esp-bsp/tree/master/components/bh1750",
+            "platforms": ["esp_idf"],
+            "chips": ["bh1750"]
+        },
+        "esp-idf/espressif/bme280": {
+            "title": "espressif/bme280",
+            "version": "0.1.1",
+            "repository": "https://github.com/espressif/esp-iot-solution/tree/master/components/sensors/pressure/bme280",
+            "platforms": ["esp_idf"],
+            "chips": ["bme280"]
+        },
         "esp-idf/espressif/bmi270": {
             "title": "espressif/bmi270",
             "platforms": ["esp_idf"],
-            "chips": ["bmi270_sensor_hub"]
+            "chips": ["bmi270", "bmi270_sensor_hub"]
         },
         "esp-idf/espressif/bmi270_sensor": {
             "title": "espressif/bmi270_sensor",
@@ -8096,6 +8453,27 @@
             "title": "esp-idf/espressif/cmake_utilities",
             "platforms": ["esp_idf"],
             "chips": []
+        },
+        "esp-idf/espressif/ds18b20": {
+            "title": "espressif/ds18b20",
+            "version": "0.4.0",
+            "repository": "https://github.com/espressif/esp-bsp/tree/master/components/ds18b20",
+            "platforms": ["esp_idf"],
+            "chips": ["ds18b20"]
+        },
+        "esp-idf/espressif/es7210": {
+            "title": "espressif/es7210",
+            "version": "1.0.1~1",
+            "repository": "https://github.com/espressif/esp-bsp/tree/master/components/es7210",
+            "platforms": ["esp_idf"],
+            "chips": ["es7210"]
+        },
+        "esp-idf/espressif/es8311": {
+            "title": "espressif/es8311",
+            "version": "1.0.0~1",
+            "repository": "https://github.com/espressif/esp-bsp/tree/master/components/es8311",
+            "platforms": ["esp_idf"],
+            "chips": ["es8311"]
         },
         "esp-idf/espressif/esp32-camera": {
             "title": "esp32-camera",
@@ -8122,7 +8500,11 @@
                 "sc031gs",
                 "sc101iot"
             ],
-            "requires": ["esp-idf/espressif/esp_jpeg"]
+            "requires": ["esp-idf/espressif/esp_jpeg"],
+            "stars": 2848,
+            "changed": "2026-11-09",
+            "archived": false,
+            "license": "Apache-2.0"
         },
         "esp-idf/espressif/esp_codec_dev": {
             "title": "esp_codec_dev",
@@ -8185,12 +8567,7 @@
             "platforms": ["esp_idf"],
             "chips": ["tca9554"]
         },
-        "esp-idf/espressif/esp_jpeg": {
-            "title": "esp-idf/espressif/esp_jpeg",
-            "repository": "",
-            "platforms": ["esp_idf"],
-            "chips": []
-        },
+        "esp-idf/espressif/esp_jpeg": {"title": "esp-idf/espressif/esp_jpeg", "platforms": ["esp_idf"], "chips": []},
         "esp-idf/espressif/esp_lcd_axs15231b": {
             "title": "espressif/esp_lcd_axs15231b",
             "platforms": ["esp_idf"],
@@ -8208,6 +8585,13 @@
         },
         "esp-idf/espressif/esp_lcd_gc9503": {
             "title": "espressif/esp_lcd_gc9503",
+            "platforms": ["esp_idf"],
+            "chips": ["gc9503"]
+        },
+        "esp-idf/espressif/esp_lcd_gc9503_mipi": {
+            "title": "espressif/esp_lcd_gc9503_mipi",
+            "version": "0.1.0",
+            "repository": "https://github.com/espressif/esp-iot-solution/tree/master/components/display/lcd/esp_lcd_gc9503_mipi",
             "platforms": ["esp_idf"],
             "chips": ["gc9503"]
         },
@@ -8231,10 +8615,24 @@
             "platforms": ["esp_idf"],
             "chips": ["jd9165"]
         },
+        "esp-idf/espressif/esp_lcd_jd9365": {
+            "title": "espressif/esp_lcd_jd9365",
+            "version": "2.0.2",
+            "repository": "https://github.com/espressif/esp-iot-solution/tree/master/components/display/lcd/esp_lcd_jd9365",
+            "platforms": ["esp_idf"],
+            "chips": ["jd9365"]
+        },
         "esp-idf/espressif/esp_lcd_panel_io_additions": {
             "title": "espressif/esp_lcd_panel_io_additions",
             "platforms": ["esp_idf"],
             "chips": ["axs15260", "gc9503"]
+        },
+        "esp-idf/espressif/esp_lcd_ra8875": {
+            "title": "espressif/esp_lcd_ra8875",
+            "version": "1.0.1",
+            "repository": "https://github.com/espressif/esp-bsp/tree/master/components/lcd/esp_lcd_ra8875",
+            "platforms": ["esp_idf"],
+            "chips": ["ra8875"]
         },
         "esp-idf/espressif/esp_lcd_sh8601": {
             "title": "espressif/esp_lcd_sh8601",
@@ -8268,11 +8666,10 @@
         },
         "esp-idf/espressif/esp_lcd_touch": {
             "title": "esp_lcd_touch",
+            "repository": "https://components.espressif.com/components/espressif/esp_lcd_touch",
             "platforms": ["esp_idf"],
             "chips": ["axs15231b", "cst816s", "cst820", "gt911", "xpt2046"],
-            "version": "1.2.1",
-            "repository": "https://components.espressif.com/components/espressif/esp_lcd_touch",
-            "requires": []
+            "version": "1.2.1"
         },
         "esp-idf/espressif/esp_lcd_touch_cst816s": {
             "title": "espressif/esp_lcd_touch_cst816s",
@@ -8302,6 +8699,20 @@
             "platforms": ["esp_idf"],
             "chips": ["tab5_touch"]
         },
+        "esp-idf/espressif/esp_lcd_touch_stmpe610": {
+            "title": "espressif/esp_lcd_touch_stmpe610",
+            "version": "1.0.9",
+            "repository": "https://github.com/espressif/esp-bsp/tree/master/components/esp_lcd_touch_stmpe610",
+            "platforms": ["esp_idf"],
+            "chips": ["stmpe610"]
+        },
+        "esp-idf/espressif/esp_lcd_touch_tt21100": {
+            "title": "espressif/esp_lcd_touch_tt21100",
+            "version": "1.2.1",
+            "repository": "https://github.com/espressif/esp-bsp/tree/master/components/lcd_touch/esp_lcd_touch_tt21100",
+            "platforms": ["esp_idf"],
+            "chips": ["tt21100"]
+        },
         "esp-idf/espressif/esp_sccb_intf": {
             "title": "esp-idf/espressif/esp_sccb_intf",
             "platforms": ["esp_idf"],
@@ -8315,14 +8726,55 @@
             "chips": [],
             "requires": ["esp-idf/espressif/esp_hosted", "esp-idf/espressif/wifi_remote_over_eppp"]
         },
+        "esp-idf/espressif/hts221": {
+            "title": "espressif/hts221",
+            "version": "1.1.4",
+            "repository": "https://github.com/espressif/esp-bsp/tree/master/components/hts221",
+            "platforms": ["esp_idf"],
+            "chips": ["hts221"]
+        },
+        "esp-idf/espressif/led_strip": {
+            "title": "led_strip",
+            "version": "3.1.1",
+            "repository": "https://github.com/espressif/idf-extra-components/tree/master/led_strip",
+            "platforms": ["esp_idf"],
+            "chips": ["ws2812", "ws2812b"]
+        },
+        "esp-idf/espressif/max17048": {
+            "title": "espressif/max17048",
+            "version": "0.2.0",
+            "repository": "https://github.com/espressif/esp-iot-solution/tree/master/components/sensors/battery_fuel_gauge/max17048",
+            "platforms": ["esp_idf"],
+            "chips": ["max17048"]
+        },
+        "esp-idf/espressif/mcp23017": {
+            "title": "espressif/mcp23017",
+            "version": "0.2.0",
+            "repository": "https://github.com/espressif/esp-iot-solution/tree/master/components/expander/io_expander/mcp23017",
+            "platforms": ["esp_idf"],
+            "chips": ["mcp23017"]
+        },
+        "esp-idf/espressif/mpu6050": {
+            "title": "espressif/mpu6050",
+            "version": "1.2.1",
+            "repository": "https://github.com/espressif/esp-bsp/tree/master/components/mpu6050",
+            "platforms": ["esp_idf"],
+            "chips": ["mpu6050"]
+        },
         "esp-idf/espressif/sensor_hub": {
             "title": "espressif/sensor_hub",
             "platforms": ["esp_idf"],
             "chips": ["bmi270_sensor_hub"]
         },
+        "esp-idf/espressif/veml6075": {
+            "title": "espressif/veml6075",
+            "version": "0.3.0",
+            "repository": "https://github.com/espressif/esp-iot-solution/tree/master/components/sensors/light_sensor/veml6075",
+            "platforms": ["esp_idf"],
+            "chips": ["veml6075"]
+        },
         "esp-idf/espressif/wifi_remote_over_eppp": {
             "title": "esp-idf/espressif/wifi_remote_over_eppp",
-            "repository": "",
             "platforms": ["esp_idf"],
             "chips": []
         },
@@ -8333,7 +8785,7 @@
             "platforms": ["esp_idf"],
             "chips": ["ov02c10"],
             "requires": ["esp-idf/espressif/cmake_utilities", "esp-idf/espressif/esp_sccb_intf"],
-            "stars": 23,
+            "stars": 24,
             "changed": "2025-05-07",
             "archived": false
         },
@@ -8356,6 +8808,7 @@
                 "sh1106",
                 "ssd1306",
                 "ssd1309",
+                "ssd1322",
                 "ssd1351",
                 "ssd1680",
                 "st7565r",
@@ -8365,10 +8818,9 @@
                 "st7920"
             ],
             "stars": 6,
-            "changed": "2026-11-14",
+            "changed": "2026-11-15",
             "archived": false,
-            "license": "MIT",
-            "requires": []
+            "license": "MIT"
         },
         "esp-idf/jef-sure/dgx-di": {
             "title": "DGX-DI",
@@ -8378,7 +8830,7 @@
             "chips": ["gsl3680"],
             "requires": ["esp-idf/jef-sure/dgx"],
             "stars": 0,
-            "changed": "2026-11-14",
+            "changed": "2026-11-13",
             "archived": false,
             "license": "MIT"
         },
@@ -8390,7 +8842,7 @@
             "chips": [],
             "requires": ["esp-idf/jef-sure/dgx", "esp-idf/jef-sure/dgx-di", "esp-idf/lvgl/lvgl"],
             "stars": 0,
-            "changed": "2026-11-14",
+            "changed": "2026-11-13",
             "archived": false,
             "license": "MIT"
         },
@@ -8403,14 +8855,13 @@
             "stars": 0,
             "changed": "2026-11-01",
             "archived": false,
-            "license": "MIT",
-            "requires": []
+            "license": "MIT"
         },
         "esp-idf/jef-sure/ld2410c": {
             "title": "LD2410C",
             "version": "0.1.5",
             "repository": "https://github.com/jef-sure/esp32-component-ld2410c",
-            "platforms": ["esp_idf"],
+            "platforms": [],
             "chips": ["ld2410c"],
             "stars": 1,
             "changed": "2026-10-07",
@@ -8424,7 +8875,7 @@
             "platforms": ["esp_idf"],
             "chips": ["pn5180"],
             "stars": 6,
-            "changed": "2026-11-01",
+            "changed": "2026-11-14",
             "archived": false,
             "license": "MIT"
         },
@@ -8436,7 +8887,7 @@
             "chips": ["pn532"],
             "audited": ["0.7.6", "0.7.7", "0.8.0", "0.8.1"],
             "stars": 3,
-            "changed": "2026-11-02",
+            "changed": "2026-11-03",
             "archived": false,
             "license": "MIT"
         },
@@ -8478,15 +8929,34 @@
             "archived": false,
             "license": "Apache-2.0"
         },
-        "github/abobija/esp-idf-rc522": {
-            "title": "abobija/esp-idf-rc522",
-            "repository": "https://github.com/abobija/esp-idf-rc522",
+        "github/aivoprykk/esp_lcd_panel_ssd1680": {
+            "title": "aivoprykk/esp_lcd_panel_ssd1680",
+            "repository": "https://github.com/aivoprykk/esp_lcd_panel_ssd1680",
             "platforms": ["esp_idf"],
-            "chips": ["mfrc522"],
-            "stars": 211,
-            "changed": "2026-09-15",
+            "chips": ["ssd1680"],
+            "stars": 5,
+            "changed": "2026-03-18",
             "archived": false,
             "license": "Apache-2.0"
+        },
+        "github/albi84/hd108_lld": {
+            "title": "albi84/HD108_LLD",
+            "repository": "https://github.com/albi84/HD108_LLD",
+            "platforms": ["esp_idf"],
+            "chips": ["led_rgb_5050"],
+            "stars": 0,
+            "changed": "2022-12-26",
+            "archived": false,
+            "license": "MIT"
+        },
+        "github/arizzian/5x5-grid-led-path-relay-control-on-esp32-s3": {
+            "title": "Arizzian/5x5-Grid-LED-Path-Relay-Control-on-ESP32-S3",
+            "repository": "https://github.com/Arizzian/5x5-Grid-LED-Path-Relay-Control-on-ESP32-S3",
+            "platforms": ["esp_idf"],
+            "chips": ["hc595"],
+            "stars": 0,
+            "changed": "2025-11-28",
+            "archived": false
         },
         "github/benklop/esp-idf-mfrc522": {
             "title": "benklop/esp-idf-mfrc522",
@@ -8503,8 +8973,8 @@
             "repository": "https://github.com/bmorcelli/DisplayDrivers",
             "platforms": ["esp_idf"],
             "chips": ["nv3041a"],
-            "stars": 4,
-            "changed": "2026-10-22",
+            "stars": 3,
+            "changed": "2026-11-12",
             "archived": false,
             "license": "MIT"
         },
@@ -8526,13 +8996,23 @@
             "changed": "2025-10-13",
             "archived": false
         },
+        "github/davidli218/esp-idf-74hc595": {
+            "title": "davidli218/esp-idf-74hc595",
+            "repository": "https://github.com/davidli218/esp-idf-74hc595",
+            "platforms": ["esp_idf"],
+            "chips": ["hc595"],
+            "stars": 0,
+            "changed": "2025-02-18",
+            "archived": false,
+            "license": "Apache-2.0"
+        },
         "github/elechouse/pn532": {
             "title": "elechouse/PN532",
             "repository": "https://github.com/elechouse/PN532",
             "platforms": ["arduino_esp32"],
             "chips": ["pn532"],
             "audited": ["8b05896a6616", "8b05896a6616"],
-            "stars": 586,
+            "stars": 587,
             "changed": "2026-07-28",
             "archived": false
         },
@@ -8552,7 +9032,7 @@
             "platforms": ["esp_idf"],
             "chips": ["scd4x"],
             "stars": 3,
-            "changed": "2026-07-16",
+            "changed": "2026-11-11",
             "archived": false,
             "license": "BSD-3-Clause"
         },
@@ -8561,8 +9041,8 @@
             "repository": "https://github.com/espressif/esp-matter",
             "platforms": ["esp_idf"],
             "chips": ["esp32_dac"],
-            "stars": 1096,
-            "changed": "2026-11-02",
+            "stars": 1107,
+            "changed": "2026-11-13",
             "archived": false,
             "license": "Apache-2.0"
         },
@@ -8577,22 +9057,72 @@
             "archived": false,
             "license": "MIT"
         },
+        "github/gin66/fastaccelstepper": {
+            "title": "gin66/FastAccelStepper",
+            "repository": "https://github.com/gin66/FastAccelStepper",
+            "platforms": ["esp_idf"],
+            "chips": ["hc595"],
+            "stars": 529,
+            "changed": "2026-11-08",
+            "archived": false,
+            "license": "MIT"
+        },
+        "github/hpbare/scd4x": {
+            "title": "hpbare/scd4x",
+            "repository": "https://github.com/hpbare/scd4x",
+            "platforms": ["esp_idf"],
+            "chips": ["scd4x"],
+            "stars": 0,
+            "changed": "2026-08-31",
+            "archived": false,
+            "license": "MIT"
+        },
+        "github/janhavelka/scd41": {
+            "title": "janhavelka/SCD41",
+            "repository": "https://github.com/janhavelka/SCD41",
+            "platforms": ["esp_idf"],
+            "chips": ["scd4x"],
+            "stars": 0,
+            "changed": "2026-11-13",
+            "archived": false,
+            "license": "MIT"
+        },
         "github/lewisxhe/sensorlib": {
             "title": "lewisxhe/SensorLib",
             "repository": "https://github.com/lewisxhe/SensorLib",
             "platforms": ["esp_idf"],
             "chips": ["gt911"],
-            "stars": 255,
-            "changed": "2026-10-24",
+            "stars": 257,
+            "changed": "2026-11-11",
             "archived": false,
             "license": "MIT"
+        },
+        "github/lexus2k/lcdgfx": {
+            "title": "lexus2k/lcdgfx",
+            "repository": "https://github.com/lexus2k/lcdgfx",
+            "platforms": ["esp_idf"],
+            "chips": ["ssd1351"],
+            "stars": 459,
+            "changed": "2026-09-01",
+            "archived": false,
+            "license": "MIT"
+        },
+        "github/liyanboy74/gc9a01-esp-idf": {
+            "title": "liyanboy74/gc9a01-esp-idf",
+            "repository": "https://github.com/liyanboy74/gc9a01-esp-idf",
+            "platforms": ["esp_idf"],
+            "chips": ["gc9a01"],
+            "stars": 46,
+            "changed": "2024-01-21",
+            "archived": false,
+            "license": "BSD-3-Clause"
         },
         "github/lvgl/lvgl_esp32_drivers": {
             "title": "lvgl/lvgl_esp32_drivers",
             "repository": "https://github.com/lvgl/lvgl_esp32_drivers",
             "platforms": ["esp_idf"],
-            "chips": ["ili9341", "xpt2046"],
-            "stars": 449,
+            "chips": ["gc9a01", "ili9341", "ssd1306", "st7789", "xpt2046"],
+            "stars": 448,
             "changed": "2026-08-03",
             "archived": true,
             "license": "MIT"
@@ -8607,6 +9137,16 @@
             "archived": true,
             "license": "MIT"
         },
+        "github/m5stack/m5unit-rgb": {
+            "title": "m5stack/M5Unit-RGB",
+            "repository": "https://github.com/m5stack/M5Unit-RGB",
+            "platforms": ["esp_idf"],
+            "chips": ["led_rgb_5050"],
+            "stars": 0,
+            "changed": "2026-10-29",
+            "archived": false,
+            "license": "MIT"
+        },
         "github/micheledarold/esp_lcd_nv3041a_i80": {
             "title": "micheledarold/esp_lcd_nv3041a_i80",
             "repository": "https://github.com/micheledarold/esp_lcd_nv3041a_i80",
@@ -8616,12 +9156,12 @@
             "changed": "2026-09-23",
             "archived": false
         },
-        "github/rayzzzzzz/esp32-component-pn5180": {
-            "title": "RayzzzzzZ/esp32-component-pn5180",
-            "repository": "https://github.com/RayzzzzzZ/esp32-component-pn5180",
+        "github/roboticsbrno/smartleds": {
+            "title": "RoboticsBrno/SmartLeds",
+            "repository": "https://github.com/RoboticsBrno/SmartLeds",
             "platforms": ["esp_idf"],
-            "chips": ["pn5180"],
-            "stars": 0,
+            "chips": ["ws2812b"],
+            "stars": 32,
             "changed": "2026-07-28",
             "archived": false,
             "license": "MIT"
@@ -8632,10 +9172,20 @@
             "platforms": ["arduino_esp32"],
             "chips": ["pn532"],
             "audited": ["1.1.0", "1.1.0"],
-            "stars": 505,
+            "stars": 504,
             "changed": "2026-10-12",
             "archived": false,
             "license": "BSD-3-Clause"
+        },
+        "github/taraholeinit/tarablessd1306": {
+            "title": "TaraHoleInIt/tarablessd1306",
+            "repository": "https://github.com/TaraHoleInIt/tarablessd1306",
+            "platforms": ["esp_idf"],
+            "chips": ["ssd1306"],
+            "stars": 67,
+            "changed": "2020-11-28",
+            "archived": false,
+            "license": "MIT"
         },
         "github/vagor-ru/esp_lcd_nv3041a": {
             "title": "Vagor-ru/esp_lcd_nv3041a",
@@ -8652,7 +9202,7 @@
             "repository": "https://github.com/vroland/epdiy",
             "platforms": ["esp_idf"],
             "chips": ["gt911"],
-            "stars": 1970,
+            "stars": 1977,
             "changed": "2026-08-23",
             "archived": false,
             "license": "LGPL-3.0"

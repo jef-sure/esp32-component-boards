@@ -7,6 +7,7 @@
     "class": "led",
     "maker": "worldsemi",
     "part": "WS2812B",
+    "names": ["ws2812"],
     "provides": {"led": {"variant": "addressable"}},
     "chain": {"per": 1},
     "ways": [{"lines": ["data"], "do": "data to its GPIO, DOUT of the last one on to the next strip"}],

@@ -7,6 +7,7 @@
     "class": "io_expander",
     "maker": "ti",
     "part": "SN74HC595",
+    "names": ["74hc595"],
     "chain": {"per": 8},
     "notes": [
         "Eight outputs from a serial input: SER, SRCLK and RCLK, with OE for the brightness of all. QH' goes to SER of the next chip, so a chain of any length takes the same lines.",

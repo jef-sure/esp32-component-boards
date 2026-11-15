@@ -1,0 +1,48 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "library",
+    "ecosystem": "esp-idf",
+    "owner": "esp-idf-lib",
+    "name": "max7219",
+    "title": "max7219",
+    "url": "https://github.com/esp-idf-lib/max7219",
+    "license": "BSD-3-Clause",
+    "install": [
+        {"via": "registry"},
+        {"via": "git", "url": "https://github.com/esp-idf-lib/max7219.git", "ref": "{version}"}
+    ],
+    "described": "1.1.2",
+    "notes": "Described from its header and code, not tried.",
+    "chips": {
+        "max7219": {
+            "header": "max7219.h",
+            "on": ["spi"],
+            "init": [
+                {
+                    "call": "max7219_init_desc",
+                    "args": ["{dev}", "{host}", "{hz}", "{cs}"],
+                    "returns": "esp_err_t",
+                    "ok": {"equals": "ESP_OK"},
+                    "notes": "The program starts the SPI bus first and fills max7219_t: cascade_size, the chips in the chain, digits and mirrored. At most 10 MHz."
+                },
+                {"call": "max7219_init", "args": ["{dev}"], "returns": "esp_err_t", "ok": {"equals": "ESP_OK"}}
+            ],
+            "supports": {"modes": ["matrix_8x8", "seven_segment"], "chain": ["brightness_per_chip"]},
+            "notes": "Text on 7-segment digits and 8x8 images; BCD decode for all digits or none. No lock of its own."
+        }
+    },
+    "checked": {
+        "api": {
+            "level": "vendor-code",
+            "source": "max7219.h and max7219.c of esp-idf-lib/max7219 at tag 1.1.2, commit 38d4424",
+            "date": "2026-11-15"
+        }
+    },
+    "versions": {
+        "1.1.2": {
+            "platforms": {"esp_idf": ">=5.4"},
+            "notes": "Its manifest names no ESP-IDF; the CI of esp-idf-lib built its examples with v5.4 to v6.1."
+        }
+    }
+}

@@ -1,0 +1,55 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "library",
+    "ecosystem": "esp-idf",
+    "owner": "esp-idf-lib",
+    "name": "shiftregister",
+    "title": "shiftregister",
+    "url": "https://github.com/esp-idf-lib/shiftregister",
+    "license": "MIT",
+    "install": [
+        {"via": "registry"},
+        {"via": "git", "url": "https://github.com/esp-idf-lib/shiftregister.git", "ref": "{version}"}
+    ],
+    "described": "1.0.2",
+    "notes": "Described from its headers and code, not tried.",
+    "chips": {
+        "hc595": {
+            "header": "shiftregister_gpio.h",
+            "on": ["gpio"],
+            "init": [
+                {
+                    "call": "shiftregister_gpio_init",
+                    "args": ["{config}"],
+                    "returns": "esp_err_t",
+                    "ok": {"equals": "ESP_OK"},
+                    "notes": "shiftregister_config_t: the GPIOs of data, clock and latch, of SRCLR and OE, and SHIFTREGISTER_MODE_WRITE. The config goes to every call; there is no handle."
+                }
+            ],
+            "controls": {
+                "write": {
+                    "call": "shiftregister_gpio_transfer",
+                    "args": ["{config}", "{data}", "{size}"],
+                    "returns": "esp_err_t",
+                    "ok": {"equals": "ESP_OK"},
+                    "notes": "Bytes LSB first, the first byte to the register farthest from the chip; the latch pulses after each byte."
+                }
+            },
+            "notes": "Bit-banged on GPIOs, no SPI. It takes GPIO 0 for an unused SRCLR or OE and sets neither: wire SRCLR high and OE low. Its example gives GPIO_NUM_NC there, which its code shifts by -1."
+        }
+    },
+    "checked": {
+        "api": {
+            "level": "vendor-code",
+            "source": "include/ and shiftregister_gpio.c of esp-idf-lib/shiftregister at tag 1.0.2, commit 3d69b7f",
+            "date": "2026-11-15"
+        }
+    },
+    "versions": {
+        "1.0.2": {
+            "platforms": {"esp_idf": ">=5.4"},
+            "notes": "Its manifest names no ESP-IDF; the CI of esp-idf-lib built its example with v5.4 to v6.1."
+        }
+    }
+}

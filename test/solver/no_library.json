@@ -1,5 +1,25 @@
 {
-    "title": "A chip with no library in the catalog comes after one that has it",
+    "title": "A chip with no library in the catalog comes after one that has it: a CLRC663 module cheaper than an RC522 does not come first",
     "answers": {"nfc_readers": 1},
-    "first": {"name": "esp32_devkit", "modules": {"pn532_module": 1}}
+    "first": {"name": "esp32_devkit", "modules": {"rc522_module": 1}},
+    "modules": {
+        "cheap_clrc663": {
+            "format": "jef-sure/boards",
+            "format_version": 2,
+            "kind": "module",
+            "name": "cheap_clrc663",
+            "title": "A cheap reader on a CLRC663",
+            "power": [{"name": "3V3", "source": "connector", "volts": [3, 3.6], "feeds": ["nfc"]}],
+            "devices": {"nfc": {"chip": "clrc663", "on": {"spi": {}}, "antenna": {"kind": "on_board"}, "logic": "3V3"}},
+            "price": {
+                "shop": {
+                    "shop": "test",
+                    "currency": "EUR",
+                    "range": [0.5, 0.5],
+                    "date": "2026-11-15",
+                    "source": "the case"
+                }
+            }
+        }
+    }
 }

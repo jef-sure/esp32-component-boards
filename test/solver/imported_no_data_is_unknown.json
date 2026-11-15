@@ -7,10 +7,10 @@
     "first": {
         "name": "esp32_devkit",
         "modules": {
-            "pn532_module": 2
+            "rc522_module": 2
         },
         "on": {
-            "pn532_module": "spi"
+            "rc522_module": "spi"
         }
     },
     "says": "its supply lines are not in the data"

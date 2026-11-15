@@ -6,6 +6,7 @@
     "title": "NXP MFRC522",
     "maker": "nxp",
     "part": "MFRC522",
+    "names": ["rc522"],
     "class": "nfc",
     "on": {"spi": {"hz": 10000000}, "i2c": {}, "uart": {}},
     "identify": {"register": "VersionReg 0x37", "values": ["0x91", "0x92"]},

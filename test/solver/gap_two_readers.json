@@ -1,5 +1,5 @@
 {
-    "title": "Two readers 100 mm apart: the PN5180 reaches 120 mm, so it stays as an unknown, and the PN532 comes first",
+    "title": "Two readers 100 mm apart: the PN5180 reaches 120 mm, so it stays as an unknown, and the RC522 comes first",
     "answers": {
         "nfc_readers": 2,
         "nfc_gap_mm": 100
@@ -7,7 +7,7 @@
     "first": {
         "name": "esp32_devkit",
         "modules": {
-            "pn532_module": 2
+            "rc522_module": 2
         }
     },
     "kit": {

@@ -1,0 +1,61 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "library",
+    "ecosystem": "esp-idf",
+    "owner": "esp-idf-lib",
+    "name": "ht16k33",
+    "title": "ht16k33",
+    "url": "https://github.com/esp-idf-lib/ht16k33",
+    "license": "ISC",
+    "install": [
+        {"via": "registry"},
+        {"via": "git", "url": "https://github.com/esp-idf-lib/ht16k33.git", "ref": "{version}"}
+    ],
+    "described": "1.0.8",
+    "notes": "Described from its header and code, not tried. Its manifest says MIT; its LICENSE file and the headers of its code say ISC.",
+    "chips": {
+        "ht16k33": {
+            "header": "ht16k33.h",
+            "on": ["i2c"],
+            "init": [
+                {
+                    "call": "i2cdev_init",
+                    "args": [],
+                    "returns": "esp_err_t",
+                    "ok": {"equals": "ESP_OK"},
+                    "notes": "Once in a program, for every library of esp-idf-lib on I2C."
+                },
+                {
+                    "call": "ht16k33_init_desc",
+                    "args": ["{dev}", "{port}", "{sda}", "{scl}", "{address}"],
+                    "returns": "esp_err_t",
+                    "ok": {"equals": "ESP_OK"}
+                },
+                {"call": "ht16k33_init", "args": ["{dev}"], "returns": "esp_err_t", "ok": {"equals": "ESP_OK"}},
+                {
+                    "call": "ht16k33_display_setup",
+                    "args": ["{dev}", "1", "{blink}"],
+                    "returns": "esp_err_t",
+                    "ok": {"equals": "ESP_OK"},
+                    "notes": "ht16k33_init leaves the display off."
+                }
+            ],
+            "notes": "Writes the whole RAM of 16 bytes; brightness, blink at 0.5 and 1 Hz (its 2 Hz gives 1 Hz). No key scan. i2cdev makes the master bus of its port itself and takes none made by another driver: on a port whose bus the board has already started, it fails."
+        }
+    },
+    "checked": {
+        "api": {
+            "level": "vendor-code",
+            "source": "ht16k33.h and ht16k33.c at tag 1.0.8, commit 2fd96b4; i2cdev.c of esp-idf-lib/i2cdev 2.2.0",
+            "date": "2026-11-15"
+        }
+    },
+    "versions": {
+        "1.0.8": {
+            "platforms": {"esp_idf": ">=5.4"},
+            "requires": {"esp-idf/esp-idf-lib/i2cdev": "*"},
+            "notes": "Its manifest names no ESP-IDF; the CI of esp-idf-lib built its example with v5.4 to v6.1."
+        }
+    }
+}

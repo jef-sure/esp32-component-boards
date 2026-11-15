@@ -6,9 +6,10 @@ algorithm and drive nothing, and what a listed library requires is listed.
 Nothing here ranks them: popularity is shown and comes last, and only an audit of the code says more.
 chip_libraries.json is an index from a chip to libraries of that list, and need not cover them all.
 
-Arduino comes from library_index.json of Arduino, ESP-IDF from the catalog, from the dependencies of the board packs and
-from a search of GitHub for components: the registry of Espressif closes its API to robots. The facts come from GitHub.
-Nobody read these libraries: a name is all that ties most of them to a chip.
+Arduino comes from library_index.json of Arduino, ESP-IDF from the catalog, from the dependencies of the board packs, from
+a search of GitHub for components and from the folders of the repositories that hold many (MONOREPOS): the registry of
+Espressif closes its API to robots. The facts come from GitHub. Nobody read these libraries: a name is all that ties most
+of them to a chip, the name of the chip, of a variant or one of its names.
 
 Needs gh, logged in. Usage: import_libraries.py INDEX_JSON_GZ [--date YYYY-MM-DD]
 """
@@ -40,6 +41,9 @@ ESP_IDF = "esp_idf"
 BUILDS_ON = {"builds_on.arduino": ARDUINO, "builds_on.esp_idf": ESP_IDF}  # what a reading found, for a library with no versions on record
 BUILT = ("yes", "partly")
 GITHUB = re.compile(r"github\.com[/:]([\w.-]+)/([\w.-]+?)(?:\.git)?/?$")
+# repositories of many components, each published to the registry under the namespace given: a search of GitHub finds
+# none of their components, which have no repository of their own
+MONOREPOS = {"espressif/idf-extra-components": "espressif", "espressif/esp-iot-solution": "espressif", "espressif/esp-bsp": "espressif"}
 
 
 def gh(*args):
@@ -50,12 +54,24 @@ def plain(text):
     return re.sub(r"[^a-z0-9]+", " ", text.lower())
 
 
+def long_enough(name):
+    return len(name.replace("_", "")) >= SHORTEST_CHIP and re.search(r"\d", name)
+
+
 def chips_of():
+    """Each chip and where it lies, with the names a library may write for it: its own, those of its variants and its names."""
     found = {}
     for root in ("catalog", "imported"):
         for path in (ROOT / root / "devices").glob("*/device.json"):
-            found.setdefault(path.parent.name, root)
-    return {name: root for name, root in sorted(found.items()) if len(name.replace("_", "")) >= SHORTEST_CHIP and re.search(r"\d", name)}
+            device = json.loads(path.read_text())
+            words = [path.parent.name, *(device.get("variants") or {}), *(device.get("names") or ())]
+            found.setdefault(path.parent.name, (root, [word for word in dict.fromkeys(words) if long_enough(word)]))
+    return {name: entry for name, entry in sorted(found.items()) if entry[1]}
+
+
+def naming(words):
+    """A text that names one of these words: at a start of a word, any ending after it (ws2812 names ws2812b-leds)."""
+    return re.compile("|".join(rf"(?<![a-z0-9]){re.escape(word.replace('_', ' '))}\w*" for word in words))
 
 
 def word(text):
@@ -100,8 +116,8 @@ def arduino_candidates(index, chips, found):
         releases[library["name"]] += 1
         last[library["name"]] = library
     usable = [library for library in last.values() if set(library.get("architectures", ())) & set(OURS) and "Retired" not in library.get("types", ())]
-    for chip in chips:
-        pattern = re.compile(rf"(?<![a-z0-9]){re.escape(chip.replace('_', ' '))}\w*")
+    for chip, (_, words) in chips.items():
+        pattern = naming(words)
         named = [library for library in usable if pattern.search(plain(library["name"]))]
         named.sort(key=lambda library: -releases[library["name"]])
         for library in named[:MOST_TO_ASK]:
@@ -147,18 +163,59 @@ def idf_candidates(chips, found):
         owner, _, rest = name.partition("/")
         for chip in chip_names:
             add(found, f"esp-idf/{word(owner)}/{word(rest or owner)}", chip, title=name, repository="", platforms=[ESP_IDF])
-    for chip, root in chips.items():
+    for chip, (root, words) in chips.items():
         if root != "catalog":
             continue  # the search takes a minute for a few: the chips we describe by hand
-        time.sleep(SEARCH_PAUSE_S)
-        names = gh("api", "-X", "GET", "search/repositories", "-f", f"q={chip.replace('_', ' ')} esp-idf in:name,description,readme fork:false", "-f", f"per_page={FOUND_BY_SEARCH}", "--jq", ".items[].full_name").split()
-        known = {item["repository"].lower().removesuffix(".git"): library for library, item in found.items() if item["repository"]}
-        for repository in names:
-            url = f"https://github.com/{repository}"
-            if url.lower() in known:
-                add(found, known[url.lower()], chip)
-            elif is_component(repository):
-                add(found, f"github/{word(repository.split('/')[0])}/{word(repository.split('/')[1])}", chip, title=repository, repository=url, platforms=[ESP_IDF])
+        for name in words:
+            time.sleep(SEARCH_PAUSE_S)
+            names = gh("api", "-X", "GET", "search/repositories", "-f", f"q={name.replace('_', ' ')} esp-idf in:name,description,readme fork:false", "-f", f"per_page={FOUND_BY_SEARCH}", "--jq", ".items[].full_name").split()
+            known = {item["repository"].lower().removesuffix(".git"): library for library, item in found.items() if item["repository"]}
+            for repository in names:
+                url = f"https://github.com/{repository}"
+                if url.lower() in known:
+                    add(found, known[url.lower()], chip)
+                elif is_component(repository):
+                    add(found, f"github/{word(repository.split('/')[0])}/{word(repository.split('/')[1])}", chip, title=repository, repository=url, platforms=[ESP_IDF])
+
+
+def field(text, key):
+    """A plain field of the top of an idf_component.yml."""
+    found = re.search(rf'^{key}:\s*"?([^"\n]*?)"?\s*$', text, re.M)
+    return found[1].strip() if found else ""
+
+
+def texts_of(repository, branch, paths):
+    """The text of each file of a repository, from one query of many."""
+    owner, name = repository.split("/")
+    texts = {}
+    for at in range(0, len(paths), REPOSITORIES_A_QUERY):
+        part = paths[at:at + REPOSITORIES_A_QUERY]
+        files = " ".join(f'f{i}: object(expression: "{branch}:{path}") {{ ... on Blob {{ text }} }}' for i, path in enumerate(part))
+        query = f'query {{ repository(owner: "{owner}", name: "{name}") {{ {files} }} }}'
+        data = json.loads(gh("api", "graphql", "-f", f"query={query}") or "{}").get("data") or {}
+        answer = data.get("repository") or {}
+        texts.update({path: answer[f"f{i}"]["text"] for i, path in enumerate(part) if answer.get(f"f{i}")})
+    return texts
+
+
+def monorepo_candidates(chips, found):
+    """The components of the repositories that hold many, as the registry has them: a folder whose idf_component.yml has a
+    version, under the namespace of its repository. Its folder and its description name the chip."""
+    patterns = {chip: naming(words) for chip, (_, words) in chips.items()}
+    for repository, namespace in MONOREPOS.items():
+        branch = gh("api", f"repos/{repository}", "--jq", ".default_branch").strip()
+        paths = gh("api", f"repos/{repository}/git/trees/{branch}?recursive=1", "--jq", '.tree[].path | select(endswith("/idf_component.yml"))').split()
+        for path, text in texts_of(repository, branch, paths).items():
+            version = field(text, "version")
+            if not version:
+                continue  # an example or a test app
+            component = path.split("/")[-2]
+            said = plain(f"{component} {field(text, 'description')}")
+            for chip, pattern in patterns.items():
+                if pattern.search(said):
+                    folder = f"https://github.com/{repository}/tree/{branch}/{path.rsplit('/', 1)[0]}"
+                    add(found, f"esp-idf/{namespace}/{word(component)}", chip, title=f"{namespace}/{component}", version=version,
+                        repository=field(text, "url") or folder, platforms=[ESP_IDF], **({"license": field(text, "license")} if field(text, "license") else {}))
 
 
 def repository_of(candidate):
@@ -203,7 +260,8 @@ def main():
     arduino_candidates(index, chips, found)
     arduino_requires(index, found)
     idf_candidates(chips, found)
-    facts = facts_of({repository_of(entry) for entry in found.values()} - {None})
+    monorepo_candidates(chips, found)
+    facts =facts_of({repository_of(entry) for entry in found.values()} - {None})
     libraries = {library: {key: value for key, value in {**entry, "chips": sorted(entry["chips"]), **facts.get(repository_of(entry), {})}.items() if value != "" and (value or key != "requires")} for library, entry in sorted(found.items())}
     out = ROOT / "catalog" / "libraries"
     (out / "libraries.json").write_text(resolve.dump({"date": args.date, "order": ORDER, "libraries": libraries}) + "\n")

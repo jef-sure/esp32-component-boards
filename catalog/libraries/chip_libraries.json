@@ -1,5 +1,5 @@
 {
-    "date": "2026-11-02",
+    "date": "2026-11-15",
     "chips": {
         "ad8495": [
             "arduino/robtillaart/ad8495",
@@ -41,11 +41,13 @@
         ],
         "adxl375": ["arduino/adafruit/adafruit-adxl375"],
         "aht20": [
+            "arduino/bonezegei/bonezegei_aht20",
             "arduino/dfrobot/dfrobot_aht20",
             "arduino/dvarrel/aht20",
             "arduino/ptsolns/ptsolns_i2connect_aht20",
             "arduino/seeed-studio/seeed_arduino_aht20",
-            "arduino/sparkfun/sparkfun-qwiic-humidity-aht20"
+            "arduino/sparkfun/sparkfun-qwiic-humidity-aht20",
+            "esp-idf/espressif/aht20"
         ],
         "am2302": ["arduino/hasenradball/am2302-sensor", "arduino/hasenradball/am2302-sensor-pi-pico"],
         "am2320": ["arduino/adafruit/adafruit-am2320-sensor-library", "arduino/asukiaaa/am2320_asukiaaa"],
@@ -56,14 +58,16 @@
             "arduino/melopero/melopero-apds9960",
             "arduino/solderedelectronics/apds9960-arduino-library-by-soldered",
             "arduino/sparkfun/sparkfun-apds9960-rgb-and-gesture-sensor",
-            "arduino/styropyr0/apds9960"
+            "arduino/styropyr0/apds9960",
+            "esp-idf/espressif/apds9960"
         ],
         "apds9999": ["arduino/adafruit/adafruit-apds9999", "arduino/arduino-libraries/arduino_apds9999"],
         "as5600": [
             "arduino/adafruit/adafruit-as5600-library",
             "arduino/robtillaart/as5600",
             "arduino/solderedelectronics/soldered-position-sensor-as5600-breakout-arduino-library",
-            "arduino/ys1374/as5600_psw"
+            "arduino/ys1374/as5600_psw",
+            "esp-idf/espressif/as5600"
         ],
         "as7331": [
             "arduino/adafruit/adafruit-as7331-library",
@@ -94,13 +98,15 @@
         "bf3005": ["esp-idf/espressif/esp32-camera"],
         "bh1750": [
             "arduino/artronshop/artronshop_bh1750",
+            "arduino/bonezegei/bonezegei_bh1750",
             "arduino/claws/bh1750",
             "arduino/digitalcodesign/mentorbit-bh1750",
             "arduino/jvkran/onetime-bh1750",
             "arduino/peterembedded/bh1750fvi",
             "arduino/robtillaart/bh1750fvi_rt",
             "arduino/starmbi/hp_bh1750",
-            "arduino/wollewald/bh1750_we"
+            "arduino/wollewald/bh1750_we",
+            "esp-idf/espressif/bh1750"
         ],
         "bme280": [
             "arduino/adafruit/adafruit-bme280-library",
@@ -114,7 +120,8 @@
             "arduino/janw-cz/jwa-bme280",
             "arduino/jvkran/forced-bme280",
             "arduino/paramoshkinandrew/bme280_arduino_i2c",
-            "arduino/sparkfun/sparkfun-bme280"
+            "arduino/sparkfun/sparkfun-bme280",
+            "esp-idf/espressif/bme280"
         ],
         "bme680": [
             "arduino/adafruit/adafruit-bme680-library",
@@ -129,7 +136,8 @@
             "arduino/7semi-solutions/7semi-bmi270",
             "arduino/arduino-libraries/arduino_bmi270_bmm150",
             "arduino/sparkfun/sparkfun-bmi270-arduino-library",
-            "arduino/tinyu-zhao/bmi270_sensor"
+            "arduino/tinyu-zhao/bmi270_sensor",
+            "esp-idf/espressif/bmi270"
         ],
         "bmi270_sensor": ["arduino/tinyu-zhao/bmi270_sensor", "esp-idf/espressif/bmi270_sensor"],
         "bmi270_sensor_hub": ["esp-idf/espressif/bmi270", "esp-idf/espressif/sensor_hub"],
@@ -232,7 +240,8 @@
             "arduino/matmunk/ds18b20",
             "arduino/robtillaart/ds18b20_int",
             "arduino/robtillaart/ds18b20_rt",
-            "arduino/soosp/ds18b20sensor"
+            "arduino/soosp/ds18b20sensor",
+            "esp-idf/espressif/ds18b20"
         ],
         "ds3231": [
             "arduino/affanhanifathtarech/ds3231_rtc",
@@ -255,11 +264,11 @@
             "arduino/dfrobot/dfrobot_ens160",
             "arduino/sparkfun/sparkfun-indoor-air-quality-sensor---ens160"
         ],
-        "es7210": ["esp-idf/espressif/esp_codec_dev"],
+        "es7210": ["esp-idf/espressif/es7210", "esp-idf/espressif/esp_codec_dev"],
         "es7243": ["esp-idf/espressif/esp_codec_dev"],
         "es7243e": ["esp-idf/espressif/esp_codec_dev"],
         "es8156": ["esp-idf/espressif/esp_codec_dev"],
-        "es8311": ["esp-idf/espressif/esp_codec_dev"],
+        "es8311": ["esp-idf/espressif/es8311", "esp-idf/espressif/esp_codec_dev"],
         "es8374": ["esp-idf/espressif/esp_codec_dev"],
         "es8388": ["esp-idf/espressif/esp_codec_dev"],
         "es8389": ["esp-idf/espressif/esp_codec_dev"],
@@ -270,13 +279,20 @@
         "gc0308": ["esp-idf/espressif/esp32-camera"],
         "gc032a": ["esp-idf/espressif/esp32-camera"],
         "gc2145": ["esp-idf/espressif/esp32-camera"],
-        "gc9503": ["esp-idf/espressif/esp_lcd_gc9503", "esp-idf/espressif/esp_lcd_panel_io_additions"],
+        "gc9503": [
+            "esp-idf/espressif/esp_lcd_gc9503",
+            "esp-idf/espressif/esp_lcd_gc9503_mipi",
+            "esp-idf/espressif/esp_lcd_panel_io_additions"
+        ],
         "gc9a01": [
             "arduino/adafruit/adafruit-gc9a01a",
             "arduino/cbm80amiga/gc9a01a-avr",
+            "arduino/esp-arduino-libs/esp32_display_panel",
             "arduino/gavinlyonsrepo/gc9a01_ltsm",
             "esp-idf/espressif/esp_lcd_gc9a01",
-            "esp-idf/jef-sure/dgx"
+            "esp-idf/jef-sure/dgx",
+            "github/liyanboy74/gc9a01-esp-idf",
+            "github/lvgl/lvgl_esp32_drivers"
         ],
         "gls3680": ["esp-idf/espressif/esp_lcd_touch_gt911"],
         "gp8403": ["arduino/adafruit/adafruit-gp8403", "arduino/dfrobot/dfrobot_gp8403", "arduino/robtillaart/gp8403"],
@@ -291,6 +307,17 @@
             "github/lewisxhe/sensorlib",
             "github/m5stack/m5epd",
             "github/vroland/epdiy"
+        ],
+        "hc595": [
+            "arduino/bonezegei/bonezegei_74hc595",
+            "arduino/diyables/diyables_4digit7segment_74hc595",
+            "arduino/fmeng/xdigit7segment_74hc595",
+            "arduino/jodeenio/74hc595plus",
+            "arduino/matmunk/liquidcrystal_74hc595",
+            "esp-idf/esp-idf-lib/shiftregister",
+            "github/arizzian/5x5-grid-led-path-relay-control-on-esp32-s3",
+            "github/davidli218/esp-idf-74hc595",
+            "github/gin66/fastaccelstepper"
         ],
         "hd44780": [
             "arduino/bonezegei/bonezegei_hd44780",
@@ -309,14 +336,16 @@
         "ht16k33": [
             "arduino/lpaseen/simple-ht16k33-library",
             "arduino/robtillaart/ht16k33",
-            "arduino/sbarabe/sbk_ht16k33"
+            "arduino/sbarabe/sbk_ht16k33",
+            "esp-idf/esp-idf-lib/ht16k33"
         ],
         "hts221": [
             "arduino/adafruit/adafruit-hts221",
             "arduino/ameltech/smarteverything-hts221",
             "arduino/arduino-libraries/arduino_hts221",
             "arduino/sodaqmoja/sodaq_hts221",
-            "arduino/stm32duino/stm32duino-hts221"
+            "arduino/stm32duino/stm32duino-hts221",
+            "esp-idf/espressif/hts221"
         ],
         "htu21d": [
             "arduino/adafruit/adafruit-htu21df-library",
@@ -394,9 +423,15 @@
             "esp-idf/espressif/esp_lcd_jd9165",
             "esp-idf/jef-sure/dgx"
         ],
-        "jd9365": ["arduino/esp-arduino-libs/esp32_display_panel", "esp-idf/jef-sure/dgx", "github/0015/a3d"],
+        "jd9365": [
+            "arduino/esp-arduino-libs/esp32_display_panel",
+            "esp-idf/espressif/esp_lcd_jd9365",
+            "esp-idf/jef-sure/dgx",
+            "github/0015/a3d"
+        ],
         "lc709203f": ["arduino/adafruit/adafruit-lc709203f"],
         "ld2410c": ["esp-idf/jef-sure/ld2410c", "github/borseandy/hlk_ld2410c_lib"],
+        "led_rgb_5050": ["github/albi84/hd108_lld", "github/m5stack/m5unit-rgb"],
         "lp5562": ["arduino/tedlanghorst/lp5562", "esp-idf/lp5562/lp5562"],
         "lpd8806": ["arduino/adafruit/lpd8806"],
         "lps28": [
@@ -425,7 +460,11 @@
             "arduino/robtillaart/ltr390_dfr",
             "arduino/robtillaart/ltr390_rt"
         ],
-        "max17048": ["arduino/7semi-solutions/7semi_max17048", "arduino/hideakitai/max17048"],
+        "max17048": [
+            "arduino/7semi-solutions/7semi_max17048",
+            "arduino/hideakitai/max17048",
+            "esp-idf/espressif/max17048"
+        ],
         "max31865": [
             "arduino/7semi-solutions/7semi_max31865",
             "arduino/adafruit/adafruit-max31865-library",
@@ -441,7 +480,8 @@
             "arduino/an7orahmed/max7219segment",
             "arduino/bonezegei/bonezegei_max7219",
             "arduino/me-rk/max7219_ch32",
-            "arduino/styropyr0/max7219"
+            "arduino/styropyr0/max7219",
+            "esp-idf/esp-idf-lib/max7219"
         ],
         "max9744": ["arduino/unknown/adafruit-max9744-library"],
         "max98357a": ["arduino/dfrobot/dfrobot_max98357a"],
@@ -455,7 +495,8 @@
             "arduino/ndomx/mcp23017-port-expander",
             "arduino/robtillaart/mcp23017_rt",
             "arduino/solderedelectronics/soldered-mcp23017-arduino-library",
-            "arduino/wollewald/mcp23017_we"
+            "arduino/wollewald/mcp23017_we",
+            "esp-idf/espressif/mcp23017"
         ],
         "mcp3421": ["arduino/adafruit/adafruit-mcp3421"],
         "mcp4725": [
@@ -485,6 +526,7 @@
         "mega_ccm": ["esp-idf/espressif/esp32-camera"],
         "mfrc522": [
             "arduino/boerge1/mfrc522_fix",
+            "arduino/bonezegei/bonezegei_rc522",
             "arduino/kkloesener/mfrc522_i2c",
             "arduino/makerspaceleiden/mfrc522-spi-i2c-uart-async",
             "arduino/miguelbalboa/mfrc522",
@@ -492,8 +534,9 @@
             "arduino/obsttube/mfrc522_ntag424dna",
             "arduino/osslibraries/rfid_mfrc522v2",
             "arduino/pablo-sampaio/easy-mfrc522",
+            "arduino/tcl47-github/rc522_uart",
             "arduino/thenitek/ndef_mfrc522",
-            "github/abobija/esp-idf-rc522",
+            "esp-idf/abobija/rc522",
             "github/benklop/esp-idf-mfrc522"
         ],
         "mlx90393": [
@@ -534,7 +577,8 @@
             "arduino/tockn/mpu6050_tockn",
             "arduino/unit-electronics-mx/devlab_mpu6050",
             "arduino/unknown/mpu6050_ind",
-            "arduino/x-croot/mpu6050auto"
+            "arduino/x-croot/mpu6050auto",
+            "esp-idf/espressif/mpu6050"
         ],
         "mpu9250": [
             "arduino/asukiaaa/mpu9250_asukiaaa",
@@ -601,14 +645,10 @@
         "pcf8591": ["arduino/adafruit/adafruit-pcf8591", "arduino/robtillaart/pcf8591", "arduino/xreef/pcf8591-library"],
         "pct2075": ["arduino/adafruit/adafruit-pct2075", "arduino/robtillaart/pct2075"],
         "pi3ioe": ["esp-idf/espressif/esp_io_expander_pi4ioe5v6408"],
-        "pn5180": [
-            "arduino/bonezegei/bonezegei_pn5180",
-            "arduino/playfultechnology/pn5180",
-            "esp-idf/jef-sure/pn5180",
-            "github/rayzzzzzz/esp32-component-pn5180"
-        ],
+        "pn5180": ["arduino/bonezegei/bonezegei_pn5180", "arduino/playfultechnology/pn5180", "esp-idf/jef-sure/pn5180"],
         "pn532": [
             "arduino/adafruit/adafruit-pn532",
+            "arduino/bonezegei/bonezegei_pn532",
             "arduino/dfrobot/dfrobot_pn532",
             "arduino/italia/cie-pn532",
             "arduino/krulkip/pn532toolkit",
@@ -619,7 +659,7 @@
             "github/ytvw/esp32-pn532"
         ],
         "qmc5883p": ["arduino/adafruit/adafruit-qmc5883p-library", "arduino/mumanchu/qmc5883pmagnetometer"],
-        "ra8875": ["arduino/adafruit/adafruit-ra8875"],
+        "ra8875": ["arduino/adafruit/adafruit-ra8875", "esp-idf/espressif/esp_lcd_ra8875"],
         "rs232": ["arduino/digitalcodesign/mentorbit-rs232"],
         "rv8803": ["arduino/adafruit/adafruit-rv8803", "arduino/sparkfun/sparkfun-qwiic-rtc-rv8803-arduino-library"],
         "rx8025t": ["arduino/marcinsaj/rtc_rx8025t"],
@@ -635,13 +675,17 @@
         ],
         "scd4x": [
             "arduino/7semi-solutions/7semi_scd4x_co2_sensor",
+            "arduino/bitbank2/bb_scd41",
             "arduino/botclibs/brgofthecyber_scd4x",
             "arduino/dfrobot/dfrobot_scd4x",
             "arduino/m5stack/m5unit-env",
             "arduino/sensirion/sensirion-i2c-scd4x",
+            "arduino/solderedelectronics/soldered-scd43",
             "arduino/sparkfun/sparkfun-scd4x-arduino-library",
             "esp-idf/jef-sure/scd4x",
-            "github/esp-idf-lib/scd4x"
+            "github/esp-idf-lib/scd4x",
+            "github/hpbare/scd4x",
+            "github/janhavelka/scd41"
         ],
         "sgp30": [
             "arduino/adafruit/adafruit-sgp30-sensor",
@@ -670,14 +714,37 @@
         ],
         "si1145": ["arduino/adafruit/adafruit-si1145-library", "arduino/wollewald/si1145_we"],
         "spa06": ["arduino/adafruit/adafruit-spa06_003", "arduino/seeed-studio/seeed-arduino-spa06"],
-        "ssd1306": ["esp-idf/jef-sure/dgx"],
+        "ssd1306": [
+            "arduino/abdulbasitkhatri/oled_display_ssd1306",
+            "arduino/acrobotic/acrobotic-ssd1306",
+            "arduino/adafruit/adafruit-ssd1306",
+            "arduino/bonezegei/bonezegei_ssd1306",
+            "arduino/durydevelop/oled-ssd1306---sh1106",
+            "arduino/elc0mpa/oled_ssd1306_chart",
+            "arduino/greiman/ssd1306ascii",
+            "arduino/hakkanr/ssd1306tur",
+            "arduino/lexus2k/ssd1306",
+            "arduino/styropyr0/ssd1306-oled-display",
+            "arduino/tejashwikalptaru/ssd1306xled",
+            "arduino/thingpulse/esp8266-and-esp32-oled-driver-for-ssd1306-displays",
+            "esp-idf/jef-sure/dgx",
+            "github/lvgl/lvgl_esp32_drivers",
+            "github/taraholeinit/tarablessd1306"
+        ],
         "ssd1309": [
             "arduino/diyables/diyables_oled_ssd1309",
             "arduino/sparkfun/sparkfun-hyperdisplay-ssd1309",
             "esp-idf/jef-sure/dgx"
         ],
-        "ssd1351": ["esp-idf/jef-sure/dgx"],
-        "ssd1680": ["esp-idf/jef-sure/dgx"],
+        "ssd1322": ["esp-idf/jef-sure/dgx"],
+        "ssd1351": [
+            "arduino/adafruit/adafruit-ssd1351-library",
+            "arduino/infinitecoder01/buffered-oreon-ssd1351",
+            "arduino/lexus2k/ssd1306",
+            "esp-idf/jef-sure/dgx",
+            "github/lexus2k/lcdgfx"
+        ],
+        "ssd1680": ["esp-idf/jef-sure/dgx", "github/aivoprykk/esp_lcd_panel_ssd1680"],
         "st7262": ["arduino/iamfaraz/waveshare_st7262_lvgl"],
         "st7565r": ["esp-idf/jef-sure/dgx"],
         "st7701": ["esp-idf/espressif/esp_lcd_st7701"],
@@ -695,7 +762,8 @@
             "arduino/gavinlyonsrepo/st7789_ltsm",
             "arduino/unknown/vega_st7735_and_st7789",
             "arduino/yoprogramo/qrcode_st7789",
-            "esp-idf/jef-sure/dgx"
+            "esp-idf/jef-sure/dgx",
+            "github/lvgl/lvgl_esp32_drivers"
         ],
         "st77916": [
             "arduino/esp-arduino-libs/esp32_display_panel",
@@ -710,7 +778,7 @@
             "arduino/m5stack/m5-sths34pf80",
             "arduino/sparkfun/sparkfun-sths34pf80-arduino-library"
         ],
-        "stmpe610": ["arduino/adafruit/adafruit-stmpe610"],
+        "stmpe610": ["arduino/adafruit/adafruit-stmpe610", "esp-idf/espressif/esp_lcd_touch_stmpe610"],
         "tab5_lcd": [
             "esp-idf/espressif/esp_lcd_ili9881c",
             "esp-idf/espressif/esp_lcd_st7121",
@@ -771,6 +839,7 @@
             "arduino/unit-electronics-mx/devlab_tsl2591",
             "arduino/unknown/tsl2591mi"
         ],
+        "tt21100": ["esp-idf/espressif/esp_lcd_touch_tt21100"],
         "vcnl4010": ["arduino/adafruit/adafruit_vcnl4010", "arduino/zanduino/vcnl4010"],
         "vcnl4020": ["arduino/adafruit/adafruit-vcnl4020-library"],
         "vcnl4030": ["arduino/adafruit/adafruit-vcnl4030"],
@@ -788,7 +857,8 @@
             "arduino/adafruit/adafruit-veml6075-library",
             "arduino/dfrobot/dfrobot_veml6075",
             "arduino/sparkfun/sparkfun-veml6075-arduino-library",
-            "arduino/wifwaf/veml6075"
+            "arduino/wifwaf/veml6075",
+            "esp-idf/espressif/veml6075"
         ],
         "veml7700": [
             "arduino/7semi-solutions/7semi-veml7700",
@@ -842,7 +912,24 @@
             "arduino/solderedelectronics/soldered-ws2812b-grid",
             "arduino/wuigor/mannanauta-ws2812",
             "arduino/xorlent/esp32_ws2812b",
-            "arduino/zhentao-lin/esp32_ws2812_lib"
+            "arduino/zhentao-lin/esp32_ws2812_lib",
+            "esp-idf/espressif/led_strip"
+        ],
+        "ws2812b": [
+            "arduino/bonezegei/bonezegei_ws2812",
+            "arduino/eason-syc/ws2812_syc_air001",
+            "arduino/fastled/fastled",
+            "arduino/freenove/freenove-ws2812-lib-for-esp32",
+            "arduino/freenove/freenove-ws2812b-rgbled-controller",
+            "arduino/kitesurfer1404/ws2812fx",
+            "arduino/paulstoffregen/ws2812capture",
+            "arduino/solderedelectronics/soldered-ws2812-arduino-library",
+            "arduino/solderedelectronics/soldered-ws2812b-grid",
+            "arduino/wuigor/mannanauta-ws2812",
+            "arduino/xorlent/esp32_ws2812b",
+            "arduino/zhentao-lin/esp32_ws2812_lib",
+            "esp-idf/espressif/led_strip",
+            "github/roboticsbrno/smartleds"
         ],
         "xpt2046": [
             "arduino/ardnew/xpt2046_calibrated",

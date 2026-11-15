@@ -1,0 +1,90 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "library",
+    "ecosystem": "esp-idf",
+    "owner": "abobija",
+    "name": "rc522",
+    "title": "esp-idf-rc522",
+    "url": "https://github.com/abobija/esp-idf-rc522",
+    "license": "Apache-2.0",
+    "install": [
+        {"via": "registry"},
+        {"via": "git", "url": "https://github.com/abobija/esp-idf-rc522.git", "ref": "{version}"}
+    ],
+    "described": "4.0.1",
+    "notes": "Described from its README and headers, not tried. Its README warns that Crypto-1 of MIFARE Classic is broken and a UID can be copied.",
+    "chips": {
+        "mfrc522": {
+            "header": "rc522.h",
+            "on": ["spi", "i2c"],
+            "init": [
+                {
+                    "call": "rc522_spi_create",
+                    "args": ["{config}", "{driver}"],
+                    "returns": "esp_err_t",
+                    "for": "spi",
+                    "ok": {"equals": "ESP_OK"},
+                    "notes": "rc522_spi_config_t of driver/rc522_spi.h: the SPI host, a bus config or NULL when the bus exists, the device config with the CS pin, and the RST pin or -1 for a soft reset."
+                },
+                {
+                    "call": "rc522_i2c_create",
+                    "args": ["{config}", "{driver}"],
+                    "returns": "esp_err_t",
+                    "for": "i2c",
+                    "ok": {"equals": "ESP_OK"},
+                    "notes": "rc522_i2c_config_t of driver/rc522_i2c.h: a bus of the i2c_master driver, the device config (its example: 0x28 at 100 kHz), and the RST pin or -1."
+                },
+                {
+                    "call": "rc522_driver_install",
+                    "args": ["{driver}"],
+                    "returns": "esp_err_t",
+                    "ok": {"equals": "ESP_OK"}
+                },
+                {
+                    "call": "rc522_create",
+                    "args": ["{config}", "{rc522}"],
+                    "returns": "esp_err_t",
+                    "ok": {"equals": "ESP_OK"},
+                    "notes": "rc522_config_t: the driver, the poll interval (120 ms by default, 50 at least), the stack and the priority of its task."
+                }
+            ],
+            "setup": [
+                {
+                    "call": "rc522_register_events",
+                    "args": ["{rc522}", "RC522_EVENT_PICC_STATE_CHANGED", "{handler}", "{arg}"],
+                    "returns": "esp_err_t",
+                    "ok": {"equals": "ESP_OK"}
+                },
+                {
+                    "call": "rc522_start",
+                    "args": ["{rc522}"],
+                    "returns": "esp_err_t",
+                    "ok": {"equals": "ESP_OK"},
+                    "notes": "Resets the chip, tests its registers and starts polling: a card comes as an event in the task of the library, and its operations are called there."
+                }
+            ],
+            "standards": ["iso14443a"],
+            "modes": ["reader"],
+            "supports": {
+                "mifare_classic": ["uid", "authenticate", "blocks_read", "blocks_write"],
+                "mifare_ultralight": ["uid", "pages_read", "pages_write"],
+                "ntag": ["uid", "pages_read", "pages_write"]
+            },
+            "notes": "Polls in a task of its own and uses no IRQ line. Several readers share one SPI host. No ISO 14443-4 and no NDEF; no UART."
+        }
+    },
+    "checked": {
+        "api": {
+            "level": "vendor-code",
+            "source": "README.md, include/ and CMakeLists.txt of esp-idf-rc522 at tag 4.0.1, commit a44b3e7",
+            "date": "2026-11-15"
+        }
+    },
+    "versions": {
+        "4.0.1": {
+            "platforms": {"esp_idf": ">=5.3"},
+            "notes": "Its manifest says idf >=5.0; its CMakeLists.txt requires esp_driver_gpio and esp_driver_i2c, which ESP-IDF has since 5.3."
+        }
+    }
+}

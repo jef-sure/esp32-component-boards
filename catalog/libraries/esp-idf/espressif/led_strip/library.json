@@ -1,0 +1,51 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "library",
+    "ecosystem": "esp-idf",
+    "owner": "espressif",
+    "name": "led_strip",
+    "title": "led_strip",
+    "url": "https://github.com/espressif/idf-extra-components/tree/master/led_strip",
+    "license": "Apache-2.0",
+    "install": [
+        {"via": "registry"},
+        {"via": "git", "url": "https://github.com/espressif/idf-extra-components.git", "path": "led_strip"}
+    ],
+    "described": "3.1.1",
+    "notes": "Described from its headers and documentation, not tried.",
+    "chips": {
+        "ws2812b": {
+            "header": "led_strip.h",
+            "on": ["gpio"],
+            "init": [
+                {
+                    "call": "led_strip_new_rmt_device",
+                    "args": ["{led_config}", "{rmt_config}", "{strip}"],
+                    "returns": "esp_err_t",
+                    "for": "rmt",
+                    "ok": {"equals": "ESP_OK"},
+                    "notes": "led_strip_config_t names the data GPIO, the number of LEDs, LED_MODEL_WS2812 and the order of the colors (GRB when none); one RMT channel a strip."
+                },
+                {
+                    "call": "led_strip_new_spi_device",
+                    "args": ["{led_config}", "{spi_config}", "{strip}"],
+                    "returns": "esp_err_t",
+                    "for": "spi",
+                    "ok": {"equals": "ESP_OK"},
+                    "notes": "Takes a whole SPI host and starts its bus itself, with MOSI only: the program does not start that bus."
+                }
+            ],
+            "supports": {"colors": ["grb", "rgb", "grbw", "rgbw"], "models": ["ws2812", "sk6812", "ws2811", "ws2816"]},
+            "notes": "The data is sent by the RMT or by an SPI host at 2.5 MHz; a chip with no RMT, as the ESP32-C2, has the SPI way only. Without DMA the RMT way takes many interrupts, and a late one, as of Wi-Fi, spoils a frame."
+        }
+    },
+    "checked": {
+        "api": {
+            "level": "vendor-code",
+            "source": "led_strip/include and docs of espressif/idf-extra-components at 8e30fe6f, the code of the registry's 3.1.1 (uploaded from 65ccbe19)",
+            "date": "2026-11-15"
+        }
+    },
+    "versions": {"3.1.1": {"platforms": {"esp_idf": ">=5.2"}}}
+}

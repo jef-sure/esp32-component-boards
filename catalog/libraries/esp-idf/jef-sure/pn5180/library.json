@@ -77,6 +77,21 @@
             "covers": ["history"],
             "source": "headers of include/ at every tag of esp32-component-pn5180 and its CHANGES.md; before tag v0.2.0 nothing is known",
             "date": "2026-10-31"
+        },
+        "pn5180": {
+            "level": "hardware",
+            "covers": ["chips.pn5180"],
+            "by": "the author of the library, on the bench",
+            "source": "PLAN.md of esp32-component-pn5180; catalog/modules/pn5180_module",
+            "notes": "The anticollision of ISO 14443A was tried on hardware in the versions before 0.2.0, at the latest 0.1.1 of 2026-04-15."
+        },
+        "pn5180_since": {
+            "level": "hardware",
+            "covers": ["chips.pn5180"],
+            "by": "the author of the library, on the bench",
+            "source": "CHANGES.md and PLAN.md of esp32-component-pn5180",
+            "notes": "0.2.0 to 0.8.3 have host tests and builds only: these versions are still to be tried on hardware.",
+            "result": "pending"
         }
     },
     "history": [

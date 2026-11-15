@@ -38,6 +38,13 @@
             "level": "vendor-code",
             "source": "README and include/scd4x.h of esp32-component-scd4x 0.2.0",
             "date": "2026-10-31"
+        },
+        "scd41": {
+            "level": "hardware",
+            "covers": ["chips.scd4x"],
+            "by": "the author of the library, on the bench",
+            "source": "README-ru.md of esp32-co2-station; its lock",
+            "notes": "An SCD41 on an ESP32 and then on the ESP32-C3-Zero of the CO2 station, before 0.0.1 of 2026-04-14, broken data and power lines included; the station built with 0.0.3. 0.1.0 and later have host tests only."
         }
     },
     "versions": {

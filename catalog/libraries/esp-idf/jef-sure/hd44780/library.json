@@ -77,6 +77,14 @@
             "level": "vendor-code",
             "source": "include/hd44780.h of esp32-component-hd44780 0.1.3; from 0.1.2 only the list of files of its manifest changed",
             "date": "2026-11-07"
+        },
+        "hd44780": {
+            "level": "hardware",
+            "covers": ["chips.hd44780"],
+            "by": "the author of the library, on the bench",
+            "date": "2026-10-31",
+            "source": "the conversation of the boards session, 2026-10-31; the build log of the terminal in dgx-bench, 2026-11-04",
+            "notes": "0.1.2 on a 2004 on a PCF8574 backpack in the terminal, on an ESP32: the text seen; 0.1.3 started there with no error on 2026-11-04 (log)."
         }
     },
     "versions": {

@@ -87,6 +87,14 @@
             "source": "two PN532 on SPI in the local terminal. I2C and UART were last tried on the first driver, three years ago; the changes of 0.7.7 say it did not run on I2C",
             "by": "Anton",
             "date": "2026-11-01"
+        },
+        "pn532": {
+            "level": "hardware",
+            "covers": ["chips.pn532"],
+            "by": "the author of the library, on the bench",
+            "source": "CHANGES.md of pn532, 0.7.3 and 0.7.5; the log of the terminal in dgx-bench, 2026-10-31",
+            "notes": "0.7.5 on two readers on separate SPI hosts of an ESP32: NTAG213, MIFARE Classic 1K and DESFire, 70 of 70 cycles on both at once; on 2026-10-31 515 reads in 3 minutes with no error (log). 0.8.0 to 0.8.2 host tests only; I2C and UART not run since the first driver.",
+            "date": "2026-10-31"
         }
     },
     "history": [

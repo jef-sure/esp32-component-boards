@@ -634,6 +634,110 @@
             "covers": ["history"],
             "source": "headers of include/ at every tag of esp32-component-dgx: the chips, the buses and the arguments of their init; before tag 0.1.0 nothing is known; 0.10.3 to 0.10.12 by the same headers at each tag on 2026-11-06, 0.10.13 and 0.10.14 on 2026-11-11, 0.10.15 to 0.10.17 on 2026-11-13, 0.11.0 on 2026-11-14",
             "date": "2026-10-31"
+        },
+        "ili9341": {
+            "level": "hardware",
+            "covers": ["chips.ili9341"],
+            "by": "the author of the library, on the bench",
+            "source": "CHANGES.md of DGX, 0.11.1",
+            "notes": "0.11.1 on the CYD S028R: display off and on, the backlight, a polyline and a triangle seen; 18 examples ran 30 s with no error.",
+            "date": "2026-11-15"
+        },
+        "jd9165": {
+            "level": "hardware",
+            "covers": ["chips.jd9165"],
+            "by": "the author of the library, on the bench",
+            "source": "CHANGES.md of DGX, 0.11.1 and 0.11.0",
+            "notes": "0.11.1 on the JC1060P470C: the backlight and display off and on seen; its frame buffer read back by the driver's own check.",
+            "date": "2026-11-15"
+        },
+        "jd9365": {
+            "level": "hardware",
+            "covers": ["chips.jd9365"],
+            "by": "the author of the library, on the bench",
+            "source": "CHANGES.md of DGX, 0.11.1 and 0.11.0",
+            "notes": "0.11.1 on the JC8012P4A1C: the backlight and display off and on seen; its frame buffer read back by the driver's own check.",
+            "date": "2026-11-15"
+        },
+        "nv3041a": {
+            "level": "hardware",
+            "covers": ["chips.nv3041a"],
+            "by": "the author of the library, on the bench",
+            "source": "CHANGES.md of DGX, 0.10.16",
+            "notes": "0.10.16 on the JC4827W543C: 18 bits a pixel seen right.",
+            "date": "2026-11-13"
+        },
+        "st77916": {
+            "level": "hardware",
+            "covers": ["chips.st77916"],
+            "by": "the author of the library, on the bench",
+            "source": "CHANGES.md of DGX, 0.11.1; catalog/modules/tft153_st77916",
+            "notes": "0.11.1 on the round 1.53-inch module on an ESP32-S3 DevKit, QSPI: display off and on seen.",
+            "date": "2026-11-15"
+        },
+        "st7920": {
+            "level": "hardware",
+            "covers": ["chips.st7920"],
+            "by": "the author of the library, on the bench",
+            "source": "CHANGES.md of DGX, 0.11.1 and 0.6.0",
+            "notes": "0.11.1 on the 12864 module on the ESP32-P4-ETH of the time clock: display off and on seen; all eight orientations seen with 0.6.0.",
+            "date": "2026-11-15"
+        },
+        "st7735": {
+            "level": "hardware",
+            "covers": ["chips.st7735"],
+            "by": "the author of the library, on the bench",
+            "source": "CHANGES.md of DGX, 0.11.1; catalog/modules/tft096_st7735",
+            "notes": "0.11.1 on the 0.96-inch 80x160 module on an ESP32: display off and on seen; eight orientations and the backlight seen with 0.11.0.",
+            "date": "2026-11-15"
+        },
+        "ssd1306": {
+            "level": "hardware",
+            "covers": ["chips.ssd1306"],
+            "by": "the author of the library, on the bench",
+            "source": "CHANGES.md of DGX, 0.11.2 and 0.10.12",
+            "notes": "0.11.2 on the 72x40 of the ESP32-C3 0.42-inch OLED board: the brightness and display off and on seen; the 128x64 of the ESP32 0.96-inch OLED board seen with 0.10.12.",
+            "date": "2026-11-15"
+        },
+        "ssd1322": {
+            "level": "hardware",
+            "covers": ["chips.ssd1322"],
+            "by": "the author of the library, on the bench",
+            "source": "CHANGES.md of DGX, 0.10.16 and 0.10.17",
+            "notes": "0.10.17 on a 3.12-inch 256x64 on the 8-bit parallel bus of an ESP32: soft text seen right.",
+            "date": "2026-11-13"
+        },
+        "ssd1680": {
+            "level": "hardware",
+            "covers": ["chips.ssd1680"],
+            "by": "the author of the library, on the bench",
+            "source": "CHANGES.md of DGX, 0.10.17; catalog/modules/epaper29_ssd1680",
+            "notes": "0.10.17 on the WeAct 2.9-inch e-paper on an ESP32: eight orientations seen right, a change in 19.4 s.",
+            "date": "2026-11-13"
+        },
+        "st7565r": {
+            "level": "hardware",
+            "covers": ["chips.st7565r"],
+            "by": "the author of the library, on the bench",
+            "source": "CHANGES.md of DGX, 0.11.2",
+            "notes": "0.11.2 on a 128x64 module on an ESP32: eight orientations seen, the contrast set.",
+            "date": "2026-11-15"
+        },
+        "gc9a01": {
+            "level": "hardware",
+            "covers": ["chips.gc9a01"],
+            "by": "the author of the library, on the bench",
+            "source": "catalog/modules/tft128_gc9a01_7pin; the lock of esp32-co2-station",
+            "notes": "0.0.7 on the 1.28-inch 7-pin module on an ESP32-C3-Zero: the gauge of the CO2 station shown.",
+            "date": "2026-06-05"
+        },
+        "ssd1351": {
+            "level": "hardware",
+            "covers": ["chips.ssd1351"],
+            "by": "the author of the library, on the bench",
+            "source": "notes of the dotview clock moved onto boards, its lock in dgx-bench",
+            "notes": "0.10.6 in the dotview clock, two displays on a NodeMCU-P32S: they work after the y direction was flipped; who looked is not written.",
+            "date": "2026-11-04"
         }
     },
     "history": [

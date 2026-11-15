@@ -34,6 +34,14 @@
             "level": "vendor-code",
             "source": "README and include/ld2410c.h of esp32-component-ld2410c 0.1.5",
             "date": "2026-11-04"
+        },
+        "ld2410c": {
+            "level": "hardware",
+            "covers": ["chips.ld2410c"],
+            "by": "the author of the library, on the bench",
+            "source": "README.md of esp32-component-ld2410c",
+            "notes": "No trial on hardware is written down: host tests only.",
+            "result": "pending"
         }
     }
 }

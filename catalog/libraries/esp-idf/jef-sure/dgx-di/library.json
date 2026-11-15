@@ -68,6 +68,14 @@
             "level": "vendor-code",
             "source": "include/ of esp32-component-dgx-di 0.1.6, the same as in 0.1.5 by git diff of the tags: 0.1.6 only asks for DGX ^0.11.0",
             "date": "2026-11-14"
+        },
+        "gsl3680": {
+            "level": "hardware",
+            "covers": ["chips.gsl3680"],
+            "by": "the author of the library, on the bench",
+            "source": "CHANGES.md of DGX-DI, 0.0.1 and 0.1.1; catalog/boards/jc8012p4a1c",
+            "notes": "0.1.4 on the JC8012P4A1C: the handwritten clock with its touch works. Gestures 11 of 11 and the pad 9 of 9 with 0.0.1; 0.1.5 ran on the computer only and 0.1.6 on no board.",
+            "date": "2026-11-04"
         }
     },
     "versions": {

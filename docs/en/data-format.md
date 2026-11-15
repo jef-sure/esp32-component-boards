@@ -530,6 +530,13 @@ CMakeLists.txt defines the macro to the version the component manager chose. A b
 older version inside the range cannot start gets `#error` below the version it needs, as the
 1.14-inch ST7789 module below DGX 0.10.16.
 
+The resolver and the page give that version as `library_from` of the device: where the oldest
+part of the range begins whose record has the chip and, when the chip lists its glass, the glass
+of the device. `check_boards.py` checks that the glue stops at the same version. The page shows
+the range of the manifest for each library a board starts, and the version the kit needs when it
+is higher. When a range spans several lines (minors in 0.x, majors after), CI builds each board
+that calls the library with the oldest version of the range and the newest of each older line.
+
 What a library requires is a field of the library, so DGX-LVGL has no chips and has versions.
 
 ### Audits

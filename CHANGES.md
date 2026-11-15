@@ -10,6 +10,15 @@
 - [Versions](docs/en/choosing-a-board.md#versions) said `idf.py update-dependencies` solves the lock again; it removes
   only `dependencies.lock`, which a project of `board_select.py` does not read. It says now to remove
   `dependencies.lock.<board>` and run `idf.py reconfigure`.
+- CI builds each board that calls a library whose range spans several lines with the oldest version of the range and
+  the newest of each older line: `hello_board` of the six boards with DGX on DGX 0.10.12 and 0.10.17, and checks the
+  lock took that version. Built on the bench on 2026-11-15 with ESP-IDF 6.1: the six boards on 0.10.12, 0.10.17, 0.11.1
+  and 0.11.2, and a board with each of the ten display modules DGX drives; the 0.96-inch ST7735 stops at `#error` below
+  0.11.0, the 1.14-inch ST7789 below 0.10.16 and the 2.9-inch e-paper below 0.10.17, the rest build on all four.
+- The page says the range of each library the board starts, as the manifest takes it, not the version the catalog
+  describes, and the version a kit needs when it is higher: `jef-sure/dgx >=0.10.12,<0.12.0 (this kit from 0.11.0)`
+  with the 0.96-inch ST7735. The resolver and the page give it as `library_from` of a device, and `check_boards.py`
+  checks the glue stops at the same version.
 
 ## 0.2.0 (2026-11-15)
 

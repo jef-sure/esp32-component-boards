@@ -132,6 +132,21 @@ def host_syntax(source, name=None):
     return 0
 
 
+def check_floors(board, glue):
+    """The glue stops below the version of a library that resolve finds its started devices need by their chips and glass."""
+    started = {part["name"] for part, _, _ in boards_gen.started_devices(board)}
+    wanted = {}
+    for name, device in board["devices"].items():
+        if name in started and device.get("library_from"):
+            record = resolve.library(device["library"])
+            label = f"{record['owner']}/{record['name']}"
+            wanted[label] = max(wanted.get(label, device["library_from"]), device["library_from"], key=resolve.version_key)
+    said = dict(re.findall(rf'#error "{re.escape(board["name"])} needs (\S+) (\S+) or later"', glue))
+    if said != wanted:
+        return error(f"{board['name']}: the glue stops below {said or 'no version'}, resolve finds the devices need {wanted or 'none'}")
+    return 0
+
+
 def main():
     fix = "--fix" in sys.argv
     syntax = "--host-syntax" in sys.argv
@@ -167,6 +182,7 @@ def main():
             core = "".join(path.read_text() for path in sorted((ROOT / "src").glob("*.c")) if path.name not in NOT_A_BOARD)
             core += "".join(path.read_text() for record, _, _ in boards_gen.started(board) for path in adapter_sources(record))
             errors += check_api(board, glue.read_text() + core)
+            errors += check_floors(board, glue.read_text())
         for problem in boards_gen.pin_problems(board):
             errors += error(f"{boards_gen.data_path(board)}: {problem}")
         if syntax and glue.exists():

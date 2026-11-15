@@ -1063,8 +1063,11 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             if (!device.library || device.used === false) continue;
             const record = catalog.libraries[device.library];
             const chip = device.libraries?.[device.library];
-            if (!found.has(device.library)) found.set(device.library, { name: `${record.owner}/${record.name}`, version: device.library_at, own: !chip?.adapter, header: chip?.header, call: chip?.init?.[0]?.call, bus: Object.keys(device.on || {})[0], url: record.url, registry: record.install.some((way) => way.via === 'registry'), devices: [] });
-            found.get(device.library).devices.push(name);
+            if (!found.has(device.library)) found.set(device.library, { name: `${record.owner}/${record.name}`, version: device.library_at, range: record.adapter?.version, from: null, own: !chip?.adapter, header: chip?.header, call: chip?.init?.[0]?.call, bus: Object.keys(device.on || {})[0], url: record.url, registry: record.install.some((way) => way.via === 'registry'), devices: [] });
+            const item = found.get(device.library);
+            item.devices.push(name);
+            // the newest of what the devices need: a glass or a chip that came after the start of the range
+            if (device.library_from && (!item.from || loader.compareVersions(item.from, device.library_from) < 0)) item.from = device.library_from;
         }
         return [...found.values()];
     }
@@ -1692,7 +1695,9 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             lines.push(...auditLines(resolved, platformName || 'esp_idf', wanted.limits.standard));
             for (const item of arduino ? [] : libraries.filter((library) => library.own)) lines.push({ level: 'do', text: t('{0} {1}: the project gets it, the program starts {2} with {3}()', item.name, item.version, item.devices.join(', '), item.call) });
             const started = arduino ? [] : libraries.filter((library) => !library.own);
-            if (started.length) lines.push({ level: 'yes', text: t('the board starts: {0}', started.map((item) => `${item.name} ${item.version}`).join(', ')) });
+            // the range the manifest of the component takes, as a program gets it, and where this kit needs more
+            const versionsOf = (item) => (!item.range ? item.version : item.from ? t('{0} (this kit from {1})', item.range, item.from) : item.range);
+            if (started.length) lines.push({ level: 'yes', text: t('the board starts: {0}', started.map((item) => `${item.name} ${versionsOf(item)}`).join('; ')) });
             if (unasked.length) lines.push({ level: 'note', text: t('on the board and not asked: {0}. The project leaves them unused and their pins stay taken', unasked.map(([name, device]) => device.chip ?? name).join(', ')) });
             if (unasked.length && !had) lines.push({ level: 'note', text: t('what nobody asked for is worth about {0} {1}: a part by the price of its chip, or by the cheapest of its role', cents(unasked.reduce((sum, [, device]) => sum + worthOf(device), 0)), KIT_CURRENCY) });
             for (const title of price.missing) lines.push({ level: 'unknown', text: t('no price for {0}', title) });

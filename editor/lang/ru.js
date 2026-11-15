@@ -165,6 +165,7 @@ LANGUAGES.ru = {
         '{0}: its supply and levels are not measured': '{0}: питание и уровни не измерены',
         '{0} {1}: the project gets it, the program starts {2} with {3}()': '{0} {1}: попадёт в проект, программа запускает {2} через {3}()',
         'the board starts: {0}': 'плата запускает сама: {0}',
+        '{0} (this kit from {1})': '{0} (этому набору — с {1})',
 
         '1-Wire': '1-Wire',
         ADC: 'АЦП',

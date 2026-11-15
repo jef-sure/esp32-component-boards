@@ -118,6 +118,31 @@ def in_range(version, spec):
     return True
 
 
+def range_versions(record):
+    """The versions of the registry a library record describes that the range of its adapter takes, oldest first."""
+    spec = (record.get("adapter") or {}).get("version")
+    if not spec or record["install"][0]["via"] != "registry":
+        return []
+    return sorted((version for version, entry in (record.get("versions") or {}).items() if "registry" in entry.get("via", ["registry"])
+                   and version_key(version) <= version_key(record["described"]) and in_range(version, spec)), key=version_key)
+
+
+def needed_from(record, chip, panel):
+    """The version of a library a device needs at least when the range of the adapter starts lower: where the oldest part of
+    the range begins whose record has the chip, and its glass when the chip lists glass. None: the whole range."""
+    known = range_versions(record)
+    if not known:
+        return None
+    starts = sorted({step["before"] for step in record.get("history") or ()
+                     if version_key(known[0]) < version_key(step["before"]) <= version_key(known[-1])}, key=version_key)
+    for start in [None, *starts]:
+        entry = library_at(record, start or known[0])["chips"].get(chip)
+        rows = (entry or {}).get("panels")
+        if entry and (rows is None or panel is None or any(row["width"] == panel.get("width") and row["height"] == panel.get("height") for row in rows)):
+            return start
+    return None
+
+
 def at_version(doc, versions, version, fields):
     """doc as it was in a version: versions has the version described and the history, applied from the newest step down."""
     key = functools.partial(version_key, scheme=versions.get("scheme", "decimal"))
@@ -221,6 +246,9 @@ def apply_type(device):
         libraries.pop(out["library"])
         if device["chip"] in chips:
             libraries[out["library"]] = chips[device["chip"]]
+        since = needed_from(record, device["chip"], (out.get("config") or {}).get("panel"))
+        if since:
+            out["library_from"] = since
     out["libraries"] = libraries
     return out
 

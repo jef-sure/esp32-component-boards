@@ -77,6 +77,48 @@ function boardResolver(catalog) {
 
     const libraryAt = (record, version) => atVersion(record, record, version, LIBRARY_HISTORY);
 
+    // A version is in a range of the component manager: comparisons joined by commas, ^ and ~ as npm reads them. A revision
+    // (1.0.0~3) and a pre-release are compared as their release.
+    function inRange(version, spec) {
+        const numbers = version.replace(/^[vV]+/, '').split(/[~+-]/)[0].split('.').map(Number);
+        for (const part of spec.split(',')) {
+            const [, op, bound] = /^\s*(>=|<=|==|>|<|=|\^|~)?\s*(\S+)\s*$/.exec(part);
+            const low = bound.split('.').map(Number);
+            if (op === '^' || op === '~') {
+                const at = op === '^' && low[0] === 0 && low[1] === 0 ? 2 : op === '~' || low[0] === 0 ? 1 : 0;
+                const high = [...low.slice(0, at), low[at] + 1, ...Array(Math.max(0, low.length - at - 1)).fill(0)];
+                if (compareKeys(low, numbers) > 0 || compareKeys(numbers, high) >= 0) return false;
+            } else {
+                const order = compareKeys(numbers, low);
+                if (!({ '>=': order >= 0, '<=': order <= 0, '>': order > 0, '<': order < 0 }[op] ?? order === 0)) return false;
+            }
+        }
+        return true;
+    }
+
+    // The versions of the registry a library record describes that the range of its adapter takes, oldest first.
+    function rangeVersions(record) {
+        const spec = record.adapter?.version;
+        if (!spec || record.install[0].via !== 'registry') return [];
+        return Object.entries(record.versions || {}).filter(([version, entry]) => (entry.via ?? ['registry']).includes('registry')
+            && compareVersions(version, record.described) <= 0 && inRange(version, spec)).map(([version]) => version).sort(compareVersions);
+    }
+
+    // The version of a library a device needs at least when the range of the adapter starts lower: where the oldest part of
+    // the range begins whose record has the chip, and its glass when the chip lists glass. null: the whole range.
+    function neededFrom(record, chip, panel) {
+        const known = rangeVersions(record);
+        if (!known.length) return null;
+        const starts = [...new Set((record.history || []).map((step) => step.before)
+            .filter((before) => compareVersions(known[0], before) < 0 && compareVersions(before, known.at(-1)) <= 0))].sort(compareVersions);
+        for (const start of [null, ...starts]) {
+            const entry = libraryAt(record, start ?? known[0]).chips[chip];
+            const rows = entry?.panels;
+            if (entry && (rows == null || !panel || rows.some((row) => row.width === panel.width && row.height === panel.height))) return start;
+        }
+        return null;
+    }
+
     // The sdkconfig lines of a chip of a revision: what the revision takes, held down by what the board says.
     function chipSettings(mcu, revision) {
         const facts = load('mcu', mcu.target);
@@ -152,6 +194,8 @@ function boardResolver(catalog) {
             const chips = libraryAt(record, out.library_at).chips;
             delete libraries[out.library];
             if (has(chips, device.chip)) libraries[out.library] = chips[device.chip];
+            const since = neededFrom(record, device.chip, out.config?.panel);
+            if (since) out.library_from = since;
         }
         out.libraries = libraries;
         return out;

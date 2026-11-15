@@ -31,7 +31,8 @@ them with the catalog, applies `catalog/rules.json`, refuses what it cannot make
 - the table of boards in `README.md` and `README.ru.md`, between
   `<!-- boards:table -->` and `<!-- boards:end -->`;
 - `catalog/index.json`, the list of the files of the catalog the page reads;
-- the list of boards of the matrix of `.github/workflows/build.yml`, between its marks.
+- the list of boards of the matrix of `.github/workflows/build.yml`, and the boards and versions of its job `window`,
+  each between its marks.
 
 It writes a file only when its content changes. The tables at its top are
 the knowledge it has beyond the data: which DGX header and `DGX_ENABLE_*`
@@ -528,4 +529,7 @@ shape of what the glue calls.
 versions of ESP-IDF, plus one build of `hello_board` with the 2004 module, a project that leaves parts alone,
 `examples/local_boards`, `examples/multi_board`, and `examples/hello` as the registry hands it out (taken from the
 archive compote packs, the component at the commit), each in its own job.
-The list of boards of the matrix is written by `boards_gen.py --all` from the data, between its marks.
+The list of boards of the matrix is written by `boards_gen.py --all` from the data, between its marks. The job `window`
+builds `hello_board` under ESP-IDF 6.1 for each board that calls a library whose range spans several lines, with the
+oldest version of the range and the newest of each older line, named in the manifest of the program as a program
+names it, and checks the lock took that version; `boards_gen.py --all` writes its entries too.

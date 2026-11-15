@@ -178,7 +178,8 @@ choice, hidden symbols beside it, manifest rules on them.
 ## Status
 
 The versions and what changed in each are in [CHANGES.md](CHANGES.md). CI builds every board of the catalog under
-ESP-IDF 5.5 and 6.1, and a board of a program with a display and a 2004: the jobs of `.github/workflows/build.yml`.
+ESP-IDF 5.5 and 6.1, each board on the older versions a range of a library takes (the oldest, and the newest of each
+older line), and a board of a program with a display and a 2004: the jobs of `.github/workflows/build.yml`.
 
 The `checked` entries say how each part was tried: `examples/hello_board` and `examples/hello_lvgl` under ESP-IDF 6.1
 on versions before 0.1.0, the handwritten clock moved onto the component, probes of DGX on the bench. The 2004 module

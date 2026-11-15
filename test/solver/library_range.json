@@ -1,0 +1,16 @@
+{
+    "title": "A board with its own display and touch: the board starts DGX and DGX-DI by the ranges of the manifest, not the versions the catalog describes",
+    "answers": {
+        "blocks": [
+            {
+                "role": "display",
+                "name": "screen"
+            },
+            {
+                "role": "touch_panel",
+                "name": "finger"
+            }
+        ]
+    },
+    "says": "the board starts: jef-sure/dgx >=0.10.12,<0.12.0; jef-sure/dgx-di >=0.1.5,<0.2.0"
+}

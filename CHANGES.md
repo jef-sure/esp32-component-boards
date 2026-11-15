@@ -15,10 +15,26 @@
   lock took that version. Built on the bench on 2026-11-15 with ESP-IDF 6.1: the six boards on 0.10.12, 0.10.17, 0.11.1
   and 0.11.2, and a board with each of the ten display modules DGX drives; the 0.96-inch ST7735 stops at `#error` below
   0.11.0, the 1.14-inch ST7789 below 0.10.16 and the 2.9-inch e-paper below 0.10.17, the rest build on all four.
-- The page says the range of each library the board starts, as the manifest takes it, not the version the catalog
+- The editor says the range of each library the board starts, as the manifest takes it, not the version the catalog
   describes, and the version a kit needs when it is higher: `jef-sure/dgx >=0.10.12,<0.12.0 (this kit from 0.11.0)`
   with the 0.96-inch ST7735. The resolver and the page give it as `library_from` of a device, and `check_boards.py`
   checks the glue stops at the same version.
+- The question of the cards of an NFC reader takes MIFARE Classic, NTAG and ISO 14443-4 (DESFire) beside the standards
+  of a chip, and a reader fits by the standards of its chip and by what its library reads: DESFire leaves out the
+  RC522, whose library does not read ISO 14443-4, and the PN532 comes first.
+- The list of libraries reads the components of Espressif's repositories of many (idf-extra-components,
+  esp-iot-solution, esp-bsp) and the other names of a chip, a new field `names` of a device: 835 libraries, 74 of
+  ESP-IDF. Records, described from their headers and code and not tried: abobija/rc522 for the MFRC522,
+  espressif/led_strip for the WS2812B, esp-idf-lib/max7219 and esp-idf-lib/ht16k33. The 74HC595 needs no library: the
+  SPI driver of ESP-IDF shifts its chain out. With a library the RC522 comes first for a reader nobody asked more of.
+- The records of the libraries of the author say on which hardware each chip was seen working, with the version and
+  the date; the PN5180 since 0.2.0 and the LD2410C since its first version are still to be tried.
+- The web tool of the component is called the editor, and what it offers for a device a kit, in the README, the
+  documentation, the help of Kconfig and the texts of the tools and the editor.
+- The README begins with what a program gets: one program for any board and for a window on the computer, a change of
+  board that touches at most what differs in the data, and the handwritten clock as such a program. It names the
+  radio among the parts of a board, the libraries the component starts, the ranges of versions, and two ways on
+  Windows, not tried yet.
 
 ## 0.2.0 (2026-11-15)
 

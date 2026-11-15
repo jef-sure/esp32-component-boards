@@ -2,7 +2,7 @@
 
 A module is a part connected to a board by wires: a display, a reader, a sensor, a strip of LEDs. It is
 not a board of its own: a board of a program names it in `modules`, with the bus it joins and its pins.
-The page writes such a board for a kit with modules. `examples/local_boards` has one written by hand: a
+The editor writes such a board for a kit with modules. `examples/local_boards` has one written by hand: a
 round QSPI display, a module of the program, and the 2004 character LCD on a PCF8574 I2C backpack of the
 catalog.
 
@@ -80,7 +80,7 @@ with such a display the glue's function is the one that links.
 
 ## The catalog and the program
 
-The modules of `catalog/modules/` are products the page offers in kits. A module of the program's own,
+The modules of `catalog/modules/` are products the editor offers in kits. A module of the program's own,
 as a part its author wired from pieces, lies in `components/local-boards/modules/` of the program, in
 the layout of `catalog/`, as the round display of the example does. The glue starts displays, touch panels,
 sound and buttons; a module of another kind (a sensor, a radio) is data: a kit names the library of its

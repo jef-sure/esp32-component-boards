@@ -101,7 +101,7 @@ a fresh clone reads them before the component is downloaded.
 ## A module
 
 A module wired to a board makes a board of the program: `components/local-boards/boards/<board>/board.json`
-names the board it stands on and its modules with their buses and pins. The page writes it for a kit with
+names the board it stands on and its modules with their buses and pins. The editor writes it for a kit with
 modules; `examples/local_boards` has one written by hand. `board_select.py <board> .` takes it as a board of
 the catalog and makes its glue beside its data. A board of the program changed later to need another library
 takes it once its `dependencies.lock.<board>` and `build/<board>` are removed: the component manager solves a
@@ -155,15 +155,15 @@ nothing but `default`, so the boards keep their order, and the `current` of `sel
 VS Code shows the presets as project configurations: *ESP-IDF: Select Project
 Configuration* chooses one, and the status bar names it.
 
-The page does the same from its kits: *add to the project* on a card puts a kit among the boards of the project, the
+The editor does the same from its kits: *add to the project* on a card puts a kit among the boards of the project, the
 radio beside each makes one current, and *make the project of these boards…* writes them. It writes `selection.json`,
 whose `boards` keep the order they were added, `current` the current one and `name` the name of the project, a board of the program
 `<project>_<board>` for a kit with a project of its own, and `sdkconfig.defaults.<board>` of each with the command
 that makes it in its first line: `board_select.py --again .` makes the rest, the defaults, the presets and the glue.
-Opened from `tools/boards_mcp.py`, the page writes through it and the server runs `--again` itself, so the project
+Opened from `tools/boards_mcp.py`, the editor writes through it and the server runs `--again` itself, so the project
 builds at once; it also starts from the `selection.json` of the project, to add a board. A board of the presets that
-the page has no kit for, one a command named or one whose kit does not fit the answers now, is listed among the boards
-of the project with its radio and stays in the project. When such a board is a computer, `host_<board>`, and the page
+the editor has no kit for, one a command named or one whose kit does not fit the answers now, is listed among the boards
+of the project with its radio and stays in the project. When such a board is a computer, `host_<board>`, and the editor
 writes a board of the program `<project>_<board>`, it writes the computer `host_<project>_<board>` too, which shows the
 board of the program with the same parts; when the old computer was current, the new one is.
 
@@ -172,7 +172,7 @@ command says so, and the presets are added by hand. `board_select.py --again .` 
 every file again by the command in its first line, and the presets, in their order and with
 their current board: the first time, as `selection.json` has them. The presets record the
 current board they were made with, and each command that changes it writes it into the `current` of `selection.json`
-too, so a current board the page changes since is taken, and one a command chose stays. The page opens a project with the order and the current board of
+too, so a current board the editor changes since is taken, and one a command chose stays. The editor opens a project with the order and the current board of
 its presets. ESP-IDF reads the defaults only into a new `sdkconfig`: to take what changed,
 remove `sdkconfig.<board>`. The `sdkconfig` of a board lies in the folder of the project, not in `build/`, so `build/`
 is removed as in any project of ESP-IDF; a version before 0.1.1 kept it in `build/<board>/`, and

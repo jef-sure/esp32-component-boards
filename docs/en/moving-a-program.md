@@ -91,11 +91,11 @@ this way was built and runs on the Guition JC1060P470C and the JC8012P4A1C, with
   `sdkconfig.defaults` for that chip. `board_select.py` does not take it for a board: its first line is not a command.
 - Its libraries, its fonts and the files it embeds.
 
-## The page in the program
+## The editor in the program
 
-`python3 managed_components/jef-sure__boards/tools/boards_mcp.py --serve --project .` opens the page on the program. A
-folder with a `CMakeLists.txt` gets only what the page makes: a board of the program in `components/local-boards/` for
+`python3 managed_components/jef-sure__boards/tools/boards_mcp.py --serve --project .` opens the editor on the program. A
+folder with a `CMakeLists.txt` gets only what the editor makes: a board of the program in `components/local-boards/` for
 a kit with modules, `sdkconfig.defaults.<board>`, `selection.json` and, through `board_select.py --again`, the presets
-and the glue. The lines of CMake and of the manifest the program lacks are shown, to put in by hand. The page makes the
+and the glue. The lines of CMake and of the manifest the program lacks are shown, to put in by hand. The editor makes the
 name of the project from `project()`: `handwritten-clock` becomes `handwritten_clock`, and a board of the program is
 `handwritten_clock_<board>`.

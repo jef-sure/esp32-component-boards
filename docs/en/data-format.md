@@ -18,7 +18,7 @@ describes every file. `tools/check_format.py` checks them.
 | `catalog/rules.json` | what makes a board wrong and a schema cannot see |
 | `catalog/questions.json` | what the selection asks, and what each answer asks of a board |
 | `catalog/judgements.json` | the judgements of the solver: how it chooses where a choice is open, each with an id |
-| `catalog/index.json` | the list of these files for the page of the editor, made by `tools/boards_gen.py --all` |
+| `catalog/index.json` | the list of these files for the editor, made by `tools/boards_gen.py --all` |
 | `components/local-boards/` of a program | what is the program's own, in the same layout: read before the catalog |
 
 Names are lowercase letters, digits and `_`: they become Kconfig symbols.
@@ -212,7 +212,7 @@ refuses any other `start`.
 A library that takes one chip for several glasses lists them in `panels` of its entry for
 the chip: size, the name it gives each, and its notes. Several can share a size, as the
 256x64 SSD1322 of Newhaven and of ZJY, wired differently. A display names the one it has in
-`config.libraries`, by library, and the page offers those of its chip and size to try; with
+`config.libraries`, by library, and the editor offers those of its chip and size to try; with
 none named it gets the first of its size:
 
 ```json
@@ -532,9 +532,9 @@ CMakeLists.txt defines the macro to the version the component manager chose. A b
 older version inside the range cannot start gets `#error` below the version it needs, as the
 1.14-inch ST7789 module below DGX 0.10.16.
 
-The resolver and the page give that version as `library_from` of the device: where the oldest
+The resolver and the editor give that version as `library_from` of the device: where the oldest
 part of the range begins whose record has the chip and, when the chip lists its glass, the glass
-of the device. `check_boards.py` checks that the glue stops at the same version. The page shows
+of the device. `check_boards.py` checks that the glue stops at the same version. The editor shows
 the range of the manifest for each library a board starts, and the version the kit needs when it
 is higher. When a range spans several lines (minors in 0.x, majors after), CI builds each board
 that calls the library with the oldest version of the range and the newest of each older line.
@@ -559,7 +559,7 @@ all the library requires, then more of `frames`, `waiting` and `code_health` at 
 required library nobody read is an unknown. More readings find more defects, so only readings of one kind compare: one
 blind reading of each library, against one version of a rubric. An entry of `checked` at level `hardware` that covers
 `transports.spi` names the buses tried: the solver wires the chip on those first and says so of any other. Stars and downloads play no part. A kit shows the order
-without counts; the line of the order holds its basis, which the page shows on hover: for each library the version
+without counts; the line of the order holds its basis, which the editor shows on hover: for each library the version
 read, the defects counted with what it requires, the points of `frames`, `waiting` and `code_health`, the date and
 the file of the audit. What was found goes to the model through the tool `library_audits` of `boards_mcp.py`.
 
@@ -681,11 +681,11 @@ whose plug is not in the data stays an unknown of the kit.
 ## Platforms
 
 `catalog/platforms/<name>/platform.json` says what a program is built on. `ecosystem` is the registry its libraries are
-published in, `registry` its address, `project` what a project of it consists of, and `writes_projects` whether the page
+published in, `registry` its address, `project` what a project of it consists of, and `writes_projects` whether the editor
 writes one. Each of `versions` has its `targets`, `preview` for those it takes as a preview, and `on` for what it is built on.
 
 A chip says the same from its side in `platforms` of `mcu.json`: `since`, `preview` and `revisions`, which `tools/make_mcu.py`
-reads from COMPATIBILITY.md. `platforms` of a version of a library uses the same names. The choice in the top row of the page
+reads from COMPATIBILITY.md. `platforms` of a version of a library uses the same names. The choice in the top row of the editor
 limits the boards by their chip and the libraries by these names.
 
 ## Ways of wiring
@@ -701,7 +701,7 @@ the fewest lines first.
 ```
 
 So each piezo disc takes one pin and one channel, or two of each when a question asks for more swing.
-The solver takes the first way that gives what is asked and counts its channels, with those the outputs of the page
+The solver takes the first way that gives what is asked and counts its channels, with those the outputs asked in the editor
 take, against `frequency_sources.ledc.outputs` of the chip (the judgement `ledc_channels`).
 
 A chip may have ways and buses both. The HD44780 has its ways only, and a 2004 with a PCF8574 soldered on says
@@ -783,7 +783,7 @@ What was tried on a board, as two LEDC pins in antiphase, is in `checked` of the
 
 `mechanics` on a board or a module holds what a case needs: `outline_mm` and `holes` with `x_mm`, `y_mm`
 and `d_mm` from the centre, y up. `do` beside it lists what a person does to fit the part, beyond the
-wires, and the page shows it in a kit.
+wires, and the editor shows it in a kit.
 `window_mm` of a panel is the opening that shows it, for a panel whose area of pixels is not measured;
 `mm_w` and `mm_h` are that area.
 
@@ -809,7 +809,7 @@ one, as a project adds what it really paid.
 | `date`, `source` | when the price was seen and who says so: a price gets old |
 | `notes` | anything else |
 
-A price may be in any currency. The page shows them, and takes a budget, in the currency chosen, by `catalog/rates.json`, the reference
+A price may be in any currency. The editor shows them, and takes a budget, in the currency chosen, by `catalog/rates.json`, the reference
 rates of the European Central Bank for one day, written by `tools/update_rates.py`. A currency with no
 rate there counts as no price.
 
@@ -830,7 +830,7 @@ many sellers, and an offer there may name its `seller`; `classifieds` (Kleinanze
 thing, the price by agreement.
 
 The offers of one shop at one quantity are kept all, each report its own: they are prices of different sellers, and
-a seller is rarely remembered. The page and `board_bom.py` count a price the same way. What is sold by the pack is
+a seller is rarely remembered. The editor and `board_bom.py` count a price the same way. What is sold by the pack is
 bought by the pack, so the pieces bought are at least the smallest `qty` of the offers. Each shop gives its offers of
 the largest `qty` the pieces bought reach, a named seller only by its newest report, and the median of their lows and
 of their highs is the price of one piece there. The cheapest shop then gives the low of the item, the dearest its
@@ -870,9 +870,9 @@ it only started.
 
 ## Questions
 
-`catalog/questions.json` holds what the page asks. A question has an `id`, a `text` and a `type`: `choice` (its
+`catalog/questions.json` holds what the editor asks. A question has an `id`, a `text` and a `type`: `choice` (its
 `choices`, each a `value` and a `text`), `flag`, `count` (with `max`), `number`, `text`, `outputs` (tones and PWM)
-or `version` (of a platform). `top` puts it in the top row of the page. `when` asks it only after other answers, by
+or `version` (of a platform). `top` puts it in the top row of the editor. `when` asks it only after other answers, by
 their ids: `true` for any answer but `none`, `{"at_least": n}` for a count. An answer asks a board for something by
 `needs`, of the question or of the choice taken: a device of a `class`, with `where` the fields it must have, what the
 board `provides`, what its `chip` provides, or an `external` antenna. A question with `limit` limits the parts instead:
@@ -887,7 +887,7 @@ keeps a block of any variant from asking it.
 `catalog/judgements.json` holds how the solver chooses where the data leaves a choice open. A judgement has an `id`, a
 `kind` and the fields of its kind, `says` (the line of a kit, `{0}` what it is about) and `why`. A kind is one function
 of `editor/solver.js`, and the schema lists the kinds there are: a new judgement of a known kind is a record, a new kind
-is code. A line of a kit that a judgement made carries its `id`: the page shows it on hover, the model gets it with the
+is code. A line of a kit that a judgement made carries its `id`: the editor shows it on hover, the model gets it with the
 kit, `selection.json` keeps it, and a case of `test/solver/` checks the `id`, not the text.
 
 | kind | fields | what it does |
@@ -907,7 +907,7 @@ solver's to read: `run` where the row `spi_boot` names a level or the pin select
 does not start), `download` where only another row names one, none otherwise.
 
 `rank` orders the judgements that choose pins, 1 first: what must hold, then `sides_asked`, the sides a person asked
-by letters on the page (see [tools.md](tools.md#the-side)), then `host_on_its_iomux`, then the costs. The solver reads it
+by letters in the editor (see [tools.md](tools.md#the-side)), then `host_on_its_iomux`, then the costs. The solver reads it
 where the sides and the IO MUX pull apart. `host_on_its_iomux`: an SPI host on the pins of its IO MUX (`iomux` of `mcu.json`, from `spi_pins.h` of
 ESP-IDF), as a wired board takes them. `limits.spi_matrix_mhz` of `mcu.json` is the clock of SPI off those pins, through
 the GPIO matrix, by the section GPIO Matrix and IO_MUX of `spi_master.rst` of ESP-IDF: the ESP32 allows only so much

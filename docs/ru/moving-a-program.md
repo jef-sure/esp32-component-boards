@@ -87,11 +87,11 @@
   этого чипа. `board_select.py` не считает его файлом платы: его первая строка — не команда.
 - Её библиотеки, шрифты и встроенные файлы.
 
-## Страница в программе
+## Редактор в программе
 
-`python3 managed_components/jef-sure__boards/tools/boards_mcp.py --serve --project .` открывает страницу для программы.
-Папка с `CMakeLists.txt` получает только то, что делает страница: плату программы в `components/local-boards/` для
+`python3 managed_components/jef-sure__boards/tools/boards_mcp.py --serve --project .` открывает редактор для программы.
+Папка с `CMakeLists.txt` получает только то, что делает редактор: плату программы в `components/local-boards/` для
 комплекта с модулями, `sdkconfig.defaults.<плата>`, `selection.json`, а через `board_select.py --again` — пресеты и
-клей. Строки CMake и манифеста, которых у программы нет, показываются, чтобы вписать их руками. Имя проекта страница
+клей. Строки CMake и манифеста, которых у программы нет, показываются, чтобы вписать их руками. Имя проекта редактор
 делает из `project()`: `handwritten-clock` становится `handwritten_clock`, а плата программы —
 `handwritten_clock_<плата>`.

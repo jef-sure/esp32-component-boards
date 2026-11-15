@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""A new project on a board of the catalog, chosen by hand: the files the page writes, from editor/skeleton/.
+"""A new project on a board of the catalog, chosen by hand: the files the editor writes, from editor/skeleton/.
 
 Usage: board_project.py DIR --board BOARD [--module MODULE ...] [--name NAME]
        board_project.py DIR --selection SELECTION.json [--name NAME]
 
 DIR is empty or holds only what a repository starts with (.git, .gitignore, README, LICENSE); nothing in it is
-replaced. The files are those of editor/skeleton/files.json, filled as the page fills them, and selection.json.
+replaced. The files are those of editor/skeleton/files.json, filled as the editor fills them, and selection.json.
 The component comes as this copy came: from git at its commit, or from the registry at its version. No solver runs: --module takes a module that
-board_select.py sets up by its defaults, as the 2004 on its I2C. A kit the page chose is taken back with --selection,
-its answers too; a kit wired to pins by the page has a board of the program, which is taken from the folder of that
+board_select.py sets up by its defaults, as the 2004 on its I2C. A kit the editor chose is taken back with --selection,
+its answers too; a kit wired to pins by the editor has a board of the program, which is taken from the folder of that
 selection.json under the name of the new project. Then, in DIR, as its README says:
 
     idf.py reconfigure
@@ -94,7 +94,7 @@ def main():
     parser.add_argument("dir", type=pathlib.Path)
     parser.add_argument("--board")
     parser.add_argument("--module", action="append", default=[])
-    parser.add_argument("--selection", type=pathlib.Path, help="selection.json the page wrote: its board and modules")
+    parser.add_argument("--selection", type=pathlib.Path, help="selection.json the editor wrote: its board and modules")
     parser.add_argument("--name", help="the name of the project (lowercase letters, digits and _); the name of DIR by default")
     args = parser.parse_args()
     if bool(args.board) == bool(args.selection):
@@ -113,7 +113,7 @@ def main():
             raw, args.module = json.loads(source.read_text()), []
     unwired = [module for module in args.module if not (ROOT / "catalog" / "modules" / module / "sdkconfig.defaults").is_file()]
     if unwired:
-        raise SystemExit(f"{', '.join(unwired)}: no module of the catalog is set up by defaults of its own; the page wires modules to pins "
+        raise SystemExit(f"{', '.join(unwired)}: no module of the catalog is set up by defaults of its own; the editor wires modules to pins "
                          "of the board: choose the kit there, or take the project it wrote with --selection DIR/selection.json")
     name = args.name or args.dir.resolve().name
     if not NAME.match(name):

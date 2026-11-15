@@ -42,8 +42,8 @@ A board is described **once, as data**, each fact with where it comes from: a sc
 the board. The rest is made from that description: the code that starts the parts, the configuration, the
 dependencies a build downloads, the map of pins, and the choice of a board for a device.
 
-[The page](#the-page) shortens the way from an idea to the work on it. It takes what a device needs, a display, a
-reader, a sensor, and gives recipes: the boards and modules that do it, with their wires, levels and prices, and the
+[The editor](#the-editor) shortens the way from an idea to the work on it. It takes what a device needs, a display, a
+reader, a sensor, and gives kits: the boards and modules that do it, with their wires, levels and prices, and the
 libraries that drive them, the best of what is available, parts already at hand among them. Then it writes the
 project.
 
@@ -69,10 +69,10 @@ idf.py --preset cyd_s028r build flash monitor
 
 `board_select.py host --as cyd_s028r` gives the project two boards: the CYD and the computer that shows its display in a
 window. The first build is the computer: a window with the display of the CYD, the mouse as its touch. The last line
-builds and flashes the CYD itself. For another board, put its name from [the table](#the-boards); [the page](#the-page)
+builds and flashes the CYD itself. For another board, put its name from [the table](#the-boards); [the editor](#the-editor)
 helps to choose a board for a device.
 
-The whole path, in VS Code, with the board chosen on the page, a program of your own and what can go wrong, is in
+The whole path, in VS Code, with the board chosen in the editor, a program of your own and what can go wrong, is in
 [Getting started](docs/en/getting-started.md).
 
 ## Three words
@@ -83,9 +83,9 @@ The whole path, in VS Code, with the board chosen on the page, a program of your
   which `board_select.py host --as <board>` gives: a program is debugged in the window, then built for the board and
   flashed with no change.
 - **A board of the program** is a board described in the program itself, in `components/local-boards/`: a board of the
-  catalog with the modules wired to it, or a board of your own. The page names it `<project>_<board>`.
-- **The page** is the web page of the component (`editor/`): what the device needs goes on its canvas, and it chooses
-  the boards and modules and writes the project, see [below](#the-page).
+  catalog with the modules wired to it, or a board of your own. The editor names it `<project>_<board>`.
+- **The editor** is the web page of the component (`editor/`): what the device needs goes on its canvas, and it chooses
+  the boards and modules and writes the project, see [below](#the-editor).
 
 ## What a board can have
 
@@ -161,7 +161,7 @@ The last column comes from the `checked` entries of level `hardware` in each `bo
 the board was seen, felt or heard working. "Only started" means no errors in the log, the result not judged. A variant
 does not take the checks of its base.
 
-A module is wired to a board in a board of the program, in its `components/local-boards/`: the page writes one
+A module is wired to a board in a board of the program, in its `components/local-boards/`: the editor writes one
 for a kit with modules, and [examples/local_boards](examples/local_boards) has one written by hand, a round display
 on QSPI and a 2004 character LCD on I2C. See [docs/en/modules.md](docs/en/modules.md).
 
@@ -171,12 +171,12 @@ licence to redistribute: the program embeds it, see
 [docs/en/touch-firmware.md](docs/en/touch-firmware.md); without it the board
 builds and runs with its touch off.
 
-## The page
+## The editor
 
-The page chooses a board and the parts for a device: the roles it needs (a display, a reader, a sensor), the kits that
+The editor chooses a board and the parts for a device: the roles it needs (a display, a reader, a sensor), the kits that
 fit with their wires, levels and prices, and what is not known; then it writes the project. In the folder of a
 project, `python3 managed_components/jef-sure__boards/tools/boards_mcp.py --serve` prints its link; given to an agent over MCP
-(`boards_mcp.py --install`), the page has a dialog with the model too. See [tools.md](docs/en/tools.md#the-page).
+(`boards_mcp.py --install`), the editor has a dialog with the model too. See [tools.md](docs/en/tools.md#the-editor).
 
 ## Documentation
 
@@ -193,15 +193,15 @@ pulls `lvgl` and `esp_lvgl_port`, and the display comes as an LVGL object.
 [espressif/esp_board_manager](https://github.com/espressif/esp_board_manager) describes boards in YAML and generates
 initialisation code into the project, with a board selected by `idf.py bmgr`. This component is meant for any board
 and any library. Today it starts DGX, DGX-DI and hd44780 of its author, the drivers of Espressif for sound, the touch
-panels and the radio beside the chip, and the XPT2046 driver of atanisoft. For the other parts the page names the
+panels and the radio beside the chip, and the XPT2046 driver of atanisoft. For the other parts the editor names the
 libraries a program takes itself. Where a library of the author competes for a chip, the libraries of that chip are
 read in audits; the others are described from their own documentation and not checked. Other platforms, Arduino among
 them, are planned. It differs in how it works. A board is data a script checks: pins, buses, devices, a calibration
 measured on the board, and where each fact comes from; a board of a program is described the same way, beside the
 program. The display is one peripheral among others. A library is described by chip in `catalog/libraries/`, what it
 does with each chip and what its versions require, so DGX, LVGL through DGX-LVGL and other libraries come in through
-adapters on the same terms. The page and its solver choose a board and the parts for a task from those facts. Beside the boards of the catalog
-in the table above, the page offers boards imported from other descriptions, marked as such. What it takes from esp-bsp is the mechanism of `components/bsp_selector`: one Kconfig
+adapters on the same terms. The editor and its solver choose a board and the parts for a task from those facts. Beside the boards of the catalog
+in the table above, the editor offers boards imported from other descriptions, marked as such. What it takes from esp-bsp is the mechanism of `components/bsp_selector`: one Kconfig
 choice, hidden symbols beside it, manifest rules on them.
 
 ## Status
@@ -240,8 +240,8 @@ tools/board_pins.py                    the map of a board's pins and its tree
 tools/board_select.py                  choose the boards of a project: their defaults, presets and locks
 tools/board_radio.py                   the step of the flash that keeps the radio beside the chip at the program's esp_hosted
 tools/board_calibration.py             a touch calibration into the data of a board, from the log of DGX-DI
-tools/board_project.py                 a new project without the page, or a kit of the page taken back
-tools/boards_mcp.py, project_writer.py the page beside an agent over MCP, or alone with --serve, and its writes
+tools/board_project.py                 a new project without the editor, or a kit of the editor taken back
+tools/boards_mcp.py, project_writer.py the editor beside an agent over MCP, or alone with --serve, and its writes
 tools/board_bom.py                     what to buy for a product, with prices as ranges
 tools/take_report.py                   a price from a GitHub issue, into the catalog
 tools/update_rates.py                  the exchange rates of the catalog, from the ECB
@@ -251,7 +251,7 @@ tools/audit.py                         what a reading of a library found, kept b
 tools/import_*.py, make_mcu.py         imported/ from other descriptions; the facts of a chip from ESP-IDF
 tools/vscode_env.py                    the settings of VS Code a project of boards needs
 imported/                              boards, modules and chips taken from other descriptions, marked as such
-editor/                                the page: what to build, a kit, a project; and the editor. Any static server from the root, then /editor/
+editor/                                the editor: what to build, a kit, a project; and edits of the catalog. Any static server from the root, then /editor/
 examples/hello/                        the program of getting started, as the registry hands it out
 examples/hello_board/                  the smallest program, built for every board in CI
 examples/hello_lvgl/                   LVGL through DGX-LVGL, built in CI for every board with a graphics display

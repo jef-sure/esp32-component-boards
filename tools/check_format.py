@@ -15,7 +15,7 @@ Checks of the data format. Needs jsonschema and node: the Python of ESP-IDF has 
    the same pins;
 8. the solver of the editor gives what the cases of test/solver/ expect, and catalog/questions.json
    passes the schema;
-9. board_bom.py counts each product of a chain, and a price of one piece as the page does;
+9. board_bom.py counts each product of a chain, and a price of one piece as the editor does;
 10. the archive compote packs for the registry holds only files git tracks, none of test/, .github/ or
    imported/ (when compote of ESP-IDF and git are there);
 11. take_report.py takes a price and a shop from an issue, and every offer names a shop of catalog/shops.json;
@@ -25,7 +25,7 @@ Checks of the data format. Needs jsonschema and node: the Python of ESP-IDF has 
 13. the lines of CMake that read the defaults of the board and its lock are the same in editor/skeleton/, the examples and
    choosing-a-board.md, the program of getting started is examples/hello/main/main.c, and examples/hello, which the
    registry hands out, is the skeleton filled for the registry; --fix writes it so;
-14. board_project.py --selection takes back a kit the page wired, with its board of the program under the new name;
+14. board_project.py --selection takes back a kit the editor wired, with its board of the program under the new name;
 15. the documents of the catalog and shops.json lie in the form resolve.dump writes; --fix writes them so.
 """
 import copy
@@ -346,7 +346,7 @@ def presets_wrong():
         select("--again")
         made = presets("name", "binaryDir")
         if made != [("default", "build/cyd_s028r"), ("jc4827w543c", "build/jc4827w543c"), ("cyd_s028r", "build/cyd_s028r")] or "CONFIG_IDF_TARGET" not in (project / "sdkconfig.defaults.cyd_s028r").read_text():
-            wrong.append(f"--again from the files of a page made the presets {made}")
+            wrong.append(f"--again from the files of the editor made the presets {made}")
         # a current board a command chose stays through --again, and selection.json names it, so the page shows it
         select("--current", "jc4827w543c")
         select("--again")
@@ -358,7 +358,7 @@ def presets_wrong():
         (project / "selection.json").write_text(json.dumps({**page, "current": "cyd_s028r"}))
         select("--again")
         if presets("name", "binaryDir")[0] != ("default", "build/cyd_s028r"):
-            wrong.append(f"--again did not take back the current board the page named: {presets('name', 'binaryDir')}")
+            wrong.append(f"--again did not take back the current board the editor named: {presets('name', 'binaryDir')}")
         # presets with no record were made with no selection.json: the current board the page wrote since is taken
         select("--current", "cyd_s028r")
         doc = json.loads((project / "CMakePresets.json").read_text())
@@ -367,7 +367,7 @@ def presets_wrong():
         (project / "selection.json").write_text(json.dumps({**page, "current": "jc4827w543c"}))
         select("--again")
         if presets("name", "binaryDir") != [("default", "build/jc4827w543c"), ("jc4827w543c", "build/jc4827w543c"), ("cyd_s028r", "build/cyd_s028r")]:
-            wrong.append(f"--again did not take the current board the page wrote over presets with no record: {presets('name', 'binaryDir')}")
+            wrong.append(f"--again did not take the current board the editor wrote over presets with no record: {presets('name', 'binaryDir')}")
         # what the ESP-IDF extension writes into default goes to its board; a stale copy in default does not undo what it
         # writes into a board chosen by name; --again and a board named again keep it
         openocd("default", "1-3.2.1")
@@ -614,7 +614,7 @@ def bridge_problems():
                                       ("/examples/hello/main/main.c", {}, 200), ("/examples/hello/CMakeLists.txt", {}, 404),
                                       ("/imported-shops/index.json", {}, 200)):
             if status(path, **headers) != wanted:
-                problems.append(f"the server of the page: {path} {headers}: not {wanted}")
+                problems.append(f"the server of the editor: {path} {headers}: not {wanted}")
         # a body of the wrong form is refused, and the tools still answer after it
         token = link.split("agent=")[1]
         own = {"Authorization": f"Bearer {token}", "Content-Type": "application/json", "Origin": base}
@@ -625,9 +625,9 @@ def bridge_problems():
             except urllib.error.HTTPError as error:
                 code = error.code
             if code != 400:
-                problems.append(f"the server of the page takes {body!r} on {path}: {code}")
+                problems.append(f"the server of the editor takes {body!r} on {path}: {code}")
         if status("/agent/messages?seen=x", Authorization=f"Bearer {token}") != 400:
-            problems.append("the server of the page: a count that is not one is not refused")
+            problems.append("the server of the editor: a count that is not one is not refused")
         for ident, name in ((4, "page_state"), (5, "edit_blocks")):
             answer = asked(ident, "tools/call", {"name": name, "arguments": {"why": "a check", "remove": ["x"]}})
             if answer.get("isError") and name == "page_state":

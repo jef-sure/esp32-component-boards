@@ -1471,7 +1471,7 @@ def gen_kconfig(boards, modules):
     out("config BOARD_SELECT_PROGRAM")
     out("    bool \"A board of this program, in components/local-boards\"")
     out("    help")
-    out(kconfig_help("A board described in the program, which tools/board_select.py or the page writes into "
+    out(kconfig_help("A board described in the program, which tools/board_select.py or the editor writes into "
                      "components/local-boards/: its own choice, Board of this program, says which."))
     out("")
     out("config BOARD_SELECT_HOST")

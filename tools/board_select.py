@@ -32,18 +32,18 @@ ESP-IDF 6 reads the presets: idf.py build builds the current board, idf.py --pre
 extension of ESP-IDF for VS Code chooses one as a project configuration. Each board builds in a directory of its own,
 so a new board is a new sdkconfig made from its defaults: no set-target, no menuconfig.
 board_select.py --current BOARD PROJECT_DIR rewrites only default, so the boards keep their order, and the current board
-of selection.json, so the page shows it. ESP-IDF 5 does not read the presets:
+of selection.json, so the editor shows it. ESP-IDF 5 does not read the presets:
 
     idf.py -B build/<BOARD> -D SDKCONFIG=sdkconfig.<BOARD> -D BOARD=<BOARD> build
 
-Both need a CMakeLists.txt that reads sdkconfig.defaults.${BOARD} when BOARD is given, as the skeleton of the page
+Both need a CMakeLists.txt that reads sdkconfig.defaults.${BOARD} when BOARD is given, as the skeleton of the editor
 does. A CMakePresets.json or a file of defaults this command did not write is not touched.
 
 Each file begins with the command that made it and the version of the component; when the component changes,
 board_select.py --again PROJECT_DIR makes every such file of the project again the same way, and the presets in their
-order with their current board. The presets record the current board they were made with, and selection.json of the page
-gets it too, so --again takes the current board of selection.json only when the page has changed it since; the first
-time, the order of selection.json too. A file whose first line alone is the command, as the page writes it, is made in
+order with their current board. The presets record the current board they were made with, and selection.json of the editor
+gets it too, so --again takes the current board of selection.json only when the editor has changed it since; the first
+time, the order of selection.json too. A file whose first line alone is the command, as the editor writes it, is made in
 full. ESP-IDF reads the defaults only into a new sdkconfig, so an
 sdkconfig made before keeps what it had.
 
@@ -87,7 +87,7 @@ def defaults_of(name, what):
         raise SystemExit(f"{name}: no such {what} in {DATA / kind} (--{what} takes {known})")
     defaults = DATA / kind / name / "sdkconfig.defaults"
     if not defaults.exists():
-        raise SystemExit(f"{name}: --module takes {known}; this {what} is wired to pins of a board by the page, in a board of the "
+        raise SystemExit(f"{name}: --module takes {known}; this {what} is wired to pins of a board by the editor, in a board of the "
                          f"program in components/local-boards/ that names it in modules")
     return defaults.read_text()
 

@@ -2,7 +2,7 @@
 
 All in `tools/`, Python 3.9 or later, as ESP-IDF 5.5 has. Most need only the standard library:
 `check_format.py` needs `jsonschema` and Node.js, which runs the JavaScript of
-the page; the importers need `jsonschema`. Run them from the root of the repository (or of
+the editor; the importers need `jsonschema`. Run them from the root of the repository (or of
 `managed_components/jef-sure__boards/`).
 
 The package of the registry carries the tools a program uses: `board_select.py`, `board_project.py`,
@@ -30,7 +30,7 @@ them with the catalog, applies `catalog/rules.json`, refuses what it cannot make
   generated` and `# boards: end of generated`;
 - the table of boards in `README.md` and `README.ru.md`, between
   `<!-- boards:table -->` and `<!-- boards:end -->`;
-- `catalog/index.json`, the list of the files of the catalog the page reads;
+- `catalog/index.json`, the list of the files of the catalog the editor reads;
 - the list of boards of the matrix of `.github/workflows/build.yml`, and the boards and versions of its job `window`,
   each between its marks.
 
@@ -92,7 +92,7 @@ python3 tools/board_select.py host --as cyd_s028r --as jc1060p470c ~/myproject  
 
 Writes `~/myproject/sdkconfig.defaults.<board>` for each board named: the board's defaults, the lines of the
 revision of its chip (`--revision`), then those of each module of `--module` that has defaults of its own (no module of
-the catalog has them now: the page wires modules into a board of the program). Then `CMakePresets.json`: a preset for each board of the
+the catalog has them now: the editor wires modules into a board of the program). Then `CMakePresets.json`: a preset for each board of the
 project, those it had and those named, each building in `build/<board>`, and `default` for the current one, the first
 named unless `--current` names another, which goes into the `current` of `selection.json` too when the project has
 one. `--current` alone changes only `default` and that `current`. A board of the project starts its
@@ -109,9 +109,9 @@ Each configuration of such a project, as `idf.py reconfigure`, writes there the 
 
 Each file it writes begins with the command that made it and the version and commit of the component. After
 the component changes, `board_select.py --again ~/myproject` makes every such file of the project again the same
-way, and the presets in their order with their current board, unless the page changed the `current` of
+way, and the presets in their order with their current board, unless the editor changed the `current` of
 `selection.json` since (see [choosing-a-board.md](choosing-a-board.md)). A file it writes that the list of the bridge
-has stays the page's: its new hash goes into the list. An `sdkconfig` made before keeps what it had: remove
+has stays the editor's: its new hash goes into the list. An `sdkconfig` made before keeps what it had: remove
 `sdkconfig.<board>` to take what changed.
 
 The configuration editor of the ESP-IDF extension (the gear) and `idf.py menuconfig` change `sdkconfig.<board>`
@@ -145,12 +145,12 @@ python3 tools/board_project.py ~/again --selection ~/old/selection.json
 python3 tools/board_project.py ~/clock-2 --board cyd_s028r --name clock_two  # a folder whose name is no name of a project
 ```
 
-A new project on a board chosen by hand, without the page: the files the page writes for a new folder
+A new project on a board chosen by hand, without the editor: the files the editor writes for a new folder
 (`editor/skeleton/files.json` lists them, both read the list), filled the same way, and `selection.json` with no
 answers. The component comes as this copy came: from git at its commit, or from the registry at its version, as the
-page writes it. `--module` takes a module that `board_select.py` sets up by its own defaults; no module of the catalog
-has them now, the page wires modules to pins. `--selection` takes
-the current kit of a `selection.json` with its answers; a kit the page wired has a board of the program, which is taken
+editor writes it. `--module` takes a module that `board_select.py` sets up by its own defaults; no module of the catalog
+has them now, the editor wires modules to pins. `--selection` takes
+the current kit of a `selection.json` with its answers; a kit the editor wired has a board of the program, which is taken
 from `components/local-boards/` beside that `selection.json` and named after the new project, with its wires and its
 libraries in the README. The folder is empty or holds only `.git`, `.gitignore`, a README or a LICENSE; nothing in it is
 replaced. The command it prints next is the one in the README of the project.
@@ -168,11 +168,11 @@ A line is what is bought as one: the board a project stands on, then the modules
 the project adds, the same goods on one line. The chips of a bought board are not lines, and a
 board with `extends` is a variant, one purchase. So a product is written as `kind: project`
 over its base board. The list counts everything, what the person has already among it: a product is bought whole, so
-its total is the cost in full of the page.
+its total is the cost in full the editor shows.
 
 Prices are ranges, so a total is a range. A line with no price is named, and the total then
 reads "at least". Currencies are not converted. For a quantity the tool takes, per shop, the
-offers of the largest `qty` that the quantity reaches, and of several the median, as the page does; a line sold only by
+offers of the largest `qty` that the quantity reaches, and of several the median, as the editor does; a line sold only by
 the pack is a pack. `--shop` takes a shop of `catalog/shops.json` by its name, its
 title or its address, as a report does.
 
@@ -222,7 +222,7 @@ headers of LEDC, MCPWM, RMT and I2S. The boot modes of the strapping pins come f
 ## update_rates.py
 
 Writes `catalog/rates.json` from the reference rates of the European Central Bank, so that prices in
-any currency compare on the page. It needs the network and nothing else; the page only reads the file.
+any currency compare in the editor. It needs the network and nothing else; the editor only reads the file.
 
 ## take_report.py
 
@@ -320,7 +320,7 @@ moved, a reading of what changed replaces the rest, and it refuses when somethin
 
 ## boards_mcp.py
 
-Puts the agent of a person beside the page. It runs as an MCP server of a client, serves the page on 127.0.0.1 and takes no
+Puts the agent of a person beside the editor. It runs as an MCP server of a client, serves the editor on 127.0.0.1 and takes no
 key: the model is the agent that started it. Once, to give it to the agent:
 
 ```sh
@@ -333,27 +333,27 @@ that keeps it elsewhere. The paths are full, so the folder of the agent does not
 it to help choose the hardware of a device.
 
 One install serves every project. A server started in a project with its own copy of the component in
-`managed_components/` hands over to that copy at once: the catalog, the page and `board_select.py` are those of the
+`managed_components/` hands over to that copy at once: the catalog, the editor and `board_select.py` are those of the
 version the project builds with. The copy the install was made from serves folders with no copy of their own; when it
 is removed, install again.
 
-The agent gives the person a link with a token. On that page a dialog appears, and once it starts it takes the column of the roles, whose search stays: the model reads the description, the blocks
+The agent gives the person a link with a token. In the editor opened by it a dialog appears, and once it starts it takes the column of the roles, whose search stays: the model reads the description, the blocks
 and the best kits, sets the blocks with their variants and parts, the conditions of the solver, and writes a description that a
 project keeps as `DESCRIPTION.md`. What the person fixes is theirs: the pin of a block, a part chosen in it, or the button
-`pin this board` of a card. The server refuses the model a change of it, the page refuses it again, and the solver keeps a
+`pin this board` of a card. The server refuses the model a change of it, the editor refuses it again, and the solver keeps a
 fixed part for its block and tries only a fixed board.
-The field on top is the theme the model starts from, and the dialog develops it: a changed theme reaches the model with the next answer of `wait_for_person`. The solver stays in the page. A page opened any other way has no dialog and works as before.
+The field on top is the theme the model starts from, and the dialog develops it: a changed theme reaches the model with the next answer of `wait_for_person`. The solver stays in the editor. Opened any other way, the editor has no dialog and works as before.
 
-With no agent the server still gives the page, its solver and the writes of a project, for the folder it runs in:
+With no agent the server still gives the editor, its solver and the writes of a project, for the folder it runs in:
 
 ```sh
 python3 managed_components/jef-sure__boards/tools/boards_mcp.py --serve   # or --project DIR, --port N
 ```
 
-It prints the link of the page and serves until Ctrl-C. The link says that no model talks, so the page shows no
+It prints the link of the editor and serves until Ctrl-C. The link says that no model talks, so the editor shows no
 dialog.
 
-The server can write the files of a project for the page, so the page writes from the integrated browser of VS Code too:
+The server can write the files of a project for the editor, so the editor writes from the integrated browser of VS Code too:
 the files go through the server, whatever the browser lets a page do with folders. It writes into one folder, the one the agent works in or `--project DIR`: an empty folder for a new
 project, or one with `CMakeLists.txt`, never the component itself. The rules are those of `tools/project_writer.py`:
 
@@ -366,7 +366,7 @@ project, or one with `CMakeLists.txt`, never the component itself. The rules are
 - what `board_select.py --again` makes after the files is made on a copy of the project first and goes by the same rule: the
   defaults, the presets and the glue of a board of the program, so no command is left to the person;
 - a write is all or nothing, each file goes to disk by a rename, the list last;
-- a request that changes anything carries the token in its header and comes from the page of this server (its `Origin`).
+- a request that changes anything carries the token in its header and comes from the editor of this server (its `Origin`).
 
 ## sync_versions.py
 
@@ -377,7 +377,7 @@ python3 tools/sync_versions.py
 Fills `versions` of the `esp-idf` library records: from the component registry what each version
 is built against and requires, from the tags of git the versions the registry has not. A version the registry does not have yet stays as written.
 
-## The page
+## The editor
 
 `editor/index.html` shows what to build and on what, and edits the files of the catalog. It needs no
 build and no network, only a static server from the root of the repository: Live Server of VS Code, or
@@ -404,10 +404,10 @@ stays, and the kit names it as an unknown. A measured question of a class with `
 as the reading distance and the cards of a reader, the diagonal and the shape of a graphics display, the outputs of a
 chain: two readers ask their own, and two blocks of one role are always two parts. Its `limit.of` and `limit.variant`
 may be lists, and a block with no variant chosen is asked what any of them is. The distance between readers stays one
-question of the page. The depth of color of a display, `depth_bits`, keeps the parts whose driver takes it (`supports.depth_bits`
+question of the editor. The depth of color of a display, `depth_bits`, keeps the parts whose driver takes it (`supports.depth_bits`
 in the record of the library); when it is not the depth the data starts the display with, the board of the program starts
 it so (`config.depth_bits` of the display of the board or of the module), and the kit names that depth as not tried on the
-board. The swing of a buzzer, `swing_v`, chooses the way a part with no bus is wired: the first whose `gives.swing_v` is not less; a bare disc on two pins in antiphase takes two LEDC channels. Of two displays from modules, the first block gives the primary one. The page shows these fields in the block; the model sets them with `edit_blocks`,
+board. The swing of a buzzer, `swing_v`, chooses the way a part with no bus is wired: the first whose `gives.swing_v` is not less; a bare disc on two pins in antiphase takes two LEDC channels. Of two displays from modules, the first block gives the primary one. The editor shows these fields in the block; the model sets them with `edit_blocks`,
 and `roles` lists them. The platform is asked without a version: a kit names the versions that take its chip and its
 libraries, and a version is fixed only when the person chooses one.
 
@@ -478,13 +478,13 @@ the project has no boards, or *make the project of these boards…* asks for a f
 
 A program with a `selection.json` keeps its name and its boards. The name of the project is the one there, and from
 `boards_mcp.py` the field is locked; a kit it has keeps the name of its board; a kit made from its card joins the boards
-the program has and becomes the current one, and the boards not on the page stay in `selection.json` as they were.
+the program has and becomes the current one, and the boards not in the editor stay in `selection.json` as they were.
 
 The list of what would happen comes first and nothing is written before `write`. A board file that
 differs is replaced only when ticked, and nothing is ever removed. If a file changed after the list
 was made, nothing is written at all. A kit with no module, and with nothing of its board left unused, gets no
 board file: the project names the board of the catalog. A part of the board the project leaves unused (`used: false`)
-takes a board of the program, as a module does. The page does not talk to GitHub: the result
+takes a board of the program, as a module does. The editor does not talk to GitHub: the result
 is a folder, for git or for nothing.
 
 The board is chosen before the first build, because the dependencies follow from what it has:
@@ -494,7 +494,7 @@ nothing more.
 ### edit
 
 `open a folder` takes a program or its `components/local-boards`, to edit the boards of that program. It takes the folder of the
-repository too, and then Chromium saves into the catalog in place. A page opened from a file has no
+repository too, and then Chromium saves into the catalog in place. Opened from a file, the editor has no
 server to load from, so there the repository comes first.
 
 On the left are the documents of the catalog, next to them the tree of the one open. `card` shows
@@ -506,7 +506,7 @@ tools read it.
 
 Every change runs the same checks as the tools: the schema, the loader, the rules and the map of
 pins. The problems are listed above the card. Chromium saves into the folder opened; without one,
-or in another browser, the page gives a download to put in place by hand. Then run
+or in another browser, the editor gives a download to put in place by hand. Then run
 `tools/boards_gen.py --all`, or `tools/board_select.py` for a board of a program.
 
 The boards of a program are listed apart, over the catalog, and what is new goes there. Without a
@@ -515,7 +515,7 @@ program a new document goes into the catalog, so `project` is not offered.
 The files of `catalog/mcu/` are written by `tools/make_mcu.py`, so they are read only here. The same
 holds for a part of a module on a board: change it in the module, or through `modules` of the board.
 
-`tools/check_format.py` compares `editor/schema.js`, `editor/pins.js` and the JSON the page saves with
+`tools/check_format.py` compares `editor/schema.js`, `editor/pins.js` and the JSON the editor saves with
 the tools in Python, on every document and on spoiled copies of them.
 
 ## test/fake

@@ -9,7 +9,7 @@ the list is empty, so every file is a person's and the first write asks. The fil
 found on a copy of the project first and go through the same rule. A write is all or nothing; each file and the list
 go to disk by a rename, the list last.
 
-Whether the bridge may write at all is the person's, asked by the page every time or kept for ever: that record is the
+Whether the bridge may write at all is the person's, asked by the editor every time or kept for ever: that record is the
 user's, in $XDG_CONFIG_HOME/jef-sure-boards/allowed.json by the path and the name of the project, so a project cannot
 give itself the right and another project at the same path is asked again.
 """
@@ -49,7 +49,7 @@ def problem_of(root, rel):
     if any(part in ("", ".", "..") for part in parts):
         return "not a plain path"
     if any(part.startswith(".") and part != ".gitignore" for part in parts):
-        return "a hidden path, as .git: not written by the page"
+        return "a hidden path, as .git: not written by the editor"
     if MADE_BY_OTHERS.match(parts[0]) or LOCK.match(parts[-1]):
         return "made by the build or by the component manager"
     here = root

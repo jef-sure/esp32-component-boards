@@ -91,7 +91,10 @@ data: `"firmware": {"set": "tool"}` on the radio, in a board of the program in
 `components/local-boards/` that extends the board of the catalog. The step of the flash
 then does nothing, and `board_radio_start()` only says what the C6 runs.
 
+Tried on the JC1060P470C with the handwritten clock on 2026-11-15: Wi-Fi, and the setup of
+the network over BLE (NimBLE of the program through esp_hosted) with the C6 brought to 3.0.10
+by the step.
+
 ## What is not there yet
 
 - A radio on SPI or UART: only SDIO.
-- Bluetooth through the updated C6 was not tried yet; Wi-Fi was.

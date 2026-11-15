@@ -93,7 +93,9 @@ and this build is for jc8012p4a1c: choose the board or the port of the build. BO
 `components/local-boards/`, которая расширяет плату каталога. Тогда шаг прошивки ничего
 не делает, а `board_radio_start()` только сообщает, что работает на C6.
 
+Проверено на JC1060P470C с рукописными часами 2026-11-15: Wi-Fi и настройка сети по BLE
+(NimBLE программы через esp_hosted) с C6, которую шаг привёл к 3.0.10.
+
 ## Чего пока нет
 
 - Радио на SPI или UART: только SDIO.
-- Bluetooth через обновлённую C6 ещё не пробовали; Wi-Fi пробовали.

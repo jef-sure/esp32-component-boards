@@ -296,7 +296,9 @@ A device names what it physically is: `maker`, `part`, `ref` as on the schematic
 `marking` when only the package can be read. The entry of a chip gives `maker`, `part`
 and `compat`, a board writes `part` when it knows more, as `ES8311-S`. A family gives
 `part` and `compat` in each variant. `maker` is a short name of ours; `compat` is the
-compatible of devicetree, the only field kept for a format outside.
+compatible of devicetree, the only field kept for a format outside. `names` of a chip are
+other names libraries and people write for it, as `ws2812` for the WS2812B: the list of
+libraries takes a library that names one of them for this chip.
 
 A part a program does not see is a device of class `other` with no `on`:
 

@@ -270,7 +270,10 @@ Its roles come from the words of `catalog/roles.json`, and from the sections of 
 ## import_libraries.py
 
 Lists the known libraries in `catalog/libraries/libraries.json`, the leading list: Arduino from `library_index.json`, ESP-IDF
-from the catalog, the dependencies of the packs and a search of GitHub. Each has one entry, with the chips it names, and a
+from the catalog, the dependencies of the packs, a search of GitHub and the folders of Espressif's repositories of many
+components (`idf-extra-components`, `esp-iot-solution`, `esp-bsp`), where a folder whose `idf_component.yml` has a version
+is a component of the registry. A library names a chip by the name of its file, of a variant or one of its `names`, as
+`rc522` for the MFRC522. Each has one entry, with the chips it names, and a
 library with no chip stays a library: it may do an algorithm and drive nothing. `chip_libraries.json` beside it is an index
 from a chip to that list and need not cover it. Needs `gh`, logged in.
 

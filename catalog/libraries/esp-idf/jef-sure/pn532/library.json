@@ -93,8 +93,15 @@
             "covers": ["chips.pn532"],
             "by": "the author of the library, on the bench",
             "source": "CHANGES.md of pn532, 0.7.3 and 0.7.5; the log of the terminal in dgx-bench, 2026-10-31",
-            "notes": "0.7.5 on two readers on separate SPI hosts of an ESP32: NTAG213, MIFARE Classic 1K and DESFire, 70 of 70 cycles on both at once; on 2026-10-31 515 reads in 3 minutes with no error (log). 0.8.0 to 0.8.2 host tests only; I2C and UART not run since the first driver.",
+            "notes": "0.7.5 on two readers on separate SPI hosts of an ESP32: NTAG213, MIFARE Classic 1K and DESFire, 70 of 70 cycles on both at once; on 2026-10-31 515 reads in 3 minutes with no error (log). the CHANGES of 0.8.0 to 0.8.2 name host tests only; I2C and UART not run since the first driver.",
             "date": "2026-10-31"
+        },
+        "pn532_08": {
+            "level": "hardware",
+            "covers": ["chips.pn532"],
+            "by": "the author of the library",
+            "source": "the word of the author on 2026-11-15",
+            "notes": "0.8 runs on hardware in a project of the author on another computer; its board, its cards and the date are not written here."
         }
     },
     "history": [

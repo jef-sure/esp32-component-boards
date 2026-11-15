@@ -314,9 +314,9 @@
             "arduino/fmeng/xdigit7segment_74hc595",
             "arduino/jodeenio/74hc595plus",
             "arduino/matmunk/liquidcrystal_74hc595",
-            "esp-idf/esp-idf-lib/shiftregister",
             "github/arizzian/5x5-grid-led-path-relay-control-on-esp32-s3",
             "github/davidli218/esp-idf-74hc595",
+            "github/esp-idf-lib/shiftregister",
             "github/gin66/fastaccelstepper"
         ],
         "hd44780": [

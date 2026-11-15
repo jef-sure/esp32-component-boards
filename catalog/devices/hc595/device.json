@@ -11,7 +11,8 @@
     "chain": {"per": 8},
     "notes": [
         "Eight outputs from a serial input: SER, SRCLK and RCLK, with OE for the brightness of all. QH' goes to SER of the next chip, so a chain of any length takes the same lines.",
-        "A high input takes 3.15 V at a supply of 4.5 V and more at 5 V: fed from 3.3 V it takes the outputs of any chip of 3.3 V."
+        "A high input takes 3.15 V at a supply of 4.5 V and more at 5 V: fed from 3.3 V it takes the outputs of any chip of 3.3 V.",
+        "It needs no library: the SPI driver of ESP-IDF shifts a chain out in one transaction of a byte a chip, MSB first, and the CS of the device is RCLK, which rises at its end and latches the outputs."
     ],
     "checked": {
         "facts": {

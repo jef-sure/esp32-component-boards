@@ -79,7 +79,6 @@
     "libraries/esp-idf/atanisoft/esp_lcd_touch_xpt2046/library.json",
     "libraries/esp-idf/esp-idf-lib/ht16k33/library.json",
     "libraries/esp-idf/esp-idf-lib/max7219/library.json",
-    "libraries/esp-idf/esp-idf-lib/shiftregister/library.json",
     "libraries/esp-idf/espressif/esp32-camera/library.json",
     "libraries/esp-idf/espressif/esp_codec_dev/library.json",
     "libraries/esp-idf/espressif/esp_driver_dac/library.json",

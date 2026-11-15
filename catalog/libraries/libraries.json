@@ -8392,17 +8392,6 @@
             "archived": false,
             "license": "BSD-3-Clause"
         },
-        "esp-idf/esp-idf-lib/shiftregister": {
-            "title": "shiftregister",
-            "version": "1.0.2",
-            "repository": "https://github.com/esp-idf-lib/shiftregister",
-            "platforms": ["esp_idf"],
-            "chips": ["hc595"],
-            "stars": 0,
-            "changed": "2026-11-11",
-            "archived": false,
-            "license": "MIT"
-        },
         "esp-idf/espressif/aht20": {
             "title": "espressif/aht20",
             "version": "2.0.0",
@@ -9035,6 +9024,17 @@
             "changed": "2026-11-11",
             "archived": false,
             "license": "BSD-3-Clause"
+        },
+        "github/esp-idf-lib/shiftregister": {
+            "title": "esp-idf-lib/shiftregister",
+            "version": "1.0.2",
+            "repository": "https://github.com/esp-idf-lib/shiftregister",
+            "platforms": ["esp_idf"],
+            "chips": ["hc595"],
+            "stars": 0,
+            "changed": "2026-11-11",
+            "archived": false,
+            "license": "MIT"
         },
         "github/espressif/esp-matter": {
             "title": "espressif/esp-matter",

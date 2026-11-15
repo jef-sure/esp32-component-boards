@@ -1,5 +1,16 @@
 # CHANGES
 
+## 0.2.1 (not released yet)
+
+- A copy of the registry named in `IDF_COMPONENT_LOCAL_STORAGE_URL`, as the installer of ESP-IDF leaves it, is said:
+  the configuration prints one line while the variable is set, and the step of the flash, when it writes an older
+  esp_hosted to the radio than the radio runs, names the lock the version came from and the copy. The component
+  manager takes a version from the copy before the registry whenever one there fits the range. Tried on the
+  JC1060P470C: the copy of 2026-10-11 gave 3.0.9 for a C6 at 3.0.10.
+- [Versions](docs/en/choosing-a-board.md#versions) said `idf.py update-dependencies` solves the lock again; it removes
+  only `dependencies.lock`, which a project of `board_select.py` does not read. It says now to remove
+  `dependencies.lock.<board>` and run `idf.py reconfigure`.
+
 ## 0.2.0 (2026-11-15)
 
 - The radio beside the chip of the JC1060P470C and the JC8012P4A1C: their ESP32-C6 is a device of the catalog,

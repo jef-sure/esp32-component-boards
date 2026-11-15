@@ -88,6 +88,14 @@ if(NOT BOARD AND CONFIG_BOARD_SELECT_NONE)
     unset(_boards_name)
 endif()
 
+# The installer of ESP-IDF may name a copy of part of the registry here. The component manager then takes a component
+# from the copy whenever a version there fits the range, not the newest of the registry. Said, not changed: the copy is
+# there for builds with no network.
+if(NOT "$ENV{IDF_COMPONENT_LOCAL_STORAGE_URL}" STREQUAL "")
+    message(STATUS "IDF_COMPONENT_LOCAL_STORAGE_URL is $ENV{IDF_COMPONENT_LOCAL_STORAGE_URL}: a lock solved with it takes a "
+                   "component from that storage when a version there fits the range, without the registry, so it may be older")
+endif()
+
 # CMake Tools of VS Code builds by the presets in the environment of VS Code, which has no ESP-IDF: this configuration
 # has it and gives it to the project's .vscode/settings.json, see tools/vscode_env.py
 idf_build_get_property(_boards_python PYTHON)

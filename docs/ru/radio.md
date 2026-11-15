@@ -86,6 +86,23 @@ and this build is for jc8012p4a1c: choose the board or the port of the build. BO
 Образ для другой ревизии чипа esptool не запишет и сам; эта проверка ловит платы на
 одинаковом чипе.
 
+### Более старая версия
+
+Шаг записывает версию сборки и тогда, когда на C6 версия новее, и сообщает, откуда сборка
+её взяла. Если в окружении указана копия реестра (см. [версии](choosing-a-board.md#версии)),
+он называет и её:
+
+```
+board_radio: the radio of 80:F1:B2:D3:3D:1B runs esp_hosted 3.0.10, newer than 3.0.9, which the program has from
+/…/clock/dependencies.lock.jc1060p470c: the step writes the older 3.0.9. The build was configured with
+IDF_COMPONENT_LOCAL_STORAGE_URL=file:///…/.espressif/tools, and the component manager takes a version that fits from
+that storage before the registry. To take the newest of the registry, remove dependencies.lock.jc1060p470c and run
+idf.py reconfigure without the variable.
+```
+
+Проверено на JC1060P470C 2026-11-15: копия EIM от 2026-10-11 дала esp_hosted 3.0.9, а
+lock, разрешённый заново без неё, — 3.0.10, которую шаг записал обратно.
+
 ## C6 со своей прошивкой
 
 Плата, у которой на C6 другая прошивка (не esp_hosted программы), говорит об этом в

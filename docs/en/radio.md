@@ -84,6 +84,23 @@ and this build is for jc8012p4a1c: choose the board or the port of the build. BO
 esptool refuses an image for another chip revision by itself; this catches boards of one
 chip.
 
+### An older version
+
+The step writes the version of the build when the C6 runs a newer one too, and says where
+the build took it. With a copy of the registry set in the environment (see
+[versions](choosing-a-board.md#versions)) it names the copy as well:
+
+```
+board_radio: the radio of 80:F1:B2:D3:3D:1B runs esp_hosted 3.0.10, newer than 3.0.9, which the program has from
+/…/clock/dependencies.lock.jc1060p470c: the step writes the older 3.0.9. The build was configured with
+IDF_COMPONENT_LOCAL_STORAGE_URL=file:///…/.espressif/tools, and the component manager takes a version that fits from
+that storage before the registry. To take the newest of the registry, remove dependencies.lock.jc1060p470c and run
+idf.py reconfigure without the variable.
+```
+
+Tried on the JC1060P470C on 2026-11-15: the copy of EIM of 2026-10-11 gave esp_hosted
+3.0.9, and the lock solved again without it gave 3.0.10, which the step wrote back.
+
 ## A C6 with firmware of its own
 
 A board whose C6 runs another firmware (not the esp_hosted of the program) says so in its

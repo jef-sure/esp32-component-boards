@@ -13,6 +13,8 @@ The version the radio was found running is kept by the MAC of the board in
 $XDG_STATE_HOME/jef-sure-boards/radios.json: while the program asks for that version, the step only reads the MAC.
 A radio changed by something else than this step is not seen; BOARD_RADIO_FORCE=1 checks it again. The same file
 remembers the hardware each board was flashed as: a build for other hardware stops here (BOARD_RADIO_FORCE=1 goes on).
+An older version than the radio runs is written too, with a line that names the lock of the build and the local storage
+of components (IDF_COMPONENT_LOCAL_STORAGE_URL) when the build was configured with one.
 """
 import datetime
 import json
@@ -195,6 +197,23 @@ class Link:
             self.s.close()
 
 
+def version_key(text):
+    """(major, minor, patch) of a version of esp_hosted; None for another form."""
+    found = re.match(r"(\d+)\.(\d+)\.(\d+)", text)
+    return tuple(int(n) for n in found.groups()) if found else None
+
+
+def going_back(facts, mac, runs, want):
+    """The line that says the radio gets an older esp_hosted, and where the build took that version."""
+    lock = facts.get("lock", "the lock of the build")  # a board_radio.json of 0.2.0 has none
+    text = f"the radio of {mac} runs esp_hosted {runs}, newer than {want}, which the program has from {lock}: the step writes the older {want}."
+    if facts.get("storage"):
+        text += (f" The build was configured with IDF_COMPONENT_LOCAL_STORAGE_URL={facts['storage']}, and the component manager takes "
+                 f"a version that fits from that storage before the registry. To take the newest of the registry, remove "
+                 f"{os.path.basename(lock)} and run idf.py reconfigure without the variable.")
+    return text
+
+
 def app_partition_size(build_dir, offset):
     """The size of the app partition at offset in the program's partition table, by ESP-IDF's own reader."""
     sys.path.insert(0, os.path.join(os.environ["IDF_PATH"], "components", "partition_table"))
@@ -234,6 +253,8 @@ def update(facts, port, mac, log):
         say(f"the radio of {mac} runs esp_hosted {runs}, the program has {want} ({time.time() - t0:.1f} s)")
         remember(mac, runs=runs, hardware=facts["hardware"], board=facts["board"])
         if runs != want:
+            if version_key(runs) and version_key(want) and version_key(runs) > version_key(want):
+                say(going_back(facts, mac, runs, want))
             image = build("coprocessor", facts["radio"]["target"], facts, [])
             with open(image, "rb") as f:
                 data = f.read()

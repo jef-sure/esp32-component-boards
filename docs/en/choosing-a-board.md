@@ -261,12 +261,24 @@ Each library a board needs comes with a range of versions in the component's
 
 - Nothing chosen: the component manager takes the newest version of the range when it
   solves the lock of a board, and `dependencies.lock.<board>` keeps it. A newer one comes
-  when the lock is solved again (`idf.py update-dependencies`, or the lock removed).
+  when the lock is solved again: remove `dependencies.lock.<board>` and run
+  `idf.py reconfigure`. `idf.py update-dependencies` removes only `dependencies.lock`,
+  which a project of `board_select.py` does not read.
 - A choice: a version the program names in its own `main/idf_component.yml`, as
   `espressif/esp_hosted: "3.0.9"`, narrows the range. A version outside the range is a
   conflict the component manager reports: there is no choice beyond what was checked.
 - No choice: a range of one version, or a part that cannot follow the program. The log
   then says what runs and what the program has.
+
+The installer of ESP-IDF (EIM) may leave a copy of part of the registry on the computer
+and name it in `IDF_COMPONENT_LOCAL_STORAGE_URL`. A lock solved with that variable set
+takes a component from the copy whenever a version there fits the range, and asks the
+registry only for the rest: the newest of the copy, not of the registry. The component
+manager then also lists the versions of the copy as "new versions available", older ones
+among them. The configuration says in one line that the variable is set; the component
+does not change it, as the copy is there for builds with no network. To take the newest
+of the registry, remove `dependencies.lock.<board>` and run `idf.py reconfigure` with the
+variable unset.
 
 The firmware of the radio beside an ESP32-P4 is not a choice of its own: it follows the
 esp_hosted the build took, see [radio.md](radio.md).

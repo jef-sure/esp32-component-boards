@@ -42,6 +42,7 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import time
 import urllib.error
 import urllib.request
 
@@ -632,11 +633,49 @@ def bridge_problems():
             answer = asked(ident, "tools/call", {"name": name, "arguments": {"why": "a check", "remove": ["x"]}})
             if answer.get("isError") and name == "page_state":
                 problems.append(f"{name} fails after a refused body")
+        problems += model_wait_problems(asked, process, base, own)
         problems += project_problems(base, own, project, config)
     finally:
         process.stdin.close()
         process.wait(timeout=5)
         folder.cleanup()
+    return problems
+
+
+def model_wait_problems(asked, process, base, own):
+    """What the model waits for: a name of a block the format refuses is refused at once, page_state waits until the state of
+    the editor shows the last edit of the blocks, and a theme the person stopped typing ends wait_for_person."""
+    problems = []
+
+    def post(path, body):
+        urllib.request.urlopen(urllib.request.Request(f"{base}{path}", data=json.dumps(body).encode(), method="POST", headers=own), timeout=5)
+
+    def call(ident, name, arguments):
+        process.stdin.write(json.dumps({"jsonrpc": "2.0", "id": ident, "method": "tools/call", "params": {"name": name, "arguments": arguments}}) + "\n")
+        process.stdin.flush()
+
+    def result():
+        return json.loads(json.loads(process.stdout.readline())["result"]["content"][0]["text"])
+
+    edited = json.loads(asked(20, "tools/call", {"name": "edit_blocks", "arguments": {"why": "a check", "add": [{"role": "display", "name": "Экран"}]}})["content"][0]["text"])
+    if edited["applied"]["add"] or [item["name"] for item in edited["refused"]] != ["Экран"]:
+        problems.append(f"edit_blocks takes a name the format refuses: {edited}")
+    messages = json.loads(urllib.request.urlopen(urllib.request.Request(f"{base}/agent/messages?seen=0", headers=own), timeout=5).read())
+    last = max(item["id"] for item in messages if "edits" in item)
+    post("/agent/state", {"task": "", "blocks": [], "applied": last - 1})
+    started = time.monotonic()
+    call(21, "page_state", {})
+    time.sleep(1)
+    post("/agent/state", {"task": "", "blocks": [{"role": "display"}], "applied": last})
+    state = result()
+    if "note" in state or state.get("applied") != last or time.monotonic() - started < 1:
+        problems.append(f"page_state does not wait for the editor to show the last edit: {state}")
+    started = time.monotonic()
+    call(22, "wait_for_person", {"seconds": 30})
+    post("/agent/state", {"task": "a clock", "blocks": [{"role": "display"}], "applied": last})
+    said = result()
+    if said.get("theme") != "a clock" or time.monotonic() - started > 10:
+        problems.append(f"a new theme does not end wait_for_person: {said} after {time.monotonic() - started:.1f} s")
     return problems
 
 

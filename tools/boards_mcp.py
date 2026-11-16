@@ -29,6 +29,7 @@ import shutil
 import subprocess
 import sys
 import threading
+import time
 import urllib.parse
 
 import project_writer
@@ -45,7 +46,11 @@ SKELETON_FILES = {posixpath.normpath(f"/editor/{source}") for source, _ in json.
 LONGEST_BODY = 4 * 1024 * 1024
 LONGEST_POLL_S = 25
 LONGEST_WAIT_S = 120
+THEME_QUIET_S = 3  # a theme is told once the person stopped typing it this long
+STATE_WAIT_S = 10  # how long page_state waits for the editor to show the last edit of the blocks
 MOST_PARTS = 40
+# a block names a module of the board of the program, so its name is a name of the format
+BLOCK_NAME = json.loads((ROOT / "catalog" / "format.schema.json").read_text())["$defs"]["name"]["pattern"]
 # where VS Code, its remote server and Cursor keep extensions, under the home folder
 EXTENSION_FOLDERS = (".vscode/extensions", ".vscode-insiders/extensions", ".vscode-server/extensions", ".cursor/extensions")
 INSTRUCTIONS = """You help a person choose hardware for a device in the editor of jef-sure/boards. Call page_link and give the
@@ -63,13 +68,13 @@ write the description with write_description: the task, the choice and why, and 
 what was found in the libraries of a chip: use it in advice, and keep it out of the description."""
 TOOLS = [
     {"name": "page_link", "description": "The link of the editor, for the person to open.", "inputSchema": {"type": "object", "properties": {}}},
-    {"name": "page_state", "description": "What the person wrote and put on the canvas, with the blocks, parts and board the person fixed, the best kits of the solver with what each says, and refusals: why the boards that do not fit do not, the most common first, with how many boards each.", "inputSchema": {"type": "object", "properties": {}}},
+    {"name": "page_state", "description": "What the person wrote and put on the canvas, with the blocks, parts and board the person fixed, the best kits of the solver with what each says, and refusals: why the boards that do not fit do not, the most common first, with how many boards each. After edit_blocks it waits for the editor to show the edit.", "inputSchema": {"type": "object", "properties": {}}},
     {"name": "wait_for_person", "description": "Waits for what the person writes in the editor. Returns the new messages, or none after seconds, and the theme of the field on top when it changed.",
      "inputSchema": {"type": "object", "properties": {"seconds": {"type": "integer", "minimum": 1, "maximum": LONGEST_WAIT_S}}}},
     {"name": "say", "description": "Shows a message to the person in the editor.", "inputSchema": {"type": "object", "required": ["text"], "properties": {"text": {"type": "string"}}}},
     {"name": "edit_blocks", "description": "Changes the blocks of the canvas, with why. add: new blocks {role, variant, name, part, asks}; change: blocks by name, "
-     "their variant, part or asks; remove: names. asks: the answers of the block to the questions of its role that roles lists, by id, as {\"co2_up_to\": 5000}. A block is named by its name, or by its role when it has none. Blocks the person fixed stay as they are: "
-     "the answer names what was refused.",
+     "their variant, part or asks; remove: names. asks: the answers of the block to the questions of its role that roles lists, by id, as {\"co2_up_to\": 5000}. A block is named by its name, or by its role when it has none; a name is lowercase Latin letters, digits and _, a letter first. "
+     "Blocks the person fixed stay as they are: the answer names what was refused.",
      "inputSchema": {"type": "object", "required": ["why"], "properties": {
          "why": {"type": "string"},
          "add": {"type": "array", "items": {"type": "object", "required": ["role"], "properties": {"role": {"type": "string"}, "variant": {"type": "string"}, "name": {"type": "string"}, "part": {"type": "string"}, "asks": {"type": "object"}}}},
@@ -94,11 +99,33 @@ class Desk:
         self.messages = []  # {id, from, text, ...}: the page reads them all, the agent those of the person
         self.read_by_agent = 0
         self.theme_told = None  # the theme as the agent last had it
+        self.theme_at = 0.0  # when the theme last changed
+        self.edited = 0  # the message of the last edit of the blocks
 
     def add(self, sender, **fields):
         with self.changed:
             self.messages.append({"id": len(self.messages) + 1, "from": sender, **fields})
+            if "edits" in fields:
+                self.edited = len(self.messages)
             self.changed.notify_all()
+
+    def set_state(self, state):
+        with self.changed:
+            if state.get("task") != self.state.get("task"):
+                self.theme_at = time.monotonic()
+            self.state = state
+            self.changed.notify_all()
+
+    def theme_new(self):
+        """A theme the agent has not had, once the person stopped typing it."""
+        task = self.state.get("task")
+        return bool(task) and task != self.theme_told and time.monotonic() - self.theme_at >= THEME_QUIET_S
+
+    def current_state(self, seconds):
+        """The state, once the editor shows the last edit of the blocks, or None after seconds."""
+        with self.changed:
+            done = self.changed.wait_for(lambda: self.state.get("applied", 0) >= self.edited, timeout=seconds)
+            return self.state if done else None
 
     def since(self, seen, seconds):
         """The messages after seen, waiting for one to come."""
@@ -107,8 +134,13 @@ class Desk:
             return self.messages[seen:]
 
     def from_person(self, seconds):
+        """What the person said since the agent last read, waiting for a message or a new theme."""
+        end = time.monotonic() + seconds
+        said = lambda: any(item["from"] == "person" for item in self.messages[self.read_by_agent:])
         with self.changed:
-            self.changed.wait_for(lambda: any(item["from"] == "person" for item in self.messages[self.read_by_agent:]), timeout=seconds)
+            # a theme becomes new by time alone, after the person stops typing: so the wait looks again each second
+            while not said() and not self.theme_new() and time.monotonic() < end:
+                self.changed.wait(min(1.0, end - time.monotonic()))
             new = [item for item in self.messages[self.read_by_agent:] if item["from"] == "person"]
             self.read_by_agent = len(self.messages)
             return new
@@ -204,7 +236,7 @@ def handler_of(desk, token, port, project=None):
             if problem:
                 return self.answer(400, {"error": problem})
             if self.path == "/agent/state":
-                desk.state = body
+                desk.set_state(body)
             elif self.path == "/agent/say":
                 desk.add("person", text=body["text"])
             else:
@@ -248,6 +280,8 @@ def state_problem(body):
         return "a block has a role"
     if "task" in body and not isinstance(body["task"], str):
         return "task is a text"
+    if "applied" in body and not (isinstance(body["applied"], int) and not isinstance(body["applied"], bool)):
+        return "applied is the number of a message"
     return None
 
 
@@ -287,8 +321,11 @@ def call(desk, link, name, arguments):
     if name == "page_link":
         return {"link": link}
     if name == "page_state":
-        desk.theme_told = desk.state.get("task")
-        return desk.state or {"note": "The editor is not open yet."}
+        state = desk.current_state(STATE_WAIT_S)
+        if state is None:
+            state = {**desk.state, "note": f"The editor has not shown the last edit of the blocks in {STATE_WAIT_S} s: this is the state before it."}
+        desk.theme_told = state.get("task")
+        return state or {"note": "The editor is not open yet."}
     if name == "wait_for_person":
         said = {"messages": [item["text"] for item in desk.from_person(min(arguments.get("seconds", LONGEST_WAIT_S), LONGEST_WAIT_S))]}
         theme = desk.state.get("task")
@@ -305,12 +342,15 @@ def call(desk, link, name, arguments):
         wanted = [item["name"] for item in arguments.get("change", [])] + list(arguments.get("remove", [])) + [item.get("name") or item["role"] for item in arguments.get("add", [])]
         roles = {role["id"] for group in json.loads((ROOT / "catalog" / "roles.json").read_text())["groups"] for role in group["roles"]}
         unknown = [item["role"] for item in arguments.get("add", []) if item["role"] not in roles]
+        misnamed = [item["name"] for item in arguments.get("add", []) if item.get("name") and not re.fullmatch(BLOCK_NAME, item["name"])]
         refused = sorted({name for name in wanted if name in fixed})
-        edits = {"add": [item for item in arguments.get("add", []) if (item.get("name") or item["role"]) not in fixed and item["role"] in roles],
+        edits = {"add": [item for item in arguments.get("add", []) if (item.get("name") or item["role"]) not in fixed and item["role"] in roles
+                         and item.get("name", "") not in misnamed],
                  "change": [item for item in arguments.get("change", []) if item["name"] not in fixed],
                  "remove": [name for name in arguments.get("remove", []) if name not in fixed]}
         desk.add("model", text=arguments["why"], edits=edits)
-        return {"applied": edits, "refused": [{"name": name, "why": "the person fixed it"} for name in refused] + [{"name": role, "why": "no such role: see roles"} for role in unknown]}
+        return {"applied": edits, "refused": [{"name": name, "why": "the person fixed it"} for name in refused] + [{"name": role, "why": "no such role: see roles"} for role in unknown]
+                + [{"name": name, "why": f"a name should match {BLOCK_NAME}: it names a module of the board of the program"} for name in misnamed]}
     if name == "write_description":
         desk.add("model", text=arguments["text"], description=True)
         return {"shown": True}

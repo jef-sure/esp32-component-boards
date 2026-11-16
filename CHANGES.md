@@ -8,6 +8,12 @@
 - [Getting started](docs/en/getting-started.md) points to the two ways on Windows in the README, and the headers of
   clang for clangd are in a section of their own after the path, "Hints in the editor": a build does not need them.
 - [radio.md](docs/en/radio.md) says the JC8012P4A1C was not tried.
+- `boards_mcp.py --install` finds `claude` in the extension of Claude Code for VS Code, which does not put it on PATH;
+  it wrote `.mcp.json` into the current folder before.
+- The dialog with a model, first run by a model on 2026-11-16: a theme the person stopped typing for 3 s ends the wait of
+  the model, which answered it after up to two minutes before; `page_state` after `edit_blocks` waits until the kits of
+  the editor answer the edit, as the editor now says which edit they answer; a block name the format refuses, as one in
+  Cyrillic, is refused by `edit_blocks` with the reason, where before every board failed on it.
 
 ## 0.2.1 (2026-11-15)
 

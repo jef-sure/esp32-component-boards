@@ -78,7 +78,7 @@ const ISSUES = 'https://github.com/jef-sure/esp32-component-boards/issues/new';
 
 // A form of the repository with its fields filled: the person sends it from their own account, and the page sends nothing.
 const reportLink = (fields) => `${ISSUES}?${new URLSearchParams(fields)}`;
-const library = { worker: null, asked: 0, sent: null, catalog: null, entries: {}, localFiles: null, schema: null, rules: null, reader: null, loader: null, levels: [], checksOf: null, questions: [], rates: null, solver: null };
+const library = { worker: null, asked: 0, askedApplied: 0, sent: null, catalog: null, entries: {}, localFiles: null, schema: null, rules: null, reader: null, loader: null, levels: [], checksOf: null, questions: [], rates: null, solver: null };
 
 // The entries of a tree in the layout of the catalog. What a program has of its own wins over the catalog.
 function readTree(files, local) {
@@ -233,6 +233,7 @@ const useEditor = Pinia.defineStore('editor', {
         agent: null, // the token of tools/boards_mcp.py, when the page came from it
         talk: [], // what was said with the model
         applied: 0, // the last message of the model whose edits are on the canvas
+        kitsApplied: 0, // the last message of the model whose edits the kits were found for: the model waits for it
         installed: null, // the versions of the platforms on the computer, from the server of the model
         description: '', // what the model wrote in the end: a project gets it
         chosen: [], // the kits of the project, in the order they were added: [{ headline, kit }]
@@ -404,7 +405,7 @@ const useEditor = Pinia.defineStore('editor', {
                 why.set(reason, (why.get(reason) ?? new Set()).add(kit.name));
             }
             const refusals = [...why].map(([reason, boards]) => ({ reason, boards: boards.size })).sort((a, b) => b.boards - a.boards).slice(0, AGENT_REFUSALS);
-            return this.agentCall('state', { method: 'POST', body: JSON.stringify({ task: this.answers.task ?? '', blocks: this.answers.blocks, board: this.answers.board ?? null, fits: this.kits.filter((kit) => kit.fits).length, kits, refusals }) }).catch(() => {});
+            return this.agentCall('state', { method: 'POST', body: JSON.stringify({ task: this.answers.task ?? '', blocks: this.answers.blocks, board: this.answers.board ?? null, fits: this.kits.filter((kit) => kit.fits).length, kits, refusals, applied: this.kitsApplied }) }).catch(() => {});
         },
         // what it says goes after what the page has, so the model reads the two in order
         async sayToAgent(text) {
@@ -416,8 +417,9 @@ const useEditor = Pinia.defineStore('editor', {
         applyEdits(message) {
             const stored = `boards.applied.${this.agent}`;
             this.applied = Math.max(this.applied, Number(localStorage.getItem(stored) ?? 0));
-            if (message.id <= this.applied) return;
+            if (message.id <= this.applied) return this.caughtUp(message.id); // on the canvas since before a reload
             const named = (name) => this.answers.blocks.find((block) => (block.name || block.role) === name && !block.fixed);
+            const before = JSON.stringify(this.answers.blocks);
             for (const name of message.edits.remove ?? []) {
                 const block = named(name);
                 if (block) this.answers.blocks.splice(this.answers.blocks.indexOf(block), 1);
@@ -432,6 +434,16 @@ const useEditor = Pinia.defineStore('editor', {
             }
             this.applied = message.id;
             localStorage.setItem(stored, String(message.id));
+            // edits that change nothing start no solver
+            if (JSON.stringify(this.answers.blocks) === before) this.caughtUp(message.id);
+        },
+        // The kits found, or being found, already answer the edits of this message: the model is told so.
+        caughtUp(id) {
+            if (this.solving) library.askedApplied = Math.max(library.askedApplied, id);
+            else if (id > this.kitsApplied) {
+                this.kitsApplied = id;
+                this.tellAgent();
+            }
         },
         // A part of the selected board on the canvas, with what its block takes from its data. Another of the role takes the
         // next such part of the board, and a block of its own when the board has no more.
@@ -477,6 +489,7 @@ const useEditor = Pinia.defineStore('editor', {
             library.worker.onmessage = ({ data }) => {
                 if (data.id !== library.asked) return;
                 this.kits = data.kits;
+                this.kitsApplied = library.askedApplied;
                 this.solving = false;
                 this.restoreChosen();
                 this.recountChosen();
@@ -501,11 +514,14 @@ const useEditor = Pinia.defineStore('editor', {
             if (owned.length) answers.have = [...(answers.have ?? []), ...owned];
             if (!library.worker) {
                 this.kits = library.solver.solve(answers);
+                this.kitsApplied = this.applied;
                 this.restoreChosen();
                 this.recountChosen();
+                this.tellAgent();
                 return;
             }
             const message = { id: ++library.asked, answers, language: this.language };
+            library.askedApplied = this.applied;
             if (library.sent !== this.stamp) {
                 message.documents = { catalog: library.catalog, schema: library.schema, rules: library.rules, questions: library.questions, roles: library.roles, libraries: library.candidates, rates: library.rates.rates, judgements: library.judgements };
                 library.sent = this.stamp;

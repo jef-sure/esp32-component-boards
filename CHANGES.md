@@ -1,5 +1,14 @@
 # CHANGES
 
+## 0.2.2 (not released yet)
+
+- The display of the CYD S028R is recorded as seen working: examples/hello of 0.0.7 from the registry drew its white
+  background and blue bar on 2026-11-07. The table of the README says so.
+- The description of the component in the registry begins with the program, as the README does.
+- [Getting started](docs/en/getting-started.md) points to the two ways on Windows in the README, and the headers of
+  clang for clangd are in a section of their own after the path, "Hints in the editor": a build does not need them.
+- [radio.md](docs/en/radio.md) says the JC8012P4A1C was not tried.
+
 ## 0.2.1 (2026-11-15)
 
 - The configuration says when `IDF_COMPONENT_LOCAL_STORAGE_URL` names a copy of the registry, as the installer of

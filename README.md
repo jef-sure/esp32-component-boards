@@ -139,7 +139,7 @@ version of each range and the newest of each older line, see [versions](docs/en/
 <!-- boards:table -->
 | board | chip | display | touch | sound | button | tried on the board |
 |---|---|---|---|---|---|---|
-| CYD (ESP32-2432S028R) | ESP32 | 320x240 ILI9341, SPI, 58x43 mm | XPT2046 (resistive) | DAC, GPIO26 | yes | touch; only started: display, sound |
+| CYD (ESP32-2432S028R) | ESP32 | 320x240 ILI9341, SPI, 58x43 mm | XPT2046 (resistive) | DAC, GPIO26 | yes | display, touch; only started: sound |
 | ESP32-C3 with a 0.42-inch OLED | ESP32-C3 | 72x40 SSD1306, I2C, 9.196x5.18 mm | none | none | yes | display |
 | Waveshare ESP32-C3-Zero | ESP32-C3 | none | none | none | yes | — |
 | ESP32-C6 Super Mini | ESP32-C6 | none | none | none | yes | — |

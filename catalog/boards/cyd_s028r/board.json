@@ -65,6 +65,14 @@
             "result": "pending",
             "notes": "starts without errors; picture and sound not judged"
         },
+        "picture": {
+            "level": "hardware",
+            "covers": ["devices.lcd"],
+            "by": "Anton",
+            "date": "2026-11-07",
+            "result": "confirmed",
+            "notes": "examples/hello of 0.0.7 from the registry: a white background with a blue bar at the top."
+        },
         "power": {
             "level": "schematic",
             "covers": ["power"],

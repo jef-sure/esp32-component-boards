@@ -327,10 +327,11 @@ key: the model is the agent that started it. Once, to give it to the agent:
 python3 tools/boards_mcp.py --install
 ```
 
-With the command `claude` on the machine this gives it to Claude Code for every folder (`claude mcp add -s user`). Without
-it, it writes `.mcp.json` in the current folder, beside the servers that file names, and prints the same entry for a client
-that keeps it elsewhere. The paths are full, so the folder of the agent does not matter. Then start the agent again and ask
-it to help choose the hardware of a device.
+With the command `claude` on PATH, or in the extension of Claude Code for VS Code, which does not put it on PATH, this
+gives it to Claude Code for every folder (`claude mcp add -s user`). Without it, it writes `.mcp.json` in the current
+folder, beside the servers that file names, and prints the same entry for a client that keeps it elsewhere. The paths
+are full, so the folder of the agent does not matter. Then start the agent again and ask it to help choose the hardware
+of a device.
 
 One install serves every project. A server started in a project with its own copy of the component in
 `managed_components/` hands over to that copy at once: the catalog, the editor and `board_select.py` are those of the

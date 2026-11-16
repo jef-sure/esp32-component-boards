@@ -46,6 +46,8 @@ LONGEST_BODY = 4 * 1024 * 1024
 LONGEST_POLL_S = 25
 LONGEST_WAIT_S = 120
 MOST_PARTS = 40
+# where VS Code, its remote server and Cursor keep extensions, under the home folder
+EXTENSION_FOLDERS = (".vscode/extensions", ".vscode-insiders/extensions", ".vscode-server/extensions", ".cursor/extensions")
 INSTRUCTIONS = """You help a person choose hardware for a device in the editor of jef-sure/boards. Call page_link and give the
 person the link. Then loop: wait_for_person, page_state, and say what helps. The field on top of the editor is the theme the
 person starts from, the task of page_state: begin from it and ask only what it leaves open, as who uses the device and where
@@ -391,11 +393,23 @@ def installed():
 
 
 
+def claude_command():
+    """The command of Claude Code: on PATH, or the newest in its extension for VS Code, which does not put it on PATH."""
+    found = shutil.which("claude")
+    if found:
+        return found
+    home = pathlib.Path.home()
+    inside = [path for folder in EXTENSION_FOLDERS for path in home.glob(f"{folder}/anthropic.claude-code-*/resources/native-binary/claude*")
+              if path.is_file() and os.access(path, os.X_OK)]
+    version = lambda path: [int(part) for part in re.findall(r"\d+", path.parents[2].name.split("-")[2])]
+    return str(max(inside, key=version)) if inside else None
+
+
 def install():
     """Gives this server to the agent of the person: to Claude Code for every folder when its command is there, otherwise in
     .mcp.json of the folder it runs in, beside the servers that file names. Full paths, so the folder of the agent does not matter."""
     server = {"command": sys.executable, "args": [str(pathlib.Path(__file__).resolve())]}
-    claude = shutil.which("claude")
+    claude = claude_command()
     if claude:
         done = subprocess.run([claude, "mcp", "add", "-s", "user", NAME, "--", server["command"], *server["args"]], capture_output=True, text=True)
         print((done.stdout + done.stderr).strip())

@@ -31,12 +31,12 @@ see [the API](docs/en/api.md).
 
 When the board of a project changes, the program stays: one command chooses the new board, and at most the program
 adapts to what differs in its data, such as the size of the display or a part the new board lacks. When a fact about a
-board is corrected, or a library changes how its parts are started, the change goes into the data and the component,
-not into the program. The [handwritten clock](https://github.com/jef-sure/handwritten-clock) is such a program: one
-code for the CYD S028R (ESP32, 320x240 on SPI), the 7-inch JC1060P470C and the 10.1-inch JC8012P4A1C (ESP32-P4,
-MIPI-DSI). It names a board in one place only, and not for a technical reason: the vendor gives no licence to
-redistribute the firmware of the touch of the 10.1-inch board, so the program embeds it for that board. When the component took over the radio beside the ESP32-P4 in 0.2.0, the clock dropped its
-own code for it.
+board is corrected, or a library changes how its parts are started, the change goes into the data and the component, not
+into the program. The [handwritten clock](https://github.com/jef-sure/handwritten-clock) is such a program: one code for
+the CYD S028R (ESP32, 320x240 on SPI), the 7-inch JC1060P470C and the 10.1-inch JC8012P4A1C (ESP32-P4, MIPI-DSI). It
+names a board in one place only, and not for a technical reason: the vendor gives no licence to redistribute the
+firmware of the touch of the 10.1-inch board, so the program embeds it for that board. When the component took over the
+radio beside the ESP32-P4 in 0.2.0, the clock dropped its own code for it.
 
 A board is described **once, as data**, each fact with where it comes from: a schematic, the vendor, a measurement on
 the board. The rest is made from that description: the code that starts the parts, the configuration, the
@@ -69,8 +69,8 @@ idf.py --preset cyd_s028r build flash monitor
 
 `board_select.py host --as cyd_s028r` gives the project two boards: the CYD and the computer that shows its display in a
 window. The first build is the computer: a window with the display of the CYD, the mouse as its touch. The last line
-builds and flashes the CYD itself. For another board, put its name from [the table](#the-boards); [the editor](#the-editor)
-helps to choose a board for a device.
+builds and flashes the CYD itself. For another board, put its name from [the table](#the-boards);
+[the editor](#the-editor) helps to choose a board for a device.
 
 The whole path, in VS Code, with the board chosen in the editor, a program of your own and what can go wrong, is in
 [Getting started](docs/en/getting-started.md).
@@ -174,35 +174,35 @@ builds and runs with its touch off.
 ## The editor
 
 The editor chooses a board and the parts for a device: the roles it needs (a display, a reader, a sensor), the kits that
-fit with their wires, levels and prices, and what is not known; then it writes the project. In the folder of a
-project, `python3 managed_components/jef-sure__boards/tools/boards_mcp.py --serve` prints its link; given to an agent over MCP
+fit with their wires, levels and prices, and what is not known; then it writes the project. In the folder of a project,
+`python3 managed_components/jef-sure__boards/tools/boards_mcp.py --serve` prints its link; given to an agent over MCP
 (`boards_mcp.py --install`), the editor has a dialog with the model too. See [tools.md](docs/en/tools.md#the-editor).
 
 ## Documentation
 
 [Getting started](docs/en/getting-started.md), [choosing a board](docs/en/choosing-a-board.md),
 [moving a program with boards of its own](docs/en/moving-a-program.md), [the API](docs/en/api.md),
-[modules](docs/en/modules.md), [the touch firmware](docs/en/touch-firmware.md), [the radio](docs/en/radio.md), [calibration](docs/en/calibration.md),
-[the tools](docs/en/tools.md), [the data format](docs/en/data-format.md), [how it works](docs/en/how-it-works.md),
-[adding a board](docs/en/adding-a-board.md). In Russian: [docs/ru/](docs/ru/).
+[modules](docs/en/modules.md), [the touch firmware](docs/en/touch-firmware.md), [the radio](docs/en/radio.md),
+[calibration](docs/en/calibration.md), [the tools](docs/en/tools.md), [the data format](docs/en/data-format.md),
+[how it works](docs/en/how-it-works.md), [adding a board](docs/en/adding-a-board.md). In Russian: [docs/ru/](docs/ru/).
 
 ## How it differs from esp-bsp and esp_board_manager
 
 [espressif/esp-bsp](https://github.com/espressif/esp-bsp) describes Espressif's own boards around LVGL: every manifest
 pulls `lvgl` and `esp_lvgl_port`, and the display comes as an LVGL object.
 [espressif/esp_board_manager](https://github.com/espressif/esp_board_manager) describes boards in YAML and generates
-initialisation code into the project, with a board selected by `idf.py bmgr`. This component is meant for any board
-and any library. Today it starts DGX, DGX-DI and hd44780 of its author, the drivers of Espressif for sound, the touch
-panels and the radio beside the chip, and the XPT2046 driver of atanisoft. For the other parts the editor names the
-libraries a program takes itself. Where a library of the author competes for a chip, the libraries of that chip are
-read in audits; the others are described from their own documentation and not checked. Other platforms, Arduino among
-them, are planned. It differs in how it works. A board is data a script checks: pins, buses, devices, a calibration
-measured on the board, and where each fact comes from; a board of a program is described the same way, beside the
-program. The display is one peripheral among others. A library is described by chip in `catalog/libraries/`, what it
-does with each chip and what its versions require, so DGX, LVGL through DGX-LVGL and other libraries come in through
-adapters on the same terms. The editor and its solver choose a board and the parts for a task from those facts. Beside the boards of the catalog
-in the table above, the editor offers boards imported from other descriptions, marked as such. What it takes from esp-bsp is the mechanism of `components/bsp_selector`: one Kconfig
-choice, hidden symbols beside it, manifest rules on them.
+initialisation code into the project, with a board selected by `idf.py bmgr`. This component is meant for any board and
+any library. Today it starts DGX, DGX-DI and hd44780 of its author, the drivers of Espressif for sound, the touch panels
+and the radio beside the chip, and the XPT2046 driver of atanisoft. For the other parts the editor names the libraries a
+program takes itself. Where a library of the author competes for a chip, the libraries of that chip are read in audits;
+the others are described from their own documentation and not checked. Other platforms, Arduino among them, are planned.
+It differs in how it works. A board is data a script checks: pins, buses, devices, a calibration measured on the board,
+and where each fact comes from; a board of a program is described the same way, beside the program. The display is one
+peripheral among others. A library is described by chip in `catalog/libraries/`, what it does with each chip and what
+its versions require, so DGX, LVGL through DGX-LVGL and other libraries come in through adapters on the same terms. The
+editor and its solver choose a board and the parts for a task from those facts. Beside the boards of the catalog in the
+table above, the editor offers boards imported from other descriptions, marked as such. What it takes from esp-bsp is
+the mechanism of `components/bsp_selector`: one Kconfig choice, hidden symbols beside it, manifest rules on them.
 
 ## Status
 
@@ -277,4 +277,5 @@ without touching any of them. Measure the touch on the board
 (`dgx_di_calibrate_measure` of DGX-DI) and give the log to `tools/board_calibration.py`.
 See [docs/en/adding-a-board.md](docs/en/adding-a-board.md).
 
-License: MIT for the work of this repository; what came from others keeps its own license, see [LICENSES.md](LICENSES.md).
+License: MIT for the work of this repository; what came from others keeps its own license, see
+[LICENSES.md](LICENSES.md).

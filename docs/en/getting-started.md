@@ -10,7 +10,8 @@ with ESP-IDF 6.1.
 
 ## What you need
 
-- ESP-IDF 5.5 or 6.x. The EIM installer of Espressif puts it in; in VS Code, "ESP-IDF: Open ESP-IDF Installation Manager".
+-  ESP-IDF 5.5 or 6.x. The EIM installer of Espressif puts it in; in VS Code, "ESP-IDF: Open ESP-IDF Installation
+  Manager".
 - VS Code with the ESP-IDF extension of Espressif. CMake Tools, which VS Code offers when it sees CMake files, does no
   harm: the component gives it the environment of ESP-IDF.
 - For the program on the computer: Linux with SDL2 and libbsd (`libsdl2-dev`, `libbsd-dev`). Windows is not a target of
@@ -55,9 +56,9 @@ registry; no clone of the repository is needed.
 The example is named `hello`, and the program would build into `hello.elf`. Give it its own name at once, before the
 board: the last line of `CMakeLists.txt`, `project(hello)`, becomes `project(my_project)`. The editor takes that name
 too: it names the board of the program `<project>_<board>` and keeps the name in `selection.json`. So the name is
-lowercase Latin letters, digits and `_`, a letter first; the editor makes another one such itself, capitals lowercase and
-other characters `_`, as `Clock-60` → `clock_60`. ESP-IDF keeps the first 31 characters of the name in the description
-of the firmware.
+lowercase Latin letters, digits and `_`, a letter first; the editor makes another one such itself, capitals lowercase
+and other characters `_`, as `Clock-60` → `clock_60`. ESP-IDF keeps the first 31 characters of the name in the
+description of the firmware.
 
 So far it is a folder on your machine. It goes to GitHub later, once the project builds (step 5). A repository on
 GitHub is not made first and cloned here: with a licence or a README the folder is no longer empty.
@@ -93,23 +94,24 @@ machine: it is opened in a browser through a small server of the component. Star
 python3 managed_components/jef-sure__boards/tools/boards_mcp.py --serve
 ```
 
-It prints a link. Open it in the integrated browser of VS Code: Ctrl+Shift+P → "Browser: Open Integrated Browser" and the
-link in its address bar; with the setting `workbench.browser.openLocalhostLinks`, Ctrl+click on the link in the terminal
-does. Put on the canvas what the device needs, as "Display" from the list on the left, and press "make a project…" on
-the card of a board that fits (several boards: "add to the project" on each, then "make the project of these boards…").
-When the wires of several blocks should come out on one edge of the board, give them one letter in the field "Its
-side": a letter names a group, not an edge, see [tools.md](tools.md#the-side). Beside the button is the mark "add the
-build on the computer": with it the board gets the computer that shows its
-display, and the computer is current; without it the board is current and the computers of the project stay as they
-were. The editor shows the files it would write; after "write" and your permission its server does the rest, as
-`board_select.py --again .`. To go from the computer to the board, clear the mark and press "make the project of these
-boards…" again; set it, and the computer is current again. A computer has no line of its own in the list of the boards of the project: it is shown with its board, and a project opened with the computer current has the mark set. The board of the project has a card of its
-own then, and its parts are in the list on the left: a part from there goes on the canvas with the characteristics it
-has on that board. See [tools.md](tools.md#the-editor).
+It prints a link. Open it in the integrated browser of VS Code: Ctrl+Shift+P → "Browser: Open Integrated Browser" and
+the link in its address bar; with the setting `workbench.browser.openLocalhostLinks`, Ctrl+click on the link in the
+terminal does. Put on the canvas what the device needs, as "Display" from the list on the left, and press "make a
+project…" on the card of a board that fits (several boards: "add to the project" on each, then "make the project of
+these boards…"). When the wires of several blocks should come out on one edge of the board, give them one letter in the
+field "Its side": a letter names a group, not an edge, see [tools.md](tools.md#the-side). Beside the button is the mark
+"add the build on the computer": with it the board gets the computer that shows its display, and the computer is
+current; without it the board is current and the computers of the project stay as they were. The editor shows the files
+it would write; after "write" and your permission its server does the rest, as `board_select.py --again .`. To go from
+the computer to the board, clear the mark and press "make the project of these boards…" again; set it, and the computer
+is current again. A computer has no line of its own in the list of the boards of the project: it is shown with its
+board, and a project opened with the computer current has the mark set. The board of the project has a card of its own
+then, and its parts are in the list on the left: a part from there goes on the canvas with the characteristics it has on
+that board. See [tools.md](tools.md#the-editor).
 
-The editor keeps the canvas in the browser at once, but for its address. The server takes a free port each time it starts,
-and on a new port the canvas is empty; `--serve --port 8765` keeps the address. Into the project the editor writes only by
-the button "make the project of these boards…" (or "make a project…" on a card), once you allow it:
+The editor keeps the canvas in the browser at once, but for its address. The server takes a free port each time it
+starts, and on a new port the canvas is empty; `--serve --port 8765` keeps the address. Into the project the editor
+writes only by the button "make the project of these boards…" (or "make a project…" on a card), once you allow it:
 - the files of the board;
 - a board of the program, `components/local-boards/boards/<project>_<board>`, when the canvas has not all the board has:
   its glue starts only what is on the canvas;
@@ -117,8 +119,8 @@ the button "make the project of these boards…" (or "make a project…" on a ca
   board of the program has only what is on the canvas too; a computer the project had stays;
 - `selection.json` with the canvas, which the editor starts from when the folder is opened again.
 
-The editor does not write the program, `main/main.c`. `board_display_init()` starts the display, and the glue of the board
-knows how to start it on that board.
+The editor does not write the program, `main/main.c`. `board_display_init()` starts the display, and the glue of the
+board knows how to start it on that board.
 
 ### A board you know: one command
 
@@ -140,9 +142,9 @@ extension takes the target of the current board. Close the old terminals of ESP-
 
 ## 3. On the computer
 
-The example from here is the CYD chosen by the commands. A board from the editor is named as the editor wrote it: a board
-of the program `<project>_<board>`, its computer `host_<project>_<board>`, where `<project>` is the name of `project(…)`
-of step 1.
+The example from here is the CYD chosen by the commands. A board from the editor is named as the editor wrote it: a
+board of the program `<project>_<board>`, its computer `host_<project>_<board>`, where `<project>` is the name of
+`project(…)` of step 1.
 
 In VS Code: Ctrl+Shift+P → "CMake: Select Configure Preset" → "the computer as CYD (ESP32-2432S028R)", then F7
 ("CMake: Build") and Ctrl+Shift+F5 ("CMake: Run Without Debugging"). A window opens: white, with a blue band at the
@@ -209,7 +211,8 @@ is red. The names of the colours are in `dgx_colors.h` of DGX.
 
 Connect the board by USB. In VS Code: Ctrl+Shift+P → "ESP-IDF: Select Project Configuration" → "CYD (ESP32-2432S028R)",
 then "ESP-IDF: Select Port to Use" and "ESP-IDF: Build, Flash and Start a Monitor on Your Device". The extension builds
-the board in `build/cyd_s028r`. From a terminal of ESP-IDF 6 the same is `idf.py --preset cyd_s028r build flash monitor`.
+the board in `build/cyd_s028r`. From a terminal of ESP-IDF 6 the same is
+`idf.py --preset cyd_s028r build flash monitor`.
 
 The log of the CYD S028R:
 

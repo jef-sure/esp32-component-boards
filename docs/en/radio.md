@@ -112,6 +112,9 @@ Tried on the JC1060P470C with the handwritten clock on 2026-11-15: Wi-Fi, and th
 the network over BLE (NimBLE of the program through esp_hosted) with the C6 brought to 3.0.10
 by the step.
 
+The JC8012P4A1C takes the radio and the step from its own data, and CI builds it; neither was
+tried on that board yet.
+
 ## What is not there yet
 
 - A radio on SPI or UART: only SDIO.

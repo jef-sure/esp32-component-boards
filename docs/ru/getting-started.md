@@ -13,25 +13,9 @@
 - VS Code с расширением ESP-IDF от Espressif. CMake Tools, который VS Code предлагает поставить, увидев файлы CMake, не
   мешает: компонент даёт ему окружение ESP-IDF.
 - Для программы на компьютере — Linux с SDL2 и libbsd (`libsdl2-dev`, `libbsd-dev`). Windows целью ESP-IDF `linux`
-  не является.
+  не является; для Windows [README](../../README.ru.md#быстрый-старт) даёт два пути, WSL2 и devcontainer, ещё не
+  проверенные.
 - Для второй половины — плата на USB.
-- Расширение clangd (`llvm-vs-code-extensions.vscode-clangd`): с ним работают подсказки и переход к определению, F12.
-  Расширение ESP-IDF настраивает его само: `clangd` из ESP-IDF и сборка текущей платы. IntelliSense расширения C/C++ от
-  Microsoft выключите, `"C_Cpp.intelliSenseEngine": "disabled"`, чтобы не работали два движка.
-
-В ESP-IDF 6.1 `clangd` ставится всегда, но без заголовков самого clang, и редактор пишет `'stddef.h' file not found`.
-Один раз на установку их кладут рядом с ним (Linux x86-64):
-
-```sh
-source ~/.espressif/tools/activate_idf_v6.1.sh
-cd "$(dirname "$(which clangd)")/.."     # esp-clangd этой установки
-V=$(basename "$(dirname "$PWD")")         # его версия, esp-21.1.3_20260408
-curl -L https://github.com/espressif/llvm-project/releases/download/$V/libs-clang-$V-x86_64-linux-gnu.tar.xz |
-    tar -xJ --strip-components=1 esp-clang/lib/clang
-```
-
-Архив — 83 МБ, из него берутся только заголовки, 8 МБ, в `lib/clang/21`. Затем в VS Code: Ctrl+Shift+P → «clangd:
-Restart language server». В ESP-IDF 5.5 и 6.0 `clangd` входит в esp-clang, который ставится по запросу.
 
 ## Терминал ESP-IDF
 
@@ -282,6 +266,27 @@ git push -u origin main
   можно удалять, как в любом проекте ESP-IDF: настройки плат лежат в папке проекта.
 - Подбор платы вместе с агентом: `python3 managed_components/jef-sure__boards/tools/boards_mcp.py --install` один раз на
   машину, до редактора; см. [tools.md](tools.md#boards_mcppy).
+- Подсказки и переход к определению в редакторе: [Подсказки в редакторе](#подсказки-в-редакторе).
+
+## Подсказки в редакторе
+
+Расширение clangd (`llvm-vs-code-extensions.vscode-clangd`): с ним работают подсказки и переход к определению, F12.
+Расширение ESP-IDF настраивает его само: `clangd` из ESP-IDF и сборка текущей платы. IntelliSense расширения C/C++ от
+Microsoft выключите, `"C_Cpp.intelliSenseEngine": "disabled"`, чтобы не работали два движка.
+
+В ESP-IDF 6.1 `clangd` ставится всегда, но без заголовков самого clang, и редактор пишет `'stddef.h' file not found`.
+Один раз на установку их кладут рядом с ним (Linux x86-64):
+
+```sh
+source ~/.espressif/tools/activate_idf_v6.1.sh
+cd "$(dirname "$(which clangd)")/.."     # esp-clangd этой установки
+V=$(basename "$(dirname "$PWD")")         # его версия, esp-21.1.3_20260408
+curl -L https://github.com/espressif/llvm-project/releases/download/$V/libs-clang-$V-x86_64-linux-gnu.tar.xz |
+    tar -xJ --strip-components=1 esp-clang/lib/clang
+```
+
+Архив — 83 МБ, из него берутся только заголовки, 8 МБ, в `lib/clang/21`. Затем в VS Code: Ctrl+Shift+P → «clangd:
+Restart language server». В ESP-IDF 5.5 и 6.0 `clangd` входит в esp-clang, который ставится по запросу.
 
 ## Чего не делать
 
@@ -289,7 +294,7 @@ git push -u origin main
 |---|---|---|
 | скопировать файлы в `main/` с их прежними датами (`cp -p`, архив, менеджер файлов) в проект, который уже собирался | `undefined reference` на свои функции: старый `CMakeLists.txt` не новее сборки, и CMake не перечитывает список исходников | `idf.py reconfigure`, в CMake Tools — «CMake: Delete Cache and Reconfigure» |
 | «ESP-IDF: Save Default Configuration» (`idf.py save-defconfig`) | в `sdkconfig.defaults` проекта — цель, выбор и настройки текущей платы, а его читает каждая плата | `board_select.py --keep .`, см. «Дальше» |
-| ничего: так ставит ESP-IDF 6.1 | `'stddef.h' file not found` в редакторе, F12 не находит | заголовки clang рядом с `clangd`, см. «Что нужно» |
+| ничего: так ставит ESP-IDF 6.1 | `'stddef.h' file not found` в редакторе, F12 не находит | заголовки clang рядом с `clangd`, см. «Подсказки в редакторе» |
 | `idf.py` или `compote` в обычном терминале без активации | `command not found` | команда активации ESP-IDF или терминал «ESP-IDF: Open ESP-IDF Terminal» |
 | `idf.py build` в терминале ESP-IDF, когда расширение считает текущей другую цель | `was generated for target 'linux', but environment variable IDF_TARGET is set to 'esp32'` | `unset IDF_TARGET` в этом терминале |
 | удалить `build/host_<плата>`, «ESP-IDF: Full Clean Project» или `idf.py fullclean` у компьютера | пропадает флеш компьютера с NVS, `build/host_<плата>/flash.bin`; настройки плат, `sdkconfig.<плата>`, остаются | сохранить этот файл, если NVS нужна |

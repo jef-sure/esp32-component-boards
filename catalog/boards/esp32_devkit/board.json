@@ -83,6 +83,12 @@
             "covers": ["connectors.en_side.edges", "connectors.3v3_side.edges"],
             "source": "the labels on front.webp of esp32_devkit_usb_c, the photo of Anton's board, USB-C on the left: the same board with a micro-USB connector (Anton, 2026-11-12)",
             "date": "2026-11-12"
+        },
+        "connectors": {
+            "level": "vendor-docs",
+            "covers": ["connectors"],
+            "source": "the silkscreen on the photo of esp32_devkit_usb_c, Anton's board: the same board with a micro-USB connector (Anton, 2026-11-12 and 2026-11-17)",
+            "date": "2026-11-17"
         }
     }
 }

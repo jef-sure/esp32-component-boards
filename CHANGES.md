@@ -8,6 +8,8 @@
 - [Getting started](docs/en/getting-started.md) points to the two ways on Windows in the README, and the headers of
   clang for clangd are in a section of their own after the path, "Hints in the editor": a build does not need them.
 - [radio.md](docs/en/radio.md) says the JC8012P4A1C was not tried.
+- The connectors of the ESP32 DevKit with micro-USB are recorded from the photo of the USB-C one, the same board (Anton):
+  a kit with it no longer says they are from memory.
 - `boards_mcp.py --install` finds `claude` in the extension of Claude Code for VS Code, which does not put it on PATH;
   it wrote `.mcp.json` into the current folder before.
 - The dialog with a model, first run by a model on 2026-11-16: a theme the person stopped typing for 3 s ends the wait of

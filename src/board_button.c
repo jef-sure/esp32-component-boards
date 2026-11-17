@@ -20,6 +20,7 @@ bool board_button_at(int index, bool *pressed)
 {
     if (!pressed || index < 0 || index >= board_button_table.count) return false;
     const struct board_button_entry *button = &board_button_table.entries[index];
+    if (button->ethernet_line && board_glue_ethernet_on) return false; /* the pin is a line of the Ethernet now */
     static uint64_t set_up; /* a bit per pin */
     if (!(set_up & (1ULL << button->pin))) {
         const gpio_config_t config = {.pin_bit_mask = 1ULL << button->pin,

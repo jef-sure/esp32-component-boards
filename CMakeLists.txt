@@ -33,6 +33,7 @@ endif()
 include("${CMAKE_CURRENT_LIST_DIR}/boards/boards.cmake")
 idf_component_register(SRCS "src/boards.c" "src/board_bus.c" "src/board_i2c.c" "src/board_spi.c" "src/board_button.c" "src/board_sound.c" "src/board_touch.c"
                             "src/board_touch_fw.c" "src/board_display_none.c" "src/board_volume.c" "src/board_button_find.c" "src/board_radio.c"
+                            "src/board_ethernet.c" "src/board_ethernet_none.c"
                        INCLUDE_DIRS "include" ${BOARDS_ADAPTER_INCLUDES}
                        PRIV_INCLUDE_DIRS "src" ${BOARDS_ADAPTER_DIRS}
                        PRIV_REQUIRES esp_driver_i2c esp_driver_gpio esp_driver_spi nvs_flash)

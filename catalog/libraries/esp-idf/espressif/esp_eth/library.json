@@ -1,0 +1,35 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "library",
+    "ecosystem": "esp-idf",
+    "owner": "espressif",
+    "name": "esp_eth",
+    "title": "Ethernet driver of ESP-IDF",
+    "url": "https://docs.espressif.com/projects/esp-idf/en/stable/esp32p4/api-reference/network/esp_eth.html",
+    "license": "Apache-2.0",
+    "install": [{"via": "platform"}],
+    "described": "6.1",
+    "chips": {
+        "ip101": {
+            "header": "esp_eth.h",
+            "on": ["rmii"],
+            "defaults": {"reset_us": 10000, "after_reset_ms": 10},
+            "adapter": {"kind": "emac", "function": "board_glue_ethernet_emac_start"},
+            "notes": "The internal EMAC of the chip over RMII with the generic PHY driver, which ESP-IDF 5.5 and 6 both have, and the reset times of the IP101 driver of ESP-IDF 5.5.5: ESP-IDF 6 has no IP101 driver of its own."
+        }
+    },
+    "adapter": {
+        "symbol": "BOARD_ETHERNET_EMAC",
+        "requires": ["esp_netif", "esp_event", "esp_driver_gpio"],
+        "headers": ["board_ethernet_emac.h"],
+        "sources": {"BOARD_ETHERNET_EMAC": ["board_ethernet_emac.c"]}
+    },
+    "checked": {
+        "api": {
+            "level": "vendor-code",
+            "source": "esp_eth_mac_esp.h, esp_eth_phy.h and esp_eth_phy_802_3.c of ESP-IDF 5.5.5 and 6.1; esp_eth_phy_ip101.c of 5.5.5",
+            "date": "2026-11-17"
+        }
+    }
+}

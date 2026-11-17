@@ -291,6 +291,28 @@ call after `true` returns `true`. When the radio runs another esp_hosted than th
 the log names both versions and the way to bring it to the program's
 (`BOARD_RADIO_FORCE=1 idf.py flash`). See [radio.md](radio.md).
 
+## Ethernet
+
+```c
+struct esp_netif_obj;
+bool board_ethernet_start(struct esp_netif_obj **netif_out); /* netif_out may be NULL */
+```
+
+On a board with an Ethernet PHY beside the MAC of the chip, as the IP101 of the ESP32-P4-ETH,
+the ESP32-P4-POE-ETH and the JC1060P470C: starts the PHY and the MAC by esp_eth of ESP-IDF and
+makes an interface of esp_netif for it, which takes its address by DHCP. The component calls
+`esp_netif_init()` and makes the default event loop when the program has not. The program learns
+of the link by `ETH_EVENT` and of the address by `IP_EVENT_ETH_GOT_IP`; `*netif_out` is the
+`esp_netif_t` of the interface. `false` when the board has no such Ethernet, or it does not start;
+a second call after `true` returns `true` and the same interface.
+
+A button on a line of the Ethernet is gone once it starts: on the boards above BOOT is GPIO35,
+TXD1 of RMII, and `board_button_at` returns `false` for it after `board_ethernet_start`. A
+program that reads the button calls it before.
+
+The PHY runs on the generic PHY driver of esp_eth, with the reset times of the IP101 driver of
+ESP-IDF 5.5: ESP-IDF 6 has no IP101 driver of its own.
+
 ## What to include, what to link
 
 The component links the libraries the chosen board needs (DGX, DGX-DI,

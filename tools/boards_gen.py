@@ -71,7 +71,7 @@ RULES = json.loads((ROOT / "catalog" / "rules.json").read_text())
 # alone for the program: SOC_SPI_PERIPH_NUM 2 counts SPI1 of the flash.
 I2C_HZ_DEFAULT = 400000
 INPUT_LINES = ("in", "int", "irq", "te", "busy")  # lines of a device that only come in
-STARTED_CLASSES = {"display", "touch", "audio", "button", "radio"}  # the rest is kept as data
+STARTED_CLASSES = {"display", "touch", "audio", "button", "radio", "network"}  # the rest is kept as data
 # the window of the computer is a host screen of DGX, always; its mouse a finger of DGX-DI when the board it shows has a touch (src/board_host.c)
 HOST_FEATURES = {"BOARD_DISPLAY_GRAPHICS": "BOARD_SELECT_HOST", "BOARD_TOUCH": "(BOARD_SELECT_HOST && BOARD_HOST_TOUCH != 0)"}
 
@@ -128,7 +128,7 @@ def adapter_dir(record):
 
 def started_devices(board):
     """What the glue starts, device by device: the device, its library and the libraries that come with it."""
-    for device in (*(board.get("displays") or ()), *board["touches"], *board["sounds"], *board["radios"]):
+    for device in (*(board.get("displays") or ()), *board["touches"], *board["sounds"], *board["radios"], *board["ethernets"]):
         record = resolve.library(device["library"])
         yield device, record, [resolve.library(name) for name in (record.get("adapter") or {}).get("with", ())]
 
@@ -271,6 +271,36 @@ def radio_part(name, device):
             "firmware": (device.get("firmware") or {}).get("set", "factory"), **started}
 
 
+RMII_LINES = ("txen", "txd0", "txd1", "rxd0", "rxd1", "crs_dv", "ref_clk", "mdc", "mdio")
+REF_CLK = {"from the PHY": False, "from the chip": True}  # whether the chip gives the clock of RMII
+
+
+def ethernet_part(name, device, buses):
+    """An Ethernet PHY on the MAC of the chip: its library, the lines of its RMII bus, its address, reset and clock, and the
+    reset times its library's entry for the chip gives."""
+    started = started_by(device)
+    key = next(iter(device.get("on") or {}), None)
+    kind, own = bus_parts(key) if key else (None, None)
+    if kind != "rmii":
+        raise ValueError(f"{name}: an Ethernet PHY on {key or 'no bus'}: its adapter takes one on rmii")
+    lines = (buses.get("rmii") or {}).get(own) or {}
+    missing = [line for line in RMII_LINES if line not in lines]
+    if missing:
+        raise ValueError(f"{name}: the bus {key} has no {', '.join(missing)}")
+    config = device.get("config") or {}
+    if config.get("ref_clk") not in REF_CLK:
+        raise ValueError(f'{name}: ref_clk "{config.get("ref_clk")}": one of {", ".join(REF_CLK)}')
+    defaults = started["entry"].get("defaults") or {}
+    return {"name": name, "chip": device["chip"], "kind": started["entry"]["adapter"]["kind"], "bus": key, "lines": {line: lines[line] for line in RMII_LINES},
+            "address": config["phy_address"], "rst": number((device.get("pins") or {}).get("rst", "nc")), "clock_out": REF_CLK[config["ref_clk"]],
+            "reset_us": defaults.get("reset_us", 0), "after_reset_ms": defaults.get("after_reset_ms", 0), **started}
+
+
+def startable(device):
+    """Whether the library the resolver chose for a device has an adapter for its chip."""
+    return bool(((device.get("libraries") or {}).get(device.get("library") or "") or {}).get("adapter"))
+
+
 def kept_numbers(device):
     """The numbers of a device the component does not set up, for board_bus_get: the host or port of its bus, its
     address on I2C, its cs and its pins. A host is printed as its constant (SPI3_HOST), a port as its number."""
@@ -292,7 +322,7 @@ def kept_numbers(device):
 def parts_of(resolved):
     """A resolved board with the devices the glue starts as lists: displays, touches, sounds, buttons; kept for the rest."""
     module = resolved["kind"] == "module"
-    board = {**resolved, "touches": [], "sounds": [], "buttons": [], "radios": [], "kept": {}}
+    board = {**resolved, "touches": [], "sounds": [], "buttons": [], "radios": [], "ethernets": [], "kept": {}}
     if module:
         board["module"] = True
     board["buses"] = {kind: {own: {key: number(value) for key, value in bus.items()} for own, bus in named.items()} for kind, named in (resolved.get("buses") or {}).items()}
@@ -313,8 +343,16 @@ def parts_of(resolved):
         elif "radio" in classes and device.get("library"):
             board["radios"].append(radio_part(name, device))
             board["kept"][name] = kept_numbers(device)  # its bus and lines stay in the table of numbers for the program
+        elif "network" in classes and startable(device):
+            board["ethernets"].append(ethernet_part(name, device, board["buses"]))
+            board["kept"][name] = kept_numbers(device)
         else:
             board["kept"][name] = kept_numbers(device)
+    # a button on a line a started Ethernet takes is there only while the Ethernet is off
+    ethernets = {ethernet["name"] for ethernet in board["ethernets"]}
+    lost = {number(group["line"]) for group in (resolved.get("shared_pins") or {}).values() if (group.get("only_while") or {}).get("device") in ethernets}
+    for button in board["buttons"]:
+        button["ethernet_line"] = button["pin"] in lost
     if displays:
         board["displays"] = [d for d in displays if d["primary"]] + [d for d in displays if not d["primary"]]
         board["display"] = board["displays"][0]
@@ -1103,7 +1141,8 @@ def glue_of(board):
             out("const struct board_sound_table board_sound_table = {.count = 0};")
         out("")
         if buttons:
-            entries = ", ".join(f'{{.name = "{button["name"]}", .pin = {button["pin"]}, .active_low = {"true" if button["active_low"] else "false"}}}' for button in buttons)
+            entries = ", ".join(f'{{.name = "{button["name"]}", .pin = {button["pin"]}, .active_low = {"true" if button["active_low"] else "false"}'
+                                f'{", .ethernet_line = true" if button.get("ethernet_line") else ""}}}' for button in buttons)
             out(f"static const struct board_button_entry button_entries[] = {{{entries}}};")
             out(f"const struct board_button_table board_button_table = {{.entries = button_entries, .count = {len(buttons)}}};")
         else:
@@ -1120,6 +1159,22 @@ def glue_of(board):
             out(f"const struct board_radio_table board_radio_table = {{.entries = radio_entries, .count = {len(radios)}}};")
         else:
             out("const struct board_radio_table board_radio_table = {.count = 0};")
+        out("")
+        ethernets = board["ethernets"]
+        for i, ethernet in enumerate(ethernets):
+            lines = ethernet["lines"]
+            out(f"/* {ethernet['name']}: an {ethernet['chip']} on {ethernet['bus']}, by {ethernet['library']} on the MAC of the chip. */")
+            out(f"static const struct board_ethernet_emac ethernet{i}_emac = {{.phy_address = {ethernet['address']}, .rst = {c_gpio(ethernet['rst'])}, "
+                f".mdc = GPIO_NUM_{lines['mdc']}, .mdio = GPIO_NUM_{lines['mdio']}, .tx_en = GPIO_NUM_{lines['txen']}, .txd0 = GPIO_NUM_{lines['txd0']}, "
+                f".txd1 = GPIO_NUM_{lines['txd1']}, .rxd0 = GPIO_NUM_{lines['rxd0']}, .rxd1 = GPIO_NUM_{lines['rxd1']}, .crs_dv = GPIO_NUM_{lines['crs_dv']}, "
+                f".ref_clk = GPIO_NUM_{lines['ref_clk']}, .clock_out = {'true' if ethernet['clock_out'] else 'false'}, "
+                f".reset_us = {ethernet['reset_us']}, .after_reset_ms = {ethernet['after_reset_ms']}}};")
+        if ethernets:
+            entries = ", ".join(f'{{.name = "{ethernet["name"]}", .start = {ethernet["entry"]["adapter"]["function"]}, .emac = &ethernet{i}_emac}}' for i, ethernet in enumerate(ethernets))
+            out(f"static const struct board_ethernet_entry ethernet_entries[] = {{{entries}}};")
+            out(f"const struct board_ethernet_table board_ethernet_table = {{.entries = ethernet_entries, .count = {len(ethernets)}}};")
+        else:
+            out("const struct board_ethernet_table board_ethernet_table = {.count = 0};")
         out("")
 
     # ---- what the board is; what it has not returns false in src/ ----

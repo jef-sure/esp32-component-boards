@@ -173,12 +173,10 @@
     "devices": {
         "boot": {"class": "button", "pins": {"in": {"gpio": 35, "active": "low"}}},
         "ethernet": {
-            "class": "network",
+            "chip": "ip101",
             "ref": "U10",
-            "maker": "icplus",
             "part": "IP101GRI",
             "on": {"rmii.rmii0": {}},
-            "provides": {"ethernet": {}},
             "pins": {"rst": 51},
             "config": {"ref_clk": "from the PHY", "phy_address": 1},
             "controls": {"enabled": {"how": "driver", "values": ["off", "on"], "start": "off", "read": "none"}},

@@ -87,5 +87,7 @@ const struct board_button_table board_button_table = {.entries = button_entries,
 
 const struct board_radio_table board_radio_table = {.count = 0};
 
+const struct board_ethernet_table board_ethernet_table = {.count = 0};
+
 /* What the board is, for board_info(). */
 const struct board_data board_data = {.name = "jc4827w543c", .title = "Guition JC4827W543C", .target = "esp32s3"};

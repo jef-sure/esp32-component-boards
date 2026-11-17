@@ -8529,6 +8529,13 @@
             "platforms": [],
             "chips": ["i2s_amp"]
         },
+        "esp-idf/espressif/esp_eth": {
+            "title": "Ethernet driver of ESP-IDF",
+            "version": "6.1",
+            "repository": "https://docs.espressif.com/projects/esp-idf/en/stable/esp32p4/api-reference/network/esp_eth.html",
+            "platforms": [],
+            "chips": ["ip101"]
+        },
         "esp-idf/espressif/esp_hosted": {
             "title": "ESP-Hosted",
             "version": "3.0.10",

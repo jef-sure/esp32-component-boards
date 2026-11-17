@@ -192,6 +192,17 @@ bool        board_button_at(int index, bool *pressed);
  */
 bool board_radio_start(void);
 
+/*
+ * The Ethernet of the board, as the IP101 beside the MAC of an ESP32-P4: starts the PHY and the MAC and makes an interface
+ * of esp_netif for it, which takes its address by DHCP. The component calls esp_netif_init and makes the default event loop
+ * when the program has not; the program learns of the link by ETH_EVENT and of the address by IP_EVENT_ETH_GOT_IP. false
+ * when the board has no such Ethernet or it does not start. A second call after true returns true and the same interface.
+ * A button on a line of the Ethernet, as BOOT on GPIO35 of the ESP32-P4-ETH, is gone once it starts: board_button_at
+ * returns false for it. The type is esp_netif_t of ESP-IDF, named by its tag so this header needs no driver.
+ */
+struct esp_netif_obj;
+bool board_ethernet_start(struct esp_netif_obj **netif_out); /* netif_out may be NULL */
+
 #ifdef __cplusplus
 }
 #endif

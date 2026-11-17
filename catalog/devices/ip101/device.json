@@ -1,0 +1,23 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "ip101",
+    "title": "IC Plus IP101 Ethernet PHY",
+    "maker": "icplus",
+    "part": "IP101",
+    "class": "network",
+    "on": {"rmii": {"required": true}},
+    "provides": {"ethernet": {}},
+    "checked": {
+        "facts": {
+            "level": "vendor-code",
+            "source": "esp_eth_phy_ip101.c of ESP-IDF 5.5.5: the OUI 0x90C3 and model 5 of IC Plus, the registers of IEEE 802.3",
+            "date": "2026-11-17"
+        }
+    },
+    "notes": [
+        "A 10/100 PHY with the registers of IEEE 802.3, so the generic PHY driver of ESP-IDF runs it. ESP-IDF 6 moved its own IP101 driver out, to espressif/ip101 of the registry.",
+        "The JC1060P470C answered over MDIO with the id 0243 0c54: IC Plus, model 5."
+    ]
+}

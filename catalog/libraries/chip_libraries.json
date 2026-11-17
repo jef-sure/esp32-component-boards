@@ -414,6 +414,7 @@
             "arduino/robtillaart/ina3221_rt",
             "arduino/tinyu-zhao/ina3221"
         ],
+        "ip101": ["esp-idf/espressif/esp_eth"],
         "is31fl3731": ["arduino/adafruit/adafruit-is31fl3731-library"],
         "is31fl3741": ["arduino/adafruit/adafruit-is31fl3741-library"],
         "ism330dhcx": ["arduino/7semi-solutions/7semi_ism330dhcx", "arduino/sparkfun/sparkfun-6dof-ism330dhcx"],

@@ -38,5 +38,7 @@ const struct board_button_table board_button_table = {.entries = button_entries,
 
 const struct board_radio_table board_radio_table = {.count = 0};
 
+const struct board_ethernet_table board_ethernet_table = {.count = 0};
+
 /* What the board is, for board_info(). */
 const struct board_data board_data = {.name = "esp32_wrover_dev", .title = "ESP32-WROVER-DEV", .target = "esp32"};

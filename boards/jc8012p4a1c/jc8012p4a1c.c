@@ -91,5 +91,7 @@ const struct board_button_table board_button_table = {.entries = button_entries,
 static const struct board_radio_entry radio_entries[] = {{.name = "radio", .update = true, .start = board_glue_radio_esp_hosted_start}};
 const struct board_radio_table board_radio_table = {.entries = radio_entries, .count = 1};
 
+const struct board_ethernet_table board_ethernet_table = {.count = 0};
+
 /* What the board is, for board_info(). */
 const struct board_data board_data = {.name = "jc8012p4a1c", .title = "Guition JC8012P4A1C", .target = "esp32p4"};

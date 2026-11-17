@@ -89,6 +89,7 @@ struct board_button_entry {
     const char *name;
     int         pin;
     bool        active_low;
+    bool        ethernet_line; /* a line of the Ethernet too: the button is there only while the Ethernet is off */
 };
 struct board_button_table {
     const struct board_button_entry *entries;
@@ -107,6 +108,23 @@ struct board_radio_table {
     int                             count;
 };
 extern const struct board_radio_table board_radio_table;
+
+/* The Ethernet of the board: the adapter of its library starts the PHY and makes its interface of esp_netif. */
+struct board_ethernet_emac; /* the data of the kind emac, defined by its adapter */
+struct esp_netif_obj;
+struct board_ethernet_entry {
+    const char *name;
+    bool (*start)(const struct board_ethernet_entry *entry, struct esp_netif_obj **netif);
+    const struct board_ethernet_emac *emac;
+};
+struct board_ethernet_table {
+    const struct board_ethernet_entry *entries;
+    int                                count;
+};
+/* Empty and weak in src/board_ethernet_none.c: the glue of a board made before the component started Ethernet has none. */
+extern const struct board_ethernet_table board_ethernet_table;
+/* True once board_ethernet_start started one: a button on a line of the Ethernet is gone then. */
+extern bool board_glue_ethernet_on;
 
 /*
  * One I2S bus of the board, as its data names it ("i2s0" is the chip's I2S0): its port and

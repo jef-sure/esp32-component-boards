@@ -2,6 +2,14 @@
 
 ## 0.2.2 (not released yet)
 
+- Ethernet: `board_ethernet_start()` starts the IP101 beside the MAC of the ESP32-P4-ETH, the ESP32-P4-POE-ETH and the
+  JC1060P470C by esp_eth of ESP-IDF, with the generic PHY driver and the reset times of the IP101 driver of ESP-IDF
+  5.5, and makes an interface of esp_netif that takes its address by DHCP. The device is `ip101` of the catalog, and its
+  library is the record `espressif/esp_eth`. BOOT on GPIO35, TXD1 of RMII on those boards, is gone once it starts:
+  `board_button_at` returns false for it. `hello_board` starts it and says so. Built on ESP-IDF 5.5.5 and 6.1, not
+  tried on a board yet.
+- A glue of a board of the program made by an older component, with no table of the Ethernet, links: the component
+  has an empty one beside it, which the glue's own replaces.
 - The display of the CYD S028R is recorded as seen working: examples/hello of 0.0.7 from the registry drew its white
   background and blue bar on 2026-11-07. The table of the README says so.
 - The description of the component in the registry begins with the program, as the README does.

@@ -35,5 +35,7 @@ const struct board_button_table board_button_table = {.entries = button_entries,
 
 const struct board_radio_table board_radio_table = {.count = 0};
 
+const struct board_ethernet_table board_ethernet_table = {.count = 0};
+
 /* What the board is, for board_info(). */
 const struct board_data board_data = {.name = "nodemcu_esp32s", .title = "NodeMCU ESP-32S V1.1, 38 pins", .target = "esp32"};

@@ -106,6 +106,8 @@ The component knows no display by itself: a board may have none, and a display i
 - a **radio** beside the chip: the ESP32-C6 of the two ESP32-P4 boards, reached through esp_hosted.
   `board_radio_start()` starts it, and a step of the flash brings its firmware to the esp_hosted of the build,
   keeping nothing of it in the flash of the board, see [the radio](docs/en/radio.md);
+- **Ethernet**: the IP101 beside the MAC of the ESP32-P4-ETH, the ESP32-P4-POE-ETH and the JC1060P470C.
+  `board_ethernet_start()` starts it with an interface of esp_netif, see [the API](docs/en/api.md#ethernet);
 - a **camera**, as data for now: its bus, connector and sensor are described, the
   component does not start it;
 - a **button**; and any **bus** the board wires, even one the component does not

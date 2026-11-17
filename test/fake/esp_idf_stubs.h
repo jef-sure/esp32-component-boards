@@ -21,6 +21,7 @@ int gpio_get_level(gpio_num_t n);
 
 #define ESP_OK 0
 #define ESP_FAIL (-1)
+#define ESP_ERR_INVALID_STATE 0x103
 typedef int esp_err_t;
 const char *esp_err_to_name(esp_err_t err);
 

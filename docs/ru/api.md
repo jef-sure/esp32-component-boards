@@ -297,6 +297,28 @@ Bluetooth. Возвращает `false`, если такого радио на �
 лог называет обе и способ привести радио к версии программы (`BOARD_RADIO_FORCE=1 idf.py flash`).
 См. [radio.md](radio.md).
 
+## Ethernet
+
+```c
+struct esp_netif_obj;
+bool board_ethernet_start(struct esp_netif_obj **netif_out); /* netif_out может быть NULL */
+```
+
+На плате с PHY Ethernet рядом с MAC чипа, как IP101 у ESP32-P4-ETH, ESP32-P4-POE-ETH и
+JC1060P470C: запускает PHY и MAC через esp_eth из ESP-IDF и делает для них интерфейс esp_netif,
+который получает адрес по DHCP. Компонент вызывает `esp_netif_init()` и создаёт цикл событий по
+умолчанию, если программа этого ещё не сделала. О связи программа узнаёт по `ETH_EVENT`, об
+адресе — по `IP_EVENT_ETH_GOT_IP`; `*netif_out` — это `esp_netif_t` интерфейса. Возвращает
+`false`, если такого Ethernet на плате нет или он не запускается; повторный вызов после `true`
+возвращает `true` и тот же интерфейс.
+
+Кнопка на линии Ethernet пропадает, когда он запущен: у плат выше BOOT — это GPIO35, TXD1 шины
+RMII, и после `board_ethernet_start` вызов `board_button_at` для неё возвращает `false`.
+Программа, которая читает кнопку, вызывает его раньше.
+
+PHY работает на общем драйвере PHY из esp_eth, с временами сброса драйвера IP101 из ESP-IDF 5.5:
+в ESP-IDF 6 своего драйвера IP101 нет.
+
 ## Что подключать, что компоновать
 
 Компонент компонует библиотеки, которые нужны выбранной плате (DGX, DGX-DI,

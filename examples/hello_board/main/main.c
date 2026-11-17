@@ -88,6 +88,10 @@ void app_main(void)
         if (board_button_at(i, &pressed)) printf("  %s: %s\n", board_button_name(i), pressed ? "held" : "free");
     }
 
+    /* After the buttons: a button on a line of the Ethernet, as BOOT on the ESP32-P4-ETH, is gone once it starts. The link
+     * and the address come later, by ETH_EVENT and IP_EVENT_ETH_GOT_IP. */
+    printf("the ethernet: %s\n", board_ethernet_start(NULL) ? "started" : "none, or it could not be started");
+
 #if CONFIG_BOARD_DISPLAY_GRAPHICS
     if (shown) {
         /* a frame: white, a blue bar at the top, so that the orientation and the order of the colors are seen */

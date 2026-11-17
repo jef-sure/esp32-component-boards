@@ -11,6 +11,7 @@
 #include "sdkconfig.h"
 
 #include "board_display.h"
+#include "board_ethernet_emac.h"
 #include "board_radio_esp_hosted.h"
 #include "board_sound_es8311.h"
 #include "board_touch.h"
@@ -87,12 +88,17 @@ static const struct board_sound_entry sound_entries[] = {{.name = "sound", .rate
 static struct board_sound_stream sound_streams[1];
 const struct board_sound_table board_sound_table = {.entries = sound_entries, .streams = sound_streams, .count = 1};
 
-static const struct board_button_entry button_entries[] = {{.name = "boot", .pin = 35, .active_low = true}};
+static const struct board_button_entry button_entries[] = {{.name = "boot", .pin = 35, .active_low = true, .ethernet_line = true}};
 const struct board_button_table board_button_table = {.entries = button_entries, .count = 1};
 
 /* radio: an esp32c6 on sdio, by esp-idf/espressif/esp_hosted. The flash step of the component keeps its firmware at the version of the build. */
 static const struct board_radio_entry radio_entries[] = {{.name = "radio", .update = true, .start = board_glue_radio_esp_hosted_start}};
 const struct board_radio_table board_radio_table = {.entries = radio_entries, .count = 1};
+
+/* ethernet: an ip101 on rmii.rmii0, by esp-idf/espressif/esp_eth on the MAC of the chip. */
+static const struct board_ethernet_emac ethernet0_emac = {.phy_address = 1, .rst = GPIO_NUM_51, .mdc = GPIO_NUM_31, .mdio = GPIO_NUM_52, .tx_en = GPIO_NUM_49, .txd0 = GPIO_NUM_34, .txd1 = GPIO_NUM_35, .rxd0 = GPIO_NUM_29, .rxd1 = GPIO_NUM_30, .crs_dv = GPIO_NUM_28, .ref_clk = GPIO_NUM_50, .clock_out = false, .reset_us = 10000, .after_reset_ms = 10};
+static const struct board_ethernet_entry ethernet_entries[] = {{.name = "ethernet", .start = board_glue_ethernet_emac_start, .emac = &ethernet0_emac}};
+const struct board_ethernet_table board_ethernet_table = {.entries = ethernet_entries, .count = 1};
 
 /* What the board is, for board_info(). */
 const struct board_data board_data = {.name = "jc1060p470c", .title = "Guition JC1060P470C", .target = "esp32p4"};

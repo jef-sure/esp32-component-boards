@@ -346,6 +346,12 @@ project keeps as `DESCRIPTION.md`. What the person fixes is theirs: the pin of a
 fixed part for its block and tries only a fixed board.
 The field on top is the theme the model starts from, and the dialog develops it: a changed theme reaches the model with the next answer of `wait_for_person`. The solver stays in the editor. Opened any other way, the editor has no dialog and works as before.
 
+The dialog draws the Markdown of the model: headings, lists, tables, code, links of the web; its text never becomes HTML.
+A line above the field of the dialog says what the model does, as the server sees its calls: it listens while it waits
+for the person, it works in another call and between calls, and after 90 s with no call it most likely ended its turn:
+the person brings it back from the chat of the agent. When the agent stops, its server goes with it, and the dialog
+stays with what was said.
+
 With no agent the server still gives the editor, its solver and the writes of a project, for the folder it runs in:
 
 ```sh

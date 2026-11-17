@@ -344,8 +344,32 @@ const KitCard = {
     `,
 };
 
+// What the model wrote, its Markdown drawn as elements: its text never becomes HTML.
+const MarkdownText = {
+    props: ['text'],
+    setup(props) {
+        const { h } = Vue;
+        const runs = (list) => list.map((run) => {
+            if (run.kind === 'text') return run.text;
+            if (run.kind === 'code') return h('code', run.text);
+            if (run.kind === 'link') return h('a', { href: run.href, target: '_blank', rel: 'noopener noreferrer' }, runs(run.runs));
+            return h(run.kind, runs(run.runs));
+        });
+        const list = (block) => h(block.ordered ? 'ol' : 'ul', block.items.map((item) => h('li', [...runs(item.runs), ...(item.list ? [list(item.list)] : [])])));
+        const block = (item) => {
+            if (item.kind === 'heading') return h(`h${Math.min(item.level + 2, 6)}`, runs(item.runs));
+            if (item.kind === 'paragraph') return h('p', item.lines.flatMap((line, at) => (at ? [h('br'), ...runs(line)] : runs(line))));
+            if (item.kind === 'list') return list(item);
+            if (item.kind === 'code') return h('pre', h('code', item.text));
+            if (item.kind === 'rule') return h('hr');
+            return h('table', [h('thead', h('tr', item.head.map((cell) => h('th', runs(cell))))), h('tbody', item.rows.map((row) => h('tr', row.map((cell) => h('td', runs(cell))))))]);
+        };
+        return () => h('div', { class: 'markdown' }, markdownBlocks(props.text).map(block));
+    },
+};
+
 const SelectPage = {
-    components: { KitCard },
+    components: { KitCard, MarkdownText },
     setup() {
         const store = useEditor();
         const fit = computed(() => store.kits.filter((kit) => kit.fits));
@@ -383,6 +407,20 @@ const SelectPage = {
         const priceLink = (item) => reportLink({ template: 'price.yml', item, currency: store.currency });
         const filter = Vue.ref('');
         const said = Vue.ref('');
+        // the clock of the line of what the model does
+        const now = Vue.ref(Date.now());
+        const ticking = setInterval(() => (now.value = Date.now()), 1000);
+        Vue.onUnmounted(() => clearInterval(ticking));
+        const activityText = computed(() => {
+            const activity = store.activity;
+            if (!activity) return '';
+            const seconds = Math.max(0, Math.round((now.value - activity.at) / 1000));
+            const clock = new Date(activity.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            if (activity.state === 'listening') return translate(store.language, 'The model is listening');
+            if (activity.state === 'working') return translate(store.language, 'The model is working: its last step {0} s ago', seconds);
+            if (activity.state === 'away') return translate(store.language, 'The model is not listening since {0}: write to your agent to bring it back', clock);
+            return translate(store.language, 'The server of the model is gone: the editor works on without it');
+        });
         const sendSaid = () => {
             store.sayToAgent(said.value);
             said.value = '';
@@ -420,7 +458,8 @@ const SelectPage = {
         const firstOfRole = (at) => store.answers.blocks.findIndex((block) => block.role === store.answers.blocks[at].role) === at;
         const outputsQuestion = computed(() => store.questions.find((question) => question.type === 'outputs'));
         // the dialog and the palette are where blocks come from: once the dialog starts it takes the column, and the search stays
-        const talking = computed(() => store.agent && store.talk.length > 0);
+        // a dialog stays when its server is gone: the person keeps what was said and sees why nobody answers
+        const talking = computed(() => !store.modelless && store.talk.length > 0);
         const stream = ref(null);
         Vue.watch(() => store.talk.length, () => Vue.nextTick(() => {
             if (stream.value) stream.value.scrollTop = stream.value.scrollHeight;
@@ -464,12 +503,12 @@ const SelectPage = {
             if (!block.part.length) block.part = undefined;
         };
         const cardHelpers = { store, host, inProject, money, partsOf, firstSays, laterSays, MARKS, priceLink, canWrite, chosenHas };
-        return { store, host, fit, boards, inProject, setPart, FROM_BOARD, BOARD_PART, boardPartsOf, partValue, cardHelpers, currentCard, currentMiss, listed, partWhere, others, asked, showAll, showKits, firstSays, laterSays, addOutput, ownable, addOwned, money, numberOf, priceLink, MARKS, filter, groups, roleOf, nameOf, outputsQuestion, firstOfRole, said, sendSaid, talking, stream, partsOf, boardTitle, servedBy, install, local, copied, copyInstall, setAsk, shownBoards, BOARDS_SHOWN, canWrite, chosenHas, chainBlock, haveOf, addHave, dropHave };
+        return { store, host, fit, boards, inProject, setPart, FROM_BOARD, BOARD_PART, boardPartsOf, partValue, cardHelpers, currentCard, currentMiss, listed, partWhere, others, asked, showAll, showKits, firstSays, laterSays, addOutput, ownable, addOwned, money, numberOf, priceLink, MARKS, filter, groups, roleOf, nameOf, outputsQuestion, firstOfRole, said, sendSaid, activityText, talking, stream, partsOf, boardTitle, servedBy, install, local, copied, copyInstall, setAsk, shownBoards, BOARDS_SHOWN, canWrite, chosenHas, chainBlock, haveOf, addHave, dropHave };
     },
     template: `
         <div class="select" :class="{ talking, waiting: !showKits }">
             <aside class="palette">
-                <details v-if="!store.agent || store.modelless" class="agent-hint"><summary>{{ t('Talk with a model') }}</summary>
+                <details v-if="(!store.agent && !talking) || store.modelless" class="agent-hint"><summary>{{ t('Talk with a model') }}</summary>
                     <p class="hint">{{ t(local ? 'Once, in the folder you started the editor from:' : 'Once, in any folder:') }}</p>
                     <div class="command"><code>{{ install }}</code><button type="button" @click="copyInstall">{{ t(copied ? 'copied' : 'copy') }}</button></div>
                     <p class="hint">{{ t('Then ask your agent to help choose the hardware: it gives a link to the editor, with a dialog.') }}</p>
@@ -487,10 +526,10 @@ const SelectPage = {
                             @dragstart="$event.dataTransfer.setData('text/plain', role.id)" @click="store.addBlock(role.id)">{{ t(role.text) }} <span class="note">{{ role.count }}</span></button>
                     </section>
                 </div>
-                <section v-if="store.agent && !store.modelless" class="talk">
+                <section v-if="(store.agent || talking) && !store.modelless" class="talk">
                     <div ref="stream" class="stream">
                         <div v-for="item in store.talk" :key="item.id" class="said" :class="item.from">
-                            <pre v-if="item.description">{{ item.text }}</pre><template v-else>{{ item.text }}</template>
+                            <markdown-text v-if="item.from === 'model'" :text="item.text"></markdown-text><template v-else>{{ item.text }}</template>
                             <div v-if="item.edits" class="offer">
                                 <span v-for="block in item.edits.add ?? []" :key="'+' + (block.name || block.role)" class="tag">+ {{ block.name || block.role }}</span>
                                 <span v-for="block in item.edits.change ?? []" :key="'~' + block.name" class="tag">~ {{ block.name }}</span>
@@ -498,7 +537,8 @@ const SelectPage = {
                             </div>
                         </div>
                     </div>
-                    <input type="text" v-model="said" :placeholder="t('Write to the model')" @keydown.enter.prevent="sendSaid">
+                    <p v-if="activityText" class="activity" :class="store.activity.state">{{ activityText }}</p>
+                    <input type="text" v-model="said" :placeholder="t('Write to the model')" :disabled="!store.agent" @keydown.enter.prevent="sendSaid">
                 </section>
             </aside>
             <form class="canvas" @submit.prevent @dragover.prevent @drop.prevent="store.addBlock($event.dataTransfer.getData('text/plain'))">

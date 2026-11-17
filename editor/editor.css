@@ -142,9 +142,24 @@ li.unknown .mark, li.do .mark { color: var(--accent); }
 .stream { display: grid; align-content: start; gap: 6px; min-height: 0; overflow: auto; }
 .talking .stream { flex: 1 1 auto; }
 .talk input { width: 100%; box-sizing: border-box; }
+.activity { margin: 0; font-size: 0.9em; color: light-dark(#555, #aaa); }
+.activity::before { content: '● '; }
+.activity.listening::before { color: #2a9d4b; }
+.activity.working::before { color: #d08c00; }
+.activity.away::before, .activity.gone::before { color: #999; content: '○ '; }
 .said { padding: 6px 8px; border-radius: 6px; background: light-dark(#fff, #1b1d22); white-space: pre-wrap; }
 .said.person { justify-self: end; background: var(--mark); }
 .said pre { margin: 0; white-space: pre-wrap; font: inherit; }
+.said.model { white-space: normal; }
+.markdown > :first-child { margin-top: 0; }
+.markdown > :last-child { margin-bottom: 0; }
+.markdown p, .markdown ul, .markdown ol, .markdown table, .markdown pre { margin: 0 0 6px; }
+.markdown ul, .markdown ol { padding-left: 18px; }
+.markdown h3, .markdown h4, .markdown h5, .markdown h6 { margin: 8px 0 4px; font-size: 1em; }
+.markdown pre { white-space: pre-wrap; font-family: monospace; }
+.markdown code { font-family: monospace; font-size: 0.95em; }
+.markdown table { border-collapse: collapse; }
+.markdown th, .markdown td { border: 1px solid light-dark(#ccc, #444); padding: 2px 6px; text-align: left; vertical-align: top; }
 .offer { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin-top: 4px; }
 .more p { margin: 4px 0; font-size: 13px; }
 .role.empty { color: var(--muted); }

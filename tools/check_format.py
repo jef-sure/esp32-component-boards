@@ -676,6 +676,36 @@ def model_wait_problems(asked, process, base, own):
     said = result()
     if said.get("theme") != "a clock" or time.monotonic() - started > 10:
         problems.append(f"a new theme does not end wait_for_person: {said} after {time.monotonic() - started:.1f} s")
+    # what the model does, as the page reads it: working after a call, listening while it waits
+    activity = lambda known: json.loads(urllib.request.urlopen(urllib.request.Request(f"{base}/agent/activity?known={known}", headers=own), timeout=30).read())
+    if activity("")["state"] != "working":
+        problems.append("the activity after a call is not working")
+    call(23, "wait_for_person", {"seconds": 3})
+    if activity("working")["state"] != "listening":
+        problems.append("the activity in wait_for_person is not listening")
+    result()
+    return problems
+
+
+def activity_problems():
+    """A model that has called nothing for WORKING_S is away, and one in a call is working, however long it takes."""
+    import boards_mcp
+    problems = []
+    kept = boards_mcp.WORKING_S
+    boards_mcp.WORKING_S = 0.2
+    try:
+        desk = boards_mcp.Desk()
+        desk.called("say", True)
+        time.sleep(0.3)
+        if desk.activity()[0] != "working":
+            problems.append("a model in a long call is not working")
+        desk.called("say", False)
+        if desk.activity_change("working", 2)["state"] != "away":
+            problems.append("a model that called nothing for WORKING_S is not away")
+    finally:
+        boards_mcp.WORKING_S = kept
+    run = subprocess.run(["node", str(TESTS / "markdown_cli.js")], capture_output=True, text=True)
+    problems += [run.stderr[:800]] if run.returncode else [line for line in run.stdout.splitlines() if line]
     return problems
 
 
@@ -1110,6 +1140,7 @@ def main():
     problems += bridge_problems()
     problems += serve_problems()
     problems += unrelated_problems()
+    problems += activity_problems()
     problems += library_list_problems()
     problems += audit_changes_wrong()
     failed += reports_refused()

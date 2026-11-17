@@ -48,6 +48,9 @@ LONGEST_POLL_S = 25
 LONGEST_WAIT_S = 120
 THEME_QUIET_S = 3  # a theme is told once the person stopped typing it this long
 STATE_WAIT_S = 10  # how long page_state waits for the editor to show the last edit of the blocks
+# A model thinks between its calls; this long after its last one with no wait open it has most likely ended its turn.
+WORKING_S = 90
+ACTIVITIES = ("listening", "working", "away")
 MOST_PARTS = 40
 # a block names a module of the board of the program, so its name is a name of the format
 BLOCK_NAME = json.loads((ROOT / "catalog" / "format.schema.json").read_text())["$defs"]["name"]["pattern"]
@@ -101,6 +104,8 @@ class Desk:
         self.theme_told = None  # the theme as the agent last had it
         self.theme_at = 0.0  # when the theme last changed
         self.edited = 0  # the message of the last edit of the blocks
+        self.calls = {}  # the tools being called, by name, with how many
+        self.call_at = time.monotonic()  # when a call last began or ended: the server starts when the agent does
 
     def add(self, sender, **fields):
         with self.changed:
@@ -108,6 +113,32 @@ class Desk:
             if "edits" in fields:
                 self.edited = len(self.messages)
             self.changed.notify_all()
+
+    def called(self, name, begins):
+        """A call of a tool begins or ends: what the model does is told to the page."""
+        with self.changed:
+            self.calls[name] = self.calls.get(name, 0) + (1 if begins else -1)
+            self.call_at = time.monotonic()
+            self.changed.notify_all()
+
+    def activity(self):
+        """What the model does, and since when: listening in wait_for_person, working in another call or between calls,
+        away once it has called nothing for WORKING_S."""
+        if self.calls.get("wait_for_person", 0) > 0:
+            return "listening", self.call_at
+        if any(count > 0 for count in self.calls.values()) or time.monotonic() - self.call_at < WORKING_S:
+            return "working", self.call_at
+        return "away", self.call_at
+
+    def activity_change(self, known, seconds):
+        """The activity once it differs from known, or as it is after seconds; away comes by time alone, so the wait looks
+        again each second."""
+        end = time.monotonic() + seconds
+        with self.changed:
+            while self.activity()[0] == known and time.monotonic() < end:
+                self.changed.wait(min(1.0, end - time.monotonic()))
+            state, since = self.activity()
+            return {"state": state, "ago_s": round(time.monotonic() - since, 1)}
 
     def set_state(self, state):
         with self.changed:
@@ -191,6 +222,13 @@ def handler_of(desk, token, port, project=None):
                 if not seen.isdigit():
                     return self.answer(400, {"error": "seen is a count"})
                 return self.answer(200, desk.since(int(seen), LONGEST_POLL_S))
+            if address.path == "/agent/activity":
+                if not self.agent_call():
+                    return self.answer(401)
+                known = urllib.parse.parse_qs(address.query).get("known", [""])[0]
+                if known and known not in ACTIVITIES:
+                    return self.answer(400, {"error": f"known is one of {', '.join(ACTIVITIES)}"})
+                return self.answer(200, desk.activity_change(known, LONGEST_POLL_S))
             if address.path == "/agent/installed":
                 return self.answer(200, installed()) if self.agent_call() else self.answer(401)
             if address.path == "/agent/project":
@@ -405,11 +443,14 @@ def answer_of(desk, link, request, tools=TOOLS, instructions=INSTRUCTIONS):
         problem = ("tools/call takes params with the name of a tool of tools/list" if not tool else argument_problem(tool["inputSchema"], arguments))
         if problem:
             return {"jsonrpc": "2.0", "id": ident, "error": {"code": -32602, "message": problem}}
+        desk.called(tool["name"], True)
         try:
             value = call(desk, link, tool["name"], arguments)
             result = {"content": [{"type": "text", "text": json.dumps(value, ensure_ascii=False)}]}
         except Exception as error:  # a tool that fails answers with an error: the conversation goes on
             result = {"content": [{"type": "text", "text": f"{tool['name']} failed: {error}"}], "isError": True}
+        finally:
+            desk.called(tool["name"], False)
     else:
         return {"jsonrpc": "2.0", "id": ident, "error": {"code": -32601, "message": f"no method {method}"}}
     return {"jsonrpc": "2.0", "id": ident, "result": result}

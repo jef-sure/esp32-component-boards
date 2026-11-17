@@ -234,6 +234,7 @@ const useEditor = Pinia.defineStore('editor', {
         talk: [], // what was said with the model
         applied: 0, // the last message of the model whose edits are on the canvas
         kitsApplied: 0, // the last message of the model whose edits the kits were found for: the model waits for it
+        activity: null, // what the model does: { state: listening, working, away or gone, at: when it began, by the clock of the page }
         installed: null, // the versions of the platforms on the computer, from the server of the model
         description: '', // what the model wrote in the end: a project gets it
         chosen: [], // the kits of the project, in the order they were added: [{ headline, kit }]
@@ -361,7 +362,10 @@ const useEditor = Pinia.defineStore('editor', {
             if (!this.agent) return;
             // boards_mcp.py --serve: the server of the page and of the writes, with no model behind it
             this.modelless = hash.get('model') === 'none';
-            if (!this.modelless) this.listen(0);
+            if (!this.modelless) {
+                this.listen(0);
+                this.followActivity('');
+            }
             this.agentCall('installed').then((versions) => (this.installed = versions)).catch(() => {});
             // the project of the server, when it has one with a selection.json: the page starts where it was left
             this.agentCall('project').then(async (project) => {
@@ -394,6 +398,16 @@ const useEditor = Pinia.defineStore('editor', {
                 return;
             }
             this.listen(next);
+        },
+        // What the model does, as the server sees its calls: the dialog says it, so the person knows whether to wait.
+        async followActivity(known) {
+            try {
+                const now = await this.agentCall(`activity?known=${known}`);
+                if (now.state !== known) this.activity = { state: now.state, at: Date.now() - now.ago_s * 1000 };
+                this.followActivity(now.state);
+            } catch {
+                this.activity = { state: 'gone', at: Date.now() };
+            }
         },
         tellAgent() {
             if (!this.agent || this.modelless) return Promise.resolve();

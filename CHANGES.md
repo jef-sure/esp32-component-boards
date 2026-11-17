@@ -18,6 +18,8 @@
   Cyrillic, is refused by `edit_blocks` with the reason, where before every board failed on it.
 - `boards_mcp.py` gives an agent its tools and the editor only in an empty folder or a program of ESP-IDF: installed for
   every folder, it stays empty in the others.
+- The dialog of the editor draws the Markdown of the model, and a line above its field says whether the model listens,
+  works or has most likely ended its turn; a dialog whose agent stopped stays with what was said.
 
 ## 0.2.1 (2026-11-15)
 

@@ -679,6 +679,26 @@ def model_wait_problems(asked, process, base, own):
     return problems
 
 
+def unrelated_problems():
+    """In a folder that is neither empty nor a program of ESP-IDF the server answers MCP with no tools; an empty folder and a
+    program get them."""
+    problems = []
+    with tempfile.TemporaryDirectory() as folder:
+        root = pathlib.Path(folder)
+        for name, files, wanted in (("notes", {"notes.txt": "a list"}, False), ("cmake_only", {"CMakeLists.txt": "project(desktop)\n"}, False),
+                                    ("empty", {}, True), ("program", {"CMakeLists.txt": "include($ENV{IDF_PATH}/tools/cmake/project.cmake)\nproject(p)\n"}, True)):
+            (root / name).mkdir()
+            for file, text in files.items():
+                (root / name / file).write_text(text)
+            rows = "".join(json.dumps({"jsonrpc": "2.0", "id": n, "method": method, "params": {}}) + "\n" for n, method in ((1, "initialize"), (2, "tools/list")))
+            run = subprocess.run([sys.executable, str(ROOT / "tools" / "boards_mcp.py"), "--project", str(root / name)], input=rows, capture_output=True, text=True, timeout=20)
+            answers = [json.loads(line) for line in run.stdout.splitlines() if line.strip()]
+            tools = answers[1]["result"]["tools"] if len(answers) == 2 else None
+            if tools is None or bool(tools) != wanted:
+                problems.append(f"boards_mcp.py in a folder {name}: {'tools' if wanted else 'no tools'} expected, got {tools if tools is None else len(tools)}")
+    return problems
+
+
 def serve_problems():
     """boards_mcp.py --serve, with no agent: it prints the link of the page, which says no model talks, and knows its project."""
     problems = []
@@ -1089,6 +1109,7 @@ def main():
     problems += canonical_wrong("--fix" in sys.argv)
     problems += bridge_problems()
     problems += serve_problems()
+    problems += unrelated_problems()
     problems += library_list_problems()
     problems += audit_changes_wrong()
     failed += reports_refused()

@@ -336,7 +336,8 @@ of a device.
 One install serves every project. A server started in a project with its own copy of the component in
 `managed_components/` hands over to that copy at once: the catalog, the editor and `board_select.py` are those of the
 version the project builds with. The copy the install was made from serves folders with no copy of their own; when it
-is removed, install again.
+is removed, install again. The server works in an empty folder, for a new device, and in a program of ESP-IDF, with
+boards or still without; in any other folder it gives the agent no tools and serves no editor.
 
 The agent gives the person a link with a token. In the editor opened by it a dialog appears, and once it starts it takes the column of the roles, whose search stays: the model reads the description, the blocks
 and the best kits, sets the blocks with their variants and parts, the conditions of the solver, and writes a description that a

@@ -16,6 +16,8 @@
   the model, which answered it after up to two minutes before; `page_state` after `edit_blocks` waits until the kits of
   the editor answer the edit, as the editor now says which edit they answer; a block name the format refuses, as one in
   Cyrillic, is refused by `edit_blocks` with the reason, where before every board failed on it.
+- `boards_mcp.py` gives an agent its tools and the editor only in an empty folder or a program of ESP-IDF: installed for
+  every folder, it stays empty in the others.
 
 ## 0.2.1 (2026-11-15)
 

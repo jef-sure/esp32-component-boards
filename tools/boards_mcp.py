@@ -385,7 +385,7 @@ def argument_problem(schema, value, at="arguments"):
     return None
 
 
-def answer_of(desk, link, request):
+def answer_of(desk, link, request, tools=TOOLS, instructions=INSTRUCTIONS):
     """The answer to a request of MCP, or None for a notification."""
     if not isinstance(request, dict):
         return {"jsonrpc": "2.0", "id": None, "error": {"code": -32600, "message": "a request is an object"}}
@@ -393,14 +393,14 @@ def answer_of(desk, link, request):
     if ident is None:
         return None
     if method == "initialize":
-        result = {"protocolVersion": PROTOCOL, "capabilities": {"tools": {}}, "serverInfo": {"name": NAME, "version": VERSION}, "instructions": INSTRUCTIONS}
+        result = {"protocolVersion": PROTOCOL, "capabilities": {"tools": {}}, "serverInfo": {"name": NAME, "version": VERSION}, "instructions": instructions}
     elif method == "ping":
         result = {}
     elif method == "tools/list":
-        result = {"tools": TOOLS}
+        result = {"tools": tools}
     elif method == "tools/call":
         params = request.get("params")
-        tool = next((item for item in TOOLS if isinstance(params, dict) and item["name"] == params.get("name")), None)
+        tool = next((item for item in tools if isinstance(params, dict) and item["name"] == params.get("name")), None)
         arguments = (params.get("arguments") or {}) if tool else None
         problem = ("tools/call takes params with the name of a tool of tools/list" if not tool else argument_problem(tool["inputSchema"], arguments))
         if problem:
@@ -467,6 +467,29 @@ def install():
     return 0
 
 
+def of_boards(project):
+    """Whether the editor has a use in the folder: an empty one for a new device, or a program of ESP-IDF, which may move
+    onto boards. Elsewhere an install for every folder would only cost an agent a server."""
+    mode = project.mode()
+    cmake = project.root / "CMakeLists.txt"
+    return mode == "create" or (mode == "update" and "project.cmake" in cmake.read_text(errors="replace"))
+
+
+def answer_rows(answer):
+    """Answers the requests of MCP on stdin until it closes."""
+    for row in sys.stdin:
+        if row.strip():
+            try:
+                request = json.loads(row)
+            except json.JSONDecodeError as error:
+                request = error
+            reply = answer(request) if not isinstance(request, json.JSONDecodeError) else \
+                {"jsonrpc": "2.0", "id": None, "error": {"code": -32700, "message": f"not JSON: {request.msg} at {request.pos}"}}
+            if reply:
+                sys.stdout.write(json.dumps(reply, ensure_ascii=False) + "\n")
+                sys.stdout.flush()
+
+
 def own_copy(project):
     """The server of the project's own copy of the component, when it has one and this is not it."""
     if os.environ.get(HANDED):
@@ -492,6 +515,12 @@ def main():
         os.environ[HANDED] = "1"
         os.execv(sys.executable, [sys.executable, str(theirs), *sys.argv[1:]])
 
+    if not args.serve and not of_boards(project_writer.Project(args.project)):
+        # no tools and no editor: the agent of an unrelated folder sees an empty server
+        idle = f"{args.project.resolve()} is neither an empty folder nor a program of ESP-IDF: boards offers nothing here."
+        answer_rows(lambda request: answer_of(None, None, request, tools=[], instructions=idle))
+        return 0
+
     desk = Desk()
     token = secrets.token_urlsafe(24)
     server = http.server.ThreadingHTTPServer(("127.0.0.1", args.port), None)
@@ -513,17 +542,7 @@ def main():
     threading.Thread(target=server.serve_forever, daemon=True).start()
     link = f"http://127.0.0.1:{port}/editor/#agent={token}"
 
-    for row in sys.stdin:
-        if row.strip():
-            try:
-                request = json.loads(row)
-            except json.JSONDecodeError as error:
-                request = error
-            answer = answer_of(desk, link, request) if not isinstance(request, json.JSONDecodeError) else \
-                {"jsonrpc": "2.0", "id": None, "error": {"code": -32700, "message": f"not JSON: {request.msg} at {request.pos}"}}
-            if answer:
-                sys.stdout.write(json.dumps(answer, ensure_ascii=False) + "\n")
-                sys.stdout.flush()
+    answer_rows(lambda request: answer_of(desk, link, request))
     return 0
 
 

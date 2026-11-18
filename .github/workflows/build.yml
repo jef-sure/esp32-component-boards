@@ -58,7 +58,7 @@ jobs:
           python3 tools/board_select.py ${{ matrix.board }} ${{ matrix.module && format('--module {0}', matrix.module) || '' }} examples/hello_board
           python3 tools/board_select.py ${{ matrix.board }} examples/hello_lvgl
           python3 tools/board_select.py ${{ matrix.board }} examples/sound_level
-          python3 -c "import sys; sys.path.insert(0, 'tools'); import resolve; board = resolve.resolve(resolve.load('boards', '${{ matrix.board }}')); print('target=' + board['mcu']['target']); print('graphics=' + str(any((device.get('config') or {}).get('kind') == 'graphics' for device in board['devices'].values())).lower()); print('sound=' + str(any('audio' in (device.get('classes') or []) for device in board['devices'].values())).lower())" >> "$GITHUB_OUTPUT"
+          python3 -c "import pathlib, sys; sys.path.insert(0, 'tools'); import boards_gen; board = boards_gen.read_board(pathlib.Path('catalog/boards/${{ matrix.board }}/board.json')); print('target=' + board['mcu']['target']); print('graphics=' + str(any(boards_gen.is_pixel(shown) for shown in board.get('displays') or [])).lower()); print('sound=' + str(bool(board['sounds'])).lower())" >> "$GITHUB_OUTPUT"
         id: board
       - name: build hello_board
         uses: espressif/esp-idf-ci-action@v1

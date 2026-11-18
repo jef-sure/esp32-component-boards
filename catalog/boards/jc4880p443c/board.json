@@ -34,6 +34,13 @@
             "date": "2026-11-18",
             "notes": "A DGX driver of the ST7701 not released yet, in the session of DGX: frame rings with the glass equal to the frame buffer, colors at 16 bits in RGB order, eight orientations, two lanes at 1000 Mbit/s, the reset on GPIO 5 and the backlight on GPIO 23 off for a second. This component does not start the display yet."
         },
+        "depth": {
+            "level": "hardware",
+            "covers": ["devices.lcd.config.depth_bits"],
+            "values": [16, 24],
+            "by": "Anton, by eye, with the DGX driver of the ST7701 of DGX 0.11.5, not released yet: 24 bits a pixel seen right as well as 16",
+            "date": "2026-11-18"
+        },
         "touch_vendor": {
             "level": "vendor-code",
             "covers": ["devices.touch.config"],

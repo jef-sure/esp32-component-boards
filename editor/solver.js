@@ -1063,11 +1063,21 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         return rows;
     }
 
+    // A display whose chip no library of the catalog drives, and a touch over one: the glue keeps them as data, as
+    // boards_gen.py does, and the program starts them itself.
+    function undriven(resolved) {
+        const displays = Object.entries(resolved.devices).filter(([, device]) => device.used !== false && (device.classes || []).includes('display')
+            && device.chip && !device.library && !Object.keys(device.libraries || {}).length).map(([name]) => name);
+        const touches = Object.entries(resolved.devices).filter(([, device]) => (device.classes || []).includes('touch') && displays.includes(device.config?.over)).map(([name]) => name);
+        return { displays, touches };
+    }
+
     // The libraries of a kit: the board starts those with an adapter, the rest are for the program to start.
     function librariesOf(resolved) {
         const found = new Map();
+        const kept = undriven(resolved).touches;
         for (const [name, device] of Object.entries(resolved.devices)) {
-            if (!device.library || device.used === false) continue;
+            if (!device.library || device.used === false || kept.includes(name)) continue;
             const record = catalog.libraries[device.library];
             const chip = device.libraries?.[device.library];
             if (!found.has(device.library)) found.set(device.library, { name: `${record.owner}/${record.name}`, version: device.library_at, range: record.adapter?.version, from: null, own: !chip?.adapter, header: chip?.header, call: chip?.init?.[0]?.call, bus: Object.keys(device.on || {})[0], url: record.url, registry: record.install.some((way) => way.via === 'registry'), devices: [] });
@@ -1702,6 +1712,11 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
             lines.push(...auditLines(resolved, platformName || 'esp_idf', wanted.limits.standard));
             for (const item of arduino ? [] : libraries.filter((library) => library.own)) lines.push({ level: 'do', text: t('{0} {1}: the project gets it, the program starts {2} with {3}()', item.name, item.version, item.devices.join(', '), item.call) });
             const started = arduino ? [] : libraries.filter((library) => !library.own);
+            for (const name of arduino ? [] : undriven(resolved).displays) {
+                const over = undriven(resolved).touches.filter((touch) => resolved.devices[touch].config?.over === name);
+                lines.push({ level: 'do', text: over.length ? t('{0}: no library of the catalog starts the {1} yet, so the component starts neither it nor {2}: the program does', name, resolved.devices[name].part ?? resolved.devices[name].chip, over.join(', '))
+                    : t('{0}: no library of the catalog starts the {1} yet, so the component does not start it: the program does', name, resolved.devices[name].part ?? resolved.devices[name].chip) });
+            }
             // the range the manifest of the component takes, as a program gets it, and where this kit needs more
             const versionsOf = (item) => (!item.range ? item.version : item.from ? t('{0} (this kit from {1})', item.range, item.from) : item.range);
             if (started.length) lines.push({ level: 'yes', text: t('the board starts: {0}', started.map((item) => `${item.name} ${versionsOf(item)}`).join('; ')) });

@@ -1,0 +1,272 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "jc4880p443c",
+    "title": "Guition JC4880P443C",
+    "maker": "guition",
+    "part": "JC4880P443C",
+    "revision": "V1.0",
+    "description": "4.3-inch 480x800 ST7701S on MIPI-DSI, GT911 touch, ES8311 sound: an ESP32-P4 with Wi-Fi and BLE in an ESP32-C6 on the same module",
+    "mcu": {
+        "target": "esp32p4",
+        "flash_mb": 16,
+        "psram_mb": 32,
+        "revision": "3.2",
+        "notes": "The core is the module JC-ESP32P4-M3, as on the JC1060P470C: an ESP32-P4, 16 MB flash, 32 MB PSRAM, an ESP32-C6. The chip of the board measured is of revision 3.2, its flash a Boya chip (68/4018)."
+    },
+    "checked": {
+        "pins": {
+            "level": "schematic",
+            "source": "JC4880P443_V1.0.pdf, the archive JC4880P443C_I_W.zip of Guition",
+            "date": "2026-11-18"
+        },
+        "chip": {
+            "level": "hardware",
+            "covers": ["mcu"],
+            "source": "esptool on Anton's board: ESP32-P4 rev v3.2, 16 MB flash of maker 0x68 (4018), USB Serial/JTAG",
+            "date": "2026-11-18"
+        },
+        "glass": {
+            "level": "hardware",
+            "covers": ["devices.lcd", "buses.dsi"],
+            "by": "Anton, by eye",
+            "date": "2026-11-18",
+            "notes": "A DGX driver of the ST7701 not released yet, in the session of DGX: frame rings with the glass equal to the frame buffer, colors at 16 bits in RGB order, eight orientations, two lanes at 1000 Mbit/s, the reset on GPIO 5 and the backlight on GPIO 23 off for a second. This component does not start the display yet."
+        },
+        "touch_vendor": {
+            "level": "vendor-code",
+            "covers": ["devices.touch.config"],
+            "source": "the BSP of Guition in the archive: esp_lcd_touch_new_i2c_gt911 at 0x5D, 480 x 800, its INT and RST left GPIO_NUM_NC",
+            "date": "2026-11-18"
+        },
+        "radio_vendor": {
+            "level": "vendor-code",
+            "covers": ["buses.sdio", "devices.radio"],
+            "source": "the sdkconfig of the demos of Guition for this board: esp_hosted on SDIO slot 1, CLK 18, CMD 19, D0 to D3 14 to 17, the reset of the C6 on GPIO 54",
+            "date": "2026-11-18"
+        },
+        "schematic_parts": {
+            "level": "schematic",
+            "covers": [
+                "devices.touch",
+                "devices.sound",
+                "devices.rs485",
+                "devices.sd",
+                "devices.radio",
+                "devices.battery",
+                "buses.uart",
+                "buses.sdmmc",
+                "buses.i2s.i2s0.din",
+                "buses.csi",
+                "connectors"
+            ],
+            "source": "JC4880P443_V1.0.pdf",
+            "date": "2026-11-18",
+            "result": "pending",
+            "notes": "From the schematic: none of these was started on the board. din is ASDOUT of the ES8311, on the net ES7210_SDOUT."
+        },
+        "power": {
+            "level": "schematic",
+            "covers": ["power"],
+            "source": "JC4880P443_V1.0.pdf, the archive JC4880P443C_I_W.zip of Guition",
+            "date": "2026-11-18"
+        }
+    },
+    "buses": {
+        "dsi": {"dsi0": {"lanes": 2, "lane_mbps": 1000, "phy_ldo_chan": 3, "phy_ldo_mv": 2500}},
+        "csi": {"csi0": {"lanes": 2, "phy_ldo_chan": 3, "phy_ldo_mv": 2500}},
+        "i2c": {"i2c0": {"sda": 7, "scl": 8}},
+        "i2s": {"i2s0": {"mclk": 13, "bclk": 12, "ws": 10, "dout": 9, "din": 48}},
+        "sdio": {"sdio0": {"clk": 18, "cmd": 19, "d0": 14, "d1": 15, "d2": 16, "d3": 17, "reset": 54}},
+        "uart": {"uart0": {"tx": 37, "rx": 38}, "uart1": {"tx": 26, "rx": 27}},
+        "sdmmc": {"sdmmc0": {"clk": 43, "cmd": 44, "d0": 39, "d1": 40, "d2": 41, "d3": 42}}
+    },
+    "power": [
+        {"name": "USB", "source": "usb", "mv": 5000},
+        {"name": "VIN", "source": "vin", "why": "Contact 1 of CN2."},
+        {
+            "name": "5V",
+            "from": ["USB", {"name": "VIN", "through": "q_vin"}],
+            "feeds": ["rs485"],
+            "why": "The net USB5V_IN, on J4 and J5."
+        },
+        {"name": "BAT+", "source": "battery", "why": "CN4."},
+        {
+            "name": "VOUT-BAT",
+            "from": ["5V", "BAT+"],
+            "through": "charger",
+            "regulator": "charger",
+            "mv": 5000,
+            "feeds": ["amplifier"]
+        },
+        {
+            "name": "LEDA",
+            "from": "VOUT-BAT",
+            "through": "led_driver",
+            "regulator": "boost",
+            "feeds": ["lcd"],
+            "why": "EN of IC1 is LCD_PWM, the backlight line of the display on GPIO23, held low by R72."
+        },
+        {"name": "VCC5V", "from": "VOUT-BAT", "through": "fuse"},
+        {
+            "name": "3V3",
+            "from": "VCC5V",
+            "through": "reg_3v3",
+            "regulator": "buck",
+            "mv": 3300,
+            "ma_max": 2000,
+            "feeds": ["mcu", "radio", "lcd", "touch", "sound"],
+            "why": "The nets VCC3V3, ESP_3V3 and VDDA are one. The net Codec_3V3 hangs on it through R9, 0 ohm."
+        },
+        {"name": "ESP_LDO_VO4", "from": "3V3", "why": "LDO channel 4 of the chip."},
+        {
+            "name": "TF_VCC",
+            "from": "ESP_LDO_VO4",
+            "through": "q_sd",
+            "feeds": ["sd"],
+            "why": "R10 from GPIO45 to the gate of Q1 is marked NC and R13 holds the gate low, so Q1 stays on and no GPIO switches the card."
+        }
+    ],
+    "connectors": {
+        "CN1": {"type": "speaker, 2 pins", "pins": ["SPK+", "SPK-"]},
+        "CN2": {"type": "MX 1.25 mm, 4 pins", "pins": ["VIN", 37, 38, "GND"]},
+        "CN3": {"type": "4 pins", "pins": ["GND", "3V3", 8, 7]},
+        "CN4": {"type": "battery, 2 pins", "pins": ["BAT+", "BAT-"]},
+        "J4": {"type": "RS-485, 4 pins", "pins": ["5V", "A", "B", "GND"]},
+        "J5": {"type": "UART1, 4 pins", "pins": ["5V", 26, 27, "GND"]},
+        "USB2": {
+            "type": "USB-C, full speed: the USB Serial/JTAG of the chip",
+            "pins": ["5V", "USB1P1_N", "USB1P1_P", "GND"]
+        },
+        "USB3": {"type": "USB-C, high speed: the USB OTG of the chip", "pins": ["5V", "ESP_USB_N", "ESP_USB_P", "GND"]},
+        "JP1": {
+            "type": "expansion header, 2 x 13",
+            "pins": [
+                "3V3",
+                "VCC5V",
+                "3V3",
+                "VCC5V",
+                "GND",
+                "GND",
+                52,
+                33,
+                51,
+                31,
+                50,
+                30,
+                49,
+                29,
+                35,
+                "GND",
+                34,
+                "3V3",
+                32,
+                "C6_U0RXD",
+                28,
+                "C6_U0TXD",
+                7,
+                "C6_IO9",
+                8,
+                "C6_CHIP_PU"
+            ]
+        },
+        "FPC2": {
+            "type": "CSI camera, FPC 0.3 mm, 15 pins",
+            "pins": [
+                "GND",
+                "CSI_DATA0_N",
+                "CSI_DATA0_P",
+                "GND",
+                "CSI_DATA1_N",
+                "CSI_DATA1_P",
+                "GND",
+                "CSI_CLK_N",
+                "CSI_CLK_P",
+                "GND",
+                "CSI_IO0",
+                "CSI_IO1",
+                8,
+                7,
+                "3V3"
+            ]
+        }
+    },
+    "devices": {
+        "lcd": {
+            "chip": "st7701",
+            "on": {"dsi.dsi0": {}},
+            "pins": {"rst": 5, "backlight": {"gpio": 23, "active": "high"}},
+            "config": {
+                "primary": true,
+                "panel": {"width": 480, "height": 800, "mm_w": 56, "mm_h": 94},
+                "depth_bits": 16
+            },
+            "controls": {"orientation": {"start": {"x": "left-right", "y": "top-bottom", "swap": false}}},
+            "notes": "On FPC1, 30 pins: the reset is contact 23, TE is not wired. The active area is 56.16 x 93.60 mm by the specification of Guition."
+        },
+        "touch": {
+            "chip": "gt911",
+            "on": {"i2c.i2c0": {}},
+            "pins": {"rst": 22, "int": 21},
+            "config": {"over": "lcd", "x_max": 479, "y_max": 799},
+            "notes": "On FPC1 with the display: TOUCH_RST contact 25, TOUCH_INT contact 28, the I2C on 26 and 27 with 5K1 to 3.3 V."
+        },
+        "sound": {
+            "chip": "es8311",
+            "ref": "U1",
+            "part": "ES8311-S",
+            "on": {"i2c.i2c0": {}, "i2s.i2s0": {}},
+            "pins": {"pa": 11},
+            "config": {"sample_rate": 22050, "pa_voltage": 5, "codec_dac_voltage": 3.3},
+            "controls": {"volume": {"start": 25}},
+            "notes": [
+                "MIC1, an MSM381A3729H9CP, is on MIC1P and MIC1N of the codec: ASDOUT of the codec comes in on GPIO48. Only the output is set up.",
+                "CE of the codec is held low through R1, so its address is 0x18. CN1 takes a speaker for the NS4150."
+            ]
+        },
+        "boot": {"class": "button", "pins": {"in": {"gpio": 35, "active": "low"}}},
+        "rs485": {
+            "class": "network",
+            "ref": "U8",
+            "on": {"uart.uart1": {}},
+            "config": {"transceiver": "MAX485", "direction": "auto"},
+            "notes": "U7, a 74LVC1G132, and U9, an 8550, make the direction from TX: no GPIO sets it. U8 runs from USB5V_IN and its RO reaches RX1 on GPIO27 through R70, 0 ohm: by the schematic that is a level of 5 V on a pin of the chip, not measured. J5 brings IO26 and IO27 out beside it."
+        },
+        "sd": {
+            "class": "storage",
+            "ref": "J1",
+            "on": {"sdmmc.sdmmc0": {}},
+            "config": {"media": "microsd"},
+            "notes": "Fed by LDO channel 4 of the chip, through Q1."
+        },
+        "radio": {
+            "chip": "esp32c6",
+            "on": {"sdio.sdio0": {}},
+            "antenna": {"kind": "on_board", "form": "ceramic", "quality": 4},
+            "notes": [
+                "The ESP32-C6 inside the module, as on the JC1060P470C. ANT1, a ceramic CA-C03, is on LAN_OUT of the module through L4, 2.2 nH; C62 and C63 of its match are NC. Where ANT1 lies on the board, whether the module carries a connector for an antenna as well and which of them the radio uses is not seen.",
+                "The net C6_IO2 joins GPIO6 of the P4 to IO2 of the C6."
+            ]
+        },
+        "battery": {
+            "class": "battery_adc",
+            "pins": {"in": 53},
+            "config": {"divider": {"top_ohm": 68000, "bottom_ohm": 100000}},
+            "notes": "R55 is 0R on the schematic. The charger is an IP5306; SW3 is its KEY, with no line to the chip."
+        },
+        "p4_module": {"class": "other", "ref": "U3", "maker": "guition", "part": "JC-ESP32P4-M3"},
+        "charger": {"class": "other", "ref": "U5", "maker": "injoinic", "part": "IP5306"},
+        "reg_3v3": {"class": "other", "ref": "AP1", "maker": "ti", "part": "TLV62569"},
+        "fuse": {
+            "class": "other",
+            "ref": "R22",
+            "notes": "Drawn as a resistor with the value 1A, as on the JC1060P470C."
+        },
+        "led_driver": {"class": "other", "ref": "IC1", "part": "MP3202"},
+        "amplifier": {"class": "other", "ref": "U2", "part": "NS4150"},
+        "mic": {"class": "other", "ref": "MIC1", "part": "MSM381A3729H9CP"},
+        "q_vin": {"class": "other", "ref": "Q2", "part": "AO3401"},
+        "q_sd": {"class": "other", "ref": "Q1", "part": "AO3401"}
+    }
+}

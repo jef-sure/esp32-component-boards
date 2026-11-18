@@ -1,0 +1,23 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "st7701",
+    "title": "ST7701S",
+    "maker": "sitronix",
+    "part": "ST7701S",
+    "class": "display",
+    "provides": {"display": {"variant": "tft"}},
+    "on": {"dsi": {"required": false}, "rgb": {"required": false}},
+    "config": {"kind": "graphics"},
+    "controls": {"orientation": {"how": "driver", "read": "none"}},
+    "checked": {
+        "facts": {
+            "level": "hardware",
+            "source": "the JC4880P443C of Anton over MIPI-DSI, 2 lanes: a DGX driver of the session of DGX drew frame rings, colors at 16 bits and eight orientations, seen right",
+            "by": "Anton",
+            "date": "2026-11-18"
+        }
+    },
+    "notes": "The ST7701S takes MIPI-DSI, or RGB with SPI for its commands. Its init on that board is the default table of esp_lcd_st7701_mipi.c of Espressif (esp_lcd_st7701 1.1.3, in the archive of Guition)."
+}

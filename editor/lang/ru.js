@@ -421,6 +421,8 @@ LANGUAGES.ru = {
         '{0} {1} does not take {2}': '{0} {1} не поддерживает {2}',
         'The editor writes projects for ESP-IDF only for now.': 'Редактор пока пишет проекты только для ESP-IDF.',
         'Write to the model': 'Напиши модели',
+        '{0}: no library of the catalog starts the {1} yet, so the component starts neither it nor {2}: the program does': '{0}: {1} пока не запускает ни одна библиотека каталога, поэтому компонент не запускает ни его, ни {2}: это делает программа',
+        '{0}: no library of the catalog starts the {1} yet, so the component does not start it: the program does': '{0}: {1} пока не запускает ни одна библиотека каталога, поэтому компонент его не запускает: это делает программа',
         'The model is listening': 'Модель слушает',
         'The model is working: its last step {0} s ago': 'Модель работает: последний шаг {0} с назад',
         'The model is not listening since {0}: write to your agent to bring it back': 'Модель не слушает с {0}: напиши своему агенту, чтобы вернуть её',

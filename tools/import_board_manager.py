@@ -38,7 +38,8 @@ NOT_WIRED = (None, -1, "-1", "GPIO_NUM_NC", "NC")
 NOT_A_CHIP = ("none", "auto", "internal")
 I2S_LINES = ("mclk", "bclk", "ws", "dout", "din")
 # the same board in a pack and in the catalog
-OURS = {"guition_boards/jc1060p470": "jc1060p470c", "guition_boards/jc8012p4a1": "jc8012p4a1c", "guition_boards/jc4827w543": "jc4827w543c", "guition_boards/esp32_2432s028": "cyd_s028r"}
+OURS = {"guition_boards/jc1060p470": "jc1060p470c", "guition_boards/jc8012p4a1": "jc8012p4a1c", "guition_boards/jc4827w543": "jc4827w543c", "guition_boards/esp32_2432s028": "cyd_s028r",
+        "guition_boards/jc4880p443": "jc4880p443c"}
 # a device the pack leaves to C code: its class, from the chip
 CUSTOM_CLASS = {"xpt2046": "touch", "axp2101": "pmic", "axp2602": "pmic", "bq27220": "fuel_gauge", "bmi270": "imu", "bmi270_sensor": "imu", "bmi270_sensor_hub": "imu",
                 "lp5562": "led", "lr1121": "radio", "ssd1309": "display", "pcf85063a": "rtc", "ssd16xx_290": "display", "es8311_es7210": "audio"}

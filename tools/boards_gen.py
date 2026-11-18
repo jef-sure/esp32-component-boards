@@ -322,7 +322,7 @@ def kept_numbers(device):
 def parts_of(resolved):
     """A resolved board with the devices the glue starts as lists: displays, touches, sounds, buttons; kept for the rest."""
     module = resolved["kind"] == "module"
-    board = {**resolved, "touches": [], "sounds": [], "buttons": [], "radios": [], "ethernets": [], "kept": {}}
+    board = {**resolved, "touches": [], "sounds": [], "buttons": [], "radios": [], "ethernets": [], "kept": {}, "kept_notes": []}
     if module:
         board["module"] = True
     board["buses"] = {kind: {own: {key: number(value) for key, value in bus.items()} for own, bus in named.items()} for kind, named in (resolved.get("buses") or {}).items()}
@@ -330,6 +330,10 @@ def parts_of(resolved):
     for name, device in resolved["devices"].items():
         classes = device["classes"]
         if device.get("used") is False:
+            board["kept"][name] = kept_numbers(device)
+        elif "display" in classes and not module and not startable(device) and not device.get("libraries"):
+            # described, and no library of the catalog drives its chip yet: kept as data, and said, so a wrong chip is seen
+            board["kept_notes"].append(f"{name} is kept as data: no library of the catalog starts a {device.get('chip')}")
             board["kept"][name] = kept_numbers(device)
         elif "display" in classes:
             displays.append(display_part(name, device, module))
@@ -348,6 +352,11 @@ def parts_of(resolved):
             board["kept"][name] = kept_numbers(device)
         else:
             board["kept"][name] = kept_numbers(device)
+    # a touch over a display kept as data maps onto nothing the glue starts: it is kept too
+    for touch in [touch for touch in board["touches"] if touch.get("over") in board["kept"]]:
+        board["kept_notes"].append(f"{touch['name']} is kept as data: the display it covers, {touch['over']}, is")
+        board["touches"].remove(touch)
+        board["kept"][touch["name"]] = kept_numbers(resolved["devices"][touch["name"]])
     # a button on a line a started Ethernet takes is there only while the Ethernet is off
     ethernets = {ethernet["name"] for ethernet in board["ethernets"]}
     lost = {number(group["line"]) for group in (resolved.get("shared_pins") or {}).values() if (group.get("only_while") or {}).get("device") in ethernets}
@@ -1667,6 +1676,7 @@ def replace_between(text, begin, end, block, what):
 
 
 PARTS = {"en": ("display", "touch", "sound", "button"), "ru": ("дисплей", "тач", "звук", "кнопка")}
+BUS_NAMES = {"dsi": "MIPI-DSI", "qspi": "QSPI", "spi": "SPI", "p8": "i80", "i2c": "I2C"}
 
 
 def tried(board, lang):
@@ -1688,6 +1698,21 @@ def tried(board, lang):
     return cell or "—"
 
 
+NOT_STARTED = {"en": "not started yet", "ru": "пока не запускается"}
+
+
+def kept_display(board, lang):
+    """A graphics display of the board the glue does not start, as the table names one: what it is, and that it waits."""
+    for name in board["kept"]:
+        device = board["devices"][name]
+        panel = (device.get("config") or {}).get("panel")
+        if "display" in device["classes"] and panel and device.get("chip"):
+            bus = bus_parts(next(iter(device.get("on") or {}), "none"))[0]
+            size = f", {panel['mm_w']}x{panel['mm_h']} mm" if panel.get("mm_w") else ""
+            return f"{panel['width']}x{panel['height']} {device['chip'].upper()}, {BUS_NAMES.get(bus, bus)}{size} ({NOT_STARTED[lang]})"
+    return None
+
+
 def gen_table(boards, lang="en"):
     """The table of the boards for the README, between its markers."""
     head = {"en": ("board", "chip", *PARTS["en"], "tried on the board"), "ru": ("плата", "чип", *PARTS["ru"], "проверено на плате")}[lang]
@@ -1698,12 +1723,12 @@ def gen_table(boards, lang="en"):
         if is_pixel(display):
             w, h, mm_w, mm_h = shown(display)
             bus = bus_parts(display["bus"]["bus"])[0]
-            bus_name = {"dsi": "MIPI-DSI", "qspi": "QSPI", "spi": "SPI", "p8": "i80", "i2c": "I2C"}[bus]
+            bus_name = BUS_NAMES[bus]
             disp = f"{w}x{h} {display['driver'].upper()}, {bus_name}" + (f", {mm_w}x{mm_h} mm" if mm_w else "")
         elif is_character(display):
             disp = f"{display['geometry']} {display['driver'].upper()}"
         else:
-            disp = none
+            disp = kept_display(board, lang) or none
         cells = []
         for touch in board["touches"]:
             t = touch["chip"].upper()
@@ -1714,6 +1739,8 @@ def gen_table(boards, lang="en"):
             if not touch["calibration"].get("measured", True):
                 t += {"en": "; calibration a placeholder", "ru": "; калибровка-заглушка"}[lang]
             cells.append(t)
+        cells += [f"{board['devices'][name]['chip'].upper()} ({NOT_STARTED[lang]})" for name in board["kept"] if "touch" in board["devices"][name]["classes"]
+                  and board["devices"][name].get("chip")]
         t = ", ".join(cells) or none
         s = ", ".join({"es8311": "ES8311", "i2s": {"en": "I2S amplifier", "ru": "усилитель I2S"}[lang]}.get(sound["kind"], f"DAC, GPIO{sound.get('out')}") for sound in board["sounds"]) or none
         b = {"en": "yes", "ru": "да"}[lang] if board["buttons"] else none
@@ -1805,6 +1832,9 @@ def main():
             if not path.exists() or path.read_text() != text:
                 path.write_text(text)
                 print(f"{path.relative_to(ROOT)}: written")
+        for board in boards:
+            for note in board.get("kept_notes") or ():
+                print(f"{board['name']}: {note}")
         print(f"{len(boards)} boards, {len(modules)} modules")
         return 0
     board_path = args.data / args.board / "board.json"

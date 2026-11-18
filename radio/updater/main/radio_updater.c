@@ -4,8 +4,8 @@
  * nothing to the flash of the P4: it runs from the place of the program's app, which is flashed again after it.
  */
 #include <inttypes.h>
-#include <stdbool.h>
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -145,8 +145,8 @@ void app_main(void)
     /* a radio too old to tell its version, as the factory firmware of the C6 of the JC4880P443C, runs "unknown": the tool
      * sends the image of the program to it as to any other version */
     esp_hosted_coprocessor_fwver_t running = {0};
-    ret              = esp_hosted_get_coprocessor_fwversion(&running);
-    const bool known = ret == ESP_OK;
+    ret                                    = esp_hosted_get_coprocessor_fwversion(&running);
+    const bool known                       = ret == ESP_OK;
     if (!known) ESP_LOGW(TAG, "esp_hosted_get_coprocessor_fwversion: %s", esp_err_to_name(ret));
 
     char line[LINE_SIZE];
@@ -160,7 +160,7 @@ void app_main(void)
         return;
     }
     size_t size = strtoul(line + strlen(SEND), NULL, 10);
-    ret = send(size, &running, known);
+    ret         = send(size, &running, known);
     if (ret != ESP_OK) {
         say("failed %s", esp_err_to_name(ret));
         return;

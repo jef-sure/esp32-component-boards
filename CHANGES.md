@@ -2,6 +2,13 @@
 
 ## 0.2.2 (not released yet)
 
+- The step of the flash that keeps the radio of an ESP32-P4 board at the esp_hosted of the build works on revision 3
+  of the chip: its update program, which starts from the bootloader of the program, is built with the size of the L2
+  cache of the program, and panicked before its first line with another. A radio too old to tell its version gets the
+  image as any other, and the step waits up to 60 s for the radio to check it. Tried on the JC4880P443C: its C6 went
+  from the factory firmware to esp_hosted 3.0.10.
+- The JC4880P443C was flashed with `hello_board`: the display shows its frame through DGX 0.11.5 with two frame
+  buffers; the touch and the sound start, not judged yet.
 - The Guition JC4880P443C, a 4.3-inch 480x800 ST7701S on MIPI-DSI with GT911 touch, ES8311 sound and the ESP32-C6 of the
   module JC-ESP32P4-M3, from the schematic of its archive. Its display starts through DGX 0.11.5, the first with the
   ST7701S, with two frame buffers; a build with an older DGX stops at `#error`, and CI builds the board with no older

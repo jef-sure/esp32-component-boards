@@ -41,6 +41,29 @@
             "by": "Anton, by eye, with the DGX driver of the ST7701 of DGX before its release as 0.11.5: 24 bits a pixel seen right as well as 16",
             "date": "2026-11-18"
         },
+        "picture": {
+            "level": "hardware",
+            "covers": ["devices.lcd"],
+            "by": "Anton",
+            "date": "2026-11-18",
+            "result": "confirmed",
+            "notes": "hello_board through this component, DGX 0.11.5 from the registry, 16 bits, two frame buffers: a white frame with a blue bar at the top."
+        },
+        "start": {
+            "level": "hardware",
+            "covers": ["devices.touch", "devices.sound"],
+            "by": "log of hello_board",
+            "date": "2026-11-18",
+            "result": "pending",
+            "notes": "The GT911 answers: product 911, config 250, 5 fingers; the ES8311 opens at 22050 Hz. Touch and sound not judged."
+        },
+        "radio": {
+            "level": "hardware",
+            "covers": ["devices.radio", "buses.sdio"],
+            "by": "the flash step of this component",
+            "date": "2026-11-18",
+            "notes": "The C6 answered on SDIO with its factory firmware, which tells esp_hosted 3.0.10 no version; the step brought it to esp_hosted 3.0.10 by OTA, and the program logs the two versions alike. Wi-Fi and BLE not tried."
+        },
         "touch_vendor": {
             "level": "vendor-code",
             "covers": ["devices.touch.config"],

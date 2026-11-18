@@ -4,6 +4,7 @@
  * nothing to the flash of the P4: it runs from the place of the program's app, which is flashed again after it.
  */
 #include <inttypes.h>
+#include <stdbool.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -77,7 +78,7 @@ static size_t read_exact(uint8_t *buffer, size_t size)
     return got;
 }
 
-static esp_err_t send(size_t size, const esp_hosted_coprocessor_fwver_t *running)
+static esp_err_t send(size_t size, const esp_hosted_coprocessor_fwver_t *running, bool known)
 {
     uint8_t  *chunk = malloc(CHUNK_SIZE);
     if (!chunk) return ESP_ERR_NO_MEM;
@@ -113,13 +114,15 @@ static esp_err_t send(size_t size, const esp_hosted_coprocessor_fwver_t *running
         ESP_LOGE(TAG, "esp_hosted_slave_ota_end: %s", esp_err_to_name(end));
         return end;
     }
-    /* a radio of esp_hosted 2.6 and above names the new firmware for boot only when told */
-    if (running->major1 > 2 || (running->major1 == 2 && running->minor1 >= 6)) {
+    /* a radio of esp_hosted 2.6 and above names the new firmware for boot only when told; one that cannot tell its version
+     * is told too, and one older than the call does not know it, which is no error */
+    if (!known || running->major1 > 2 || (running->major1 == 2 && running->minor1 >= 6)) {
         ret = esp_hosted_slave_ota_activate();
-        if (ret != ESP_OK) {
+        if (ret != ESP_OK && known) {
             ESP_LOGE(TAG, "esp_hosted_slave_ota_activate: %s", esp_err_to_name(ret));
             return ret;
         }
+        if (ret != ESP_OK) ESP_LOGW(TAG, "esp_hosted_slave_ota_activate: %s, for a radio of no version", esp_err_to_name(ret));
     }
     return ESP_OK;
 }
@@ -139,16 +142,17 @@ void app_main(void)
         say("no radio %d", rc);
         return;
     }
+    /* a radio too old to tell its version, as the factory firmware of the C6 of the JC4880P443C, runs "unknown": the tool
+     * sends the image of the program to it as to any other version */
     esp_hosted_coprocessor_fwver_t running = {0};
-    ret = esp_hosted_get_coprocessor_fwversion(&running);
-    if (ret != ESP_OK) {
-        say("no version %s", esp_err_to_name(ret));
-        return;
-    }
+    ret              = esp_hosted_get_coprocessor_fwversion(&running);
+    const bool known = ret == ESP_OK;
+    if (!known) ESP_LOGW(TAG, "esp_hosted_get_coprocessor_fwversion: %s", esp_err_to_name(ret));
 
     char line[LINE_SIZE];
     do {
-        say("runs %" PRIu32 ".%" PRIu32 ".%" PRIu32, running.major1, running.minor1, running.patch1);
+        if (known) say("runs %" PRIu32 ".%" PRIu32 ".%" PRIu32, running.major1, running.minor1, running.patch1);
+        else say("runs unknown");
     } while (!read_line(line, sizeof(line), pdMS_TO_TICKS(REPEAT_MS)));
 
     if (strncmp(line, SEND, strlen(SEND)) != 0) {
@@ -156,7 +160,7 @@ void app_main(void)
         return;
     }
     size_t size = strtoul(line + strlen(SEND), NULL, 10);
-    ret = send(size, &running);
+    ret = send(size, &running, known);
     if (ret != ESP_OK) {
         say("failed %s", esp_err_to_name(ret));
         return;

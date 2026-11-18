@@ -33,6 +33,7 @@ ESPRESSIF_USB_JTAG = (0x303A, 0x1001)  # its USB serial number is the MAC of the
 VERSION_WAIT_S = 30  # the update program boots, resets the radio and asks it
 RESTART_WAIT_S = 40  # the radio boots its new firmware, the update program starts again
 STEP_WAIT_S = 10  # a confirmation of a piece, or the start of a transfer
+END_WAIT_S = 60  # the radio checks the whole image before it answers: the factory firmware of the C6 of the JC4880P443C took over 10 s
 HERE = os.path.dirname(os.path.abspath(__file__))
 RADIO_DIR = os.path.join(os.path.dirname(HERE), "radio")
 STATE = os.path.join(os.environ.get("XDG_STATE_HOME") or os.path.expanduser("~/.local/state"), "jef-sure-boards", "radios.json")
@@ -268,7 +269,7 @@ def update(facts, port, mac, log):
                 link.expect("ok ", STEP_WAIT_S)
                 if n < len(pieces):
                     link.write(pieces[n])
-            link.expect("sent ", STEP_WAIT_S)
+            link.expect("sent ", END_WAIT_S)
             runs = link.expect("runs ", RESTART_WAIT_S)[len("runs "):]
             say(f"{len(data)} bytes sent in {time.time() - t1:.1f} s: the radio runs esp_hosted {runs}")
             remember(mac, runs=runs)

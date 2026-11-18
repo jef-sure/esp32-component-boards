@@ -115,6 +115,14 @@ by the step.
 The JC8012P4A1C takes the radio and the step from its own data, and CI builds it; neither was
 tried on that board yet.
 
+Tried on the JC4880P443C on 2026-11-18: its C6 came with a factory firmware too old to tell its
+version, which the update program says as `runs unknown`; the step sent it the image all the
+same, and the C6 then ran esp_hosted 3.0.10, the version of the build. The C6 checks a whole
+image before it answers, which took that firmware more than 10 s. The update program starts from
+the bootloader of the program, so it is built with the revision of the chip and the size of the
+L2 cache of the program: on revision 3 of the ESP32-P4 one built for another cache panics before
+its first line. Wi-Fi and Bluetooth were not tried on that board.
+
 ## What is not there yet
 
 - A radio on SPI or UART: only SDIO.

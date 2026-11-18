@@ -160,6 +160,13 @@ if(TARGET flash AND NOT CMAKE_BUILD_EARLY_EXPANSION)
         if(CONFIG_${_boards_chip}_SELECTS_REV_LESS_V3)
             list(APPEND _boards_host "CONFIG_${_boards_chip}_SELECTS_REV_LESS_V3=y")
         endif()
+        # the L2 cache too: the update program starts from the program's bootloader, which gives the cache its size, and on
+        # revision 3 of an ESP32-P4 a program built for another size panics before its first line
+        foreach(_boards_cache 128KB 256KB 512KB LINE_64B LINE_128B)
+            if(CONFIG_CACHE_L2_CACHE_${_boards_cache})
+                list(APPEND _boards_host "CONFIG_CACHE_L2_CACHE_${_boards_cache}=y")
+            endif()
+        endforeach()
         set(_boards_count 0)
         foreach(_boards_line ${_boards_host})
             string(JSON _boards_lines SET "${_boards_lines}" ${_boards_count} "\"${_boards_line}\"")

@@ -62,11 +62,8 @@ static struct board_display_started displays_started[1];
 const struct board_display_table board_display_table = {.panels = display_panels, .started = displays_started, .count = 1};
 
 /* touch: gt911 on i2c.i2c0, the calibration of its measured board. */
-/* The calibration below is a placeholder, not measured on a board: the touch works, only not
- * straight; board_touch_start says so. Measure the board (dgx_di_calibrate_measure) and put the
- * numbers in the data. */
-static const dgx_di_aim_t touch0_aims[] = {{.meant_x = 48, .meant_y = 48, .x = 48, .y = 48}, {.meant_x = 431, .meant_y = 48, .x = 431, .y = 48}, {.meant_x = 48, .meant_y = 751, .x = 48, .y = 751}, {.meant_x = 431, .meant_y = 751, .x = 431, .y = 751}};
-static const struct board_touch_calibration touch0_calibrated = {.aims = touch0_aims, .count = 4, .width = 480, .height = 800, .blink_ms = 0, .gap_ms = 0, .placeholder = true};
+static const dgx_di_aim_t touch0_aims[] = {{.meant_x = 48, .meant_y = 48, .x = 49, .y = 59}, {.meant_x = 431, .meant_y = 48, .x = 429, .y = 46}, {.meant_x = 48, .meant_y = 751, .x = 54, .y = 761}, {.meant_x = 431, .meant_y = 751, .x = 421, .y = 764}, {.meant_x = 240, .meant_y = 48, .x = 237, .y = 66}, {.meant_x = 240, .meant_y = 751, .x = 231, .y = 768}, {.meant_x = 48, .meant_y = 400, .x = 53, .y = 404}, {.meant_x = 431, .meant_y = 400, .x = 424, .y = 407}, {.meant_x = 240, .meant_y = 400, .x = 239, .y = 412}};
+static const struct board_touch_calibration touch0_calibrated = {.aims = touch0_aims, .count = 9, .width = 480, .height = 800, .blink_ms = 0, .gap_ms = 0, .placeholder = false};
 static const struct board_touch_panel touch0_panel = {.x_max = 480, .y_max = 800, .rst = GPIO_NUM_22, .irq = GPIO_NUM_21, .i2c_port = I2C_NUM_0, .fingers = 5};
 static dgx_di_esp_lcd_touch_t touch0_device;
 static const uint8_t touch0_addresses[] = {0x5d, 0x14};

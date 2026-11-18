@@ -8,12 +8,15 @@
   image as any other, and the step waits up to 60 s for the radio to check it. Tried on the JC4880P443C: its C6 went
   from the factory firmware to esp_hosted 3.0.10.
 - The JC4880P443C was flashed with `hello_board`: the display shows its frame through DGX 0.11.5 with two frame
-  buffers; the touch and the sound start, not judged yet.
+  buffers. Its touch is calibrated on the board, three rounds of nine targets: 4.9 pixels off on average and 9 at
+  worst with the calibration, 10.6 and 18 without. Its sound starts; no speaker was on CN1 to hear it.
+- `tools/board_calibration.py` takes the last calibration of a log, the one of all the rounds:
+  `dgx_di_calibrate_measure` logs one after each round, and the tool took the first. A measurement takes the place of
+  a placeholder calibration.
 - The Guition JC4880P443C, a 4.3-inch 480x800 ST7701S on MIPI-DSI with GT911 touch, ES8311 sound and the ESP32-C6 of the
   module JC-ESP32P4-M3, from the schematic of its archive. Its display starts through DGX 0.11.5, the first with the
   ST7701S, with two frame buffers; a build with an older DGX stops at `#error`, and CI builds the board with no older
-  one. Its touch has a placeholder calibration until it is measured on the board. Built on ESP-IDF 5.5.5 and 6.1, not
-  flashed with this component. The record imported from guition_boards 0.2.2 is gone: it gave the touch of the
+  one. Built on ESP-IDF 5.5.5 and 6.1. The record imported from guition_boards 0.2.2 is gone: it gave the touch of the
   10.1-inch board, a GSL3680 of 800 x 1280, 550 Mbit/s of DSI and 24 bits, where its own demos and the schematic give a
   GT911 of 480 x 800, 750 or 1000 Mbit/s and 16 bits.
 - A display whose chip no library of the catalog names, and a touch over it, are kept as data: the glue does not start

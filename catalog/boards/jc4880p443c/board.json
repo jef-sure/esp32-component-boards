@@ -49,13 +49,20 @@
             "result": "confirmed",
             "notes": "hello_board through this component, DGX 0.11.5 from the registry, 16 bits, two frame buffers: a white frame with a blue bar at the top."
         },
+        "touch": {
+            "level": "hardware",
+            "covers": ["devices.touch"],
+            "by": "Anton",
+            "date": "2026-11-18",
+            "notes": "dgx_di_calibrate_measure, three rounds of nine targets: the touches 10.6 pixels off on average and 18 at worst without the calibration, 4.9 and 9 with it; the panel lies under the display as the display does."
+        },
         "start": {
             "level": "hardware",
-            "covers": ["devices.touch", "devices.sound"],
+            "covers": ["devices.sound"],
             "by": "log of hello_board",
             "date": "2026-11-18",
             "result": "pending",
-            "notes": "The GT911 answers: product 911, config 250, 5 fingers; the ES8311 opens at 22050 Hz. Touch and sound not judged."
+            "notes": "The ES8311 opens at 22050 Hz. No speaker is on CN1, so nothing was heard."
         },
         "radio": {
             "level": "hardware",
@@ -246,16 +253,32 @@
                 "calibrations": [
                     {
                         "rule": "the newest",
-                        "measured": false,
-                        "notes": "A placeholder: the touch taken as the glass, pixel for pixel, as the BSP of Guition gives it 480 x 800. Measure the board with dgx_di_calibrate_measure and give the log to tools/board_calibration.py.",
+                        "measured_with": {"esp-idf/jef-sure/dgx-di": "0.1.6", "esp-idf/jef-sure/dgx": "0.11.5"},
+                        "notes": "The places are the medians of the touches in the log.",
                         "x_max": 479,
                         "y_max": 799,
                         "width": 480,
                         "height": 800,
-                        "left_up": {"meant": [48, 48], "device": [48, 48]},
-                        "right_up": {"meant": [431, 48], "device": [431, 48]},
-                        "left_down": {"meant": [48, 751], "device": [48, 751]},
-                        "right_down": {"meant": [431, 751], "device": [431, 751]}
+                        "left_up": {"meant": [48, 48], "device": [49, 59]},
+                        "right_up": {"meant": [431, 48], "device": [429, 46]},
+                        "left_down": {"meant": [48, 751], "device": [54, 761]},
+                        "right_down": {"meant": [431, 751], "device": [421, 764]},
+                        "up": {"meant": [240, 48], "device": [237, 66]},
+                        "down": {"meant": [240, 751], "device": [231, 768]},
+                        "left": {"meant": [48, 400], "device": [53, 404]},
+                        "right": {"meant": [431, 400], "device": [424, 407]},
+                        "middle": {"meant": [240, 400], "device": [239, 412]},
+                        "libraries": {
+                            "esp-idf/jef-sure/dgx-di": {
+                                "rounds": 3,
+                                "blink_ms": 0,
+                                "gap_ms": 0,
+                                "off_tenths": 106,
+                                "worst_tenths": 180,
+                                "left_tenths": 49,
+                                "left_worst_tenths": 90
+                            }
+                        }
                     }
                 ]
             },

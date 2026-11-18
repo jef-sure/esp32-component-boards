@@ -44,6 +44,9 @@ def knots(text, name):
 
 
 def parse(text):
+    # dgx_di_calibrate_measure logs the calibration of the rounds so far after each round: the last is of them all
+    last = text.rfind("{.version")
+    text = text[last:] if last >= 0 else text
     affine = re.search(r"\.affine\s*=\s*\{([^{}]*)\}", text)
     if not affine:
         raise SystemExit("no .affine in the text")
@@ -101,6 +104,11 @@ def entry_of(cal, text):
     return out
 
 
+def with_measured(calibrations, entry):
+    """The entries of a touch with a new measurement last: it takes the place of a placeholder, which was never one."""
+    return [kept for kept in calibrations if kept.get("measured", True)] + [entry]
+
+
 def main():
     if len(sys.argv) < 2:
         raise SystemExit(__doc__)
@@ -112,7 +120,8 @@ def main():
     measured = dict(arg.split("=", 1) for arg in sys.argv[3:])
     text = sys.stdin.read()
     head = {"rule": "the newest", **({"measured_with": measured} if measured else {})}
-    board["devices"][touch].setdefault("config", {}).setdefault("calibrations", []).append({**head, **entry_of(parse(text), text)})
+    config = board["devices"][touch].setdefault("config", {})
+    config["calibrations"] = with_measured(config.get("calibrations") or [], {**head, **entry_of(parse(text), text)})
     path.write_text(resolve.dump(board) + "\n")
     print(f"{path.relative_to(ROOT)}: the calibration of {touch} written; now tools/boards_gen.py --all")
     return 0

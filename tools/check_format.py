@@ -709,6 +709,24 @@ def activity_problems():
     return problems
 
 
+def calibration_problems():
+    """tools/board_calibration.py on the log of a measurement of three rounds, of the JC4880P443C: the places are the
+    medians of all the touches, the figures those of the last calibration logged, and a placeholder gives way."""
+    import board_calibration
+    text = (TESTS / "calibration_jc4880p443c.log").read_text()
+    cal = board_calibration.parse(text)
+    entry = board_calibration.entry_of(cal, text)
+    problems = []
+    if cal["rounds"] != 3 or entry["libraries"]["esp-idf/jef-sure/dgx-di"]["off_tenths"] != 106:
+        problems.append(f"board_calibration.py takes a calibration of {cal['rounds']} rounds, not the last of 3")
+    if entry["left_up"]["device"] != [49, 59] or entry["notes"] != board_calibration.TOUCHES:
+        problems.append(f"board_calibration.py: left_up is {entry['left_up']['device']}, not the median [49, 59] of the three touches")
+    kept = board_calibration.with_measured([{"measured": False, "x_max": 479}, {"x_max": 1}], entry)
+    if [item.get("measured", True) for item in kept] != [True, True] or kept[-1] is not entry:
+        problems.append("board_calibration.py keeps a placeholder beside a measurement")
+    return problems
+
+
 def unrelated_problems():
     """In a folder that is neither empty nor a program of ESP-IDF the server answers MCP with no tools; an empty folder and a
     program get them."""
@@ -1140,6 +1158,7 @@ def main():
     problems += bridge_problems()
     problems += serve_problems()
     problems += unrelated_problems()
+    problems += calibration_problems()
     problems += activity_problems()
     problems += library_list_problems()
     problems += audit_changes_wrong()

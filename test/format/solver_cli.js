@@ -81,8 +81,10 @@ for (const name of names) {
     const given = read(path.join(CASES, name));
     const prices = Object.entries(given.prices || {}).map(([board, range]) => [board, catalog.boards[board].price]);
     for (const [board, range] of Object.entries(given.prices || {})) catalog.boards[board].price = { shop: { shop: 'test', currency: 'EUR', range, date: '2026-11-01', source: 'the case' } };
-    const kept = Object.keys(given.change || {}).map((board) => [board, catalog.boards[board]]);
-    for (const [board, patch] of Object.entries(given.change || {})) catalog.boards[board] = loader.merge(structuredClone(catalog.boards[board]), patch);
+    // a change goes to the catalog the case is solved over: the one with imported/ behind it, for a case that says so
+    const changed = given.imported ? wider : catalog;
+    const kept = Object.keys(given.change || {}).map((board) => [board, changed.boards[board]]);
+    for (const [board, patch] of Object.entries(given.change || {})) changed.boards[board] = loader.merge(structuredClone(changed.boards[board]), patch);
     const added = modulesOf(given);
     Object.assign(catalog.modules, added);
     const keptRates = { ...rates };
@@ -213,7 +215,7 @@ for (const name of names) {
     for (const module of Object.keys(added)) delete catalog.modules[module];
     Object.assign(rates, keptRates);
     for (const [board, price] of prices) catalog.boards[board].price = price;
-    for (const [board, doc] of kept) catalog.boards[board] = doc;
+    for (const [board, doc] of kept) changed.boards[board] = doc;
     // a module of a case is not in the catalog the generator reads
     if (!given.modules && !given.imported) for (const kit of fit) if (kit.project && !projects.has(JSON.stringify(kit.project))) projects.set(JSON.stringify(kit.project), kit.project);
 }

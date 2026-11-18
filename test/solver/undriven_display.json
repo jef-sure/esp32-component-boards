@@ -1,15 +1,26 @@
 {
-    "title": "A display whose chip no library of the catalog drives stays a display of the board, and the kit says the program starts it and the touch over it",
+    "title": "A display whose chip no library names, as an EK79007 of the imported data (with the kind and the orientation its record lacks), stays a display of the board, and the kit says the program starts it and the touch over it",
+    "imported": true,
     "answers": {
         "display": "graphics",
         "touch": true
     },
-    "says": "no library of the catalog starts the ST7701S yet, so the component starts neither it nor touch",
-    "fit": [
-        "cyd_s028r",
-        "jc1060p470c",
-        "jc4827w543c",
-        "jc4880p443c",
-        "jc8012p4a1c"
-    ]
+    "change": {
+        "jc4880p443c": {
+            "devices": {
+                "lcd": {
+                    "chip": "ek79007",
+                    "config": {
+                        "kind": "graphics"
+                    },
+                    "controls": {
+                        "orientation": {
+                            "how": "driver"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "says": "no library of the catalog starts the ek79007 yet, so the component starts neither it nor touch"
 }

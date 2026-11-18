@@ -33,3 +33,9 @@ struct board_display_table {
     int                               count;
 };
 extern const struct board_display_table board_display_table;
+
+#if BOARDS_VERSION_JEF_SURE__DGX >= BOARDS_VERSION(0, 11, 1)
+/* dgx_screen_orientation(), which turns every display since DGX 0.11.1, in the form orientation of a panel takes: a driver
+ * with no call of its own to turn it, as the ST7701, is turned by this, and its error goes to the log. */
+void board_glue_screen_orientation(dgx_screen_t *scr, dgx_orientation_t dir_x, dgx_orientation_t dir_y, bool swap_xy);
+#endif

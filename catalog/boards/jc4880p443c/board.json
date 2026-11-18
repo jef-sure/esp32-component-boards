@@ -32,13 +32,13 @@
             "covers": ["devices.lcd", "buses.dsi"],
             "by": "Anton, by eye",
             "date": "2026-11-18",
-            "notes": "A DGX driver of the ST7701 not released yet, in the session of DGX: frame rings with the glass equal to the frame buffer, colors at 16 bits in RGB order, eight orientations, two lanes at 1000 Mbit/s, the reset on GPIO 5 and the backlight on GPIO 23 off for a second. This component does not start the display yet."
+            "notes": "The driver of the ST7701 of DGX before its release as 0.11.5: frame rings with the glass equal to the frame buffer, colors at 16 bits in RGB order, eight orientations, two lanes at 1000 Mbit/s, the reset on GPIO 5 and the backlight on GPIO 23 off for a second. Through this component it was not run yet."
         },
         "depth": {
             "level": "hardware",
             "covers": ["devices.lcd.config.depth_bits"],
             "values": [16, 24],
-            "by": "Anton, by eye, with the DGX driver of the ST7701 of DGX 0.11.5, not released yet: 24 bits a pixel seen right as well as 16",
+            "by": "Anton, by eye, with the DGX driver of the ST7701 of DGX before its release as 0.11.5: 24 bits a pixel seen right as well as 16",
             "date": "2026-11-18"
         },
         "touch_vendor": {
@@ -216,7 +216,26 @@
             "chip": "gt911",
             "on": {"i2c.i2c0": {}},
             "pins": {"rst": 22, "int": 21},
-            "config": {"over": "lcd", "x_max": 479, "y_max": 799},
+            "config": {
+                "over": "lcd",
+                "x_max": 479,
+                "y_max": 799,
+                "calibrations": [
+                    {
+                        "rule": "the newest",
+                        "measured": false,
+                        "notes": "A placeholder: the touch taken as the glass, pixel for pixel, as the BSP of Guition gives it 480 x 800. Measure the board with dgx_di_calibrate_measure and give the log to tools/board_calibration.py.",
+                        "x_max": 479,
+                        "y_max": 799,
+                        "width": 480,
+                        "height": 800,
+                        "left_up": {"meant": [48, 48], "device": [48, 48]},
+                        "right_up": {"meant": [431, 48], "device": [431, 48]},
+                        "left_down": {"meant": [48, 751], "device": [48, 751]},
+                        "right_down": {"meant": [431, 751], "device": [431, 751]}
+                    }
+                ]
+            },
             "notes": "On FPC1 with the display: TOUCH_RST contact 25, TOUCH_INT contact 28, the I2C on 26 and 27 with 5K1 to 3.3 V."
         },
         "sound": {

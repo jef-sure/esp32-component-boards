@@ -296,6 +296,11 @@ def ethernet_part(name, device, buses):
             "reset_us": defaults.get("reset_us", 0), "after_reset_ms": defaults.get("after_reset_ms", 0), **started}
 
 
+def named_by_a_library(chip):
+    """Whether a record of the catalog has the chip, at any version: a build pinned to a version before it came is not asked."""
+    return any(chip in (record.get("chips") or {}) for record in resolve.all_libraries(tuple(resolve.ROOTS)).values())
+
+
 def startable(device):
     """Whether the library the resolver chose for a device has an adapter for its chip."""
     return bool(((device.get("libraries") or {}).get(device.get("library") or "") or {}).get("adapter"))
@@ -331,8 +336,9 @@ def parts_of(resolved):
         classes = device["classes"]
         if device.get("used") is False:
             board["kept"][name] = kept_numbers(device)
-        elif "display" in classes and not module and not startable(device) and not device.get("libraries"):
-            # described, and no library of the catalog drives its chip yet: kept as data, and said, so a wrong chip is seen
+        elif "display" in classes and not module and not named_by_a_library(device.get("chip")):
+            # described, and no library of the catalog names its chip yet: kept as data, and said, so a wrong chip is seen. A
+            # library that has the chip only from a later version is no such case: the glue stops below that version.
             board["kept_notes"].append(f"{name} is kept as data: no library of the catalog starts a {device.get('chip')}")
             board["kept"][name] = kept_numbers(device)
         elif "display" in classes:
@@ -853,6 +859,17 @@ def c_aims(cal):
     return [f"{{.meant_x = {p['meant'][0]}, .meant_y = {p['meant'][1]}, .x = {p['device'][0]}, .y = {p['device'][1]}}}" for p in places]
 
 
+# A call of a library that returns its error, in the form orientation of a panel takes: the adapter of that library wraps it
+# and logs the error (adapters/jef-sure__dgx/board_display.h).
+WRAPPED_CALLS = {"dgx_screen_orientation": "board_glue_screen_orientation"}
+
+
+def turned_by(entry):
+    """What the table of a panel calls to turn it: the call of its driver, or the wrapper of a call that returns its error."""
+    call = ((entry.get("controls") or {}).get("orientation") or {}).get("call", "NULL")
+    return WRAPPED_CALLS.get(call, call)
+
+
 def c_gpio(num):
     return "GPIO_NUM_NC" if num is None else f"GPIO_NUM_{num}"
 
@@ -1067,7 +1084,7 @@ def glue_of(board):
             light = backlight if lit_low or any(step.get("line") == "backlight" for step in entry.get("setup", ())) else "GPIO_NUM_NC"
             rows.append(f"    {{.name = \"{shown['name']}\", .glass_w = {panel['width']}, .glass_h = {panel['height']}, .mm_w = {whole_mm(panel.get('mm_w', 0))}, .mm_h = {whole_mm(panel.get('mm_h', 0))}, "
                         f".dir_x = {library['values']['dir_x'][orientation['x']]}, .dir_y = {library['values']['dir_y'][orientation['y']]}, .swap_xy = {'true' if orientation.get('swap', False) else 'false'}, "
-                        f".backlight = {light}, .backlight_on = {1 if shown.get('backlight_on_high', True) else 0}, {f'.host = &board_spi_{own}, ' if bus_name in shared else ''}{bus_field}, .screen = display{i}_screen, .orientation = {entry.get('controls', {}).get('orientation', {}).get('call', 'NULL')}}},")
+                        f".backlight = {light}, .backlight_on = {1 if shown.get('backlight_on_high', True) else 0}, {f'.host = &board_spi_{own}, ' if bus_name in shared else ''}{bus_field}, .screen = display{i}_screen, .orientation = {turned_by(entry)}}},")
         grouped = [f"    {{.name = \"{name}\", .group = true, .left = {place[group['left']]}, .right = {place[group['right']]}}}," for name, group in group_rows]
         table = grouped + rows if first else rows + grouped
         out("static const struct board_display_panel display_panels[] = {")
@@ -1246,6 +1263,17 @@ def stretches(record):
         inside = [version for version in known if (start is None or key(version) >= key(start)) and (end is None or key(version) < key(end))]
         if inside:
             found.append((start, inside[-1]))
+    return found
+
+
+def needed_by(board):
+    """The version of each library from which the devices of a board are there in it, as the ST7701 in DGX 0.11.5: the glue
+    stops below it, so CI builds the board with no older one."""
+    found = {}
+    for device in (board.get("devices") or {}).values():
+        since = device.get("library_from")
+        if since and (device["library"] not in found or resolve.version_key(since) > resolve.version_key(found[device["library"]])):
+            found[device["library"]] = since
     return found
 
 
@@ -1661,7 +1689,8 @@ def gen_workflow_boards(boards):
 def gen_workflow_window(boards):
     """The entries of the matrix of the job that builds each board with the older versions its libraries take."""
     entries = [f'          - {{board: {board["name"]}, library: {record["owner"]}/{record["name"]}, version: "{version}"}}'
-               for board in boards for record in used_libraries(board).values() for version in tried_versions(record)]
+               for board in boards for name, record in used_libraries(board).items() for version in tried_versions(record)
+               if resolve.version_key(version) >= resolve.version_key(needed_by(board).get(name, "0.0.0"))]
     return "\n".join([WINDOW_BEGIN, *entries, WINDOW_END])
 
 

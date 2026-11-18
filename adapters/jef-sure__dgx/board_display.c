@@ -14,6 +14,14 @@ _Static_assert((int)DgxScreenLeftRight == BOARD_DIR_FORWARD && (int)DgxScreenTop
                    (int)DgxScreenBottomTop == BOARD_DIR_BACKWARD,
                "dir_x and dir_y of boards.h are passed to DGX as they are");
 
+#if BOARDS_VERSION_JEF_SURE__DGX >= BOARDS_VERSION(0, 11, 1)
+void board_glue_screen_orientation(dgx_screen_t *scr, dgx_orientation_t dir_x, dgx_orientation_t dir_y, bool swap_xy)
+{
+    esp_err_t err = dgx_screen_orientation(scr, dir_x, dir_y, swap_xy);
+    if (err != ESP_OK) ESP_LOGE(TAG, "dgx_screen_orientation: %s", esp_err_to_name(err));
+}
+#endif
+
 static void keep_orientation(const struct board_display_panel *panel, struct board_display *d, int dir_x, int dir_y, bool swap_xy)
 {
     d->dir_x   = dir_x;

@@ -3,13 +3,17 @@
 ## 0.2.2 (not released yet)
 
 - The Guition JC4880P443C, a 4.3-inch 480x800 ST7701S on MIPI-DSI with GT911 touch, ES8311 sound and the ESP32-C6 of the
-  module JC-ESP32P4-M3, from the schematic of its archive: its sound, button and radio start; its display and touch are
-  data until a library of the catalog drives the ST7701, and the table of the README says so. Built on ESP-IDF 5.5.5 and
-  6.1, not flashed with this component. The record imported from guition_boards 0.2.2 is gone: it gave the touch of the
+  module JC-ESP32P4-M3, from the schematic of its archive. Its display starts through DGX 0.11.5, the first with the
+  ST7701S, with two frame buffers; a build with an older DGX stops at `#error`, and CI builds the board with no older
+  one. Its touch has a placeholder calibration until it is measured on the board. Built on ESP-IDF 5.5.5 and 6.1, not
+  flashed with this component. The record imported from guition_boards 0.2.2 is gone: it gave the touch of the
   10.1-inch board, a GSL3680 of 800 x 1280, 550 Mbit/s of DSI and 24 bits, where its own demos and the schematic give a
   GT911 of 480 x 800, 750 or 1000 Mbit/s and 16 bits.
-- A display whose chip no library of the catalog drives, and a touch over it, are kept as data: the glue does not start
+- A display whose chip no library of the catalog names, and a touch over it, are kept as data: the glue does not start
   them, `boards_gen.py` names them, and a kit with them says the program starts them.
+- The record of DGX describes 0.11.5: the ST7701S, turned by `dgx_screen_orientation()`, which the adapter of DGX wraps
+  for the table of a panel. CI builds a board with the older versions of a library only from the version its devices
+  need.
 - Ethernet: `board_ethernet_start()` starts the IP101 beside the MAC of the ESP32-P4-ETH, the ESP32-P4-POE-ETH and the
   JC1060P470C by esp_eth of ESP-IDF, with the generic PHY driver and the reset times of the IP101 driver of ESP-IDF
   5.5, and makes an interface of esp_netif that takes its address by DHCP. The device is `ip101` of the catalog, and its

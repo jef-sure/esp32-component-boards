@@ -7,12 +7,23 @@
  */
 #include "boards.h"
 #include "board_glue.h"
+/* jef-sure/dgx before 0.11.5: st7701: no library this component can start it with: none in the catalog */
+#if BOARDS_VERSION_JEF_SURE__DGX < BOARDS_VERSION(0, 11, 5)
+#error "jc4880p443c needs jef-sure/dgx 0.11.5 or later"
+#endif
 
 #include "sdkconfig.h"
 
+#include "board_display.h"
 #include "board_radio_esp_hosted.h"
 #include "board_sound_es8311.h"
+#include "board_touch.h"
+#include "board_touch_gt911.h"
+#include "board_touch_lcd.h"
+#include "board_touch_spi.h"
+#include "bus/dgx_dsi_esp32.h"
 #include "driver/i2s_std.h"
+#include "drivers/st7701.h"
 
 /* Guition JC4880P443C: 4.3-inch 480x800 ST7701S on MIPI-DSI, GT911 touch, ES8311 sound: an ESP32-P4 with Wi-Fi and BLE in an ESP32-C6 on the same module. */
 
@@ -25,7 +36,7 @@ static const struct board_i2s_bus board_i2s_i2s0 = {.port = I2S_NUM_0, .mclk = G
 /* Every bus of the board, its numbers by name: the kinds the component sets up and the
  * kinds it only keeps for the program, for a program that sets its own hardware up on the
  * board's wiring instead of copying pins. */
-static const struct board_bus_field board_bus_fields[] = {{"dsi.dsi0", "lane_mbps", 1000}, {"dsi.dsi0", "lanes", 2}, {"dsi.dsi0", "phy_ldo_chan", 3}, {"dsi.dsi0", "phy_ldo_mv", 2500}, {"csi.csi0", "lanes", 2}, {"csi.csi0", "phy_ldo_chan", 3}, {"csi.csi0", "phy_ldo_mv", 2500}, {"i2c.i2c0", "scl", 8}, {"i2c.i2c0", "sda", 7}, {"i2s.i2s0", "bclk", 12}, {"i2s.i2s0", "din", 48}, {"i2s.i2s0", "dout", 9}, {"i2s.i2s0", "mclk", 13}, {"i2s.i2s0", "ws", 10}, {"sdio.sdio0", "clk", 18}, {"sdio.sdio0", "cmd", 19}, {"sdio.sdio0", "d0", 14}, {"sdio.sdio0", "d1", 15}, {"sdio.sdio0", "d2", 16}, {"sdio.sdio0", "d3", 17}, {"sdio.sdio0", "reset", 54}, {"uart.uart0", "rx", 38}, {"uart.uart0", "tx", 37}, {"uart.uart1", "rx", 27}, {"uart.uart1", "tx", 26}, {"sdmmc.sdmmc0", "clk", 43}, {"sdmmc.sdmmc0", "cmd", 44}, {"sdmmc.sdmmc0", "d0", 39}, {"sdmmc.sdmmc0", "d1", 40}, {"sdmmc.sdmmc0", "d2", 41}, {"sdmmc.sdmmc0", "d3", 42}, {"lcd", "backlight", 23}, {"lcd", "rst", 5}, {"rs485", "port", 1}, {"battery", "in", 53}, {"touch", "int", 21}, {"touch", "port", 0}, {"touch", "rst", 22}};
+static const struct board_bus_field board_bus_fields[] = {{"dsi.dsi0", "lane_mbps", 1000}, {"dsi.dsi0", "lanes", 2}, {"dsi.dsi0", "phy_ldo_chan", 3}, {"dsi.dsi0", "phy_ldo_mv", 2500}, {"csi.csi0", "lanes", 2}, {"csi.csi0", "phy_ldo_chan", 3}, {"csi.csi0", "phy_ldo_mv", 2500}, {"i2c.i2c0", "scl", 8}, {"i2c.i2c0", "sda", 7}, {"i2s.i2s0", "bclk", 12}, {"i2s.i2s0", "din", 48}, {"i2s.i2s0", "dout", 9}, {"i2s.i2s0", "mclk", 13}, {"i2s.i2s0", "ws", 10}, {"sdio.sdio0", "clk", 18}, {"sdio.sdio0", "cmd", 19}, {"sdio.sdio0", "d0", 14}, {"sdio.sdio0", "d1", 15}, {"sdio.sdio0", "d2", 16}, {"sdio.sdio0", "d3", 17}, {"sdio.sdio0", "reset", 54}, {"uart.uart0", "rx", 38}, {"uart.uart0", "tx", 37}, {"uart.uart1", "rx", 27}, {"uart.uart1", "tx", 26}, {"sdmmc.sdmmc0", "clk", 43}, {"sdmmc.sdmmc0", "cmd", 44}, {"sdmmc.sdmmc0", "d0", 39}, {"sdmmc.sdmmc0", "d1", 40}, {"sdmmc.sdmmc0", "d2", 41}, {"sdmmc.sdmmc0", "d3", 42}, {"rs485", "port", 1}, {"battery", "in", 53}};
 const struct board_bus_table board_bus_table = {.fields = board_bus_fields, .count = sizeof(board_bus_fields) / sizeof(board_bus_fields[0])};
 
 const struct board_spi_table board_spi_table = {.count = 0};
@@ -33,7 +44,39 @@ const struct board_spi_table board_spi_table = {.count = 0};
 /* The board's I2C buses by port: board_glue_i2c makes the master of one at the first ask. */
 const struct board_i2c_table board_i2c_table = {.buses = board_i2c_buses, .count = sizeof(board_i2c_buses) / sizeof(board_i2c_buses[0])};
 
-const struct board_touch_table board_touch_table = {.count = 0};
+/* lcd: a 480x800 st7701 on dsi.dsi0. */
+static dgx_bus_protocols_t *display0_bus(void)
+{
+    return dgx_dsi_init(0, 2, 1000, 3, 2500);
+}
+
+static dgx_screen_t *display0_screen(dgx_bus_protocols_t *bus)
+{
+    return dgx_st7701_init(bus, GPIO_NUM_5, GPIO_NUM_23, 16, DgxScreenRGB, DgxDsiTwoFrames);
+}
+
+static const struct board_display_panel display_panels[] = {
+    {.name = "lcd", .glass_w = 480, .glass_h = 800, .mm_w = 56, .mm_h = 94, .dir_x = DgxScreenLeftRight, .dir_y = DgxScreenTopBottom, .swap_xy = false, .backlight = GPIO_NUM_NC, .backlight_on = 1, .bus = display0_bus, .screen = display0_screen, .orientation = board_glue_screen_orientation},
+};
+static struct board_display_started displays_started[1];
+const struct board_display_table board_display_table = {.panels = display_panels, .started = displays_started, .count = 1};
+
+/* touch: gt911 on i2c.i2c0, the calibration of its measured board. */
+/* The calibration below is a placeholder, not measured on a board: the touch works, only not
+ * straight; board_touch_start says so. Measure the board (dgx_di_calibrate_measure) and put the
+ * numbers in the data. */
+static const dgx_di_aim_t touch0_aims[] = {{.meant_x = 48, .meant_y = 48, .x = 48, .y = 48}, {.meant_x = 431, .meant_y = 48, .x = 431, .y = 48}, {.meant_x = 48, .meant_y = 751, .x = 48, .y = 751}, {.meant_x = 431, .meant_y = 751, .x = 431, .y = 751}};
+static const struct board_touch_calibration touch0_calibrated = {.aims = touch0_aims, .count = 4, .width = 480, .height = 800, .blink_ms = 0, .gap_ms = 0, .placeholder = true};
+static const struct board_touch_panel touch0_panel = {.x_max = 480, .y_max = 800, .rst = GPIO_NUM_22, .irq = GPIO_NUM_21, .i2c_port = I2C_NUM_0, .fingers = 5};
+static dgx_di_esp_lcd_touch_t touch0_device;
+static const uint8_t touch0_addresses[] = {0x5d, 0x14};
+static const struct board_touch_gt911 touch0_driver = {.panel = &touch0_panel, .calibrated = &touch0_calibrated, .device = &touch0_device, .addresses = touch0_addresses, .address_count = 2, .i2c_hz = 400000};
+
+static const struct board_touch_entry touch_entries[] = {{.name = "touch", .over = "lcd", .start = board_glue_touch_gt911_start, .gt911 = &touch0_driver}};
+static struct board_touch touches_started[1];
+static struct board_touch_slot touch_slots[1];
+const struct board_touch_slots board_touch_slots = {.slots = touch_slots, .count = 1};
+const struct board_touch_table board_touch_table = {.entries = touch_entries, .started = touches_started, .count = 1};
 
 /* sound: es8311 at 22050 Hz. */
 static const struct board_sound_es8311 sound0_es8311 = {.i2s = &board_i2s_i2s0, .i2c_port = I2C_NUM_0, .address = 0x18, .pa = GPIO_NUM_11,

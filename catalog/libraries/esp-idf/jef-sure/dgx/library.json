@@ -12,7 +12,7 @@
         {"via": "registry"},
         {"via": "git", "url": "https://github.com/jef-sure/esp32-component-dgx.git", "ref": "{version}"}
     ],
-    "described": "0.11.0",
+    "described": "0.11.5",
     "description": "Graphics on displays of SPI, QSPI, 8-bit parallel, MIPI-DSI and I2C, with its own panel drivers.",
     "values": {
         "color_order": {"rgb": "DgxScreenRGB", "bgr": "DgxScreenBGR"},
@@ -433,6 +433,30 @@
                 }
             ]
         },
+        "st7701": {
+            "header": "drivers/st7701.h",
+            "on": ["dsi"],
+            "select": ["DGX_ENABLE_ST7701"],
+            "init": [
+                {
+                    "call": "dgx_st7701_init",
+                    "args": ["{bus}", "{rst}", "{backlight}", "{depth}", "{color}", "DgxDsiTwoFrames"],
+                    "returns": "screen",
+                    "ok": {"not": "NULL"}
+                }
+            ],
+            "supports": {"depth_bits": [16, 24]},
+            "controls": {
+                "orientation": {
+                    "call": "dgx_screen_orientation",
+                    "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
+                    "ok": {"equals": "ESP_OK"}
+                }
+            },
+            "setup": [{"control": "orientation"}],
+            "adapter": {"kind": "panel"},
+            "notes": "The 4.3-inch 480x800 glass of the Guition JC4880P443C, with the commands its factory firmware sends; only the MIPI-DSI kind of the controller. It has no calls of its own: dgx_screen_orientation(), dgx_screen_backlight() and dgx_screen_display() turn and switch it. Two frame buffers: one tears a moving picture, and at 24 bits the measure of that board asks for two."
+        },
         "st7789": {
             "header": "drivers/st7789.h",
             "on": ["spi", "p8"],
@@ -618,7 +642,7 @@
         "version": ">=0.10.12,<0.12.0",
         "symbol": "BOARD_DISPLAY_GRAPHICS",
         "requires": ["esp_driver_gpio"],
-        "notes": "0.10.0 is not in the registry. 0.10.8 is the first that builds for the linux target of ESP-IDF: the window of the board host; 0.10.9 turns its glass as the board is held, 0.10.10 gives its mouse, 0.10.11 its keys and a window on no bus. 0.10.12 turns the SSD1306, SSD1309 and SH1106. 0.10.13 draws straight segments by the pen, 0.10.14 a filled circle with a soft edge and gives a screen its user_data. 0.10.16 has the 1.14-inch glass of the ST7789 and the NV3041A at 18 bits, 0.10.17 the SSD1680 of e-paper, whose glue calls dgx_ssd1680_init. 0.11.0 takes the backlight line in the constructor of every display that has one and lights it once the display is set up; it has the 0.96-inch glass of the ST7735. The range starts at 0.10.12: src/ and adapters/ built with it, and with 0.10.17 and 0.11.0, in hello_board on cyd_s028r and jc8012p4a1c on 2026-11-14.",
+        "notes": "0.10.0 is not in the registry. 0.10.8 is the first that builds for the linux target of ESP-IDF: the window of the board host; 0.10.9 turns its glass as the board is held, 0.10.10 gives its mouse, 0.10.11 its keys and a window on no bus. 0.10.12 turns the SSD1306, SSD1309 and SH1106. 0.10.13 draws straight segments by the pen, 0.10.14 a filled circle with a soft edge and gives a screen its user_data. 0.10.16 has the 1.14-inch glass of the ST7789 and the NV3041A at 18 bits, 0.10.17 the SSD1680 of e-paper, whose glue calls dgx_ssd1680_init. 0.11.0 takes the backlight line in the constructor of every display that has one and lights it once the display is set up; it has the 0.96-inch glass of the ST7735. The range starts at 0.10.12: src/ and adapters/ built with it, and with 0.10.17 and 0.11.0, in hello_board on cyd_s028r and jc8012p4a1c on 2026-11-14. 0.11.5 has the ST7701S of the 4.3-inch JC4880P443C, which turns only by dgx_screen_orientation(), the call of every display since 0.11.1.",
         "headers": ["board_display.h"],
         "public": "boards_dgx.h",
         "sources": {"BOARD_DISPLAY_GRAPHICS": ["board_display.c"]}
@@ -691,6 +715,14 @@
             "notes": "0.11.1 on the 0.96-inch 80x160 module on an ESP32: display off and on seen; eight orientations and the backlight seen with 0.11.0.",
             "date": "2026-11-15"
         },
+        "st7701": {
+            "level": "hardware",
+            "covers": ["chips.st7701"],
+            "by": "the author of the library, on the bench",
+            "source": "CHANGES.md of DGX, 0.11.5",
+            "notes": "On the JC4880P443C, seen by eye at 16 and 24 bits: the frame on the edge of the glass, the colors, all eight orientations and the backlight; one frame buffer only, two were not run on that board.",
+            "date": "2026-11-18"
+        },
         "ssd1306": {
             "level": "hardware",
             "covers": ["chips.ssd1306"],
@@ -738,9 +770,15 @@
             "source": "notes of the dotview clock moved onto boards, its lock in dgx-bench",
             "notes": "0.10.6 in the dotview clock, two displays on a NodeMCU-P32S: they work after the y direction was flipped; who looked is not written.",
             "date": "2026-11-04"
+        },
+        "api_0_11_5": {
+            "level": "vendor-code",
+            "source": "include/drivers/st7701.h and include/dgx_screen.h of esp32-component-dgx 0.11.5 (3d5d223), and CHANGES.md from 0.11.1 to 0.11.5: nothing the record says changed but the ST7701S added; the calls named after a driver stay, called deprecated",
+            "date": "2026-11-18"
         }
     },
     "history": [
+        {"before": "0.11.5", "chips": {"st7701": null}},
         {
             "before": "0.11.0",
             "chips": {
@@ -944,6 +982,11 @@
         {"before": "0.5.0", "chips": {"jd9165": null}, "transports": {"dsi": null}}
     ],
     "versions": {
+        "0.11.5": {"platforms": {"esp_idf": ">=5.2.0"}},
+        "0.11.4": {"platforms": {"esp_idf": ">=5.2.0"}},
+        "0.11.3": {"platforms": {"esp_idf": ">=5.2.0"}},
+        "0.11.2": {"platforms": {"esp_idf": ">=5.2.0"}},
+        "0.11.1": {"platforms": {"esp_idf": ">=5.2.0"}},
         "0.11.0": {"platforms": {"esp_idf": ">=5.2.0"}},
         "0.10.17": {"platforms": {"esp_idf": ">=5.2.0"}},
         "0.10.16": {"platforms": {"esp_idf": ">=5.2.0"}},

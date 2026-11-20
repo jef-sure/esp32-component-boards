@@ -25,7 +25,7 @@
 #include "driver/spi_common.h"
 #include "drivers/rgb_panel.h"
 
-/* Sunton ESP32-8048S070C: 7-inch 800x480 EK9716 on parallel RGB, GT911 touch, MAX98357 I2S amplifier; an ESP32-S3 with 16 MB flash and 8 MB octal PSRAM. */
+/* Sunton ESP32-8048S070C: 7-inch 800x480 EK9716 on parallel RGB, GT911 touch, an I2S amplifier; an ESP32-S3 with 16 MB flash and 8 MB octal PSRAM. */
 
 /* The buses of the board. */
 static const struct board_spi_bus board_spi_spi2 = {.host = SPI2_HOST, .mosi = GPIO_NUM_11, .miso = GPIO_NUM_13, .sclk = GPIO_NUM_12};

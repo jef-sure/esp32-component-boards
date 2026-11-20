@@ -2,14 +2,16 @@
 
 ## 0.2.2 (not released yet)
 
-- The Sunton ESP32-8048S070C, a 7-inch 800x480 glass on the parallel RGB bus of an ESP32-S3, with GT911 touch, a
-  MAX98357 amplifier on I2S and the BOOT button, from the schematic V1.1 of its archive. Its display starts through
+- The Sunton ESP32-8048S070C, a 7-inch 800x480 glass on the parallel RGB bus of an ESP32-S3, with GT911 touch, an
+  amplifier on I2S and the BOOT button, from the schematic V1.1 of its archive and photos of a board. Its display starts through
   DGX 0.11.6, the first with the RGB bus, at a pixel clock of 33 MHz with two frame buffers in PSRAM: a contributor of
   DGX saw the board hold 33 MHz with these pins, where the demos of the vendor run 12 and 16. A build with an older DGX
   stops at `#error`. The defaults of the board set `CONFIG_SPIRAM_XIP_FROM_PSRAM`, without which every write to the
   flash spoils the picture. The touch has a placeholder calibration until it is measured on the board. Built on
   ESP-IDF 5.5.5 and 6.1 with DGX 0.11.7 of the registry; not flashed. The record imported from guition_boards 0.2.2 is
-  gone: it named the controller of the glass ST7262, where the specification of the board names the EK9716.
+  gone: it named the controller of the glass ST7262, where the specification of the board names the EK9716. On the
+  photo of the back the amplifier has 8 pins, where the MAX98357 of the schematic has 16, and the resistive touch and
+  the resistor that joins INT of the touch to GPIO18 are not fitted.
 - The record of DGX describes 0.11.7: the parallel RGB bus of 0.11.6 and its glass of the ESP32-8048S070. The bus takes
   its lines in a structure: a transport of a library names its type and fields in `pins`, and the glue makes a constant
   of it. The index of chips names DGX for the EK9716 and for the ST7701S, which it has since 0.11.5.

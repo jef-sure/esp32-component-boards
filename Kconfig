@@ -36,8 +36,8 @@ config BOARD_SELECT_ESP32_8048S070C
     depends on IDF_TARGET_ESP32S3
     select DGX_ENABLE_RGB
     help
-        7-inch 800x480 EK9716 on parallel RGB, GT911 touch, MAX98357 I2S
-        amplifier; an ESP32-S3 with 16 MB flash and 8 MB octal PSRAM.
+        7-inch 800x480 EK9716 on parallel RGB, GT911 touch, an I2S amplifier; an
+        ESP32-S3 with 16 MB flash and 8 MB octal PSRAM.
 
 config BOARD_SELECT_ESP32_C3_OLED_042
     bool "ESP32-C3 with a 0.42-inch OLED: 72x40 SSD1306"

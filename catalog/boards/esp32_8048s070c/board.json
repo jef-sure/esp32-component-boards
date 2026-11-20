@@ -7,12 +7,12 @@
     "maker": "jingcai",
     "part": "ESP32-8048S070C",
     "revision": "V1.1",
-    "description": "7-inch 800x480 EK9716 on parallel RGB, GT911 touch, MAX98357 I2S amplifier; an ESP32-S3 with 16 MB flash and 8 MB octal PSRAM",
+    "description": "7-inch 800x480 EK9716 on parallel RGB, GT911 touch, an I2S amplifier; an ESP32-S3 with 16 MB flash and 8 MB octal PSRAM",
     "notes": [
         "The frame buffers of the display lie in PSRAM, and the interrupt that copies them to the panel runs on the core that made the display: call board_display_init from the task that draws. At 33 MHz the other core keeps off PSRAM; docs/rgb-display-en.md of DGX gives the clocks that hold.",
-        "GPIO18 is LRCLK of the amplifier through R27 and TP_INT of the touch through R17, both 0 ohm. The data gives it to the amplifier and leaves INT of the touch out, as the Arduino demo of the vendor does (TOUCH_GT911_INT -1). Whether both resistors are fitted is not seen.",
+        "GPIO18 is LRCLK of the amplifier through R27 and TP_INT of the touch through R17, both 0 ohm on the schematic. On the photo of a board R17 is empty and R27 fitted: INT of the touch reaches no GPIO, as the Arduino demo of the vendor has it (TOUCH_GT911_INT -1).",
         "GPIO0 is the BOOT button and BCLK of the amplifier through R28: while the sound plays the button reads the clock, and a press holds BCLK low. The board V1.0 had BCLK on GPIO19, the SDA of the touch.",
-        "The schematic also has a resistive touch, an XPT2046 on the lines of the TF slot: CS 38, CLK 12, DIN 11, DOUT 13, IRQ 18. The specification names only the board with no touch (ESP32-8048S070N) and the capacitive one; this data is the capacitive board.",
+        "The schematic also has a resistive touch, an XPT2046 on the lines of the TF slot: CS 38, CLK 12, DIN 11, DOUT 13, IRQ 18. On the photo of a board U1 is empty and its connector K1 fitted. The specification names only the board with no touch (ESP32-8048S070N) and the capacitive one; this data is the capacitive board.",
         "The reset of the panel goes to an RC circuit (R16, C35), not to a GPIO.",
         "GPIO19 and GPIO20, the USB of the chip, are the I2C of the touch: USB1 reaches the chip through the CH340C only."
     ],
@@ -22,6 +22,18 @@
         "psram_mb": 8,
         "psram_mhz": 80,
         "notes": "An ESP32-S3-WROOM-1 by the specification and the schematic, with 16 MB flash and 8 MB PSRAM; GPIO35 to GPIO37, the lines of octal PSRAM, are not wired."
+    },
+    "images": {
+        "front": {
+            "file": "front.webp",
+            "source": "a photo of the board, 2026-11-20, straightened, reflections on the glass removed, the height brought to the 181 x 108 mm of the specification",
+            "shows": "front"
+        },
+        "back": {
+            "file": "back.webp",
+            "source": "a photo of the board, 2026-11-20, straightened, the height brought to the 181 x 108 mm of the specification",
+            "shows": "back"
+        }
     },
     "checked": {
         "pins": {
@@ -69,6 +81,13 @@
             "covers": ["devices.touch"],
             "source": "touch.h of the demo 7_1_lvgl_music_gt911_7.0 of the vendor archive: a GT911 on SDA 19, SCL 20, RST 38, INT -1; HAL.h of the same demo: I2S DOUT 17, BCLK 0, LRC 18",
             "date": "2026-11-20"
+        },
+        "photo": {
+            "level": "hardware",
+            "covers": ["notes", "devices.sound.notes", "devices.s3_module", "connectors"],
+            "by": "a photo of the back of a board",
+            "date": "2026-11-20",
+            "notes": "R26 to R29 by U4 fitted, R17 empty, U1 empty. U4 has 8 pins, where the MAX98357 of the schematic has 16: its marking is not readable. The antenna of the module, a trace, lies at the edge of the board."
         }
     },
     "buses": {
@@ -166,10 +185,9 @@
         "sound": {
             "chip": "i2s_amp",
             "ref": "U4",
-            "part": "MAX98357",
             "on": {"i2s.i2s0": {}},
             "config": {"sample_rate": 22050},
-            "notes": "DIN GPIO17, LRCLK GPIO18, BCLK GPIO0, each through a 0 ohm resistor. GAIN is on ground. SD_MODE comes from VBUS through R29, whose value the schematic does not give. The speaker goes on P6."
+            "notes": "DIN GPIO17, LRCLK GPIO18, BCLK GPIO0, each through a 0 ohm resistor. The schematic names a MAX98357 with GAIN on ground and SD_MODE from VBUS through R29, whose value it does not give; on the photo of a board U4 has 8 pins, not the 16 of that chip. The speaker goes on P6."
         },
         "boot": {"class": "button", "pins": {"in": {"gpio": 0, "active": "low"}}},
         "sd": {"class": "storage", "ref": "TF1", "on": {"spi.spi2": {"cs": 10}}, "config": {"media": "microsd"}},

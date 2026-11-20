@@ -123,7 +123,7 @@ an SPI, I2C or I2S bus is a host or port of the chip: `spi.spi2` is its SPI2,
 | `i2s` | `bclk` and `ws`, or `clk` for PDM (`"nc"` for a PDM output with no clock line, into a filter); `mclk`, `dout`, `din` optional; `dout2`, `din2`..`din4` for more PDM lines |
 | `dsi` | `lanes`, `lane_mbps`, `phy_ldo_chan`, `phy_ldo_mv` |
 | `p8` | `d0`..`d7`, `wr`, `dc`, `hz`; `rd` optional |
-| `rgb` | `pclk`, `data` (a list); `de`, `vsync`, `hsync`, `hz` optional |
+| `rgb` | `pclk`, `data` (a list, the lowest bit first); `de`, `vsync`, `hsync`, `hz` optional. A display the component starts needs `hsync`, `vsync`, `hz` measured on the board, and a data line for each bit of a pixel |
 | `csi` | `lanes`; `lane_mbps`, `phy_ldo_chan`, `phy_ldo_mv` optional. The lanes have pins of their own |
 | `dvp` | `pclk`, `vsync`, `de`, `data` (8 to 16 lines); `hsync` optional |
 | `uart` | `tx`, `rx`; `rts`, `cts`, `baud` optional |
@@ -471,7 +471,9 @@ parameters (`controls`) and what it can do (`standards`, `modes`, `supports`, `l
 step is a `call`, a `control` applied or a `line` set: a step `"line": "backlight"` says the
 driver does not light it by itself. A backlight lit by a low level the glue lights too, as a driver
 that takes `{backlight}` lights it by a high one. `transports` says how the library sets a bus up:
-`init` creates it, `shared` joins one set up before.
+`init` creates it, `shared` joins one set up before. An `init` that takes its lines in a structure, as
+`dgx_rgb_init` does, names it in `pins`, its type and its fields: the glue makes a constant of it, `{pins}`
+in `args`.
 
 An operation not listed in `supports` is one the library does not do:
 `"mifare_classic": ["uid", "ndef_read"]` says it reads NDEF from such a card and does not write

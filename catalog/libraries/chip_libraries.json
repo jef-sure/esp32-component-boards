@@ -258,6 +258,7 @@
         "ds3234": ["arduino/solderedelectronics/soldered-ds3234-rtc"],
         "ds3502": ["arduino/adafruit/adafruit-ds3502", "arduino/robtillaart/ds3502"],
         "ek79007": ["esp-idf/espressif/esp_lcd_ek79007"],
+        "ek9716": ["esp-idf/jef-sure/dgx"],
         "emc2101": ["arduino/adafruit/adafruit-emc2101"],
         "ens160": [
             "arduino/adafruit/ens160---adafruit-fork",
@@ -748,7 +749,7 @@
         "ssd1680": ["esp-idf/jef-sure/dgx", "github/aivoprykk/esp_lcd_panel_ssd1680"],
         "st7262": ["arduino/iamfaraz/waveshare_st7262_lvgl"],
         "st7565r": ["esp-idf/jef-sure/dgx"],
-        "st7701": ["esp-idf/espressif/esp_lcd_st7701"],
+        "st7701": ["esp-idf/espressif/esp_lcd_st7701", "esp-idf/jef-sure/dgx"],
         "st7735": [
             "arduino/adafruit/adafruit-st7735-and-st7789-library",
             "arduino/gavinlyonsrepo/st7735_ltsm",

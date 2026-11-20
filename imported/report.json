@@ -23,7 +23,7 @@
             "license": "Apache-2.0"
         }
     },
-    "boards": 95,
+    "boards": 94,
     "chips": 43,
     "refused": {
         "esp_boards_esp32_ethernet_kit": ["rule gpio_one_owner: GPIO 0 has two owners: boot_button, rmii.eth0"],
@@ -72,6 +72,39 @@
             "GPIO 34: pack nothing, catalog ['light.in']",
             "GPIO 36: pack nothing, catalog ['touch.int']",
             "GPIO 39: pack ['spi_touch.miso_io_num'], catalog ['spi.spi3.miso']"
+        ],
+        "esp32_8048s070c": [
+            "GPIO 0: pack nothing, catalog ['i2s.i2s0.bclk', 'boot.in']",
+            "GPIO 1: pack ['display_lcd.data_gpio_nums[10]'], catalog ['rgb.rgb0.data10']",
+            "GPIO 2: pack ['gpio_backlight.pin'], catalog ['lcd.backlight']",
+            "GPIO 3: pack ['display_lcd.data_gpio_nums[7]'], catalog ['rgb.rgb0.data7']",
+            "GPIO 4: pack ['display_lcd.data_gpio_nums[4]'], catalog ['rgb.rgb0.data4']",
+            "GPIO 5: pack ['display_lcd.data_gpio_nums[3]'], catalog ['rgb.rgb0.data3']",
+            "GPIO 6: pack ['display_lcd.data_gpio_nums[2]'], catalog ['rgb.rgb0.data2']",
+            "GPIO 7: pack ['display_lcd.data_gpio_nums[1]'], catalog ['rgb.rgb0.data1']",
+            "GPIO 8: pack ['display_lcd.data_gpio_nums[8]'], catalog ['rgb.rgb0.data8']",
+            "GPIO 9: pack ['display_lcd.data_gpio_nums[5]'], catalog ['rgb.rgb0.data5']",
+            "GPIO 10: pack ['fs_sdcard.cs_gpio_num'], catalog ['sd.cs']",
+            "GPIO 11: pack ['spi_sdcard.mosi_io_num'], catalog ['spi.spi2.mosi']",
+            "GPIO 12: pack ['spi_sdcard.sclk_io_num'], catalog ['spi.spi2.sclk']",
+            "GPIO 13: pack ['spi_sdcard.miso_io_num'], catalog ['spi.spi2.miso']",
+            "GPIO 14: pack ['display_lcd.data_gpio_nums[11]'], catalog ['rgb.rgb0.data11']",
+            "GPIO 15: pack ['display_lcd.data_gpio_nums[0]'], catalog ['rgb.rgb0.data0']",
+            "GPIO 16: pack ['display_lcd.data_gpio_nums[9]'], catalog ['rgb.rgb0.data9']",
+            "GPIO 17: pack nothing, catalog ['i2s.i2s0.dout']",
+            "GPIO 18: pack nothing, catalog ['i2s.i2s0.ws']",
+            "GPIO 19: pack ['i2c_touch.sda'], catalog ['i2c.i2c0.sda']",
+            "GPIO 20: pack ['i2c_touch.scl'], catalog ['i2c.i2c0.scl']",
+            "GPIO 21: pack ['display_lcd.data_gpio_nums[12]'], catalog ['rgb.rgb0.data12']",
+            "GPIO 38: pack ['lcd_touch.rst_gpio_num'], catalog ['touch.rst']",
+            "GPIO 39: pack ['display_lcd.hsync_gpio_num'], catalog ['rgb.rgb0.hsync']",
+            "GPIO 40: pack ['display_lcd.vsync_gpio_num'], catalog ['rgb.rgb0.vsync']",
+            "GPIO 41: pack ['display_lcd.de_gpio_num'], catalog ['rgb.rgb0.de']",
+            "GPIO 42: pack ['display_lcd.pclk_gpio_num'], catalog ['rgb.rgb0.pclk']",
+            "GPIO 45: pack ['display_lcd.data_gpio_nums[15]'], catalog ['rgb.rgb0.data15']",
+            "GPIO 46: pack ['display_lcd.data_gpio_nums[6]'], catalog ['rgb.rgb0.data6']",
+            "GPIO 47: pack ['display_lcd.data_gpio_nums[13]'], catalog ['rgb.rgb0.data13']",
+            "GPIO 48: pack ['display_lcd.data_gpio_nums[14]'], catalog ['rgb.rgb0.data14']"
         ],
         "jc1060p470c": [
             "GPIO 0: pack nothing, catalog ['lcd.rst']",

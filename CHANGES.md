@@ -2,6 +2,19 @@
 
 ## 0.2.2 (not released yet)
 
+- The Sunton ESP32-8048S070C, a 7-inch 800x480 glass on the parallel RGB bus of an ESP32-S3, with GT911 touch, a
+  MAX98357 amplifier on I2S and the BOOT button, from the schematic V1.1 of its archive. Its display starts through
+  DGX 0.11.6, the first with the RGB bus, at a pixel clock of 33 MHz with two frame buffers in PSRAM: a contributor of
+  DGX saw the board hold 33 MHz with these pins, where the demos of the vendor run 12 and 16. A build with an older DGX
+  stops at `#error`. The defaults of the board set `CONFIG_SPIRAM_XIP_FROM_PSRAM`, without which every write to the
+  flash spoils the picture. The touch has a placeholder calibration until it is measured on the board. Built on
+  ESP-IDF 5.5.5 and 6.1 with DGX 0.11.7 of the registry; not flashed. The record imported from guition_boards 0.2.2 is
+  gone: it named the controller of the glass ST7262, where the specification of the board names the EK9716.
+- The record of DGX describes 0.11.7: the parallel RGB bus of 0.11.6 and its glass of the ESP32-8048S070. The bus takes
+  its lines in a structure: a transport of a library names its type and fields in `pins`, and the glue makes a constant
+  of it. The index of chips names DGX for the EK9716 and for the ST7701S, which it has since 0.11.5.
+- `tools/import_board_manager.py` compares the data lines of an RGB display of a pack with the catalog: it read only
+  single pins and said the pack had none of them.
 - The step of the flash that keeps the radio of an ESP32-P4 board at the esp_hosted of the build works on revision 3
   of the chip: its update program, which starts from the bootloader of the program, is built with the size of the L2
   cache of the program, and panicked before its first line with another. A radio too old to tell its version gets the

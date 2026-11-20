@@ -12,8 +12,8 @@
         {"via": "registry"},
         {"via": "git", "url": "https://github.com/jef-sure/esp32-component-dgx.git", "ref": "{version}"}
     ],
-    "described": "0.11.5",
-    "description": "Graphics on displays of SPI, QSPI, 8-bit parallel, MIPI-DSI and I2C, with its own panel drivers.",
+    "described": "0.11.7",
+    "description": "Graphics on displays of SPI, QSPI, 8-bit parallel, parallel RGB, MIPI-DSI and I2C, with its own panel drivers.",
     "values": {
         "color_order": {"rgb": "DgxScreenRGB", "bgr": "DgxScreenBGR"},
         "dir_x": {"left-right": "DgxScreenLeftRight", "right-left": "DgxScreenRightLeft"},
@@ -101,6 +101,24 @@
             },
             "defaults": {"lanes": 2, "lane_mbps": 750, "phy_ldo_chan": 3, "phy_ldo_mv": 2500}
         },
+        "rgb": {
+            "header": "bus/dgx_rgb_esp32.h",
+            "select": ["DGX_ENABLE_RGB"],
+            "pins": {
+                "type": "dgx_rgb_pins_t",
+                "fields": {
+                    "pclk": "{pclk}",
+                    "hsync": "{hsync}",
+                    "vsync": "{vsync}",
+                    "de": "{de}",
+                    "disp": "GPIO_NUM_NC",
+                    "data": "{data}"
+                }
+            },
+            "init": {"call": "dgx_rgb_init", "args": ["&{pins}", "{hz}"], "returns": "bus", "ok": {"not": "NULL"}},
+            "defaults": {"de": "GPIO_NUM_NC"},
+            "notes": "The 16 data lines of RGB565, blue from its lowest bit. The pixel clock is the board's, measured on it: the glass allows a range, the board holds what its PSRAM brings. The frame buffer lies in PSRAM; docs/rgb-display-en.md of DGX says what a program sets: the display made on the core that draws, the other core kept off PSRAM at 33 MHz, CONFIG_SPIRAM_XIP_FROM_PSRAM for a program that writes to the flash, CONFIG_LCD_RGB_RESTART_IN_VSYNC off."
+        },
         "i2c": {
             "header": "bus/dgx_i2c_esp32.h",
             "select": ["DGX_ENABLE_I2C"],
@@ -131,6 +149,38 @@
         }
     },
     "chips": {
+        "ek9716": {
+            "header": "drivers/rgb_panel.h",
+            "on": ["rgb"],
+            "select": ["DGX_ENABLE_RGB"],
+            "init": [
+                {
+                    "call": "dgx_rgb_panel_init",
+                    "args": ["{bus}", "{panel}", "{rst}", "{backlight}", "{depth}", "{color}", "DgxRgbTwoFrames"],
+                    "returns": "screen",
+                    "ok": {"not": "NULL"}
+                }
+            ],
+            "supports": {"depth_bits": [16]},
+            "controls": {
+                "orientation": {
+                    "call": "dgx_screen_orientation",
+                    "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
+                    "ok": {"equals": "ESP_OK"}
+                }
+            },
+            "setup": [{"control": "orientation"}],
+            "adapter": {"kind": "panel"},
+            "panels": [
+                {
+                    "width": 800,
+                    "height": 480,
+                    "value": "&dgx_rgb_panel_jc8048b070n",
+                    "notes": "the 7-inch JC8048B070N of the Sunton ESP32-8048S070, with the timing of the demo of its maker; its sheet allows a pixel clock of 29 to 38 MHz"
+                }
+            ],
+            "notes": "An RGB glass takes no commands: pins on the glass set its controller, so DGX describes the glass, not the controller, and another glass is another dgx_rgb_panel_t. The bus turns the picture, by dgx_screen_orientation(). Two frame buffers in PSRAM, 750 KB each at 800x480: a batch of drawing is shown whole, and a moving picture does not tear."
+        },
         "gc9a01": {
             "header": "drivers/gc9a01.h",
             "on": ["spi", "p8"],
@@ -642,7 +692,7 @@
         "version": ">=0.10.12,<0.12.0",
         "symbol": "BOARD_DISPLAY_GRAPHICS",
         "requires": ["esp_driver_gpio"],
-        "notes": "0.10.0 is not in the registry. 0.10.8 is the first that builds for the linux target of ESP-IDF: the window of the board host; 0.10.9 turns its glass as the board is held, 0.10.10 gives its mouse, 0.10.11 its keys and a window on no bus. 0.10.12 turns the SSD1306, SSD1309 and SH1106. 0.10.13 draws straight segments by the pen, 0.10.14 a filled circle with a soft edge and gives a screen its user_data. 0.10.16 has the 1.14-inch glass of the ST7789 and the NV3041A at 18 bits, 0.10.17 the SSD1680 of e-paper, whose glue calls dgx_ssd1680_init. 0.11.0 takes the backlight line in the constructor of every display that has one and lights it once the display is set up; it has the 0.96-inch glass of the ST7735. The range starts at 0.10.12: src/ and adapters/ built with it, and with 0.10.17 and 0.11.0, in hello_board on cyd_s028r and jc8012p4a1c on 2026-11-14. 0.11.5 has the ST7701S of the 4.3-inch JC4880P443C, which turns only by dgx_screen_orientation(), the call of every display since 0.11.1.",
+        "notes": "0.10.0 is not in the registry. 0.10.8 is the first that builds for the linux target of ESP-IDF: the window of the board host; 0.10.9 turns its glass as the board is held, 0.10.10 gives its mouse, 0.10.11 its keys and a window on no bus. 0.10.12 turns the SSD1306, SSD1309 and SH1106. 0.10.13 draws straight segments by the pen, 0.10.14 a filled circle with a soft edge and gives a screen its user_data. 0.10.16 has the 1.14-inch glass of the ST7789 and the NV3041A at 18 bits, 0.10.17 the SSD1680 of e-paper, whose glue calls dgx_ssd1680_init. 0.11.0 takes the backlight line in the constructor of every display that has one and lights it once the display is set up; it has the 0.96-inch glass of the ST7735. The range starts at 0.10.12: src/ and adapters/ built with it, and with 0.10.17 and 0.11.0, in hello_board on cyd_s028r and jc8012p4a1c on 2026-11-14. 0.11.5 has the ST7701S of the 4.3-inch JC4880P443C, which turns only by dgx_screen_orientation(), the call of every display since 0.11.1. 0.11.6 has the parallel RGB bus and the 7-inch glass of the Sunton ESP32-8048S070.",
         "headers": ["board_display.h"],
         "public": "boards_dgx.h",
         "sources": {"BOARD_DISPLAY_GRAPHICS": ["board_display.c"]}
@@ -775,9 +825,28 @@
             "level": "vendor-code",
             "source": "include/drivers/st7701.h and include/dgx_screen.h of esp32-component-dgx 0.11.5 (3d5d223), and CHANGES.md from 0.11.1 to 0.11.5: nothing the record says changed but the ST7701S added; the calls named after a driver stay, called deprecated",
             "date": "2026-11-18"
+        },
+        "api_0_11_6": {
+            "level": "vendor-code",
+            "source": "include/bus/dgx_rgb_esp32.h, include/drivers/rgb_panel.h, Kconfig and CHANGES.md of esp32-component-dgx 0.11.6 (a94f7f4), and git diff of include/ from 0.11.5: the RGB bus and the glass JC8048B070N added, no call the record names changed",
+            "date": "2026-11-20"
+        },
+        "api_0_11_7": {
+            "level": "vendor-code",
+            "source": "CHANGES.md of esp32-component-dgx 0.11.7 (16f95b3) and git diff from 0.11.6: one fix in the build of fonts; include/ and Kconfig the same",
+            "date": "2026-11-20"
+        },
+        "ek9716": {
+            "level": "hardware",
+            "covers": ["chips.ek9716"],
+            "by": "a contributor of DGX with the board; Anton saw the videos of the tests",
+            "source": "CHANGES.md and docs/rgb-display-en.md of DGX 0.11.6",
+            "notes": "On the Sunton ESP32-8048S070 with two frame buffers: the bus holds 33 MHz, 59.5 frames a second, while the processor draws as fast as it can, and a moving picture does not tear.",
+            "date": "2026-11-20"
         }
     },
     "history": [
+        {"before": "0.11.6", "chips": {"ek9716": null}, "transports": {"rgb": null}},
         {"before": "0.11.5", "chips": {"st7701": null}},
         {
             "before": "0.11.0",
@@ -982,6 +1051,8 @@
         {"before": "0.5.0", "chips": {"jd9165": null}, "transports": {"dsi": null}}
     ],
     "versions": {
+        "0.11.7": {"platforms": {"esp_idf": ">=5.2.0"}},
+        "0.11.6": {"platforms": {"esp_idf": ">=5.2.0"}},
         "0.11.5": {"platforms": {"esp_idf": ">=5.2.0"}},
         "0.11.4": {"platforms": {"esp_idf": ">=5.2.0"}},
         "0.11.3": {"platforms": {"esp_idf": ">=5.2.0"}},

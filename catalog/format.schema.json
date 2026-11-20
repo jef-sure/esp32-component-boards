@@ -1493,6 +1493,16 @@
         "requires": { "type": "array", "uniqueItems": true, "items": { "type": "string" } },
         "init": { "$ref": "#/$defs/libraryStep" },
         "shared": { "$ref": "#/$defs/libraryStep", "description": "On a bus set up before." },
+        "pins": {
+          "description": "The init takes the lines in a structure: the glue makes a constant of this type with these fields, a list of lines as an array, and {pins} in the args is its name.",
+          "type": "object",
+          "required": ["type", "fields"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "type": "string", "minLength": 1 },
+            "fields": { "type": "object", "minProperties": 1, "additionalProperties": { "type": "string" } }
+          }
+        },
         "defaults": { "type": "object" },
         "notes": { "$ref": "#/$defs/notes" }
       }

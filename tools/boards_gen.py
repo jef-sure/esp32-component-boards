@@ -105,10 +105,14 @@ def bus_of(board, bus_name):
     return (board.get("buses", {}).get(kind, {}) or {}).get(own) if own else None
 
 
+def fill(text, values):
+    """A text of a library with its {names} replaced by the values of this board."""
+    return re.sub(r"\{(\w+)\}", lambda m: str(values[m[1]]), text)
+
+
 def fill_call(step, values):
-    """A step of a library as a C call: its {names} replaced by the values of this board."""
-    args = [re.sub(r"\{(\w+)\}", lambda m: str(values[m[1]]), arg) for arg in step["args"]]
-    return f"{step['call']}({', '.join(args)})"
+    """A step of a library as a C call."""
+    return f"{step['call']}({', '.join(fill(arg, values) for arg in step['args'])})"
 
 
 def transport_of(display):
@@ -498,6 +502,14 @@ def read_board(path):
             elif kind == "dsi":
                 if not isinstance(bus.get("lanes"), int):
                     raise ValueError(f'the bus dsi.{own} lacks its "lanes"')
+            elif kind == "rgb":
+                for signal in ("pclk", "hsync", "vsync"):
+                    if not isinstance(bus.get(signal), int):
+                        raise ValueError(f'the bus rgb.{own} lacks its "{signal}" pin')
+                if bus.get("de") is not None and not isinstance(bus.get("de"), int):
+                    raise ValueError(f'the bus rgb.{own} has a de that is not a pin')
+                if not isinstance(bus.get("data"), list) or not all(isinstance(number(line), int) for line in bus["data"]):
+                    raise ValueError(f'the data of the bus rgb.{own} is a list of pins, the lowest bit first')
             elif kind == "p8":
                 for signal in ("d0", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "wr", "dc", "hz"):
                     if not isinstance(bus.get(signal), int):
@@ -544,7 +556,7 @@ def read_board(path):
         elif is_pixel(display):
             bus_name = display.get("bus", {}).get("bus")
             if not bus_name or bus_parts(bus_name)[0] not in display["entry"]["on"]:
-                raise ValueError('the display\'s bus is a name from buses: "spi.spi2", "qspi.spi2", "dsi.dsi0", "p8.i80", "i2c.i2c0"')
+                raise ValueError('the display\'s bus is a name from buses: "spi.spi2", "qspi.spi2", "dsi.dsi0", "rgb.rgb0", "p8.i80", "i2c.i2c0"')
             if bus_of(data, bus_name) is None:
                 raise ValueError(f'the display\'s bus "{bus_name}" is not among the board\'s buses')
             panel = display.get("panel")
@@ -587,9 +599,14 @@ def read_board(path):
                 for key in ("lane_mbps", "phy_ldo_chan", "phy_ldo_mv"):
                     if not isinstance(bus_of(data, bus_name).get(key), int):
                         raise ValueError(f'the bus {bus_name} of a panel lacks its "{key}"')
+            if kind == "rgb":
+                if not isinstance(bus_of(data, bus_name).get("hz"), int):
+                    raise ValueError(f'the bus {bus_name} of a panel lacks its "hz": the pixel clock is the board\'s, measured on it')
+                if len(bus_of(data, bus_name)["data"]) != depth:
+                    raise ValueError(f"the bus {bus_name} has {len(bus_of(data, bus_name)['data'])} data lines for {depth} bits a pixel: a pixel goes in one clock")
             if kind == "i2c" and i2c_address(display["bus"].get("address")) is None:
                 raise ValueError('a display on I2C needs its 7-bit address, e.g. "0x3C"')
-            for line in display["entry"]["supports"].get("lines") or {"spi": ("cs", "dc"), "qspi": ("cs",), "p8": ("cs",), "dsi": (), "i2c": ()}[kind]:
+            for line in display["entry"]["supports"].get("lines") or {"spi": ("cs", "dc"), "qspi": ("cs",), "p8": ("cs",), "dsi": (), "rgb": (), "i2c": ()}[kind]:
                 if line not in display["bus"]:
                     raise ValueError(f'the display lacks its "{line}" line')
         else:
@@ -874,6 +891,11 @@ def c_gpio(num):
     return "GPIO_NUM_NC" if num is None else f"GPIO_NUM_{num}"
 
 
+def c_lines(value):
+    """A line, or a list of them as the data lines of RGB come, in C."""
+    return f"{{{', '.join(c_gpio(number(item)) for item in value)}}}" if isinstance(value, list) else c_gpio(value)
+
+
 # The storage of DGX-DI each kind of touch panel is a device of, defined in the glue.
 TOUCH_DEVICES = {"gt911": "dgx_di_esp_lcd_touch_t", "esp_lcd_touch": "dgx_di_esp_lcd_touch_t", "gsl3680": "dgx_di_gsl3680_t"}
 
@@ -1057,14 +1079,19 @@ def glue_of(board):
                 out(f"    return {fill_call(transport['shared'], values)};")
                 bus_field = f".i2c_port = I2C_NUM_{port_of(own, 'i2c')}, .on_i2c = display{i}_bus"
             else:
-                out(f"static dgx_bus_protocols_t *display{i}_bus(void)")
-                out("{")
-                values = {**transport.get("defaults", {}), **{key: value if key in resolve.NOT_LINES else c_gpio(value) for key, value in bus.items()}, "host": f"{(own or '').upper()}_HOST"}
+                values = {**transport.get("defaults", {}), **{key: value if key in resolve.NOT_LINES - {"data"} else c_lines(value) for key, value in bus.items()}, "host": f"{(own or '').upper()}_HOST"}
                 own_select = "{cs}" in entry["init"][0]["args"]  # the driver of such a chip holds its select itself, so the bus has none
                 values.update({"dc": "GPIO_NUM_NC", **{line: c_gpio(db[line]) for line in ("cs", "dc") if line in db and not (own_select and line == "cs")}})
                 values.update({"hz": db["hz"]} if "hz" in db else {})  # the speed of a device goes before that of its bus
                 values.update({"mode": db["mode"]} if "mode" in db else {})
                 values.setdefault("cs", "GPIO_NUM_NC")
+                if "pins" in transport:
+                    # an init that takes its lines in a structure: a constant of it beside the function
+                    fields = ", ".join(f".{field} = {fill(text, values)}" for field, text in transport["pins"]["fields"].items())
+                    out(f"static const {transport['pins']['type']} display{i}_pins = {{{fields}}};")
+                    values["pins"] = f"display{i}_pins"
+                out(f"static dgx_bus_protocols_t *display{i}_bus(void)")
+                out("{")
                 out(f"    return {fill_call(transport['shared' if bus_name in shared else 'init'], values)};")
                 bus_field = f".bus = display{i}_bus"
             out("}")
@@ -1705,7 +1732,7 @@ def replace_between(text, begin, end, block, what):
 
 
 PARTS = {"en": ("display", "touch", "sound", "button"), "ru": ("дисплей", "тач", "звук", "кнопка")}
-BUS_NAMES = {"dsi": "MIPI-DSI", "qspi": "QSPI", "spi": "SPI", "p8": "i80", "i2c": "I2C"}
+BUS_NAMES = {"dsi": "MIPI-DSI", "rgb": "RGB", "qspi": "QSPI", "spi": "SPI", "p8": "i80", "i2c": "I2C"}
 
 
 def tried(board, lang):

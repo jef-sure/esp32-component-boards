@@ -92,7 +92,7 @@ The whole path, in VS Code, with the board chosen in the editor, a program of yo
 The component knows no display by itself: a board may have none, and a display is one peripheral among others:
 
 - a **graphics display** driven by [DGX](https://github.com/jef-sure/esp32-component-dgx):
-  MIPI-DSI, QSPI or SPI panels, with their size in pixels and in millimetres and
+  MIPI-DSI, parallel RGB, QSPI or SPI panels, with their size in pixels and in millimetres and
   the way they lie on the board;
 - a **character display** (HD44780) through
   [hd44780](https://github.com/jef-sure/esp32-component-hd44780), on the board
@@ -142,6 +142,7 @@ version of each range and the newest of each older line, see [versions](docs/en/
 | board | chip | display | touch | sound | button | tried on the board |
 |---|---|---|---|---|---|---|
 | CYD (ESP32-2432S028R) | ESP32 | 320x240 ILI9341, SPI, 58x43 mm | XPT2046 (resistive) | DAC, GPIO26 | yes | display, touch; only started: sound |
+| Sunton ESP32-8048S070C | ESP32-S3 | 800x480 EK9716, RGB, 154x86 mm | GT911; calibration a placeholder | I2S amplifier | yes | display |
 | ESP32-C3 with a 0.42-inch OLED | ESP32-C3 | 72x40 SSD1306, I2C, 9.196x5.18 mm | none | none | yes | display |
 | Waveshare ESP32-C3-Zero | ESP32-C3 | none | none | none | yes | — |
 | ESP32-C6 Super Mini | ESP32-C6 | none | none | none | yes | — |

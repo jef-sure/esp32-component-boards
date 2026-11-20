@@ -1,0 +1,20 @@
+# The Sunton ESP32-8048S070C (7-inch): what its chip, its memory and its display need, read
+# before the program's own defaults (SDKCONFIG_DEFAULTS of the project, tools/board_select.py
+# puts this file there). The first two lines are the choice of the board: the chip, and the
+# board in the menu of the configuration. The DGX driver its panel needs (RGB) comes with that
+# choice.
+CONFIG_IDF_TARGET="esp32s3"
+CONFIG_BOARD_SELECT_ESP32_8048S070C=y
+
+CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y
+CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_240=y
+
+# 8 MB octal PSRAM: the two frame buffers of the display, 750 KB each, lie there
+CONFIG_SPIRAM=y
+CONFIG_SPIRAM_MODE_OCT=y
+CONFIG_SPIRAM_SPEED_80M=y
+
+# The code and the constants of the program run from PSRAM: without it every write to the flash (NVS, which Wi-Fi
+# writes too, an update) turns the cache off, the bus cannot read the frame buffer, and the picture jumps. It takes the
+# size of the code again in PSRAM; a program that never writes to the flash may turn it off.
+CONFIG_SPIRAM_XIP_FROM_PSRAM=y

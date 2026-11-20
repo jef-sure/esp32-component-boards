@@ -1,0 +1,22 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "ek9716",
+    "title": "EK9716",
+    "maker": "fitipower",
+    "part": "EK9716",
+    "class": "display",
+    "provides": {"display": {"variant": "tft"}},
+    "on": {"rgb": {"required": true}},
+    "config": {"kind": "graphics"},
+    "controls": {"orientation": {"how": "driver", "read": "none"}},
+    "checked": {
+        "facts": {
+            "level": "vendor-docs",
+            "source": "the datasheet of the EK9716 (Preliminary): a source driver with a timing controller for 24-bit parallel RGB, set by its pins MODE, DITHB, SHLR and UPDN; ESP32-8048S070 Specifications-EN.pdf names it the driver chip of that board",
+            "date": "2026-11-20"
+        }
+    },
+    "notes": "A glass on the EK9716 takes no commands: its pins on the glass choose DE or sync mode, dithering and the directions of the scan. A program sees only the size and the timing of the glass."
+}

@@ -46,7 +46,6 @@
     "boards/guition_boards_esp32_2424s012/board.json",
     "boards/guition_boards_esp32_8048s043/board.json",
     "boards/guition_boards_esp32_8048s050/board.json",
-    "boards/guition_boards_esp32_8048s070/board.json",
     "boards/guition_boards_jc1060f570c/board.json",
     "boards/guition_boards_jc1060p470_i_w_y/board.json",
     "boards/guition_boards_jc3248w535/board.json",

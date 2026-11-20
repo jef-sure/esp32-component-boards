@@ -1,0 +1,196 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "esp32_8048s070c",
+    "title": "Sunton ESP32-8048S070C",
+    "maker": "jingcai",
+    "part": "ESP32-8048S070C",
+    "revision": "V1.1",
+    "description": "7-inch 800x480 EK9716 on parallel RGB, GT911 touch, MAX98357 I2S amplifier; an ESP32-S3 with 16 MB flash and 8 MB octal PSRAM",
+    "notes": [
+        "The frame buffers of the display lie in PSRAM, and the interrupt that copies them to the panel runs on the core that made the display: call board_display_init from the task that draws. At 33 MHz the other core keeps off PSRAM; docs/rgb-display-en.md of DGX gives the clocks that hold.",
+        "GPIO18 is LRCLK of the amplifier through R27 and TP_INT of the touch through R17, both 0 ohm. The data gives it to the amplifier and leaves INT of the touch out, as the Arduino demo of the vendor does (TOUCH_GT911_INT -1). Whether both resistors are fitted is not seen.",
+        "GPIO0 is the BOOT button and BCLK of the amplifier through R28: while the sound plays the button reads the clock, and a press holds BCLK low. The board V1.0 had BCLK on GPIO19, the SDA of the touch.",
+        "The schematic also has a resistive touch, an XPT2046 on the lines of the TF slot: CS 38, CLK 12, DIN 11, DOUT 13, IRQ 18. The specification names only the board with no touch (ESP32-8048S070N) and the capacitive one; this data is the capacitive board.",
+        "The reset of the panel goes to an RC circuit (R16, C35), not to a GPIO.",
+        "GPIO19 and GPIO20, the USB of the chip, are the I2C of the touch: USB1 reaches the chip through the CH340C only."
+    ],
+    "mcu": {
+        "target": "esp32s3",
+        "flash_mb": 16,
+        "psram_mb": 8,
+        "psram_mhz": 80,
+        "notes": "An ESP32-S3-WROOM-1 by the specification and the schematic, with 16 MB flash and 8 MB PSRAM; GPIO35 to GPIO37, the lines of octal PSRAM, are not wired."
+    },
+    "checked": {
+        "pins": {
+            "level": "schematic",
+            "source": "ESP32-8048S070-MCU-V1.1.png and ESP32-8048S070-LCM-V1.1.png, 5-Schematic of the vendor archive 7.0inch_ESP32-8048S070.zip",
+            "date": "2026-11-20"
+        },
+        "chip": {
+            "level": "vendor-docs",
+            "covers": ["devices.lcd", "mcu"],
+            "source": "ESP32-8048S070 Specifications-EN.pdf of the vendor archive: driver chip EK9716, ESP32-S3-WROOM-1, 16 MB flash, 8 MB PSRAM, effective display area 153.84 x 85.63 mm",
+            "date": "2026-11-20"
+        },
+        "glass": {
+            "level": "vendor-docs",
+            "covers": ["devices.lcd.config.panel"],
+            "source": "JC8048B070N.pdf, the sheet of the glass: 800 x 480, active area 154.08 x 85.92 mm, a pixel clock of 29 to 38 MHz; MODE high selects DE mode",
+            "date": "2026-11-20"
+        },
+        "pixel_clock": {
+            "level": "hardware",
+            "covers": ["buses.rgb.rgb0.hz", "devices.lcd"],
+            "by": "a contributor of DGX with the board; Anton saw the videos of the tests",
+            "source": "CHANGES.md and docs/rgb-display-en.md of DGX 0.11.6",
+            "date": "2026-11-20",
+            "notes": "The pins of this data and 33 MHz with two frame buffers: 59.5 frames a second while the processor draws as fast as it can, the display made on the core that draws. The demo of the vendor runs 16 MHz, the music demo 12."
+        },
+        "backlight_pwm": {
+            "level": "hardware",
+            "covers": ["devices.lcd.pins.backlight"],
+            "by": "a contributor of DGX with the board",
+            "date": "2026-11-20",
+            "notes": "PWM on GPIO2 dims the backlight at 200 Hz and 1 kHz; at 5 kHz and above every duty below 100% leaves it dark."
+        },
+        "schematic_parts": {
+            "level": "schematic",
+            "covers": ["devices.touch", "devices.sound", "devices.boot", "devices.sd", "connectors", "power"],
+            "source": "ESP32-8048S070-MCU-V1.1.png and ESP32-8048S070-LCM-V1.1.png",
+            "date": "2026-11-20",
+            "result": "pending",
+            "notes": "From the schematic: no board through this component has run them."
+        },
+        "touch_vendor": {
+            "level": "vendor-code",
+            "covers": ["devices.touch"],
+            "source": "touch.h of the demo 7_1_lvgl_music_gt911_7.0 of the vendor archive: a GT911 on SDA 19, SCL 20, RST 38, INT -1; HAL.h of the same demo: I2S DOUT 17, BCLK 0, LRC 18",
+            "date": "2026-11-20"
+        }
+    },
+    "buses": {
+        "rgb": {
+            "rgb0": {
+                "pclk": 42,
+                "hsync": 39,
+                "vsync": 40,
+                "de": 41,
+                "data": [15, 7, 6, 5, 4, 9, 46, 3, 8, 16, 1, 14, 21, 47, 48, 45],
+                "hz": 33000000
+            }
+        },
+        "i2c": {"i2c0": {"sda": 19, "scl": 20}},
+        "i2s": {"i2s0": {"mclk": "nc", "bclk": 0, "ws": 18, "dout": 17, "din": "nc"}},
+        "spi": {"spi2": {"mosi": 11, "miso": 13, "sclk": 12}}
+    },
+    "power": [
+        {
+            "name": "VBUS",
+            "source": "usb",
+            "mv": 5000,
+            "plug": "usb_c",
+            "feeds": ["sound"],
+            "why": "USB1, type C. VDD of the amplifier U4 is on VBUS itself."
+        },
+        {"name": "VIN", "source": "vin", "why": "Contact 1 of P1."},
+        {"name": "5V", "from": [{"name": "VBUS", "through": "d_usb"}, {"name": "VIN", "through": "q_vin"}]},
+        {
+            "name": "LEDA",
+            "from": "5V",
+            "through": "led_driver",
+            "regulator": "boost",
+            "feeds": ["lcd"],
+            "why": "EN of U5 is BL_CTR, the backlight line on GPIO2 through R13, held low by R14."
+        },
+        {
+            "name": "3.3V",
+            "from": "5V",
+            "through": "reg_3v3",
+            "regulator": "buck",
+            "mv": 3300,
+            "feeds": ["mcu", "lcd", "touch", "sd", "usb_uart"],
+            "why": "VGH, VGL and AVDD of the glass come from it through the DC-DC of the LCM sheet."
+        }
+    ],
+    "shared_pins": {"boot_bclk": {"line": 0, "devices": ["boot", "sound"]}},
+    "connectors": {
+        "P1": {"type": "HC 1.25 mm, 4 pins", "pins": ["VIN", "U0TXD", "U0RXD", "GND"]},
+        "P2": {"type": "HC 1.25 mm, 4 pins", "pins": [19, 11, 12, 13]},
+        "P3": {"type": "HC 1.25 mm, 4 pins", "pins": [17, 18, 19, 20]},
+        "P4": {"type": "HC 1.25 mm, 4 pins", "pins": ["GND", "3.3V", 17, 18]},
+        "P5": {"type": "SH 1.0 mm, 4 pins", "pins": ["GND", "3.3V", 17, 18]},
+        "P6": {"type": "JST 1.25 mm, 2 pins", "pins": ["SPK+", "SPK-"]}
+    },
+    "devices": {
+        "lcd": {
+            "chip": "ek9716",
+            "on": {"rgb.rgb0": {}},
+            "pins": {"rst": "nc", "backlight": {"gpio": 2, "active": "high"}},
+            "config": {
+                "primary": true,
+                "panel": {"width": 800, "height": 480, "mm_w": 154, "mm_h": 86},
+                "depth_bits": 16
+            },
+            "controls": {"orientation": {"start": {"x": "left-right", "y": "top-bottom", "swap": false}}},
+            "notes": "The glass JC8048B070N on LCD1, 50 pins. B0 to B2, G0, G1 and R0 to R2 are on ground: 16 lines of RGB565. MODE is high, DE mode; L/R is high, U/D low. DCLK comes through L3, a ferrite bead. The timing is that of dgx_rgb_panel_jc8048b070n of DGX, from the demo of the vendor."
+        },
+        "touch": {
+            "chip": "gt911",
+            "on": {"i2c.i2c0": {}},
+            "pins": {"rst": 38},
+            "config": {
+                "over": "lcd",
+                "x_max": 799,
+                "y_max": 479,
+                "calibrations": [
+                    {
+                        "rule": "the newest",
+                        "measured": false,
+                        "notes": "A placeholder: the touch taken as the glass, pixel for pixel. Measure the board with dgx_di_calibrate_measure and give the log to tools/board_calibration.py.",
+                        "x_max": 799,
+                        "y_max": 479,
+                        "width": 800,
+                        "height": 480,
+                        "left_up": {"meant": [48, 48], "device": [48, 48]},
+                        "right_up": {"meant": [751, 48], "device": [751, 48]},
+                        "left_down": {"meant": [48, 431], "device": [48, 431]},
+                        "right_down": {"meant": [751, 431], "device": [751, 431]}
+                    }
+                ]
+            },
+            "notes": "On FPC1, 6 pins: SDA GPIO19 and SCL GPIO20 with 4K7 to 3.3 V (R4, R3), REST GPIO38, INT on TP_INT. With INT not held at reset the address is not chosen: both are tried."
+        },
+        "sound": {
+            "chip": "i2s_amp",
+            "ref": "U4",
+            "part": "MAX98357",
+            "on": {"i2s.i2s0": {}},
+            "config": {"sample_rate": 22050},
+            "notes": "DIN GPIO17, LRCLK GPIO18, BCLK GPIO0, each through a 0 ohm resistor. GAIN is on ground. SD_MODE comes from VBUS through R29, whose value the schematic does not give. The speaker goes on P6."
+        },
+        "boot": {"class": "button", "pins": {"in": {"gpio": 0, "active": "low"}}},
+        "sd": {"class": "storage", "ref": "TF1", "on": {"spi.spi2": {"cs": 10}}, "config": {"media": "microsd"}},
+        "s3_module": {"class": "other", "ref": "IC1", "maker": "espressif", "part": "ESP32-S3-WROOM-1"},
+        "usb_uart": {
+            "class": "other",
+            "ref": "U2",
+            "part": "CH340C",
+            "notes": "DTR and RTS reset the chip into its loader through T1 and T2."
+        },
+        "reg_3v3": {
+            "class": "other",
+            "ref": "U3",
+            "notes": "The schematic gives no part number: a buck converter by its pins and L6."
+        },
+        "led_driver": {
+            "class": "other",
+            "ref": "U5",
+            "notes": "The schematic gives no part number: a boost converter for the LEDs by its pins, L1 and D2."
+        },
+        "d_usb": {"class": "other", "ref": "D1", "part": "1N5819W"},
+        "q_vin": {"class": "other", "ref": "Q1", "part": "AO3401"}
+    }
+}

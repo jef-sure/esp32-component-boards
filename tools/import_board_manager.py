@@ -39,7 +39,7 @@ NOT_A_CHIP = ("none", "auto", "internal")
 I2S_LINES = ("mclk", "bclk", "ws", "dout", "din")
 # the same board in a pack and in the catalog
 OURS = {"guition_boards/jc1060p470": "jc1060p470c", "guition_boards/jc8012p4a1": "jc8012p4a1c", "guition_boards/jc4827w543": "jc4827w543c", "guition_boards/esp32_2432s028": "cyd_s028r",
-        "guition_boards/jc4880p443": "jc4880p443c"}
+        "guition_boards/jc4880p443": "jc4880p443c", "guition_boards/esp32_8048s070": "esp32_8048s070c"}
 # a device the pack leaves to C code: its class, from the chip
 CUSTOM_CLASS = {"xpt2046": "touch", "axp2101": "pmic", "axp2602": "pmic", "bq27220": "fuel_gauge", "bmi270": "imu", "bmi270_sensor": "imu", "bmi270_sensor_hub": "imu",
                 "lp5562": "led", "lr1121": "radio", "ssd1309": "display", "pcf85063a": "rtc", "ssd16xx_290": "display", "es8311_es7210": "audio"}
@@ -617,6 +617,9 @@ def pins_of_pack(devices, peripherals):
             for key, value in node.items():
                 if isinstance(value, int) and re.search(r"(gpio_num|_gpio|_io|_io_num|^pin|^gpio_num)$", key):
                     add(value, f"{path}.{key}")
+                elif isinstance(value, list) and key.endswith("gpio_nums"):  # the data lines of RGB, the lowest bit first
+                    for at, pin in enumerate(value):
+                        add(pin, f"{path}.{key}[{at}]")
                 elif key == "pins" and isinstance(value, dict):
                     for pin_name, pin in value.items():
                         add(pin, f"{path}.{pin_name}")

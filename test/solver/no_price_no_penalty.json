@@ -1,5 +1,5 @@
 {
-    "title": "Without a budget a missing price is no unknown: the JC4827 with no price still beats the priced CYD, which holds an LED nobody asked for",
+    "title": "Without a budget a missing price is no unknown: the ESP32-8048S070C and the JC4827 with no price still beat the priced CYD, which holds an LED nobody asked for",
     "answers": {
         "display": "graphics",
         "touch": true,
@@ -75,10 +75,13 @@
     "change": {
         "jc4827w543c": {
             "price": null
+        },
+        "esp32_8048s070c": {
+            "price": null
         }
     },
     "first": {
-        "name": "jc4827w543c",
+        "name": "esp32_8048s070c",
         "modules": {}
     }
 }

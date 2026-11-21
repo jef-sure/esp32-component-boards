@@ -1,6 +1,6 @@
 # CHANGES
 
-## 0.3.0 (not released yet)
+## 0.2.2 (not released yet)
 
 - DGX 0.12 is in the range: `>=0.10.12,<0.13.0`. The record of DGX describes 0.12.0, whose constructors of the SSD1306,
   SH1106, SSD1309, SSD1322 and SSD1680 take the reset line before the resolution; a call in the order of 0.11 compiles
@@ -14,6 +14,8 @@
   adapter does not call. CI also builds the boards with touch with DGX-DI 0.1.5 and 0.1.7, except 0.1.5 for the
   boards whose display needs DGX 0.11: it requires DGX `^0.10.10`. `tools/boards_gen.py` leaves a version out of
   that list when what it requires of another library leaves no version the board needs.
+- examples/hello_lvgl asks for DGX-LVGL `^0.1.0`, which is on DGX 0.12 and DGX-DI 0.2; with `^0.0.3` it got DGX 0.11.
+  The record of DGX-LVGL describes 0.1.0.
 - The Sunton ESP32-8048S070C, a 7-inch 800x480 glass on the parallel RGB bus of an ESP32-S3, with GT911 touch, an
   amplifier on I2S and the BOOT button, from the schematic V1.1 of its archive and photos of a board. Its display starts through
   DGX 0.11.6, the first with the RGB bus, at a pixel clock of 33 MHz with two frame buffers in PSRAM: a contributor of

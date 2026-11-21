@@ -12,7 +12,7 @@
         {"via": "registry"},
         {"via": "git", "url": "https://github.com/jef-sure/esp32-component-dgx-di.git", "ref": "{version}"}
     ],
-    "described": "0.1.6",
+    "described": "0.2.0",
     "description": "Input for DGX: touch panels with calibration and gestures, pads, keyboards.",
     "interfaces": {
         "esp_lcd_touch": {
@@ -51,9 +51,9 @@
         }
     },
     "adapter": {
-        "version": ">=0.1.5,<0.2.0",
+        "version": ">=0.1.5,<0.3.0",
         "symbol": "BOARD_TOUCH",
-        "notes": "0.1.4 has the struct tag of dgx_di_pointer_t. 0.1.5 builds for the linux target of ESP-IDF and has dgx_di_host.h: the mouse over a window of DGX as a finger, the touch of the board host. 0.1.6 is the same code on DGX 0.11.0; 0.1.5 stays in the range for a project on DGX 0.10.",
+        "notes": "0.1.4 has the struct tag of dgx_di_pointer_t. 0.1.5 builds for the linux target of ESP-IDF and has dgx_di_host.h: the mouse over a window of DGX as a finger, the touch of the board host. 0.1.6 is the same code on DGX 0.11.0; 0.1.5 stays in the range for a project on DGX 0.10. 0.1.7 draws the keyboard and the pad on another screen, and 0.2.0 is the same code on DGX 0.12.0 with a const font for the keyboard: the adapter calls neither the keyboard nor the pad.",
         "headers": ["board_touch.h"],
         "public": "boards_dgx_di.h",
         "sources": {
@@ -69,16 +69,28 @@
             "source": "include/ of esp32-component-dgx-di 0.1.6, the same as in 0.1.5 by git diff of the tags: 0.1.6 only asks for DGX ^0.11.0",
             "date": "2026-11-14"
         },
+        "api_0_1_7": {
+            "level": "vendor-code",
+            "source": "CHANGES.md of esp32-component-dgx-di 0.1.7 (b850138) and git diff of include/ from 0.1.6: only dgx_di_keyboard_draw_to(), dgx_di_pad_draw_to() and the member alpha of dgx_di_pad_t added",
+            "date": "2026-11-21"
+        },
+        "api_0_2_0": {
+            "level": "vendor-code",
+            "source": "CHANGES.md and idf_component.yml of esp32-component-dgx-di 0.2.0 (cf7d3b8) and git diff of include/ and src/ from 0.1.7: DGX ^0.12.0, dgx_di_keyboard_open() takes a const font, the calibration draws in a batch of DGX by the names of 0.12; no call the record names changed",
+            "date": "2026-11-21"
+        },
         "gsl3680": {
             "level": "hardware",
             "covers": ["chips.gsl3680"],
             "by": "the author of the library, on the bench",
             "source": "CHANGES.md of DGX-DI, 0.0.1 and 0.1.1; catalog/boards/jc8012p4a1c",
-            "notes": "0.1.4 on the JC8012P4A1C: the handwritten clock with its touch works. Gestures 11 of 11 and the pad 9 of 9 with 0.0.1; 0.1.5 ran on the computer only and 0.1.6 on no board.",
+            "notes": "0.1.4 on the JC8012P4A1C: the handwritten clock with its touch works. Gestures 11 of 11 and the pad 9 of 9 with 0.0.1; 0.1.5 ran on the computer only and 0.1.6, 0.1.7 and 0.2.0 on no board.",
             "date": "2026-11-04"
         }
     },
     "versions": {
+        "0.2.0": {"requires": {"esp-idf/jef-sure/dgx": "^0.12.0"}, "platforms": {"esp_idf": ">=5.3.0"}},
+        "0.1.7": {"requires": {"esp-idf/jef-sure/dgx": "^0.11.0"}, "platforms": {"esp_idf": ">=5.3.0"}},
         "0.1.6": {"requires": {"esp-idf/jef-sure/dgx": "^0.11.0"}, "platforms": {"esp_idf": ">=5.3.0"}},
         "0.1.5": {"requires": {"esp-idf/jef-sure/dgx": "^0.10.10"}, "platforms": {"esp_idf": ">=5.3.0"}},
         "0.1.4": {"requires": {"esp-idf/jef-sure/dgx": "^0.10.1"}, "platforms": {"esp_idf": ">=5.3.0"}},

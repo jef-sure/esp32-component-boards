@@ -1304,6 +1304,18 @@ def needed_by(board):
     return found
 
 
+def buildable(board, record, version):
+    """A board can be built with this version of a library: it is not older than the board needs, and what it requires of
+    another library leaves a version the board needs, as DGX-DI 0.1.5, on DGX 0.10, does not for a glass of DGX 0.11."""
+    key = resolve.version_key
+    needed = needed_by(board)
+    if key(version) < key(needed.get(resolve.library_id(record), "0.0.0")):
+        return False
+    requires = (record.get("versions") or {}).get(version, {}).get("requires") or {}
+    return all(any(resolve.in_range(have, spec) and key(have) >= key(needed[name]) for have in range_versions(resolve.library(name)))
+               for name, spec in requires.items() if name in needed)
+
+
 def used_libraries(board):
     """The libraries the glue of a board calls, each once."""
     found = {}
@@ -1716,8 +1728,8 @@ def gen_workflow_boards(boards):
 def gen_workflow_window(boards):
     """The entries of the matrix of the job that builds each board with the older versions its libraries take."""
     entries = [f'          - {{board: {board["name"]}, library: {record["owner"]}/{record["name"]}, version: "{version}"}}'
-               for board in boards for name, record in used_libraries(board).items() for version in tried_versions(record)
-               if resolve.version_key(version) >= resolve.version_key(needed_by(board).get(name, "0.0.0"))]
+               for board in boards for record in used_libraries(board).values() for version in tried_versions(record)
+               if buildable(board, record, version)]
     return "\n".join([WINDOW_BEGIN, *entries, WINDOW_END])
 
 

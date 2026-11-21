@@ -8,7 +8,12 @@
   names the glass with `DGX_`, and the adapter frees a bus by `dgx_bus_dispose()`: 0.12.0 warns at the calls named
   after a driver, the names without `DGX_` and `bus->dispose`. The window of the computer turns its display the same
   way and gets the version of DGX of its build, as a board does. CI also builds the boards with DGX 0.11.8, the newest
-  of 0.11. A board with touch still builds with DGX 0.11: DGX-DI 0.1.7 requires `^0.11.0`.
+  of 0.11.
+- DGX-DI 0.2 is in the range: `>=0.1.5,<0.3.0`. The record of DGX-DI describes 0.2.0, which requires DGX `^0.12.0`:
+  a board with touch builds with DGX 0.12 through it. 0.1.7 and 0.2.0 change the keyboard and the pad, which the
+  adapter does not call. CI also builds the boards with touch with DGX-DI 0.1.5 and 0.1.7, except 0.1.5 for the
+  boards whose display needs DGX 0.11: it requires DGX `^0.10.10`. `tools/boards_gen.py` leaves a version out of
+  that list when what it requires of another library leaves no version the board needs.
 - The Sunton ESP32-8048S070C, a 7-inch 800x480 glass on the parallel RGB bus of an ESP32-S3, with GT911 touch, an
   amplifier on I2S and the BOOT button, from the schematic V1.1 of its archive and photos of a board. Its display starts through
   DGX 0.11.6, the first with the RGB bus, at a pixel clock of 33 MHz with two frame buffers in PSRAM: a contributor of

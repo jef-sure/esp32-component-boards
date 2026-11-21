@@ -103,7 +103,10 @@ jobs:
           - {board: cyd_s028r, library: jef-sure/dgx, version: "0.10.12"}
           - {board: cyd_s028r, library: jef-sure/dgx, version: "0.10.17"}
           - {board: cyd_s028r, library: jef-sure/dgx, version: "0.11.8"}
+          - {board: cyd_s028r, library: jef-sure/dgx-di, version: "0.1.5"}
+          - {board: cyd_s028r, library: jef-sure/dgx-di, version: "0.1.7"}
           - {board: esp32_8048s070c, library: jef-sure/dgx, version: "0.11.8"}
+          - {board: esp32_8048s070c, library: jef-sure/dgx-di, version: "0.1.7"}
           - {board: esp32_c3_oled_042, library: jef-sure/dgx, version: "0.10.12"}
           - {board: esp32_c3_oled_042, library: jef-sure/dgx, version: "0.10.17"}
           - {board: esp32_c3_oled_042, library: jef-sure/dgx, version: "0.11.8"}
@@ -113,13 +116,20 @@ jobs:
           - {board: jc1060p470c, library: jef-sure/dgx, version: "0.10.12"}
           - {board: jc1060p470c, library: jef-sure/dgx, version: "0.10.17"}
           - {board: jc1060p470c, library: jef-sure/dgx, version: "0.11.8"}
+          - {board: jc1060p470c, library: jef-sure/dgx-di, version: "0.1.5"}
+          - {board: jc1060p470c, library: jef-sure/dgx-di, version: "0.1.7"}
           - {board: jc4827w543c, library: jef-sure/dgx, version: "0.10.12"}
           - {board: jc4827w543c, library: jef-sure/dgx, version: "0.10.17"}
           - {board: jc4827w543c, library: jef-sure/dgx, version: "0.11.8"}
+          - {board: jc4827w543c, library: jef-sure/dgx-di, version: "0.1.5"}
+          - {board: jc4827w543c, library: jef-sure/dgx-di, version: "0.1.7"}
           - {board: jc4880p443c, library: jef-sure/dgx, version: "0.11.8"}
+          - {board: jc4880p443c, library: jef-sure/dgx-di, version: "0.1.7"}
           - {board: jc8012p4a1c, library: jef-sure/dgx, version: "0.10.12"}
           - {board: jc8012p4a1c, library: jef-sure/dgx, version: "0.10.17"}
           - {board: jc8012p4a1c, library: jef-sure/dgx, version: "0.11.8"}
+          - {board: jc8012p4a1c, library: jef-sure/dgx-di, version: "0.1.5"}
+          - {board: jc8012p4a1c, library: jef-sure/dgx-di, version: "0.1.7"}
           # window: end of generated
     steps:
       - uses: actions/checkout@v4

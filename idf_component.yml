@@ -40,7 +40,7 @@ dependencies:
     matches:
       - if: "$CONFIG{BOARD_DISPLAY_GRAPHICS} == 1"
   jef-sure/dgx-di:
-    version: ">=0.1.5,<0.2.0"
+    version: ">=0.1.5,<0.3.0"
     matches:
       - if: "$CONFIG{BOARD_TOUCH} == 1"
   jef-sure/hd44780:

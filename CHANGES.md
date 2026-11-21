@@ -1,6 +1,6 @@
 # CHANGES
 
-## 0.2.2 (not released yet)
+## 0.2.2 (2026-11-22)
 
 - DGX 0.12 is in the range: `>=0.10.12,<0.13.0`. The record of DGX describes 0.12.0, whose constructors of the SSD1306,
   SH1106, SSD1309, SSD1322 and SSD1680 take the reset line before the resolution; a call in the order of 0.11 compiles
@@ -67,7 +67,7 @@
 - [Getting started](docs/en/getting-started.md) points to the two ways on Windows in the README, and the headers of
   clang for clangd are in a section of their own after the path, "Hints in the editor": a build does not need them.
 - [radio.md](docs/en/radio.md) says the JC8012P4A1C was not tried.
-- The connectors of the ESP32 DevKit with micro-USB are recorded from the photo of the USB-C one, the same board (Anton):
+- The connectors of the ESP32 DevKit with micro-USB are recorded from the photo of the USB-C one, the same board:
   a kit with it no longer says they are from memory.
 - `boards_mcp.py --install` finds `claude` in the extension of Claude Code for VS Code, which does not put it on PATH;
   it wrote `.mcp.json` into the current folder before.
@@ -79,6 +79,7 @@
   every folder, it stays empty in the others.
 - The dialog of the editor draws the Markdown of the model, and a line above its field says whether the model listens,
   works or has most likely ended its turn; a dialog whose agent stopped stays with what was said.
+- The recipes take the component as `^0.2.2`.
 
 ## 0.2.1 (2026-11-15)
 

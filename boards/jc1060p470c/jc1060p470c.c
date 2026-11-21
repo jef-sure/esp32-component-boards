@@ -57,7 +57,9 @@ static dgx_screen_t *display0_screen(dgx_bus_protocols_t *bus)
 }
 
 static const struct board_display_panel display_panels[] = {
-#if BOARDS_VERSION_JEF_SURE__DGX >= BOARDS_VERSION(0, 11, 0)
+#if BOARDS_VERSION_JEF_SURE__DGX >= BOARDS_VERSION(0, 11, 1)
+    {.name = "lcd", .glass_w = 1024, .glass_h = 600, .mm_w = 154, .mm_h = 86, .dir_x = DgxScreenLeftRight, .dir_y = DgxScreenTopBottom, .swap_xy = false, .backlight = GPIO_NUM_NC, .backlight_on = 1, .bus = display0_bus, .screen = display0_screen, .orientation = board_glue_screen_orientation},
+#elif BOARDS_VERSION_JEF_SURE__DGX >= BOARDS_VERSION(0, 11, 0)
     {.name = "lcd", .glass_w = 1024, .glass_h = 600, .mm_w = 154, .mm_h = 86, .dir_x = DgxScreenLeftRight, .dir_y = DgxScreenTopBottom, .swap_xy = false, .backlight = GPIO_NUM_NC, .backlight_on = 1, .bus = display0_bus, .screen = display0_screen, .orientation = dgx_jd9165_orientation},
 #else
     {.name = "lcd", .glass_w = 1024, .glass_h = 600, .mm_w = 154, .mm_h = 86, .dir_x = DgxScreenLeftRight, .dir_y = DgxScreenTopBottom, .swap_xy = false, .backlight = GPIO_NUM_23, .backlight_on = 1, .bus = display0_bus, .screen = display0_screen, .orientation = dgx_jd9165_orientation},

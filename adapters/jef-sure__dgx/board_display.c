@@ -50,7 +50,11 @@ static bool start_panel(const struct board_display_panel *panel, struct board_di
     if (!bus) return false;
     dgx_screen_t *screen = panel->screen(bus);
     if (!screen) {
+#if BOARDS_VERSION_JEF_SURE__DGX >= BOARDS_VERSION(0, 11, 1)
+        dgx_bus_dispose(&bus);
+#else
         bus->dispose(bus);
+#endif
         return false;
     }
     if (panel->orientation) panel->orientation(screen, (dgx_orientation_t)panel->dir_x, (dgx_orientation_t)panel->dir_y, panel->swap_xy);

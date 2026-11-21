@@ -36,7 +36,7 @@ dependencies:
     rules:
       - if: "idf_version <6.1"
   jef-sure/dgx:
-    version: ">=0.10.12,<0.12.0"
+    version: ">=0.10.12,<0.13.0"
     matches:
       - if: "$CONFIG{BOARD_DISPLAY_GRAPHICS} == 1"
   jef-sure/dgx-di:

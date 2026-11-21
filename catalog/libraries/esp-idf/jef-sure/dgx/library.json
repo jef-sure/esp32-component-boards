@@ -12,7 +12,7 @@
         {"via": "registry"},
         {"via": "git", "url": "https://github.com/jef-sure/esp32-component-dgx.git", "ref": "{version}"}
     ],
-    "described": "0.11.7",
+    "described": "0.12.0",
     "description": "Graphics on displays of SPI, QSPI, 8-bit parallel, parallel RGB, MIPI-DSI and I2C, with its own panel drivers.",
     "values": {
         "color_order": {"rgb": "DgxScreenRGB", "bgr": "DgxScreenBGR"},
@@ -196,9 +196,9 @@
             "supports": {"depth_bits": [12, 16, 18]},
             "controls": {
                 "orientation": {
-                    "call": "dgx_gc9a01_orientation",
+                    "call": "dgx_screen_orientation",
                     "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
-                    "ok": "none"
+                    "ok": {"equals": "ESP_OK"}
                 }
             },
             "setup": [{"control": "orientation"}],
@@ -226,9 +226,9 @@
             "supports": {"depth_bits": [16, 18]},
             "controls": {
                 "orientation": {
-                    "call": "dgx_ili9341_orientation",
+                    "call": "dgx_screen_orientation",
                     "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
-                    "ok": "none"
+                    "ok": {"equals": "ESP_OK"}
                 }
             },
             "setup": [{"control": "orientation"}],
@@ -256,9 +256,9 @@
             "supports": {"depth_bits": [16, 24]},
             "controls": {
                 "orientation": {
-                    "call": "dgx_jd9165_orientation",
+                    "call": "dgx_screen_orientation",
                     "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
-                    "ok": "none"
+                    "ok": {"equals": "ESP_OK"}
                 }
             },
             "setup": [{"control": "orientation"}],
@@ -279,9 +279,9 @@
             "supports": {"depth_bits": [16, 24]},
             "controls": {
                 "orientation": {
-                    "call": "dgx_jd9365_orientation",
+                    "call": "dgx_screen_orientation",
                     "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
-                    "ok": "none"
+                    "ok": {"equals": "ESP_OK"}
                 }
             },
             "setup": [{"control": "orientation"}],
@@ -302,9 +302,9 @@
             "supports": {"depth_bits": [16, 18]},
             "controls": {
                 "orientation": {
-                    "call": "dgx_nv3041a_orientation",
+                    "call": "dgx_screen_orientation",
                     "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
-                    "ok": "none"
+                    "ok": {"equals": "ESP_OK"}
                 }
             },
             "setup": [{"control": "orientation"}],
@@ -324,7 +324,7 @@
             "init": [
                 {
                     "call": "dgx_sh1106_init",
-                    "args": ["{bus}", "{panel}", "{rst}"],
+                    "args": ["{bus}", "{rst}", "{panel}"],
                     "returns": "screen",
                     "ok": {"not": "NULL"}
                 }
@@ -332,15 +332,15 @@
             "supports": {"depth_bits": [1]},
             "controls": {
                 "orientation": {
-                    "call": "dgx_sh1106_orientation",
+                    "call": "dgx_screen_orientation",
                     "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
-                    "ok": "none"
+                    "ok": {"equals": "ESP_OK"}
                 }
             },
             "setup": [{"control": "orientation"}],
             "panels": [
-                {"width": 128, "height": 64, "value": "SH1106_128X64"},
-                {"width": 64, "height": 32, "value": "SH1106_64X32"}
+                {"width": 128, "height": 64, "value": "DGX_SH1106_128X64"},
+                {"width": 64, "height": 32, "value": "DGX_SH1106_64X32"}
             ]
         },
         "ssd1306": {
@@ -350,7 +350,7 @@
             "init": [
                 {
                     "call": "dgx_ssd1306_init",
-                    "args": ["{bus}", "{panel}", "{external_vcc}", "{rst}"],
+                    "args": ["{bus}", "{rst}", "{panel}", "{external_vcc}"],
                     "returns": "screen",
                     "ok": {"not": "NULL"}
                 }
@@ -359,18 +359,18 @@
             "adapter": {"kind": "panel"},
             "controls": {
                 "orientation": {
-                    "call": "dgx_ssd1306_orientation",
+                    "call": "dgx_screen_orientation",
                     "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
-                    "ok": "none"
+                    "ok": {"equals": "ESP_OK"}
                 }
             },
             "setup": [{"control": "orientation"}],
             "panels": [
-                {"width": 128, "height": 32, "value": "SSD1306_128X32"},
-                {"width": 128, "height": 64, "value": "SSD1306_128X64"},
-                {"width": 96, "height": 16, "value": "SSD1306_96X16"},
-                {"width": 64, "height": 48, "value": "SSD1306_64X48"},
-                {"width": 72, "height": 40, "value": "SSD1306_72X40"}
+                {"width": 128, "height": 32, "value": "DGX_SSD1306_128X32"},
+                {"width": 128, "height": 64, "value": "DGX_SSD1306_128X64"},
+                {"width": 96, "height": 16, "value": "DGX_SSD1306_96X16"},
+                {"width": 64, "height": 48, "value": "DGX_SSD1306_64X48"},
+                {"width": 72, "height": 40, "value": "DGX_SSD1306_72X40"}
             ]
         },
         "ssd1309": {
@@ -380,7 +380,7 @@
             "init": [
                 {
                     "call": "dgx_ssd1309_init",
-                    "args": ["{bus}", "{panel}", "{rst}"],
+                    "args": ["{bus}", "{rst}", "{panel}"],
                     "returns": "screen",
                     "ok": {"not": "NULL"}
                 }
@@ -388,15 +388,15 @@
             "supports": {"depth_bits": [1]},
             "controls": {
                 "orientation": {
-                    "call": "dgx_ssd1309_orientation",
+                    "call": "dgx_screen_orientation",
                     "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
-                    "ok": "none"
+                    "ok": {"equals": "ESP_OK"}
                 }
             },
             "setup": [{"control": "orientation"}],
             "panels": [
-                {"width": 128, "height": 64, "value": "SSD1309_128X64"},
-                {"width": 128, "height": 32, "value": "SSD1309_128X32"}
+                {"width": 128, "height": 64, "value": "DGX_SSD1309_128X64"},
+                {"width": 128, "height": 32, "value": "DGX_SSD1309_128X32"}
             ]
         },
         "ssd1351": {
@@ -414,9 +414,9 @@
             "supports": {"depth_bits": [16, 18]},
             "controls": {
                 "orientation": {
-                    "call": "dgx_ssd1351_orientation",
+                    "call": "dgx_screen_orientation",
                     "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
-                    "ok": "none"
+                    "ok": {"equals": "ESP_OK"}
                 }
             },
             "setup": [
@@ -454,31 +454,31 @@
             "supports": {"depth_bits": [12, 16, 18]},
             "controls": {
                 "orientation": {
-                    "call": "dgx_st7735_orientation",
+                    "call": "dgx_screen_orientation",
                     "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
-                    "ok": "none"
+                    "ok": {"equals": "ESP_OK"}
                 }
             },
             "setup": [{"control": "orientation"}],
             "adapter": {"kind": "panel"},
             "panels": [
-                {"width": 128, "height": 160, "value": "ST7735_RESOLUTION_128x160"},
+                {"width": 128, "height": 160, "value": "DGX_ST7735_128X160"},
                 {
                     "width": 160,
                     "height": 128,
-                    "value": "ST7735_RESOLUTION_160x128",
-                    "notes": "128x160 turned by dgx_st7735_orientation(scr, DgxScreenRightLeft, DgxScreenTopBottom, true)"
+                    "value": "DGX_ST7735_160X128",
+                    "notes": "128x160 turned by dgx_screen_orientation(scr, DgxScreenRightLeft, DgxScreenTopBottom, true)"
                 },
                 {
                     "width": 80,
                     "height": 160,
-                    "value": "ST7735_RESOLUTION_80x160",
+                    "value": "DGX_ST7735_80X160",
                     "notes": "the 0.96-inch IPS glass, upright, at column 24 of a controller set for 128x160, with no inversion, usually in BGR order: Adafruit's INITR_MINI160x80"
                 },
                 {
                     "width": 160,
                     "height": 80,
-                    "value": "ST7735_RESOLUTION_160x80",
+                    "value": "DGX_ST7735_160X80",
                     "notes": "the 0.96-inch glass turned as 160x128 is"
                 }
             ]
@@ -522,39 +522,39 @@
             "supports": {"depth_bits": [12, 16, 18]},
             "controls": {
                 "orientation": {
-                    "call": "dgx_st7789_orientation",
+                    "call": "dgx_screen_orientation",
                     "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
-                    "ok": "none"
+                    "ok": {"equals": "ESP_OK"}
                 }
             },
             "setup": [{"control": "orientation"}],
             "adapter": {"kind": "panel"},
             "panels": [
-                {"width": 240, "height": 240, "value": "ST7789_RESOLUTION_240x240"},
-                {"width": 240, "height": 320, "value": "ST7789_RESOLUTION_240x320"},
+                {"width": 240, "height": 240, "value": "DGX_ST7789_240X240"},
+                {"width": 240, "height": 320, "value": "DGX_ST7789_240X320"},
                 {
                     "width": 320,
                     "height": 240,
-                    "value": "ST7789_RESOLUTION_320x240",
-                    "notes": "240x320 turned by dgx_st7789_orientation(scr, DgxScreenRightLeft, DgxScreenTopBottom, true)"
+                    "value": "DGX_ST7789_320X240",
+                    "notes": "240x320 turned by dgx_screen_orientation(scr, DgxScreenRightLeft, DgxScreenTopBottom, true)"
                 },
-                {"width": 76, "height": 284, "value": "ST7789_RESOLUTION_76x284", "notes": "the 2.25-inch bar, upright"},
+                {"width": 76, "height": 284, "value": "DGX_ST7789_76X284", "notes": "the 2.25-inch bar, upright"},
                 {
                     "width": 284,
                     "height": 76,
-                    "value": "ST7789_RESOLUTION_284x76",
+                    "value": "DGX_ST7789_284X76",
                     "notes": "the 2.25-inch bar turned as 320x240 is"
                 },
                 {
                     "width": 135,
                     "height": 240,
-                    "value": "ST7789_RESOLUTION_135x240",
+                    "value": "DGX_ST7789_135X240",
                     "notes": "the 1.14-inch glass, upright, 52 columns and 40 rows into the memory"
                 },
                 {
                     "width": 240,
                     "height": 135,
-                    "value": "ST7789_RESOLUTION_240x135",
+                    "value": "DGX_ST7789_240X135",
                     "notes": "the 1.14-inch glass turned as 320x240 is"
                 }
             ]
@@ -574,9 +574,9 @@
             "supports": {"depth_bits": [16, 18]},
             "controls": {
                 "orientation": {
-                    "call": "dgx_st77916_orientation",
+                    "call": "dgx_screen_orientation",
                     "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
-                    "ok": "none"
+                    "ok": {"equals": "ESP_OK"}
                 }
             },
             "setup": [{"control": "orientation"}],
@@ -597,9 +597,9 @@
             "supports": {"depth_bits": [1], "lines": ["cs"]},
             "controls": {
                 "orientation": {
-                    "call": "dgx_st7920_orientation",
+                    "call": "dgx_screen_orientation",
                     "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
-                    "ok": "none"
+                    "ok": {"equals": "ESP_OK"}
                 }
             },
             "setup": [{"control": "orientation"}],
@@ -612,7 +612,7 @@
             "init": [
                 {
                     "call": "dgx_ssd1322_init",
-                    "args": ["{bus}", "{panel}", "{rst}"],
+                    "args": ["{bus}", "{rst}", "{panel}"],
                     "returns": "screen",
                     "ok": {"not": "NULL"}
                 }
@@ -620,9 +620,9 @@
             "supports": {"depth_bits": [4]},
             "controls": {
                 "orientation": {
-                    "call": "dgx_ssd1322_orientation",
+                    "call": "dgx_screen_orientation",
                     "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
-                    "ok": "none"
+                    "ok": {"equals": "ESP_OK"}
                 }
             },
             "setup": [{"control": "orientation"}],
@@ -631,16 +631,21 @@
                 {
                     "width": 256,
                     "height": 64,
-                    "value": "SSD1322_256X64",
+                    "value": "DGX_SSD1322_256X64",
                     "notes": "Newhaven NHD-3.12-25664 and the 3.12-inch clones"
                 },
-                {"width": 256, "height": 64, "value": "SSD1322_256X64_ZJY", "notes": "by ZJY, its glass from column 24"},
-                {"width": 240, "height": 128, "value": "SSD1322_240X128", "notes": "dual COM"},
-                {"width": 240, "height": 128, "value": "SSD1322_240X128_TOPWIN", "notes": "by Topwin, single COM"},
+                {
+                    "width": 256,
+                    "height": 64,
+                    "value": "DGX_SSD1322_256X64_ZJY",
+                    "notes": "by ZJY, its glass from column 24"
+                },
+                {"width": 240, "height": 128, "value": "DGX_SSD1322_240X128", "notes": "dual COM"},
+                {"width": 240, "height": 128, "value": "DGX_SSD1322_240X128_TOPWIN", "notes": "by Topwin, single COM"},
                 {
                     "width": 128,
                     "height": 64,
-                    "value": "SSD1322_128X64",
+                    "value": "DGX_SSD1322_128X64",
                     "notes": "Newhaven NHD-2.7-12864WDW3, two segments a pixel"
                 }
             ]
@@ -652,7 +657,7 @@
             "init": [
                 {
                     "call": "dgx_ssd1680_init",
-                    "args": ["{bus}", "{panel}", "{rst}", "{busy}"],
+                    "args": ["{bus}", "{rst}", "{busy}", "{panel}"],
                     "returns": "screen",
                     "ok": {"not": "NULL"}
                 }
@@ -660,9 +665,9 @@
             "supports": {"depth_bits": [8]},
             "controls": {
                 "orientation": {
-                    "call": "dgx_ssd1680_orientation",
+                    "call": "dgx_screen_orientation",
                     "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
-                    "ok": "none"
+                    "ok": {"equals": "ESP_OK"}
                 }
             },
             "setup": [
@@ -676,23 +681,23 @@
                 {
                     "width": 128,
                     "height": 296,
-                    "value": "SSD1680_128X296_BWR",
+                    "value": "DGX_SSD1680_128X296_BWR",
                     "notes": "2.9-inch: WeAct Studio, Good Display GDEM029C90"
                 },
                 {
                     "width": 122,
                     "height": 250,
-                    "value": "SSD1680_122X250_BWR",
+                    "value": "DGX_SSD1680_122X250_BWR",
                     "notes": "2.13-inch: WeAct Studio, Good Display GDEY0213Z98; not checked on a module"
                 }
             ]
         }
     },
     "adapter": {
-        "version": ">=0.10.12,<0.12.0",
+        "version": ">=0.10.12,<0.13.0",
         "symbol": "BOARD_DISPLAY_GRAPHICS",
         "requires": ["esp_driver_gpio"],
-        "notes": "0.10.0 is not in the registry. 0.10.8 is the first that builds for the linux target of ESP-IDF: the window of the board host; 0.10.9 turns its glass as the board is held, 0.10.10 gives its mouse, 0.10.11 its keys and a window on no bus. 0.10.12 turns the SSD1306, SSD1309 and SH1106. 0.10.13 draws straight segments by the pen, 0.10.14 a filled circle with a soft edge and gives a screen its user_data. 0.10.16 has the 1.14-inch glass of the ST7789 and the NV3041A at 18 bits, 0.10.17 the SSD1680 of e-paper, whose glue calls dgx_ssd1680_init. 0.11.0 takes the backlight line in the constructor of every display that has one and lights it once the display is set up; it has the 0.96-inch glass of the ST7735. The range starts at 0.10.12: src/ and adapters/ built with it, and with 0.10.17 and 0.11.0, in hello_board on cyd_s028r and jc8012p4a1c on 2026-11-14. 0.11.5 has the ST7701S of the 4.3-inch JC4880P443C, which turns only by dgx_screen_orientation(), the call of every display since 0.11.1. 0.11.6 has the parallel RGB bus and the 7-inch glass of the Sunton ESP32-8048S070.",
+        "notes": "0.10.0 is not in the registry. 0.10.8 is the first that builds for the linux target of ESP-IDF: the window of the board host; 0.10.9 turns its glass as the board is held, 0.10.10 gives its mouse, 0.10.11 its keys and a window on no bus. 0.10.12 turns the SSD1306, SSD1309 and SH1106. 0.10.13 draws straight segments by the pen, 0.10.14 a filled circle with a soft edge and gives a screen its user_data. 0.10.16 has the 1.14-inch glass of the ST7789 and the NV3041A at 18 bits, 0.10.17 the SSD1680 of e-paper, whose glue calls dgx_ssd1680_init. 0.11.0 takes the backlight line in the constructor of every display that has one and lights it once the display is set up; it has the 0.96-inch glass of the ST7735. The range starts at 0.10.12: src/ and adapters/ built with it, and with 0.10.17 and 0.11.0, in hello_board on cyd_s028r and jc8012p4a1c on 2026-11-14. 0.11.5 has the ST7701S of the 4.3-inch JC4880P443C, which turns only by dgx_screen_orientation(), the call of every display since 0.11.1. 0.11.6 has the parallel RGB bus and the 7-inch glass of the Sunton ESP32-8048S070. From 0.11.1 every display turns by dgx_screen_orientation() and the glass has a name with DGX_; the glue uses them from there, as 0.12.0 warns at the calls named after a driver and the names without DGX_. 0.12.0 takes the reset line before the resolution in the constructors of the SSD1306, SH1106, SSD1309, SSD1322 and SSD1680.",
         "headers": ["board_display.h"],
         "public": "boards_dgx.h",
         "sources": {"BOARD_DISPLAY_GRAPHICS": ["board_display.c"]}
@@ -836,6 +841,16 @@
             "source": "CHANGES.md of esp32-component-dgx 0.11.7 (16f95b3) and git diff from 0.11.6: one fix in the build of fonts; include/ and Kconfig the same",
             "date": "2026-11-20"
         },
+        "api_0_11_8": {
+            "level": "vendor-code",
+            "source": "CHANGES.md of esp32-component-dgx 0.11.8 (067eba0) and git diff from 0.11.7: a fix of soft text on a 16-bit bus; in include/ only a comment of dgx_font.h, Kconfig the same",
+            "date": "2026-11-21"
+        },
+        "api_0_12_0": {
+            "level": "vendor-code",
+            "source": "include/drivers/, include/bus/dgx_bus_protocols.h, include/dgx_screen.h, Kconfig, CHANGES.md and \"Deprecated names\" of docs/api-en.md of esp32-component-dgx 0.12.0 (07f4357), and git diff of include/ from 0.11.8: the five monochrome constructors take the reset line before the resolution, the calls named after a driver and the names of the glass without DGX_ are deprecated; dgx_screen_orientation() and the names with DGX_ are there since 0.11.1",
+            "date": "2026-11-21"
+        },
         "ek9716": {
             "level": "hardware",
             "covers": ["chips.ek9716"],
@@ -846,8 +861,316 @@
         }
     },
     "history": [
+        {
+            "before": "0.12.0",
+            "chips": {
+                "sh1106": {
+                    "init": [
+                        {
+                            "call": "dgx_sh1106_init",
+                            "args": ["{bus}", "{panel}", "{rst}"],
+                            "returns": "screen",
+                            "ok": {"not": "NULL"}
+                        }
+                    ]
+                },
+                "ssd1309": {
+                    "init": [
+                        {
+                            "call": "dgx_ssd1309_init",
+                            "args": ["{bus}", "{panel}", "{rst}"],
+                            "returns": "screen",
+                            "ok": {"not": "NULL"}
+                        }
+                    ]
+                },
+                "ssd1322": {
+                    "init": [
+                        {
+                            "call": "dgx_ssd1322_init",
+                            "args": ["{bus}", "{panel}", "{rst}"],
+                            "returns": "screen",
+                            "ok": {"not": "NULL"}
+                        }
+                    ]
+                },
+                "ssd1306": {
+                    "init": [
+                        {
+                            "call": "dgx_ssd1306_init",
+                            "args": ["{bus}", "{panel}", "{external_vcc}", "{rst}"],
+                            "returns": "screen",
+                            "ok": {"not": "NULL"}
+                        }
+                    ]
+                },
+                "ssd1680": {
+                    "init": [
+                        {
+                            "call": "dgx_ssd1680_init",
+                            "args": ["{bus}", "{panel}", "{rst}", "{busy}"],
+                            "returns": "screen",
+                            "ok": {"not": "NULL"}
+                        }
+                    ]
+                }
+            },
+            "notes": "The constructors of the SSD1306, SH1106, SSD1309, SSD1322 and SSD1680 took the resolution before the reset line."
+        },
         {"before": "0.11.6", "chips": {"ek9716": null}, "transports": {"rgb": null}},
         {"before": "0.11.5", "chips": {"st7701": null}},
+        {
+            "before": "0.11.1",
+            "chips": {
+                "gc9a01": {
+                    "controls": {
+                        "orientation": {
+                            "call": "dgx_gc9a01_orientation",
+                            "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
+                            "ok": "none"
+                        }
+                    }
+                },
+                "ili9341": {
+                    "controls": {
+                        "orientation": {
+                            "call": "dgx_ili9341_orientation",
+                            "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
+                            "ok": "none"
+                        }
+                    }
+                },
+                "jd9165": {
+                    "controls": {
+                        "orientation": {
+                            "call": "dgx_jd9165_orientation",
+                            "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
+                            "ok": "none"
+                        }
+                    }
+                },
+                "jd9365": {
+                    "controls": {
+                        "orientation": {
+                            "call": "dgx_jd9365_orientation",
+                            "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
+                            "ok": "none"
+                        }
+                    }
+                },
+                "nv3041a": {
+                    "controls": {
+                        "orientation": {
+                            "call": "dgx_nv3041a_orientation",
+                            "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
+                            "ok": "none"
+                        }
+                    }
+                },
+                "sh1106": {
+                    "controls": {
+                        "orientation": {
+                            "call": "dgx_sh1106_orientation",
+                            "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
+                            "ok": "none"
+                        }
+                    },
+                    "panels": [
+                        {"width": 128, "height": 64, "value": "SH1106_128X64"},
+                        {"width": 64, "height": 32, "value": "SH1106_64X32"}
+                    ]
+                },
+                "ssd1306": {
+                    "controls": {
+                        "orientation": {
+                            "call": "dgx_ssd1306_orientation",
+                            "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
+                            "ok": "none"
+                        }
+                    },
+                    "panels": [
+                        {"width": 128, "height": 32, "value": "SSD1306_128X32"},
+                        {"width": 128, "height": 64, "value": "SSD1306_128X64"},
+                        {"width": 96, "height": 16, "value": "SSD1306_96X16"},
+                        {"width": 64, "height": 48, "value": "SSD1306_64X48"},
+                        {"width": 72, "height": 40, "value": "SSD1306_72X40"}
+                    ]
+                },
+                "ssd1309": {
+                    "controls": {
+                        "orientation": {
+                            "call": "dgx_ssd1309_orientation",
+                            "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
+                            "ok": "none"
+                        }
+                    },
+                    "panels": [
+                        {"width": 128, "height": 64, "value": "SSD1309_128X64"},
+                        {"width": 128, "height": 32, "value": "SSD1309_128X32"}
+                    ]
+                },
+                "ssd1351": {
+                    "controls": {
+                        "orientation": {
+                            "call": "dgx_ssd1351_orientation",
+                            "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
+                            "ok": "none"
+                        }
+                    }
+                },
+                "st7735": {
+                    "controls": {
+                        "orientation": {
+                            "call": "dgx_st7735_orientation",
+                            "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
+                            "ok": "none"
+                        }
+                    },
+                    "panels": [
+                        {"width": 128, "height": 160, "value": "ST7735_RESOLUTION_128x160"},
+                        {
+                            "width": 160,
+                            "height": 128,
+                            "value": "ST7735_RESOLUTION_160x128",
+                            "notes": "128x160 turned by dgx_st7735_orientation(scr, DgxScreenRightLeft, DgxScreenTopBottom, true)"
+                        },
+                        {
+                            "width": 80,
+                            "height": 160,
+                            "value": "ST7735_RESOLUTION_80x160",
+                            "notes": "the 0.96-inch IPS glass, upright, at column 24 of a controller set for 128x160, with no inversion, usually in BGR order: Adafruit's INITR_MINI160x80"
+                        },
+                        {
+                            "width": 160,
+                            "height": 80,
+                            "value": "ST7735_RESOLUTION_160x80",
+                            "notes": "the 0.96-inch glass turned as 160x128 is"
+                        }
+                    ]
+                },
+                "st7789": {
+                    "controls": {
+                        "orientation": {
+                            "call": "dgx_st7789_orientation",
+                            "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
+                            "ok": "none"
+                        }
+                    },
+                    "panels": [
+                        {"width": 240, "height": 240, "value": "ST7789_RESOLUTION_240x240"},
+                        {"width": 240, "height": 320, "value": "ST7789_RESOLUTION_240x320"},
+                        {
+                            "width": 320,
+                            "height": 240,
+                            "value": "ST7789_RESOLUTION_320x240",
+                            "notes": "240x320 turned by dgx_st7789_orientation(scr, DgxScreenRightLeft, DgxScreenTopBottom, true)"
+                        },
+                        {
+                            "width": 76,
+                            "height": 284,
+                            "value": "ST7789_RESOLUTION_76x284",
+                            "notes": "the 2.25-inch bar, upright"
+                        },
+                        {
+                            "width": 284,
+                            "height": 76,
+                            "value": "ST7789_RESOLUTION_284x76",
+                            "notes": "the 2.25-inch bar turned as 320x240 is"
+                        },
+                        {
+                            "width": 135,
+                            "height": 240,
+                            "value": "ST7789_RESOLUTION_135x240",
+                            "notes": "the 1.14-inch glass, upright, 52 columns and 40 rows into the memory"
+                        },
+                        {
+                            "width": 240,
+                            "height": 135,
+                            "value": "ST7789_RESOLUTION_240x135",
+                            "notes": "the 1.14-inch glass turned as 320x240 is"
+                        }
+                    ]
+                },
+                "st77916": {
+                    "controls": {
+                        "orientation": {
+                            "call": "dgx_st77916_orientation",
+                            "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
+                            "ok": "none"
+                        }
+                    }
+                },
+                "st7920": {
+                    "controls": {
+                        "orientation": {
+                            "call": "dgx_st7920_orientation",
+                            "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
+                            "ok": "none"
+                        }
+                    }
+                },
+                "ssd1322": {
+                    "controls": {
+                        "orientation": {
+                            "call": "dgx_ssd1322_orientation",
+                            "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
+                            "ok": "none"
+                        }
+                    },
+                    "panels": [
+                        {
+                            "width": 256,
+                            "height": 64,
+                            "value": "SSD1322_256X64",
+                            "notes": "Newhaven NHD-3.12-25664 and the 3.12-inch clones"
+                        },
+                        {
+                            "width": 256,
+                            "height": 64,
+                            "value": "SSD1322_256X64_ZJY",
+                            "notes": "by ZJY, its glass from column 24"
+                        },
+                        {"width": 240, "height": 128, "value": "SSD1322_240X128", "notes": "dual COM"},
+                        {
+                            "width": 240,
+                            "height": 128,
+                            "value": "SSD1322_240X128_TOPWIN",
+                            "notes": "by Topwin, single COM"
+                        },
+                        {
+                            "width": 128,
+                            "height": 64,
+                            "value": "SSD1322_128X64",
+                            "notes": "Newhaven NHD-2.7-12864WDW3, two segments a pixel"
+                        }
+                    ]
+                },
+                "ssd1680": {
+                    "controls": {
+                        "orientation": {
+                            "call": "dgx_ssd1680_orientation",
+                            "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
+                            "ok": "none"
+                        }
+                    },
+                    "panels": [
+                        {
+                            "width": 128,
+                            "height": 296,
+                            "value": "SSD1680_128X296_BWR",
+                            "notes": "2.9-inch: WeAct Studio, Good Display GDEM029C90"
+                        },
+                        {
+                            "width": 122,
+                            "height": 250,
+                            "value": "SSD1680_122X250_BWR",
+                            "notes": "2.13-inch: WeAct Studio, Good Display GDEY0213Z98; not checked on a module"
+                        }
+                    ]
+                }
+            },
+            "notes": "No dgx_screen_orientation(): a display turned by the call of its driver, and the glass of the monochrome displays, the ST7735 and the ST7789 had names without DGX_."
+        },
         {
             "before": "0.11.0",
             "chips": {
@@ -1051,6 +1374,8 @@
         {"before": "0.5.0", "chips": {"jd9165": null}, "transports": {"dsi": null}}
     ],
     "versions": {
+        "0.12.0": {"platforms": {"esp_idf": ">=5.2.0"}},
+        "0.11.8": {"platforms": {"esp_idf": ">=5.2.0"}},
         "0.11.7": {"platforms": {"esp_idf": ">=5.2.0"}},
         "0.11.6": {"platforms": {"esp_idf": ">=5.2.0"}},
         "0.11.5": {"platforms": {"esp_idf": ">=5.2.0"}},

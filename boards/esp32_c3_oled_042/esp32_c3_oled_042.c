@@ -40,11 +40,21 @@ static dgx_bus_protocols_t *display0_bus(i2c_master_bus_handle_t i2c)
 
 static dgx_screen_t *display0_screen(dgx_bus_protocols_t *bus)
 {
+#if BOARDS_VERSION_JEF_SURE__DGX >= BOARDS_VERSION(0, 12, 0)
+    return dgx_ssd1306_init(bus, GPIO_NUM_NC, DGX_SSD1306_72X40, false);
+#elif BOARDS_VERSION_JEF_SURE__DGX >= BOARDS_VERSION(0, 11, 1)
+    return dgx_ssd1306_init(bus, DGX_SSD1306_72X40, false, GPIO_NUM_NC);
+#else
     return dgx_ssd1306_init(bus, SSD1306_72X40, false, GPIO_NUM_NC);
+#endif
 }
 
 static const struct board_display_panel display_panels[] = {
+#if BOARDS_VERSION_JEF_SURE__DGX >= BOARDS_VERSION(0, 11, 1)
+    {.name = "oled", .glass_w = 72, .glass_h = 40, .mm_w = 9, .mm_h = 5, .dir_x = DgxScreenLeftRight, .dir_y = DgxScreenTopBottom, .swap_xy = false, .backlight = GPIO_NUM_NC, .backlight_on = 1, .i2c_port = I2C_NUM_0, .on_i2c = display0_bus, .screen = display0_screen, .orientation = board_glue_screen_orientation},
+#else
     {.name = "oled", .glass_w = 72, .glass_h = 40, .mm_w = 9, .mm_h = 5, .dir_x = DgxScreenLeftRight, .dir_y = DgxScreenTopBottom, .swap_xy = false, .backlight = GPIO_NUM_NC, .backlight_on = 1, .i2c_port = I2C_NUM_0, .on_i2c = display0_bus, .screen = display0_screen, .orientation = dgx_ssd1306_orientation},
+#endif
 };
 static struct board_display_started displays_started[1];
 const struct board_display_table board_display_table = {.panels = display_panels, .started = displays_started, .count = 1};

@@ -9,6 +9,7 @@
  * function of src/ returning false, so that the contract of boards.h holds at link on every board.
  * With no board chosen, src/board_none.c gives the tables, all empty.
  */
+#include "board_version.h"
 #include "boards.h"
 
 #include "driver/i2c_master.h"
@@ -16,10 +17,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/* A version as one number, for the #if of the glue: CMakeLists.txt defines BOARDS_VERSION_<LIBRARY> to the version of
- * that library in the build, written with this macro. */
-#define BOARDS_VERSION(major, minor, patch) ((major) * 1000000L + (minor) * 1000L + (patch))
 
 /* What the board is: given by its glue (board_data), handed out by board_info(). */
 struct board_data {

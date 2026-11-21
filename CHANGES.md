@@ -1,7 +1,14 @@
 # CHANGES
 
-## 0.2.2 (not released yet)
+## 0.3.0 (not released yet)
 
+- DGX 0.12 is in the range: `>=0.10.12,<0.13.0`. The record of DGX describes 0.12.0, whose constructors of the SSD1306,
+  SH1106, SSD1309, SSD1322 and SSD1680 take the reset line before the resolution; a call in the order of 0.11 compiles
+  in C and returns NULL at run time. From DGX 0.11.1 the glue turns every display by `dgx_screen_orientation()` and
+  names the glass with `DGX_`, and the adapter frees a bus by `dgx_bus_dispose()`: 0.12.0 warns at the calls named
+  after a driver, the names without `DGX_` and `bus->dispose`. The window of the computer turns its display the same
+  way and gets the version of DGX of its build, as a board does. CI also builds the boards with DGX 0.11.8, the newest
+  of 0.11. A board with touch still builds with DGX 0.11: DGX-DI 0.1.7 requires `^0.11.0`.
 - The Sunton ESP32-8048S070C, a 7-inch 800x480 glass on the parallel RGB bus of an ESP32-S3, with GT911 touch, an
   amplifier on I2S and the BOOT button, from the schematic V1.1 of its archive and photos of a board. Its display starts through
   DGX 0.11.6, the first with the RGB bus, at a pixel clock of 33 MHz with two frame buffers in PSRAM: a contributor of

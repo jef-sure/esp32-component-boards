@@ -5,6 +5,39 @@
 # the menu follows); what it needs comes as manifest rules (dependencies) and the Kconfig of
 # the boards (selects). Kconfig and boards/boards.cmake are made by tools/boards_gen.py --all
 # from the data, as the glue is.
+# The version of each library whose versions the glue and the code tell apart, as the component manager chose it, for
+# their #if: BOARDS_VERSION_<LIBRARY>=BOARDS_VERSION(major,minor,patch), the list in boards/boards.cmake. A library in the
+# project's components/ has no COMPONENT_VERSION; the version line of its manifest gives it.
+function(boards_library_versions)
+    if(CMAKE_BUILD_EARLY_EXPANSION)
+        return()
+    endif()
+    idf_build_get_property(components BUILD_COMPONENTS)
+    foreach(entry ${BOARDS_LIBRARY_VERSIONS})
+        string(REPLACE "=" ";" parts "${entry}")
+        list(GET parts 0 library)
+        list(GET parts 1 macro)
+        if(NOT library IN_LIST components)
+            continue()
+        endif()
+        idf_component_get_property(version ${library} COMPONENT_VERSION)
+        if(NOT version MATCHES "^[0-9]+\\.[0-9]+\\.[0-9]+$")
+            idf_component_get_property(dir ${library} COMPONENT_DIR)
+            set(version "")
+            if(EXISTS "${dir}/idf_component.yml")
+                file(STRINGS "${dir}/idf_component.yml" version REGEX "^version:")
+            endif()
+        endif()
+        if(NOT version MATCHES "([0-9]+)\\.([0-9]+)\\.([0-9]+)")
+            message(FATAL_ERROR "the version of ${library} is unknown: the component manager gives none, and ${dir}/idf_component.yml "
+                                "has no version line; the glue of the board needs it to choose its calls")
+        endif()
+        target_compile_definitions(${COMPONENT_LIB} PRIVATE "${macro}=BOARDS_VERSION(${CMAKE_MATCH_1},${CMAKE_MATCH_2},${CMAKE_MATCH_3})")
+    endforeach()
+endfunction()
+
+include("${CMAKE_CURRENT_LIST_DIR}/boards/boards.cmake")
+
 # The computer (the linux target of ESP-IDF, the board host): nothing of a chip is there, and one file gives boards.h over SDL2,
 # its display a window of DGX and its touch the mouse as DGX-DI reads it, which the manifest brings by BOARD_DISPLAY_GRAPHICS
 # and BOARD_TOUCH as for a board.
@@ -28,9 +61,9 @@ if(IDF_TARGET STREQUAL "linux")
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(BOARDS_SDL2 REQUIRED IMPORTED_TARGET sdl2)
     target_link_libraries(${COMPONENT_LIB} PUBLIC PkgConfig::BOARDS_SDL2 m) # libm, which a chip's program always has
+    boards_library_versions()
     return()
 endif()
-include("${CMAKE_CURRENT_LIST_DIR}/boards/boards.cmake")
 idf_component_register(SRCS "src/boards.c" "src/board_bus.c" "src/board_i2c.c" "src/board_spi.c" "src/board_button.c" "src/board_sound.c" "src/board_touch.c"
                             "src/board_touch_fw.c" "src/board_display_none.c" "src/board_volume.c" "src/board_button_find.c" "src/board_radio.c"
                             "src/board_ethernet.c" "src/board_ethernet_none.c"
@@ -87,44 +120,13 @@ list(LENGTH _boards_glue _boards_len)
 if(_boards_len)
     target_sources(${COMPONENT_LIB} PRIVATE ${_boards_glue})
 endif()
-# The version of each library whose versions the glue tells apart, as the component manager chose it, for its #if:
-# BOARDS_VERSION_<LIBRARY>=BOARDS_VERSION(major,minor,patch). A library in the project's components/ has no
-# COMPONENT_VERSION; the version line of its manifest gives it.
-if(NOT CMAKE_BUILD_EARLY_EXPANSION)
-    idf_build_get_property(_boards_components BUILD_COMPONENTS)
-    foreach(_entry ${BOARDS_LIBRARY_VERSIONS})
-        string(REPLACE "=" ";" _parts "${_entry}")
-        list(GET _parts 0 _library)
-        list(GET _parts 1 _macro)
-        if(NOT _library IN_LIST _boards_components)
-            continue()
-        endif()
-        idf_component_get_property(_version ${_library} COMPONENT_VERSION)
-        if(NOT _version MATCHES "^[0-9]+\\.[0-9]+\\.[0-9]+$")
-            idf_component_get_property(_dir ${_library} COMPONENT_DIR)
-            set(_version "")
-            if(EXISTS "${_dir}/idf_component.yml")
-                file(STRINGS "${_dir}/idf_component.yml" _version REGEX "^version:")
-            endif()
-        endif()
-        if(NOT _version MATCHES "([0-9]+)\\.([0-9]+)\\.([0-9]+)")
-            message(FATAL_ERROR "the version of ${_library} is unknown: the component manager gives none, and ${_dir}/idf_component.yml "
-                                "has no version line; the glue of the board needs it to choose its calls")
-        endif()
-        target_compile_definitions(${COMPONENT_LIB} PRIVATE "${_macro}=BOARDS_VERSION(${CMAKE_MATCH_1},${CMAKE_MATCH_2},${CMAKE_MATCH_3})")
-    endforeach()
-endif()
+boards_library_versions()
 unset(_project_dir)
 unset(_local_boards)
 unset(_cmake)
 unset(_dir)
 unset(_boards_glue)
 unset(_boards_len)
-unset(_boards_components)
-unset(_library)
-unset(_macro)
-unset(_version)
-unset(_dir)
 unset(_board)
 unset(_module)
 unset(_upper)

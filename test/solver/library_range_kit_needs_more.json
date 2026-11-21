@@ -9,5 +9,5 @@
             }
         ]
     },
-    "says": "jef-sure/dgx >=0.10.12,<0.12.0 (this kit from 0.11.0)"
+    "says": "jef-sure/dgx >=0.10.12,<0.13.0 (this kit from 0.11.0)"
 }

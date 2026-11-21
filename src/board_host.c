@@ -36,6 +36,7 @@
 
 #include "esp_private/partition_linux.h"
 #endif
+#include "board_version.h"
 #include "dgx_host_screen.h"
 #include "drivers/dgx_panel.h"
 #include "esp_log.h"
@@ -67,6 +68,17 @@ const board_info_t *board_info(void)
 
 static board_display_t shown;
 static dgx_screen_t   *screen;
+
+/* dgx_screen_orientation() turns every display since DGX 0.11.1, and 0.12.0 warns at dgx_panel_orientation() */
+static void turn(int dir_x, int dir_y, bool swap_xy)
+{
+#if BOARDS_VERSION_JEF_SURE__DGX >= BOARDS_VERSION(0, 11, 1)
+    esp_err_t err = dgx_screen_orientation(screen, (dgx_orientation_t)dir_x, (dgx_orientation_t)dir_y, swap_xy);
+    if (err != ESP_OK) ESP_LOGE(TAG, "dgx_screen_orientation: %s", esp_err_to_name(err));
+#else
+    dgx_panel_orientation(screen, (dgx_orientation_t)dir_x, (dgx_orientation_t)dir_y, swap_xy);
+#endif
+}
 
 /* what a display reports of its orientation, as keep_orientation of the adapter of DGX does on a board */
 static void keep_orientation(board_display_t *display, int dir_x, int dir_y, bool swap_xy)
@@ -103,7 +115,7 @@ bool board_display_init_at(int index, board_display_t *out)
             return false;
         }
         sound_end_set();
-        dgx_panel_orientation(screen, (dgx_orientation_t)CONFIG_BOARD_HOST_DIR_X, (dgx_orientation_t)CONFIG_BOARD_HOST_DIR_Y, CONFIG_BOARD_HOST_SWAP);
+        turn(CONFIG_BOARD_HOST_DIR_X, CONFIG_BOARD_HOST_DIR_Y, CONFIG_BOARD_HOST_SWAP);
         shown = (board_display_t){.name = "window", .index = 0};
         keep_orientation(&shown, CONFIG_BOARD_HOST_DIR_X, CONFIG_BOARD_HOST_DIR_Y, CONFIG_BOARD_HOST_SWAP);
     }
@@ -119,7 +131,7 @@ bool board_display_init(board_display_t *out)
 bool board_display_orientation(board_display_t *display, int dir_x, int dir_y, bool swap_xy)
 {
     if (!display || !screen) return false;
-    dgx_panel_orientation(screen, (dgx_orientation_t)dir_x, (dgx_orientation_t)dir_y, swap_xy);
+    turn(dir_x, dir_y, swap_xy);
     keep_orientation(display, dir_x, dir_y, swap_xy);
     shown = *display;
     return true;

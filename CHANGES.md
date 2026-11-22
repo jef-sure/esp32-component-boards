@@ -1,5 +1,13 @@
 # CHANGES
 
+## 0.2.3 (not released yet)
+
+- A library given by `path` or `override_path` in a directory of another name, as `dgx` for jef-sure/dgx, gets its
+  version for the glue: `CMakeLists.txt` finds its component by the directory the lock of the component manager gives
+  for it, and stops when no component of the build is there. Before, the glue saw no version and built the calls of
+  the oldest DGX of the range: the calls DGX 0.12 warns at, and the constructors of the monochrome displays in the
+  order of 0.11, which compile in C and return NULL with DGX 0.12.
+
 ## 0.2.2 (2026-11-22)
 
 - DGX 0.12 is in the range: `>=0.10.12,<0.13.0`. The record of DGX describes 0.12.0, whose constructors of the SSD1306,

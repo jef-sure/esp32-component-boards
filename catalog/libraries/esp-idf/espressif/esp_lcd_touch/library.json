@@ -17,8 +17,8 @@
     "adapter": {
         "symbol": "BOARD_TOUCH_ESP_LCD",
         "requires": ["esp_lcd"],
-        "headers": ["board_touch_spi.h"],
-        "sources": {"BOARD_TOUCH_SPI": ["board_touch_spi.c"]},
+        "headers": ["board_touch_spi.h", "board_touch_i2c.h"],
+        "sources": {"BOARD_TOUCH_SPI": ["board_touch_spi.c"], "BOARD_TOUCH_I2C": ["board_touch_i2c.c"]},
         "notes": "It comes as a dependency of its drivers: no rule of the manifest of its own."
     },
     "checked": {

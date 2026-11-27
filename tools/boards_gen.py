@@ -242,6 +242,10 @@ def touch_part(name, device):
     part = {"name": name, "kind": entry["adapter"]["kind"], "chip": device["chip"], "bus": key, "firmware": device.get("firmware") or {}, **started}
     if part["kind"] == "esp_lcd_touch":
         part.update({"component": started["library"].split("/", 1)[1], "header": entry["header"], "cs": number(connection["cs"]), "irq": number(pins["int"])})
+    elif part["kind"] == "esp_lcd_touch_i2c":
+        part.update({"component": started["library"].split("/", 1)[1], "header": entry["header"], "io": (entry.get("defaults") or {}).get("io"),
+                     "address": connection.get("address")})
+        part.update({line: number(pins[line]) for line in ("rst", "int") if line in pins})
     else:
         part.update({line: number(pins[line]) for line in ("rst", "int") if line in pins})
     part.update({field: connection[field] for field in ("hz", "address_try") if field in connection})
@@ -640,12 +644,17 @@ def read_board(path):
             raise ValueError("the calibration is for another display: its width/height differ from the panel's")
         if not touch.get("bus") or bus_of(data, touch["bus"]) is None:
             raise ValueError(f'the touch\'s bus "{touch.get("bus")}" is not among the board\'s buses')
-        if touch["kind"] in ("gt911", "gsl3680") and bus_parts(touch["bus"])[0] != "i2c":
+        if touch["kind"] in ("gt911", "gsl3680", "esp_lcd_touch_i2c") and bus_parts(touch["bus"])[0] != "i2c":
             raise ValueError(f'a {touch["kind"]} is on an I2C bus of the board: bus is its name, "i2c.i2c0"')
         if touch["kind"] == "gt911":
             for address in touch.get("address_try") or ["0x5d"]:
                 if i2c_address(address) not in (0x5D, 0x14):
                     raise ValueError(f'a GT911 has address 0x5d or 0x14, not {address}')
+        if touch["kind"] == "esp_lcd_touch_i2c":
+            if i2c_address(touch.get("address")) is None:
+                raise ValueError(f'a {touch["chip"]} on I2C needs its address, in its record or on the bus of the board')
+            if not touch.get("io"):
+                raise ValueError(f'the record of {touch["library"]} names no I2C settings of the driver for a {touch["chip"]}: defaults.io')
         if touch["kind"] == "esp_lcd_touch":
             if bus_parts(touch["bus"])[0] != "spi":
                 raise ValueError('a touch of the esp_lcd_touch kind is on an SPI bus of the board: bus is its name, "spi.spi3"')
@@ -902,7 +911,7 @@ def c_lines(value):
 
 
 # The storage of DGX-DI each kind of touch panel is a device of, defined in the glue.
-TOUCH_DEVICES = {"gt911": "dgx_di_esp_lcd_touch_t", "esp_lcd_touch": "dgx_di_esp_lcd_touch_t", "gsl3680": "dgx_di_gsl3680_t"}
+TOUCH_DEVICES = {"gt911": "dgx_di_esp_lcd_touch_t", "esp_lcd_touch": "dgx_di_esp_lcd_touch_t", "esp_lcd_touch_i2c": "dgx_di_esp_lcd_touch_t", "gsl3680": "dgx_di_gsl3680_t"}
 
 
 def glue_of(board):
@@ -957,6 +966,8 @@ def glue_of(board):
         if touch["kind"] == "esp_lcd_touch":
             headers.append(touch["header"])
             headers.append("driver/spi_common.h")
+        elif touch["kind"] == "esp_lcd_touch_i2c":
+            headers.append(touch["header"])
     if any(sound["kind"] != "dac" for sound in sounds):
         headers.append("driver/i2s_std.h")  # I2S_NUM_* of the table of buses
     if plain_spi or any(key == "host" for numbers in board["kept"].values() for key in numbers):
@@ -1160,6 +1171,9 @@ def glue_of(board):
                 numbered = "false" if touch.get("resistive") else "true"
                 out(f"static const struct board_touch_spi touch{i}_driver = {{{common}, .host = {own.upper()}_HOST, .cs = {c_gpio(touch['cs'])}, .hz = {touch.get('hz', touch['entry']['defaults']['hz'])}, "
                     f".numbered = {numbered}, .create = {touch['entry']['init'][0]['call']}}};")
+            elif kind == "esp_lcd_touch_i2c":
+                out(f"static const struct board_touch_i2c touch{i}_driver = {{{common}, .io = {touch['io']}, .address = {i2c_address(touch['address']):#04x}, "
+                    f".hz = {I2C_HZ_DEFAULT}, .create = {touch['entry']['init'][0]['call']}}};")
             else:
                 out(f"static const struct board_touch_gsl3680 touch{i}_driver = {{{common}}};")
             out("")

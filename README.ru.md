@@ -147,7 +147,7 @@ idf.py --preset cyd_s028r build flash monitor
 | ESP32 with a 0.96-inch OLED | ESP32 | 128x64 SSD1306, I2C, 22x11.2 mm | нет | нет | да | дисплей |
 | Waveshare ESP32-P4-ETH | ESP32-P4 | нет | нет | ES8311 | да | — |
 | Waveshare ESP32-P4-POE-ETH | ESP32-P4 | нет | нет | ES8311 | да | — |
-| Waveshare ESP32-S3-Touch-AMOLED-1.32 | ESP32-S3 | 466x466 CO5300, QSPI, 23.7x23.7 mm | CST820 (пока не запускается) | ES8311 | да | дисплей, звук |
+| Waveshare ESP32-S3-Touch-AMOLED-1.32 | ESP32-S3 | 466x466 CO5300, QSPI, 23.7x23.7 mm | CST820 | ES8311 | да | дисплей, тач, звук |
 | Waveshare ESP32-S3-Zero | ESP32-S3 | нет | нет | нет | да | — |
 | ESP32-WROVER-DEV | ESP32 | нет | нет | нет | да | — |
 | ESP32-S3 DevKit, 16 MB, 8 MB PSRAM | ESP32-S3 | нет | нет | нет | да | кнопка |

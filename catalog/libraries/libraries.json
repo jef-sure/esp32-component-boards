@@ -8668,9 +8668,12 @@
             "version": "1.2.1"
         },
         "esp-idf/espressif/esp_lcd_touch_cst816s": {
-            "title": "espressif/esp_lcd_touch_cst816s",
+            "title": "esp_lcd_touch CST816S",
+            "version": "1.1.2",
+            "repository": "https://components.espressif.com/components/espressif/esp_lcd_touch_cst816s",
             "platforms": ["esp_idf"],
-            "chips": ["cst816s"]
+            "chips": ["cst816s", "cst820"],
+            "requires": ["esp-idf/espressif/esp_lcd_touch"]
         },
         "esp-idf/espressif/esp_lcd_touch_ft5x06": {
             "title": "espressif/esp_lcd_touch_ft5x06",

@@ -25,6 +25,10 @@ dependencies:
     version: "~3.0.9"
     matches:
       - if: "$CONFIG{BOARD_RADIO_ESP_HOSTED} == 1"
+  espressif/esp_lcd_touch_cst816s:
+    version: "^1.1.1"
+    matches:
+      - if: "$CONFIG{BOARD_TOUCH_CST816S} == 1"
   espressif/esp_lcd_touch_gt911:
     version: "^1.1.1"
     matches:

@@ -197,7 +197,7 @@
             "esp-idf/espressif/esp_lcd_touch",
             "esp-idf/espressif/esp_lcd_touch_cst816s"
         ],
-        "cst820": ["esp-idf/espressif/esp_lcd_touch", "esp-idf/kodediy/esp_lcd_touch_cst820"],
+        "cst820": ["esp-idf/espressif/esp_lcd_touch", "esp-idf/espressif/esp_lcd_touch_cst816s", "esp-idf/kodediy/esp_lcd_touch_cst820"],
         "cst9217": ["esp-idf/waveshare/esp_lcd_touch_cst9217"],
         "dht11": [
             "arduino/adish0016/dht118266",

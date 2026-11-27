@@ -5,4 +5,4 @@
 # depends on the board chosen cannot stand in REQUIRES. Optional: a component the rules of the
 # manifest did not bring is simply not there, and the glue that needs it is not compiled either.
 # PUBLIC: a program draws with DGX and reads DGX-DI through the headers this brings.
-idf_component_optional_requires(PUBLIC esp_driver_gpio esp_driver_i2c esp_driver_i2s esp_driver_spi espressif__esp_codec_dev jef-sure__dgx)
+idf_component_optional_requires(PUBLIC esp_driver_gpio esp_driver_i2c esp_driver_i2s esp_driver_spi espressif__esp_codec_dev espressif__esp_lcd_touch espressif__esp_lcd_touch_cst816s jef-sure__dgx jef-sure__dgx-di)

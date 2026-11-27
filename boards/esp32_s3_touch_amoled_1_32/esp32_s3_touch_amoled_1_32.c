@@ -16,9 +16,14 @@
 
 #include "board_display.h"
 #include "board_sound_es8311.h"
+#include "board_touch.h"
+#include "board_touch_i2c.h"
+#include "board_touch_lcd.h"
+#include "board_touch_spi.h"
 #include "bus/dgx_qspi_esp32.h"
 #include "driver/i2s_std.h"
 #include "drivers/co5300.h"
+#include "esp_lcd_touch_cst816s.h"
 
 /* Waveshare ESP32-S3-Touch-AMOLED-1.32: A round 1.32-inch 466x466 AMOLED, CO5300 on QSPI, CST820 touch, ES8311 with a speaker header and a microphone; an ESP32-S3-PICO-1 with 8 MB flash and 8 MB octal PSRAM, a battery charger, PWR and BOOT buttons. */
 
@@ -31,7 +36,7 @@ static const struct board_i2s_bus board_i2s_i2s0 = {.port = I2S_NUM_0, .mclk = G
 /* Every bus of the board, its numbers by name: the kinds the component sets up and the
  * kinds it only keeps for the program, for a program that sets its own hardware up on the
  * board's wiring instead of copying pins. */
-static const struct board_bus_field board_bus_fields[] = {{"qspi.spi2", "d0", 12}, {"qspi.spi2", "d1", 13}, {"qspi.spi2", "d2", 14}, {"qspi.spi2", "d3", 15}, {"qspi.spi2", "hz", 40000000}, {"qspi.spi2", "sclk", 11}, {"i2c.i2c0", "scl", 48}, {"i2c.i2c0", "sda", 47}, {"i2s.i2s0", "bclk", 39}, {"i2s.i2s0", "din", 40}, {"i2s.i2s0", "dout", 42}, {"i2s.i2s0", "mclk", 38}, {"i2s.i2s0", "ws", 41}, {"touch", "address", 21}, {"touch", "int", 6}, {"touch", "port", 0}, {"touch", "rst", 7}, {"battery", "in", 4}, {"usb", "d_minus", 19}, {"usb", "d_plus", 20}};
+static const struct board_bus_field board_bus_fields[] = {{"qspi.spi2", "d0", 12}, {"qspi.spi2", "d1", 13}, {"qspi.spi2", "d2", 14}, {"qspi.spi2", "d3", 15}, {"qspi.spi2", "hz", 40000000}, {"qspi.spi2", "sclk", 11}, {"i2c.i2c0", "scl", 48}, {"i2c.i2c0", "sda", 47}, {"i2s.i2s0", "bclk", 39}, {"i2s.i2s0", "din", 40}, {"i2s.i2s0", "dout", 42}, {"i2s.i2s0", "mclk", 38}, {"i2s.i2s0", "ws", 41}, {"battery", "in", 4}, {"usb", "d_minus", 19}, {"usb", "d_plus", 20}};
 const struct board_bus_table board_bus_table = {.fields = board_bus_fields, .count = sizeof(board_bus_fields) / sizeof(board_bus_fields[0])};
 
 /* The hosts the board's buses claim, SPI and QSPI alike: spi2. */
@@ -58,7 +63,18 @@ static const struct board_display_panel display_panels[] = {
 static struct board_display_started displays_started[1];
 const struct board_display_table board_display_table = {.panels = display_panels, .started = displays_started, .count = 1};
 
-const struct board_touch_table board_touch_table = {.count = 0};
+/* touch: espressif/esp_lcd_touch_cst816s on i2c.i2c0, the calibration of its measured board. */
+static const dgx_di_aim_t touch0_aims[] = {{.meant_x = 83, .meant_y = 83, .x = 386, .y = 380}, {.meant_x = 382, .meant_y = 83, .x = 67, .y = 388}, {.meant_x = 83, .meant_y = 382, .x = 372, .y = 69}, {.meant_x = 382, .meant_y = 382, .x = 68, .y = 68}, {.meant_x = 233, .meant_y = 25, .x = 249, .y = 437}, {.meant_x = 233, .meant_y = 441, .x = 212, .y = 10}, {.meant_x = 25, .meant_y = 233, .x = 444, .y = 226}, {.meant_x = 441, .meant_y = 233, .x = 12, .y = 228}, {.meant_x = 233, .meant_y = 233, .x = 220, .y = 216}};
+static const struct board_touch_calibration touch0_calibrated = {.aims = touch0_aims, .count = 9, .width = 466, .height = 466, .blink_ms = 0, .gap_ms = 0, .placeholder = false};
+static const struct board_touch_panel touch0_panel = {.x_max = 466, .y_max = 466, .rst = GPIO_NUM_7, .irq = GPIO_NUM_6, .i2c_port = I2C_NUM_0, .fingers = 1};
+static dgx_di_esp_lcd_touch_t touch0_device;
+static const struct board_touch_i2c touch0_driver = {.panel = &touch0_panel, .calibrated = &touch0_calibrated, .device = &touch0_device, .io = ESP_LCD_TOUCH_IO_I2C_CST816S_CONFIG(), .address = 0x15, .hz = 400000, .create = esp_lcd_touch_new_i2c_cst816s};
+
+static const struct board_touch_entry touch_entries[] = {{.name = "touch", .over = "lcd", .start = board_glue_touch_i2c_start, .esp_lcd_touch_i2c = &touch0_driver}};
+static struct board_touch touches_started[1];
+static struct board_touch_slot touch_slots[1];
+const struct board_touch_slots board_touch_slots = {.slots = touch_slots, .count = 1};
+const struct board_touch_table board_touch_table = {.entries = touch_entries, .started = touches_started, .count = 1};
 
 /* sound: es8311 at 22050 Hz. */
 static const struct board_sound_es8311 sound0_es8311 = {.i2s = &board_i2s_i2s0, .i2c_port = I2C_NUM_0, .address = 0x18, .pa = GPIO_NUM_46,

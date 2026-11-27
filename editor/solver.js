@@ -1076,7 +1076,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
     // A display or a touch whose chip no library of the catalog drives, and a touch over such a display: the glue keeps
     // them as data, as boards_gen.py does, and the program starts them itself.
     // The kinds of adapter that start a touch, TOUCH_DEVICES of boards_gen.py: a chip a library drives as a display is no touch.
-    const TOUCH_ADAPTERS = new Set(['gt911', 'esp_lcd_touch', 'gsl3680']);
+    const TOUCH_ADAPTERS = new Set(['gt911', 'esp_lcd_touch', 'esp_lcd_touch_i2c', 'gsl3680']);
     function undriven(resolved) {
         const displays = Object.entries(resolved.devices).filter(([, device]) => device.used !== false && (device.classes || []).includes('display')
             && device.chip && !device.library && !Object.keys(device.libraries || {}).length).map(([name]) => name);

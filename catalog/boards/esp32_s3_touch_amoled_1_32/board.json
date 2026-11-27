@@ -72,6 +72,13 @@
             "date": "2026-11-27",
             "result": "confirmed",
             "notes": "hello_board through this component: the second of 441 Hz at 22050 Hz and volume 25 heard on a speaker at J6."
+        },
+        "touch": {
+            "level": "hardware",
+            "covers": ["devices.touch"],
+            "by": "a program of the bench through this component, the board in Anton's hand",
+            "date": "2026-11-27",
+            "notes": "The CST820 starts through esp_lcd_touch_cst816s 1.1.2 (IC id 183) and answers at 0x15. With the calibration of the data, 30 touches on the nine rings came out 14 pixels from the nearest ring on average and 33 at worst. With an identity calibration the point came out mirrored through the center: the panel lies turned by 180 degrees."
         }
     },
     "buses": {
@@ -131,7 +138,36 @@
             "chip": "cst820",
             "on": {"i2c.i2c0": {}},
             "pins": {"rst": 7, "int": 6},
-            "config": {"over": "lcd", "x_max": 465, "y_max": 465},
+            "config": {
+                "over": "lcd",
+                "x_max": 465,
+                "y_max": 465,
+                "calibrations": [
+                    {
+                        "rule": "the newest",
+                        "measured": true,
+                        "measured_with": {
+                            "esp-idf/jef-sure/dgx-di": "0.2.0",
+                            "esp-idf/jef-sure/dgx": "0.12.13",
+                            "esp-idf/espressif/esp_lcd_touch_cst816s": "1.1.2"
+                        },
+                        "notes": "Measured by a program of the bench, not by dgx_di_calibrate_measure, whose targets near the corners lie outside a round glass: one ring at a time, two rounds, each place the median of the two touches. The touch lies turned by 180 degrees under the glass. Turned back, a touch was 18 pixels off its ring on average and 27.5 at worst.",
+                        "x_max": 465,
+                        "y_max": 465,
+                        "width": 466,
+                        "height": 466,
+                        "left_up": {"meant": [83, 83], "device": [386, 380]},
+                        "right_up": {"meant": [382, 83], "device": [67, 388]},
+                        "left_down": {"meant": [83, 382], "device": [372, 69]},
+                        "right_down": {"meant": [382, 382], "device": [68, 68]},
+                        "up": {"meant": [233, 25], "device": [249, 437]},
+                        "down": {"meant": [233, 441], "device": [212, 10]},
+                        "left": {"meant": [25, 233], "device": [444, 226]},
+                        "right": {"meant": [441, 233], "device": [12, 228]},
+                        "middle": {"meant": [233, 233], "device": [220, 216]}
+                    }
+                ]
+            },
             "notes": "On P1 with the panel. The I2C has 10K to VCC3V3, R32 and R33."
         },
         "sound": {

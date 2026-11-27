@@ -19,6 +19,7 @@
 #include "board_sound_es8311.h"
 #include "board_touch.h"
 #include "board_touch_gt911.h"
+#include "board_touch_i2c.h"
 #include "board_touch_lcd.h"
 #include "board_touch_spi.h"
 #include "bus/dgx_dsi_esp32.h"

@@ -13,6 +13,7 @@
 #include "board_display.h"
 #include "board_sound_dac.h"
 #include "board_touch.h"
+#include "board_touch_i2c.h"
 #include "board_touch_lcd.h"
 #include "board_touch_spi.h"
 #include "bus/dgx_spi_esp32.h"

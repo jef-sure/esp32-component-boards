@@ -1,0 +1,87 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "library",
+    "ecosystem": "esp-idf",
+    "owner": "espressif",
+    "name": "esp_lcd_touch_cst816s",
+    "title": "esp_lcd_touch CST816S",
+    "url": "https://components.espressif.com/components/espressif/esp_lcd_touch_cst816s",
+    "license": "Custom",
+    "install": [
+        {"via": "registry"},
+        {
+            "via": "git",
+            "url": "https://github.com/espressif/esp-bsp.git",
+            "path": "components/lcd_touch/esp_lcd_touch_cst816s"
+        }
+    ],
+    "described": "1.1.2",
+    "chips": {
+        "cst816s": {
+            "header": "esp_lcd_touch_cst816s.h",
+            "on": ["i2c"],
+            "interface": "esp_lcd_touch",
+            "defaults": {"io": "ESP_LCD_TOUCH_IO_I2C_CST816S_CONFIG()"},
+            "init": [
+                {
+                    "call": "esp_lcd_touch_new_i2c_cst816s",
+                    "args": ["{io}", "{config}", "{handle}"],
+                    "ok": {"equals": "ESP_OK"}
+                }
+            ],
+            "adapter": {
+                "kind": "esp_lcd_touch_i2c",
+                "function": "board_glue_touch_i2c_start",
+                "symbols": ["BOARD_TOUCH_I2C"],
+                "headers": ["board_touch_lcd.h"]
+            }
+        },
+        "cst820": {
+            "header": "esp_lcd_touch_cst816s.h",
+            "on": ["i2c"],
+            "interface": "esp_lcd_touch",
+            "defaults": {"io": "ESP_LCD_TOUCH_IO_I2C_CST816S_CONFIG()"},
+            "init": [
+                {
+                    "call": "esp_lcd_touch_new_i2c_cst816s",
+                    "args": ["{io}", "{config}", "{handle}"],
+                    "ok": {"equals": "ESP_OK"}
+                }
+            ],
+            "adapter": {
+                "kind": "esp_lcd_touch_i2c",
+                "function": "board_glue_touch_i2c_start",
+                "symbols": ["BOARD_TOUCH_I2C"],
+                "headers": ["board_touch_lcd.h"]
+            },
+            "notes": "The driver of the CST816S reads the CST820: the number of points at 0x02 and one point at 0x03 to 0x06, as the code of Waveshare for its CST820 boards does."
+        }
+    },
+    "adapter": {
+        "version": "^1.1.1",
+        "symbol": "BOARD_TOUCH_CST816S",
+        "with": ["esp-idf/jef-sure/dgx-di", "esp-idf/espressif/esp_lcd_touch"]
+    },
+    "checked": {
+        "api": {
+            "level": "vendor-code",
+            "source": "esp_lcd_touch_cst816s.c and include/esp_lcd_touch_cst816s.h of 1.1.2",
+            "date": "2026-11-27"
+        }
+    },
+    "versions": {
+        "1.1.2": {"requires": {"esp-idf/espressif/esp_lcd_touch": "^1.2.0"}, "platforms": {"esp_idf": ">=5.2"}},
+        "1.1.1~2": {"requires": {"esp-idf/espressif/esp_lcd_touch": "^1.2.0"}, "platforms": {"esp_idf": ">=5.2"}},
+        "1.1.1~1": {"requires": {"esp-idf/espressif/esp_lcd_touch": "^1.2.0"}, "platforms": {"esp_idf": ">=5.2"}},
+        "1.1.1": {"requires": {"esp-idf/espressif/esp_lcd_touch": "^1.2.0"}, "platforms": {"esp_idf": ">=4.4.2"}},
+        "1.1.0": {"requires": {"esp-idf/espressif/esp_lcd_touch": "^1.0.4"}, "platforms": {"esp_idf": ">=4.4.2"}},
+        "1.0.6": {"requires": {"esp-idf/espressif/esp_lcd_touch": "^1.0.4"}, "platforms": {"esp_idf": ">=4.4.2"}},
+        "1.0.5": {"requires": {"esp-idf/espressif/esp_lcd_touch": "^1.0.4"}, "platforms": {"esp_idf": ">=4.4.2"}},
+        "1.0.4": {"requires": {"esp-idf/espressif/esp_lcd_touch": "^1.0.4"}, "platforms": {"esp_idf": ">=4.4.2"}},
+        "1.0.3~1": {"requires": {"esp-idf/espressif/esp_lcd_touch": "^1.0.4"}, "platforms": {"esp_idf": ">=4.4.2"}},
+        "1.0.3": {"requires": {"esp-idf/espressif/esp_lcd_touch": "^1.0.4"}, "platforms": {"esp_idf": ">=4.4.2"}},
+        "1.0.2~1": {"requires": {"esp-idf/espressif/esp_lcd_touch": "^1.0.4"}, "platforms": {"esp_idf": ">=4.4.2"}},
+        "1.0.1": {"requires": {"esp-idf/espressif/esp_lcd_touch": "^1.0"}, "platforms": {"esp_idf": ">=4.4.2"}}
+    }
+}

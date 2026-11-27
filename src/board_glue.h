@@ -60,6 +60,7 @@ struct board_touch_panel {
 /* The data of each kind of touch panel, defined by its adapter. */
 struct board_touch_gt911;
 struct board_touch_spi;
+struct board_touch_i2c;
 struct board_touch_gsl3680;
 
 /*
@@ -72,6 +73,7 @@ struct board_touch_entry {
     bool (*start)(int index, const struct board_touch_entry *entry, const struct board_display *display, struct board_touch *out);
     const struct board_touch_gt911   *gt911;
     const struct board_touch_spi     *esp_lcd_touch;
+    const struct board_touch_i2c     *esp_lcd_touch_i2c;
     const struct board_touch_gsl3680 *gsl3680;
 };
 struct board_touch_table {

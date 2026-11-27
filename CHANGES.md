@@ -1,5 +1,12 @@
 # CHANGES
 
+## 0.2.4 (not released yet)
+
+- The record of DGX describes 0.12.13 and its four new displays: the CO5300 of round AMOLED panels on QSPI from 0.12.4,
+  the ST7796 (ST7796S) of 320x480 panels on SPI or the 8-bit bus and the AXS15231B of the Guition JC3248W535 on QSPI from
+  0.12.7, the NV3007 of 142x428 bar panels on SPI from 0.12.9. A board with one of them needs that version. No board of
+  the catalog has them yet. The index of chips names DGX for the four.
+
 ## 0.2.3 (2026-11-22)
 
 - A library given by `path` or `override_path` in a directory of another name, as `dgx` for jef-sure/dgx, gets its

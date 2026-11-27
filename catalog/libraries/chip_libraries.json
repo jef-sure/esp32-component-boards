@@ -92,7 +92,7 @@
             "arduino/mrmx/mrmx---aw9523b",
             "esp-idf/espressif/esp_io_expander_aw9523"
         ],
-        "axs15231b": ["esp-idf/espressif/esp_lcd_axs15231b", "esp-idf/espressif/esp_lcd_touch"],
+        "axs15231b": ["esp-idf/espressif/esp_lcd_axs15231b", "esp-idf/espressif/esp_lcd_touch", "esp-idf/jef-sure/dgx"],
         "axs15260": ["esp-idf/espressif/esp_lcd_panel_io_additions", "esp-idf/guition/esp_lcd_axs15260"],
         "bf20a6": ["esp-idf/espressif/esp32-camera"],
         "bf3005": ["esp-idf/espressif/esp32-camera"],
@@ -191,7 +191,7 @@
             "arduino/sparkfun/sparkfun-ccs811-arduino-library"
         ],
         "cjc8910": ["esp-idf/espressif/esp_codec_dev"],
-        "co5300": ["esp-idf/espressif/esp_lcd_co5300"],
+        "co5300": ["esp-idf/espressif/esp_lcd_co5300", "esp-idf/jef-sure/dgx"],
         "cst816s": [
             "arduino/fbiego/cst816s",
             "esp-idf/espressif/esp_lcd_touch",
@@ -598,6 +598,7 @@
             "arduino/sparkfun/sparkfun-qwiic-scale-nau7802-arduino-library"
         ],
         "nt99141": ["esp-idf/espressif/esp32-camera"],
+        "nv3007": ["esp-idf/jef-sure/dgx"],
         "nv3041a": [
             "esp-idf/jef-sure/dgx",
             "github/bmorcelli/displaydrivers",
@@ -773,7 +774,7 @@
             "esp-idf/espressif/esp_lcd_st77916",
             "esp-idf/jef-sure/dgx"
         ],
-        "st7796": ["esp-idf/espressif/esp_lcd_st7796"],
+        "st7796": ["esp-idf/espressif/esp_lcd_st7796", "esp-idf/jef-sure/dgx"],
         "st7920": ["esp-idf/jef-sure/dgx"],
         "sths34pf80": [
             "arduino/adafruit/adafruit-sths34pf80",

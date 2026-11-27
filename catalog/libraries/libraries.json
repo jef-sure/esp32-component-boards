@@ -8792,15 +8792,18 @@
         },
         "esp-idf/jef-sure/dgx": {
             "title": "DGX",
-            "version": "0.12.0",
+            "version": "0.12.13",
             "repository": "https://github.com/jef-sure/esp32-component-dgx",
             "platforms": ["esp_idf"],
             "chips": [
+                "axs15231b",
+                "co5300",
                 "ek9716",
                 "gc9a01",
                 "ili9341",
                 "jd9165",
                 "jd9365",
+                "nv3007",
                 "nv3041a",
                 "sh1106",
                 "ssd1306",
@@ -8813,6 +8816,7 @@
                 "st7735",
                 "st7789",
                 "st77916",
+                "st7796",
                 "st7920"
             ],
             "stars": 6,

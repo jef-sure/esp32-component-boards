@@ -12,7 +12,7 @@
         {"via": "registry"},
         {"via": "git", "url": "https://github.com/jef-sure/esp32-component-dgx.git", "ref": "{version}"}
     ],
-    "described": "0.12.0",
+    "described": "0.12.13",
     "description": "Graphics on displays of SPI, QSPI, 8-bit parallel, parallel RGB, MIPI-DSI and I2C, with its own panel drivers.",
     "values": {
         "color_order": {"rgb": "DgxScreenRGB", "bgr": "DgxScreenBGR"},
@@ -691,13 +691,166 @@
                     "notes": "2.13-inch: WeAct Studio, Good Display GDEY0213Z98; not checked on a module"
                 }
             ]
+        },
+        "st7796": {
+            "header": "drivers/st7796s.h",
+            "on": ["spi", "p8"],
+            "select": ["DGX_ENABLE_SPI_ST7796S"],
+            "init": [
+                {
+                    "call": "dgx_st7796s_init",
+                    "args": ["{bus}", "{rst}", "{backlight}", "{depth}", "{color}", "{panel}"],
+                    "returns": "screen",
+                    "ok": {"not": "NULL"}
+                }
+            ],
+            "supports": {"depth_bits": [16, 18]},
+            "controls": {
+                "orientation": {
+                    "call": "dgx_screen_orientation",
+                    "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
+                    "ok": {"equals": "ESP_OK"}
+                }
+            },
+            "setup": [{"control": "orientation"}],
+            "adapter": {"kind": "panel"},
+            "panels": [
+                {"width": 320, "height": 480, "value": "DGX_ST7796S_320X480"},
+                {
+                    "width": 480,
+                    "height": 320,
+                    "value": "DGX_ST7796S_480X320",
+                    "notes": "320x480 turned by dgx_screen_orientation(scr, DgxScreenRightLeft, DgxScreenTopBottom, true)"
+                }
+            ],
+            "notes": "The ST7796S, as DGX names it. With DgxScreenRGB the driver sets the BGR bit of MADCTL, as TFT_eSPI does; a module that shows red and blue swapped takes DgxScreenBGR."
+        },
+        "nv3007": {
+            "header": "drivers/nv3007.h",
+            "on": ["spi", "p8"],
+            "select": ["DGX_ENABLE_NV3007"],
+            "init": [
+                {
+                    "call": "dgx_nv3007_init",
+                    "args": ["{bus}", "{rst}", "{backlight}", "{depth}", "{color}", "{panel}"],
+                    "returns": "screen",
+                    "ok": {"not": "NULL"}
+                }
+            ],
+            "supports": {"depth_bits": [16, 18]},
+            "controls": {
+                "orientation": {
+                    "call": "dgx_screen_orientation",
+                    "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
+                    "ok": {"equals": "ESP_OK"}
+                }
+            },
+            "setup": [{"control": "orientation"}],
+            "adapter": {"kind": "panel"},
+            "panels": [
+                {
+                    "width": 142,
+                    "height": 428,
+                    "value": "DGX_NV3007_142X428",
+                    "notes": "the bar glass, upright, 12 columns into a memory of 168x428"
+                },
+                {
+                    "width": 428,
+                    "height": 142,
+                    "value": "DGX_NV3007_428X142",
+                    "notes": "142x428 turned by dgx_screen_orientation(scr, DgxScreenRightLeft, DgxScreenTopBottom, true)"
+                }
+            ],
+            "notes": "The init table is that of the 2.79-inch module."
+        },
+        "axs15231b": {
+            "header": "drivers/axs15231b.h",
+            "on": ["qspi"],
+            "select": ["DGX_ENABLE_AXS15231B"],
+            "init": [
+                {
+                    "call": "dgx_axs15231b_init",
+                    "args": ["{bus}", "{rst}", "{backlight}", "{depth}", "{color}", "{panel}"],
+                    "returns": "screen",
+                    "ok": {"not": "NULL"}
+                }
+            ],
+            "supports": {"depth_bits": [16]},
+            "controls": {
+                "orientation": {
+                    "call": "dgx_screen_orientation",
+                    "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
+                    "ok": {"equals": "ESP_OK"}
+                }
+            },
+            "setup": [{"control": "orientation"}],
+            "adapter": {"kind": "panel"},
+            "panels": [
+                {
+                    "width": 320,
+                    "height": 480,
+                    "value": "DGX_AXS15231B_320X480",
+                    "notes": "the glass of the Guition JC3248W535"
+                }
+            ],
+            "notes": "The screen keeps its picture in a 16-bit virtual screen from the heap, 300 KB for 320x480 (PSRAM on a board that has it), and sends what changed in whole blocks of 4x4 pixels. The touch controller in the same chip is not read by DGX."
+        },
+        "co5300": {
+            "header": "drivers/co5300.h",
+            "on": ["qspi"],
+            "select": ["DGX_ENABLE_CO5300"],
+            "init": [
+                {
+                    "call": "dgx_co5300_init",
+                    "args": ["{bus}", "{rst}", "{depth}", "{color}", "{panel}"],
+                    "returns": "screen",
+                    "ok": {"not": "NULL"}
+                }
+            ],
+            "supports": {"depth_bits": [16]},
+            "controls": {
+                "orientation": {
+                    "call": "dgx_screen_orientation",
+                    "args": ["{screen}", "{dir_x}", "{dir_y}", "{swap_xy}"],
+                    "ok": {"equals": "ESP_OK"}
+                }
+            },
+            "setup": [{"control": "orientation"}],
+            "adapter": {"kind": "panel"},
+            "panels": [
+                {
+                    "width": 466,
+                    "height": 466,
+                    "value": "DGX_CO5300_466X466",
+                    "notes": "round: Waveshare ESP32-S3-Touch-AMOLED-1.32, 1.75 and 1.75C, ESP32-C6-Touch-AMOLED-1.32"
+                },
+                {
+                    "width": 480,
+                    "height": 480,
+                    "value": "DGX_CO5300_480X480",
+                    "notes": "Waveshare ESP32-S3-Touch-AMOLED-2.16"
+                },
+                {
+                    "width": 368,
+                    "height": 448,
+                    "value": "DGX_CO5300_368X448",
+                    "notes": "Waveshare ESP32-S3-Touch-AMOLED-1.8 and ESP32-C6-Touch-AMOLED-1.8 of the second revision"
+                },
+                {
+                    "width": 280,
+                    "height": 456,
+                    "value": "DGX_CO5300_280X456",
+                    "notes": "Waveshare ESP32-S3-Touch-AMOLED-1.64, LilyGO T-Display S3 AMOLED 1.64"
+                }
+            ],
+            "notes": "The screen keeps its picture in a 16-bit virtual screen from the heap, 434 KB for 466x466 (PSRAM on a board that has it), and sends what changed in whole pairs of columns and rows. The panel has no backlight line: dgx_screen_brightness() sets its brightness. dgx_co5300_init_with() sends in step with the TE line of the panel; the glue calls dgx_co5300_init(). Of the four glasses only the 466x466 was tried."
         }
     },
     "adapter": {
         "version": ">=0.10.12,<0.13.0",
         "symbol": "BOARD_DISPLAY_GRAPHICS",
         "requires": ["esp_driver_gpio"],
-        "notes": "0.10.0 is not in the registry. 0.10.8 is the first that builds for the linux target of ESP-IDF: the window of the board host; 0.10.9 turns its glass as the board is held, 0.10.10 gives its mouse, 0.10.11 its keys and a window on no bus. 0.10.12 turns the SSD1306, SSD1309 and SH1106. 0.10.13 draws straight segments by the pen, 0.10.14 a filled circle with a soft edge and gives a screen its user_data. 0.10.16 has the 1.14-inch glass of the ST7789 and the NV3041A at 18 bits, 0.10.17 the SSD1680 of e-paper, whose glue calls dgx_ssd1680_init. 0.11.0 takes the backlight line in the constructor of every display that has one and lights it once the display is set up; it has the 0.96-inch glass of the ST7735. The range starts at 0.10.12: src/ and adapters/ built with it, and with 0.10.17 and 0.11.0, in hello_board on cyd_s028r and jc8012p4a1c on 2026-11-14. 0.11.5 has the ST7701S of the 4.3-inch JC4880P443C, which turns only by dgx_screen_orientation(), the call of every display since 0.11.1. 0.11.6 has the parallel RGB bus and the 7-inch glass of the Sunton ESP32-8048S070. From 0.11.1 every display turns by dgx_screen_orientation() and the glass has a name with DGX_; the glue uses them from there, as 0.12.0 warns at the calls named after a driver and the names without DGX_. 0.12.0 takes the reset line before the resolution in the constructors of the SSD1306, SH1106, SSD1309, SSD1322 and SSD1680.",
+        "notes": "0.10.0 is not in the registry. 0.10.8 is the first that builds for the linux target of ESP-IDF: the window of the board host; 0.10.9 turns its glass as the board is held, 0.10.10 gives its mouse, 0.10.11 its keys and a window on no bus. 0.10.12 turns the SSD1306, SSD1309 and SH1106. 0.10.13 draws straight segments by the pen, 0.10.14 a filled circle with a soft edge and gives a screen its user_data. 0.10.16 has the 1.14-inch glass of the ST7789 and the NV3041A at 18 bits, 0.10.17 the SSD1680 of e-paper, whose glue calls dgx_ssd1680_init. 0.11.0 takes the backlight line in the constructor of every display that has one and lights it once the display is set up; it has the 0.96-inch glass of the ST7735. The range starts at 0.10.12: src/ and adapters/ built with it, and with 0.10.17 and 0.11.0, in hello_board on cyd_s028r and jc8012p4a1c on 2026-11-14. 0.11.5 has the ST7701S of the 4.3-inch JC4880P443C, which turns only by dgx_screen_orientation(), the call of every display since 0.11.1. 0.11.6 has the parallel RGB bus and the 7-inch glass of the Sunton ESP32-8048S070. From 0.11.1 every display turns by dgx_screen_orientation() and the glass has a name with DGX_; the glue uses them from there, as 0.12.0 warns at the calls named after a driver and the names without DGX_. 0.12.0 takes the reset line before the resolution in the constructors of the SSD1306, SH1106, SSD1309, SSD1322 and SSD1680. 0.12.4 adds the CO5300, 0.12.7 the ST7796S and the AXS15231B, 0.12.9 the NV3007: a board with one of them needs that version.",
         "headers": ["board_display.h"],
         "public": "boards_dgx.h",
         "sources": {"BOARD_DISPLAY_GRAPHICS": ["board_display.c"]}
@@ -858,9 +1011,49 @@
             "source": "CHANGES.md and docs/rgb-display-en.md of DGX 0.11.6",
             "notes": "On the Sunton ESP32-8048S070 with two frame buffers: the bus holds 33 MHz, 59.5 frames a second, while the processor draws as fast as it can, and a moving picture does not tear.",
             "date": "2026-11-20"
+        },
+        "api_0_12_13": {
+            "level": "vendor-code",
+            "source": "include/drivers/st7796s.h, nv3007.h, axs15231b.h and co5300.h, include/dgx_screen.h, Kconfig and CHANGES.md of esp32-component-dgx 0.12.1 to 0.12.13, and git diff of include/ from 0.12.0: four drivers added, no call the record names changed; dgx_screen_rgb() of a 4-bit screen gives 0x00 .. 0xF0 from 0.12.12, which the glue does not call",
+            "date": "2026-11-27"
+        },
+        "co5300": {
+            "level": "hardware",
+            "covers": ["chips.co5300"],
+            "by": "the author of the library, on the bench",
+            "source": "CHANGES.md of DGX, 0.12.4 and 0.12.5",
+            "notes": "On the Waveshare ESP32-S3-Touch-AMOLED-1.32, the 466x466 glass; the other glasses not tried.",
+            "date": "2026-11-24"
+        },
+        "axs15231b": {
+            "level": "hardware",
+            "covers": ["chips.axs15231b"],
+            "by": "the author of the library, on the bench",
+            "source": "CHANGES.md of DGX, 0.12.7",
+            "notes": "On the Guition JC3248W535.",
+            "date": "2026-11-25"
+        },
+        "st7796": {
+            "level": "hardware",
+            "covers": ["chips.st7796"],
+            "by": "a contributor of DGX with the module",
+            "source": "CHANGES.md of DGX, 0.12.7",
+            "notes": "A 320x480 module on an ESP32 drew right at 40 MHz on SPI, at 16 and 18 bits and in all eight orientations.",
+            "date": "2026-11-25"
+        },
+        "nv3007": {
+            "level": "hardware",
+            "covers": ["chips.nv3007"],
+            "by": "a contributor of DGX with the module",
+            "source": "CHANGES.md of DGX, 0.12.9",
+            "notes": "On a 2.79-inch module of 142x428.",
+            "date": "2026-11-26"
         }
     },
     "history": [
+        {"before": "0.12.9", "chips": {"nv3007": null}},
+        {"before": "0.12.7", "chips": {"st7796": null, "axs15231b": null}},
+        {"before": "0.12.4", "chips": {"co5300": null}},
         {
             "before": "0.12.0",
             "chips": {
@@ -1374,6 +1567,19 @@
         {"before": "0.5.0", "chips": {"jd9165": null}, "transports": {"dsi": null}}
     ],
     "versions": {
+        "0.12.13": {"platforms": {"esp_idf": ">=5.2.0"}},
+        "0.12.12": {"platforms": {"esp_idf": ">=5.2.0"}},
+        "0.12.11": {"platforms": {"esp_idf": ">=5.2.0"}},
+        "0.12.10": {"platforms": {"esp_idf": ">=5.2.0"}},
+        "0.12.9": {"platforms": {"esp_idf": ">=5.2.0"}},
+        "0.12.8": {"platforms": {"esp_idf": ">=5.2.0"}},
+        "0.12.7": {"platforms": {"esp_idf": ">=5.2.0"}},
+        "0.12.6": {"platforms": {"esp_idf": ">=5.2.0"}},
+        "0.12.5": {"platforms": {"esp_idf": ">=5.2.0"}},
+        "0.12.4": {"platforms": {"esp_idf": ">=5.2.0"}},
+        "0.12.3": {"platforms": {"esp_idf": ">=5.2.0"}},
+        "0.12.2": {"platforms": {"esp_idf": ">=5.2.0"}},
+        "0.12.1": {"platforms": {"esp_idf": ">=5.2.0"}},
         "0.12.0": {"platforms": {"esp_idf": ">=5.2.0"}},
         "0.11.8": {"platforms": {"esp_idf": ">=5.2.0"}},
         "0.11.7": {"platforms": {"esp_idf": ">=5.2.0"}},

@@ -716,6 +716,7 @@ const app = createApp({
         Vue.watch(() => store.language, (language) => {
             localStorage.setItem(PREFERENCES.language, language);
             document.documentElement.lang = language;
+            builderMounted?.setLanguage?.(language); // the builder of dgx-ui follows the language of this page
         }, { immediate: true });
         Vue.watch(() => store.currency, (currency) => localStorage.setItem(PREFERENCES.currency, currency));
         // the name typed for a new project, by its folder: a reload of the page keeps it

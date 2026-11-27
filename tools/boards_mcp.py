@@ -55,7 +55,8 @@ ACTIVITIES = ("listening", "working", "away")
 MOST_PARTS = 40
 # the builder of pages of dgx-ui, served on this page under BUILDER when the project has dgx-ui: its own copy mounts it
 BUILDER = "/dgx-ui"
-DGX_UI_SERVE = "managed_components/jef-sure__dgx-ui/tools/dgx_ui_serve.py"
+DGX_UI_TOOLS = "managed_components/jef-sure__dgx-ui/tools"
+TOOL_PREFIX = "ui_"  # the tools of the builder among boards' own: one server for both pages
 # a block names a module of the board of the program, so its name is a name of the format
 BLOCK_NAME = json.loads((ROOT / "catalog" / "format.schema.json").read_text())["$defs"]["name"]["pattern"]
 # where VS Code, its remote server and Cursor keep extensions, under the home folder
@@ -73,6 +74,9 @@ the person asked; what it only shows, as the antenna quality of a board from 0 t
 device stands and how far it is from what it talks to. When the person is done,
 write the description with write_description: the task, the choice and why, and what stays unknown. library_audits tells
 what was found in the libraries of a chip: use it in advice, and keep it out of the description."""
+BUILDER_INSTRUCTIONS = (f"The project has dgx-ui: its pages are on the page \"pages\" of the same editor, and the tools whose names begin "
+                        f"with {TOOL_PREFIX} read and edit them there; the skill boards-dgx-ui tells how. The dialog stays this one: "
+                        f"page_link, wait_for_person and say.")
 TOOLS = [
     {"name": "page_link", "description": "The link of the editor, for the person to open.", "inputSchema": {"type": "object", "properties": {}}},
     {"name": "page_state", "description": "What the person wrote and put on the canvas, with the blocks, parts and board the person fixed, the best kits of the solver with what each says, and refusals: why the boards that do not fit do not, the most common first, with how many boards each. After edit_blocks it waits for the editor to show the edit.", "inputSchema": {"type": "object", "properties": {}}},
@@ -181,26 +185,48 @@ class Desk:
             return new
 
 
-def builder_of(project, token, port):
-    """The calls of the builder of dgx-ui on this server, from the project's own copy of dgx-ui: its mounted() answers the
-    paths under BUILDER by its own rules of reading and writing. None when the project has no dgx-ui or its copy mounts on
-    no other server yet."""
-    path = project.root / DGX_UI_SERVE if project else None
-    if not path or not path.is_file():
-        return None
-    spec = importlib.util.spec_from_file_location("dgx_ui_serve", path)
+def load(path, name):
+    """A module of the project's copy of dgx-ui, or None when it does not load: that is dgx-ui's to fix, and the page of
+    boards works on without it."""
+    spec = importlib.util.spec_from_file_location(name, path)
     module = importlib.util.module_from_spec(spec)
     try:
         spec.loader.exec_module(module)
-    except Exception as error:  # a copy that does not load is dgx-ui's to fix: the page of boards works on without it
+    except Exception as error:
         print(f"boards_mcp.py: {path}: {error}", file=sys.stderr, flush=True)
         return None
-    mounted = getattr(module, "mounted", None)
-    return mounted(str(project.root), token, port, BUILDER) if mounted else None
+    return module
 
 
-def handler_of(desk, token, port, project=None):
-    builder = builder_of(project, token, port)
+class Builder:
+    """The builder of pages of dgx-ui on this server, from the project's own copy of dgx-ui: its files and its calls of the
+    project under BUILDER, by its own rules of reading and writing, and, from a copy that gives them, its tools for the
+    agent, named with TOOL_PREFIX, which it runs through the page. The why of each edit goes into the dialog of boards."""
+
+    def __init__(self, handles, tools=(), call=None):
+        self.handles, self.tools, self.call = handles, list(tools), call
+
+    @classmethod
+    def of(cls, project, token, port, desk):
+        """None when the project has no dgx-ui, or a copy that mounts on no other server."""
+        folder = project.root / DGX_UI_TOOLS if project else None
+        if not folder or not folder.is_dir():
+            return None
+        root = str(project.root)
+        agent = load(folder / "dgx_ui_mcp.py", "dgx_ui_mcp") if (folder / "dgx_ui_mcp.py").is_file() else None
+        if agent and hasattr(agent, "mounted_agent"):
+            said = (lambda why: desk.add("model", text=why)) if desk else None
+            tools, call, handle_agent = agent.mounted_agent(root, token, port, BUILDER, TOOL_PREFIX, said=said)
+            return cls([agent.serve.mounted(root, token, port, BUILDER), handle_agent], tools, call)
+        serve = load(folder / "dgx_ui_serve.py", "dgx_ui_serve") if (folder / "dgx_ui_serve.py").is_file() else None
+        mounted = getattr(serve, "mounted", None)
+        return cls([mounted(root, token, port, BUILDER)]) if mounted else None
+
+    def handle(self, request):
+        return any(handle(request) for handle in self.handles)
+
+
+def handler_of(desk, token, port, project=None, builder=None):
 
     class Page(http.server.SimpleHTTPRequestHandler):
         def __init__(self, *args, **kwargs):
@@ -238,7 +264,7 @@ def handler_of(desk, token, port, project=None):
         def do_GET(self):
             if not self.allowed():
                 return self.answer(403)
-            if builder and builder(self):
+            if builder and builder.handle(self):
                 return None
             address = urllib.parse.urlsplit(self.path)
             if address.path == "/agent/messages":
@@ -263,7 +289,7 @@ def handler_of(desk, token, port, project=None):
                 if not project:
                     return self.answer(404, {"error": "no project: the server was started for none"})
                 return self.answer(200, {"path": str(project.root), "name": project.name(), "mode": project.mode(), "for_ever": project.allowed_for_ever(),
-                                         "builder": BUILDER if builder else None})
+                                         "builder": BUILDER if builder else None, "builder_agent": bool(builder and builder.tools)})
             if address.path == "/agent/project/file":
                 # what lies in the project, for the page to show what a write would change: by the rule of a write
                 if not self.agent_call():
@@ -285,7 +311,7 @@ def handler_of(desk, token, port, project=None):
             return super().do_GET()
 
         def do_POST(self):
-            if self.allowed() and builder and builder(self):
+            if self.allowed() and builder and builder.handle(self):
                 return None
             if not self.allowed() or not self.agent_call() or not self.own_origin():
                 return self.answer(401)
@@ -452,8 +478,12 @@ def argument_problem(schema, value, at="arguments"):
     return None
 
 
-def answer_of(desk, link, request, tools=TOOLS, instructions=INSTRUCTIONS):
-    """The answer to a request of MCP, or None for a notification."""
+def answer_of(desk, link, request, tools=TOOLS, instructions=INSTRUCTIONS, builder=None):
+    """The answer to a request of MCP, or None for a notification. The tools of the builder of dgx-ui, when the project has
+    one that gives them, come after boards' own and are run by it."""
+    if builder and builder.tools:
+        tools = [*tools, *builder.tools]
+        instructions = f"{instructions} {BUILDER_INSTRUCTIONS}"
     if not isinstance(request, dict):
         return {"jsonrpc": "2.0", "id": None, "error": {"code": -32600, "message": "a request is an object"}}
     method, ident = request.get("method"), request.get("id")
@@ -474,8 +504,11 @@ def answer_of(desk, link, request, tools=TOOLS, instructions=INSTRUCTIONS):
             return {"jsonrpc": "2.0", "id": ident, "error": {"code": -32602, "message": problem}}
         desk.called(tool["name"], True)
         try:
-            value = call(desk, link, tool["name"], arguments)
-            result = {"content": [{"type": "text", "text": json.dumps(value, ensure_ascii=False)}]}
+            if builder and tool in builder.tools:
+                result = builder.call(tool["name"], arguments)
+            else:
+                value = call(desk, link, tool["name"], arguments)
+                result = {"content": [{"type": "text", "text": json.dumps(value, ensure_ascii=False)}]}
         except Exception as error:  # a tool that fails answers with an error: the conversation goes on
             result = {"content": [{"type": "text", "text": f"{tool['name']} failed: {error}"}], "isError": True}
         finally:
@@ -525,23 +558,52 @@ def component_version():
     return found[1] if found else "?"
 
 
-def install_skill():
-    """The skill boards-editor copied for Claude Code, into skills/ of its folder of the person, with the version of this
-    copy under its title: a copy, which stays when the project's copy of the component goes; one of the person's own is not
-    written over. Whether it is there."""
-    folder = pathlib.Path(os.environ.get("CLAUDE_CONFIG_DIR") or pathlib.Path.home() / ".claude") / "skills" / SKILL.parent.name
+def write_skill(name, text):
+    """A skill copied for Claude Code, into skills/<name>/ of its folder of the person, with the version of this copy under
+    its title: a copy, which stays when the project's copy of the component goes; one of the person's own is not written
+    over. Whether it is there."""
+    folder = pathlib.Path(os.environ.get("CLAUDE_CONFIG_DIR") or pathlib.Path.home() / ".claude") / "skills" / name
     target = folder / "SKILL.md"
-    text = re.sub(r"^(# .*\n)", lambda title: f"{title.group(1)}\n{SKILL_MARK}{component_version()}.\n", SKILL.read_text(encoding="utf-8"),
-                  count=1, flags=re.M)
+    text = re.sub(r"^(# .*\n)", lambda title: f"{title.group(1)}\n{SKILL_MARK}{component_version()}.\n", text, count=1, flags=re.M)
     old = target.read_text(encoding="utf-8", errors="replace") if target.exists() else None
     if old is not None and SKILL_MARK not in old:
-        print(f"{target}: a skill {SKILL.parent.name} of another's is there, left as it is; this one is {SKILL}.")
+        print(f"{target}: a skill {name} of another's is there, left as it is.")
         return False
     if old != text:
         folder.mkdir(parents=True, exist_ok=True)
         target.write_text(text, encoding="utf-8")
-    print(f"{target}: the skill {SKILL.parent.name} of jef-sure/boards {component_version()} is there.")
+    print(f"{target}: the skill {name} of jef-sure/boards {component_version()} is there.")
     return True
+
+
+def install_skill():
+    """The skill boards-editor."""
+    return write_skill(SKILL.parent.name, SKILL.read_text(encoding="utf-8"))
+
+
+COMBINED = "boards-dgx-ui"
+COMBINED_HEAD = f"""---
+name: {COMBINED}
+description: Use when a project has both jef-sure/boards and dgx-ui, and the boards MCP server serves both: the editor of boards, where a person chooses the hardware, and on its page "pages" the builder of dgx-ui's pages, edited through the tools whose names begin with {TOOL_PREFIX}. Tells the work in both, in one dialog.
+---
+
+# Working with boards and dgx-ui on one page
+
+The editor of boards and the builder of dgx-ui are one page and one server. Its dialog is boards' (page_link,
+wait_for_person, say); the tools of boards choose the hardware, and those beginning with {TOOL_PREFIX} edit the pages.
+"""
+
+
+def install_combined_skill(project):
+    """The skill boards-dgx-ui, for a project with dgx-ui whose copy gives its part: boards-editor's text, its headings one
+    level down, then dgx-ui's part for a server that hosts it. Nothing for a project without such a copy."""
+    path = project / DGX_UI_TOOLS / "dgx_ui_mcp.py"
+    agent = load(path, "dgx_ui_mcp") if path.is_file() else None
+    if not agent or not hasattr(agent, "skill_part"):
+        return None
+    ours = re.sub(r"\A---\n.*?\n---\n+", "", SKILL.read_text(encoding="utf-8"), flags=re.S)
+    ours = re.sub(r"^(#+ )", r"#\1", ours, flags=re.M)
+    return write_skill(COMBINED, f"{COMBINED_HEAD}\n{ours.rstrip()}\n\n{agent.skill_part(TOOL_PREFIX, hosted=True).strip()}\n")
 
 
 def install():
@@ -552,6 +614,7 @@ def install():
     claude = claude_command()
     if claude:
         install_skill()
+        install_combined_skill(pathlib.Path.cwd())
         done = subprocess.run([claude, "mcp", "add", "-s", "user", NAME, "--", server["command"], *server["args"]], capture_output=True, text=True)
         print((done.stdout + done.stderr).strip())
         if done.returncode:
@@ -626,7 +689,8 @@ def main():
     token = secrets.token_urlsafe(24)
     server = http.server.ThreadingHTTPServer(("127.0.0.1", args.port), None)
     port = server.server_address[1]
-    server.RequestHandlerClass = handler_of(desk, token, port, project_writer.Project(args.project))
+    builder = Builder.of(project_writer.Project(args.project), token, port, None if args.serve else desk)
+    server.RequestHandlerClass = handler_of(desk, token, port, project_writer.Project(args.project), builder)
     server.daemon_threads = True
     if args.serve:
         # no model talks: the page shows no dialog, and the solver and the writes of the project work as with one
@@ -643,7 +707,7 @@ def main():
     threading.Thread(target=server.serve_forever, daemon=True).start()
     link = f"http://127.0.0.1:{port}/editor/#agent={token}"
 
-    answer_rows(lambda request: answer_of(desk, link, request))
+    answer_rows(lambda request: answer_of(desk, link, request, builder=builder))
     return 0
 
 

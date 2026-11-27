@@ -336,7 +336,9 @@ of a device.
 For Claude Code the install also writes the skill `boards-editor`, from `tools/skills/boards-editor/SKILL.md`, into
 `skills/` of its folder (`~/.claude`, or `CLAUDE_CONFIG_DIR`): the order of work with the editor, what the agent must
 not do, where the API and the data are told, and worked cases. The copy is marked with the version it came from, and a
-skill of the same name that it did not write stays as it is. Run again, the install writes it afresh.
+skill of the same name that it did not write stays as it is. Run again, the install writes it afresh. Run in a project
+whose copy of dgx-ui gives its part of a skill, it also writes `boards-dgx-ui`: the text of `boards-editor` and dgx-ui's
+part for the builder on the page of boards, for the agent of one server for both.
 
 One install serves every project. A server started in a project with its own copy of the component in
 `managed_components/` hands over to that copy at once: the catalog, the editor and `board_select.py` are those of the
@@ -369,8 +371,11 @@ dialog.
 When the project has [dgx-ui](https://github.com/jef-sure/esp32-component-dgx-ui), the editor has a third page, "pages":
 the builder of dgx-ui's pages, served under `/dgx-ui` by the project's own copy of dgx-ui
 (`managed_components/jef-sure__dgx-ui`), which reads and writes the project by its own rules. The page of boards stays
-the main one, and the builder runs there with no agent of its own. A copy of dgx-ui that cannot be mounted on another
-server gives no such page; the editor works on without it.
+the main one, and one server serves both pages: with a copy of dgx-ui from 0.1.11 on, the agent gets the builder's
+tools beside boards' own, named with `ui_` (`ui_page_state`, `ui_page_image`, `ui_read_file`, `ui_edit_file`,
+`ui_select`, `ui_formats`), and the builder has no dialog and no language of its own: the why of each edit is said in
+boards' dialog, and the language of boards' page is the builder's. With an older copy the builder is there with no
+agent; a copy that cannot be mounted on another server gives no such page, and the editor works on without it.
 
 The server can write the files of a project for the editor, so the editor writes from the integrated browser of VS Code too:
 the files go through the server, whatever the browser lets a page do with folders. It writes into one folder, the one the agent works in or `--project DIR`: an empty folder for a new

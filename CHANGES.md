@@ -2,6 +2,13 @@
 
 ## 0.2.4 (not released yet)
 
+- One server for the page of boards and the builder of dgx-ui on it: with a copy of dgx-ui from 0.1.11 on,
+  `boards_mcp.py` lists the builder's six tools after its own, named with `ui_`, and runs them through the page; the why
+  of each edit goes into boards' dialog, and the builder has no dialog and no language selector of its own, following
+  the language of boards' page. `--install` in such a project also writes the skill `boards-dgx-ui`, boards-editor's text
+  followed by dgx-ui's part. Tried with dgx-ui 0.1.11 of its tag: the fifteen tools listed, `ui_page_state` saying the
+  builder is not open and then giving the pages once its tab is open in headless Chrome, an edit taken with its why in
+  boards' dialog, no error on the page.
 - New board: the Waveshare ESP32-S3-Touch-AMOLED-1.32, `esp32_s3_touch_amoled_1_32`. A round 466x466 AMOLED with a
   CO5300 on QSPI, started through DGX 0.12.4 or later; an ES8311 with a speaker header; BOOT and PWR buttons; a battery
   divider on GPIO4. Pins from the schematic of Waveshare. On the board `hello_board` shows its picture and its tone is

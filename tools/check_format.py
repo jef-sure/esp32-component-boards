@@ -793,7 +793,7 @@ def project_problems(base, own, project, config):
              "sdkconfig.defaults.jc4827w543c": "# board_select.py jc4827w543c\n", "sdkconfig.defaults.cyd_s028r": "# board_select.py cyd_s028r\n",
              "sdkconfig.defaults.esp32p4": "CONFIG_PARTITION_TABLE_CUSTOM=y\n"}
     # a folder with no dgx-ui: the builder of its pages is not served
-    if got("/agent/project")[1] != {"path": str(project.resolve()), "name": "garland", "mode": "create", "for_ever": False, "builder": None}:
+    if got("/agent/project")[1] != {"path": str(project.resolve()), "name": "garland", "mode": "create", "for_ever": False, "builder": None, "builder_agent": False}:
         problems.append(f"the project of the bridge: {got('/agent/project')}")
     if post("/agent/project/plan", {"files": files}, {**own, "Origin": "http://evil.example"})[0] != 401:
         problems.append("a plan from another site is not refused")

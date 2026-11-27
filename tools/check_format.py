@@ -792,7 +792,8 @@ def project_problems(base, own, project, config):
     files = {"CMakeLists.txt": "project(garland)\n", "selection.json": json.dumps({"boards": [{"board": "jc4827w543c"}, {"board": "cyd_s028r"}], "current": "cyd_s028r"}),
              "sdkconfig.defaults.jc4827w543c": "# board_select.py jc4827w543c\n", "sdkconfig.defaults.cyd_s028r": "# board_select.py cyd_s028r\n",
              "sdkconfig.defaults.esp32p4": "CONFIG_PARTITION_TABLE_CUSTOM=y\n"}
-    if got("/agent/project")[1] != {"path": str(project.resolve()), "name": "garland", "mode": "create", "for_ever": False}:
+    # a folder with no dgx-ui: the builder of its pages is not served
+    if got("/agent/project")[1] != {"path": str(project.resolve()), "name": "garland", "mode": "create", "for_ever": False, "builder": None}:
         problems.append(f"the project of the bridge: {got('/agent/project')}")
     if post("/agent/project/plan", {"files": files}, {**own, "Origin": "http://evil.example"})[0] != 401:
         problems.append("a plan from another site is not refused")

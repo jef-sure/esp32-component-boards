@@ -2,6 +2,9 @@
 
 ## 0.2.4 (not released yet)
 
+- The solver asks a graphics display for its pixels: along the short side at least and along the long side at least,
+  so that a board can be chosen for pages made first, as those of dgx-ui. The sides are compared by length, as DGX
+  turns a picture: a page of 480x800 fits a glass of 800x480.
 - The record of DGX describes 0.12.13 and its four new displays: the CO5300 of round AMOLED panels on QSPI from 0.12.4,
   the ST7796 (ST7796S) of 320x480 panels on SPI or the 8-bit bus and the AXS15231B of the Guition JC3248W535 on QSPI from
   0.12.7, the NV3007 of 142x428 bar panels on SPI from 0.12.9. A board with one of them needs that version. No board of

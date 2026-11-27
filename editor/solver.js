@@ -132,6 +132,16 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
     // a panel is round only when its data says so: a GC9A01 drives square glass too
     MEASURES.shape = { of: (device) => (device.config?.panel ? (device.config.panel.round ? 'round' : 'rectangular') : null), fits: (shape, asked) => shape === asked, short: (asked) => t('no {0} display', t(asked)), unknown: 'the shape of the display is not in the data' };
 
+    // the pixels of the glass by the length of its sides: a picture made for 320x480 fits a glass of 480x320, which DGX turns
+    const sidesOf = (device) => {
+        const panel = device.config?.panel;
+        return Number.isInteger(panel?.width) && Number.isInteger(panel?.height) ? [panel.width, panel.height].sort((a, b) => a - b) : null;
+    };
+    MEASURES.pixels_short = { of: (device) => sidesOf(device)?.[0] ?? null, short: (asked) => t('the short side of the display has fewer than {0} pixels', asked),
+        unknown: 'the pixels of the display are not in the data' };
+    MEASURES.pixels_long = { of: (device) => sidesOf(device)?.[1] ?? null, short: (asked) => t('the long side of the display has fewer than {0} pixels', asked),
+        unknown: 'the pixels of the display are not in the data' };
+
     // the depths of color the driver of a display takes; a block taken from a board shows the depth its data starts it with
     MEASURES.depth_bits = { of: (device) => device.libraries?.[device.library]?.supports?.depth_bits ?? null, fits: (depths, asked) => depths.includes(Number(asked)),
         short: (asked) => t('no display whose driver takes {0} bits of color', asked), unknown: 'the depths of color its driver takes are not in the data',

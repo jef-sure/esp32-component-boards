@@ -1,0 +1,20 @@
+{
+    "title": "A display block asks 480 pixels on the short side and 800 on the long one, as a page of dgx-ui made for 480x800: a glass of 800x480 fits too, as DGX turns the picture, and a smaller one does not",
+    "answers": {
+        "blocks": [
+            {
+                "role": "display",
+                "asks": {
+                    "pixels_short": 480,
+                    "pixels_long": 800
+                }
+            }
+        ]
+    },
+    "fit": [
+        "esp32_8048s070c",
+        "jc1060p470c",
+        "jc4880p443c",
+        "jc8012p4a1c"
+    ]
+}

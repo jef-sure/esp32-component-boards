@@ -404,20 +404,23 @@ marked `?`. Boards that do not fit are listed with the reason. The solver only p
 is a project, and the checks of the tools decide about it. So two PN532 go on SPI by themselves,
 because the rules refuse one I2C address twice.
 
-A block asks of the data of its part through the questions of its role: a question with `limit.field`, the path of a value
-in the data of a part with its variant applied, and `limit.fits`, how the value meets the answer (`up_to`, `down_to`,
-`at_least`, `at_most`, `includes`, `is`), as `co2_up_to` on `provides.air.specified`. The answer lies in `asks` of the block,
-so two temperature blocks, a room and an oven, ask different ranges and are two needs. A part whose data has no such value
-stays, and the kit names it as an unknown. A measured question of a class with `"asked": "block"` is asked of each block too,
-as the reading distance and the cards of a reader, the diagonal and the shape of a graphics display, the outputs of a
-chain: two readers ask their own, and two blocks of one role are always two parts. Its `limit.of` and `limit.variant`
-may be lists, and a block with no variant chosen is asked what any of them is. The distance between readers stays one
-question of the editor. The depth of color of a display, `depth_bits`, keeps the parts whose driver takes it (`supports.depth_bits`
-in the record of the library); when it is not the depth the data starts the display with, the board of the program starts
-it so (`config.depth_bits` of the display of the board or of the module), and the kit names that depth as not tried on the
-board. The swing of a buzzer, `swing_v`, chooses the way a part with no bus is wired: the first whose `gives.swing_v` is not less; a bare disc on two pins in antiphase takes two LEDC channels. Of two displays from modules, the first block gives the primary one. The editor shows these fields in the block; the model sets them with `edit_blocks`,
-and `roles` lists them. The platform is asked without a version: a kit names the versions that take its chip and its
-libraries, and a version is fixed only when the person chooses one.
+A block asks of the data of its part through the questions of its role: a question with `limit.field`, the path of a
+value in the data of a part with its variant applied, and `limit.fits`, how the value meets the answer (`up_to`,
+`down_to`, `at_least`, `at_most`, `includes`, `is`), as `co2_up_to` on `provides.air.specified`. The answer lies in
+`asks` of the block, so two temperature blocks, a room and an oven, ask different ranges and are two needs. A part whose
+data has no such value stays, and the kit names it as an unknown. A measured question of a class with `"asked": "block"`
+is asked of each block too, as the reading distance and the cards of a reader, the diagonal, the pixels by its short and
+its long side and the shape of a graphics display, the outputs of a chain: two readers ask their own, and two blocks of
+one role are always two parts. Its `limit.of` and `limit.variant` may be lists, and a block with no variant chosen is
+asked what any of them is. The distance between readers stays one question of the editor. The depth of color of a
+display, `depth_bits`, keeps the parts whose driver takes it (`supports.depth_bits` in the record of the library); when
+it is not the depth the data starts the display with, the board of the program starts it so (`config.depth_bits` of the
+display of the board or of the module), and the kit names that depth as not tried on the board. The swing of a buzzer,
+`swing_v`, chooses the way a part with no bus is wired: the first whose `gives.swing_v` is not less; a bare disc on two
+pins in antiphase takes two LEDC channels. Of two displays from modules, the first block gives the primary one. The
+editor shows these fields in the block; the model sets them with `edit_blocks`, and `roles` lists them. The platform is
+asked without a version: a kit names the versions that take its chip and its libraries, and a version is fixed only when
+the person chooses one.
 
 ### The side
 

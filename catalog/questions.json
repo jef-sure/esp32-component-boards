@@ -21,6 +21,22 @@
             "limit": {"measure": "diagonal_in", "of": "display", "variant": ["tft", "oled", "epaper", "memory", "mono_lcd"]}
         },
         {
+            "id": "pixels_short",
+            "asked": "block",
+            "text": "Its pixels along the short side at least",
+            "type": "number",
+            "when": {"display": "graphics"},
+            "limit": {"measure": "pixels_short", "of": "display", "variant": ["tft", "oled", "epaper", "memory", "mono_lcd"]}
+        },
+        {
+            "id": "pixels_long",
+            "asked": "block",
+            "text": "Its pixels along the long side at least",
+            "type": "number",
+            "when": {"display": "graphics"},
+            "limit": {"measure": "pixels_long", "of": "display", "variant": ["tft", "oled", "epaper", "memory", "mono_lcd"]}
+        },
+        {
             "id": "display_shape",
             "asked": "block",
             "text": "Its shape",

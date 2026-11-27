@@ -36,7 +36,8 @@
                 "symbols": ["BOARD_TOUCH_I2C"],
                 "headers": ["board_touch_lcd.h"]
             },
-            "notes": "The component drives the panel too; boards takes only its touch, as the display is DGX's. Its macro of I2C settings gives no speed, so the adapter sets 400 kHz."
+            "notes": "The component drives the panel too; boards takes only its touch, as the display is DGX's. Its macro of I2C settings gives no speed, so the adapter sets 400 kHz. Its read gives each point the place of the first record, so it reads one finger of the two the chip tells.",
+            "limits": {"fingers": 1}
         }
     },
     "adapter": {
@@ -47,7 +48,7 @@
     "checked": {
         "api": {
             "level": "vendor-code",
-            "source": "include/esp_lcd_axs15231b.h of 2.1.1~1: esp_lcd_touch_new_i2c_axs15231b(), ESP_LCD_TOUCH_IO_I2C_AXS15231B_CONFIG() at 0x3B with no scl_speed_hz",
+            "source": "include/esp_lcd_axs15231b.h of 2.1.1~1: esp_lcd_touch_new_i2c_axs15231b(), ESP_LCD_TOUCH_IO_I2C_AXS15231B_CONFIG() at 0x3B with no scl_speed_hz; touch_axs15231b_read_data() of esp_lcd_axs15231b.c fills every point from the first record",
             "date": "2026-11-27"
         }
     },

@@ -10,6 +10,7 @@
     "description": "3.5-inch 320x480 AXS15231B on QSPI, its touch in the same chip on I2C; an ESP32-S3 with 16 MB flash and 8 MB octal PSRAM",
     "notes": [
         "The display and the touch are one chip, the AXS15231B: the display on QSPI through DGX, the touch on I2C at 0x3B through espressif/esp_lcd_axs15231b.",
+        "The touch reads one finger, where the AXS15231B tells two: the driver of Espressif, espressif/esp_lcd_axs15231b 2.1.1~1, gives every point the place of the first (touch_axs15231b_read_data).",
         "The schematic names the lines of the touch twice and differently: the block of the pull-ups R3, R4 has TP_SCL on IO4 and TP_SDA on IO8, the connector of the panel has TP-SDA on IO4 and TP-SCL on IO8. The board answers with SDA on 4 and SCL on 8.",
         "The reset of the panel is the reset line of the chip (EN), not a GPIO.",
         "The amplifier has no enable line: its CTRL is held up through R23, 1 MOhm, so it is on whenever there is power. It has no volume of its own: a program scales its samples.",
@@ -136,16 +137,36 @@
                 "calibrations": [
                     {
                         "rule": "the newest",
-                        "measured": false,
-                        "notes": "A placeholder: the touch taken as the glass, pixel for pixel. Measure the board with dgx_di_calibrate_measure and give the log to tools/board_calibration.py.",
+                        "measured_with": {
+                            "esp-idf/jef-sure/dgx-di": "0.2.2",
+                            "esp-idf/espressif/esp_lcd_axs15231b": "2.1.1~1",
+                            "esp-idf/jef-sure/dgx": "0.12.13"
+                        },
+                        "notes": "The places are the medians of the touches in the log. Measured with DGX-DI reading the touch after its INT, at the 60 Hz the controller reports at (dgx_di_esp_lcd_touch_reports() of 0.2.2).",
                         "x_max": 319,
                         "y_max": 479,
                         "width": 320,
                         "height": 480,
-                        "left_up": {"meant": [32, 32], "device": [32, 32]},
-                        "right_up": {"meant": [287, 32], "device": [287, 32]},
-                        "left_down": {"meant": [32, 447], "device": [32, 447]},
-                        "right_down": {"meant": [287, 447], "device": [287, 447]}
+                        "left_up": {"meant": [40, 40], "device": [56, 24]},
+                        "right_up": {"meant": [279, 40], "device": [288, 32]},
+                        "left_down": {"meant": [40, 439], "device": [34, 456]},
+                        "right_down": {"meant": [279, 439], "device": [295, 458]},
+                        "up": {"meant": [160, 40], "device": [170, 17]},
+                        "down": {"meant": [160, 439], "device": [171, 455]},
+                        "left": {"meant": [40, 240], "device": [46, 246]},
+                        "right": {"meant": [279, 240], "device": [296, 246]},
+                        "middle": {"meant": [160, 240], "device": [166, 251]},
+                        "libraries": {
+                            "esp-idf/jef-sure/dgx-di": {
+                                "rounds": 3,
+                                "blink_ms": 0,
+                                "gap_ms": 0,
+                                "off_tenths": 149,
+                                "worst_tenths": 230,
+                                "left_tenths": 50,
+                                "left_worst_tenths": 90
+                            }
+                        }
                     }
                 ]
             },

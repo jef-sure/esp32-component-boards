@@ -250,6 +250,10 @@ def touch_part(name, device):
         part.update({line: number(pins[line]) for line in ("rst", "int") if line in pins})
     part.update({field: connection[field] for field in ("hz", "address_try") if field in connection})
     part.update({field: config[field] for field in ("over", "x_max", "y_max", "fingers", "resistive", "calibrations") if field in config})
+    # the fingers the library reads, when it reads fewer than the chip tells, as esp_lcd_axs15231b gives its first point for each
+    most = (entry.get("limits") or {}).get("fingers")
+    if most and part.get("fingers", most) > most:
+        part["fingers"] = most
     return part
 
 

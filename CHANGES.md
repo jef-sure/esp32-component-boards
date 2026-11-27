@@ -14,9 +14,13 @@
   0x3B, with SDA on 4 and SCL on 8 as an I2C probe of the board found, where one block of the schematic swaps the two
   names; it starts through espressif/esp_lcd_axs15231b on the I2C path of esp_lcd_touch, each device of the board
   naming its library. A chip with two roles, as this one, takes its config on each device of the board, not in its
-  record. The calibration of the touch is a placeholder: the controller reports its points at 60 Hz, a read between two
-  reports gets none, and DGX-DI, reading every 10 ms, sees a held finger at every other read, so its calibration takes
-  no press. Read every 20 ms, the touch holds.
+  record. The controller reports its points at 60 Hz, and a read between two reports gets none: DGX-DI 0.2.0, reading
+  every 10 ms, sees a held finger at every other read. DGX-DI 0.2.2 reads it after its INT: with it every read had
+  the finger, and the calibration of the board was measured, three rounds, 6.4 pixels off on average and 11 at worst
+  in the last, 14.9 and 23 with none. The glue does not ask DGX-DI for that pace yet: a program calls
+  `dgx_di_esp_lcd_touch_reports()` itself until DGX-DI 0.2.2 is in the registry. The touch reads one finger of the two
+  the chip tells: the driver of Espressif, esp_lcd_axs15231b 2.1.1~1, gives every point the place of the first. The
+  generator now takes the fingers of a library's `limits` when they are fewer than the chip's.
 - One server for the page of boards and the builder of dgx-ui on it: with a copy of dgx-ui from 0.1.11 on,
   `boards_mcp.py` lists the builder's six tools after its own, named with `ui_`, and runs them through the page; the why
   of each edit goes into boards' dialog, and the builder has no dialog and no language selector of its own, following

@@ -729,6 +729,7 @@ const app = createApp({
             <span class="views">
                 <button :class="{ here: store.page === 'select' }" @click="store.page = 'select'">{{ t('select') }}</button>
                 <button :class="{ here: store.page === 'edit' }" @click="store.page = 'edit'">{{ t('edit') }}</button>
+                <button v-if="store.builder" :class="{ here: store.page === 'pages' }" @click="store.page = 'pages'">{{ t('pages') }}</button>
             </span>
             <button v-if="host.canOpenFolder" :title="t('a program or its local-boards; the repository, to save into the catalog')" @click="store.openFolder()">{{ t('open a folder') }}</button>
             <label v-else class="button">{{ t('open a folder') }}<input type="file" webkitdirectory hidden @change="store.openPicked($event.target.files)"></label>
@@ -757,7 +758,7 @@ const app = createApp({
         <p v-else-if="!store.loaded" class="start">The page is not served from the repository, so it has no catalog: open the folder of the repository.
             A program or its <code>local-boards</code> comes after it.</p>
         <select-page v-else-if="store.page === 'select'"></select-page>
-        <main v-else>
+        <main v-else-if="store.page === 'edit'">
             <nav class="documents">
                 <input type="search" v-model="store.filter" placeholder="filter">
                 <new-document></new-document>
@@ -789,6 +790,8 @@ const app = createApp({
                 </section>
             </div>
         </main>
+        <!-- the builder of dgx-ui, mounted once and kept while another page is shown -->
+        <div id="dgx-ui-builder" v-show="store.page === 'pages'"></div>
     `,
 });
 

@@ -361,6 +361,12 @@ python3 managed_components/jef-sure__boards/tools/boards_mcp.py --serve   # or -
 It prints the link of the editor and serves until Ctrl-C. The link says that no model talks, so the editor shows no
 dialog.
 
+When the project has [dgx-ui](https://github.com/jef-sure/esp32-component-dgx-ui), the editor has a third page, "pages":
+the builder of dgx-ui's pages, served under `/dgx-ui` by the project's own copy of dgx-ui
+(`managed_components/jef-sure__dgx-ui`), which reads and writes the project by its own rules. The page of boards stays
+the main one, and the builder runs there with no agent of its own. A copy of dgx-ui that cannot be mounted on another
+server gives no such page; the editor works on without it.
+
 The server can write the files of a project for the editor, so the editor writes from the integrated browser of VS Code too:
 the files go through the server, whatever the browser lets a page do with folders. It writes into one folder, the one the agent works in or `--project DIR`: an empty folder for a new
 project, or one with `CMakeLists.txt`, never the component itself. The rules are those of `tools/project_writer.py`:

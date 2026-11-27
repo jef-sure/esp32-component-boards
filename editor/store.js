@@ -16,6 +16,8 @@ const NAME = /^[a-z][a-z0-9_]*$/; // as a name of the schema: a board of the pro
 const nameOf = (text) => text.toLowerCase().replace(/[^a-z0-9_]+/g, '_').replace(/^[^a-z]+/, '') || 'my_project';
 const REPOSITORY_ONLY = /^(\.git|\.gitignore|\.gitattributes|README.*|LICENSE.*)$/i; // a folder with only these is still empty for a new project
 const LOCAL_BOARD = (name) => `components/local-boards/boards/${name}/board.json`;
+// the builder of dgx-ui on this page: no agent of its own and no line that sends the person to the page of boards
+const BUILDER_OPTIONS = { agent: false, boardsLine: false };
 const STUB = (board) => `# board_select.py ${board}`; // the first line of the defaults of a board: the command that makes them
 const PRESETS = 'CMakePresets.json';
 // the board the preset default builds, of the text of CMakePresets.json; null for none
@@ -231,6 +233,7 @@ const useEditor = Pinia.defineStore('editor', {
         kits: [],
         solving: false,
         agent: null, // the token of tools/boards_mcp.py, when the page came from it
+        builder: null, // where the builder of pages of dgx-ui is served, once it is mounted on this page
         talk: [], // what was said with the model
         applied: 0, // the last message of the model whose edits are on the canvas
         kitsApplied: 0, // the last message of the model whose edits the kits were found for: the model waits for it
@@ -370,6 +373,7 @@ const useEditor = Pinia.defineStore('editor', {
             // the project of the server, when it has one with a selection.json: the page starts where it was left
             this.agentCall('project').then(async (project) => {
                 this.project = project;
+                if (project.builder) this.mountBuilder(project.builder);
                 // a new project keeps the name typed for its folder; a program has its own, and selection.json the one its boards took
                 if (project.mode === 'create') this.projectName = localStorage.getItem(`${PREFERENCES.project}:${project.path}`) || nameOf(project.name);
                 if (project.mode !== 'update') return;
@@ -379,6 +383,35 @@ const useEditor = Pinia.defineStore('editor', {
                 if (saved?.text) this.takeSelection(saved.text, presets?.text);
                 else this.takePresets(presets?.text);
             }).catch(() => {});
+        },
+        // The builder of pages of dgx-ui, when the project has dgx-ui: its files and calls come from the server of boards under
+        // base, by the project's own copy. Its styles and scripts are taken in the order of its own index.html, but for the Vue
+        // and Pinia this page has and the start of its own page; it is mounted with no agent, as boards' is the agent here.
+        async mountBuilder(base) {
+            try {
+                const index = await fetch(`${base}/editor/index.html`, { cache: 'no-store' });
+                if (!index.ok) throw new Error(`its page: ${index.status}`);
+                const page = new DOMParser().parseFromString(await index.text(), 'text/html');
+                for (const link of page.querySelectorAll('link[rel="stylesheet"][href]')) {
+                    const style = Object.assign(document.createElement('link'), { rel: 'stylesheet', href: `${base}/editor/${link.getAttribute('href')}` });
+                    document.head.append(style);
+                }
+                for (const script of page.querySelectorAll('script[src]')) {
+                    const src = script.getAttribute('src');
+                    if (src.startsWith('vendor/') || src === 'start.js') continue;
+                    await new Promise((resolve, reject) => {
+                        const element = Object.assign(document.createElement('script'), { src: `${base}/editor/${src}` });
+                        element.onload = resolve;
+                        element.onerror = () => reject(new Error(src));
+                        document.body.append(element);
+                    });
+                }
+                await Vue.nextTick();
+                dgxUiBuilderMount('#dgx-ui-builder', { host: await dgxUiServerHost(this.agent, base), ...BUILDER_OPTIONS, start: { language: this.language } });
+                this.builder = base;
+            } catch (error) {
+                this.error = `dgx-ui: ${error.message}`;
+            }
         },
         async agentCall(path, options = {}) {
             const answer = await fetch(`/agent/${path}`, { ...options, headers: { Authorization: `Bearer ${this.agent}` } });

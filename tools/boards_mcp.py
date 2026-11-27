@@ -19,6 +19,7 @@ integrated browser of VS Code: the files go through this server, not through the
 """
 import argparse
 import http.server
+import importlib.util
 import json
 import os
 import pathlib
@@ -52,6 +53,9 @@ STATE_WAIT_S = 10  # how long page_state waits for the editor to show the last e
 WORKING_S = 90
 ACTIVITIES = ("listening", "working", "away")
 MOST_PARTS = 40
+# the builder of pages of dgx-ui, served on this page under BUILDER when the project has dgx-ui: its own copy mounts it
+BUILDER = "/dgx-ui"
+DGX_UI_SERVE = "managed_components/jef-sure__dgx-ui/tools/dgx_ui_serve.py"
 # a block names a module of the board of the program, so its name is a name of the format
 BLOCK_NAME = json.loads((ROOT / "catalog" / "format.schema.json").read_text())["$defs"]["name"]["pattern"]
 # where VS Code, its remote server and Cursor keep extensions, under the home folder
@@ -177,7 +181,27 @@ class Desk:
             return new
 
 
+def builder_of(project, token, port):
+    """The calls of the builder of dgx-ui on this server, from the project's own copy of dgx-ui: its mounted() answers the
+    paths under BUILDER by its own rules of reading and writing. None when the project has no dgx-ui or its copy mounts on
+    no other server yet."""
+    path = project.root / DGX_UI_SERVE if project else None
+    if not path or not path.is_file():
+        return None
+    spec = importlib.util.spec_from_file_location("dgx_ui_serve", path)
+    module = importlib.util.module_from_spec(spec)
+    try:
+        spec.loader.exec_module(module)
+    except Exception as error:  # a copy that does not load is dgx-ui's to fix: the page of boards works on without it
+        print(f"boards_mcp.py: {path}: {error}", file=sys.stderr, flush=True)
+        return None
+    mounted = getattr(module, "mounted", None)
+    return mounted(str(project.root), token, port, BUILDER) if mounted else None
+
+
 def handler_of(desk, token, port, project=None):
+    builder = builder_of(project, token, port)
+
     class Page(http.server.SimpleHTTPRequestHandler):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, directory=str(ROOT), **kwargs)
@@ -214,6 +238,8 @@ def handler_of(desk, token, port, project=None):
         def do_GET(self):
             if not self.allowed():
                 return self.answer(403)
+            if builder and builder(self):
+                return None
             address = urllib.parse.urlsplit(self.path)
             if address.path == "/agent/messages":
                 if not self.agent_call():
@@ -236,7 +262,8 @@ def handler_of(desk, token, port, project=None):
                     return self.answer(401)
                 if not project:
                     return self.answer(404, {"error": "no project: the server was started for none"})
-                return self.answer(200, {"path": str(project.root), "name": project.name(), "mode": project.mode(), "for_ever": project.allowed_for_ever()})
+                return self.answer(200, {"path": str(project.root), "name": project.name(), "mode": project.mode(), "for_ever": project.allowed_for_ever(),
+                                         "builder": BUILDER if builder else None})
             if address.path == "/agent/project/file":
                 # what lies in the project, for the page to show what a write would change: by the rule of a write
                 if not self.agent_call():
@@ -258,6 +285,8 @@ def handler_of(desk, token, port, project=None):
             return super().do_GET()
 
         def do_POST(self):
+            if self.allowed() and builder and builder(self):
+                return None
             if not self.allowed() or not self.agent_call() or not self.own_origin():
                 return self.answer(401)
             length = int(self.headers.get("Content-Length", "0"))

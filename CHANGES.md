@@ -2,6 +2,11 @@
 
 ## 0.2.4 (not released yet)
 
+- The editor shows the builder of the pages of dgx-ui on a page of its own, "pages", when the project has dgx-ui:
+  `boards_mcp.py` serves it under `/dgx-ui` through the `mounted()` of the project's own copy of dgx-ui, which reads and
+  writes the project by its own rules, and the builder runs with no agent of its own. Without such a copy, or with one
+  that has no `mounted()` yet, the editor is as before. Not tried with the builder yet: the dgx-ui that mounts on another
+  server is not released.
 - The solver asks a graphics display for its pixels: along the short side at least and along the long side at least,
   so that a board can be chosen for pages made first, as those of dgx-ui. The sides are compared by length, as DGX
   turns a picture: a page of 480x800 fits a glass of 800x480.

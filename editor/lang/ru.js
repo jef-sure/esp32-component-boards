@@ -5,6 +5,7 @@ LANGUAGES.ru = {
         select: 'подбор',
         edit: 'редактор',
         'open a folder': 'открыть папку',
+        'pages': 'страницы',
         'a program or its local-boards; the repository, to save into the catalog': 'программа или её local-boards; репозиторий — чтобы сохранять в каталог',
         "Let's build something great!": 'Соберём что-нибудь отличное!',
         'A new project in': 'Новый проект в',

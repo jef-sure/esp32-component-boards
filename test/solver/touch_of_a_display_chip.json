@@ -1,0 +1,8 @@
+{
+    "title": "A touch in the chip of the display, as the AXS15231B of the JC3248W535: a library drives the chip as a display only, so the board fits a display with touch, and its kit says the program starts the touch",
+    "answers": {
+        "display": "graphics",
+        "touch": true
+    },
+    "says": "touch: no library of the catalog starts the AXS15231B yet, so the component does not start it: the program does"
+}

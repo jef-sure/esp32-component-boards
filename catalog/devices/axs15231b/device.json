@@ -1,0 +1,19 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "axs15231b",
+    "title": "AXS15231B",
+    "part": "AXS15231B",
+    "class": ["display", "touch"],
+    "provides": {"display": {"variant": "tft"}},
+    "on": {"qspi": {}, "i2c": {"address": "0x3b"}},
+    "controls": {"orientation": {"how": "driver", "read": "none"}},
+    "notes": "A controller of a display and of its touch in one chip: the display on QSPI, the touch on I2C. A board names it twice, a device of each class, and gives each its own config.",
+    "checked": {
+        "facts": {
+            "level": "hardware",
+            "source": "esp32-component-dgx, include/drivers/axs15231b.h and CHANGES 0.12.7: the display on QSPI, tried on the Guition JC3248W535; the touch answered at 0x3B on that board, 2026-11-27"
+        }
+    }
+}

@@ -2,5 +2,5 @@
     "title": "What a board has needs no module",
     "answers": {"display": "graphics", "touch": true, "sound": true},
     "first": {"modules": {}},
-    "fit": ["cyd_s028r", "esp32_8048s070c", "esp32_s3_touch_amoled_1_32", "jc1060p470c", "jc4827w543c", "jc4880p443c", "jc8012p4a1c"]
+    "fit": ["cyd_s028r", "esp32_8048s070c", "esp32_s3_touch_amoled_1_32", "jc1060p470c", "jc3248w535", "jc4827w543c", "jc4880p443c", "jc8012p4a1c"]
 }

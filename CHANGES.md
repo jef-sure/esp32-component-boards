@@ -2,6 +2,12 @@
 
 ## 0.2.4 (not released yet)
 
+- New board: the Guition JC3248W535, `jc3248w535`. A 3.5-inch 320x480 AXS15231B on QSPI, started through DGX 0.12.7
+  or later; an I2S amplifier, a TF slot, the BOOT button and a battery divider on GPIO5. Pins from the schematic V1.0 of
+  Guition. On the board `hello_board` shows its picture. Its touch is the same AXS15231B on I2C at 0x3B, with SDA on 4
+  and SCL on 8 as an I2C probe of the board found, where one block of the schematic swaps the two names; no library of
+  the catalog starts it as a touch yet, so it stays data for the program. A chip with two roles, as this one, takes its
+  config on each device of the board, not in its record.
 - One server for the page of boards and the builder of dgx-ui on it: with a copy of dgx-ui from 0.1.11 on,
   `boards_mcp.py` lists the builder's six tools after its own, named with `ui_`, and runs them through the page; the why
   of each edit goes into boards' dialog, and the builder has no dialog and no language selector of its own, following

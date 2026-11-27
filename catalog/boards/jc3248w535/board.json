@@ -1,0 +1,155 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "jc3248w535",
+    "title": "Guition JC3248W535",
+    "maker": "guition",
+    "part": "JC3248W535",
+    "revision": "V1.0",
+    "description": "3.5-inch 320x480 AXS15231B on QSPI, its touch in the same chip on I2C; an ESP32-S3 with 16 MB flash and 8 MB octal PSRAM",
+    "notes": [
+        "The display and the touch are one chip, the AXS15231B: the display on QSPI, the touch on I2C at 0x3B. No library of the catalog starts the touch yet, so the program does.",
+        "The schematic names the lines of the touch twice and differently: the block of the pull-ups R3, R4 has TP_SCL on IO4 and TP_SDA on IO8, the connector of the panel has TP-SDA on IO4 and TP-SCL on IO8. The board answers with SDA on 4 and SCL on 8.",
+        "The reset of the panel is the reset line of the chip (EN), not a GPIO.",
+        "The amplifier has no enable line: its CTRL is held up through R23, 1 MOhm, so it is on whenever there is power. It has no volume of its own: a program scales its samples.",
+        "GPIO5 is the battery divider (33k over 100k, through R25) and contact 1 of P2 at once."
+    ],
+    "mcu": {"target": "esp32s3", "flash_mb": 16, "psram_mb": 8, "psram_mhz": 80},
+    "checked": {
+        "pins": {
+            "level": "schematic",
+            "source": "JC3248W535 V1.0, two sheets of 5-IO pin distribution of the vendor, from the page of the board on the wiki of Spotpear",
+            "date": "2026-11-27"
+        },
+        "spec": {
+            "level": "vendor-docs",
+            "covers": ["mcu.flash_mb", "mcu.psram_mb", "devices.lcd.config.panel"],
+            "source": "JC3248W535 Specifications-EN of Guition: ESP32-S3-WROOM-1, 8 MB PSRAM, 16 MB flash, IPS 320x480, display area 73.4 x 49.0 mm",
+            "date": "2026-11-27"
+        },
+        "chip": {
+            "level": "hardware",
+            "covers": ["mcu"],
+            "by": "esptool on Anton's board",
+            "unit": "MAC c4:9e:7e:3b:86:44",
+            "date": "2026-11-27",
+            "notes": "ESP32-S3 (QFN56) rev v0.2 with 8 MB embedded PSRAM; flash of 16 MB, GigaDevice 0x4018, quad"
+        },
+        "display": {
+            "level": "hardware",
+            "covers": ["devices.lcd", "buses.qspi"],
+            "by": "the author of DGX, on this board",
+            "source": "CHANGES.md of DGX 0.12.7: the AXS15231B tried on the Guition JC3248W535, QSPI at 40 MHz, backlight on GPIO1",
+            "date": "2026-11-25"
+        },
+        "touch_bus": {
+            "level": "hardware",
+            "covers": ["buses.i2c", "devices.touch"],
+            "by": "an I2C probe on Anton's board",
+            "unit": "MAC c4:9e:7e:3b:86:44",
+            "date": "2026-11-27",
+            "notes": "a device at 0x3B with SDA 4 and SCL 8, three rounds of three; nothing with SDA 8 and SCL 4; INT (GPIO3) high at rest"
+        },
+        "touch": {
+            "level": "hardware",
+            "covers": ["devices.touch"],
+            "by": "Anton, with the firmware of the vendor",
+            "date": "2026-11-27",
+            "notes": "the touch works in the factory demo"
+        },
+        "sound": {
+            "level": "hardware",
+            "covers": ["devices.sound"],
+            "by": "Anton",
+            "date": "2026-11-27",
+            "notes": "sound heard from the board"
+        },
+        "power": {"level": "schematic", "covers": ["power"], "source": "JC3248W535 V1.0", "date": "2026-11-27"},
+        "touch_points": {
+            "level": "vendor-docs",
+            "covers": ["devices.touch.config.fingers"],
+            "source": "AXS15231 datasheet v0.5 (2023-03-06): \"Support two-point detection\"",
+            "date": "2026-11-27"
+        }
+    },
+    "buses": {
+        "spi": {"spi3": {"mosi": 11, "miso": 13, "sclk": 12}},
+        "i2s": {"i2s0": {"mclk": "nc", "bclk": 42, "ws": 2, "dout": 41, "din": "nc"}},
+        "qspi": {"spi2": {"hz": 40000000, "d0": 21, "d1": 48, "d2": 40, "d3": 39, "sclk": 47}},
+        "i2c": {"i2c0": {"sda": 4, "scl": 8}}
+    },
+    "power": [
+        {"name": "USB", "source": "usb", "mv": 5000, "plug": "usb_c", "why": "USB1, type C."},
+        {"name": "VIN", "source": "vin", "why": "Contact 1 of P1."},
+        {"name": "5V", "from": [{"name": "USB", "through": "d_usb"}, {"name": "VIN", "through": "q_vin"}]},
+        {"name": "BAT+", "source": "battery", "why": "P5."},
+        {"name": "VOUT-BAT", "from": ["5V", "BAT+"], "through": "charger", "regulator": "charger", "feeds": ["sound"]},
+        {
+            "name": "3V3",
+            "from": "VOUT-BAT",
+            "through": "reg_3v3",
+            "regulator": "buck",
+            "mv": 3300,
+            "feeds": ["mcu", "lcd", "touch", "sd"],
+            "why": "The net 3.3V of the schematic."
+        }
+    ],
+    "connectors": {
+        "P1": {"type": "HC 1.25 mm, 4 pins", "pins": ["VIN", "U0TXD", "U0RXD", "GND"]},
+        "P2": {"type": "HC 1.25 mm, 8 pins", "pins": [5, 6, 7, 15, 16, 46, 9, 14]},
+        "P3": {"type": "HC 1.25 mm, 4 pins", "pins": ["GND", "3V3", 17, 18]},
+        "P4": {"type": "HC 1.0 mm, 4 pins", "pins": ["GND", "3V3", 17, 18]},
+        "P5": {"type": "JST 1.25 mm, 2 pins", "pins": ["BAT+", "BAT-"]},
+        "P6": {"type": "JST 1.25 mm, 2 pins", "pins": ["SPK+", "SPK-"]}
+    },
+    "devices": {
+        "battery": {
+            "class": "battery_adc",
+            "pins": {"in": 5},
+            "config": {"divider": {"top_ohm": 33000, "bottom_ohm": 100000}}
+        },
+        "lcd": {
+            "chip": "axs15231b",
+            "class": "display",
+            "on": {"qspi.spi2": {"cs": 45}},
+            "pins": {"rst": "nc", "backlight": {"gpio": 1, "active": "high"}, "te": 38},
+            "config": {
+                "kind": "graphics",
+                "primary": true,
+                "panel": {"width": 320, "height": 480, "mm_w": 49, "mm_h": 73.4},
+                "depth_bits": 16
+            },
+            "controls": {"orientation": {"start": {"x": "left-right", "y": "top-bottom", "swap": false}}}
+        },
+        "touch": {
+            "chip": "axs15231b",
+            "class": "touch",
+            "on": {"i2c.i2c0": {"address": "0x3b"}},
+            "pins": {"rst": "nc", "int": 3},
+            "config": {"over": "lcd", "x_max": 319, "y_max": 479, "fingers": 2}
+        },
+        "sound": {"chip": "i2s_amp", "ref": "U4", "on": {"i2s.i2s0": {}}, "config": {"sample_rate": 22050}},
+        "boot": {"class": "button", "pins": {"in": {"gpio": 0, "active": "low"}}},
+        "sd": {"class": "storage", "ref": "TF1", "on": {"spi.spi3": {"cs": 10}}, "config": {"media": "microsd"}},
+        "s3_module": {"class": "other", "ref": "IC1", "maker": "espressif", "part": "ESP32-S3-WROOM-1"},
+        "charger": {
+            "class": "other",
+            "ref": "U2",
+            "notes": "The schematic gives no part number; SW1 on its KEY turns the board on and off from the battery."
+        },
+        "reg_3v3": {
+            "class": "other",
+            "ref": "U3",
+            "notes": "The schematic gives no part number: a buck converter by its pins and L3."
+        },
+        "d_usb": {"class": "other", "ref": "D1", "part": "1N5819W"},
+        "q_vin": {"class": "other", "ref": "Q1", "part": "AO3401"},
+        "q_backlight": {
+            "class": "other",
+            "ref": "Q2",
+            "part": "AO3402",
+            "notes": "Switches the cathode of the backlight from GPIO1; R16 holds the gate low."
+        }
+    }
+}

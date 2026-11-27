@@ -117,7 +117,8 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
     function diagonalOf(device) {
         const panel = device.config?.panel;
         const [width, height] = panel?.mm_w ? [panel.mm_w, panel.mm_h] : panel?.window_mm ?? [];
-        return width ? Math.hypot(width, height) / MM_IN_INCH : null;
+        // a round glass is sold by its diameter, which its pixels span
+        return width ? (panel.round ? width : Math.hypot(width, height)) / MM_IN_INCH : null;
     }
 
     // What a question can limit: where the figure lies, and what to say when a part falls short or has no figure.

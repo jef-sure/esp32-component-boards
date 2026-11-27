@@ -151,7 +151,7 @@ version of each range and the newest of each older line, see [versions](docs/en/
 | ESP32 with a 0.96-inch OLED | ESP32 | 128x64 SSD1306, I2C, 22x11.2 mm | none | none | yes | display |
 | Waveshare ESP32-P4-ETH | ESP32-P4 | none | none | ES8311 | yes | — |
 | Waveshare ESP32-P4-POE-ETH | ESP32-P4 | none | none | ES8311 | yes | — |
-| Waveshare ESP32-S3-Touch-AMOLED-1.32 | ESP32-S3 | 466x466 CO5300, QSPI, 23.7x23.7 mm | CST820 | ES8311 | yes | display, touch, sound |
+| Waveshare ESP32-S3-Touch-AMOLED-1.32 | ESP32-S3 | 466x466 CO5300, QSPI, 33.5x33.5 mm | CST820 | ES8311 | yes | display, touch, sound |
 | Waveshare ESP32-S3-Zero | ESP32-S3 | none | none | none | yes | — |
 | ESP32-WROVER-DEV | ESP32 | none | none | none | yes | — |
 | ESP32-S3 DevKit, 16 MB, 8 MB PSRAM | ESP32-S3 | none | none | none | yes | button |

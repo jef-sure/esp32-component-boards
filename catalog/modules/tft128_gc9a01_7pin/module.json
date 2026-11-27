@@ -17,7 +17,7 @@
             "logic": "none",
             "config": {
                 "primary": true,
-                "panel": {"width": 240, "height": 240, "mm_w": 23, "mm_h": 23, "round": true},
+                "panel": {"width": 240, "height": 240, "mm_w": 32.4, "mm_h": 32.4, "round": true},
                 "depth_bits": 16,
                 "color_order": "bgr"
             },
@@ -46,7 +46,7 @@
         "silkscreen": {
             "level": "vendor-docs",
             "covers": ["devices.lcd"],
-            "source": "the back: 1.28\"TFT VER1.0, 240*240, IC:GC9A01; the size in mm is a square of 1.28 inches across, not measured. Not tried.",
+            "source": "the back: 1.28\"TFT VER1.0, 240*240, IC:GC9A01; the size in mm is the diameter of the active area that the eight-contact module with the same glass marks, 32.4 mm, not measured on this one. Not tried.",
             "date": "2026-11-13"
         },
         "co2_station": {

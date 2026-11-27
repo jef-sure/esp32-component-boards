@@ -58,7 +58,7 @@ static dgx_screen_t *display0_screen(dgx_bus_protocols_t *bus)
 }
 
 static const struct board_display_panel display_panels[] = {
-    {.name = "lcd", .glass_w = 466, .glass_h = 466, .mm_w = 24, .mm_h = 24, .dir_x = DgxScreenLeftRight, .dir_y = DgxScreenTopBottom, .swap_xy = false, .backlight = GPIO_NUM_NC, .backlight_on = 1, .bus = display0_bus, .screen = display0_screen, .orientation = board_glue_screen_orientation},
+    {.name = "lcd", .glass_w = 466, .glass_h = 466, .mm_w = 34, .mm_h = 34, .dir_x = DgxScreenLeftRight, .dir_y = DgxScreenTopBottom, .swap_xy = false, .backlight = GPIO_NUM_NC, .backlight_on = 1, .bus = display0_bus, .screen = display0_screen, .orientation = board_glue_screen_orientation},
 };
 static struct board_display_started displays_started[1];
 const struct board_display_table board_display_table = {.panels = display_panels, .started = displays_started, .count = 1};

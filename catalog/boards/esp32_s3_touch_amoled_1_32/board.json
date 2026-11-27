@@ -128,11 +128,11 @@
             "pins": {"rst": 8, "te": 9},
             "config": {
                 "primary": true,
-                "panel": {"width": 466, "height": 466, "mm_w": 23.7, "mm_h": 23.7, "round": true},
+                "panel": {"width": 466, "height": 466, "mm_w": 33.5, "mm_h": 33.5, "round": true},
                 "depth_bits": 16
             },
             "controls": {"orientation": {"start": {"x": "left-right", "y": "top-bottom", "swap": false}}},
-            "notes": "On P1, a board-to-board connector of 24 pins; VCI_EN of the panel is pulled up by R12. The size is the square of a diagonal of 1.32 inches, the diameter Waveshare gives for the round glass."
+            "notes": "On P1, a board-to-board connector of 24 pins; VCI_EN of the panel is pulled up by R12. The size is the diameter of the round glass, 1.32 inches by Waveshare: the pixels span it, not measured."
         },
         "touch": {
             "chip": "cst820",

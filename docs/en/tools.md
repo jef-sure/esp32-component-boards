@@ -333,6 +333,11 @@ folder, beside the servers that file names, and prints the same entry for a clie
 are full, so the folder of the agent does not matter. Then start the agent again and ask it to help choose the hardware
 of a device.
 
+For Claude Code the install also writes the skill `boards-editor`, from `tools/skills/boards-editor/SKILL.md`, into
+`skills/` of its folder (`~/.claude`, or `CLAUDE_CONFIG_DIR`): the order of work with the editor, what the agent must
+not do, where the API and the data are told, and worked cases. The copy is marked with the version it came from, and a
+skill of the same name that it did not write stays as it is. Run again, the install writes it afresh.
+
 One install serves every project. A server started in a project with its own copy of the component in
 `managed_components/` hands over to that copy at once: the catalog, the editor and `board_select.py` are those of the
 version the project builds with. The copy the install was made from serves folders with no copy of their own; when it

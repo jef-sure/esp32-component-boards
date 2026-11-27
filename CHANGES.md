@@ -2,6 +2,9 @@
 
 ## 0.2.4 (not released yet)
 
+- `boards_mcp.py --install` writes the skill `boards-editor` for Claude Code, as dgx-ui writes its own: the order of
+  work with the editor, what the agent must not do, the questions of a display, what comes after the choice, where the
+  API and the data are told, and worked cases. A skill of the same name it did not write stays as it is.
 - The editor shows the builder of the pages of dgx-ui on a page of its own, "pages", when the project has dgx-ui:
   `boards_mcp.py` serves it under `/dgx-ui` through the `mounted()` of the project's own copy of dgx-ui, which reads and
   writes the project by its own rules, and the builder runs with no agent of its own. Without such a copy, or with one

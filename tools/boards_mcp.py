@@ -515,12 +515,43 @@ def claude_command():
     return str(max(inside, key=version)) if inside else None
 
 
+SKILL = pathlib.Path(__file__).resolve().parent / "skills" / "boards-editor" / "SKILL.md"
+SKILL_MARK = "Written by boards_mcp.py --install of jef-sure/boards "
+
+
+def component_version():
+    """The version of the copy of the component this runs from, as its manifest says."""
+    found = re.search(r"""^version:\s*["']?([^"'\s#]+)""", (ROOT / "idf_component.yml").read_text(), flags=re.M)
+    return found[1] if found else "?"
+
+
+def install_skill():
+    """The skill boards-editor copied for Claude Code, into skills/ of its folder of the person, with the version of this
+    copy under its title: a copy, which stays when the project's copy of the component goes; one of the person's own is not
+    written over. Whether it is there."""
+    folder = pathlib.Path(os.environ.get("CLAUDE_CONFIG_DIR") or pathlib.Path.home() / ".claude") / "skills" / SKILL.parent.name
+    target = folder / "SKILL.md"
+    text = re.sub(r"^(# .*\n)", lambda title: f"{title.group(1)}\n{SKILL_MARK}{component_version()}.\n", SKILL.read_text(encoding="utf-8"),
+                  count=1, flags=re.M)
+    old = target.read_text(encoding="utf-8", errors="replace") if target.exists() else None
+    if old is not None and SKILL_MARK not in old:
+        print(f"{target}: a skill {SKILL.parent.name} of another's is there, left as it is; this one is {SKILL}.")
+        return False
+    if old != text:
+        folder.mkdir(parents=True, exist_ok=True)
+        target.write_text(text, encoding="utf-8")
+    print(f"{target}: the skill {SKILL.parent.name} of jef-sure/boards {component_version()} is there.")
+    return True
+
+
 def install():
-    """Gives this server to the agent of the person: to Claude Code for every folder when its command is there, otherwise in
-    .mcp.json of the folder it runs in, beside the servers that file names. Full paths, so the folder of the agent does not matter."""
+    """Gives this server to the agent of the person: to Claude Code for every folder when its command is there, with the
+    skill boards-editor, otherwise in .mcp.json of the folder it runs in, beside the servers that file names. Full paths, so
+    the folder of the agent does not matter. Run again, it writes the skill afresh."""
     server = {"command": sys.executable, "args": [str(pathlib.Path(__file__).resolve())]}
     claude = claude_command()
     if claude:
+        install_skill()
         done = subprocess.run([claude, "mcp", "add", "-s", "user", NAME, "--", server["command"], *server["args"]], capture_output=True, text=True)
         print((done.stdout + done.stderr).strip())
         if done.returncode:

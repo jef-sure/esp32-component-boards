@@ -7,7 +7,7 @@
  */
 #include "boards.h"
 #include "board_glue.h"
-/* jef-sure/dgx before 0.12.7: /home/anton/git/esp32-component-boards/catalog/boards/jc3248w535/board.json: lcd: its chip has no such library, or not in that version: lcd:esp-idf/jef-sure/dgx */
+/* jef-sure/dgx before 0.12.7: catalog/boards/jc3248w535/board.json: lcd: its chip has no such library, or not in that version: lcd:esp-idf/jef-sure/dgx */
 #if BOARDS_VERSION_JEF_SURE__DGX < BOARDS_VERSION(0, 12, 7)
 #error "jc3248w535 needs jef-sure/dgx 0.12.7 or later"
 #endif

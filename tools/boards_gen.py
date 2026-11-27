@@ -1369,7 +1369,9 @@ def glue_pinned(board, name, version):
             again.update({key: board[key] for key in ("local",) if key in board})
             return glue_of(again).split("\n"), None
     except (ValueError, KeyError, resolve.Refused) as err:
-        return None, str(err)
+        # the reason goes into the glue: the path of the data from the root, so the glue is the same in every checkout
+        path = pathlib.Path(board["data_file"])
+        return None, str(err).replace(str(path), str(path.relative_to(ROOT)) if path.is_relative_to(ROOT) else path.name)
 
 
 def gen_c(board):

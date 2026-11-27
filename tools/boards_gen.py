@@ -249,7 +249,7 @@ def touch_part(name, device):
     else:
         part.update({line: number(pins[line]) for line in ("rst", "int") if line in pins})
     part.update({field: connection[field] for field in ("hz", "address_try") if field in connection})
-    part.update({field: config[field] for field in ("over", "x_max", "y_max", "fingers", "resistive", "calibrations") if field in config})
+    part.update({field: config[field] for field in ("over", "x_max", "y_max", "fingers", "resistive", "calibrations", "reports_hz") if field in config})
     # the fingers the library reads, when it reads fewer than the chip tells, as esp_lcd_axs15231b gives its first point for each
     most = (entry.get("limits") or {}).get("fingers")
     if most and part.get("fingers", most) > most:
@@ -1172,7 +1172,7 @@ def glue_of(board):
             irq = touch.get("irq") if kind == "esp_lcd_touch" else touch.get("int")
             kind_of_bus, own_bus = bus_parts(touch["bus"]) if isinstance(touch.get("bus"), str) else (None, None)
             port = f"I2C_NUM_{port_of(own_bus, 'i2c')}" if kind_of_bus == "i2c" else "-1"
-            out(f"static const struct board_touch_panel touch{i}_panel = {{.x_max = {touch['x_max'] + 1}, .y_max = {touch['y_max'] + 1}, .rst = {c_gpio(touch.get('rst'))}, .irq = {c_gpio(irq)}, .i2c_port = {port}, .fingers = {touch.get('fingers', 1)}}};")
+            out(f"static const struct board_touch_panel touch{i}_panel = {{.x_max = {touch['x_max'] + 1}, .y_max = {touch['y_max'] + 1}, .rst = {c_gpio(touch.get('rst'))}, .irq = {c_gpio(irq)}, .i2c_port = {port}, .fingers = {touch.get('fingers', 1)}" + (f", .reports_hz = {touch['reports_hz']}" if touch.get('reports_hz') else '') + "};")
             out(f"static {TOUCH_DEVICES[kind]} touch{i}_device;")
             common = f".panel = &touch{i}_panel, .calibrated = &touch{i}_calibrated, .device = &touch{i}_device"
             if kind == "gt911":

@@ -1183,7 +1183,7 @@
             "over": { "description": "The display the touch lies over, or \"none\". The calibration is for that display.", "$ref": "#/$defs/name" },
             "x_max": { "type": "integer", "minimum": 1, "description": "The largest raw coordinate, not their number." },
             "y_max": { "type": "integer", "minimum": 1 },
-            "fingers": { "type": "integer", "minimum": 1, "description": "It comes from the chip's entry; a board writes it when it differs." },
+            "fingers": { "type": "integer", "minimum": 1, "description": "It comes from the chip's entry; a board writes it when it differs." }, "reports_hz": { "type": "integer", "minimum": 1, "description": "How many times a second the chip has new points, when a read between two reports gets none: the library reads it no oftener." },
             "resistive": { "type": "boolean" },
             "calibrations": {
               "description": "What was measured on this panel, one entry a measurement, the newest last; the last is taken for now.",

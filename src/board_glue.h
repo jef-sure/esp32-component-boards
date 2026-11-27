@@ -55,6 +55,7 @@ struct board_touch_panel {
     int rst, irq;  /* GPIO_NUM_NC when not wired */
     int i2c_port;  /* the port of its I2C bus; -1 for a panel on SPI */
     int fingers;
+    int reports_hz; /* how many times a second the chip has new points; 0: read it at any pace */
 };
 
 /* The data of each kind of touch panel, defined by its adapter. */

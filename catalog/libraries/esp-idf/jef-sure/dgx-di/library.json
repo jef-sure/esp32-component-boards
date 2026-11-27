@@ -12,7 +12,7 @@
         {"via": "registry"},
         {"via": "git", "url": "https://github.com/jef-sure/esp32-component-dgx-di.git", "ref": "{version}"}
     ],
-    "described": "0.2.0",
+    "described": "0.2.2",
     "description": "Input for DGX: touch panels with calibration and gestures, pads, keyboards.",
     "interfaces": {
         "esp_lcd_touch": {
@@ -21,6 +21,12 @@
                 "call": "dgx_di_esp_lcd_touch_init",
                 "args": ["{touch}", "{handle}", "{fingers}", "{numbered}"],
                 "ok": "none"
+            },
+            "pace": {
+                "call": "dgx_di_esp_lcd_touch_reports",
+                "args": ["{touch}", "{reports_hz}"],
+                "ok": "none",
+                "notes": "After the init: the panel read no oftener than the chip reports, after its INT when it is wired. Returns false when the INT cannot be listened to; the pace holds then too."
             }
         },
         "host": {
@@ -53,7 +59,7 @@
     "adapter": {
         "version": ">=0.1.5,<0.3.0",
         "symbol": "BOARD_TOUCH",
-        "notes": "0.1.4 has the struct tag of dgx_di_pointer_t. 0.1.5 builds for the linux target of ESP-IDF and has dgx_di_host.h: the mouse over a window of DGX as a finger, the touch of the board host. 0.1.6 is the same code on DGX 0.11.0; 0.1.5 stays in the range for a project on DGX 0.10. 0.1.7 draws the keyboard and the pad on another screen, and 0.2.0 is the same code on DGX 0.12.0 with a const font for the keyboard: the adapter calls neither the keyboard nor the pad.",
+        "notes": "0.1.4 has the struct tag of dgx_di_pointer_t. 0.1.5 builds for the linux target of ESP-IDF and has dgx_di_host.h: the mouse over a window of DGX as a finger, the touch of the board host. 0.1.6 is the same code on DGX 0.11.0; 0.1.5 stays in the range for a project on DGX 0.10. 0.1.7 draws the keyboard and the pad on another screen, and 0.2.0 is the same code on DGX 0.12.0 with a const font for the keyboard: the adapter calls neither the keyboard nor the pad. 0.2.2 reads a panel at the pace of its chip (dgx_di_esp_lcd_touch_reports), which the adapter asks for when the touch says reports_hz.",
         "headers": ["board_touch.h"],
         "public": "boards_dgx_di.h",
         "sources": {
@@ -62,7 +68,10 @@
             "BOARD_TOUCH_ESP_LCD": ["board_touch_lcd.c"]
         }
     },
-    "history": [{"before": "0.1.5", "interfaces": {"host": null}}],
+    "history": [
+        {"before": "0.2.2", "interfaces": {"esp_lcd_touch": {"pace": null}}},
+        {"before": "0.1.5", "interfaces": {"host": null}}
+    ],
     "checked": {
         "api": {
             "level": "vendor-code",
@@ -79,6 +88,11 @@
             "source": "CHANGES.md and idf_component.yml of esp32-component-dgx-di 0.2.0 (cf7d3b8) and git diff of include/ and src/ from 0.1.7: DGX ^0.12.0, dgx_di_keyboard_open() takes a const font, the calibration draws in a batch of DGX by the names of 0.12; no call the record names changed",
             "date": "2026-11-21"
         },
+        "api_0_2_2": {
+            "level": "vendor-code",
+            "source": "include/dgx_di_esp_lcd_touch.h, CMakeLists.txt and CHANGES.md of esp32-component-dgx-di 0.2.2 (c57dd10): dgx_di_esp_lcd_touch_reports(t, hz) after the init; esp_timer and esp_driver_gpio in REQUIRES, as the header uses them",
+            "date": "2026-11-27"
+        },
         "gsl3680": {
             "level": "hardware",
             "covers": ["chips.gsl3680"],
@@ -86,9 +100,18 @@
             "source": "CHANGES.md of DGX-DI, 0.0.1 and 0.1.1; catalog/boards/jc8012p4a1c",
             "notes": "0.1.4 on the JC8012P4A1C: the handwritten clock with its touch works. Gestures 11 of 11 and the pad 9 of 9 with 0.0.1; 0.1.5 ran on the computer only and 0.1.6, 0.1.7 and 0.2.0 on no board.",
             "date": "2026-11-04"
+        },
+        "axs15231b_pace": {
+            "level": "hardware",
+            "covers": ["interfaces.esp_lcd_touch.pace"],
+            "by": "a probe and dgx_di_calibrate_measure on Anton's JC3248W535",
+            "date": "2026-11-27",
+            "notes": "with the copy that became 0.2.2: by INT, a held finger seen at every read; the calibration took every press"
         }
     },
     "versions": {
+        "0.2.2": {"requires": {"esp-idf/jef-sure/dgx": "^0.12.0"}, "platforms": {"esp_idf": ">=5.3.0"}},
+        "0.2.1": {"via": ["git"]},
         "0.2.0": {"requires": {"esp-idf/jef-sure/dgx": "^0.12.0"}, "platforms": {"esp_idf": ">=5.3.0"}},
         "0.1.7": {"requires": {"esp-idf/jef-sure/dgx": "^0.11.0"}, "platforms": {"esp_idf": ">=5.3.0"}},
         "0.1.6": {"requires": {"esp-idf/jef-sure/dgx": "^0.11.0"}, "platforms": {"esp_idf": ">=5.3.0"}},

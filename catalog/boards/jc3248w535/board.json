@@ -69,9 +69,17 @@
         "power": {"level": "schematic", "covers": ["power"], "source": "JC3248W535 V1.0", "date": "2026-11-27"},
         "touch_points": {
             "level": "vendor-docs",
-            "covers": ["devices.touch.config.fingers"],
-            "source": "AXS15231 datasheet v0.5 (2023-03-06): \"Support two-point detection\"",
+            "covers": ["devices.touch.config.fingers", "devices.touch.config.reports_hz"],
+            "source": "AXS15231 datasheet v0.5 (2023-03-06): \"Support two-point detection\", \"Point reporting rate 60Hz\"",
             "date": "2026-11-27"
+        },
+        "touch_rate": {
+            "level": "hardware",
+            "covers": ["devices.touch.config.reports_hz"],
+            "by": "a probe on Anton's board",
+            "unit": "MAC c4:9e:7e:3b:86:44",
+            "date": "2026-11-27",
+            "notes": "a finger held: read every 10 ms a point at about every other read, every 20 and 34 ms at every read, the display redrawn or not"
         }
     },
     "buses": {
@@ -134,6 +142,7 @@
                 "x_max": 319,
                 "y_max": 479,
                 "fingers": 2,
+                "reports_hz": 60,
                 "calibrations": [
                     {
                         "rule": "the newest",

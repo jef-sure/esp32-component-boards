@@ -6,3 +6,5 @@ static inline void dgx_di_esp_lcd_touch_init(dgx_di_esp_lcd_touch_t *t, esp_lcd_
     t->numbered       = numbered;
     t->device.fingers = fingers;
 }
+/* 0.2.2: the panel read at the pace of its chip */
+bool dgx_di_esp_lcd_touch_reports(dgx_di_esp_lcd_touch_t *t, int hz);

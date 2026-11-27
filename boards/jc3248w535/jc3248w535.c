@@ -70,7 +70,7 @@ const struct board_display_table board_display_table = {.panels = display_panels
 /* touch: espressif/esp_lcd_axs15231b on i2c.i2c0, the calibration of its measured board. */
 static const dgx_di_aim_t touch0_aims[] = {{.meant_x = 40, .meant_y = 40, .x = 56, .y = 24}, {.meant_x = 279, .meant_y = 40, .x = 288, .y = 32}, {.meant_x = 40, .meant_y = 439, .x = 34, .y = 456}, {.meant_x = 279, .meant_y = 439, .x = 295, .y = 458}, {.meant_x = 160, .meant_y = 40, .x = 170, .y = 17}, {.meant_x = 160, .meant_y = 439, .x = 171, .y = 455}, {.meant_x = 40, .meant_y = 240, .x = 46, .y = 246}, {.meant_x = 279, .meant_y = 240, .x = 296, .y = 246}, {.meant_x = 160, .meant_y = 240, .x = 166, .y = 251}};
 static const struct board_touch_calibration touch0_calibrated = {.aims = touch0_aims, .count = 9, .width = 320, .height = 480, .blink_ms = 0, .gap_ms = 0, .placeholder = false};
-static const struct board_touch_panel touch0_panel = {.x_max = 320, .y_max = 480, .rst = GPIO_NUM_NC, .irq = GPIO_NUM_3, .i2c_port = I2C_NUM_0, .fingers = 1};
+static const struct board_touch_panel touch0_panel = {.x_max = 320, .y_max = 480, .rst = GPIO_NUM_NC, .irq = GPIO_NUM_3, .i2c_port = I2C_NUM_0, .fingers = 1, .reports_hz = 60};
 static dgx_di_esp_lcd_touch_t touch0_device;
 static const struct board_touch_i2c touch0_driver = {.panel = &touch0_panel, .calibrated = &touch0_calibrated, .device = &touch0_device, .io = ESP_LCD_TOUCH_IO_I2C_AXS15231B_CONFIG(), .address = 0x3b, .hz = 400000, .create = esp_lcd_touch_new_i2c_axs15231b};
 

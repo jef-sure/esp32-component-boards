@@ -2,6 +2,11 @@
 
 ## 0.2.4 (not released yet)
 
+- The record of DGX-DI describes 0.2.2, whose `dgx_di_esp_lcd_touch_reports()` reads a panel at the pace of its chip,
+  after its INT when it is wired. A touch says that pace in `reports_hz` of its config, and the adapter of DGX-DI asks
+  for it with DGX-DI 0.2.2 or later: the version of DGX-DI in a build is a macro now, as that of DGX is. Tried on the
+  JC3248W535 with DGX-DI 0.2.2 of the registry and no call in the program: read by its INT, a held finger at every
+  read, every 10, 20 and 34 ms.
 - Hidden Kconfig symbols say the display as the program sees it at start: `BOARD_DISPLAY_WIDTH`,
   `BOARD_DISPLAY_HEIGHT` and `BOARD_DISPLAY_COLOR_BITS`, after its start orientation, 0 with no pixel display, and the
   window's on the computer. The builder of dgx-ui takes them from the sdkconfig of the board, so it draws pages at the
@@ -17,8 +22,9 @@
   record. The controller reports its points at 60 Hz, and a read between two reports gets none: DGX-DI 0.2.0, reading
   every 10 ms, sees a held finger at every other read. DGX-DI 0.2.2 reads it after its INT: with it every read had
   the finger, and the calibration of the board was measured, three rounds, 6.4 pixels off on average and 11 at worst
-  in the last, 14.9 and 23 with none. The glue does not ask DGX-DI for that pace yet: a program calls
-  `dgx_di_esp_lcd_touch_reports()` itself until DGX-DI 0.2.2 is in the registry. The touch reads one finger of the two
+  in the last, 14.9 and 23 with none. With DGX-DI 0.2.2 or later the adapter asks for that pace itself, from
+  `reports_hz` of the touch in the data, 60 by the datasheet; with an older DGX-DI the touch is read as before.
+  The touch reads one finger of the two
   the chip tells: the driver of Espressif, esp_lcd_axs15231b 2.1.1~1, gives every point the place of the first. The
   generator now takes the fingers of a library's `limits` when they are fewer than the chip's.
 - One server for the page of boards and the builder of dgx-ui on it: with a copy of dgx-ui from 0.1.11 on,

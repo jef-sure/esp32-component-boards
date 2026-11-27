@@ -1,6 +1,6 @@
 # CHANGES
 
-## 0.2.4 (not released yet)
+## 0.2.4 (2026-11-27)
 
 - The record of DGX-DI describes 0.2.2, whose `dgx_di_esp_lcd_touch_reports()` reads a panel at the pace of its chip,
   after its INT when it is wired. A touch says that pace in `reports_hz` of its config, and the adapter of DGX-DI asks
@@ -67,10 +67,11 @@
 - The solver asks a graphics display for its pixels: along the short side at least and along the long side at least,
   so that a board can be chosen for pages made first, as those of dgx-ui. The sides are compared by length, as DGX
   turns a picture: a page of 480x800 fits a glass of 800x480.
-- The record of DGX describes 0.12.13 and its four new displays: the CO5300 of round AMOLED panels on QSPI from 0.12.4,
-  the ST7796 (ST7796S) of 320x480 panels on SPI or the 8-bit bus and the AXS15231B of the Guition JC3248W535 on QSPI from
-  0.12.7, the NV3007 of 142x428 bar panels on SPI from 0.12.9. A board with one of them needs that version. No board of
-  the catalog has them yet. The index of chips names DGX for the four.
+- The record of DGX describes 0.12.13 and its four new displays: the CO5300 of round AMOLED panels on QSPI from
+  0.12.4, the ST7796 (ST7796S) of 320x480 panels on SPI or the 8-bit bus and the AXS15231B of the Guition JC3248W535
+  on QSPI from 0.12.7, the NV3007 of 142x428 bar panels on SPI from 0.12.9. A board with one of them needs that
+  version. The JC3248W535 and the ESP32-S3-Touch-AMOLED-1.32 of this release have the AXS15231B and the CO5300. The
+  index of chips names DGX for the four.
 - The radio beside the chip of the JC1060P470C, the JC4880P443C and the JC8012P4A1C is off until the program turns it on:
   `CONFIG_BOARD_RADIO=y` in its `sdkconfig.defaults`, or Boards in menuconfig. esp_hosted starts itself before
   `app_main()` once it is in the build, and it came with the board, so a program that never used Wi-Fi carried it: on the
@@ -86,6 +87,7 @@
   of `editor/skeleton/CMakeLists.txt`. Built on ESP-IDF 6.1 for the JC4880P443C with the radio off, on, off and on
   again in its sdkconfig, and on 5.5.5 for the JC1060P470C off and on: off has no warning and no esp_hosted, on has
   esp_hosted with the pins of the data. Not flashed.
+- The recipes take the component as `^0.2.4`.
 
 ## 0.2.3 (2026-11-22)
 

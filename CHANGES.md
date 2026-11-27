@@ -2,6 +2,12 @@
 
 ## 0.2.4 (not released yet)
 
+- Hidden Kconfig symbols say the display as the program sees it at start: `BOARD_DISPLAY_WIDTH`,
+  `BOARD_DISPLAY_HEIGHT` and `BOARD_DISPLAY_COLOR_BITS`, after its start orientation, 0 with no pixel display, and the
+  window's on the computer. The builder of dgx-ui takes them from the sdkconfig of the board, so it draws pages at the
+  size the program has, turned as it starts. A board of the program does not set them yet. Tried with dgx-ui 0.1.11:
+  in a project with the JC3248W535 chosen and no copy of boards' data, the builder takes 320x480 at 16 bits from
+  `sdkconfig.jc3248w535`.
 - New board: the Guition JC3248W535, `jc3248w535`. A 3.5-inch 320x480 AXS15231B on QSPI, started through DGX 0.12.7
   or later; an I2S amplifier, a TF slot, the BOOT button and a battery divider on GPIO5. Pins from the schematic V1.0 of
   Guition. On the board `hello_board` shows its picture and plays its tone. Its touch is the same AXS15231B on I2C at

@@ -77,6 +77,12 @@ board is chosen, and feature symbols say what the chosen board has:
 `BOARD_TOUCH_XPT2046`, `BOARD_SOUND_ES8311`, `BOARD_DISPLAY_HD44780`. They are
 numbers because the rules of the component manager compare numbers easily.
 
+Three more say the display as the program sees it at start, after the orientation it starts with:
+`BOARD_DISPLAY_WIDTH`, `BOARD_DISPLAY_HEIGHT` and `BOARD_DISPLAY_COLOR_BITS`, 0 for a board with no pixel
+display, and those of the window on the computer for `host_<board>`. A tool that draws for the board takes
+them from the sdkconfig of the board, as the builder of dgx-ui does. A board of the program does not set them
+yet: such a tool reads its `board.json`.
+
 The rules in `idf_component.yml` look at those symbols:
 
 ```yaml

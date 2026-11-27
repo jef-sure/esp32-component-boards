@@ -386,6 +386,51 @@ config BOARD_NODEMCU_ESP32S
     default 1 if BOARD_SELECT_NODEMCU_ESP32S
     default 0
 
+config BOARD_DISPLAY_WIDTH
+    int
+    default 320 if BOARD_SELECT_CYD_S028R
+    default 800 if BOARD_SELECT_ESP32_8048S070C
+    default 72 if BOARD_SELECT_ESP32_C3_OLED_042
+    default 128 if BOARD_SELECT_ESP32_OLED_096
+    default 466 if BOARD_SELECT_ESP32_S3_TOUCH_AMOLED_1_32
+    default 1024 if BOARD_SELECT_JC1060P470C
+    default 320 if BOARD_SELECT_JC3248W535
+    default 480 if BOARD_SELECT_JC4827W543C
+    default 480 if BOARD_SELECT_JC4880P443C
+    default 1280 if BOARD_SELECT_JC8012P4A1C
+    default BOARD_HOST_WIDTH if BOARD_SELECT_HOST
+    default 0
+
+config BOARD_DISPLAY_HEIGHT
+    int
+    default 240 if BOARD_SELECT_CYD_S028R
+    default 480 if BOARD_SELECT_ESP32_8048S070C
+    default 40 if BOARD_SELECT_ESP32_C3_OLED_042
+    default 64 if BOARD_SELECT_ESP32_OLED_096
+    default 466 if BOARD_SELECT_ESP32_S3_TOUCH_AMOLED_1_32
+    default 600 if BOARD_SELECT_JC1060P470C
+    default 480 if BOARD_SELECT_JC3248W535
+    default 272 if BOARD_SELECT_JC4827W543C
+    default 800 if BOARD_SELECT_JC4880P443C
+    default 800 if BOARD_SELECT_JC8012P4A1C
+    default BOARD_HOST_HEIGHT if BOARD_SELECT_HOST
+    default 0
+
+config BOARD_DISPLAY_COLOR_BITS
+    int
+    default 16 if BOARD_SELECT_CYD_S028R
+    default 16 if BOARD_SELECT_ESP32_8048S070C
+    default 1 if BOARD_SELECT_ESP32_C3_OLED_042
+    default 1 if BOARD_SELECT_ESP32_OLED_096
+    default 16 if BOARD_SELECT_ESP32_S3_TOUCH_AMOLED_1_32
+    default 16 if BOARD_SELECT_JC1060P470C
+    default 16 if BOARD_SELECT_JC3248W535
+    default 16 if BOARD_SELECT_JC4827W543C
+    default 16 if BOARD_SELECT_JC4880P443C
+    default 16 if BOARD_SELECT_JC8012P4A1C
+    default BOARD_HOST_COLOR_BITS if BOARD_SELECT_HOST
+    default 0
+
 # What the chosen board and the modules have, as the rules need it: a graphics display
 # brings DGX, a touch brings DGX-DI and its driver, sound with an ES8311 brings esp_codec_dev,
 # a character display brings hd44780. Derived from the data, so the data of a board and the

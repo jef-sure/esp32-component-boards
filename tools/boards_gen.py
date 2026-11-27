@@ -417,6 +417,15 @@ def primary_shown(board):
     return shown(display) if is_pixel(display) else None
 
 
+def primary_depth(board):
+    """The depth of color of the primary display, in bits: the left member of a primary group of two."""
+    displays = {display["name"]: display for display in board.get("displays") or []}
+    for group in (board.get("display_groups") or {}).values():
+        if group.get("primary"):
+            return displays[group["left"]]["depth_bits"]
+    return board["display"]["depth_bits"]
+
+
 def not_started(device):
     """What the data of a device says and the glue cannot do yet."""
     config = device.get("config") or {}
@@ -1720,6 +1729,18 @@ def gen_kconfig(boards, modules):
         out(f"config BOARD_{board['name'].upper()}")
         out("    int")
         out(f"    default 1 if {choice_symbol(board)}")
+        out("    default 0")
+        out("")
+    # The display as the program sees it at start, after the orientation it starts with: for a tool that draws for the
+    # board, as the builder of dgx-ui does, which reads them from the sdkconfig of the board. 0 for a board with none.
+    shown_of = {choice_symbol(board): (primary_shown(board), primary_depth(board)) for board in boards if primary_shown(board)}
+    for field, at, host in (("WIDTH", 0, "BOARD_HOST_WIDTH"), ("HEIGHT", 1, "BOARD_HOST_HEIGHT"), ("COLOR_BITS", None, "BOARD_HOST_COLOR_BITS")):
+        out(f"config BOARD_DISPLAY_{field}")
+        out("    int")
+        for symbol, (size, depth) in shown_of.items():
+            if size:
+                out(f"    default {depth if at is None else size[at]} if {symbol}")
+        out(f"    default {host} if BOARD_SELECT_HOST")
         out("    default 0")
         out("")
     out("# What the chosen board and the modules have, as the rules need it: a graphics display")

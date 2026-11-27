@@ -8,8 +8,10 @@
 - The editor shows the builder of the pages of dgx-ui on a page of its own, "pages", when the project has dgx-ui:
   `boards_mcp.py` serves it under `/dgx-ui` through the `mounted()` of the project's own copy of dgx-ui, which reads and
   writes the project by its own rules, and the builder runs with no agent of its own. Without such a copy, or with one
-  that has no `mounted()` yet, the editor is as before. Not tried with the builder yet: the dgx-ui that mounts on another
-  server is not released.
+  that has no `mounted()` yet, the editor is as before. Tried in headless Chrome with dgx-ui 0.1.10 of its tag (not in
+  the registry yet) in a project of nine pages: the builder opens the project at once and draws its first page, with no
+  error on the page; a page written through the server of boards is taken, a write from another origin and one of
+  `CMakeLists.txt` are refused.
 - The solver asks a graphics display for its pixels: along the short side at least and along the long side at least,
   so that a board can be chosen for pages made first, as those of dgx-ui. The sides are compared by length, as DGX
   turns a picture: a page of 480x800 fits a glass of 800x480.

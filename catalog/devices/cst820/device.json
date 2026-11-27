@@ -1,0 +1,18 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "cst820",
+    "title": "Hynitron CST820",
+    "maker": "hynitron",
+    "part": "CST820",
+    "class": "touch",
+    "on": {"i2c": {"required": true, "address": "0x15"}},
+    "config": {"fingers": 1},
+    "checked": {
+        "facts": {
+            "level": "vendor-code",
+            "source": "the examples of Waveshare for the ESP32-S3-Touch-AMOLED-1.32: address 0x15, one point read from register 0x03"
+        }
+    }
+}

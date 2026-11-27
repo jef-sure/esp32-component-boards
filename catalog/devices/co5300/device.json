@@ -1,0 +1,20 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "device",
+    "name": "co5300",
+    "title": "Chipone CO5300",
+    "maker": "chipone",
+    "part": "CO5300",
+    "class": "display",
+    "provides": {"display": {"variant": "oled"}},
+    "on": {"qspi": {"required": true, "lines": ["rst"]}},
+    "config": {"kind": "graphics"},
+    "controls": {"orientation": {"how": "driver", "read": "none"}},
+    "checked": {
+        "facts": {
+            "level": "hardware",
+            "source": "esp32-component-dgx, include/drivers/co5300.h and CHANGES 0.12.4, 0.12.5: an AMOLED controller on QSPI, no backlight line"
+        }
+    }
+}

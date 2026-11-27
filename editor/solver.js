@@ -1073,13 +1073,17 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
         return rows;
     }
 
-    // A display whose chip no library of the catalog drives, and a touch over one: the glue keeps them as data, as
-    // boards_gen.py does, and the program starts them itself.
+    // A display or a touch whose chip no library of the catalog drives, and a touch over such a display: the glue keeps
+    // them as data, as boards_gen.py does, and the program starts them itself.
+    // The kinds of adapter that start a touch, TOUCH_DEVICES of boards_gen.py: a chip a library drives as a display is no touch.
+    const TOUCH_ADAPTERS = new Set(['gt911', 'esp_lcd_touch', 'gsl3680']);
     function undriven(resolved) {
         const displays = Object.entries(resolved.devices).filter(([, device]) => device.used !== false && (device.classes || []).includes('display')
             && device.chip && !device.library && !Object.keys(device.libraries || {}).length).map(([name]) => name);
         const touches = Object.entries(resolved.devices).filter(([, device]) => (device.classes || []).includes('touch') && displays.includes(device.config?.over)).map(([name]) => name);
-        return { displays, touches };
+        const alone = Object.entries(resolved.devices).filter(([name, device]) => !touches.includes(name) && device.used !== false && (device.classes || []).includes('touch')
+            && device.chip && !Object.values(device.libraries || {}).some((entry) => TOUCH_ADAPTERS.has(entry?.adapter?.kind))).map(([name]) => name);
+        return { displays, touches: [...touches, ...alone], alone };
     }
 
     // The libraries of a kit: the board starts those with an adapter, the rest are for the program to start.
@@ -1726,6 +1730,9 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
                 const over = undriven(resolved).touches.filter((touch) => resolved.devices[touch].config?.over === name);
                 lines.push({ level: 'do', text: over.length ? t('{0}: no library of the catalog starts the {1} yet, so the component starts neither it nor {2}: the program does', name, resolved.devices[name].part ?? resolved.devices[name].chip, over.join(', '))
                     : t('{0}: no library of the catalog starts the {1} yet, so the component does not start it: the program does', name, resolved.devices[name].part ?? resolved.devices[name].chip) });
+            }
+            for (const name of arduino ? [] : undriven(resolved).alone) {
+                lines.push({ level: 'do', text: t('{0}: no library of the catalog starts the {1} yet, so the component does not start it: the program does', name, resolved.devices[name].part ?? resolved.devices[name].chip) });
             }
             // the range the manifest of the component takes, as a program gets it, and where this kit needs more
             const versionsOf = (item) => (!item.range ? item.version : item.from ? t('{0} (this kit from {1})', item.range, item.from) : item.range);

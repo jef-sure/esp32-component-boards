@@ -2,6 +2,14 @@
 
 ## 0.2.4 (not released yet)
 
+- New board: the Waveshare ESP32-S3-Touch-AMOLED-1.32, `esp32_s3_touch_amoled_1_32`. A round 466x466 AMOLED with a
+  CO5300 on QSPI, started through DGX 0.12.4 or later; an ES8311 with a speaker header; BOOT and PWR buttons; a battery
+  divider on GPIO4. Pins from the schematic of Waveshare. On the board `hello_board` shows its picture and its tone is
+  heard. Its CST820 touch stays data for the program (`board_bus_get`): no library of the catalog starts that chip yet.
+  On a battery the program keeps the power on with GPIO18 high, which the glue does not set yet.
+- A touch whose chip no library starts as a touch is kept as data, as a display with such a chip already was, and the
+  kit of the editor says the program starts it. A chip a library drives only as a display, as the AXS15231B, counts as
+  not started for its touch.
 - `boards_mcp.py --install` writes the skill `boards-editor` for Claude Code, as dgx-ui writes its own: the order of
   work with the editor, what the agent must not do, the questions of a display, what comes after the choice, where the
   API and the data are told, and worked cases. A skill of the same name it did not write stays as it is.

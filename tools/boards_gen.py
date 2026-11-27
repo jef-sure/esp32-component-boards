@@ -300,9 +300,11 @@ def ethernet_part(name, device, buses):
             "reset_us": defaults.get("reset_us", 0), "after_reset_ms": defaults.get("after_reset_ms", 0), **started}
 
 
-def named_by_a_library(chip):
-    """Whether a record of the catalog has the chip, at any version: a build pinned to a version before it came is not asked."""
-    return any(chip in (record.get("chips") or {}) for record in resolve.all_libraries(tuple(resolve.ROOTS)).values())
+def named_by_a_library(chip, kinds=None):
+    """Whether a record of the catalog has the chip, at any version: a build pinned to a version before it came is not asked.
+    With kinds, only an entry whose adapter is of one of them counts: a chip a library drives as a display is no touch."""
+    entries = [(record.get("chips") or {}).get(chip) for record in resolve.all_libraries(tuple(resolve.ROOTS)).values()]
+    return any(entry is not None and (kinds is None or (entry.get("adapter") or {}).get("kind") in kinds) for entry in entries)
 
 
 def startable(device):
@@ -343,10 +345,13 @@ def parts_of(resolved):
         elif "display" in classes and not module and not named_by_a_library(device.get("chip")):
             # described, and no library of the catalog names its chip yet: kept as data, and said, so a wrong chip is seen. A
             # library that has the chip only from a later version is no such case: the glue stops below that version.
-            board["kept_notes"].append(f"{name} is kept as data: no library of the catalog starts a {device.get('chip')}")
+            board["kept_notes"].append(f"{name} is kept as data: no library of the catalog starts the {device.get('chip')}")
             board["kept"][name] = kept_numbers(device)
         elif "display" in classes:
             displays.append(display_part(name, device, module))
+        elif "touch" in classes and not module and not named_by_a_library(device.get("chip"), TOUCH_DEVICES):
+            board["kept_notes"].append(f"{name} is kept as data: no library of the catalog starts the {device.get('chip')}")
+            board["kept"][name] = kept_numbers(device)
         elif "touch" in classes:
             board["touches"].append(touch_part(name, device))
         elif "audio" in classes:

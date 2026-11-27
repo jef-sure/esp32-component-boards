@@ -1,0 +1,175 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "board",
+    "name": "esp32_s3_touch_amoled_1_32",
+    "title": "Waveshare ESP32-S3-Touch-AMOLED-1.32",
+    "maker": "waveshare",
+    "part": "ESP32-S3-Touch-AMOLED-1.32",
+    "description": "A round 1.32-inch 466x466 AMOLED, CO5300 on QSPI, CST820 touch, ES8311 with a speaker header and a microphone; an ESP32-S3-PICO-1 with 8 MB flash and 8 MB octal PSRAM, a battery charger, PWR and BOOT buttons",
+    "notes": [
+        "On a battery the board starts while PWR is held: the program sets GPIO18 (BAT_EN) high to keep the power on, and low turns the board off. On USB the power does not depend on GPIO18.",
+        "GPIO17 reads PWR through D2, low while it is pressed.",
+        "GPIO16 (Codec_EN) is EN of U3, the LDO of the codec, pulled up by R20: the codec is fed unless the program drives GPIO16 low.",
+        "USB-C goes to the chip itself, GPIO19 and 20 through 22 ohm: the log comes on the USB Serial/JTAG port. J1 brings the same D- and D+ out.",
+        "GPIO 33 to 37 are taken by the octal PSRAM inside the chip."
+    ],
+    "mcu": {
+        "target": "esp32s3",
+        "part": "ESP32-S3-PICO-1-N8R8",
+        "flash_mb": 8,
+        "psram_mb": 8,
+        "revision": "0.2",
+        "antenna": {"kind": "on_board", "form": "ceramic", "quality": 4}
+    },
+    "checked": {
+        "pins": {
+            "level": "schematic",
+            "source": "ESP32-S3-Touch-AMOLED-1.32-Schematic.pdf, Resources of docs.waveshare.com/ESP32-S3-Touch-AMOLED-1.32",
+            "date": "2026-11-27"
+        },
+        "pins_vendor": {
+            "level": "vendor-code",
+            "covers": ["devices.lcd", "devices.touch", "buses.qspi", "buses.i2c"],
+            "source": "user_config.h of 08_FactoryProgram, github.com/waveshareteam/ESP32-S3-Touch-AMOLED-1.32",
+            "date": "2026-11-27",
+            "result": "confirmed",
+            "notes": "The same pins as the schematic; the touch at 0x15, the QSPI at 40 MHz."
+        },
+        "chip": {
+            "level": "hardware",
+            "covers": ["mcu"],
+            "source": "esptool on Anton's board: ESP32-S3-PICO-1 (LGA56) rev v0.2, 8 MB flash (XMC), 8 MB PSRAM (AP_3v3)",
+            "date": "2026-11-27"
+        },
+        "glass": {
+            "level": "hardware",
+            "covers": ["devices.lcd", "buses.qspi"],
+            "by": "the author of DGX, on this board",
+            "source": "CHANGES.md of DGX, 0.12.4 and 0.12.5",
+            "date": "2026-11-24",
+            "notes": "The CO5300 driver of DGX at 40 MHz, 16 bits, the reset on GPIO8, TE on GPIO9. Through this component it was not run yet."
+        },
+        "touch_chip": {
+            "level": "vendor-docs",
+            "covers": ["devices.touch.chip"],
+            "source": "the page of the board at docs.waveshare.com: a CO5300 and a CST820",
+            "date": "2026-11-27",
+            "notes": "The schematic draws only the connector of the panel and names no chip."
+        },
+        "picture": {
+            "level": "hardware",
+            "covers": ["devices.lcd"],
+            "by": "Anton",
+            "date": "2026-11-27",
+            "result": "confirmed",
+            "notes": "hello_board through this component, DGX 0.12.13 from the registry, 16 bits: a white screen with a blue bar at the top."
+        },
+        "sound": {
+            "level": "hardware",
+            "covers": ["devices.sound"],
+            "by": "Anton",
+            "date": "2026-11-27",
+            "result": "confirmed",
+            "notes": "hello_board through this component: the second of 441 Hz at 22050 Hz and volume 25 heard on a speaker at J6."
+        }
+    },
+    "buses": {
+        "qspi": {"spi2": {"hz": 40000000, "d0": 12, "d1": 13, "d2": 14, "d3": 15, "sclk": 11}},
+        "i2c": {"i2c0": {"sda": 47, "scl": 48}},
+        "i2s": {"i2s0": {"mclk": 38, "bclk": 39, "ws": 41, "dout": 42, "din": 40}}
+    },
+    "power": [
+        {"name": "VBUS", "source": "usb", "mv": 5000, "plug": "usb_c", "why": "Type_C1."},
+        {"name": "VBAT", "source": "battery", "why": "J2."},
+        {
+            "name": "VSYS",
+            "from": [{"name": "VBUS", "through": "d_vbus"}, {"name": "VBAT", "through": ["q_key", "q_vbus"]}],
+            "feeds": ["amplifier"],
+            "why": "Q1 passes VBAT while PWR is held or while GPIO18 (BAT_EN) holds T1 on; Q2 stops it while VBUS is there."
+        },
+        {
+            "name": "VCC3V3",
+            "from": "VSYS",
+            "through": "reg_3v3",
+            "regulator": "buck",
+            "mv": 3300,
+            "feeds": ["mcu", "lcd", "touch"]
+        },
+        {
+            "name": "Codec_3V3",
+            "from": "VSYS",
+            "through": "reg_codec",
+            "regulator": "ldo",
+            "mv": 3300,
+            "feeds": ["sound", "mic"],
+            "why": "EN of U3 is Codec_EN on GPIO16, pulled up to VCC3V3 by R20."
+        }
+    ],
+    "connectors": {
+        "J1": {
+            "type": "SH 1.0 mm, 12 pins",
+            "pins": ["GND", "VSYS", "VCC3V3", 0, 1, 2, 48, 47, "D_N", "D_P", "U0TXD", "U0RXD"]
+        },
+        "J2": {"type": "MX 1.25 mm, 2 pins", "pins": ["BAT+", "BAT-"]},
+        "J6": {"type": "MX 1.25 mm, 2 pins", "pins": ["SPK+", "SPK-"]}
+    },
+    "devices": {
+        "lcd": {
+            "chip": "co5300",
+            "on": {"qspi.spi2": {"cs": 10}},
+            "pins": {"rst": 8, "te": 9},
+            "config": {
+                "primary": true,
+                "panel": {"width": 466, "height": 466, "mm_w": 23.7, "mm_h": 23.7, "round": true},
+                "depth_bits": 16
+            },
+            "controls": {"orientation": {"start": {"x": "left-right", "y": "top-bottom", "swap": false}}},
+            "notes": "On P1, a board-to-board connector of 24 pins; VCI_EN of the panel is pulled up by R12. The size is the square of a diagonal of 1.32 inches, the diameter Waveshare gives for the round glass."
+        },
+        "touch": {
+            "chip": "cst820",
+            "on": {"i2c.i2c0": {}},
+            "pins": {"rst": 7, "int": 6},
+            "config": {"over": "lcd", "x_max": 465, "y_max": 465},
+            "notes": "On P1 with the panel. The I2C has 10K to VCC3V3, R32 and R33."
+        },
+        "sound": {
+            "chip": "es8311",
+            "ref": "U5",
+            "on": {"i2c.i2c0": {}, "i2s.i2s0": {}},
+            "pins": {"pa": 46},
+            "config": {"sample_rate": 22050, "pa_voltage": 5, "codec_dac_voltage": 3.3},
+            "controls": {"volume": {"start": 25}},
+            "notes": [
+                "CE of the codec is held low through R19, so its address is 0x18. PA_CTRL reaches CTRL of the NS4150B through R29, 0 ohm, and R31 holds it low.",
+                "MIC1 is on MIC1P of the codec: ASDOUT comes in on GPIO40. Only the output is set up."
+            ]
+        },
+        "battery": {
+            "class": "battery_adc",
+            "pins": {"in": 4},
+            "config": {"divider": {"top_ohm": 200000, "bottom_ohm": 200000}}
+        },
+        "boot": {"class": "button", "ref": "Key2", "pins": {"in": {"gpio": 0, "active": "low"}}},
+        "pwr": {"class": "button", "ref": "Key1", "pins": {"in": {"gpio": 17, "active": "low"}}},
+        "usb": {
+            "class": "usb",
+            "pins": {"d_minus": 19, "d_plus": 20},
+            "notes": "D- and D+ of Type_C1 go to the USB Serial/JTAG of the chip, the console and the flashing."
+        },
+        "mic": {"class": "other", "ref": "MIC1", "notes": "The schematic gives no part number."},
+        "amplifier": {"class": "other", "ref": "U6", "part": "NS4150B"},
+        "charger": {
+            "class": "other",
+            "ref": "U1",
+            "part": "ETA6098",
+            "notes": "It charges the battery from VBUS; R4, 82K, sets the current to 2 A by the table of the schematic."
+        },
+        "reg_3v3": {"class": "other", "ref": "U2", "part": "MP1605GTF-Z"},
+        "reg_codec": {"class": "other", "ref": "U3", "part": "RT9193-33PB"},
+        "d_vbus": {"class": "other", "ref": "D1", "part": "MBR230LSFT1G"},
+        "q_key": {"class": "other", "ref": "Q1", "part": "AO3401"},
+        "q_vbus": {"class": "other", "ref": "Q2", "part": "AO3401"}
+    }
+}

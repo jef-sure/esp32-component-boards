@@ -7,7 +7,7 @@
  */
 #include "boards.h"
 #include "board_glue.h"
-/* jef-sure/dgx before 0.12.7: axs15231b: no library this component can start it with: none in the catalog */
+/* jef-sure/dgx before 0.12.7: /home/anton/git/esp32-component-boards/catalog/boards/jc3248w535/board.json: lcd: its chip has no such library, or not in that version: lcd:esp-idf/jef-sure/dgx */
 #if BOARDS_VERSION_JEF_SURE__DGX < BOARDS_VERSION(0, 12, 7)
 #error "jc3248w535 needs jef-sure/dgx 0.12.7 or later"
 #endif
@@ -16,10 +16,15 @@
 
 #include "board_display.h"
 #include "board_sound_i2s.h"
+#include "board_touch.h"
+#include "board_touch_i2c.h"
+#include "board_touch_lcd.h"
+#include "board_touch_spi.h"
 #include "bus/dgx_qspi_esp32.h"
 #include "driver/i2s_std.h"
 #include "driver/spi_common.h"
 #include "drivers/axs15231b.h"
+#include "esp_lcd_axs15231b.h"
 
 /* Guition JC3248W535: 3.5-inch 320x480 AXS15231B on QSPI, its touch in the same chip on I2C; an ESP32-S3 with 16 MB flash and 8 MB octal PSRAM. */
 
@@ -33,7 +38,7 @@ static const struct board_i2s_bus board_i2s_i2s0 = {.port = I2S_NUM_0, .mclk = G
 /* Every bus of the board, its numbers by name: the kinds the component sets up and the
  * kinds it only keeps for the program, for a program that sets its own hardware up on the
  * board's wiring instead of copying pins. */
-static const struct board_bus_field board_bus_fields[] = {{"spi.spi3", "miso", 13}, {"spi.spi3", "mosi", 11}, {"spi.spi3", "sclk", 12}, {"i2s.i2s0", "bclk", 42}, {"i2s.i2s0", "dout", 41}, {"i2s.i2s0", "ws", 2}, {"qspi.spi2", "d0", 21}, {"qspi.spi2", "d1", 48}, {"qspi.spi2", "d2", 40}, {"qspi.spi2", "d3", 39}, {"qspi.spi2", "hz", 40000000}, {"qspi.spi2", "sclk", 47}, {"i2c.i2c0", "scl", 8}, {"i2c.i2c0", "sda", 4}, {"battery", "in", 5}, {"touch", "address", 59}, {"touch", "int", 3}, {"touch", "port", 0}, {"sd", "cs", 10}, {"sd", "host", SPI3_HOST}};
+static const struct board_bus_field board_bus_fields[] = {{"spi.spi3", "miso", 13}, {"spi.spi3", "mosi", 11}, {"spi.spi3", "sclk", 12}, {"i2s.i2s0", "bclk", 42}, {"i2s.i2s0", "dout", 41}, {"i2s.i2s0", "ws", 2}, {"qspi.spi2", "d0", 21}, {"qspi.spi2", "d1", 48}, {"qspi.spi2", "d2", 40}, {"qspi.spi2", "d3", 39}, {"qspi.spi2", "hz", 40000000}, {"qspi.spi2", "sclk", 47}, {"i2c.i2c0", "scl", 8}, {"i2c.i2c0", "sda", 4}, {"battery", "in", 5}, {"sd", "cs", 10}, {"sd", "host", SPI3_HOST}};
 const struct board_bus_table board_bus_table = {.fields = board_bus_fields, .count = sizeof(board_bus_fields) / sizeof(board_bus_fields[0])};
 
 /* The SPI buses open to the program's devices. A host with only a display on it is not one of them. */
@@ -62,7 +67,21 @@ static const struct board_display_panel display_panels[] = {
 static struct board_display_started displays_started[1];
 const struct board_display_table board_display_table = {.panels = display_panels, .started = displays_started, .count = 1};
 
-const struct board_touch_table board_touch_table = {.count = 0};
+/* touch: espressif/esp_lcd_axs15231b on i2c.i2c0, the calibration of its measured board. */
+/* The calibration below is a placeholder, not measured on a board: the touch works, only not
+ * straight; board_touch_start says so. Measure the board (dgx_di_calibrate_measure) and put the
+ * numbers in the data. */
+static const dgx_di_aim_t touch0_aims[] = {{.meant_x = 32, .meant_y = 32, .x = 32, .y = 32}, {.meant_x = 287, .meant_y = 32, .x = 287, .y = 32}, {.meant_x = 32, .meant_y = 447, .x = 32, .y = 447}, {.meant_x = 287, .meant_y = 447, .x = 287, .y = 447}};
+static const struct board_touch_calibration touch0_calibrated = {.aims = touch0_aims, .count = 4, .width = 320, .height = 480, .blink_ms = 0, .gap_ms = 0, .placeholder = true};
+static const struct board_touch_panel touch0_panel = {.x_max = 320, .y_max = 480, .rst = GPIO_NUM_NC, .irq = GPIO_NUM_3, .i2c_port = I2C_NUM_0, .fingers = 2};
+static dgx_di_esp_lcd_touch_t touch0_device;
+static const struct board_touch_i2c touch0_driver = {.panel = &touch0_panel, .calibrated = &touch0_calibrated, .device = &touch0_device, .io = ESP_LCD_TOUCH_IO_I2C_AXS15231B_CONFIG(), .address = 0x3b, .hz = 400000, .create = esp_lcd_touch_new_i2c_axs15231b};
+
+static const struct board_touch_entry touch_entries[] = {{.name = "touch", .over = "lcd", .start = board_glue_touch_i2c_start, .esp_lcd_touch_i2c = &touch0_driver}};
+static struct board_touch touches_started[1];
+static struct board_touch_slot touch_slots[1];
+const struct board_touch_slots board_touch_slots = {.slots = touch_slots, .count = 1};
+const struct board_touch_table board_touch_table = {.entries = touch_entries, .started = touches_started, .count = 1};
 
 /* sound: i2s at 22050 Hz. */
 

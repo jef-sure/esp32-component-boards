@@ -95,6 +95,7 @@
     "libraries/esp-idf/espressif/esp_driver_i2s/library.json",
     "libraries/esp-idf/espressif/esp_eth/library.json",
     "libraries/esp-idf/espressif/esp_hosted/library.json",
+    "libraries/esp-idf/espressif/esp_lcd_axs15231b/library.json",
     "libraries/esp-idf/espressif/esp_lcd_touch/library.json",
     "libraries/esp-idf/espressif/esp_lcd_touch_cst816s/library.json",
     "libraries/esp-idf/espressif/esp_lcd_touch_gt911/library.json",

@@ -1,0 +1,64 @@
+{
+    "format": "jef-sure/boards",
+    "format_version": 2,
+    "kind": "library",
+    "ecosystem": "esp-idf",
+    "owner": "espressif",
+    "name": "esp_lcd_axs15231b",
+    "title": "esp_lcd AXS15231B",
+    "url": "https://components.espressif.com/components/espressif/esp_lcd_axs15231b",
+    "license": "Custom",
+    "install": [
+        {"via": "registry"},
+        {
+            "via": "git",
+            "url": "https://github.com/espressif/esp-iot-solution.git",
+            "path": "components/display/lcd/esp_lcd_axs15231b"
+        }
+    ],
+    "described": "2.1.1~1",
+    "chips": {
+        "axs15231b": {
+            "header": "esp_lcd_axs15231b.h",
+            "on": ["i2c"],
+            "interface": "esp_lcd_touch",
+            "defaults": {"io": "ESP_LCD_TOUCH_IO_I2C_AXS15231B_CONFIG()"},
+            "init": [
+                {
+                    "call": "esp_lcd_touch_new_i2c_axs15231b",
+                    "args": ["{io}", "{config}", "{handle}"],
+                    "ok": {"equals": "ESP_OK"}
+                }
+            ],
+            "adapter": {
+                "kind": "esp_lcd_touch_i2c",
+                "function": "board_glue_touch_i2c_start",
+                "symbols": ["BOARD_TOUCH_I2C"],
+                "headers": ["board_touch_lcd.h"]
+            },
+            "notes": "The component drives the panel too; boards takes only its touch, as the display is DGX's. Its macro of I2C settings gives no speed, so the adapter sets 400 kHz."
+        }
+    },
+    "adapter": {
+        "version": "^2.1.1",
+        "symbol": "BOARD_TOUCH_AXS15231B",
+        "with": ["esp-idf/jef-sure/dgx-di", "esp-idf/espressif/esp_lcd_touch"]
+    },
+    "checked": {
+        "api": {
+            "level": "vendor-code",
+            "source": "include/esp_lcd_axs15231b.h of 2.1.1~1: esp_lcd_touch_new_i2c_axs15231b(), ESP_LCD_TOUCH_IO_I2C_AXS15231B_CONFIG() at 0x3B with no scl_speed_hz",
+            "date": "2026-11-27"
+        }
+    },
+    "versions": {
+        "2.1.1~1": {"requires": {"esp-idf/espressif/esp_lcd_touch": "^1"}, "platforms": {"esp_idf": ">=5.3"}},
+        "2.1.1": {"requires": {"esp-idf/espressif/esp_lcd_touch": "^1"}, "platforms": {"esp_idf": ">=5.3"}},
+        "2.1.0": {"requires": {"esp-idf/espressif/esp_lcd_touch": "^1"}, "platforms": {"esp_idf": ">=5.3"}},
+        "2.0.2": {"requires": {"esp-idf/espressif/esp_lcd_touch": "^1"}, "platforms": {"esp_idf": ">=5.3"}},
+        "2.0.0": {"requires": {"esp-idf/espressif/esp_lcd_touch": "^1"}, "platforms": {"esp_idf": ">=5.3"}},
+        "1.0.1~1": {"requires": {"esp-idf/espressif/esp_lcd_touch": "^1"}, "platforms": {"esp_idf": ">5.0.4,!=5.1.1"}},
+        "1.0.1": {"requires": {"esp-idf/espressif/esp_lcd_touch": "^1"}, "platforms": {"esp_idf": ">5.0.4,!=5.1.1"}},
+        "1.0.0": {"requires": {"esp-idf/espressif/esp_lcd_touch": "^1"}, "platforms": {"esp_idf": ">5.0.4,!=5.1.1"}}
+    }
+}

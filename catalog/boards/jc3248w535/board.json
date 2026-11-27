@@ -9,7 +9,7 @@
     "revision": "V1.0",
     "description": "3.5-inch 320x480 AXS15231B on QSPI, its touch in the same chip on I2C; an ESP32-S3 with 16 MB flash and 8 MB octal PSRAM",
     "notes": [
-        "The display and the touch are one chip, the AXS15231B: the display on QSPI, the touch on I2C at 0x3B. No library of the catalog starts the touch yet, so the program does.",
+        "The display and the touch are one chip, the AXS15231B: the display on QSPI through DGX, the touch on I2C at 0x3B through espressif/esp_lcd_axs15231b.",
         "The schematic names the lines of the touch twice and differently: the block of the pull-ups R3, R4 has TP_SCL on IO4 and TP_SDA on IO8, the connector of the panel has TP-SDA on IO4 and TP-SCL on IO8. The board answers with SDA on 4 and SCL on 8.",
         "The reset of the panel is the reset line of the chip (EN), not a GPIO.",
         "The amplifier has no enable line: its CTRL is held up through R23, 1 MOhm, so it is on whenever there is power. It has no volume of its own: a program scales its samples.",
@@ -120,14 +120,36 @@
                 "panel": {"width": 320, "height": 480, "mm_w": 49, "mm_h": 73.4},
                 "depth_bits": 16
             },
-            "controls": {"orientation": {"start": {"x": "left-right", "y": "top-bottom", "swap": false}}}
+            "controls": {"orientation": {"start": {"x": "left-right", "y": "top-bottom", "swap": false}}},
+            "library": "esp-idf/jef-sure/dgx"
         },
         "touch": {
             "chip": "axs15231b",
             "class": "touch",
             "on": {"i2c.i2c0": {"address": "0x3b"}},
             "pins": {"rst": "nc", "int": 3},
-            "config": {"over": "lcd", "x_max": 319, "y_max": 479, "fingers": 2}
+            "config": {
+                "over": "lcd",
+                "x_max": 319,
+                "y_max": 479,
+                "fingers": 2,
+                "calibrations": [
+                    {
+                        "rule": "the newest",
+                        "measured": false,
+                        "notes": "A placeholder: the touch taken as the glass, pixel for pixel. Measure the board with dgx_di_calibrate_measure and give the log to tools/board_calibration.py.",
+                        "x_max": 319,
+                        "y_max": 479,
+                        "width": 320,
+                        "height": 480,
+                        "left_up": {"meant": [32, 32], "device": [32, 32]},
+                        "right_up": {"meant": [287, 32], "device": [287, 32]},
+                        "left_down": {"meant": [32, 447], "device": [32, 447]},
+                        "right_down": {"meant": [287, 447], "device": [287, 447]}
+                    }
+                ]
+            },
+            "library": "esp-idf/espressif/esp_lcd_axs15231b"
         },
         "sound": {"chip": "i2s_amp", "ref": "U4", "on": {"i2s.i2s0": {}}, "config": {"sample_rate": 22050}},
         "boot": {"class": "button", "pins": {"in": {"gpio": 0, "active": "low"}}},

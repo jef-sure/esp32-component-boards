@@ -1,8 +1,8 @@
 {
-    "title": "A touch in the chip of the display, as the AXS15231B of the JC3248W535: a library drives the chip as a display only, so the board fits a display with touch, and its kit says the program starts the touch",
+    "title": "A chip that is the display and the touch, as the AXS15231B of the JC3248W535: DGX starts it as the display and espressif/esp_lcd_axs15231b as the touch, each device of the board naming its library, and the kit names both",
     "answers": {
         "display": "graphics",
         "touch": true
     },
-    "says": "touch: no library of the catalog starts the AXS15231B yet, so the component does not start it: the program does"
+    "says": "the board starts: jef-sure/dgx >=0.10.12,<0.13.0 (this kit from 0.12.7); espressif/esp_lcd_axs15231b ^2.1.1"
 }

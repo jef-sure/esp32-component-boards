@@ -8565,9 +8565,12 @@
         },
         "esp-idf/espressif/esp_jpeg": {"title": "esp-idf/espressif/esp_jpeg", "platforms": ["esp_idf"], "chips": []},
         "esp-idf/espressif/esp_lcd_axs15231b": {
-            "title": "espressif/esp_lcd_axs15231b",
+            "title": "esp_lcd AXS15231B",
+            "version": "2.1.1~1",
+            "repository": "https://components.espressif.com/components/espressif/esp_lcd_axs15231b",
             "platforms": ["esp_idf"],
-            "chips": ["axs15231b"]
+            "chips": ["axs15231b"],
+            "requires": ["esp-idf/espressif/esp_lcd_touch"]
         },
         "esp-idf/espressif/esp_lcd_co5300": {
             "title": "espressif/esp_lcd_co5300",

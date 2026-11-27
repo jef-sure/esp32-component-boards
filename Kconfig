@@ -245,6 +245,17 @@ config BOARD_MODULE_LCD2004_PCF8574
         A 20x4 character LCD sold with a PCF8574 backpack soldered on: I2C on
         four contacts, a trimmer for the contrast, a jumper for the backlight.
 
+config BOARD_RADIO
+    bool "The radio beside the chip, for Wi-Fi and Bluetooth"
+    depends on BOARD_SELECT_JC1060P470C || BOARD_SELECT_JC4880P443C || BOARD_SELECT_JC8012P4A1C || BOARD_RADIO_ESP_HOSTED_BY_PROGRAM
+    help
+        On: the library of the radio (esp_hosted for the ESP32-C6 of an ESP32-P4
+        board) comes into the build, board_radio_start() starts it, and the
+        flash step keeps its firmware. Off: none of it is built, which saves
+        some 180 KB of flash and more once Wi-Fi is used, and
+        board_radio_start() returns false. esp_hosted starts itself before
+        app_main once it is in the build, so it comes only when asked for.
+
 config BOARD_SOUND_TASK_STACK
     int "Stack of the task of the sound, bytes"
     default 3072
@@ -386,7 +397,7 @@ config BOARD_ETHERNET_EMAC_BY_PROGRAM
 
 config BOARD_RADIO_ESP_HOSTED
     int
-    default 1 if BOARD_SELECT_JC1060P470C || BOARD_SELECT_JC4880P443C || BOARD_SELECT_JC8012P4A1C || BOARD_RADIO_ESP_HOSTED_BY_PROGRAM
+    default 1 if (BOARD_SELECT_JC1060P470C || BOARD_SELECT_JC4880P443C || BOARD_SELECT_JC8012P4A1C || BOARD_RADIO_ESP_HOSTED_BY_PROGRAM) && BOARD_RADIO
     default 0
 
 config BOARD_RADIO_ESP_HOSTED_BY_PROGRAM

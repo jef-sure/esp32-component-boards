@@ -182,6 +182,27 @@ unset(_source)
 # reads them and builds the update program and the image of the radio only when the radio runs another version.
 # The target is there in every build that flashes, doing nothing for a board with no such radio: a pre-flash task left in a
 # preset of VS Code finds it either way.
+# The radio turned on in a project whose lock the component manager solved with it off: the manager solves its rules
+# again only for a lock it has not seen, so esp_hosted is not there and its adapter would fail on a missing header.
+if(CONFIG_BOARD_RADIO_ESP_HOSTED AND NOT CMAKE_BUILD_EARLY_EXPANSION)
+    idf_build_get_property(_boards_components BUILD_COMPONENTS)
+    if(NOT "espressif__esp_hosted" IN_LIST _boards_components)
+        idf_build_get_property(_boards_lock DEPENDENCIES_LOCK)
+        message(FATAL_ERROR "the radio is on (CONFIG_BOARD_RADIO=y), and esp_hosted is not in the build: the lock ${_boards_lock} "
+                            "was solved with the radio off. Remove that lock and build again. The CMakeLists.txt of a project from "
+                            "editor/skeleton of jef-sure/boards keeps dependencies.lock.<board>.radio for the radio on its own.")
+    endif()
+elseif(BOARD_RADIO_TARGET AND NOT CMAKE_BUILD_EARLY_EXPANSION)
+    # and the other way: esp_hosted left in by a lock solved with the radio on starts itself before app_main
+    idf_build_get_property(_boards_components BUILD_COMPONENTS)
+    if("espressif__esp_hosted" IN_LIST _boards_components)
+        idf_build_get_property(_boards_lock DEPENDENCIES_LOCK)
+        message(WARNING "the radio of the board is off, and esp_hosted is in the build, starting itself before app_main: unless "
+                        "the program asks for it itself, the lock ${_boards_lock} was solved with the radio on. Remove that lock "
+                        "and build again.")
+    endif()
+endif()
+
 if(TARGET flash AND NOT CMAKE_BUILD_EARLY_EXPANSION)
     idf_build_get_property(_boards_components BUILD_COMPONENTS)
     if(NOT BOARD_RADIO_FIRMWARE STREQUAL "program" OR NOT "espressif__esp_hosted" IN_LIST _boards_components)

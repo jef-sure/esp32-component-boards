@@ -71,6 +71,15 @@ def check_defaults(board):
     for line in lines:
         if settings and re.match(r"CONFIG_(SPIRAM_SPEED_|ESP_DEFAULT_CPU_FREQ_MHZ_|\w+_REV_MIN_|\w+_SELECTS_REV_LESS_V3)", line):
             errors += error(f"{path.relative_to(ROOT)}: {line} follows the revision of the chip, board_select.py writes it")
+    # the settings of esp_hosted go in sdkconfig.defaults.radio, which a project reads only when the radio is on: while it
+    # is off no Kconfig knows them
+    for line in lines:
+        if line.startswith("CONFIG_ESP_HOSTED_"):
+            errors += error(f"{path.relative_to(ROOT)}: {line} is a setting of the radio: it goes in sdkconfig.defaults.radio")
+    radio_path = path.with_name("sdkconfig.defaults.radio")
+    radio_lines = [l.strip() for l in radio_path.read_text().splitlines() if l.strip() and not l.strip().startswith("#")] if radio_path.exists() else []
+    if radio_path.exists() and not board.get("radios"):
+        errors += error(f"{radio_path.relative_to(ROOT)}: the board has no radio for it")
     # the pins esp_hosted takes for a radio on SDIO are those of its bus in the data: written twice, checked to agree
     for radio in board.get("radios") or ():
         if radio["kind"] != "esp_hosted" or radio["transport"] != "sdio":
@@ -79,8 +88,8 @@ def check_defaults(board):
         wanted = [f"CONFIG_ESP_HOSTED_HOST_SDIO_PIN_{signal.upper()}={bus[signal]}" for signal in SDIO_SIGNALS if signal in bus]
         wanted += [f"CONFIG_ESP_HOSTED_HOST_RESET_GPIO={bus['reset']}"] if "reset" in bus else []
         for line in wanted:
-            if line not in lines:
-                errors += error(f"{path.relative_to(ROOT)}: {radio['name']} is on {radio['bus']}, so esp_hosted takes {line}")
+            if line not in radio_lines:
+                errors += error(f"{radio_path.relative_to(ROOT)}: {radio['name']} is on {radio['bus']}, so esp_hosted takes {line}")
     select = f"CONFIG_{boards_gen.choice_symbol(board)}=y"
     if select not in lines:
         errors += error(f"{path.relative_to(ROOT)}: the first lines choose the board: {select}")

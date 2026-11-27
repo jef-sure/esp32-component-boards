@@ -6,6 +6,21 @@
   the ST7796 (ST7796S) of 320x480 panels on SPI or the 8-bit bus and the AXS15231B of the Guition JC3248W535 on QSPI from
   0.12.7, the NV3007 of 142x428 bar panels on SPI from 0.12.9. A board with one of them needs that version. No board of
   the catalog has them yet. The index of chips names DGX for the four.
+- The radio beside the chip of the JC1060P470C, the JC4880P443C and the JC8012P4A1C is off until the program turns it on:
+  `CONFIG_BOARD_RADIO=y` in its `sdkconfig.defaults`, or Boards in menuconfig. esp_hosted starts itself before
+  `app_main()` once it is in the build, and it came with the board, so a program that never used Wi-Fi carried it: on the
+  JC4880P443C `hello_board` is 201 KB smaller without it. While the radio is off, esp_hosted and esp_wifi_remote are not
+  in the build, the flash step leaves the C6 alone, and `board_radio_start()` returns false and logs how to turn the
+  radio on. The settings of esp_hosted move from the defaults of the board to `sdkconfig.defaults.radio` of its data:
+  `board_select.py` writes them beside the board's as `sdkconfig.defaults.<board>.radio`, and the `CMakeLists.txt` of
+  a project reads that file when `CONFIG_BOARD_RADIO=y`, so no Kconfig meets the settings of a library it does not have.
+  With the radio on, the project keeps a lock of its own, `dependencies.lock.<board>.radio`: the component manager does
+  not solve a lock again when only the configuration changed, so the radio turned on or off in menuconfig would keep
+  the components of the other state. A build stops when the radio is on and esp_hosted is not there, and warns when
+  the radio is off and esp_hosted is, both naming the lock to remove. A project made before this takes the new lines
+  of `editor/skeleton/CMakeLists.txt`. Built on ESP-IDF 6.1 for the JC4880P443C with the radio off, on, off and on
+  again in its sdkconfig, and on 5.5.5 for the JC1060P470C off and on: off has no warning and no esp_hosted, on has
+  esp_hosted with the pins of the data. Not flashed.
 
 ## 0.2.3 (2026-11-22)
 

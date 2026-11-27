@@ -87,8 +87,12 @@ static const struct board_button_entry button_entries[] = {{.name = "boot", .pin
 const struct board_button_table board_button_table = {.entries = button_entries, .count = 1};
 
 /* radio: an esp32c6 on sdio, by esp-idf/espressif/esp_hosted. The flash step of the component keeps its firmware at the version of the build. */
+#if CONFIG_BOARD_RADIO
 static const struct board_radio_entry radio_entries[] = {{.name = "radio", .update = true, .start = board_glue_radio_esp_hosted_start}};
 const struct board_radio_table board_radio_table = {.entries = radio_entries, .count = 1};
+#else
+const struct board_radio_table board_radio_table = {.count = 0, .off = true};
+#endif
 
 const struct board_ethernet_table board_ethernet_table = {.count = 0};
 

@@ -81,6 +81,7 @@ files:
     - "catalog/**/*.json"
     - "catalog/**/*.webp"
     - "catalog/**/sdkconfig.defaults"
+    - "catalog/**/sdkconfig.defaults.radio"
     # the two programs of the radio beside the chip, which tools/board_radio.py builds in the build directory of a program
     - "radio/*/CMakeLists.txt"
     - "radio/*/main/CMakeLists.txt"

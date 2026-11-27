@@ -94,8 +94,12 @@ static const struct board_button_entry button_entries[] = {{.name = "boot", .pin
 const struct board_button_table board_button_table = {.entries = button_entries, .count = 1};
 
 /* radio: an esp32c6 on sdio, by esp-idf/espressif/esp_hosted. The flash step of the component keeps its firmware at the version of the build. */
+#if CONFIG_BOARD_RADIO
 static const struct board_radio_entry radio_entries[] = {{.name = "radio", .update = true, .start = board_glue_radio_esp_hosted_start}};
 const struct board_radio_table board_radio_table = {.entries = radio_entries, .count = 1};
+#else
+const struct board_radio_table board_radio_table = {.count = 0, .off = true};
+#endif
 
 /* ethernet: an ip101 on rmii.rmii0, by esp-idf/espressif/esp_eth on the MAC of the chip. */
 static const struct board_ethernet_emac ethernet0_emac = {.phy_address = 1, .rst = GPIO_NUM_51, .mdc = GPIO_NUM_31, .mdio = GPIO_NUM_52, .tx_en = GPIO_NUM_49, .txd0 = GPIO_NUM_34, .txd1 = GPIO_NUM_35, .rxd0 = GPIO_NUM_29, .rxd1 = GPIO_NUM_30, .crs_dv = GPIO_NUM_28, .ref_clk = GPIO_NUM_50, .clock_out = false, .reset_us = 10000, .after_reset_ms = 10};

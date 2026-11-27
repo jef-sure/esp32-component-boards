@@ -1208,8 +1208,12 @@ def glue_of(board):
             out(f"/* {radio['name']}: an {radio['chip']} on {radio['transport']}, by {radio['library']}. {keeper}. */")
         if radios:
             entries = ", ".join(f'{{.name = "{radio["name"]}", .update = {"true" if radio["firmware"] == "program" else "false"}, .start = {radio["entry"]["adapter"]["function"]}}}' for radio in radios)
+            out("#if CONFIG_BOARD_RADIO")
             out(f"static const struct board_radio_entry radio_entries[] = {{{entries}}};")
             out(f"const struct board_radio_table board_radio_table = {{.entries = radio_entries, .count = {len(radios)}}};")
+            out("#else")
+            out("const struct board_radio_table board_radio_table = {.count = 0, .off = true};")
+            out("#endif")
         else:
             out("const struct board_radio_table board_radio_table = {.count = 0};")
         out("")
@@ -1532,6 +1536,22 @@ def possible_features():
     return found
 
 
+def radio_symbols():
+    """The hidden symbols of the libraries that start a radio beside the chip: they are raised only when the program turns
+    the radio on by BOARD_RADIO, as esp_hosted starts itself before app_main once it is in the build."""
+    found = set()
+    for record in resolve.all_libraries(tuple(resolve.ROOTS)).values():
+        for chip, entry in (record.get("chips") or {}).items():
+            try:
+                classes = resolve.load("devices", chip).get("class") or ()
+            except resolve.Refused:
+                continue
+            if entry.get("adapter") and "radio" in classes:
+                found.add(record["adapter"]["symbol"])
+                found.update(entry["adapter"].get("symbols", ()))
+    return found
+
+
 def gen_local_kconfig(boards):
     """Kconfig.projbuild of the component local-boards: which board of the program, when the choice of jef-sure/boards is
     "A board of this program". Its boards raise the hidden symbols of the component by selecting their *_BY_PROGRAM,
@@ -1655,6 +1675,19 @@ def gen_kconfig(boards, modules):
             out("    help")
             out(kconfig_help(sentence(module["description"])))
             out("")
+    radios = sorted(radio_symbols())
+    with_radio = [choice_symbol(board) for board in boards if board.get("radios")] + [symbol + BY_PROGRAM for symbol in radios]
+    if with_radio:
+        out("config BOARD_RADIO")
+        out("    bool \"The radio beside the chip, for Wi-Fi and Bluetooth\"")
+        out(f"    depends on {' || '.join(with_radio)}")
+        out("    help")
+        out(kconfig_help("On: the library of the radio (esp_hosted for the ESP32-C6 of an ESP32-P4 board) comes into the "
+                         "build, board_radio_start() starts it, and the flash step keeps its firmware. Off: none of it is "
+                         "built, which saves some 180 KB of flash and more once Wi-Fi is used, and board_radio_start() "
+                         "returns false. esp_hosted starts itself before app_main once it is in the build, so it comes "
+                         "only when asked for."))
+        out("")
     out("config BOARD_SOUND_TASK_STACK")
     out("    int \"Stack of the task of the sound, bytes\"")
     out("    default 3072")
@@ -1693,7 +1726,8 @@ def gen_kconfig(boards, modules):
     for feature in sorted(all_features):
         out(f"config {feature}")
         out("    int")
-        out(f"    default 1 if {' || '.join([*all_features[feature], feature + BY_PROGRAM])}")
+        condition = " || ".join([*all_features[feature], feature + BY_PROGRAM])
+        out(f"    default 1 if ({condition}) && BOARD_RADIO" if feature in radios else f"    default 1 if {condition}")
         out("    default 0")
         out("")
         out(f"config {feature}{BY_PROGRAM}")

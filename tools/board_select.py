@@ -111,6 +111,41 @@ def local_defaults(local, name):
     return re.sub(rf"^CONFIG_BOARD_SELECT_{name.upper()}=y$", f"{PROGRAM_LINE}\n\\g<0>", text, count=1, flags=re.M)
 
 
+RADIO_DEFAULTS = "sdkconfig.defaults.radio"  # the settings of the radio of a board, read only when the program turns it on
+
+
+def radio_defaults(local, board):
+    """The settings of the radio of a board, as its defaults are found: a board of the program with its own defaults has its
+    own radio file or none, one that extends a board of the catalog takes that board's. None: no radio to set."""
+    own = local / "boards" / board
+    if (own / "board.json").exists():
+        if (own / "sdkconfig.defaults").exists():
+            path = own / RADIO_DEFAULTS
+        else:
+            base = resolve.load("boards", board).get("extends")
+            path = DATA / "boards" / base / RADIO_DEFAULTS if base else None
+    else:
+        path = DATA / "boards" / board / RADIO_DEFAULTS
+    return path.read_text() if path and path.exists() else None
+
+
+def write_radio(project, local, board):
+    """sdkconfig.defaults.<board>.radio beside the board's own file, which the CMakeLists.txt of the project reads after it
+    when CONFIG_BOARD_RADIO=y; removed when the board has no radio. Its first line is not the command of this tool, so it is
+    never taken for the file of one more board. The file written, or None."""
+    path = project / f"sdkconfig.defaults.{board}.radio"
+    text = None if is_host(board) else radio_defaults(local, board)
+    if not text:
+        if path.exists():
+            path.unlink()
+            print(f"{path}: removed, {board} has no radio")
+        return None
+    path.write_text(f"# The radio of {board}, written by tools/board_select.py of jef-sure/boards beside sdkconfig.defaults.{board}: the\n"
+                    "# CMakeLists.txt of the project reads it after that file when CONFIG_BOARD_RADIO=y. Do not edit.\n" + text)
+    print(f"{path}: the radio of {board}, read when CONFIG_BOARD_RADIO=y")
+    return path
+
+
 def defaults_text(project, local, board, modules, revision):
     """The defaults of one board of the project: its own, the lines of the revision of its chip, those of its modules."""
     parts = [f"# The board of this project, chosen by tools/board_select.py of jef-sure/boards: {board}"
@@ -395,6 +430,10 @@ def again(parser, project):
         path.write_text(made_by(board, args.module, args.revision) + text)
         written.append(path)
         print(f"{path}: {board}, {target}, again")
+        if path.name != "sdkconfig.defaults.board":
+            radio = write_radio(project, local, board)
+            if radio:
+                written.append(radio)
         if path.name != "sdkconfig.defaults.board":
             targets[board] = target
     # a file named by its board is one of the boards of the presets, one of them alone too, as the page writes it
@@ -700,14 +739,18 @@ def main():
         texts[project / f"sdkconfig.defaults.{board}"] = made_by(board, args.module, args.revision) + text
     if any(not path.read_text().startswith(RECORD) for path in texts if path.exists()):
         raise SystemExit(f"{', '.join(str(path) for path in texts if path.exists() and not path.read_text().startswith(RECORD))}: not written by this command, so not replaced")
+    radios = []
     for out, text in texts.items():
         out.write_text(text)
         print(f"{out}: {out.name.split('.', 2)[2]}, {target_of(out)}")
+        radio = write_radio(project, local, out.name.split('.', 2)[2])
+        if radio:
+            radios.append(radio)
     every, _ = order_of(project, boards_of(project), boards)
     current = args.current or boards[0]
     command = "board_select.py --again ."
     (project / PRESETS).write_text(presets_text(project, every, [target_of(project / f"sdkconfig.defaults.{board}") for board in every], current, command, current))
-    project_writer.keep_ours(project, [*texts, project / PRESETS, *current_taken(project, current)])
+    project_writer.keep_ours(project, [*texts, *radios, project / PRESETS, *current_taken(project, current)])
     seed_locks(project, every)
     move_sdkconfig(project, every)
     vscode_env.current(project, current, target_of(project / f"sdkconfig.defaults.{current}"))

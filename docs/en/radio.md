@@ -1,17 +1,32 @@
 # The radio beside the chip
 
-An ESP32-P4 has no radio. The Guition JC1060P470C and JC8012P4A1C carry an ESP32-C6
-beside it, on SDIO, and the P4 reaches its Wi-Fi and Bluetooth through esp_hosted: the
-C6 runs esp_hosted as a coprocessor, the program runs it as the host. Both sides should
+An ESP32-P4 has no radio. The Guition JC1060P470C, JC4880P443C and JC8012P4A1C carry an
+ESP32-C6 beside it, on SDIO, and the P4 reaches its Wi-Fi and Bluetooth through esp_hosted:
+the C6 runs esp_hosted as a coprocessor, the program runs it as the host. Both sides should
 run one version of esp_hosted; esp_hosted itself says so, and the newer one has the fixes.
 
-## What comes with the board
+## Turning it on
+
+The radio is off until the program turns it on, in its `sdkconfig.defaults`:
+
+```
+CONFIG_BOARD_RADIO=y
+```
+
+or in menuconfig, Boards, "The radio beside the chip". esp_hosted starts itself before
+`app_main()` once it is in the build, so while the radio is off it is not built at all: on
+the JC4880P443C, `hello_board` is 201 KB smaller without it. `board_radio_start()` then
+returns `false` and the log says how to turn the radio on.
+
+## What comes when it is on
 
 - `espressif/esp_hosted`, in the range of the component's `idf_component.yml`, and
   `espressif/esp_wifi_remote` on ESP-IDF below 6.1 (6.1 has the Wi-Fi remote in
   `esp_wifi`). A program calls `esp_wifi_*` as on a chip with a radio.
-- The settings of the host side, from the data of the board: the Bluetooth controller is
-  in the C6, so the NimBLE stack of the program reaches it through esp_hosted.
+- The settings of the host side, from the data of the board: `board_select.py` writes them
+  to `sdkconfig.defaults.<board>.radio`, which the `CMakeLists.txt` of the project reads after
+  the defaults of the board when `CONFIG_BOARD_RADIO=y`. The Bluetooth controller is in the
+  C6, so the NimBLE stack of the program reaches it through esp_hosted.
 - `board_radio_start()`, see [the API](api.md): it waits until the C6 answers and says in
   the log when it runs another esp_hosted than the program.
 - A step of the flash that brings the C6 to the esp_hosted of the build.

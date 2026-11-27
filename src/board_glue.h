@@ -103,6 +103,7 @@ struct board_radio_entry {
 struct board_radio_table {
     const struct board_radio_entry *entries;
     int                             count;
+    bool                            off; /* the board has a radio, and CONFIG_BOARD_RADIO leaves it out of the build */
 };
 extern const struct board_radio_table board_radio_table;
 

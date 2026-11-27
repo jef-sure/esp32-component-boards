@@ -17,6 +17,21 @@ if(NOT SDKCONFIG_DEFAULTS AND BOARD)
                             "set-target, or -D BOARD with the preset of another board, chooses no board.")
     endif()
     set(SDKCONFIG_DEFAULTS "sdkconfig.defaults.${BOARD}")
+    # the settings of the radio of the board, when the program turns it on: CONFIG_BOARD_RADIO=y in the sdkconfig of the
+    # board, or, before there is one, in sdkconfig.defaults; while it is off no Kconfig knows them
+    if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/sdkconfig.defaults.${BOARD}.radio)
+        set(_boards_radio "")
+        foreach(_boards_file sdkconfig.${BOARD} sdkconfig.defaults)
+            if(NOT _boards_radio AND EXISTS ${CMAKE_CURRENT_LIST_DIR}/${_boards_file})
+                file(STRINGS ${CMAKE_CURRENT_LIST_DIR}/${_boards_file} _boards_radio REGEX "^(# )?CONFIG_BOARD_RADIO[= ]")
+            endif()
+        endforeach()
+        if(_boards_radio MATCHES "^CONFIG_BOARD_RADIO=y")
+            list(APPEND SDKCONFIG_DEFAULTS "sdkconfig.defaults.${BOARD}.radio")
+            # a lock of its own: the component manager solves its rules again only for a lock it has not seen
+            set(_boards_lock ".radio")
+        endif()
+    endif()
     if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/sdkconfig.defaults)
         list(APPEND SDKCONFIG_DEFAULTS "sdkconfig.defaults")
     endif()
@@ -49,8 +64,9 @@ if(NOT BOARD AND NOT SDKCONFIG_DEFAULTS AND EXISTS ${CMAKE_CURRENT_LIST_DIR}/CMa
     endif()
 endif()
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
-# each board has its lock of the components beside the project, to commit: dependencies.lock.<board>
+# each board has its lock of the components beside the project, to commit: dependencies.lock.<board>, and with its radio
+# on dependencies.lock.<board>.radio
 if(BOARD)
-    idf_build_set_property(DEPENDENCIES_LOCK ${CMAKE_CURRENT_LIST_DIR}/dependencies.lock.${BOARD})
+    idf_build_set_property(DEPENDENCIES_LOCK ${CMAKE_CURRENT_LIST_DIR}/dependencies.lock.${BOARD}${_boards_lock})
 endif()
 project(hello)

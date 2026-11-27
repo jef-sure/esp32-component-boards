@@ -1,0 +1,37 @@
+I (102613) dgx_di_calibrate: display 466x466 (466x466 its own): touch each blinking target and hold a moment
+I (104305) dgx_di_calibrate: round 1, target 1 at 90, 90: the device's 373, 357
+I (105743) dgx_di_calibrate: round 1, target 2 at 375, 90: the device's 72, 365
+I (107202) dgx_di_calibrate: round 1, target 3 at 375, 375: the device's 68, 83
+I (108650) dgx_di_calibrate: round 1, target 4 at 90, 375: the device's 376, 83
+I (110139) dgx_di_calibrate: round 1, target 5 at 233, 30: the device's 224, 440
+I (111347) dgx_di_calibrate: round 1, target 6 at 435, 233: the device's 9, 208
+I (112665) dgx_di_calibrate: round 1, target 7 at 233, 435: the device's 225, 13
+I (114053) dgx_di_calibrate: round 1, target 8 at 30, 233: the device's 432, 224
+I (115712) dgx_di_calibrate: round 1, target 9 at 233, 233: the device's 217, 214
+I (115713) dgx_di_calibrate: The panel lies under the display of 466x466 (its own orientation) its x and y the other way; its touches were taken 15.6 pixels off on average and 24 at worst without this calibration, 3.9 and 6 with it (1 round). It neither showed a finger before a press nor lost one held: up after 30 ms.
+I (115714) dgx_di_calibrate: the calibration of 1 round: {.version = 1, .size = sizeof(dgx_di_calibration_t), .x_min = 0, .x_max = 465, .y_min = 0, .y_max = 465, .width = 466, .height = 466, .flags = 3, .knots_x = 5, .knots_y = 5, .rounds = 1, .affine = {62012, 12, 162436, -791, 64356, -276579}, .x = {{34, 30}, {89, 90}, {233, 233}, {376, 375}, {434, 435}}, .y = {{17, 30}, {95, 90}, {238, 233}, {368, 375}, {437, 435}}, .down_ms = 0, .up_ms = 30, .blink_ms = 0, .gap_ms = 0, .off_tenths = 156, .worst_tenths = 240, .left_tenths = 39, .left_worst_tenths = 60}
+I (119005) dgx_di_calibrate: round 2, target 1 at 90, 90: the device's 376, 374, taken at 88, 82, off by -2, -8
+I (120704) dgx_di_calibrate: round 2, target 2 at 375, 90: the device's 61, 380, taken at 384, 74, off by +9, -16
+I (122182) dgx_di_calibrate: round 2, target 3 at 375, 375: the device's 68, 73, taken at 377, 382, off by +2, +7
+I (123489) dgx_di_calibrate: round 2, target 4 at 90, 375: the device's 375, 77, taken at 89, 382, off by -1, +7
+I (125088) dgx_di_calibrate: round 2, target 5 at 233, 30: the device's 221, 438, taken at 233, 32, off by +0, +2
+I (126466) dgx_di_calibrate: round 2, target 6 at 435, 233: the device's 16, 221, taken at 428, 225, off by -7, -8
+I (127703) dgx_di_calibrate: round 2, target 7 at 233, 435: the device's 218, 12, taken at 236, 436, off by +3, +1
+I (128940) dgx_di_calibrate: round 2, target 8 at 30, 233: the device's 417, 217, taken at 45, 234, off by +15, +1
+I (130639) dgx_di_calibrate: round 2, target 9 at 233, 233: the device's 215, 219, taken at 239, 229, off by +6, -4
+I (130639) dgx_di_calibrate: round 2: off by 8.0 pixels on average, 16 at worst, by the rounds before
+I (130640) dgx_di_calibrate: The panel lies under the display of 466x466 (its own orientation) its x and y the other way; its touches were taken 14.9 pixels off on average and 23 at worst without this calibration, 2.6 and 4 with it (2 rounds). It neither showed a finger before a press nor lost one held: up after 30 ms.
+I (130641) dgx_di_calibrate: the calibration of 2 rounds: {.version = 1, .size = sizeof(dgx_di_calibration_t), .x_min = 0, .x_max = 465, .y_min = 0, .y_max = 465, .width = 466, .height = 466, .flags = 3, .knots_x = 5, .knots_y = 5, .rounds = 2, .affine = {62414, 28, -15534, -186, 63213, -39009}, .x = {{38, 30}, {86, 90}, {233, 233}, {379, 375}, {430, 435}}, .y = {{24, 30}, {91, 90}, {237, 233}, {372, 375}, {435, 435}}, .down_ms = 0, .up_ms = 30, .blink_ms = 0, .gap_ms = 0, .off_tenths = 149, .worst_tenths = 230, .left_tenths = 26, .left_worst_tenths = 40}
+I (133983) dgx_di_calibrate: round 3, target 1 at 90, 90: the device's 380, 376, taken at 84, 85, off by -6, -5
+I (135923) dgx_di_calibrate: round 3, target 2 at 375, 90: the device's 75, 376, taken at 367, 84, off by -8, -6
+I (137522) dgx_di_calibrate: round 3, target 3 at 375, 375: the device's 62, 72, taken at 381, 380, off by +6, +5
+I (139040) dgx_di_calibrate: round 3, target 4 at 90, 375: the device's 377, 86, taken at 88, 368, off by -2, -7
+I (140719) dgx_di_calibrate: round 3, target 5 at 233, 30: the device's 221, 438, taken at 232, 31, off by -1, +1
+I (142338) dgx_di_calibrate: round 3, target 6 at 435, 233: the device's 7, 211, taken at 442, 239, off by +7, +6
+I (143635) dgx_di_calibrate: round 3, target 7 at 233, 435: the device's 219, 12, taken at 234, 436, off by +1, +1
+I (145013) dgx_di_calibrate: round 3, target 8 at 30, 233: the device's 427, 229, taken at 27, 223, off by -3, -10
+I (146692) dgx_di_calibrate: round 3, target 9 at 233, 233: the device's 218, 213, taken at 235, 238, off by +2, +5
+I (146692) dgx_di_calibrate: round 3: off by 5.6 pixels on average, 10 at worst, by the rounds before
+I (146693) dgx_di_calibrate: The panel lies under the display of 466x466 (its own orientation) its x and y the other way; its touches were taken 13.8 pixels off on average and 22 at worst without this calibration, 2.1 and 5 with it (3 rounds). It neither showed a finger before a press nor lost one held: up after 30 ms.
+I (146694) dgx_di_calibrate: the calibration of 3 rounds: {.version = 1, .size = sizeof(dgx_di_calibration_t), .x_min = 0, .x_max = 465, .y_min = 0, .y_max = 465, .width = 466, .height = 466, .flags = 3, .knots_x = 5, .knots_y = 5, .rounds = 3, .affine = {62216, -378, 131178, -1394, 62519, 445492}, .x = {{37, 30}, {85, 90}, {234, 233}, {376, 375}, {433, 435}}, .y = {{27, 30}, {88, 90}, {239, 233}, {371, 375}, {434, 435}}, .down_ms = 0, .up_ms = 30, .blink_ms = 0, .gap_ms = 0, .off_tenths = 138, .worst_tenths = 220, .left_tenths = 21, .left_worst_tenths = 50}
+I (148218) touch_check: RESULT calibration: {.version = 1, .size = sizeof(dgx_di_calibration_t), .x_min = 0, .x_max = 465, .y_min = 0, .y_max = 465, .width = 466, .height = 466, .flags = 3, .knots_x = 5, .knots_y = 5, .rounds = 3, .affine = {62216, -378, 131178, -1394, 62519, 445492}, .x = {{37, 30}, {85, 90}, {234, 233}, {376, 375}, {433, 435}}, .y = {{27, 30}, {88, 90}, {239, 233}, {371, 375}, {434, 435}}, .down_ms = 0, .up_ms = 30, .blink_ms = 0, .gap_ms = 0, .off_tenths = 138, .worst_tenths = 220, .left_tenths = 21, .left_worst_tenths = 50}

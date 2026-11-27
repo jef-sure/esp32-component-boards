@@ -711,7 +711,8 @@ def activity_problems():
 
 def calibration_problems():
     """tools/board_calibration.py on the log of a measurement of three rounds, of the JC4880P443C: the places are the
-    medians of all the touches, the figures those of the last calibration logged, and a placeholder gives way."""
+    medians of all the touches, the figures those of the last calibration logged, and a placeholder gives way; and on
+    the log of a round measure, of the AMOLED-1.32."""
     import board_calibration
     text = (TESTS / "calibration_jc4880p443c.log").read_text()
     cal = board_calibration.parse(text)
@@ -724,6 +725,11 @@ def calibration_problems():
     kept = board_calibration.with_measured([{"measured": False, "x_max": 479}, {"x_max": 1}], entry)
     if [item.get("measured", True) for item in kept] != [True, True] or kept[-1] is not entry:
         problems.append("board_calibration.py keeps a placeholder beside a measurement")
+    # a round display, measured by dgx_di_calibrate_measure_round: five knots on each axis, the corners on the diagonals
+    text = (TESTS / "calibration_amoled_1_32_ring.log").read_text()
+    entry = board_calibration.entry_of(board_calibration.parse(text), text)
+    if (entry["left_up"], entry["up"]) != ({"meant": [90, 90], "device": [376, 374]}, {"meant": [233, 30], "device": [221, 438]}):
+        problems.append(f"board_calibration.py on a round measure: left_up {entry['left_up']}, up {entry['up']}, not the medians of the log")
     return problems
 
 

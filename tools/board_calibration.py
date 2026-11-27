@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
 Writes a touch calibration into the data of a board: the places aimed at and what DGX-DI adds to
-them. Give the log of dgx_di_calibrate_measure on stdin: the places come from its touches. A text
+them. Give the log of dgx_di_calibrate_measure, or of dgx_di_calibrate_measure_round for a round display,
+on stdin: the places come from its touches. A text
 with only the C initializer gives places worked back from it.
 
     python3 tools/board_calibration.py BOARD [TOUCH [LIBRARY=VERSION ...]] < log.txt
@@ -18,12 +19,18 @@ LIBRARY = "esp-idf/jef-sure/dgx-di"  # dgx_di_calibrate_measure prints the calib
 HEAD = ("x_min", "x_max", "y_min", "y_max", "width", "height", "flags", "knots_x", "knots_y", "rounds")
 TAIL = ("down_ms", "up_ms", "blink_ms", "gap_ms", "off_tenths", "worst_tenths", "left_tenths", "left_worst_tenths")
 MIRROR_X, MIRROR_Y, SWAP_XY = 1, 2, 4  # DGX_DI_MIRROR_X, DGX_DI_MIRROR_Y, DGX_DI_SWAP_XY
-KNOTS = 3  # DGX_DI_KNOTS: dgx_di_calibrate_measure aims at three places of each axis
+KNOTS = 3  # dgx_di_calibrate_measure aims at three places of each axis
+RING_KNOTS = 5  # dgx_di_calibrate_measure_round (DGX-DI 0.2.2) at five: the rim, the corners on its diagonals, the middle
 KEPT = 15  # dgx_di_calibrate_measure makes each target of the touches of the last rounds
 PLACES = {
     "left_up": (0, 0), "right_up": (2, 0), "left_down": (0, 2), "right_down": (2, 2),
     "up": (1, 0), "down": (1, 2), "left": (0, 1), "right": (2, 1), "middle": (1, 1),
 }
+RING = {
+    "left_up": (1, 1), "right_up": (3, 1), "left_down": (1, 3), "right_down": (3, 3),
+    "up": (2, 0), "down": (2, 4), "left": (0, 2), "right": (4, 2), "middle": (2, 2),
+}
+LAYOUTS = {KNOTS: PLACES, RING_KNOTS: RING}  # the places of a measurement by its knots on each axis
 OWN = ("rounds", "blink_ms", "gap_ms", "off_tenths", "worst_tenths", "left_tenths", "left_worst_tenths")  # what the places do not say
 WORKED_BACK = "The places are worked back from the calibration of DGX-DI: where it placed each target, not the touches themselves."
 TOUCHES = "The places are the medians of the touches in the log."
@@ -89,15 +96,16 @@ def touches_of(text, rounds):
 
 def entry_of(cal, text):
     """The entry of the data: the targets found by the knots of the record, each on the touches of the log if it has them."""
-    if cal["knots_x"] != KNOTS or cal["knots_y"] != KNOTS:
-        raise SystemExit("the calibration has no knots: its targets are not known, measure again")
+    places = LAYOUTS.get(cal["knots_x"]) if cal["knots_x"] == cal["knots_y"] else None
+    if not places:
+        raise SystemExit(f"the calibration has {cal['knots_x']} and {cal['knots_y']} knots: its targets are not known, measure again")
     touches = touches_of(text, cal["rounds"])
-    out = {"notes": TOUCHES if len(touches) == len(PLACES) else WORKED_BACK}
+    out = {"notes": TOUCHES if len(touches) == len(places) else WORKED_BACK}
     out.update({name: cal[name] for name in ("x_max", "y_max", "width", "height")})
-    for place, (column, row) in PLACES.items():
+    for place, (column, row) in places.items():
         (x, meant_x), (y, meant_y) = cal["x"][column], cal["y"][row]
         device = on_device(cal, x, y)
-        if len(touches) == len(PLACES):
+        if len(touches) == len(places):
             device = min(touches, key=lambda touch: (touch[0] - device[0]) ** 2 + (touch[1] - device[1]) ** 2)
         out[place] = {"meant": [meant_x, meant_y], "device": device}
     out["libraries"] = {LIBRARY: {name: cal[name] for name in OWN}}

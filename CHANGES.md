@@ -43,9 +43,11 @@
   CO5300 on QSPI, started through DGX 0.12.4 or later; an ES8311 with a speaker header; BOOT and PWR buttons; a battery
   divider on GPIO4. Pins from the schematic of Waveshare. On the board `hello_board` shows its picture and its tone is
   heard. Its CST820 touch starts through `espressif/esp_lcd_touch_cst816s`, whose registers the CST820 has. The panel
-  lies turned by 180 degrees under the glass; the calibration of the data, measured on rings inside the round glass,
-  turns it back, and on the board a touch came out 14 pixels from its ring on average. On a battery the program keeps
-  the power on with GPIO18 high, which the glue does not set yet.
+  lies turned by 180 degrees under the glass. The calibration of the data is the round measure of DGX-DI 0.2.2,
+  `dgx_di_calibrate_measure_round`: the touches came 13.8 pixels off on average without it and 2.1 with it. DGX-DI
+  before 0.2.2 takes from the same places only the turn and the affine. On a battery the program keeps the power on
+  with GPIO18 high, which the glue does not set yet.
+- `board_calibration.py` takes the log of `dgx_di_calibrate_measure_round` as well, five places on each axis.
 - A touch whose chip no library starts as a touch is kept as data, as a display with such a chip already was, and the
   kit of the editor says the program starts it. A chip a library drives only as a display, as the AXS15231B, counts as
   not started for its touch.

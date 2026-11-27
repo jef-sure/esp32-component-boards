@@ -64,7 +64,7 @@ static struct board_display_started displays_started[1];
 const struct board_display_table board_display_table = {.panels = display_panels, .started = displays_started, .count = 1};
 
 /* touch: espressif/esp_lcd_touch_cst816s on i2c.i2c0, the calibration of its measured board. */
-static const dgx_di_aim_t touch0_aims[] = {{.meant_x = 83, .meant_y = 83, .x = 386, .y = 380}, {.meant_x = 382, .meant_y = 83, .x = 67, .y = 388}, {.meant_x = 83, .meant_y = 382, .x = 372, .y = 69}, {.meant_x = 382, .meant_y = 382, .x = 68, .y = 68}, {.meant_x = 233, .meant_y = 25, .x = 249, .y = 437}, {.meant_x = 233, .meant_y = 441, .x = 212, .y = 10}, {.meant_x = 25, .meant_y = 233, .x = 444, .y = 226}, {.meant_x = 441, .meant_y = 233, .x = 12, .y = 228}, {.meant_x = 233, .meant_y = 233, .x = 220, .y = 216}};
+static const dgx_di_aim_t touch0_aims[] = {{.meant_x = 90, .meant_y = 90, .x = 376, .y = 374}, {.meant_x = 375, .meant_y = 90, .x = 72, .y = 376}, {.meant_x = 90, .meant_y = 375, .x = 376, .y = 83}, {.meant_x = 375, .meant_y = 375, .x = 68, .y = 73}, {.meant_x = 233, .meant_y = 30, .x = 221, .y = 438}, {.meant_x = 233, .meant_y = 435, .x = 219, .y = 12}, {.meant_x = 30, .meant_y = 233, .x = 427, .y = 224}, {.meant_x = 435, .meant_y = 233, .x = 9, .y = 211}, {.meant_x = 233, .meant_y = 233, .x = 217, .y = 214}};
 static const struct board_touch_calibration touch0_calibrated = {.aims = touch0_aims, .count = 9, .width = 466, .height = 466, .blink_ms = 0, .gap_ms = 0, .placeholder = false};
 static const struct board_touch_panel touch0_panel = {.x_max = 466, .y_max = 466, .rst = GPIO_NUM_7, .irq = GPIO_NUM_6, .i2c_port = I2C_NUM_0, .fingers = 1};
 static dgx_di_esp_lcd_touch_t touch0_device;

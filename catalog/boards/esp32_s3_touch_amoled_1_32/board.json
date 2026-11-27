@@ -144,7 +144,7 @@
                 "y_max": 465,
                 "calibrations": [
                     {
-                        "rule": "the newest",
+                        "rule": "before the round measure of DGX-DI",
                         "measured": true,
                         "measured_with": {
                             "esp-idf/jef-sure/dgx-di": "0.2.0",
@@ -165,6 +165,39 @@
                         "left": {"meant": [25, 233], "device": [444, 226]},
                         "right": {"meant": [441, 233], "device": [12, 228]},
                         "middle": {"meant": [233, 233], "device": [220, 216]}
+                    },
+                    {
+                        "rule": "the newest",
+                        "measured_with": {
+                            "esp-idf/jef-sure/dgx-di": "0.2.1",
+                            "esp-idf/jef-sure/dgx": "0.12.13",
+                            "esp-idf/espressif/esp_lcd_touch_cst816s": "1.1.2"
+                        },
+                        "notes": "The places are the medians of the touches in the log: dgx_di_calibrate_measure_round, three rounds, by examples/touch_check of DGX-DI on Anton's board, its tree as tagged 0.2.1 (on the registry as 0.2.2). The log is test/format/calibration_amoled_1_32_ring.log.",
+                        "x_max": 465,
+                        "y_max": 465,
+                        "width": 466,
+                        "height": 466,
+                        "left_up": {"meant": [90, 90], "device": [376, 374]},
+                        "right_up": {"meant": [375, 90], "device": [72, 376]},
+                        "left_down": {"meant": [90, 375], "device": [376, 83]},
+                        "right_down": {"meant": [375, 375], "device": [68, 73]},
+                        "up": {"meant": [233, 30], "device": [221, 438]},
+                        "down": {"meant": [233, 435], "device": [219, 12]},
+                        "left": {"meant": [30, 233], "device": [427, 224]},
+                        "right": {"meant": [435, 233], "device": [9, 211]},
+                        "middle": {"meant": [233, 233], "device": [217, 214]},
+                        "libraries": {
+                            "esp-idf/jef-sure/dgx-di": {
+                                "rounds": 3,
+                                "blink_ms": 0,
+                                "gap_ms": 0,
+                                "off_tenths": 138,
+                                "worst_tenths": 220,
+                                "left_tenths": 21,
+                                "left_worst_tenths": 50
+                            }
+                        }
                     }
                 ]
             },

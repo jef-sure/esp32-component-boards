@@ -1,9 +1,11 @@
 /* A touch panel of esp_lcd_touch as a device of DGX-DI. */
 #include "board_touch_lcd.h"
 
+#if BOARDS_VERSION_JEF_SURE__DGX_DI >= BOARDS_VERSION(0, 2, 2)
 #include "esp_log.h"
 
 static const char *TAG = "board";
+#endif
 
 bool board_glue_touch_lcd_attach(dgx_di_esp_lcd_touch_t *device, int index, esp_lcd_touch_handle_t handle, bool numbered, const struct board_touch_panel *panel,
                                  const struct board_touch_calibration *calibrated, const struct board_display *display, struct board_touch *out)

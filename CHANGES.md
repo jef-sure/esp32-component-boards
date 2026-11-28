@@ -1,5 +1,18 @@
 # CHANGES
 
+## 0.2.5 (not released yet)
+
+- The quick start of the README and step 2 of Getting started say how to choose a board with an agent over MCP:
+  `boards_mcp.py --install` once a machine, then the link the agent gives.
+- A part of a board with a class of its own takes no role of another class from its chip. The touch of the JC3248W535,
+  an AXS15231B like its display, was a second display on the page: it stood twice in the list of the board, and a
+  display block made from the board said that the size, pixels, shape and depths of its display are not in the data.
+- A size of display as sold is the diagonal of the visible area rounded up, and the solver takes it so: a display
+  fits a size short of it by no more than half its last digit and no more than 1.5 percent, 3.45 inches for 3.5, 6.9
+  for 7, 0.955 for 0.96. The card says the figure of the data then, as 3.47 inches for the JC3248W535.
+- The 0.96-inch TFT on an ST7735S has the lit area measured on a module with a caliper, 11 x 22 mm, in place of the
+  10.8 x 21.7 mm of a page of lcdwiki.
+
 ## 0.2.4 (2026-11-27)
 
 - The record of DGX-DI describes 0.2.2, whose `dgx_di_esp_lcd_touch_reports()` reads a panel at the pace of its chip,

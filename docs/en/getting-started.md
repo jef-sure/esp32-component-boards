@@ -122,6 +122,20 @@ writes only by the button "make the project of these boards…" (or "make a proj
 The editor does not write the program, `main/main.c`. `board_display_init()` starts the display, and the glue of the
 board knows how to start it on that board.
 
+### No board chosen yet: with an agent
+
+The same editor, with a dialog with the model of an agent over MCP. Once a machine:
+
+```sh
+python3 managed_components/jef-sure__boards/tools/boards_mcp.py --install
+```
+
+With Claude Code on the machine the server is given to it for every folder; otherwise the command writes `.mcp.json`
+in the current folder and prints the entry for a client that keeps it elsewhere. Restart the agent in the folder of
+the project and ask it to help choose the hardware for a device. It gives a link with a token: the editor opened by
+it has the dialog, the model places blocks on the canvas, and what you pin stays yours. The project is written as
+above, by the button and after your permission. See [tools.md](tools.md#boards_mcppy).
+
 ### A board you know: one command
 
 ```sh

@@ -1,0 +1,14 @@
+{
+    "title": "A size as sold is the diagonal of the visible area rounded up: the JC3248W535 of 3.47 inches is a display of 3.5, and the card says its figure",
+    "answers": {
+        "blocks": [
+            {
+                "role": "display",
+                "asks": {
+                    "diagonal_in": 3.5
+                }
+            }
+        ]
+    },
+    "says": "3.47 inches by its visible area: a size as sold is rounded up"
+}

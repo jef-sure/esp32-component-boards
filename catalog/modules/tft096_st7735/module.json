@@ -21,8 +21,8 @@
                 "panel": {
                     "width": 80,
                     "height": 160,
-                    "mm_w": 10.8,
-                    "mm_h": 21.7,
+                    "mm_w": 11,
+                    "mm_h": 22,
                     "memory_width": 128,
                     "memory_height": 160,
                     "offset_x": 24,
@@ -70,8 +70,16 @@
         "glass": {
             "level": "community",
             "covers": ["devices.lcd.config.panel.mm_w", "devices.lcd.config.panel.mm_h"],
-            "source": "the page of the MSP0961 of lcdwiki (www.lcdwiki.com/0.96inch_IPS_Module): active area 10.80x21.70 mm. Not measured on this one.",
-            "date": "2026-11-14"
+            "source": "the page of the MSP0961 of lcdwiki (www.lcdwiki.com/0.96inch_IPS_Module): active area 10.80x21.70 mm",
+            "date": "2026-11-14",
+            "result": "refuted",
+            "notes": "The module measured gives 11 x 22 mm, the entry lit_area."
+        },
+        "lit_area": {
+            "level": "hardware",
+            "covers": ["devices.lcd.config.panel.mm_w", "devices.lcd.config.panel.mm_h"],
+            "by": "Anton, with a caliper",
+            "notes": "The lit area under the glass, 11 x 22 mm; its edge is not easy to catch through the glass."
         },
         "trial": {
             "level": "hardware",

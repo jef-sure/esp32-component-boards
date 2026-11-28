@@ -72,6 +72,16 @@ window. The first build is the computer: a window with the display of the CYD, t
 builds and flashes the CYD itself. For another board, put its name from [the table](#the-boards);
 [the editor](#the-editor) helps to choose a board for a device.
 
+With an agent over MCP, Claude Code or another client, the board is chosen in a dialog. Once a machine:
+
+```sh
+python3 managed_components/jef-sure__boards/tools/boards_mcp.py --install
+```
+
+Restart the agent and ask it to help choose the hardware for a device: it gives a link to the editor with the dialog,
+and the editor writes the project after your permission. For a client other than Claude Code the command writes
+`.mcp.json` in the current folder and prints the entry for its settings. See [tools.md](docs/en/tools.md#boards_mcppy).
+
 The whole path, in VS Code, with the board chosen in the editor, a program of your own and what can go wrong, is in
 [Getting started](docs/en/getting-started.md).
 

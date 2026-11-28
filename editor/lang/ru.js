@@ -138,6 +138,7 @@ LANGUAGES.ru = {
         'a strapping pin': 'пин загрузки',
         'does not come out': 'не выведен на разъём',
         'the display is smaller than {0} inches': 'дисплей меньше {0} дюймов',
+        '{0} inches by its visible area: a size as sold is rounded up': '{0} дюйма по видимой области: размер в продаже округлён вверх',
         'the short side of the display has fewer than {0} pixels': 'у дисплея по короткой стороне меньше {0} пикселей',
         'the long side of the display has fewer than {0} pixels': 'у дисплея по длинной стороне меньше {0} пикселей',
         'the pixels of the display are not in the data': 'размера дисплея в пикселях нет в данных',

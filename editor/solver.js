@@ -26,6 +26,10 @@ const KIT_CURRENCY = 'EUR';
 const LEAST_WORTH = 0.01; // the least a part of a board weighs, in KIT_CURRENCY: a part with no price is not counted as 0 (Anton, 2026-11-03)
 const PRESCALES_TRIED = 8; // the smallest prescalers that fit: a larger one only loses resolution
 const MM_IN_INCH = 25.4;
+// a size as sold is the diagonal of the visible area rounded up: 3.45 inches is sold as 3.5, 6.9 as 7, 23.7 as 24, but
+// 0.955 as 0.96: by half the last digit of the size, and no more than this share of it
+const SOLD_ROUNDING = 0.015;
+const soldAs = (diagonal, asked) => diagonal >= asked - Math.min(asked * SOLD_ROUNDING, 0.5 * 10 ** -(String(asked).split('.')[1]?.length ?? 0)) - 1e-9;
 const cents = (value) => Math.round(value * 100) / 100;
 // a range of a price as the page writes it: one number when both ends are the same
 const spread = ([low, high]) => (cents(low) === cents(high) ? `${cents(low)}` : `${cents(low)}–${cents(high)}`);
@@ -106,7 +110,10 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
     // A part of a need: by its class, or by the role it names. A variant it does not name stays in: the kit can only say so.
     const isClass = (device, need) => {
         const byClass = need.role ? Boolean(device.provides?.[need.role]) : (device.classes || []).includes(need.class) && Object.entries(need.where || {}).every(([path, value]) => valueAt(device, path) === value);
-        const found = byClass || Boolean(need.id && device.provides?.[need.id]); // an imported part has no class of its own, it names its roles
+        // an imported part has no class of its own, it names its roles; a part with a class takes no role of another class
+        // from its chip, as the touch of a chip that is a display too
+        const own = need.class && device.classes?.length;
+        const found = byClass || (!own && Boolean(need.id && device.provides?.[need.id]));
         const said = device.provides?.[need.id]?.variant;
         return found && (!need.variant || !said || said === need.variant);
     };
@@ -124,7 +131,8 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
     // What a question can limit: where the figure lies, and what to say when a part falls short or has no figure.
     const reachOf = (device) => [].concat(device.provides?.nfc?.range_mm ?? null);
     const MEASURES = {
-        diagonal_in: { of: diagonalOf, short: (asked) => t('the display is smaller than {0} inches', asked), unknown: 'the size of the display is not in the data' },
+        diagonal_in: { of: diagonalOf, fits: soldAs,
+            near: (diagonal, asked) => (Number(diagonal.toFixed(2)) < asked ? t('{0} inches by its visible area: a size as sold is rounded up', diagonal.toFixed(2)) : null), short: (asked) => t('the display is smaller than {0} inches', asked), unknown: 'the size of the display is not in the data' },
         range_mm: { of: (device) => reachOf(device)[0], short: (asked) => t('no reader that reaches {0} mm', asked), unknown: 'the reading distance is not in the data' },
         // The reach of a reader is a guide along its axis and two readers side by side are not measured: an unknown of the kit, not a refusal.
         gap_mm: { of: (device) => reachOf(device).at(-1), fits: (reach, gap) => reach < gap, soft: (title, reach, gap) => t('{0} reaches {1} mm and the readers are {2} mm apart: a card at one may be read by the other too, this is not measured', title, reach, gap), unknown: 'the longest reading distance is not in the data', unanswered: 'the distance between the readers is not given: a card at one may be read by the other too' },
@@ -1448,6 +1456,10 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
                 return rejected();
             }
             for (const limit of limits) if (large.some((device) => limit.of(device) === null)) say('unknown', t(limit.unknown));
+            for (const limit of limits) for (const device of large.slice(0, need.count)) {
+                const near = limit.of(device) !== null && limit.near?.(limit.of(device), limit.asked);
+                if (near) say('note', `${need.title}: ${near}`);
+            }
             // unnamed_variant: a part of no named variant answers nothing where a module of the catalog names the one asked
             const unnamed = need.variant ? large.filter((device) => !device.provides?.[need.id]?.variant) : [];
             const named = judgementsOf('unnamed_variant')[0];
@@ -1639,6 +1651,7 @@ function kitSolver({ catalog, loader, questions, roles = [], libraries = { all: 
                     const value = limit.of(pick.module.device);
                     if (value === null) lines.push({ level: 'unknown', text: `${pick.module.title}: ${t(limit.unknown)}` });
                     else if (limit.soft && !limit.fits(value, limit.asked)) lines.push({ level: 'unknown', text: limit.soft(pick.module.title, value, limit.asked) });
+                    else if (limit.near?.(value, limit.asked)) lines.push({ level: 'note', text: `${pick.module.title}: ${limit.near(value, limit.asked)}` });
                 }
                 for (const text of catalog.modules[pick.module.name].do ?? []) lines.push({ level: 'do', text: `${pick.module.title}: ${t(text)}` });
                 // how the way taken is wired, as two pins in antiphase

@@ -1,0 +1,25 @@
+{
+    "title": "The touch of a chip that is a display too is not a second display of the board: a display block made from the board's display asks nothing of the touch",
+    "answers": {
+        "blocks": [
+            {
+                "role": "display",
+                "asks": {
+                    "diagonal_in": 3.4,
+                    "pixels_short": 320,
+                    "pixels_long": 480,
+                    "display_shape": "rectangular",
+                    "depth_bits": "16"
+                },
+                "from": {
+                    "board": "jc3248w535",
+                    "device": "lcd"
+                }
+            }
+        ]
+    },
+    "quiet": {
+        "board": "jc3248w535",
+        "text": "not in the data"
+    }
+}
